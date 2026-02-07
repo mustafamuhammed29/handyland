@@ -220,4 +220,4 @@ For issues or questions:
 
 ## 📝 License
 
-© 2024 HandyLand. All rights reserved.
+© 2026 HandyLand. All rights reserved.
