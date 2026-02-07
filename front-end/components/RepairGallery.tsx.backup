@@ -1,0 +1,363 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { LanguageCode } from '../types';
+import { translations } from '../i18n';
+import { CheckCircle, MoveHorizontal, ScanLine, Smartphone, Hammer, Wand2, Droplets, Monitor, Cpu, Filter, Clock, Activity, X } from 'lucide-react';
+
+interface RepairGalleryProps {
+    lang: LanguageCode;
+}
+
+const CATEGORIES = [
+    { id: 'all', label: 'All Cases', icon: <Filter className="w-4 h-4" /> },
+    { id: 'screen', label: 'Screens', icon: <Monitor className="w-4 h-4" /> },
+    { id: 'glass', label: 'Rear Glass', icon: <Smartphone className="w-4 h-4" /> },
+    { id: 'water', label: 'Water Dmg', icon: <Droplets className="w-4 h-4" /> },
+    { id: 'camera', label: 'Camera', icon: <ScanLine className="w-4 h-4" /> },
+];
+
+export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
+    const [sliderPosition, setSliderPosition] = useState(15);
+    const [selectedId, setSelectedId] = useState<any>(null);
+    const [filter, setFilter] = useState('all');
+    const [isScanning, setIsScanning] = useState(false);
+    const [comparisons, setComparisons] = useState<any[]>([]);
+    const [settings, setSettings] = useState<any>({
+        title: 'Digital Repair Archive',
+        subtitle: 'Archive_System_V2.0',
+        buttonText: 'View All Repairs',
+        totalRepairs: 1240,
+        isEnabled: true
+    });
+    const [loading, setLoading] = useState(true);
+    const [showAllModal, setShowAllModal] = useState(false);
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const isDragging = useRef(false);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const [casesRes, settingsRes] = await Promise.all([
+                fetch('/api/repair-cases'),
+                fetch('/api/repair-gallery-settings')
+            ]);
+            const casesData = await casesRes.json();
+            const settingsData = await settingsRes.json();
+
+            setComparisons(casesData);
+            if (casesData.length > 0) {
+                setSelectedId(casesData[0]._id);
+            }
+            setSettings(settingsData);
+        } catch (error) {
+            console.error('Failed to fetch repair gallery:', error);
+            // Fallback to empty if no data
+            setComparisons([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!settings.isEnabled) return null;
+
+    if (loading) {
+        return (
+            <section className="py-24 bg-[#09090b] border-t border-slate-900">
+                <div className="flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-slate-800 border-t-cyan-500 rounded-full animate-spin"></div>
+                </div>
+            </section>
+        );
+    }
+
+    if (comparisons.length === 0) {
+        return (
+            <section className="py-24 bg-[#09090b] border-t border-slate-900">
+                <div className="max-w-7xl mx-auto px-4 text-center">
+                    <p className="text-slate-500">No repair cases available yet.</p>
+                </div>
+            </section>
+        );
+    }
+
+    const activeProject = comparisons.find(c => c._id === selectedId) || comparisons[0];
+    const filteredProjects = filter === 'all'
+        ? comparisons
+        : comparisons.filter(c => c.category === filter);
+
+    const handleMove = (clientX: number) => {
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+            const percentage = (x / rect.width) * 100;
+            setSliderPosition(percentage);
+        }
+    };
+
+    const handleMouseDown = () => { isDragging.current = true; };
+    const handleMouseUp = () => { isDragging.current = false; };
+    const handleMouseMove = (e: React.MouseEvent) => { if (isDragging.current) handleMove(e.clientX); };
+    const handleTouchMove = (e: React.TouchEvent) => { handleMove(e.touches[0].clientX); };
+
+    const handleScan = () => {
+        setIsScanning(true);
+        setTimeout(() => setIsScanning(false), 1500);
+    };
+
+    return (
+        <section className="py-24 relative bg-[#050505]">
+            {/* Cyberpunk Grid Background */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(13,148,136,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(13,148,136,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+                {/* Header */}
+                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <Wand2 className="w-8 h-8 text-cyan-400" />
+                            <span className="text-cyan-500 font-mono tracking-widest text-sm uppercase">{settings.subtitle}</span>
+                        </div>
+                        <h2 className="text-4xl lg:text-5xl font-black text-white">
+                            {settings.title}
+                        </h2>
+                    </div>
+
+                    {/* Filter Tabs */}
+                    <div className="flex flex-wrap gap-2">
+                        {CATEGORIES.map(cat => (
+                            <button
+                                key={cat.id}
+                                onClick={() => setFilter(cat.id)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-bold transition-all ${filter === cat.id
+                                    ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                                    : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-600'
+                                    }`}
+                            >
+                                {cat.icon}
+                                <span>{cat.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex flex-col lg:flex-row gap-8 min-h-[600px]">
+
+                    {/* LEFT: THE DIAGNOSTIC VIEWER (Interactive Slider) */}
+                    <div className="w-full lg:w-2/3 flex flex-col">
+                        <div className="relative flex-1 rounded-3xl overflow-hidden border-2 border-slate-800 bg-slate-950 shadow-2xl group">
+                            {/* Before/After Container */}
+                            <div
+                                ref={containerRef}
+                                className="relative w-full h-full cursor-ew-resize select-none min-h-[500px]"
+                                onMouseDown={handleMouseDown}
+                                onMouseUp={handleMouseUp}
+                                onMouseMove={handleMouseMove}
+                                onTouchMove={handleTouchMove}
+                                onMouseLeave={handleMouseUp}
+                            >
+                                {/* AFTER Image (Right) */}
+                                <div className="absolute inset-0">
+                                    <img
+                                        src={activeProject.imgAfter}
+                                        alt="After"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm flex items-center gap-2 shadow-lg">
+                                        <CheckCircle className="w-4 h-4" />
+                                        {activeProject.labelAfter}
+                                    </div>
+                                </div>
+
+                                {/* BEFORE Image (Left) - Clipped */}
+                                <div
+                                    className="absolute inset-0 overflow-hidden"
+                                    style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+                                >
+                                    <img
+                                        src={activeProject.imgBefore}
+                                        alt="Before"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg">
+                                        {activeProject.labelBefore}
+                                    </div>
+                                </div>
+
+                                {/* Slider Line */}
+                                <div
+                                    className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_20px_rgba(255,255,255,0.8)] z-20 pointer-events-none"
+                                    style={{ left: `${sliderPosition}%` }}
+                                >
+                                    <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center">
+                                        <MoveHorizontal className="w-6 h-6 text-slate-900" />
+                                    </div>
+                                </div>
+
+                                {/* Scan Animation Overlay */}
+                                {isScanning && (
+                                    <div className="absolute inset-0 pointer-events-none z-30">
+                                        <div className="absolute inset-0 bg-cyan-500/20 animate-pulse"></div>
+                                        <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)] animate-scan"></div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Bottom Info Bar */}
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent p-6 space-y-3">
+                                <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+                                    {activeProject.title}
+                                    <span className={`text-xs px-3 py-1 rounded-full font-bold ${activeProject.difficulty === 'Expert' ? 'bg-red-500/20 text-red-400 border border-red-500/50' :
+                                            activeProject.difficulty === 'High' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50' :
+                                                activeProject.difficulty === 'Med' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' :
+                                                    'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50'
+                                        }`}>
+                                        LVL: {activeProject.difficulty}
+                                    </span>
+                                </h3>
+                                <p className="text-slate-400 text-sm font-mono">{activeProject.description || activeProject.desc}</p>
+                                <div className="flex items-center gap-4 text-xs text-slate-500">
+                                    <div className="flex items-center gap-1">
+                                        <Clock className="w-3 h-3" />
+                                        {activeProject.time}
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Activity className="w-3 h-3" />
+                                        {activeProject.category}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Scan Button */}
+                        <button
+                            onClick={handleScan}
+                            className="mt-4 w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 group"
+                        >
+                            <ScanLine className="w-5 h-5 group-hover:animate-pulse" />
+                            <span>INITIATE DIAGNOSTIC SCAN</span>
+                        </button>
+                    </div>
+
+                    {/* RIGHT: Case Files Grid */}
+                    <div className="w-full lg:w-1/3 flex flex-col">
+                        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex-1 flex flex-col">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-2">
+                                    <Activity className="w-5 h-5 text-cyan-400" />
+                                    <h3 className="text-white font-bold uppercase tracking-wider text-sm">Case Files ({filteredProjects.length})</h3>
+                                </div>
+                            </div>
+
+                            {/* Scrollable Grid */}
+                            <div className="flex-1 overflow-y-auto pr-2 space-y-3 max-h-[500px] custom-scrollbar">
+                                {filteredProjects.map((project) => (
+                                    <button
+                                        key={project._id}
+                                        onClick={() => setSelectedId(project._id)}
+                                        className="w-full text-left group"
+                                    >
+                                        <div className={`relative rounded-xl overflow-hidden border-2 transition-all ${selectedId === project._id
+                                                ? 'border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                                                : 'border-slate-800 hover:border-slate-600'
+                                            }`}>
+                                            {/* Thumbnail */}
+                                            <div className="relative h-32 bg-slate-900">
+                                                <img
+                                                    src={project.imgAfter}
+                                                    alt={project.title}
+                                                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                                />
+
+                                                {/* Icons overlay */}
+                                                <div className="absolute top-2 right-2">
+                                                    {project.category === 'water' && <Droplets className="w-3 h-3 text-blue-400" />}
+                                                    {project.category === 'screen' && <Monitor className="w-3 h-3 text-purple-400" />}
+                                                    {project.category === 'glass' && <Hammer className="w-3 h-3 text-red-400" />}
+                                                </div>
+
+                                                <div className="absolute bottom-2 left-2 right-2">
+                                                    <div className="text-xs font-bold text-white truncate">{project.title}</div>
+                                                    <div className="text-[10px] text-slate-400 truncate">{project.description || project.desc}</div>
+                                                </div>
+
+                                                {/* Active Indicator */}
+                                                {selectedId === project._id && (
+                                                    <div className="absolute inset-0 border-2 border-cyan-500 rounded-xl animate-pulse"></div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Upload/CTA Area */}
+                            <div className="mt-4 pt-4 border-t border-slate-800">
+                                <button
+                                    onClick={() => setShowAllModal(true)}
+                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border border-cyan-500/30 text-cyan-300 text-sm font-bold hover:bg-cyan-900/70 transition-all flex items-center justify-center gap-2 group"
+                                >
+                                    <Smartphone className="w-4 h-4 group-hover:animate-bounce" />
+                                    {settings.buttonText} {settings.totalRepairs ? settings.totalRepairs.toLocaleString() : ''}
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            {/* View All Modal */}
+            {showAllModal && (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                        {/* Modal Header */}
+                        <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+                            <div>
+                                <h3 className="text-2xl font-bold text-white">All Repair Cases</h3>
+                                <p className="text-slate-500 text-sm mt-1">{comparisons.length} total cases</p>
+                            </div>
+                            <button
+                                onClick={() => setShowAllModal(false)}
+                                className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-6 overflow-y-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {comparisons.map((item) => (
+                                    <div key={item._id} className="bg-slate-950 border border-slate-800 rounded-xl p-4 hover:border-cyan-500 transition-colors">
+                                        <h4 className="text-white font-bold mb-2">{item.title}</h4>
+                                        <div className="flex gap-2 mb-3">
+                                            <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">{item.category}</span>
+                                            <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">{item.difficulty}</span>
+                                            <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">{item.time}</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <p className="text-xs text-slate-600 mb-1">{item.labelBefore}</p>
+                                                <img src={item.imgBefore} alt="Before" className="w-full h-32 object-cover rounded" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-600 mb-1">{item.labelAfter}</p>
+                                                <img src={item.imgAfter} alt="After" className="w-full h-32 object-cover rounded" />
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-500 text-sm mt-3">{item.description}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </section>
+    );
+};

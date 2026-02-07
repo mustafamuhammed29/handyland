@@ -1,0 +1,57 @@
+[
+    {
+        "id": "1",
+        "name": "iPhone 15 Pro Max",
+        "brand": "Apple",
+        "price": 1199,
+        "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&q=80",
+        "category": "Smartphones",
+        "description": "The ultimate iPhone with titanium design and A17 Pro chip.",
+        "condition": "New",
+        "storage": "256GB"
+    },
+    {
+        "id": "2",
+        "name": "Samsung Galaxy S24 Ultra",
+        "brand": "Samsung",
+        "price": 1299,
+        "image": "https://images.unsplash.com/photo-1706606991536-e35393452954?w=500&q=80",
+        "category": "Smartphones",
+        "description": "Galaxy AI is here. Epic titanium design.",
+        "condition": "New",
+        "storage": "512GB"
+    },
+    {
+        "id": "3",
+        "name": "Google Pixel 8 Pro",
+        "brand": "Google",
+        "price": 999,
+        "image": "https://images.unsplash.com/photo-1698664531818-f2988165b4c4?w=500&q=80",
+        "category": "Smartphones",
+        "description": "Google AI and the best Pixel camera yet.",
+        "condition": "New",
+        "storage": "128GB"
+    },
+    {
+        "id": "4",
+        "name": "iPhone 13",
+        "brand": "Apple",
+        "price": 599,
+        "image": "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=500&q=80",
+        "category": "Smartphones",
+        "description": "Your new superpower. A lightning-fast chip.",
+        "condition": "Refurbished",
+        "storage": "128GB"
+    },
+    {
+        "id": "5",
+        "name": "Xiaomi 14 Ultra",
+        "brand": "Xiaomi",
+        "price": 1099,
+        "image": "https://images.unsplash.com/photo-1715690382346-6aa8d8d21c33?w=500&q=80",
+        "category": "Smartphones",
+        "description": "Leica optics and unmatched performance.",
+        "condition": "New",
+        "storage": "512GB"
+    }
+]

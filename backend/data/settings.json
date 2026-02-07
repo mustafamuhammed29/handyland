@@ -1,0 +1,23 @@
+{
+  "siteName": "HandyLand",
+  "contactEmail": "support@handyland.de",
+  "footerText": "© 2024 HandyLand GmbH. All rights reserved.",
+  "hero": {
+    "headline": "NEXT GEN\nTRADING",
+    "subheadline": "Experience the future of device trading.",
+    "bgStart": "#0f172a",
+    "bgEnd": "#020617",
+    "accentColor": "#22d3ee"
+  },
+  "valuation": {
+    "step1Title": "Select Manufacturer",
+    "step2Title": "Select Storage",
+    "step3Title": "Select Condition"
+  },
+  "content": {
+    "accessoriesTitle": "Gear Arsenal",
+    "accessoriesSubtitle": "Equip your hardware with premium modules.",
+    "repairTitle": "Service Terminal",
+    "repairSubtitle": "Transparent pricing for advanced hardware repair"
+  }
+}

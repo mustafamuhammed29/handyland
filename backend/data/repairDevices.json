@@ -1,0 +1,67 @@
+[
+    {
+        "id": "iphone-15-pro-max",
+        "model": "iPhone 15 Pro Max",
+        "brand": "Apple",
+        "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=800&auto=format&fit=crop",
+        "services": [
+            {
+                "type": "screen",
+                "label": "OLED Display Assembly",
+                "price": 380,
+                "duration": "1h",
+                "warranty": "12 Months"
+            },
+            {
+                "type": "battery",
+                "label": "High Capacity Cell",
+                "price": 90,
+                "duration": "45m",
+                "warranty": "12 Months"
+            },
+            {
+                "type": "charging",
+                "label": "Charging Port & Flex",
+                "price": 85,
+                "duration": "45m",
+                "warranty": "6 Months"
+            },
+            {
+                "type": "camera",
+                "label": "Triple Camera Module",
+                "price": 140,
+                "duration": "30m",
+                "warranty": "12 Months"
+            },
+            {
+                "type": "backglass",
+                "label": "Laser Glass Removal",
+                "price": 120,
+                "duration": "2h",
+                "warranty": "Lifetime"
+            }
+        ]
+    },
+    {
+        "id": "samsung-s24-ultra",
+        "model": "Samsung S24 Ultra",
+        "brand": "Samsung",
+        "image": "https://images.unsplash.com/photo-1706606991536-fac5f6c82098?q=80&w=800&auto=format&fit=crop",
+        "services": [
+            {
+                "type": "screen",
+                "label": "Dynamic AMOLED 2X",
+                "price": 340,
+                "duration": "1h",
+                "warranty": "12 Months"
+            },
+            {
+                "type": "battery",
+                "label": "Original Battery Cell",
+                "price": 85,
+                "duration": "45m",
+                "warranty": "12 Months"
+            }
+        ]
+    }
+]

@@ -1,0 +1,54 @@
+[
+    {
+        "id": "acc_1",
+        "name": "AirPods Pro (2nd Gen)",
+        "category": "audio",
+        "price": 249,
+        "image": "https://images.unsplash.com/photo-1603351154351-5cf99bc32f2d?w=500&q=80",
+        "description": "Active Noise Cancellation and Transparency mode.",
+        "tag": "BESTSELLER",
+        "specs": {
+            "battery": "6h",
+            "case": "MagSafe"
+        }
+    },
+    {
+        "id": "acc_2",
+        "name": "Anker 737 Power Bank",
+        "category": "power",
+        "price": 149,
+        "image": "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=500&q=80",
+        "description": "Ultra-powerful two-way charging.",
+        "tag": "POWERHOUSE",
+        "specs": {
+            "capacity": "24000mAh",
+            "output": "140W"
+        }
+    },
+    {
+        "id": "acc_3",
+        "name": "Spigen Ultra Hybrid",
+        "category": "protection",
+        "price": 39,
+        "image": "https://images.unsplash.com/photo-1603351154351-5cf99bc32f2d?w=500&q=80",
+        "description": "Crystal clear protection for your device.",
+        "tag": "DURABLE",
+        "specs": {
+            "material": "TPU + PC",
+            "drop": "Military Grade"
+        }
+    },
+    {
+        "id": "acc_4",
+        "name": "Apple Watch Ultra 2",
+        "category": "wearables",
+        "price": 799,
+        "image": "https://images.unsplash.com/photo-1695048065099-2a20484d2569?w=500&q=80",
+        "description": "The most rugged and capable Apple Watch.",
+        "tag": "ADVENTURE",
+        "specs": {
+            "battery": "36h",
+            "case": "Titanium"
+        }
+    }
+]
