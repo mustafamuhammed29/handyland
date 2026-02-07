@@ -11,36 +11,89 @@ interface MarketplaceProps {
 
 export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [filterBrand, setFilterBrand] = useState('All');
     const [visibleCount, setVisibleCount] = useState(15);
     const [selectedProduct, setSelectedProduct] = useState<PhoneListing & { specs: any } | null>(null);
     const [products, setProducts] = useState<(PhoneListing & { specs: any })[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const itemsPerPage = 12;
+
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
+    const [sort, setSort] = useState('newest');
+    const [selectedRam, setSelectedRam] = useState('');
+    const [selectedStorage, setSelectedStorage] = useState('');
+    const [selectedCondition, setSelectedCondition] = useState('');
+
+    // Dropdown options
+    const ramOptions = ['4GB', '6GB', '8GB', '12GB', '16GB'];
+    const storageOptions = ['64GB', '128GB', '256GB', '512GB', '1TB'];
+
     const { addToCart } = useCart();
     const { addToast } = useToast();
     const t = translations[lang];
 
+    // Debounce search term
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+            setCurrentPage(1); // Reset to page 1 on new search
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
     React.useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await fetch('/api/products');
+                setLoading(true);
+                const queryParams = new URLSearchParams({
+                    page: currentPage.toString(),
+                    limit: itemsPerPage.toString(),
+                    search: debouncedSearchTerm,
+                    brand: filterBrand,
+                    sort,
+                    minPrice,
+                    maxPrice,
+                    ram: selectedRam,
+                    storage: selectedStorage,
+                    condition: selectedCondition
+                });
+
+                const response = await fetch(`/api/products?${queryParams.toString()}`);
                 if (!response.ok) throw new Error('Failed to fetch');
                 const data = await response.json();
 
-                // Transform data to match frontend types and ensure specs are populated
-                const formatted = data.map((p: any) => ({
-                    ...p,
-                    model: p.name || p.model, // Backend uses 'name', frontend uses 'model'
-                    // Map top-level backend fields to specs object if specs is missing or incomplete
-                    specs: {
-                        cpu: p.processor || p.specs?.cpu || 'Standard Chip',
-                        battery: p.battery || p.specs?.battery || 'Standard Battery',
-                        screen: p.display || p.specs?.screen || 'HD Display'
-                    },
-                    imageUrl: p.image || p.imageUrl || '' // Handle naming difference
-                }));
-
-                setProducts(formatted);
+                if (data.products) {
+                    const formatted = data.products.map((p: any) => ({
+                        ...p,
+                        model: p.name || p.model, // Backend uses 'name', frontend uses 'model'
+                        // Map top-level backend fields to specs object if specs is missing or incomplete
+                        specs: {
+                            cpu: p.processor || p.specs?.cpu || 'Standard Chip',
+                            battery: p.battery || p.specs?.battery || 'Standard Battery',
+                            screen: p.display || p.specs?.screen || 'HD Display'
+                        },
+                        imageUrl: p.image || p.imageUrl || '' // Handle naming difference
+                    }));
+                    setProducts(formatted);
+                    setTotalPages(data.totalPages);
+                } else {
+                    // Fallback for old API structure (array)
+                    const formatted = (Array.isArray(data) ? data : []).map((p: any) => ({
+                        ...p,
+                        model: p.name || p.model,
+                        specs: {
+                            cpu: p.processor || p.specs?.cpu || 'Standard Chip',
+                            battery: p.battery || p.specs?.battery || 'Standard Battery',
+                            screen: p.display || p.specs?.screen || 'HD Display'
+                        },
+                        imageUrl: p.image || p.imageUrl || ''
+                    }));
+                    setProducts(formatted);
+                }
             } catch (error) {
                 console.error("Failed to load products", error);
             } finally {
@@ -49,7 +102,9 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         };
 
         fetchProducts();
-    }, []);
+        fetchProducts();
+        fetchProducts();
+    }, [currentPage, debouncedSearchTerm, filterBrand, sort, minPrice, maxPrice, selectedRam, selectedStorage, selectedCondition]);
 
     // Logic to add to global cart
     const handleAddToCart = (phone: any) => {
@@ -97,11 +152,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80';
     };
 
-    const filteredPhones = products.filter(phone => {
-        const matchesSearch = (phone.model || '').toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesBrand = filterBrand === 'All' || phone.brand === filterBrand;
-        return matchesSearch && matchesBrand;
-    });
+    // Filter logic moved to backend
+    const filteredPhones = products;
 
     if (loading) {
         return <div className="min-h-screen pt-32 text-center text-white">Loading Marketplace...</div>;
@@ -130,6 +182,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                             <img
                                 src={getProductImage(selectedProduct)}
                                 alt={selectedProduct.model}
+                                loading="lazy"
                                 className="relative z-10 w-3/4 max-w-sm drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                             />
 
@@ -215,26 +268,73 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     </div>
 
                     {/* Control Panel Filter */}
-                    <div className="glass-modern p-2 rounded-2xl flex items-center gap-2 w-full md:w-auto overflow-x-auto border border-slate-800">
-                        <div className="relative flex-1 md:w-64">
-                            <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-cyan-400 transition-colors" />
-                            <input
-                                type="text"
-                                placeholder="Search Database..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-slate-900/80 text-white rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-cyan-500 outline-none border border-transparent placeholder-slate-600"
-                            />
+                    {/* Control Panel Filter */}
+                    <div className="flex flex-col gap-4 w-full md:w-auto">
+                        <div className="glass-modern p-2 rounded-2xl flex items-center gap-2 w-full overflow-x-auto border border-slate-800">
+                            <div className="relative flex-1 md:w-64">
+                                <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-cyan-400 transition-colors" />
+                                <input
+                                    type="text"
+                                    placeholder="Search Database..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full bg-slate-900/80 text-white rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-cyan-500 outline-none border border-transparent placeholder-slate-600"
+                                />
+                            </div>
+                            <div className="h-8 w-px bg-slate-800 mx-1"></div>
+                            <select
+                                value={sort}
+                                onChange={(e) => setSort(e.target.value)}
+                                className="bg-slate-900/80 text-white rounded-xl px-4 py-2 text-sm border-none focus:ring-1 focus:ring-cyan-500 outline-none"
+                            >
+                                <option value="newest">Newest</option>
+                                <option value="price_asc">Price: Low to High</option>
+                                <option value="price_desc">Price: High to Low</option>
+                                <option value="name_asc">Name: A-Z</option>
+                            </select>
                         </div>
-                        <div className="h-8 w-px bg-slate-800 mx-1"></div>
-                        <div className="flex gap-2">
+
+                        {/* Advanced Filters */}
+                        <div className="flex flex-wrap gap-2">
+                            <input
+                                type="number"
+                                placeholder="Min Price"
+                                value={minPrice}
+                                onChange={(e) => setMinPrice(e.target.value)}
+                                className="w-24 bg-slate-900/80 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:border-cyan-500 outline-none"
+                            />
+                            <input
+                                type="number"
+                                placeholder="Max Price"
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(e.target.value)}
+                                className="w-24 bg-slate-900/80 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:border-cyan-500 outline-none"
+                            />
+                            <select
+                                value={selectedRam}
+                                onChange={(e) => setSelectedRam(e.target.value)}
+                                className="bg-slate-900/80 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:border-cyan-500 outline-none"
+                            >
+                                <option value="">RAM: Any</option>
+                                {ramOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                            </select>
+                            <select
+                                value={selectedStorage}
+                                onChange={(e) => setSelectedStorage(e.target.value)}
+                                className="bg-slate-900/80 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:border-cyan-500 outline-none"
+                            >
+                                <option value="">Storage: Any</option>
+                                {storageOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                            </select>
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto pb-1 mt-1">
                             {['All', 'Apple', 'Samsung', 'Google', 'Xiaomi'].map(brand => (
                                 <button
                                     key={brand}
                                     onClick={() => setFilterBrand(brand)}
-                                    className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${filterBrand === brand
+                                    className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${filterBrand === brand
                                         ? 'bg-cyan-900/30 text-cyan-400 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
-                                        : 'text-slate-500 hover:text-white hover:bg-slate-800'
+                                        : 'bg-slate-900 text-slate-500 hover:text-white hover:bg-slate-800 border border-slate-800'
                                         }`}
                                 >
                                     {brand}
@@ -262,6 +362,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                     <img
                                         src={getProductImage(phone)}
                                         alt={phone.model}
+                                        loading="lazy"
                                         className="w-full h-full object-cover opacity-90 group-hover/image:opacity-100 group-hover/image:scale-110 transition-all duration-700"
                                     />
 
@@ -335,16 +436,26 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                 </div>
 
                 {/* Load More Button */}
-                {visibleCount < filteredPhones.length && (
-                    <div className="mt-12 text-center">
-                        <button
-                            onClick={() => setVisibleCount(prev => prev + 15)}
-                            className="px-8 py-3 bg-slate-800 hover:bg-cyan-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-cyan-500/20 border border-slate-700 hover:border-cyan-400"
-                        >
-                            Load More
-                        </button>
-                    </div>
-                )}
+                {/* Pagination Controls */}
+                <div className="mt-12 flex justify-center items-center gap-4">
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-6 py-3 bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl transition-all border border-slate-700 hover:bg-slate-700"
+                    >
+                        Previous
+                    </button>
+                    <span className="text-slate-400 font-mono">
+                        Page <span className="text-white font-bold">{currentPage}</span> of {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="px-6 py-3 bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl transition-all border border-slate-700 hover:bg-slate-700"
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -9,6 +9,7 @@ interface DeviceBlueprint {
     validStorages: string[];
     marketingName?: string;
     description?: string;
+    imageUrl?: string;
     priceConfig?: {
         batteryPenalty?: {
             threshold: number;
@@ -35,6 +36,7 @@ const ValuationManager = () => {
     const [formData, setFormData] = useState<Partial<DeviceBlueprint>>({
         brand: 'Apple',
         modelName: '',
+        imageUrl: '',
         basePrice: 0,
         validStorages: ['128GB', '256GB']
     });
@@ -63,6 +65,27 @@ const ValuationManager = () => {
         setLoading(false);
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const res = await fetch('http://localhost:5000/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.imageUrl) {
+                setFormData(prev => ({ ...prev, imageUrl: data.imageUrl }));
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+        }
+    };
+
     const handleSave = async () => {
         try {
             const method = editingDevice ? 'PUT' : 'POST';
@@ -79,7 +102,7 @@ const ValuationManager = () => {
             if (res.ok) {
                 setIsModalOpen(false);
                 setEditingDevice(null);
-                setFormData({ brand: 'Apple', modelName: '', basePrice: 0, validStorages: ['128GB', '256GB'], priceConfig: { storagePrices: {} } });
+                setFormData({ brand: 'Apple', modelName: '', imageUrl: '', basePrice: 0, validStorages: ['128GB', '256GB'], priceConfig: { storagePrices: {} } });
                 fetchDevices();
             }
         } catch (error) {
@@ -153,7 +176,7 @@ const ValuationManager = () => {
                 <button
                     onClick={() => {
                         setEditingDevice(null);
-                        setFormData({ brand: 'Apple', modelName: '', basePrice: 0, validStorages: ['128GB', '256GB'], priceConfig: { storagePrices: {} } });
+                        setFormData({ brand: 'Apple', modelName: '', imageUrl: '', basePrice: 0, validStorages: ['128GB', '256GB'], priceConfig: { storagePrices: {} } });
                         setIsModalOpen(true);
                     }}
                     className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-cyan-900/20 transition-all"
@@ -262,6 +285,32 @@ const ValuationManager = () => {
                                                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white"
                                                 placeholder="e.g. iPhone 15"
                                             />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs text-slate-400 mb-1 block">Device Image</label>
+                                        <div className="flex items-center gap-4">
+                                            {formData.imageUrl && (
+                                                <div className="w-16 h-16 bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                                                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+                                            <div className="flex-1">
+                                                <input
+                                                    type="file"
+                                                    onChange={handleImageUpload}
+                                                    accept="image/*"
+                                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/10 file:text-cyan-400 hover:file:bg-cyan-500/20"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={formData.imageUrl || ''}
+                                                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                                                    placeholder="Or paste image URL..."
+                                                    className="w-full mt-2 bg-slate-900/50 border-none rounded text-xs text-slate-400 px-2 py-1"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 

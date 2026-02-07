@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import ErrorBoundary from './components/ErrorBoundary';
+import { LoadingProvider } from './context/LoadingContext';
+import { GlobalLoader } from './components/GlobalLoader';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -11,8 +14,13 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <LoadingProvider>
+        <BrowserRouter>
+          <App />
+          <GlobalLoader />
+        </BrowserRouter>
+      </LoadingProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

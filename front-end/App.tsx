@@ -13,7 +13,10 @@ import { Stats } from './components/Stats';
 import { Contact } from './components/Contact';
 import { CartDrawer } from './components/CartDrawer';
 import { Checkout } from './components/Checkout';
+import PaymentSuccess from './PaymentSuccess';
+import { ProductDetails } from './components/ProductDetails';
 import { Dashboard } from './components/Dashboard';
+import { SellDevice } from './pages/SellDevice';
 
 import { SellerStudio } from './components/SellerStudio';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -23,6 +26,7 @@ import { VerifyEmail } from './components/VerifyEmail';
 import { ResetPassword } from './components/ResetPassword';
 import Login from './Login';
 import Register from './Register';
+import VerifyEmailNotice from './VerifyEmailNotice';
 import ForgotPassword from './ForgotPassword';
 import { ViewState, LanguageCode, User } from './types';
 import { translations } from './i18n';
@@ -136,11 +140,15 @@ function App() {
                 <Route path="/accessories" element={<Accessories lang={lang} />} />
                 <Route path="/repair" element={<Repair lang={lang} />} />
                 <Route path="/valuation" element={<Valuation lang={lang} />} />
+                <Route path="/sell/:quoteRef" element={<SellDevice />} />
                 <Route path="shop" element={<Accessories lang={lang} />} />
+                <Route path="products/:id" element={<ProductDetails lang={lang} />} />
                 <Route path="/contact" element={<Contact lang={lang} />} /> {/* Kept from original */}
                 <Route path="checkout" element={<Checkout lang={lang} />} />
+                <Route path="payment-success" element={<PaymentSuccess />} />
                 <Route path="login" element={<Auth setView={setView} lang={lang} setUser={setUser} />} />
                 <Route path="verify-email" element={<VerifyEmail />} />
+                <Route path="verify-email-notice" element={<VerifyEmailNotice />} />
                 <Route path="reset-password" element={<ResetPassword />} />
 
                 {/* Dynamic Pages */}

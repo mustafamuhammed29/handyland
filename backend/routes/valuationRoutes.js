@@ -77,7 +77,12 @@ router.delete('/devices/:id', async (req, res) => {
 const valuationController = require('../controllers/valuationController');
 const { protect } = require('../middleware/auth');
 
-router.post('/saved', protect, valuationController.saveValuation);
+// Public Calculation Endpoint
+router.post('/calculate', valuationController.calculateValuation);
+
+// Authorized Quote Management
+router.post('/quote', protect, valuationController.createQuote);
+router.post('/saved', protect, valuationController.saveValuation); // Classic Save (keep for backward compatibility or replace)
 router.get('/saved', protect, valuationController.getMyValuations);
 router.delete('/saved/:id', protect, valuationController.deleteValuation);
 

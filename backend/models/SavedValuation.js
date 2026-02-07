@@ -18,18 +18,27 @@ const SavedValuationSchema = new mongoose.Schema({
         type: String, // e.g., "Excellent"
         required: true
     },
+    quoteReference: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
     estimatedValue: {
         type: Number,
         required: true
     },
     expiryDate: {
         type: Date,
-        default: () => Date.now() + 7 * 24 * 60 * 60 * 1000 // Valid for 7 days
+        default: () => Date.now() + 48 * 60 * 60 * 1000 // 48 hours for quotes
     },
     status: {
         type: String,
-        enum: ['active', 'expired', 'sold'],
+        enum: ['active', 'expired', 'sold', 'pending_shipment'],
         default: 'active'
+    },
+    isQuote: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

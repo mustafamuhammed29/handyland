@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Phone, MapPin, AlertCircle, Loader, Shield } from 'lucide-react';
+import { validateEmail, validatePassword, validatePhone, validateRequired } from './validation';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -29,13 +30,28 @@ const Register: React.FC = () => {
         setError('');
 
         // Validation
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+        // Validation
+        if (!validateRequired(formData.name)) {
+            setError('Name is required');
+            return;
+        }
+        if (!validateEmail(formData.email)) {
+            setError('Please enter a valid email address');
+            return;
+        }
+        if (!validatePhone(formData.phone)) {
+            setError('Please enter a valid phone number');
             return;
         }
 
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
+        const passwordValidation = validatePassword(formData.password);
+        if (!passwordValidation.isValid) {
+            setError(passwordValidation.message || 'Invalid password');
+            return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match');
             return;
         }
 
@@ -58,12 +74,8 @@ const Register: React.FC = () => {
             const data = await response.json();
 
             if (data.success) {
-                // Auto-login after registration
-                localStorage.setItem('userToken', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-
-                // Redirect to home
-                navigate('/');
+                // Redirect to verification notice
+                navigate('/verify-email-notice', { state: { email: formData.email } });
             } else {
                 setError(data.message || 'Registration failed');
             }

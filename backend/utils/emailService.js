@@ -130,6 +130,35 @@ const emailTemplates = {
         </html>
     `,
 
+    // Quote Email
+    quote: (name, quoteRef, device, price, redirectUrl) => `
+        <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
+            <div style="background-color: #0f172a; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: #06b6d4; margin: 0;">HandyLand Quote</h1>
+            </div>
+            <div style="background-color: #f8fafc; padding: 20px; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #1e293b;">Hello ${name},</h2>
+                <p>Your valuation for <strong>${device}</strong> is ready!</p>
+                
+                <div style="background-color: #fff; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #cbd5e1;">
+                    <p style="margin: 5px 0; color: #64748b;">Quote Reference:</p>
+                    <p style="margin: 0; font-size: 18px; font-weight: bold; color: #0f172a;">${quoteRef}</p>
+                    <div style="margin: 15px 0; height: 1px; background-color: #e2e8f0;"></div>
+                    <p style="margin: 5px 0; color: #64748b;">Estimated Value:</p>
+                    <p style="margin: 0; font-size: 32px; font-weight: bold; color: #10b981;">€${price}</p>
+                </div>
+                
+                <p>This quote is valid for <strong>48 hours</strong>.</p>
+                <p>Ready to sell? Click below to finalize your order and get your free shipping label.</p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${process.env.FRONTEND_URL}${redirectUrl}" style="background-color: #0891b2; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Finalize Sale</a>
+                </div>
+                <p style="font-size: 12px; color: #94a3b8; text-align: center;">If the button doesn't work, copy this link: ${process.env.FRONTEND_URL}${redirectUrl}</p>
+            </div>
+        </div>
+    `,
+
     // Password Reset
     passwordReset: (name, token) => `
         <!DOCTYPE html>

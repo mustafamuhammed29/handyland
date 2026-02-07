@@ -4,10 +4,17 @@ const crypto = require('crypto');
 const { validationResult } = require('express-validator');
 const { sendEmail, emailTemplates } = require('../utils/emailService');
 
-// Generate JWT Token
+// Generate Access Token
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET || 'your-secret-key-change-in-production', {
-        expiresIn: '30d'
+        expiresIn: '15m' // Short lived
+    });
+};
+
+// Generate Refresh Token
+const generateRefreshToken = (id) => {
+    return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-key', {
+        expiresIn: '7d'
     });
 };
 
@@ -37,7 +44,9 @@ exports.register = async (req, res) => {
             password,
             phone,
             address,
+            address,
             verificationToken,
+            verificationTokenExpire: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
             isVerified: false
         });
 
@@ -61,7 +70,9 @@ exports.register = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Registration successful! Please check your email.',
-            token,
+            success: true,
+            message: 'Registration successful! Please check your email.',
+            // token, // Removed auto-login token
             user: {
                 id: user._id,
                 name: user.name,
@@ -117,6 +128,19 @@ exports.login = async (req, res) => {
         }
 
         const token = generateToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+
+        // Save refresh token to user
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        // Send refresh token in HTTP-only cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
 
         res.status(200).json({
             success: true,
@@ -301,17 +325,21 @@ exports.verifyEmail = async (req, res) => {
     try {
         const { token } = req.params;
 
-        const user = await User.findOne({ verificationToken: token });
+        const user = await User.findOne({
+            verificationToken: token,
+            verificationTokenExpire: { $gt: Date.now() }
+        });
 
         if (!user) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid verification token'
+                message: 'Invalid or expired verification token'
             });
         }
 
         user.isVerified = true;
         user.verificationToken = undefined;
+        user.verificationTokenExpire = undefined;
         await user.save();
 
         res.status(200).json({
@@ -455,6 +483,7 @@ exports.resendVerification = async (req, res) => {
         // Generate new verification token
         const verificationToken = crypto.randomBytes(32).toString('hex');
         user.verificationToken = verificationToken;
+        user.verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
         await user.save();
 
         // Send verification email
@@ -487,3 +516,57 @@ exports.resendVerification = async (req, res) => {
 };
 
 module.exports = exports;
+
+// @desc    Refresh Access Token
+// @route   GET /api/auth/refresh
+// @access  Public (with cookie)
+exports.refreshToken = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            return res.status(401).json({ message: 'No refresh token found' });
+        }
+
+        // Verify token
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-key');
+
+        // Check if user exists and token matches
+        const user = await User.findById(decoded.id);
+        if (!user || user.refreshToken !== refreshToken) {
+            return res.status(401).json({ message: 'Invalid refresh token' });
+        }
+
+        // Generate new access token
+        const accessToken = generateToken(user._id);
+
+        res.json({ token: accessToken });
+    } catch (error) {
+        res.status(401).json({ message: 'Invalid refresh token' });
+    }
+};
+
+// @desc    Logout user
+// @route   POST /api/auth/logout
+// @access  Private
+exports.logout = async (req, res) => {
+    try {
+        if (req.user) {
+            const user = await User.findById(req.user.id);
+            if (user) {
+                user.refreshToken = undefined;
+                await user.save();
+            }
+        }
+
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
+
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader, CheckCircle } from 'lucide-react';
+import { validateEmail, validateRequired } from './validation';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -17,6 +18,20 @@ const Login: React.FC = () => {
         e.preventDefault();
         setError('');
         setShowResend(false);
+        // Validation
+        if (!validateRequired(email)) {
+            setError('Email is required');
+            return;
+        }
+        if (!validateEmail(email)) {
+            setError('Please enter a valid email address');
+            return;
+        }
+        if (!validateRequired(password)) {
+            setError('Password is required');
+            return;
+        }
+
         setLoading(true);
 
         try {

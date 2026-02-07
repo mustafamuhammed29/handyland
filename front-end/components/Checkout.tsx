@@ -15,18 +15,56 @@ export const Checkout: React.FC<CheckoutProps> = ({ setView, lang }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
-    const handlePayment = (e: React.FormEvent) => {
+    const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsProcessing(true);
-        
-        // Mock API call
-        setTimeout(() => {
+
+        try {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                addToast("Please login to complete purchase", "error");
+                setView(ViewState.LOGIN);
+                return;
+            }
+
+            // Map cart to backend expected items format
+            const items = cart.map(item => ({
+                name: item.title,
+                price: item.price,
+                image: item.image,
+                quantity: 1, // Assuming 1 for now
+                product: item.id, // Assuming id is the product id
+                productType: 'device' // Defaulting
+            }));
+
+            const response = await fetch('http://localhost:5000/api/payment/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    items,
+                    shippingAddress: {
+                        line1: "123 Test St", // You might want to collect this from form
+                        city: "Berlin",
+                        country: "DE"
+                    }
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error(data.message || 'Payment failed');
+            }
+        } catch (error: any) {
+            console.error('Payment error:', error);
+            addToast(error.message || "Failed to initiate payment", "error");
             setIsProcessing(false);
-            setIsSuccess(true);
-            clearCart();
-            addToast("Order placed successfully!", "success");
-            setTimeout(() => setView(ViewState.DASHBOARD), 3000);
-        }, 2500);
+        }
     };
 
     if (isSuccess) {
@@ -93,7 +131,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ setView, lang }) => {
                                 <span className="text-lg font-serif">P</span> PayPal
                             </button>
                         </div>
-                        
+
                         <div className="space-y-3">
                             <input type="text" placeholder="Card Number" className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
                             <div className="grid grid-cols-2 gap-4">
@@ -108,7 +146,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ setView, lang }) => {
                 <div className="lg:col-span-1">
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-2xl p-6 sticky top-28">
                         <h3 className="text-xl font-bold text-white mb-6">Order Summary</h3>
-                        
+
                         <div className="space-y-4 mb-6 max-h-60 overflow-y-auto custom-scrollbar">
                             {cart.map((item, i) => (
                                 <div key={i} className="flex gap-3">
@@ -136,7 +174,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ setView, lang }) => {
                             </div>
                         </div>
 
-                        <button 
+                        <button
                             onClick={handlePayment}
                             disabled={isProcessing}
                             className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
@@ -149,7 +187,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ setView, lang }) => {
                                 </>
                             )}
                         </button>
-                        
+
                         <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
                             <ShieldCheck className="w-3 h-3" /> SSL Encrypted Transaction
                         </div>
