@@ -63,7 +63,7 @@ export interface RepairTicket {
   id: string;
   device: string;
   issue: string;
-  status: 'received' | 'diagnosing' | 'repairing' | 'testing' | 'ready';
+  status: 'received' | 'diagnosing' | 'repairing' | 'testing' | 'ready' | 'attention';
   date: string;
   cost: number;
 }
@@ -73,7 +73,8 @@ export interface Transaction {
   type: 'purchase' | 'repair' | 'refund';
   amount: number;
   date: string;
-  status: 'completed' | 'pending';
+  time?: string;
+  status: 'completed' | 'pending' | 'delivered' | 'shipped';
 }
 
 export enum ViewState {

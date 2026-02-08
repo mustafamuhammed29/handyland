@@ -34,3 +34,43 @@ exports.getDashboardStats = async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch dashboard stats' });
     }
 };
+
+exports.getUserStats = async (req, res) => {
+    try {
+        // Mock data for graphs (In a real app, aggregation pipelines on Orders/Repairs)
+        const balanceTrend = [
+            { month: 'Jan', balance: 120 },
+            { month: 'Feb', balance: 135 },
+            { month: 'Mar', balance: 110 },
+            { month: 'Apr', balance: 160 },
+            { month: 'May', balance: 195 },
+            { month: 'Jun', balance: 250 },
+        ];
+
+        const spendingDistribution = [
+            { name: 'Purchases', value: 450 },
+            { name: 'Repairs', value: 300 },
+            { name: 'Accessories', value: 150 },
+        ];
+
+        const monthlyOrders = [
+            { month: 'Jan', orders: 2 },
+            { month: 'Feb', orders: 1 },
+            { month: 'Mar', orders: 3 },
+            { month: 'Apr', orders: 2 },
+            { month: 'May', orders: 4 },
+            { month: 'Jun', orders: 2 },
+        ];
+
+        res.json({
+            success: true,
+            balanceTrend,
+            spendingDistribution,
+            monthlyOrders
+        });
+
+    } catch (error) {
+        console.error("Error fetching user stats", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
