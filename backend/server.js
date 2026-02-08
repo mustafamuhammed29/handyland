@@ -128,6 +128,7 @@ app.use('/api/pages', require('./routes/pageRoutes'));
 app.use('/api/accessories', require('./routes/accessoriesRoutes'));
 app.use('/api/repair-archive', require('./routes/repairArchiveRoutes'));
 app.use('/api/valuation', require('./routes/valuationRoutes'));
+app.use('/api/promotions', require('./routes/promotionsRoutes'));
 
 // Basic Routes
 app.get('/', (req, res) => {
