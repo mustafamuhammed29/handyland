@@ -8,6 +8,7 @@ import {
 import { ViewState, User as UserType, RepairTicket, Transaction, SavedValuation } from '../types';
 import { useToast } from '../context/ToastContext';
 import { api } from '../utils/api';
+import { ENV } from '../src/config/env';
 
 
 
@@ -79,14 +80,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
         );
     };
 
+    // ... (imports)
+
+    // ... (inside component)
     const fetchDashboardData = async () => {
         try {
             // User Info
-            const userData = await api.get<any>('/api/auth/me');
+            const userData = await api.get<any>(`${ENV.API_URL}/auth/me`);
             if (userData.success) setUserStats(userData.user);
 
             // Orders
-            const ordersData = await api.get<any>('/api/orders');
+            const ordersData = await api.get<any>(`${ENV.API_URL}/orders`);
             if (ordersData.success) {
                 const formattedOrders: Transaction[] = ordersData.orders.map((order: any) => ({
                     id: order.orderNumber,
@@ -100,24 +104,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
             }
 
             // Repairs
-            const repairsData = await api.get<any>('/api/repairs/tickets/my-tickets');
+            const repairsData = await api.get<any>(`${ENV.API_URL}/repairs/tickets/my-tickets`);
             if (repairsData.success) setRepairs(repairsData.tickets);
 
             // Valuations
-            const valData = await api.get<any>('/api/valuation/saved');
+            const valData = await api.get<any>(`${ENV.API_URL}/valuation/saved`);
             if (valData.success) setValuations(valData.valuations);
 
             // Promotions
-            const promoData = await api.get<any>('/api/promotions/active');
+            const promoData = await api.get<any>(`${ENV.API_URL}/promotions/active`);
             if (promoData.success) setPromotions(promoData.promotions);
 
             // Chart Data
-            const statsData = await api.get<any>('/api/stats/user');
+            const statsData = await api.get<any>(`${ENV.API_URL}/stats/user`);
             if (statsData.success) setChartData(statsData);
 
         } catch (error: any) {
             console.error("Error fetching dashboard data", error);
-            addToast(error.message || "Failed to refresh dashboard data", "error");
+            addToast("Failed to load dashboard. Please refresh.", "error");
         }
     };
 
