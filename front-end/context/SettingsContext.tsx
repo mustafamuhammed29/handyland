@@ -35,6 +35,15 @@ interface RepairArchiveSettings {
     totalRepairs: number;
 }
 
+interface SectionSettings {
+    hero: boolean;
+    stats: boolean;
+    repairGallery: boolean;
+    marketplace: boolean;
+    accessories: boolean;
+    contact: boolean;
+}
+
 interface Settings {
     siteName?: string;
     contactEmail?: string;
@@ -48,6 +57,7 @@ interface Settings {
     content: ContentSettings;
     stats: StatsSettings;
     repairArchive: RepairArchiveSettings;
+    sections: SectionSettings;
 }
 
 interface SettingsContextType {
@@ -89,6 +99,14 @@ const defaultSettings: Settings = {
         subtitle: 'Archive_System_V2.0',
         buttonText: 'View All Repairs',
         totalRepairs: 1240
+    },
+    sections: {
+        hero: true,
+        stats: true,
+        repairGallery: true,
+        marketplace: true,
+        accessories: true,
+        contact: true
     }
 };
 
@@ -114,7 +132,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     content: { ...prev.content, ...data.content },
                     stats: { ...prev.stats, ...data.stats },
                     repairArchive: { ...prev.repairArchive, ...data.repairArchive },
-                    valuation: { ...prev.valuation, ...data.valuation }
+                    valuation: { ...prev.valuation, ...data.valuation },
+                    sections: { ...prev.sections, ...data.sections }
                 }));
 
                 setLoading(false);

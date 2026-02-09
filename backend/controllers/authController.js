@@ -6,14 +6,20 @@ const { sendEmail, emailTemplates } = require('../utils/emailService');
 
 // Generate Access Token
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET || 'your-secret-key-change-in-production', {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not defined');
+    }
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '15m' // Short lived
     });
 };
 
 // Generate Refresh Token
 const generateRefreshToken = (id) => {
-    return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-key', {
+    if (!process.env.REFRESH_TOKEN_SECRET) {
+        throw new Error('REFRESH_TOKEN_SECRET is not defined');
+    }
+    return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET, {
         expiresIn: '7d'
     });
 };
@@ -44,7 +50,6 @@ exports.register = async (req, res) => {
             password,
             phone,
             address,
-            address,
             verificationToken,
             verificationTokenExpire: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
             isVerified: false
@@ -68,8 +73,6 @@ exports.register = async (req, res) => {
         const token = generateToken(user._id);
 
         res.status(201).json({
-            success: true,
-            message: 'Registration successful! Please check your email.',
             success: true,
             message: 'Registration successful! Please check your email.',
             // token, // Removed auto-login token
@@ -285,6 +288,14 @@ exports.adminLogin = async (req, res) => {
             });
         }
 
+        // Check if user is verified
+        if (!user.isVerified) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please verify your email first'
+            });
+        }
+
         // Check password
         const isMatch = await user.matchPassword(password);
 
@@ -324,29 +335,45 @@ exports.adminLogin = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
     try {
         const { token } = req.params;
+        console.log("Verifying email with token:", token);
 
+        // Find user with matching token and valid expiration
         const user = await User.findOne({
             verificationToken: token,
             verificationTokenExpire: { $gt: Date.now() }
         });
 
         if (!user) {
+            console.log("Verify failed: Invalid or expired token");
+            // Check if token exists but expired
+            const expiredUser = await User.findOne({ verificationToken: token });
+            if (expiredUser) {
+                console.log("Token found but expired. Expiry:", expiredUser.verificationTokenExpire, "Now:", Date.now());
+            } else {
+                console.log("Token not found at all.");
+            }
+
             return res.status(400).json({
                 success: false,
                 message: 'Invalid or expired verification token'
             });
         }
 
+        console.log("User found for verification:", user.email);
+
         user.isVerified = true;
         user.verificationToken = undefined;
         user.verificationTokenExpire = undefined;
         await user.save();
+
+        console.log("User verified successfully:", user.email);
 
         res.status(200).json({
             success: true,
             message: 'Email verified successfully! You can now login.'
         });
     } catch (error) {
+        console.error("Verify Email Error:", error);
         res.status(500).json({
             success: false,
             message: 'Error verifying email',
@@ -529,11 +556,21 @@ exports.refreshToken = async (req, res) => {
         }
 
         // Verify token
-        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-key');
+        // Verify token
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
         // Check if user exists and token matches
-        const user = await User.findById(decoded.id);
-        if (!user || user.refreshToken !== refreshToken) {
+        // Need to select +refreshToken because it defaults to select: false
+        const user = await User.findById(decoded.id).select('+refreshToken');
+
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid refresh token' });
+        }
+
+        // Hash the incoming token to compare with stored hash
+        const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+        if (user.refreshToken !== hashedToken) {
             return res.status(401).json({ message: 'Invalid refresh token' });
         }
 

@@ -7,6 +7,13 @@ import {
 } from 'lucide-react';
 import { ViewState, User as UserType, RepairTicket, Transaction, SavedValuation } from '../types';
 import { useToast } from '../context/ToastContext';
+import { api } from '../utils/api';
+
+
+
+const Skeleton = ({ className }: { className?: string }) => (
+    <div className={`animate-pulse bg-slate-800/50 rounded-xl ${className}`} />
+);
 
 interface DashboardProps {
     user: UserType | null;
@@ -35,6 +42,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
     // Wallet State
     const [showAddFunds, setShowAddFunds] = useState(false);
     const [showAddCard, setShowAddCard] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const { addToast } = useToast();
 
@@ -53,14 +61,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                 <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible" preserveAspectRatio="none">
                     <polyline
                         fill="none"
-                        stroke="#06b6d4"
+                        className="stroke-cyan-500"
                         strokeWidth="2"
                         points={points}
                         vectorEffect="non-scaling-stroke"
                     />
                     {data.map((d: any, i: number) => (
                         <g key={i}>
-                            <circle cx={(i / (data.length - 1)) * 100} cy={100 - (d.balance / maxVal) * 100} r="1.5" fill="#fff" stroke="#06b6d4" />
+                            <circle cx={(i / (data.length - 1)) * 100} cy={100 - (d.balance / maxVal) * 100} r="1.5" className="fill-white stroke-cyan-500" />
                         </g>
                     ))}
                 </svg>
@@ -73,18 +81,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
 
     const fetchDashboardData = async () => {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            const headers = { 'Authorization': `Bearer ${token}` };
-
             // User Info
-            const userRes = await fetch('http://localhost:5000/api/auth/me', { headers });
-            const userData = await userRes.json();
+            const userData = await api.get<any>('/api/auth/me');
             if (userData.success) setUserStats(userData.user);
 
             // Orders
-            const ordersRes = await fetch('http://localhost:5000/api/orders', { headers });
-            const ordersData = await ordersRes.json();
+            const ordersData = await api.get<any>('/api/orders');
             if (ordersData.success) {
                 const formattedOrders: Transaction[] = ordersData.orders.map((order: any) => ({
                     id: order.orderNumber,
@@ -98,38 +100,54 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
             }
 
             // Repairs
-            const repairsRes = await fetch('http://localhost:5000/api/repair-devices/my-tickets', { headers }); // Fixed Endpoint
-            const repairsData = await repairsRes.json();
+            const repairsData = await api.get<any>('/api/repairs/tickets/my-tickets');
             if (repairsData.success) setRepairs(repairsData.tickets);
 
             // Valuations
-            const valRes = await fetch('http://localhost:5000/api/valuation/saved', { headers });
-            const valData = await valRes.json();
+            const valData = await api.get<any>('/api/valuation/saved');
             if (valData.success) setValuations(valData.valuations);
 
             // Promotions
-            const promoRes = await fetch('http://localhost:5000/api/promotions/active', { headers });
-            const promoData = await promoRes.json();
+            const promoData = await api.get<any>('/api/promotions/active');
             if (promoData.success) setPromotions(promoData.promotions);
 
             // Chart Data
-            const statsRes = await fetch('http://localhost:5000/api/stats/user', { headers });
-            const statsData = await statsRes.json();
+            const statsData = await api.get<any>('/api/stats/user');
             if (statsData.success) setChartData(statsData);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching dashboard data", error);
+            addToast(error.message || "Failed to refresh dashboard data", "error");
         }
     };
 
     // Initial Fetch & Polling
     React.useEffect(() => {
-        fetchDashboardData();
+        const init = async () => {
+            await fetchDashboardData();
+            setIsLoading(false);
+        };
+        init();
         const interval = setInterval(fetchDashboardData, 30000); // 30s Auto-refresh
         return () => clearInterval(interval);
     }, []);
 
     const user = userStats || initialUser; // Prefer fetched stats
+
+    if (isLoading && !user) {
+        return (
+            <div className="min-h-screen pt-28 pb-12 px-4 max-w-7xl mx-auto flex gap-8">
+                <Skeleton className="w-full lg:w-72 h-96 shrink-0" />
+                <div className="flex-1 space-y-6">
+                    <Skeleton className="h-48 w-full" />
+                    <div className="grid grid-cols-2 gap-6">
+                        <Skeleton className="h-48 w-full" />
+                        <Skeleton className="h-48 w-full" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (!user) return null;
 
@@ -333,7 +351,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                     {chartData ? (
                                         <SimpleLineChart data={chartData.balanceTrend} />
                                     ) : (
-                                        <div className="h-32 flex items-center justify-center text-slate-500 text-xs">Loading Chart...</div>
+                                        <Skeleton className="h-32 w-full mt-4" />
                                     )}
                                 </div>
 

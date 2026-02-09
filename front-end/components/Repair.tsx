@@ -6,6 +6,7 @@ import { Search, Wrench, Clock, MessageSquare, Zap, Activity, ChevronRight, Cpu,
 
 import { translations } from '../i18n';
 import { useSettings } from '../context/SettingsContext';
+import { api } from '../utils/api';
 
 // --- DATA STRUCTURES ---
 
@@ -56,16 +57,22 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/repair-devices')
-            .then(res => res.json())
-            .then(data => {
-                setRepairCatalog(data);
-                setLoading(false);
-            })
-            .catch(err => {
+        const loadRepairs = async () => {
+            try {
+                const data = await api.get<RepairDevice[]>('/api/repairs');
+                if (Array.isArray(data)) {
+                    setRepairCatalog(data);
+                } else {
+                    console.error("Invalid repairs data format", data);
+                    setRepairCatalog([]);
+                }
+            } catch (err) {
                 console.error("Failed to load repairs", err);
+            } finally {
                 setLoading(false);
-            });
+            }
+        };
+        loadRepairs();
     }, []);
 
     // Backend fetch removed as per cleanup request

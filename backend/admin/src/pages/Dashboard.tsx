@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Users, ShoppingCart, DollarSign, TrendingUp, Package, Mail } from 'lucide-react';
+import { api } from '../utils/api';
 
-const API_URL = 'http://localhost:5000/api';
+// const API_URL = 'http://localhost:5000/api'; // use api utility instead
 
 interface Stats {
     totalUsers: number;
@@ -22,32 +23,23 @@ const Dashboard: React.FC = () => {
 
     const fetchStats = async () => {
         try {
-            const token = localStorage.getItem('adminToken');
-
             // Fetch order stats
-            const orderResponse = await fetch(`${API_URL}/orders/admin/stats`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            const orderData = await orderResponse.json();
+            const orderResponse = await api.get<any>('/api/orders/admin/stats');
+            const orderStats = orderResponse.data?.stats || orderResponse.data;
 
             // Fetch user stats
-            const userResponse = await fetch(`${API_URL}/users/admin/stats`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            const userData = await userResponse.json();
+            const userResponse = await api.get<any>('/api/users/admin/stats');
+            const userStats = userResponse.data?.stats || userResponse.data;
 
-            if (orderData.success && userData.success) {
+            // Check keys depending on API response structure
+            if (orderStats && userStats) {
                 setStats({
-                    totalUsers: userData.stats.totalUsers,
-                    activeUsers: userData.stats.activeUsers,
-                    totalOrders: orderData.stats.totalOrders,
-                    pendingOrders: orderData.stats.pendingOrders,
-                    deliveredOrders: orderData.stats.deliveredOrders,
-                    totalRevenue: orderData.stats.totalRevenue
+                    totalUsers: userStats.totalUsers,
+                    activeUsers: userStats.activeUsers,
+                    totalOrders: orderStats.totalOrders,
+                    pendingOrders: orderStats.pendingOrders,
+                    deliveredOrders: orderStats.deliveredOrders,
+                    totalRevenue: orderStats.totalRevenue
                 });
             }
         } catch (error) {

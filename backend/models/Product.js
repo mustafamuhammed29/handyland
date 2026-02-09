@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const productSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true }, // Keeping string ID for compatibility
     name: { type: String, required: true },
-    price: { type: Number, required: true },
+    price: { type: Number, required: true, min: 0 },
+    stock: { type: Number, required: true, default: 0, min: 0 },
     description: String,
     image: String,
     category: String,

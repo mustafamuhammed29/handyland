@@ -24,8 +24,11 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/handyland',
     .then(() => console.log('✅ MongoDB Connected'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
+const compression = require('compression');
+
 // Security Middleware
 app.use(helmet()); // Secure HTTP headers
+app.use(compression()); // Compress responses
 
 // Request logging
 if (process.env.NODE_ENV === 'development') {
@@ -37,19 +40,35 @@ if (process.env.NODE_ENV === 'development') {
 // Rate limiting - General API
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 1000, // Increased for dev
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
 });
-// app.use('/api/', limiter); // Disabled for dev
+app.use('/api/', limiter);
 
 // CORS Configuration
+// CORS Configuration
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173'
+];
+
 app.use(cors({
-    origin: true, // Allow all origins for debugging
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 // Body parser
@@ -117,7 +136,7 @@ const authLimiter = rateLimit({
 
 app.use('/api/auth', authRoutes); // app.use('/api/auth', authLimiter, authRoutes); Disabled for dev
 app.use('/api/products', productRoutes);
-app.use('/api/repair-devices', repairRoutes);
+app.use('/api/repairs', repairRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', paymentRoutes);

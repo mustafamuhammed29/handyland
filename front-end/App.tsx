@@ -17,6 +17,7 @@ import PaymentSuccess from './PaymentSuccess';
 import { ProductDetails } from './components/ProductDetails';
 import { Dashboard } from './components/Dashboard';
 import { SellDevice } from './pages/SellDevice';
+import { NotFound } from './pages/NotFound';
 
 import { SellerStudio } from './components/SellerStudio';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -144,7 +145,7 @@ function App() {
                 <Route path="shop" element={<Accessories lang={lang} />} />
                 <Route path="products/:id" element={<ProductDetails lang={lang} />} />
                 <Route path="/contact" element={<Contact lang={lang} />} /> {/* Kept from original */}
-                <Route path="checkout" element={<Checkout lang={lang} />} />
+                <Route path="checkout" element={<Checkout lang={lang} setView={setView} />} />
                 <Route path="payment-success" element={<PaymentSuccess />} />
                 <Route path="login" element={<Auth setView={setView} lang={lang} setUser={setUser} />} />
                 <Route path="verify-email" element={<VerifyEmail />} />
@@ -166,11 +167,11 @@ function App() {
               {/* PROTECTED ROUTES */}
               <Route element={<ProtectedRoute user={user} />}>
                 <Route path="dashboard" element={<Dashboard user={user} setView={setView} logout={() => setUser(null)} />} />
-                <Route path="seller" element={<SellerStudio lang={lang} />} />
+                <Route path="seller" element={<SellerStudio lang={lang} setView={setView} />} />
               </Route>
 
               {/* Fallback */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </CartProvider>

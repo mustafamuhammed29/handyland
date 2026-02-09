@@ -20,7 +20,7 @@ const RepairTicketSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['received', 'diagnosing', 'repairing', 'testing', 'ready', 'completed'],
+        enum: ['received', 'diagnosing', 'repairing', 'testing', 'ready', 'completed', 'attention'],
         default: 'received'
     },
     cost: {
