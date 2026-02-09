@@ -32,13 +32,13 @@ export const Navbar: React.FC<NavbarProps> = ({ setView, lang, setLang, user }) 
   ];
 
   return (
-    <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50">
+    <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50 rtl:left-auto rtl:right-1/2 rtl:translate-x-1/2">
       <div className="glass-modern rounded-3xl px-6 py-4 border border-slate-700/50 shadow-2xl">
         <div className="flex justify-between items-center">
 
           {/* Logo - Dynamic from Settings */}
           <Link to="/" className="flex items-center cursor-pointer group">
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center mr-3 shadow-lg group-hover:rotate-12 transition-transform">
+            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center me-3 shadow-lg group-hover:rotate-12 transition-transform">
               <Smartphone className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-black text-white tracking-tighter uppercase">
@@ -57,7 +57,7 @@ export const Navbar: React.FC<NavbarProps> = ({ setView, lang, setLang, user }) 
                   : 'text-slate-400 hover:text-white'
                   }`}
               >
-                <span className="mr-2">{item.icon}</span>
+                <span className="me-2">{item.icon}</span>
                 {item.label}
               </Link>
             ))}
@@ -75,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({ setView, lang, setLang, user }) 
                   {lang.toUpperCase()}
                 </button>
                 {langMenuOpen && (
-                  <div className="absolute top-12 right-0 bg-slate-900 border border-slate-800 rounded-xl p-2 shadow-xl flex flex-col gap-1 min-w-[80px]">
+                  <div className="absolute top-12 right-0 rtl:right-auto rtl:left-0 bg-slate-900 border border-slate-800 rounded-xl p-2 shadow-xl flex flex-col gap-1 min-w-[80px]">
                     {['de', 'en', 'ar'].map((l) => (
                       <button
                         key={l}
@@ -92,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({ setView, lang, setLang, user }) 
 
             <button onClick={() => setIsCartOpen(true)} className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500 transition-colors group">
               <ShoppingCart className="w-5 h-5 text-slate-400 group-hover:text-cyan-400" />
-              {cart.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 text-black text-[10px] font-black rounded-full flex items-center justify-center border border-black">{cart.length}</span>}
+              {cart.length > 0 && <span className="absolute -top-1 -right-1 rtl:right-auto rtl:-left-1 w-4 h-4 bg-cyan-500 text-black text-[10px] font-black rounded-full flex items-center justify-center border border-black">{cart.length}</span>}
             </button>
 
             <Link

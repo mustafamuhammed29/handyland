@@ -1,5 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Order = require('../models/Order');
+const Product = require('../models/Product');
+const Accessory = require('../models/Accessory');
 
 // @desc    Create Stripe checkout session
 // @route   POST /api/payment/create-checkout-session
@@ -13,6 +15,23 @@ exports.createCheckoutSession = async (req, res) => {
                 success: false,
                 message: 'No items provided'
             });
+        }
+
+        // Validate Stock
+        for (const item of items) {
+            let product;
+            if (item.productType === 'Product') {
+                product = await Product.findById(item.product);
+            } else {
+                product = await Accessory.findById(item.product);
+            }
+
+            if (!product) {
+                return res.status(404).json({ success: false, message: `Product not found: ${item.name}` });
+            }
+            if (product.stock < item.quantity) {
+                return res.status(400).json({ success: false, message: `Insufficient stock for ${item.name}. Available: ${product.stock}` });
+            }
         }
 
         // Create line items for Stripe
@@ -166,6 +185,15 @@ exports.handleWebhook = async (req, res) => {
                 paymentId: session.payment_intent,
                 status: 'processing'
             });
+
+            // Deduct Stock
+            for (const item of parsedItems) {
+                if (item.productType === 'Product') {
+                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+                } else {
+                    await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+                }
+            }
             break;
 
         case 'payment_intent.payment_failed':

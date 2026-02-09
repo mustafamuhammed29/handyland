@@ -25,7 +25,9 @@ const productSchema = new mongoose.Schema({
     color: String,
     display: String,
     storage: String,
-    specs: Object // Flexible specs object
+    specs: Object, // Flexible specs object
+    rating: { type: Number, default: 0 },
+    numReviews: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

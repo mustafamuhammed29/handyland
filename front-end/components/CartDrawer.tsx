@@ -10,7 +10,7 @@ interface CartDrawerProps {
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ lang, setView }) => {
-    const { cart, removeFromCart, isCartOpen, setIsCartOpen, cartTotal } = useCart();
+    const { cart, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen, cartTotal } = useCart();
     const t = translations[lang];
 
     const handleCheckout = () => {
@@ -52,9 +52,28 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang, setView }) => {
                                 <div className="flex-1 min-w-0">
                                     <h4 className="font-bold text-white text-sm truncate">{item.title}</h4>
                                     <div className="text-xs text-slate-400 truncate">{item.subtitle}</div>
-                                    <div className="text-cyan-400 font-bold mt-1">{item.price}{t.currency}</div>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <div className="text-cyan-400 font-bold">{item.price}{t.currency}</div>
+                                        {/* Quantity Selector */}
+                                        <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-1">
+                                            <button
+                                                onClick={() => updateQuantity(item.id, -1)}
+                                                className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+                                                disabled={(item.quantity || 1) <= 1}
+                                            >
+                                                -
+                                            </button>
+                                            <span className="text-xs font-mono w-4 text-center text-white">{item.quantity || 1}</span>
+                                            <button
+                                                onClick={() => updateQuantity(item.id, 1)}
+                                                className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button onClick={() => removeFromCart(item.id)} className="text-slate-500 hover:text-red-400 self-center">
+                                <button onClick={() => removeFromCart(item.id)} className="text-slate-500 hover:text-red-400 self-start">
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             </div>

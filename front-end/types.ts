@@ -8,7 +8,17 @@ export interface PhoneListing {
   storage: string;
   color: string;
   imageUrl: string;
+  images?: string[];
   description: string;
+  specs?: {
+    cpu?: string;
+    battery?: string;
+    screen?: string;
+    camera?: string;
+    ram?: string;
+  };
+  rating?: number;
+  numReviews?: number;
 }
 
 export interface RepairService {
@@ -36,6 +46,7 @@ export interface CartItem {
   price: number;
   image: string;
   category: 'device' | 'accessory';
+  quantity?: number;
 }
 
 export interface SavedValuation {
@@ -47,16 +58,27 @@ export interface SavedValuation {
   date: string;
 }
 
+
+export interface Coupon {
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  amount: number;
+  minOrderAmount: number;
+  expirationDate: Date;
+  isActive: boolean;
+}
+
 export interface User {
+  [x: string]: any;
   id: string;
   name: string;
   email: string;
+  role: 'user' | 'admin';
+  token?: string;
   phone?: string;
   address?: string;
-  avatar?: string;
   balance?: number;
   points?: number;
-  role?: 'user' | 'admin';
 }
 
 export interface RepairTicket {
@@ -74,6 +96,7 @@ export interface Transaction {
   amount: number;
   date: string;
   time?: string;
+  items?: string[];
   status: 'completed' | 'pending' | 'delivered' | 'shipped';
 }
 

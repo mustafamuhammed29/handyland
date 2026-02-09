@@ -1,9 +1,10 @@
-import React, { useState, MouseEvent } from 'react';
+import React, { useState, MouseEvent, useEffect } from 'react';
 import { PhoneListing, LanguageCode } from '../types';
-import { Search, ShoppingCart, Cpu, Signal, X, Layers, ChevronRight, Plus } from 'lucide-react';
+import { Search, ShoppingCart, Cpu, Signal, X, Layers, ChevronRight, Plus, Grid, List, Filter } from 'lucide-react';
 import { translations } from '../i18n';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
+import { SkeletonProductCard } from './SkeletonProductCard';
 
 interface MarketplaceProps {
     lang: LanguageCode;
@@ -14,12 +15,15 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [filterBrand, setFilterBrand] = useState('All');
     const [visibleCount, setVisibleCount] = useState(15);
-    const [selectedProduct, setSelectedProduct] = useState<PhoneListing & { specs: any } | null>(null);
-    const [products, setProducts] = useState<(PhoneListing & { specs: any })[]>([]);
+    const [selectedProduct, setSelectedProduct] = useState<PhoneListing | null>(null);
+    const [products, setProducts] = useState<PhoneListing[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const itemsPerPage = 12;
+
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [showFilters, setShowFilters] = useState(false);
 
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
@@ -37,7 +41,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const t = translations[lang];
 
     // Debounce search term
-    React.useEffect(() => {
+    useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm);
             setCurrentPage(1); // Reset to page 1 on new search
@@ -45,7 +49,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         return () => clearTimeout(timer);
     }, [searchTerm]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
@@ -69,28 +73,31 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                 if (data.products) {
                     const formatted = data.products.map((p: any) => ({
                         ...p,
-                        model: p.name || p.model, // Backend uses 'name', frontend uses 'model'
-                        // Map top-level backend fields to specs object if specs is missing or incomplete
+                        model: p.name || p.model,
                         specs: {
                             cpu: p.processor || p.specs?.cpu || 'Standard Chip',
                             battery: p.battery || p.specs?.battery || 'Standard Battery',
-                            screen: p.display || p.specs?.screen || 'HD Display'
+                            screen: p.display || p.specs?.screen || 'HD Display',
+                            ram: p.specs?.ram || 'N/A'
                         },
-                        imageUrl: p.image || p.imageUrl || '' // Handle naming difference
+                        imageUrl: p.image || p.imageUrl || '',
+                        images: p.images || [p.image || p.imageUrl]
                     }));
                     setProducts(formatted);
                     setTotalPages(data.totalPages);
                 } else {
-                    // Fallback for old API structure (array)
+                    // Fallback mechanism
                     const formatted = (Array.isArray(data) ? data : []).map((p: any) => ({
                         ...p,
                         model: p.name || p.model,
                         specs: {
                             cpu: p.processor || p.specs?.cpu || 'Standard Chip',
                             battery: p.battery || p.specs?.battery || 'Standard Battery',
-                            screen: p.display || p.specs?.screen || 'HD Display'
+                            screen: p.display || p.specs?.screen || 'HD Display',
+                            ram: p.specs?.ram || 'N/A'
                         },
-                        imageUrl: p.image || p.imageUrl || ''
+                        imageUrl: p.image || p.imageUrl || '',
+                        images: p.images || [p.image || p.imageUrl]
                     }));
                     setProducts(formatted);
                 }
@@ -102,11 +109,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         };
 
         fetchProducts();
-        fetchProducts();
-        fetchProducts();
     }, [currentPage, debouncedSearchTerm, filterBrand, sort, minPrice, maxPrice, selectedRam, selectedStorage, selectedCondition]);
 
-    // Logic to add to global cart
     const handleAddToCart = (phone: any) => {
         const imageUrl = phone.images?.[0] || phone.imageUrl || '';
         addToCart({
@@ -120,7 +124,6 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         addToast(`${phone.model} added to cart`, 'success');
     };
 
-    // Spotlight Effect
     const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
         const cards = document.getElementsByClassName("spotlight-card");
         for (const card of cards) {
@@ -138,26 +141,11 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         return `http://127.0.0.1:5000${url}`;
     };
 
-    // Helper to get image from product (handles both images array and imageUrl)
     const getProductImage = (product: any) => {
-        // Try images array first (from DB)
-        if (product.images && product.images.length > 0) {
-            return getImageUrl(product.images[0]);
-        }
-        // Fallback to imageUrl (for compatibility)
-        if (product.imageUrl) {
-            return getImageUrl(product.imageUrl);
-        }
-        // Default fallback
+        if (product.images && product.images.length > 0) return getImageUrl(product.images[0]);
+        if (product.imageUrl) return getImageUrl(product.imageUrl);
         return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80';
     };
-
-    // Filter logic moved to backend
-    const filteredPhones = products;
-
-    if (loading) {
-        return <div className="min-h-screen pt-32 text-center text-white">Loading Marketplace...</div>;
-    }
 
     return (
         <div className="relative z-10 py-16 min-h-screen" onMouseMove={handleMouseMove}>
@@ -191,11 +179,11 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 <div className="bg-black/60 backdrop-blur border border-white/10 p-3 rounded-xl">
                                     <Cpu className="w-4 h-4 text-purple-400 mb-1" />
                                     <div className="text-[10px] text-slate-400 uppercase">Processor</div>
-                                    <div className="text-sm font-bold text-white">{selectedProduct.specs.cpu}</div>
+                                    <div className="text-sm font-bold text-white">{selectedProduct.specs?.cpu}</div>
                                 </div>
                                 <div className="bg-black/60 backdrop-blur border border-white/10 p-3 rounded-xl">
                                     <div className="text-[10px] text-slate-400 uppercase">Battery</div>
-                                    <div className="text-sm font-bold text-white">{selectedProduct.specs.battery}</div>
+                                    <div className="text-sm font-bold text-white">{selectedProduct.specs?.battery}</div>
                                 </div>
                             </div>
                         </div>
@@ -206,7 +194,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full ${selectedProduct.condition === 'new' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' : 'bg-purple-500/10 text-purple-400 border border-purple-500/30'}`}>
                                     {selectedProduct.condition}
                                 </span>
-                                <span className="text-xs text-slate-500 font-mono">ID: {selectedProduct.id}-XJ9</span>
+                                <span className="text-xs text-slate-500 font-mono">ID: {selectedProduct.id.substring(0, 8)}</span>
                             </div>
 
                             <h2 className="text-4xl font-black text-white mb-2 leading-tight">{selectedProduct.model}</h2>
@@ -229,7 +217,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 </div>
                                 <div className="flex justify-between py-2 border-b border-slate-800/50">
                                     <span className="text-slate-500 text-sm">Display</span>
-                                    <span className="text-white font-medium">{selectedProduct.specs.screen}</span>
+                                    <span className="text-white font-medium">{selectedProduct.specs?.screen}</span>
                                 </div>
                             </div>
 
@@ -254,85 +242,39 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                {/* Futuristic Header */}
-                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
-                    <div className="relative">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                            <span className="text-xs text-green-500 font-mono uppercase tracking-widest">System Online</span>
+                {/* Header & Controls */}
+                <div className="flex flex-col gap-8 mb-8">
+                    <div className="flex flex-col md:flex-row justify-between items-end gap-4">
+                        <div>
+                            <h2 className="text-5xl font-black text-white mb-2 tracking-tight">MARKET<span className="text-cyan-500">PLACE</span></h2>
+                            <div className="h-1 w-24 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"></div>
                         </div>
-                        <h2 className="text-5xl font-black text-white mb-2 tracking-tight">
-                            MARKET<span className="text-cyan-500">PLACE</span>
-                        </h2>
-                        <div className="h-1 w-24 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"></div>
+
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'}`}><Grid className="w-5 h-5" /></button>
+                            <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'}`}><List className="w-5 h-5" /></button>
+                            <button onClick={() => setShowFilters(!showFilters)} className={`p-2 rounded-lg ${showFilters ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'} md:hidden`}><Filter className="w-5 h-5" /></button>
+                        </div>
                     </div>
 
-                    {/* Control Panel Filter */}
-                    {/* Control Panel Filter */}
-                    <div className="flex flex-col gap-4 w-full md:w-auto">
-                        <div className="glass-modern p-2 rounded-2xl flex items-center gap-2 w-full overflow-x-auto border border-slate-800">
-                            <div className="relative flex-1 md:w-64">
-                                <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-cyan-400 transition-colors" />
-                                <input
-                                    type="text"
-                                    placeholder="Search Database..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-slate-900/80 text-white rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-cyan-500 outline-none border border-transparent placeholder-slate-600"
-                                />
-                            </div>
-                            <div className="h-8 w-px bg-slate-800 mx-1"></div>
-                            <select
-                                value={sort}
-                                onChange={(e) => setSort(e.target.value)}
-                                className="bg-slate-900/80 text-white rounded-xl px-4 py-2 text-sm border-none focus:ring-1 focus:ring-cyan-500 outline-none"
-                            >
-                                <option value="newest">Newest</option>
-                                <option value="price_asc">Price: Low to High</option>
-                                <option value="price_desc">Price: High to Low</option>
-                                <option value="name_asc">Name: A-Z</option>
-                            </select>
-                        </div>
-
-                        {/* Advanced Filters */}
-                        <div className="flex flex-wrap gap-2">
+                    {/* Search & Main Filter Bar */}
+                    <div className="glass-modern p-2 rounded-2xl flex flex-col md:flex-row items-center gap-4 border border-slate-800">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-cyan-400 transition-colors" />
                             <input
-                                type="number"
-                                placeholder="Min Price"
-                                value={minPrice}
-                                onChange={(e) => setMinPrice(e.target.value)}
-                                className="w-24 bg-slate-900/80 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:border-cyan-500 outline-none"
+                                type="text"
+                                placeholder="Search Devices (e.g. iPhone 13 Pro)..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full bg-slate-900/50 text-white rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-cyan-500 outline-none border border-transparent placeholder-slate-600"
                             />
-                            <input
-                                type="number"
-                                placeholder="Max Price"
-                                value={maxPrice}
-                                onChange={(e) => setMaxPrice(e.target.value)}
-                                className="w-24 bg-slate-900/80 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:border-cyan-500 outline-none"
-                            />
-                            <select
-                                value={selectedRam}
-                                onChange={(e) => setSelectedRam(e.target.value)}
-                                className="bg-slate-900/80 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:border-cyan-500 outline-none"
-                            >
-                                <option value="">RAM: Any</option>
-                                {ramOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                            </select>
-                            <select
-                                value={selectedStorage}
-                                onChange={(e) => setSelectedStorage(e.target.value)}
-                                className="bg-slate-900/80 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:border-cyan-500 outline-none"
-                            >
-                                <option value="">Storage: Any</option>
-                                {storageOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                            </select>
                         </div>
-                        <div className="flex gap-2 overflow-x-auto pb-1 mt-1">
+                        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
                             {['All', 'Apple', 'Samsung', 'Google', 'Xiaomi'].map(brand => (
                                 <button
                                     key={brand}
                                     onClick={() => setFilterBrand(brand)}
-                                    className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${filterBrand === brand
+                                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${filterBrand === brand
                                         ? 'bg-cyan-900/30 text-cyan-400 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
                                         : 'bg-slate-900 text-slate-500 hover:text-white hover:bg-slate-800 border border-slate-800'
                                         }`}
@@ -341,101 +283,120 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 </button>
                             ))}
                         </div>
+                        <div className="w-px h-8 bg-slate-800 hidden md:block"></div>
+                        <select
+                            value={sort}
+                            onChange={(e) => setSort(e.target.value)}
+                            className="bg-slate-900/50 text-white rounded-xl px-4 py-2.5 text-sm border-none focus:ring-1 focus:ring-cyan-500 outline-none min-w-[150px]"
+                        >
+                            <option value="newest">Newest Arrivals</option>
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="price_desc">Price: High to Low</option>
+                        </select>
+                    </div>
+
+                    {/* Expanded Filters */}
+                    <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-300 ${showFilters || window.innerWidth >= 768 ? 'block' : 'hidden md:grid'}`}>
+                        <input type="number" placeholder="Min Price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                        <input type="number" placeholder="Max Price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
+                        <select value={selectedRam} onChange={(e) => setSelectedRam(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none">
+                            <option value="">RAM: Any</option>
+                            {ramOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                        <select value={selectedStorage} onChange={(e) => setSelectedStorage(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none">
+                            <option value="">Storage: Any</option>
+                            {storageOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
                     </div>
                 </div>
 
-                {/* Product Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 group perspective-container">
-                    {filteredPhones.slice(0, visibleCount).map((phone) => (
-                        <div
-                            key={phone.id}
-                            className="spotlight-card rounded-3xl h-full flex flex-col border border-slate-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] bg-slate-900/40 backdrop-blur-sm"
-                        >
-                            <div className="spotlight-border"></div>
-
-                            {/* Image Area */}
-                            <div className="relative p-1">
-                                <div
-                                    className="relative h-72 overflow-hidden rounded-2xl bg-gradient-to-b from-slate-800 to-slate-950 cursor-pointer group/image"
-                                    onClick={() => setSelectedProduct(phone)}
-                                >
-                                    <img
-                                        src={getProductImage(phone)}
-                                        alt={phone.model}
-                                        loading="lazy"
-                                        className="w-full h-full object-cover opacity-90 group-hover/image:opacity-100 group-hover/image:scale-110 transition-all duration-700"
-                                    />
-
-                                    {/* Overlay Badges */}
-                                    <div className="absolute top-3 left-3 flex gap-2">
-                                        <span className={`text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border ${phone.condition === 'new'
-                                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                                            : 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                                            }`}>
-                                            {phone.condition.toUpperCase()}
-                                        </span>
-                                    </div>
-
-                                    {/* Quick View Button Overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
-                                        <span className="bg-white/10 border border-white/20 text-white px-4 py-2 rounded-full font-bold text-sm backdrop-blur-md flex items-center gap-2">
-                                            <Layers className="w-4 h-4" /> Inspect
-                                        </span>
-                                    </div>
-                                </div>
+                {/* Product Grid / List */}
+                {loading ? (
+                    <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className={viewMode === 'list' ? 'h-48' : 'h-96'}>
+                                <SkeletonProductCard />
                             </div>
-
-                            {/* Info Area */}
-                            <div className="p-5 flex-1 flex flex-col">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div>
-                                        <div className="text-[10px] text-cyan-500 font-mono uppercase mb-1 tracking-wider">{phone.brand}</div>
-                                        <h3 className="text-xl font-bold text-white leading-tight hover:text-cyan-400 transition-colors cursor-pointer" onClick={() => setSelectedProduct(phone)}>
-                                            {phone.model}
-                                        </h3>
+                        ))}
+                    </div>
+                ) : (
+                    <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                        {products.map((phone) => (
+                            viewMode === 'grid' ? (
+                                // GRID CARD
+                                <div key={phone.id} className="spotlight-card rounded-3xl h-full flex flex-col border border-slate-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] bg-slate-900/40 backdrop-blur-sm group">
+                                    <div className="spotlight-border"></div>
+                                    <div className="relative p-1">
+                                        <div className="relative h-72 overflow-hidden rounded-2xl bg-gradient-to-b from-slate-800 to-slate-950 cursor-pointer" onClick={() => setSelectedProduct(phone)}>
+                                            <img src={getProductImage(phone)} alt={phone.model} loading="lazy" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" />
+                                            <div className="absolute top-3 left-3 flex gap-2">
+                                                <span className={`text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border ${phone.condition === 'new' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'}`}>
+                                                    {phone.condition.toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
+                                                <span className="bg-white/10 border border-white/20 text-white px-4 py-2 rounded-full font-bold text-sm backdrop-blur-md flex items-center gap-2">
+                                                    <Layers className="w-4 h-4" /> Inspect
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="text-xl font-bold text-white">
-                                            {phone.price}{t.currency}
+                                    <div className="p-5 flex-1 flex flex-col">
+                                        <div className="mb-3">
+                                            <div className="text-[10px] text-cyan-500 font-mono uppercase mb-1 tracking-wider">{phone.brand}</div>
+                                            <h3 className="text-xl font-bold text-white hover:text-cyan-400 transition-colors cursor-pointer" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 mb-6">
+                                            <div className="bg-slate-900/50 rounded-lg p-2 border border-slate-800 flex items-center gap-2">
+                                                <Cpu className="w-3 h-3 text-slate-400" />
+                                                <span className="text-xs text-slate-300 truncate">{phone.specs?.cpu}</span>
+                                            </div>
+                                            <div className="bg-slate-900/50 rounded-lg p-2 border border-slate-800 flex items-center gap-2">
+                                                <Signal className="w-3 h-3 text-slate-400" />
+                                                <span className="text-xs text-slate-300">5G Ready</span>
+                                            </div>
+                                        </div>
+                                        <div className="mt-auto flex items-center justify-between gap-3">
+                                            <div className="text-xl font-bold text-white">{phone.price}{t.currency}</div>
+                                            <button onClick={() => handleAddToCart(phone)} className="bg-slate-800 hover:bg-cyan-600 hover:text-black text-white p-3 rounded-xl font-bold transition-all duration-300 group/btn">
+                                                <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Tech Specs Mini Grid */}
-                                <div className="grid grid-cols-2 gap-2 mb-6">
-                                    <div className="bg-slate-900/50 rounded-lg p-2 border border-slate-800 flex items-center gap-2">
-                                        <Cpu className="w-3 h-3 text-slate-400" />
-                                        <span className="text-xs text-slate-300 truncate">{phone.specs.cpu}</span>
+                            ) : (
+                                // LIST CARD
+                                <div key={phone.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex gap-6 hover:border-cyan-500/30 transition-all group">
+                                    <div className="w-32 h-32 bg-slate-900 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer" onClick={() => setSelectedProduct(phone)}>
+                                        <img src={getProductImage(phone)} alt={phone.model} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                     </div>
-                                    <div className="bg-slate-900/50 rounded-lg p-2 border border-slate-800 flex items-center gap-2">
-                                        <Signal className="w-3 h-3 text-slate-400" />
-                                        <span className="text-xs text-slate-300">5G Ready</span>
+                                    <div className="flex-1 flex flex-col justify-center">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="text-xs text-cyan-500 font-mono uppercase mb-1">{phone.brand}</div>
+                                                <h3 className="text-xl font-bold text-white hover:text-cyan-400 cursor-pointer" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-2xl font-bold text-white">{phone.price}{t.currency}</div>
+                                                <div className={`text-xs font-bold uppercase ${phone.condition === 'new' ? 'text-emerald-400' : 'text-purple-400'}`}>{phone.condition}</div>
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-400 text-sm line-clamp-2 mb-4">{phone.description}</p>
+                                        <div className="flex gap-3 mt-auto">
+                                            <button onClick={() => handleAddToCart(phone)} className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-lg transition-all text-sm flex items-center gap-2">
+                                                <ShoppingCart className="w-4 h-4" /> Add to Cart
+                                            </button>
+                                            <button onClick={() => setSelectedProduct(phone)} className="px-4 py-2 border border-slate-700 hover:bg-slate-800 text-white font-bold rounded-lg transition-all text-sm">
+                                                Details
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
+                            )
+                        ))}
+                    </div>
+                )}
 
-                                {/* Actions */}
-                                <div className="mt-auto flex gap-3">
-                                    <button
-                                        onClick={() => handleAddToCart(phone)}
-                                        className="flex-1 bg-slate-800 hover:bg-cyan-600 hover:text-black text-white py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 group/btn"
-                                    >
-                                        <ShoppingCart className="w-4 h-4" />
-                                        <span className="group-hover/btn:hidden">{t.buyNow}</span>
-                                        <span className="hidden group-hover/btn:inline">Add +</span>
-                                    </button>
-                                    <button
-                                        onClick={() => setSelectedProduct(phone)}
-                                        className="px-4 py-3 border border-slate-700 hover:border-cyan-500 rounded-xl text-slate-400 hover:text-cyan-400 transition-all"
-                                    >
-                                        <ChevronRight className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Load More Button */}
                 {/* Pagination Controls */}
                 <div className="mt-12 flex justify-center items-center gap-4">
                     <button
@@ -456,6 +417,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         Next
                     </button>
                 </div>
+
             </div>
         </div>
     );

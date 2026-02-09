@@ -1,7 +1,50 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Accessory = require('../models/Accessory');
+const Coupon = require('../models/Coupon');
 const { sendEmail, emailTemplates } = require('../utils/emailService');
+
+// @desc    Apply Coupon
+// @route   POST /api/orders/apply-coupon
+// @access  Private
+exports.applyCoupon = async (req, res) => {
+    try {
+        const { code, cartTotal } = req.body;
+        const coupon = await Coupon.findOne({ code: code.toUpperCase() });
+
+        if (!coupon) {
+            return res.status(404).json({ success: false, message: 'Invalid coupon code' });
+        }
+
+        if (!coupon.isValid()) {
+            return res.status(400).json({ success: false, message: 'Coupon expired or limit reached' });
+        }
+
+        if (cartTotal < coupon.minOrderAmount) {
+            return res.status(400).json({ success: false, message: `Minimum order amount is ${coupon.minOrderAmount}€` });
+        }
+
+        let discount = 0;
+        if (coupon.discountType === 'percentage') {
+            discount = (cartTotal * coupon.amount) / 100;
+        } else {
+            discount = coupon.amount;
+        }
+
+        // Cap discount at total amount
+        if (discount > cartTotal) discount = cartTotal;
+
+        res.json({
+            success: true,
+            discount,
+            totalAfterDiscount: cartTotal - discount,
+            couponCode: coupon.code
+        });
+
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
 // @desc    Create new order
 // @route   POST /api/orders

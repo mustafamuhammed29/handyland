@@ -9,6 +9,7 @@ router.get('/admin/stats', protect, authorize('admin'), orderController.getOrder
 router.put('/admin/:id/status', protect, authorize('admin'), orderController.updateOrderStatus);
 
 // User routes (protected)
+router.post('/apply-coupon', protect, orderController.applyCoupon);
 router.post('/', protect, orderController.createOrder);
 router.get('/', protect, orderController.getMyOrders);
 router.get('/:id', protect, orderController.getOrder);

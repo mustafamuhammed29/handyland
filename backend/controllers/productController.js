@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Review = require('../models/Review');
 const { v4: uuidv4 } = require('uuid');
 
 exports.getAllProducts = async (req, res) => {
@@ -132,7 +133,31 @@ exports.deleteProduct = async (req, res) => {
 
 
 
-const Review = require('../models/Review');
+
+
+// @desc    Get related products
+// @route   GET /api/products/:id/related
+// @access  Public
+exports.getRelatedProducts = async (req, res) => {
+    try {
+        const product = await Product.findOne({ id: req.params.id });
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        const related = await Product.find({
+            $or: [
+                { category: product.category },
+                { brand: product.brand }
+            ],
+            id: { $ne: product.id }
+        }).limit(4);
+
+        res.json(related);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 // @desc    Create new review
 // @route   POST /api/products/:id/reviews
@@ -140,7 +165,7 @@ const Review = require('../models/Review');
 exports.createProductReview = async (req, res) => {
     try {
         const { rating, comment } = req.body;
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findOne({ id: req.params.id });
 
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
@@ -148,7 +173,7 @@ exports.createProductReview = async (req, res) => {
 
         const alreadyReviewed = await Review.findOne({
             user: req.user.id,
-            product: req.params.id
+            product: product._id
         });
 
         if (alreadyReviewed) {
@@ -156,19 +181,18 @@ exports.createProductReview = async (req, res) => {
         }
 
         const review = await Review.create({
-            name: req.user.name,
-            rating: Number(rating),
-            comment,
             user: req.user.id,
-            product: req.params.id
+            product: product._id,
+            rating: Number(rating),
+            comment
         });
 
         // Update Product stats
-        const reviews = await Review.find({ product: req.params.id });
+        const reviews = await Review.find({ product: product._id });
         product.numReviews = reviews.length;
         product.rating = reviews.reduce((acc, item) => item.rating + acc, 0) / reviews.length;
 
-        await product.save();
+        await product.save(); // Note: Product schema doesn't have rating/numReviews yet, might need update
 
         res.status(201).json({ message: 'Review added' });
     } catch (error) {
@@ -181,7 +205,10 @@ exports.createProductReview = async (req, res) => {
 // @access  Public
 exports.getProductReviews = async (req, res) => {
     try {
-        const reviews = await Review.find({ product: req.params.id }).populate('user', 'name');
+        const product = await Product.findOne({ id: req.params.id });
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        const reviews = await Review.find({ product: product._id }).populate('user', 'name');
         res.json(reviews);
     } catch (error) {
         res.status(500).json({ message: error.message });
