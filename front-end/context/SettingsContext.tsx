@@ -48,6 +48,11 @@ interface Settings {
     siteName?: string;
     contactEmail?: string;
     footerText?: string;
+    navbar?: {
+        logoText?: string;
+        logoAccentText?: string;
+        showLanguageSwitcher?: boolean;
+    };
     hero: HeroSettings;
     valuation: {
         step1Title: string;

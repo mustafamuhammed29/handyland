@@ -13,4 +13,7 @@ router.delete('/:id', protect, authorize('admin'), productController.deleteProdu
 router.post('/:id/reviews', protect, productController.createProductReview);
 router.get('/:id/reviews', productController.getProductReviews);
 
+// Related Products
+router.get('/:id/related', productController.getRelatedProducts);
+
 module.exports = router;

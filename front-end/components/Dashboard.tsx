@@ -3,14 +3,12 @@ import {
     User, Package, Wrench, Settings, LogOut, Activity,
     CreditCard, Bell, Shield, Wallet, ChevronRight,
     BarChart3, Smartphone, FileText, TrendingUp, Plus, MapPin,
-    RotateCcw, Truck, MessageSquare, Download, ChevronLeft
+    RotateCcw, Truck, MessageSquare, Download, ChevronLeft, Loader2, Lock
 } from 'lucide-react';
 import { ViewState, User as UserType, RepairTicket, Transaction, SavedValuation } from '../types';
 import { useToast } from '../context/ToastContext';
 import { api } from '../utils/api';
 import { ENV } from '../src/config/env';
-
-
 
 const Skeleton = ({ className }: { className?: string }) => (
     <div className={`animate-pulse bg-slate-800/50 rounded-xl ${className}`} />
@@ -44,6 +42,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
     const [showAddFunds, setShowAddFunds] = useState(false);
     const [showAddCard, setShowAddCard] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Profile Update State
+    const [profileData, setProfileData] = useState({
+        name: initialUser?.name || '',
+        email: initialUser?.email || '',
+        phone: initialUser?.phone || '',
+        address: initialUser?.address || ''
+    });
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
     const { addToast } = useToast();
 
@@ -80,25 +93,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
         );
     };
 
-    // ... (imports)
-
-    // ... (inside component)
     const fetchDashboardData = async () => {
         try {
             // User Info
             const userData = await api.get<any>('/api/auth/me');
-            if (userData.success) setUserStats(userData.user);
+            if (userData.success) {
+                setUserStats(userData.user);
+                setProfileData({
+                    name: userData.user.name,
+                    email: userData.user.email,
+                    phone: userData.user.phone || '',
+                    address: userData.user.address || ''
+                });
+            }
 
             // Orders
-            const ordersData = await api.get<any>('/api/orders');
+            const ordersData = await api.get<any>('/api/orders'); // Uses getMyOrders
             if (ordersData.success) {
                 const formattedOrders: Transaction[] = ordersData.orders.map((order: any) => ({
-                    id: order.orderNumber,
+                    id: order._id, // MongoDB ID
                     type: 'purchase',
                     amount: order.totalAmount,
                     date: new Date(order.createdAt).toLocaleDateString(),
                     time: new Date(order.createdAt).toLocaleTimeString(),
-                    status: order.status
+                    status: order.status,
+                    items: order.orderItems // Store items for detail view
                 }));
                 setTransactions(formattedOrders);
             }
@@ -121,7 +140,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
 
         } catch (error: any) {
             console.error("Error fetching dashboard data", error);
-            addToast("Failed to load dashboard. Please refresh.", "error");
+            // Don't toast on every poll failure, only initial or manual
         }
     };
 
@@ -135,6 +154,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
         const interval = setInterval(fetchDashboardData, 30000); // 30s Auto-refresh
         return () => clearInterval(interval);
     }, []);
+
+    const handleProfileUpdate = async () => {
+        setIsUpdatingProfile(true);
+        try {
+            await api.put('/api/users/profile', profileData);
+            addToast("Profile updated successfully", "success");
+            await fetchDashboardData(); // Refresh data
+        } catch (error: any) {
+            addToast(error.response?.data?.message || "Failed to update profile", "error");
+        } finally {
+            setIsUpdatingProfile(false);
+        }
+    };
+
+    const handlePasswordChange = async () => {
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            addToast("Passwords do not match", "error");
+            return;
+        }
+        setIsUpdatingPassword(true);
+        try {
+            await api.put('/api/users/change-password', {
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+            });
+            addToast("Password changed successfully", "success");
+            setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (error: any) {
+            addToast(error.response?.data?.message || "Failed to change password", "error");
+        } finally {
+            setIsUpdatingPassword(false);
+        }
+    };
+
 
     const user = userStats || initialUser; // Prefer fetched stats
 
@@ -185,7 +238,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                         <div className="flex items-center gap-4 mb-8">
                             <div className="relative">
                                 <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-900/30">
-                                    {user.name.charAt(0)}
+                                    {user.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
                             </div>
@@ -247,11 +300,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                             {/* Stats Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-3xl relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity rtl:right-auto rtl:left-0">
                                         <Wallet className="w-16 h-16 text-white" />
                                     </div>
                                     <div className="text-slate-500 text-sm mb-1">Balance</div>
-                                    <div className="text-3xl font-black text-white">€{user.balance || '0.00'}</div>
+                                    <div className="text-3xl font-black text-white">€{user.balance?.toFixed(2) || '0.00'}</div>
                                     <div className="text-xs text-emerald-400 mt-2 flex items-center gap-1">
                                         <TrendingUp className="w-3 h-3" /> +12% this month
                                     </div>
@@ -382,32 +435,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Recent Activity */}
-                            <div>
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-bold text-white">Recent Activity</h3>
-                                    <button onClick={() => setActiveTab('orders')} className="text-xs text-cyan-400 hover:underline">View All Activity</button>
-                                </div>
-                                <div className="space-y-3">
-                                    {transactions.slice(0, 3).map((trx) => (
-                                        <div key={trx.id} className="flex items-center justify-between bg-black/20 border border-slate-800/50 p-4 rounded-2xl hover:bg-slate-800/50 transition-colors">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${trx.type === 'purchase' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
-                                                    {trx.type === 'purchase' ? <Package className="w-5 h-5" /> : <Wrench className="w-5 h-5" />}
-                                                </div>
-                                                <div>
-                                                    <div className="font-bold text-white capitalize">{trx.type}</div>
-                                                    <div className="text-xs text-slate-500">{trx.date} • {trx.id}</div>
-                                                </div>
-                                            </div>
-                                            <div className="font-mono font-bold text-white">
-                                                -€{trx.amount}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
                         </div>
                     )}
 
@@ -427,7 +454,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                             <div className="grid md:grid-cols-2 gap-4">
                                 {valuations.map(val => (
                                     <div key={val.id} className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 hover:border-blue-500/30 transition-all group relative overflow-hidden">
-                                        {/* Background Glow */}
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -z-10 group-hover:bg-blue-500/10 transition-colors"></div>
 
                                         <div className="flex justify-between items-start mb-6">
@@ -475,13 +501,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                                     Sell Now <ChevronRight className="w-4 h-4" />
                                                 </button>
                                             </div>
-                                        </div>
-
-                                        {/* Warning if old */}
-                                        {/* Mock logic for date comparison */}
-                                        <div className="mt-4 pt-4 border-t border-dashed border-slate-800 text-xs text-amber-500 flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-                                            Offer expires in 3 days. Lock in this price today!
                                         </div>
                                     </div>
                                 ))}
@@ -579,19 +598,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                                             ))}
                                                         </div>
                                                     </div>
-                                                    <div>
-                                                        <h4 className="text-sm font-bold text-slate-300 mb-4">Quick Actions</h4>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            <button className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition-colors">
-                                                                <MessageSquare className="w-3 h-3" /> Chat with Technician
-                                                            </button>
-                                                            {ticket.status === 'ready' && (
-                                                                <button className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/50 rounded-lg text-xs font-bold transition-colors">
-                                                                    <Truck className="w-3 h-3" /> Schedule Pickup
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -632,69 +638,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                         <div className="text-white font-mono text-sm">•••• 4291</div>
                                     </div>
                                 </div>
-
-                                {/* Saved Visa */}
-                                <div className="w-80 h-48 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 p-6 flex flex-col justify-between shadow-lg relative overflow-hidden transform hover:scale-105 transition-transform cursor-pointer">
-                                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-bold text-white italic">VISA</span>
-                                        <span className="bg-white/20 px-2 py-1 rounded text-[10px] text-white">Default</span>
-                                    </div>
-                                    <div className="font-mono text-white text-lg tracking-widest mt-4">
-                                        •••• •••• •••• 8821
-                                    </div>
-                                    <div className="flex justify-between text-blue-100 text-xs mt-auto">
-                                        <div className="flex flex-col">
-                                            <span className="opacity-70">Card Holder</span>
-                                            <span className="font-bold">{user.name.toUpperCase()}</span>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="opacity-70">Expires</span>
-                                            <span className="font-bold">12/26</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Payment Methods & History */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6">
-                                    <h3 className="font-bold text-white mb-4">Payment Methods</h3>
-                                    <div className="space-y-4">
-                                        <button
-                                            onClick={() => setShowAddCard(true)}
-                                            className="w-full flex items-center justify-between p-4 rounded-xl border border-dashed border-slate-700 hover:border-blue-500 hover:bg-blue-500/5 transition-all group"
-                                        >
-                                            <div className="flex items-center gap-3 text-slate-400 group-hover:text-blue-400">
-                                                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
-                                                    <Plus className="w-4 h-4" />
-                                                </div>
-                                                <span className="text-sm font-medium">Link New Card or Bank Account</span>
-                                            </div>
-                                            <ChevronRight className="w-4 h-4 text-slate-600" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6">
-                                    <h3 className="font-bold text-white mb-4">Recent Transactions</h3>
-                                    <div className="space-y-4">
-                                        {transactions.slice(0, 3).map((trx) => (
-                                            <div key={trx.id} className="flex items-center justify-between border-b border-slate-800/50 pb-3 last:border-0 last:pb-0">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${trx.type === 'purchase' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
-                                                        {trx.type === 'purchase' ? <Package className="w-4 h-4" /> : <Wrench className="w-4 h-4" />}
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-sm font-bold text-white">{trx.type === 'purchase' ? 'Order Payment' : 'Repair Service'}</div>
-                                                        <div className="text-[10px] text-slate-500">{trx.date}</div>
-                                                    </div>
-                                                </div>
-                                                <div className="font-mono font-bold text-white text-sm">-€{trx.amount}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     )}
@@ -704,6 +647,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                         <div className="space-y-6 animate-in fade-in">
                             <h2 className="text-2xl font-bold text-white mb-6">Account Settings</h2>
 
+                            {/* Profile Information */}
                             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8">
                                 <h3 className="font-bold text-white mb-6 flex items-center gap-2">
                                     <User className="w-5 h-5 text-cyan-400" /> Personal Information
@@ -711,44 +655,97 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-xs text-slate-400 uppercase font-bold">Full Name</label>
-                                        <input type="text" defaultValue={user.name} className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none transition-colors" />
+                                        <input
+                                            type="text"
+                                            value={profileData.name}
+                                            onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs text-slate-400 uppercase font-bold">Email Address</label>
-                                        <input type="email" defaultValue={user.email} className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none transition-colors" />
+                                        <input
+                                            type="email"
+                                            value={profileData.email}
+                                            onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs text-slate-400 uppercase font-bold">Phone Number</label>
-                                        <input type="text" defaultValue={user.phone || "+49 152 993 882"} className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none transition-colors" />
+                                        <input
+                                            type="text"
+                                            value={profileData.phone}
+                                            onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs text-slate-400 uppercase font-bold">Shipping Address</label>
                                         <div className="relative">
                                             <MapPin className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" />
-                                            <input type="text" defaultValue={user.address || "Alexanderplatz 1, 10178 Berlin"} className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 pl-10 text-white focus:border-cyan-500 outline-none transition-colors" />
+                                            <input
+                                                type="text"
+                                                value={profileData.address}
+                                                onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
+                                                className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 pl-10 text-white focus:border-cyan-500 outline-none transition-colors"
+                                            />
                                         </div>
                                     </div>
                                 </div>
                                 <div className="mt-8 flex justify-end">
-                                    <button className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-cyan-900/20 transition-all">
-                                        Save Changes
+                                    <button
+                                        onClick={handleProfileUpdate}
+                                        disabled={isUpdatingProfile}
+                                        className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-cyan-900/20 transition-all flex items-center gap-2"
+                                    >
+                                        {isUpdatingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
                                     </button>
                                 </div>
                             </div>
 
+                            {/* Password Change */}
                             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8">
                                 <h3 className="font-bold text-white mb-6 flex items-center gap-2">
-                                    <Bell className="w-5 h-5 text-purple-400" /> Notification Preferences
+                                    <Lock className="w-5 h-5 text-red-400" /> Security
                                 </h3>
-                                <div className="space-y-4">
-                                    {['Order Updates', 'Repair Status Changes', 'Promotional Offers', 'New Device Alerts'].map((item) => (
-                                        <div key={item} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-800/50 transition-colors">
-                                            <span className="text-slate-300 text-sm">{item}</span>
-                                            <div className="w-12 h-6 bg-slate-700 rounded-full relative cursor-pointer">
-                                                <div className="absolute right-1 top-1 w-4 h-4 bg-emerald-400 rounded-full shadow-sm"></div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="grid md:grid-cols-3 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-slate-400 uppercase font-bold">Current Password</label>
+                                        <input
+                                            type="password"
+                                            value={passwordData.currentPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-slate-400 uppercase font-bold">New Password</label>
+                                        <input
+                                            type="password"
+                                            value={passwordData.newPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-slate-400 uppercase font-bold">Confirm Password</label>
+                                        <input
+                                            type="password"
+                                            value={passwordData.confirmPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mt-8 flex justify-end">
+                                    <button
+                                        onClick={handlePasswordChange}
+                                        disabled={isUpdatingPassword}
+                                        className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-bold border border-slate-700 transition-all flex items-center gap-2"
+                                    >
+                                        {isUpdatingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update Password'}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -837,13 +834,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                                     <div className="grid md:grid-cols-2 gap-8">
                                                         <div>
                                                             <h4 className="text-sm font-bold text-slate-300 mb-4">Items</h4>
-                                                            {/* Mock Items Logic - In real app, fetch order details */}
-                                                            <div className="flex items-center gap-3 mb-3">
-                                                                <div className="w-10 h-10 bg-slate-800 rounded-lg"></div>
-                                                                <div>
-                                                                    <div className="text-sm text-white">iPhone 13 Screen Protector</div>
-                                                                    <div className="text-xs text-slate-500">Qty: 1 • €19.99</div>
-                                                                </div>
+                                                            <div className="space-y-3">
+                                                                {(order.items || []).map((item: any) => (
+                                                                    <div key={item._id || item.name} className="flex items-center gap-3">
+                                                                        <div className="w-10 h-10 bg-slate-800 rounded-lg overflow-hidden">
+                                                                            {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
+                                                                        </div>
+                                                                        <div>
+                                                                            <div className="text-sm text-white">{item.name}</div>
+                                                                            <div className="text-xs text-slate-500">Qty: {item.quantity} • €{item.price}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                         </div>
                                                         <div>
@@ -853,21 +855,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                                                     <button className="px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/20">
                                                                         Cancel Order
                                                                     </button>
-                                                                )}
-                                                                {order.status === 'shipped' && (
-                                                                    <button className="px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold hover:bg-blue-500/20">
-                                                                        Track Package
-                                                                    </button>
-                                                                )}
-                                                                {order.status === 'delivered' && (
-                                                                    <>
-                                                                        <button className="px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold hover:bg-emerald-500/20">
-                                                                            Leave Review
-                                                                        </button>
-                                                                        <button className="px-4 py-2 bg-slate-800 text-white border border-slate-700 rounded-lg text-xs font-bold hover:bg-slate-700">
-                                                                            Buy Again
-                                                                        </button>
-                                                                    </>
                                                                 )}
                                                                 <button className="px-4 py-2 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-bold hover:bg-slate-700 flex items-center gap-2">
                                                                     <Download className="w-3 h-3" /> Invoice
@@ -879,29 +866,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                             )}
                                         </div>
                                     ))}
-
-                                {/* Pagination Controls */}
-                                {transactions.filter(t => t.type === 'purchase').length > ordersPerPage && (
-                                    <div className="flex justify-center gap-2 mt-6">
-                                        <button
-                                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                            disabled={currentPage === 1}
-                                            className="p-2 rounded-lg bg-slate-800 text-white disabled:opacity-50"
-                                        >
-                                            <ChevronLeft className="w-4 h-4" />
-                                        </button>
-                                        <span className="px-4 flex items-center text-sm font-bold text-white">
-                                            Page {currentPage}
-                                        </span>
-                                        <button
-                                            onClick={() => setCurrentPage(prev => prev + 1)}
-                                            disabled={transactions.filter(t => t.type === 'purchase').length <= currentPage * ordersPerPage}
-                                            className="p-2 rounded-lg bg-slate-800 text-white disabled:opacity-50"
-                                        >
-                                            <ChevronRight className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                )}
 
                                 {/* Empty State */}
                                 {transactions.filter(t => t.type === 'purchase').length === 0 && (
@@ -921,66 +885,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                     )}
                 </div>
             </div>
-            {/* Modals */}
-            {showAddFunds && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-                        <button onClick={() => setShowAddFunds(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
-                            <Plus className="w-6 h-6 rotate-45" />
-                        </button>
-                        <h3 className="text-xl font-bold text-white mb-4">Add Funds</h3>
-                        <p className="text-slate-400 text-sm mb-6">Top up your JawwalHub wallet instantly.</p>
-                        <div className="grid grid-cols-3 gap-2 mb-6">
-                            {[10, 25, 50, 100, 200, 500].map(amount => (
-                                <button key={amount} className="bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-mono font-bold transition-colors">
-                                    €{amount}
-                                </button>
-                            ))}
-                        </div>
-                        <input type="number" placeholder="Enter custom amount" className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white mb-6 focus:border-cyan-500 outline-none" />
-                        <button className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold">
-                            Proceed to Payment
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {showAddCard && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-                        <button onClick={() => setShowAddCard(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
-                            <Plus className="w-6 h-6 rotate-45" />
-                        </button>
-                        <h3 className="text-xl font-bold text-white mb-4">Add Payment Method</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-xs text-slate-400 uppercase font-bold block mb-1">Card Number</label>
-                                <div className="relative">
-                                    <CreditCard className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" />
-                                    <input type="text" placeholder="0000 0000 0000 0000" className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 pl-10 text-white focus:border-cyan-500 outline-none font-mono" />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs text-slate-400 uppercase font-bold block mb-1">Expiry</label>
-                                    <input type="text" placeholder="MM/YY" className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none font-mono" />
-                                </div>
-                                <div>
-                                    <label className="text-xs text-slate-400 uppercase font-bold block mb-1">CVC</label>
-                                    <input type="text" placeholder="123" className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none font-mono" />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-xs text-slate-400 uppercase font-bold block mb-1">Cardholder Name</label>
-                                <input type="text" placeholder="John Doe" className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none" />
-                            </div>
-                            <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold mt-4">
-                                Save Card
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Modals for Wallet (Add Funds etc) can be kept or enhanced here */}
         </div>
     );
 };
