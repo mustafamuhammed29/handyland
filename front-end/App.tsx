@@ -17,7 +17,9 @@ import PaymentSuccess from './PaymentSuccess';
 import { ProductDetails } from './components/ProductDetails';
 import { Dashboard } from './components/Dashboard';
 import { SellDevice } from './pages/SellDevice';
-import { NotFound } from './pages/NotFound';
+import NotFound from './pages/NotFound';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 import { SellerStudio } from './components/SellerStudio';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -154,8 +156,9 @@ function App() {
 
                 {/* Dynamic Pages */}
                 <Route path="/info" element={<InfoPage lang={lang} />} />
-                <Route path="/agb" element={<InfoPage lang={lang} />} />
-                <Route path="/privacy" element={<InfoPage lang={lang} />} />
+                <Route path="/agb" element={<TermsAndConditions />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+
                 <Route path="/datenschutz" element={<InfoPage lang={lang} />} />
                 <Route path="/service" element={<InfoPage lang={lang} />} />
                 <Route path="/kundenservice" element={<InfoPage lang={lang} />} />

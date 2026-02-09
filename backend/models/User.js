@@ -133,4 +133,8 @@ UserSchema.methods.generateResetPasswordToken = function () {
     return resetToken;
 };
 
+// Add Indexes
+UserSchema.index({ email: 1 });
+UserSchema.index({ role: 1 });
+
 module.exports = mongoose.model('User', UserSchema);
