@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LanguageCode } from '../types';
 import { translations } from '../i18n';
+import { api } from '../utils/api';
 
 interface InfoPageProps {
     lang: LanguageCode;
@@ -38,9 +39,7 @@ export const InfoPage: React.FC<InfoPageProps> = ({ lang }) => {
         setLoading(true);
         setError(false);
         try {
-            const res = await fetch(`http://localhost:5000/api/pages/${slug}`);
-            if (!res.ok) throw new Error('Page not found');
-            const data = await res.json();
+            const data = await api.get<any>(`/api/pages/${slug}`);
             setTitle(data.title);
             setContent(data.content);
         } catch (err) {

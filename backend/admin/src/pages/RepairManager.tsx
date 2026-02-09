@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Save, ChevronRight, ArrowLeft, Plus, Trash2, Edit2, X } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
+import { api } from '../utils/api';
 
 export default function RepairManager() {
     const [devices, setDevices] = useState<any[]>([]);
@@ -23,14 +24,14 @@ export default function RepairManager() {
         fetchDevices();
     }, []);
 
-    const fetchDevices = () => {
-        fetch('http://localhost:5000/api/repair-devices')
-            .then(res => res.json())
-            .then(data => {
-                setDevices(data);
-                setLoading(false);
-            })
-            .catch(err => console.error("Failed to load repairs", err));
+    const fetchDevices = async () => {
+        try {
+            const response = await api.get<any[]>('/api/repairs');
+            setDevices(response.data);
+            setLoading(false);
+        } catch (error) {
+            console.error("Failed to load repairs", error);
+        }
     };
 
     const handleSelectDevice = (device: any) => {
@@ -42,7 +43,7 @@ export default function RepairManager() {
         e.stopPropagation();
         if (!confirm('Are you sure you want to delete this device and all its services?')) return;
         try {
-            await fetch(`http://localhost:5000/api/repair-devices/${id}`, { method: 'DELETE' });
+            await api.delete(`/api/repairs/${id}`);
             fetchDevices();
             if (selectedDevice?.id === id) setSelectedDevice(null);
         } catch (error) {
@@ -66,25 +67,16 @@ export default function RepairManager() {
     const handleDeviceSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const method = deviceForm.id ? 'PUT' : 'POST';
-            // Correct endpoint for creating/updating device
-            // Note: The backend route /api/repair-devices post/put handles device data
-            // We might need to ensure backend supports simple PUT for device info
-            // If backend only has /:id/services, we might need to rely on that or update backend
-            // For now assuming standard REST:
-            // POST /api/repair-devices (New)
-            // PUT /api/repair-devices/:id (Update info)
-
             const url = deviceForm.id
-                ? `http://localhost:5000/api/repair-devices/${deviceForm.id}`
-                : 'http://localhost:5000/api/repair-devices';
+                ? `/api/repairs/${deviceForm.id}`
+                : '/api/repairs';
 
-            await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(deviceForm)
-            });
-            setIsDeviceModalOpen(false);
+            if (deviceForm.id) {
+                await api.put(url, deviceForm);
+            } else {
+                await api.post(url, deviceForm);
+            }
+
             setIsDeviceModalOpen(false);
             setDeviceForm({ id: '', model: '', brand: 'Apple', image: '', isVisible: true, services: [] });
             fetchDevices();
@@ -113,12 +105,8 @@ export default function RepairManager() {
     const handleSaveServices = async () => {
         if (!selectedDevice) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/repair-devices/${selectedDevice.id}/services`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ services: editedServices })
-            });
-            const updatedDevice = await res.json();
+            const response = await api.put(`/api/repairs/${selectedDevice.id}/services`, { services: editedServices });
+            const updatedDevice = response.data;
 
             setDevices(devices.map(d => d.id === updatedDevice.id ? updatedDevice : d));
             setSelectedDevice(updatedDevice);

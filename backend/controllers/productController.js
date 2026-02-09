@@ -71,6 +71,11 @@ exports.getAllProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
     try {
+        const { name, price, category } = req.body;
+        if (!name || !price || !category) {
+            return res.status(400).json({ message: "Name, price, and category are required" });
+        }
+
         const newProduct = new Product({
             ...req.body,
             id: uuidv4()

@@ -72,20 +72,38 @@ const UserSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    // Encryption for refreshToken
+    refreshToken: {
+        type: String,
+        select: false
     }
 }, {
     timestamps: true
 });
 
-// Hash password before saving - Fixed for Mongoose 7+
+// Pre-save hook for hashing password and encrypting refresh token
 UserSchema.pre('save', async function () {
-    // Only hash if password is modified
-    if (!this.isModified('password')) {
-        return;
-    }
+    console.log('User pre-save hook triggered for:', this.email);
+    try {
+        // 1. Encrypt Refresh Token
+        if (this.isModified('refreshToken') && this.refreshToken) {
+            console.log('Encrypting refresh token...');
+            const crypto = require('crypto');
+            this.refreshToken = crypto.createHash('sha256').update(this.refreshToken).digest('hex');
+        }
 
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+        // 2. Hash Password
+        if (this.isModified('password')) {
+            console.log('Hashing password...');
+            const salt = await bcrypt.genSalt(10);
+            this.password = await bcrypt.hash(this.password, salt);
+        }
+        console.log('User pre-save hook completed successfully.');
+    } catch (error) {
+        console.error('Error in User pre-save hook:', error);
+        throw error;
+    }
 });
 
 // Method to compare password

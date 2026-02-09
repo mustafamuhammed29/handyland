@@ -20,7 +20,10 @@ exports.protect = async (req, res, next) => {
 
     try {
         // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-in-production');
+        if (!process.env.JWT_SECRET) {
+            throw new Error('JWT_SECRET is not defined');
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // Get user from token
         req.user = await User.findById(decoded.id).select('-password');
@@ -31,6 +34,17 @@ exports.protect = async (req, res, next) => {
                 message: 'User not found'
             });
         }
+
+        if (!req.user.isActive) {
+            return res.status(401).json({
+                success: false,
+                message: 'User account is deactivated'
+            });
+        }
+
+        // if (!req.user.isVerified) { // Optional: Enforce verification for all protected routes?
+        //     return res.status(401).json({ message: 'Please verify your email' });
+        // }
 
         next();
     } catch (error) {

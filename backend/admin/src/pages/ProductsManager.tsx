@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, X, Save } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
 
+import { api } from '../utils/api';
+
 export default function ProductsManager() {
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -22,17 +24,25 @@ export default function ProductsManager() {
         category: 'Smartphones'
     });
 
-    const fetchProducts = () => {
-        fetch('http://localhost:5000/api/products')
-            .then(res => res.json())
-            .then(data => {
-                setProducts(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("Failed to load products", err);
-                setLoading(false);
-            });
+    const fetchProducts = async () => {
+        try {
+            const res = await api.get('/api/products');
+            // Safety check: ensure response data is an array
+            if (Array.isArray(res.data)) {
+                setProducts(res.data);
+            } else if (res.data && Array.isArray(res.data.products)) {
+                // Handle potential pagination wrapper
+                setProducts(res.data.products);
+            } else {
+                console.error("Invalid products data format:", res.data);
+                setProducts([]);
+            }
+        } catch (err) {
+            console.error("Failed to load products", err);
+            setProducts([]); // Fallback to empty array on error
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -42,7 +52,7 @@ export default function ProductsManager() {
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this product?')) return;
         try {
-            await fetch(`http://localhost:5000/api/products/${id}`, { method: 'DELETE' });
+            await api.delete(`/api/products/${id}`);
             fetchProducts();
         } catch (error) {
             console.error("Failed to delete", error);
@@ -71,10 +81,9 @@ export default function ProductsManager() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const method = formData.id ? 'PUT' : 'POST';
             const url = formData.id
-                ? `http://localhost:5000/api/products/${formData.id}`
-                : 'http://localhost:5000/api/products';
+                ? `/api/products/${formData.id}`
+                : '/api/products';
 
             // Map frontend model field back to name if needed by backend, or adjust backend
             // Currently backend expects 'name', so we should send 'name'
@@ -83,11 +92,12 @@ export default function ProductsManager() {
                 name: formData.model // Ensure backend gets 'name' which maps to 'model' in UI
             };
 
-            await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            if (formData.id) {
+                await api.put(url, payload);
+            } else {
+                await api.post(url, payload);
+            }
+
             setIsModalOpen(false);
             resetForm();
             fetchProducts();

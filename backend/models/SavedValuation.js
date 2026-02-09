@@ -27,9 +27,10 @@ const SavedValuationSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    expiryDate: {
+    expiresAt: {
         type: Date,
-        default: () => Date.now() + 48 * 60 * 60 * 1000 // 48 hours for quotes
+        default: () => Date.now() + 48 * 60 * 60 * 1000, // 48 hours for quotes
+        index: { expireAfterSeconds: 0 } // Auto-delete after expiry
     },
     status: {
         type: String,

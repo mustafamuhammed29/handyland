@@ -36,6 +36,14 @@ exports.createOrder = async (req, res) => {
                 });
             }
 
+            // Check Stock
+            if (product.stock < item.quantity) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Insufficient stock for: ${product.name}`
+                });
+            }
+
             const itemTotal = product.price * item.quantity;
             totalAmount += itemTotal;
 
@@ -58,6 +66,15 @@ exports.createOrder = async (req, res) => {
             paymentMethod,
             notes
         });
+
+        // Update Stock
+        for (const item of orderItems) {
+            if (item.productType === 'Product') {
+                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+            } else if (item.productType === 'Accessory') {
+                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+            }
+        }
 
         // Send order confirmation email
         try {

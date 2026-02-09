@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
+import { api } from '../utils/api';
 
 export const VerifyEmail = () => {
     const [searchParams] = useSearchParams();
@@ -17,12 +18,16 @@ export const VerifyEmail = () => {
         }
 
         const verify = async () => {
-            // Mock Verification
-            setTimeout(() => {
+            try {
+                // Call actual API
+                const response = await api.get<{ message: string }>(`/api/auth/verify-email/${token}`);
                 setStatus('success');
-                setMessage('Email verified successfully! (Mock)');
-                setTimeout(() => navigate('/'), 3000);
-            }, 1500);
+                setMessage(response.message || 'Email verified successfully!');
+                setTimeout(() => navigate('/login'), 3000); // Redirect to login
+            } catch (error: any) {
+                setStatus('error');
+                setMessage(error.message || 'Verification failed. Link may be expired.');
+            }
         };
 
         verify();
@@ -51,7 +56,7 @@ export const VerifyEmail = () => {
 
                 {status !== 'loading' && (
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={() => navigate('/login')}
                         className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
                     >
                         Go to Login <ArrowRight className="w-4 h-4" />

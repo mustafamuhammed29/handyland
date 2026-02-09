@@ -5,6 +5,7 @@ const accessorySchema = new mongoose.Schema({
     name: { type: String, required: true },
     category: { type: String, required: true }, // audio, power, protection, wearables
     price: { type: Number, required: true },
+    stock: { type: Number, required: true, default: 0 },
     image: String,
     description: String,
     tag: String,
