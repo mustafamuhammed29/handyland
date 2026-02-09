@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -36,6 +36,7 @@ import { translations } from './i18n';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
+import { GlobalError } from './components/GlobalError';
 
 // Home Component to group Home-related sections
 const Home = ({ setView, lang }: { setView: any, lang: LanguageCode }) => {
@@ -68,14 +69,24 @@ const Home = ({ setView, lang }: { setView: any, lang: LanguageCode }) => {
 };
 
 
-function App() {
+// AppContent uses the hooks that require the contexts provided in App
+function AppContent() {
   const navigate = useNavigate();
-
-  const [view, setViewState] = useState<ViewState>(ViewState.HOME);
+  const [view, setView] = useState<ViewState>(ViewState.HOME);
   const [lang, setLang] = useState<LanguageCode>('de');
   const [user, setUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [showCart, setShowCart] = useState(false);
+
+  // Use settings context to check for global load errors
+  // This is now safe because AppContent is wrapped by SettingsProvider in App
+  const { loading: settingsLoading, error: settingsError } = useSettings();
+
+  // Load language preference
+  useEffect(() => {
+    const savedLang = localStorage.getItem('handyland_lang') as LanguageCode;
+    if (savedLang) setLang(savedLang);
+  }, []);
 
   // Restore session on load
   React.useEffect(() => {
@@ -92,9 +103,23 @@ function App() {
     }
   }, []);
 
+  // Handle Global Error
+  if (settingsError) {
+    return <GlobalError onRetry={() => window.location.reload()} />;
+  }
+
+  // Handle Loading - Optional: Show a splash screen
+  if (settingsLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   // Legacy setView for components that still rely on it
-  const setView = (view: ViewState) => {
-    setViewState(view);
+  const setViewLegacy = (view: ViewState) => {
+    setView(view);
     switch (view) {
       case ViewState.HOME: navigate('/'); break;
       case ViewState.MARKETPLACE: navigate('/marketplace'); break;
@@ -116,67 +141,72 @@ function App() {
   const toggleCart = () => setShowCart(!showCart);
 
   return (
+    <div className={`min-h-screen font-sans bg-slate-950 selection:bg-blue-500/30 selection:text-blue-200 ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      <Routes>
+        {/* PUBLIC LAYOUT */}
+        <Route
+          path="/"
+          element={
+            <PublicLayout
+              view={ViewState.HOME}
+              setView={setViewLegacy}
+              lang={lang}
+              user={user}
+              cartCount={10}
+              toggleCart={toggleCart}
+              toggleAuth={toggleAuth}
+            />
+          }
+        >
+          <Route path="/" element={<Home setView={setViewLegacy} lang={lang} />} />
+          <Route path="/marketplace" element={<Marketplace lang={lang} />} />
+          <Route path="/accessories" element={<Accessories lang={lang} />} />
+          <Route path="/repair" element={<Repair lang={lang} />} />
+          <Route path="/valuation" element={<Valuation lang={lang} />} />
+          <Route path="/sell/:quoteRef" element={<SellDevice />} />
+          <Route path="shop" element={<Accessories lang={lang} />} />
+          <Route path="products/:id" element={<ProductDetails lang={lang} />} />
+          <Route path="/contact" element={<Contact lang={lang} />} />
+          <Route path="checkout" element={<Checkout lang={lang} setView={setViewLegacy} />} />
+          <Route path="payment-success" element={<PaymentSuccess />} />
+          <Route path="login" element={<Auth setView={setViewLegacy} lang={lang} setUser={setUser} />} />
+          <Route path="verify-email" element={<VerifyEmail />} />
+          <Route path="verify-email-notice" element={<VerifyEmailNotice />} />
+          <Route path="reset-password" element={<ResetPassword />} />
+
+          {/* Dynamic Pages */}
+          <Route path="/info" element={<InfoPage lang={lang} />} />
+          <Route path="/agb" element={<TermsAndConditions />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+
+          <Route path="/datenschutz" element={<InfoPage lang={lang} />} />
+          <Route path="/service" element={<InfoPage lang={lang} />} />
+          <Route path="/kundenservice" element={<InfoPage lang={lang} />} />
+          <Route path="/impressum" element={<InfoPage lang={lang} />} />
+          <Route path="/uber-uns" element={<InfoPage lang={lang} />} />
+          <Route path="/page/:slug" element={<InfoPage lang={lang} />} />
+        </Route>
+
+        {/* PROTECTED ROUTES */}
+        <Route element={<ProtectedRoute user={user} />}>
+          <Route path="dashboard" element={<Dashboard user={user} setView={setViewLegacy} logout={() => setUser(null)} />} />
+          <Route path="seller" element={<SellerStudio lang={lang} setView={setViewLegacy} />} />
+        </Route>
+
+        {/* Fallback */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
+  );
+}
+
+// Main App Component that provides context
+function App() {
+  return (
     <ToastProvider>
       <SettingsProvider>
         <CartProvider>
-          {/* Cart Drawer is now handled inside PublicLayout or globally if needed, let's keep it global for now or move to PublicLayout */}
-          {/* Actually, the request is to separate completely. Admin shouldn't have cart drawer. */}
-          <div className={`min-h-screen font-sans bg-slate-950 selection:bg-blue-500/30 selection:text-blue-200 ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-            <Routes>
-              {/* PUBLIC LAYOUT */}
-              <Route
-                path="/"
-                element={
-                  <PublicLayout
-                    view={ViewState.HOME} // Using ViewState.HOME as 'view' is not defined in App's scope
-                    setView={setView}
-                    lang={lang}
-                    user={user}
-                    cartCount={10}
-                    toggleCart={toggleCart}
-                    toggleAuth={toggleAuth}
-                  />
-                }
-              >
-                <Route path="/" element={<Home setView={setView} lang={lang} />} />
-                <Route path="/marketplace" element={<Marketplace lang={lang} />} />
-                <Route path="/accessories" element={<Accessories lang={lang} />} />
-                <Route path="/repair" element={<Repair lang={lang} />} />
-                <Route path="/valuation" element={<Valuation lang={lang} />} />
-                <Route path="/sell/:quoteRef" element={<SellDevice />} />
-                <Route path="shop" element={<Accessories lang={lang} />} />
-                <Route path="products/:id" element={<ProductDetails lang={lang} />} />
-                <Route path="/contact" element={<Contact lang={lang} />} /> {/* Kept from original */}
-                <Route path="checkout" element={<Checkout lang={lang} setView={setView} />} />
-                <Route path="payment-success" element={<PaymentSuccess />} />
-                <Route path="login" element={<Auth setView={setView} lang={lang} setUser={setUser} />} />
-                <Route path="verify-email" element={<VerifyEmail />} />
-                <Route path="verify-email-notice" element={<VerifyEmailNotice />} />
-                <Route path="reset-password" element={<ResetPassword />} />
-
-                {/* Dynamic Pages */}
-                <Route path="/info" element={<InfoPage lang={lang} />} />
-                <Route path="/agb" element={<TermsAndConditions />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-
-                <Route path="/datenschutz" element={<InfoPage lang={lang} />} />
-                <Route path="/service" element={<InfoPage lang={lang} />} />
-                <Route path="/kundenservice" element={<InfoPage lang={lang} />} />
-                <Route path="/impressum" element={<InfoPage lang={lang} />} />
-                <Route path="/uber-uns" element={<InfoPage lang={lang} />} />
-                <Route path="/page/:slug" element={<InfoPage lang={lang} />} />
-              </Route>
-
-              {/* PROTECTED ROUTES */}
-              <Route element={<ProtectedRoute user={user} />}>
-                <Route path="dashboard" element={<Dashboard user={user} setView={setView} logout={() => setUser(null)} />} />
-                <Route path="seller" element={<SellerStudio lang={lang} setView={setView} />} />
-              </Route>
-
-              {/* Fallback */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
+          <AppContent />
         </CartProvider>
       </SettingsProvider>
     </ToastProvider>

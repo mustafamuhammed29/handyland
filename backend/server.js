@@ -82,30 +82,8 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 
-// Multer configuration for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif|webp/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed!'));
-        }
-    }
-});
+// Image Upload Utility
+const upload = require('./utils/imageUpload');
 
 // Serve Static Files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -130,11 +108,14 @@ const paymentRoutes = require('./routes/paymentRoutes');
 // Stricter rate limit for auth endpoints (relaxed for development)
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // Increased from 5 to 20 for development
-    message: 'Too many authentication attempts, please try again later.',
+    max: 5, // Strict limit for login/register
+    message: {
+        success: false,
+        message: 'Too many authentication attempts, please try again later.'
+    }
 });
 
-app.use('/api/auth', authRoutes); // app.use('/api/auth', authLimiter, authRoutes); Disabled for dev
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/repairs', repairRoutes);
 app.use('/api/settings', settingsRoutes);

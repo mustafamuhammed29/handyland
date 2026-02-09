@@ -57,11 +57,20 @@ exports.createOrder = async (req, res) => {
             });
         }
 
+        // Calculate Tax and Shipping
+        const taxRate = 0.19; // 19% Tax
+        const shippingFee = totalAmount > 100 ? 0 : 5.99; // Free shipping over 100
+        const taxAmount = totalAmount * taxRate;
+
+        const finalAmount = totalAmount + shippingFee; // Tax is usually included in price in EU, but if not: + taxAmount
+
         // Create order
         const order = await Order.create({
             user: req.user.id,
             items: orderItems,
-            totalAmount,
+            totalAmount: finalAmount,
+            tax: taxAmount,
+            shippingFee,
             shippingAddress,
             paymentMethod,
             notes
@@ -195,6 +204,15 @@ exports.cancelOrder = async (req, res) => {
         order.status = 'cancelled';
         await order.save();
 
+        // Rollback Stock
+        for (const item of order.items) {
+            if (item.productType === 'Product') {
+                await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+            } else if (item.productType === 'Accessory') {
+                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+            }
+        }
+
         res.status(200).json({
             success: true,
             message: 'Order cancelled successfully',
@@ -270,6 +288,14 @@ exports.updateOrderStatus = async (req, res) => {
         }
 
         if (trackingNumber) {
+            // Basic tracking number validation (alphanumeric, 8-20 chars)
+            const trackingRegex = /^[A-Z0-9]{8,20}$/;
+            if (!trackingRegex.test(trackingNumber)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid tracking number format (Alphanumeric, 8-20 chars)'
+                });
+            }
             order.trackingNumber = trackingNumber;
         }
 

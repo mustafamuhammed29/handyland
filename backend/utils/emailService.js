@@ -288,6 +288,44 @@ const emailTemplates = {
         </body>
         </html>
     `,
+    // Repair Status Update
+    repairStatusUpdate: (name, ticket, newStatus) => `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+                .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+                .header { background: #8e44ad; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 20px; color: #333; }
+                .status { background: #8e44ad; color: white; padding: 10px 20px; border-radius: 5px; display: inline-block; margin: 10px 0; }
+                .button { display: inline-block; padding: 12px 30px; background: #8e44ad; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+                .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Repair Update 🔧</h1>
+                </div>
+                <div class="content">
+                    <h2>Hello ${name}!</h2>
+                    <p>Your repair ticket status has been updated.</p>
+                    
+                    <p><strong>Device:</strong> ${ticket.device}</p>
+                    <p><strong>Issue:</strong> ${ticket.issue}</p>
+                    <p><strong>New Status:</strong> <span class="status">${newStatus.toUpperCase()}</span></p>
+                    
+                    <p>We are working hard to get your device back to you in perfect condition.</p>
+                    <a href="${process.env.FRONTEND_URL}/dashboard" class="button">View Ticket</a>
+                </div>
+                <div class="footer">
+                    <p>HandyLand - Expert Repair Services</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `,
 };
 
 module.exports = {

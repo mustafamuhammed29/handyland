@@ -5,13 +5,15 @@ const RepairTicket = require('../models/RepairTicket');
 // @access  Private
 exports.createTicket = async (req, res) => {
     try {
-        const { device, issue, notes } = req.body;
+        const { device, issue, notes, appointmentDate, serviceType } = req.body;
 
         const ticket = await RepairTicket.create({
             user: req.user.id,
             device,
             issue,
-            notes
+            notes,
+            appointmentDate,
+            serviceType
         });
 
         res.status(201).json({
@@ -22,6 +24,52 @@ exports.createTicket = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error creating repair ticket',
+            error: error.message
+        });
+    }
+};
+
+const { sendEmail, emailTemplates } = require('../utils/emailService');
+
+// @desc    Update repair ticket status (Admin)
+// @route   PUT /api/repairs/tickets/:id/status
+// @access  Private/Admin
+exports.updateTicketStatus = async (req, res) => {
+    try {
+        const { status, estimatedCost, notes } = req.body;
+        const ticket = await RepairTicket.findById(req.params.id).populate('user', 'name email');
+
+        if (!ticket) {
+            return res.status(404).json({ success: false, message: 'Ticket not found' });
+        }
+
+        if (status) ticket.status = status;
+        if (estimatedCost) ticket.estimatedCost = estimatedCost;
+        if (notes) ticket.notes = notes; // Or add to a history array if modeled
+
+        await ticket.save();
+
+        // Send Email Notification
+        if (status) {
+            try {
+                await sendEmail({
+                    email: ticket.user.email,
+                    subject: `Repair Update: ${ticket.device}`,
+                    html: emailTemplates.repairStatusUpdate(ticket.user.name, ticket, status)
+                });
+            } catch (emailError) {
+                console.error('Email sending failed:', emailError);
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            ticket
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error updating ticket',
             error: error.message
         });
     }

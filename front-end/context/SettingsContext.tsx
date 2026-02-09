@@ -64,41 +64,42 @@ interface SettingsContextType {
     settings: Settings;
     updateSettings: (newSettings: Settings) => Promise<void>;
     loading: boolean;
+    error: boolean;
 }
 
 const defaultSettings: Settings = {
     hero: {
         bgStart: '#0f172a',
         bgEnd: '#020617',
-        headline: 'NEXT GEN\nTRADING',
-        subheadline: 'Experience the future of device trading.',
+        headline: '', // Removed Static Default
+        subheadline: '', // Removed Static Default
         accentColor: '#22d3ee',
-        buttonMarket: 'Markt betreten',
-        buttonValuation: 'Gerät bewerten',
-        trustBadge1: 'VERIFIED SELLERS',
-        trustBadge2: '24/7 SUPPORT',
-        trustBadge3: '4.9★ RATED'
+        buttonMarket: '',
+        buttonValuation: '',
+        trustBadge1: '',
+        trustBadge2: '',
+        trustBadge3: ''
     },
     valuation: {
         step1Title: 'Select Manufacturer'
     },
     content: {
-        accessoriesTitle: 'Gear Arsenal',
-        accessoriesSubtitle: 'Equip your hardware with premium modules.',
-        repairTitle: 'Service Terminal',
-        repairSubtitle: 'Transparent pricing for advanced hardware repair'
+        accessoriesTitle: '',
+        accessoriesSubtitle: '',
+        repairTitle: '',
+        repairSubtitle: ''
     },
     stats: {
-        devicesRepaired: 5000,
-        happyCustomers: 12500,
-        averageRating: 4.9,
-        marketExperience: 10
+        devicesRepaired: 0,
+        happyCustomers: 0,
+        averageRating: 0,
+        marketExperience: 0
     },
     repairArchive: {
-        title: 'Digital Repair Archive',
-        subtitle: 'Archive_System_V2.0',
-        buttonText: 'View All Repairs',
-        totalRepairs: 1240
+        title: '',
+        subtitle: '',
+        buttonText: '',
+        totalRepairs: 0
     },
     sections: {
         hero: true,
@@ -115,6 +116,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [settings, setSettings] = useState<Settings>(defaultSettings);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
     const { addToast } = useToast();
 
     useEffect(() => {
@@ -139,6 +141,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 setLoading(false);
             } catch (error) {
                 console.error("Failed to load global settings", error);
+                // CRITICAL: Do NOT partial load defaults here if we want to show a global error.
+                // Instead, set an error state.
+                setError(true);
                 setLoading(false);
             }
         };
@@ -153,7 +158,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     return (
-        <SettingsContext.Provider value={{ settings, updateSettings, loading }}>
+        <SettingsContext.Provider value={{ settings, updateSettings, loading, error }}>
             {children}
         </SettingsContext.Provider>
     );

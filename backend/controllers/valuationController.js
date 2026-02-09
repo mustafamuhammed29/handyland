@@ -7,20 +7,24 @@ const User = require('../models/User');
 // Helper: Calculate Price (Moved from Frontend)
 const calculatePriceInternal = async (details) => {
     let price = 0;
-    const device = await DeviceBlueprint.findOne({ modelName: details.model });
+    // Find by model name (case-insensitive)
+    const device = await DeviceBlueprint.findOne({ model: { $regex: new RegExp(`^${details.model}$`, 'i') } });
 
     if (!device) {
-        // Fallback or error if device not found. For now returning a safe default or error.
-        // In a real scenario, you might want to throw an error.
-        return { price: 0, device: null, error: 'Device not found' };
+        console.warn(`Valuation: Device not found for model ${details.model}`);
+        // Fallback to a default safe value or basic calculation if blueprint missing
+        return { price: 50, device: null, error: null };
     }
 
     price = device.basePrice || 500;
 
     // 2. Storage Logic
-    // Check if blueprint has specific storage price override
-    if (device.priceConfig && device.priceConfig.storagePrices && device.priceConfig.storagePrices[details.storage]) {
-        price += device.priceConfig.storagePrices[details.storage];
+    // Mongoose Map: use .get() if it's a document, or obj access if lean.
+    const storagePrices = device.priceConfig?.storagePrices;
+    const specificPrice = storagePrices ? (storagePrices instanceof Map ? storagePrices.get(details.storage) : storagePrices[details.storage]) : undefined;
+
+    if (specificPrice !== undefined) {
+        price += specificPrice;
     } else {
         // Multiplier fallback
         let storageMult = 1.0;
@@ -40,23 +44,27 @@ const calculatePriceInternal = async (details) => {
     };
 
     let conditionMult = defaultModifiers[details.condition] || 0.75;
-    if (device.priceConfig && device.priceConfig.conditionModifiers && device.priceConfig.conditionModifiers[details.condition]) {
-        conditionMult = device.priceConfig.conditionModifiers[details.condition];
+    const conditionModifiers = device.priceConfig?.conditionModifiers;
+    const specificConditionDetails = conditionModifiers ? (conditionModifiers instanceof Map ? conditionModifiers.get(details.condition) : conditionModifiers[details.condition]) : undefined;
+
+    if (specificConditionDetails) {
+        conditionMult = specificConditionDetails;
     }
 
     price = price * conditionMult;
 
-    // 4. Battery Logic (Simple Backend Version)
-    // If "new" battery (or > 90%), no penalty. If old/bad, penalty.
-    // We can accept 'battery' as 'new'/'old' OR numeric 'batteryHealth'
+    // 4. Battery Logic
     if (details.batteryHealth) {
         const health = parseInt(details.batteryHealth);
-        if (health < 85) {
+        const threshold = device.priceConfig?.batteryPenalty?.threshold || 85;
+        const deduction = device.priceConfig?.batteryPenalty?.deductionPerPercent || 5;
+
+        if (health < threshold) {
             price -= 50; // Base penalty
-            price -= (85 - health) * 5; // Extra penalty
+            price -= (threshold - health) * deduction; // Extra penalty
         }
     } else if (details.battery === 'old' || details.battery === 'service') {
-        price = price * 0.8; // Flat 20% penalty for bad battery if no specific health given
+        price = price * 0.8;
     }
 
     // 5. Accessories
@@ -96,6 +104,62 @@ exports.calculateValuation = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// --- BLUEPRINT CRUD (ADMIN) ---
+
+// @desc    Get all blueprints
+// @route   GET /api/valuation/blueprints
+// @access  Private/Admin
+exports.getBlueprints = async (req, res) => {
+    try {
+        const blueprints = await DeviceBlueprint.find().sort({ brand: 1, model: 1 });
+        res.json(blueprints);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Create blueprint
+// @route   POST /api/valuation/blueprints
+// @access  Private/Admin
+exports.createBlueprint = async (req, res) => {
+    try {
+        const blueprint = await DeviceBlueprint.create(req.body);
+        res.status(201).json(blueprint);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// @desc    Update blueprint
+// @route   PUT /api/valuation/blueprints/:id
+// @access  Private/Admin
+exports.updateBlueprint = async (req, res) => {
+    try {
+        const blueprint = await DeviceBlueprint.findOneAndUpdate(
+            { id: req.params.id },
+            req.body,
+            { new: true }
+        );
+        if (!blueprint) return res.status(404).json({ message: 'Blueprint not found' });
+        res.json(blueprint);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Delete blueprint
+// @route   DELETE /api/valuation/blueprints/:id
+// @access  Private/Admin
+exports.deleteBlueprint = async (req, res) => {
+    try {
+        const result = await DeviceBlueprint.findOneAndDelete({ id: req.params.id });
+        if (!result) return res.status(404).json({ message: 'Blueprint not found' });
+        res.json({ message: 'Blueprint deleted' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };
 

@@ -31,11 +31,23 @@ exports.updateDeviceServices = async (req, res) => {
 };
 
 // ... existing methods
-exports.getRepairAdvice = (req, res) => {
+exports.estimateRepairCost = (req, res) => {
     const { device, issue } = req.body;
-    // Mock AI response for now
+
+    // Mock logic for estimation
+    let baseCost = 50;
+    if (device.toLowerCase().includes('iphone')) baseCost += 30;
+    if (device.toLowerCase().includes('macbook')) baseCost += 100;
+    if (issue.toLowerCase().includes('screen')) baseCost += 80;
+    if (issue.toLowerCase().includes('battery')) baseCost += 40;
+    if (issue.toLowerCase().includes('water')) baseCost += 100;
+
     res.json({
-        advice: `(Backend AI) Advice for ${device} regarding ${issue}: Please visit our store for a free diagnostic.`
+        device,
+        issue,
+        estimatedCost: baseCost,
+        currency: 'USD',
+        note: 'This is a preliminary estimate. Final cost may vary after diagnostic.'
     });
 };
 

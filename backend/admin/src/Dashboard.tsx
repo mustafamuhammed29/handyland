@@ -22,27 +22,65 @@ const StatCard = ({ title, value, change, trend, icon: Icon, color }: any) => (
     </div>
 );
 
+// Custom Simple Charts to avoid heavy libraries for now
+const BarChart = ({ data }: { data: any[] }) => {
+    if (!data || data.length === 0) return null;
+    const max = Math.max(...data.map(d => d.balance));
+    return (
+        <div className="flex justify-between items-end h-32 gap-2 mt-4">
+            {data.map((d, i) => (
+                <div key={i} className="flex flex-col items-center gap-2 group w-full">
+                    <div
+                        className="w-full bg-blue-600 rounded-t-sm group-hover:bg-blue-500 transition-all relative"
+                        style={{ height: `${(d.balance / max) * 100}%` }}
+                    >
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                            €{d.balance}
+                        </div>
+                    </div>
+                    <span className="text-[10px] text-slate-500">{d.month}</span>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 export default function Dashboard() {
     const [stats, setStats] = useState<any>({
         counts: { products: 0, accessories: 0, repairServices: 0, portfolioCases: 0 },
         recentActivity: []
     });
+    const [revenueStats, setRevenueStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/stats')
-            .then(res => res.json())
-            .then(data => {
-                setStats(data);
+        const fetchData = async () => {
+            try {
+                const [statsRes, revenueRes] = await Promise.all([
+                    fetch('http://localhost:5000/api/stats'),
+                    fetch('http://localhost:5000/api/stats/user')
+                ]);
+                const statsData = await statsRes.json();
+                const revenueData = await revenueRes.json();
+                setStats(statsData);
+                setRevenueStats(revenueData);
+            } catch (error) {
+                console.error("Dashboard fetch error:", error);
+            } finally {
                 setLoading(false);
-            })
-            .catch(err => console.error(err));
+            }
+        };
+        fetchData();
     }, []);
 
-    if (loading) return <div className="p-8 text-white">Loading Dashboard...</div>;
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+    );
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in pb-12">
             <div className="flex justify-between items-end">
                 <div>
                     <h2 className="text-3xl font-black text-white">Dashboard Overview</h2>
@@ -50,10 +88,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex gap-2">
                     <button className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-bold transition-colors">
-                        Last 24 Hours
-                    </button>
-                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold shadow-lg shadow-blue-900/20 transition-colors">
-                        Last 7 Days
+                        Refresh Data
                     </button>
                 </div>
             </div>
@@ -94,6 +129,46 @@ export default function Dashboard() {
                 />
             </div>
 
+            {/* Revenue Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <h3 className="text-lg font-bold text-white mb-2">Revenue Trend</h3>
+                    <p className="text-sm text-slate-400 mb-6">Gross income over the last 6 months</p>
+
+                    {revenueStats && revenueStats.balanceTrend ? (
+                        <BarChart data={revenueStats.balanceTrend} />
+                    ) : (
+                        <div className="h-32 flex items-center justify-center text-slate-500 text-sm">No revenue data available</div>
+                    )}
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <h3 className="text-lg font-bold text-white mb-2">Spending Distribution</h3>
+                    <p className="text-sm text-slate-400 mb-6">Revenue by category</p>
+
+                    <div className="space-y-4">
+                        {revenueStats && revenueStats.spendingDistribution ? (
+                            revenueStats.spendingDistribution.map((item: any) => (
+                                <div key={item.name}>
+                                    <div className="flex justify-between text-xs text-slate-300 mb-1">
+                                        <span>{item.name}</span>
+                                        <span className="font-mono">€{item.value}</span>
+                                    </div>
+                                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full ${item.name === 'Purchases' ? 'bg-blue-500' : item.name === 'Accessories' ? 'bg-purple-500' : 'bg-emerald-500'}`}
+                                            style={{ width: `${(item.value / (revenueStats.spendingDistribution.reduce((a: any, b: any) => a + b.value, 0) || 1)) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center text-slate-500 py-8">No distribution data</div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             {/* Content Area */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
@@ -112,11 +187,14 @@ export default function Dashboard() {
                                     <div className="text-slate-500 text-xs">Added Recently • {item.brand}</div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-emerald-400 font-bold text-sm">${item.price}</div>
+                                    <div className="text-emerald-400 font-bold text-sm">€{item.price}</div>
                                     <div className="text-slate-500 text-xs">{item.condition}</div>
                                 </div>
                             </div>
                         ))}
+                        {stats.recentActivity.length === 0 && (
+                            <div className="text-center text-slate-500 py-4">No recent activity</div>
+                        )}
                     </div>
                 </div>
 
