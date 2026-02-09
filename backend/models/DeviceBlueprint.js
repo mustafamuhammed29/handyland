@@ -1,64 +1,43 @@
 const mongoose = require('mongoose');
 
 const deviceBlueprintSchema = new mongoose.Schema({
-    brand: {
-        type: String,
-        required: true,
-        enum: ['Apple', 'Samsung', 'Google', 'Xiaomi', 'Huawei', 'OnePlus', 'Sony', 'Other']
-    },
-    modelName: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    basePrice: {
-        type: Number,
-        required: true
-    },
-    releaseYear: Number,
-    imageUrl: String,
+    id: { type: String, required: true, unique: true },
+    model: { type: String, required: true },
+    brand: { type: String, required: true },
+    basePrice: { type: Number, required: true },
+    image: { type: String }, // URL to device image
 
-    // Specifications
-    validStorages: [{
-        type: String // e.g., ["64GB", "128GB"]
-    }],
-
-    // Offer / Description
-    marketingName: String,
-    description: String,
-
-    // Advanced Pricing Logic
+    // Price Configuration
     priceConfig: {
-        batteryPenalty: {
-            threshold: { type: Number, default: 85 }, // Percentage below which penalty applies
-            deductionPerPercent: { type: Number, default: 5 } // Euros deducted per 1% drop below threshold
-        },
-        conditionModifiers: {
-            new: { type: Number, default: 1.0 },
-            like_new: { type: Number, default: 0.9 },
-            good: { type: Number, default: 0.75 },
-            fair: { type: Number, default: 0.5 },
-            broken: { type: Number, default: 0.2 } // Changed poor to broken to match frontend
-        },
-        conditionDescriptions: {
-            new: { type: String, default: "Neu und unbenutzt. Du hast das Gerät weder verwendet noch ausgepackt." },
-            like_new: { type: String, default: "Absolut makellos! Auch nach langem Suchen findest du nicht die kleinste Gebrauchsspur." },
-            good: { type: String, default: "Einige leichte Gebrauchsspuren wie feine Kratzer auf dem Display." },
-            fair: { type: String, default: "Deutliche Kratzer oder Kerben am Rahmen oder Display." },
-            broken: { type: String, default: "Das Gerät hat schwere Schäden, Risse oder technische Defekte." }
-        },
         storagePrices: {
             type: Map,
             of: Number,
             default: {}
+            // Example: { "64GB": 0, "128GB": 20, "256GB": 50 }
+        },
+        conditionModifiers: {
+            type: Map,
+            of: Number,
+            default: {
+                "new": 1.0,
+                "like_new": 0.9,
+                "good": 0.75,
+                "fair": 0.6,
+                "broken": 0.3
+            }
+        },
+        batteryPenalty: {
+            threshold: { type: Number, default: 85 },
+            deductionPerPercent: { type: Number, default: 5 }
         }
     },
 
-    // Custom overrides (optional)
-    customModifiers: {
-        storage: Map,
-        condition: Map
-    }
-}, { timestamps: true });
+    // Category for grouping (e.g., "Smartphone", "Tablet")
+    category: { type: String, default: 'Smartphone' },
+
+    active: { type: Boolean, default: true }
+}, {
+    timestamps: true
+});
 
 module.exports = mongoose.model('DeviceBlueprint', deviceBlueprintSchema);

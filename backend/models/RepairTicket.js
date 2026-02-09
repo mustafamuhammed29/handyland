@@ -23,9 +23,16 @@ const RepairTicketSchema = new mongoose.Schema({
         enum: ['pending', 'received', 'diagnosing', 'repairing', 'testing', 'ready', 'completed', 'cancelled'],
         default: 'pending'
     },
-    cost: {
-        type: Number,
-        default: 0
+    estimatedCost: {
+        type: Number
+    },
+    appointmentDate: {
+        type: Date
+    },
+    serviceType: {
+        type: String,
+        enum: ['Mail-in', 'In-Store', 'On-Site'],
+        default: 'In-Store'
     },
     notes: String,
     timeline: [{

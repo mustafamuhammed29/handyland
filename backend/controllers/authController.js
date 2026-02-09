@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const RefreshToken = require('../models/RefreshToken');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
@@ -42,6 +43,15 @@ exports.register = async (req, res) => {
 
         // Generate verification token
         const verificationToken = crypto.randomBytes(32).toString('hex');
+
+        // Check password strength
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 8 characters long and include at least one letter, one number, and one special character.'
+            });
+        }
 
         // Create user
         const user = await User.create({
@@ -131,11 +141,17 @@ exports.login = async (req, res) => {
         }
 
         const token = generateToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
 
-        // Save refresh token to user
-        user.refreshToken = refreshToken;
-        await user.save();
+        // Generate Refresh Token (Opaque)
+        const refreshToken = crypto.randomBytes(40).toString('hex');
+        const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+        // Save refresh token to DB
+        await RefreshToken.create({
+            token: refreshToken,
+            user: user._id,
+            expiryDate: refreshTokenExpiry
+        });
 
         // Send refresh token in HTTP-only cookie
         res.cookie('refreshToken', refreshToken, {
@@ -549,37 +565,36 @@ module.exports = exports;
 // @access  Public (with cookie)
 exports.refreshToken = async (req, res) => {
     try {
-        const refreshToken = req.cookies.refreshToken;
+        const requestToken = req.cookies.refreshToken;
 
-        if (!refreshToken) {
+        if (!requestToken) {
             return res.status(401).json({ message: 'No refresh token found' });
         }
 
-        // Verify token
-        // Verify token
-        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+        // Find token in DB
+        const refreshTokenDoc = await RefreshToken.findOne({ token: requestToken });
 
-        // Check if user exists and token matches
-        // Need to select +refreshToken because it defaults to select: false
-        const user = await User.findById(decoded.id).select('+refreshToken');
-
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid refresh token' });
+        if (!refreshTokenDoc) {
+            return res.status(403).json({ message: 'Refresh token is not in database!' });
         }
 
-        // Hash the incoming token to compare with stored hash
-        const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
-
-        if (user.refreshToken !== hashedToken) {
-            return res.status(401).json({ message: 'Invalid refresh token' });
+        // Verify expiration
+        if (RefreshToken.verifyExpiration(refreshTokenDoc)) {
+            await RefreshToken.findByIdAndRemove(refreshTokenDoc._id, { useFindAndModify: false });
+            return res.status(403).json({
+                message: 'Refresh token was expired. Please make a new signin request'
+            });
         }
+
+        const user = await User.findById(refreshTokenDoc.user);
 
         // Generate new access token
-        const accessToken = generateToken(user._id);
+        const newAccessToken = generateToken(user._id);
 
-        res.json({ token: accessToken });
+        res.json({ token: newAccessToken });
     } catch (error) {
-        res.status(401).json({ message: 'Invalid refresh token' });
+        console.error("Refresh Token Error:", error);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 };
 
@@ -588,12 +603,8 @@ exports.refreshToken = async (req, res) => {
 // @access  Private
 exports.logout = async (req, res) => {
     try {
-        if (req.user) {
-            const user = await User.findById(req.user.id);
-            if (user) {
-                user.refreshToken = undefined;
-                await user.save();
-            }
+        if (req.cookies.refreshToken) {
+            await RefreshToken.deleteOne({ token: req.cookies.refreshToken });
         }
 
         res.clearCookie('refreshToken', {
