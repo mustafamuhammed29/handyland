@@ -7,7 +7,7 @@ const { protect, admin } = require('../middleware/auth'); // Assuming admin midd
 // BLUEPRINT MANAGEMENT (ADMIN)
 // ==========================================
 // Changed to /devices to match Admin Panel frontend
-router.get('/devices', protect, valuationController.getBlueprints);
+router.get('/devices', valuationController.getBlueprints);
 router.post('/devices', protect, valuationController.createBlueprint);
 router.put('/devices/:id', protect, valuationController.updateBlueprint);
 router.delete('/devices/:id', protect, valuationController.deleteBlueprint);

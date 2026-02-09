@@ -5,6 +5,7 @@ const repairTicketController = require('../controllers/repairTicketController');
 const { protect, authorize } = require('../middleware/auth');
 
 // Public routes (Catalog & Estimation)
+router.get('/', repairController.getRepairCatalog);
 router.get('/catalog', repairController.getRepairCatalog);
 router.post('/estimate', repairController.estimateRepairCost); // Replaces getRepairAdvice
 
