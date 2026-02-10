@@ -133,6 +133,7 @@ app.use('/api/reviews', require('./routes/reviewRoutes')); // Added
 app.use('/api/addresses', require('./routes/addressRoutes')); // Added
 app.use('/api/transactions', require('./routes/transactionRoutes')); // Added
 app.use('/api/notifications', require('./routes/notificationRoutes')); // Added
+app.use('/api/cart', require('./routes/cartRoutes')); // Added
 
 // Basic Routes
 app.get('/', (req, res) => {

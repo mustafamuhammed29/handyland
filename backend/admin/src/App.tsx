@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
+import { ActiveCarts } from './components/ActiveCarts';
 import ProductsManager from './pages/ProductsManager';
 import RepairManager from './pages/RepairManager';
 import SettingsManager from './pages/SettingsManager';
@@ -27,6 +28,7 @@ const SidebarLink = ({ to, icon: Icon, label }: { to: string, icon: any, label: 
     </Link>
   );
 };
+
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { user, logout } = useAuth();
@@ -67,6 +69,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
         <nav className="flex-1 space-y-2">
           <SidebarLink to="/" icon={LayoutDashboard} label="Dashboard" />
+          <SidebarLink to="/carts" icon={ShoppingCart} label="Active Carts" />
           <SidebarLink to="/users" icon={Users} label="Users" />
           <SidebarLink to="/orders" icon={Package} label="Orders" />
           <SidebarLink to="/products" icon={Smartphone} label="Products" />
@@ -131,6 +134,7 @@ function AppContent() {
               <Layout>
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
+                  <Route path="/carts" element={<ActiveCarts />} />
                   <Route path="/users" element={<UsersManager />} />
                   <Route path="/orders" element={<OrdersManager />} />
                   <Route path="/products" element={<ProductsManager />} />
