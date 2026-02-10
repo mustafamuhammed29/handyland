@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { ViewState, User as UserType, RepairTicket, Transaction, SavedValuation, Address, PhoneListing, Order, WalletTransaction } from '../types';
+import { User as UserType, RepairTicket, Transaction, SavedValuation, Address, PhoneListing, Order, WalletTransaction } from '../types';
 import { useToast } from '../context/ToastContext';
 import { api } from '../utils/api';
 import { ENV } from '../src/config/env';
@@ -18,11 +18,10 @@ const Skeleton = ({ className }: { className?: string }) => (
 
 interface DashboardProps {
     user: UserType | null;
-    setView: (view: ViewState) => void;
     logout: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView, logout }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout }) => {
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'repairs' | 'wallet' | 'settings' | 'valuations' | 'wishlist'>('overview');
@@ -426,7 +425,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
 
     const handleSell = (valId: string) => {
         addToast("Redirecting to Seller Studio...", "info");
-        setTimeout(() => setView(ViewState.SELLER_STUDIO), 500);
+        setTimeout(() => navigate('/seller'), 500);
     };
 
     return (
@@ -588,7 +587,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                         </div>
                                         <div className="font-bold text-lg mb-1">{promotions[0].title}</div>
                                         <p className="text-xs text-blue-100 opacity-90 mb-4">{promotions[0].description}</p>
-                                        <button onClick={() => setView(ViewState.REPAIR)} className="bg-white text-blue-600 text-xs font-bold px-4 py-2 rounded-full hover:bg-blue-50 transition-colors shadow-sm">
+                                        <button onClick={() => navigate('/repair')} className="bg-white text-blue-600 text-xs font-bold px-4 py-2 rounded-full hover:bg-blue-50 transition-colors shadow-sm">
                                             Claim {promotions[0].discount} Off
                                         </button>
                                     </div>
@@ -711,7 +710,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                     <h2 className="text-2xl font-bold text-white">Saved Valuations</h2>
                                     <p className="text-slate-400 text-sm">Track the value of your devices over time.</p>
                                 </div>
-                                <button onClick={() => setView(ViewState.VALUATION)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors border border-slate-700">
+                                <button onClick={() => navigate('/valuation')} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors border border-slate-700">
                                     <Plus className="w-4 h-4" /> New Scan
                                 </button>
                             </div>

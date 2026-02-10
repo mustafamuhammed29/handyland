@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ViewState, LanguageCode } from '../types';
+import { LanguageCode } from '../types';
 import { translations } from '../i18n';
 import { Link } from 'react-router-dom';
 import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube, Send } from 'lucide-react';
@@ -7,11 +7,10 @@ import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube, S
 import { useSettings } from '../context/SettingsContext';
 
 interface FooterProps {
-  setView: (view: ViewState) => void;
   lang: LanguageCode;
 }
 
-export const Footer: React.FC<FooterProps> = ({ setView, lang }) => {
+export const Footer: React.FC<FooterProps> = ({ lang }) => {
   const t = translations[lang];
   const { settings: globalSettings } = useSettings();
 

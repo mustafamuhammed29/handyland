@@ -79,6 +79,10 @@ const OrderSchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        email: {
+            type: String, // Critical for guest checkout
+            required: true
+        },
         phone: {
             type: String,
             required: true
@@ -156,8 +160,8 @@ OrderSchema.pre('save', function () {
 });
 
 // Add Indexes
-OrderSchema.index({ user: 1 });
-OrderSchema.index({ orderNumber: 1 });
+// OrderSchema.index({ user: 1 }); // Already defined in schema
+// OrderSchema.index({ orderNumber: 1 }); // Already defined in schema
 OrderSchema.index({ status: 1 });
 
 module.exports = mongoose.model('Order', OrderSchema);

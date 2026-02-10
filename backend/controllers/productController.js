@@ -274,3 +274,36 @@ exports.answerQuestion = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// @desc    Validate stock for checkout
+// @route   POST /api/products/validate-stock
+// @access  Public
+exports.validateStock = async (req, res) => {
+    try {
+        const { items } = req.body; // Expecting array of { id, quantity }
+        const errors = [];
+
+        for (const item of items) {
+            const product = await Product.findOne({ id: item.id });
+            if (!product) {
+                // Might be an accessory not in Product model? 
+                // If cart has mixed types, we need to handle that.
+                // Checkout.tsx sends productType: 'Product' or 'Accessory'.
+                // But for now, let's assume all main products are in Product.
+                // If not found, maybe ignore or flag? Safe default is flag.
+                errors.push({ id: item.id, message: `Product not found: ${item.name || item.id}` });
+            } else if (product.stock < item.quantity) {
+                errors.push({ id: item.id, message: `Insufficient stock for ${product.name}. Available: ${product.stock}` });
+            }
+        }
+
+        if (errors.length > 0) {
+            const errorMsg = errors.map(e => e.message).join(', ');
+            return res.status(400).json({ success: false, errors, message: errorMsg });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

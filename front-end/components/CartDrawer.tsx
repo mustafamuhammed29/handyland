@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { ShoppingCart, X, Trash2, ArrowRight, Zap, Heart, Tag, Truck, Check, Loader2 } from 'lucide-react';
-import { LanguageCode, ViewState } from '../types';
+import { LanguageCode } from '../types';
 import { translations } from '../i18n';
 import { api } from '../utils/api';
 
 interface CartDrawerProps {
     lang: LanguageCode;
-    setView: (view: ViewState) => void;
 }
 
-export const CartDrawer: React.FC<CartDrawerProps> = ({ lang, setView }) => {
+export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
+    const navigate = useNavigate();
     const {
         cart, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen,
         cartTotal, finalTotal,
@@ -30,7 +31,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang, setView }) => {
 
     const handleCheckout = () => {
         setIsCartOpen(false);
-        setView(ViewState.CHECKOUT);
+        navigate('/checkout');
     };
 
     const handleApplyCoupon = async () => {

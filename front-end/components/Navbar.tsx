@@ -1,21 +1,20 @@
 
 import React, { useState } from 'react';
 import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, LayoutGrid, ShoppingCart } from 'lucide-react';
-import { ViewState, LanguageCode, User } from '../types';
+import { LanguageCode, User } from '../types';
 import { translations } from '../i18n';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { Link, useLocation } from 'react-router-dom';
 
 interface NavbarProps {
-  currentView?: ViewState; // Optional for backward compat if needed, but unused mainly
-  setView: (view: ViewState) => void;
   lang: LanguageCode;
-  setLang: (lang: LanguageCode) => void;
+  setLang?: (lang: LanguageCode) => void; // Made optional as it might not be passed always or handled by context
   user: User | null;
+  cartCount: number; // Add cartCount as it was passed in PublicLayout
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ setView, lang, setLang, user }) => {
+export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, user, cartCount }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const { cart, setIsCartOpen } = useCart();

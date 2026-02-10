@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { ViewState, LanguageCode } from '../types';
+import { LanguageCode } from '../types';
 import { Upload, Camera, Tag, Smartphone, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { useNavigate } from 'react-router-dom';
 
 interface SellerStudioProps {
-    setView: (view: ViewState) => void;
     lang: LanguageCode;
 }
 
-export const SellerStudio: React.FC<SellerStudioProps> = ({ setView, lang }) => {
+export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
+    const navigate = useNavigate();
     const { addToast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [step, setStep] = useState(1);
-    
+
     // Mock Form State
     const [title, setTitle] = useState('');
     const [price, setPrice] = useState('');
@@ -21,12 +22,12 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ setView, lang }) => 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        
+
         // Mock API Submission
         setTimeout(() => {
             setIsSubmitting(false);
             addToast("Listing Published Successfully!", "success");
-            setView(ViewState.DASHBOARD);
+            navigate('/dashboard');
         }, 2000);
     };
 
@@ -45,21 +46,21 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ setView, lang }) => 
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden relative">
                 {/* Progress Bar */}
                 <div className="h-1 w-full bg-slate-800">
-                    <div 
-                        className="h-full bg-orange-500 transition-all duration-500" 
+                    <div
+                        className="h-full bg-orange-500 transition-all duration-500"
                         style={{ width: `${(step / 3) * 100}%` }}
                     ></div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8">
-                    
+
                     {/* STEP 1: IMAGES */}
                     {step === 1 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right">
                             <h2 className="text-xl font-bold text-white flex items-center gap-2">
                                 <Camera className="w-5 h-5 text-orange-400" /> Device Photos
                             </h2>
-                            
+
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="aspect-square rounded-2xl border-2 border-dashed border-slate-700 bg-slate-800/50 flex flex-col items-center justify-center text-slate-400 hover:border-orange-500 hover:text-orange-400 hover:bg-orange-500/5 transition-all cursor-pointer group">
                                     <Upload className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
@@ -78,7 +79,7 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ setView, lang }) => 
                                     <span className="text-xs mt-2">Screen On</span>
                                 </div>
                             </div>
-                            
+
                             <div className="bg-blue-900/20 border border-blue-500/20 p-4 rounded-xl flex gap-3 text-sm text-blue-200">
                                 <AlertCircle className="w-5 h-5 shrink-0" />
                                 <p>Tip: Ensure the screen is on and shows the "About Phone" settings page for faster verification.</p>
@@ -100,20 +101,20 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ setView, lang }) => 
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Listing Title</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         value={title}
                                         onChange={e => setTitle(e.target.value)}
                                         placeholder="e.g. iPhone 14 Pro Max - 256GB - Deep Purple"
                                         className="w-full bg-black/40 border border-slate-700 rounded-xl p-4 text-white focus:border-orange-500 outline-none"
                                     />
                                 </div>
-                                
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Price (€)</label>
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             value={price}
                                             onChange={e => setPrice(e.target.value)}
                                             placeholder="0.00"
@@ -122,7 +123,7 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ setView, lang }) => 
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Condition</label>
-                                        <select 
+                                        <select
                                             value={condition}
                                             onChange={e => setCondition(e.target.value)}
                                             className="w-full bg-black/40 border border-slate-700 rounded-xl p-4 text-white focus:border-orange-500 outline-none appearance-none"
@@ -137,7 +138,7 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ setView, lang }) => 
 
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Description</label>
-                                    <textarea 
+                                    <textarea
                                         rows={4}
                                         placeholder="Describe scratches, battery health, included accessories..."
                                         className="w-full bg-black/40 border border-slate-700 rounded-xl p-4 text-white focus:border-orange-500 outline-none resize-none"
@@ -184,8 +185,8 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ setView, lang }) => 
                                 <button type="button" onClick={() => setStep(2)} className="flex-1 py-4 bg-transparent border border-slate-700 hover:bg-slate-800 text-slate-400 font-bold rounded-xl transition-all">
                                     Edit
                                 </button>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     disabled={isSubmitting}
                                     className="flex-[2] py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold rounded-xl shadow-lg shadow-orange-900/20 transition-all flex items-center justify-center gap-2"
                                 >
@@ -201,5 +202,5 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ setView, lang }) => 
 };
 
 const PlusIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
 );

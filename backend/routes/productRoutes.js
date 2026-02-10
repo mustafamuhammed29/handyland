@@ -21,4 +21,7 @@ router.get('/:id/questions', productController.getProductQuestions);
 router.post('/:id/questions', protect, productController.askQuestion);
 router.put('/questions/:id/answer', protect, authorize('admin'), productController.answerQuestion);
 
+// Stock Validation
+router.post('/validate-stock', productController.validateStock);
+
 module.exports = router;

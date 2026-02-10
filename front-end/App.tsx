@@ -30,7 +30,7 @@ import Login from './Login';
 import Register from './Register';
 import VerifyEmailNotice from './VerifyEmailNotice';
 import ForgotPassword from './ForgotPassword';
-import { ViewState, LanguageCode, User } from './types';
+import { LanguageCode, User } from './types';
 import { translations } from './i18n';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
@@ -48,13 +48,13 @@ const Checkout = React.lazy(() => import('./pages/Checkout').then(module => ({ d
 const OrderDetails = React.lazy(() => import('./pages/OrderDetails').then(module => ({ default: module.OrderDetails })));
 
 // Home Component to group Home-related sections
-const Home = ({ setView, lang }: { setView: any, lang: LanguageCode }) => {
+const Home = ({ lang }: { lang: LanguageCode }) => {
   const { settings } = useSettings();
   const sections = settings?.sections || { hero: true, stats: true, repairGallery: true, marketplace: true, accessories: true, contact: true };
 
   return (
     <>
-      {sections.hero && <Hero setView={setView} lang={lang} />}
+      {sections.hero && <Hero lang={lang} />}
       {sections.stats && <Stats />}
       {sections.repairGallery && (
         <div className="bg-slate-950">
@@ -82,11 +82,8 @@ const Home = ({ setView, lang }: { setView: any, lang: LanguageCode }) => {
 
 // AppContent uses the hooks that require the contexts provided in App
 function AppContent() {
-  const navigate = useNavigate();
   const location = useLocation();
-  const [view, setView] = useState<ViewState>(ViewState.HOME);
   const [lang, setLang] = useState<LanguageCode>('de');
-  const [showAuth, setShowAuth] = useState(false);
   const { user, setUser } = useAuth(); // Use AuthContext
 
   // Use settings context to check for global load errors
@@ -113,28 +110,6 @@ function AppContent() {
     );
   }
 
-  // Legacy setView for components that still rely on it
-  const setViewLegacy = (view: ViewState) => {
-    setView(view);
-    switch (view) {
-      case ViewState.HOME: navigate('/'); break;
-      case ViewState.MARKETPLACE: navigate('/marketplace'); break;
-      case ViewState.REPAIR: navigate('/repair'); break;
-      case ViewState.VALUATION: navigate('/valuation'); break;
-      case ViewState.LOGIN: navigate('/login'); break;
-      case ViewState.CHECKOUT: navigate('/checkout'); break;
-      case ViewState.DASHBOARD: navigate('/dashboard'); break;
-      case ViewState.SELLER_STUDIO: navigate('/seller'); break;
-      case ViewState.AGB: navigate('/agb'); break;
-      case ViewState.PRIVACY: navigate('/privacy'); break;
-      case ViewState.SERVICE: navigate('/service'); break;
-      case ViewState.IMPRESSUM: navigate('/impressum'); break;
-      case ViewState.ABOUT: navigate('/about'); break;
-    }
-  };
-
-  const toggleAuth = () => setShowAuth(!showAuth);
-
   return (
     <div className={`min-h-screen font-sans bg-slate-950 selection:bg-blue-500/30 selection:text-blue-200 ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <Suspense fallback={<GlobalLoader />}>
@@ -145,16 +120,13 @@ function AppContent() {
               path="/"
               element={
                 <PublicLayout
-                  view={ViewState.HOME}
-                  setView={setViewLegacy}
                   lang={lang}
                   user={user}
-                  cartCount={10}
-                  toggleAuth={toggleAuth}
+                  cartCount={10} // This should come from CartContext, will fix later
                 />
               }
             >
-              <Route path="/" element={<PageTransition><Home setView={setViewLegacy} lang={lang} /></PageTransition>} />
+              <Route path="/" element={<PageTransition><Home lang={lang} /></PageTransition>} />
               <Route path="/marketplace" element={<Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense>} />
               <Route path="/marketplace/:id" element={<Suspense fallback={<GlobalLoader />}><ProductDetails lang={lang} /></Suspense>} />
               <Route path="/orders/:id" element={<ProtectedRoute user={user}><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
@@ -167,7 +139,7 @@ function AppContent() {
               <Route path="contact" element={<PageTransition><Contact lang={lang} /></PageTransition>} />
               <Route path="checkout" element={<ProtectedRoute user={user}><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout lang={lang} /></Suspense></PageTransition></ProtectedRoute>} />
               <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
-              <Route path="login" element={<PageTransition><Auth setView={setViewLegacy} lang={lang} setUser={setUser} /></PageTransition>} />
+              <Route path="login" element={<PageTransition><Auth lang={lang} setUser={setUser} /></PageTransition>} />
               <Route path="verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
               <Route path="verify-email-notice" element={<PageTransition><VerifyEmailNotice /></PageTransition>} />
               <Route path="reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
@@ -191,8 +163,8 @@ function AppContent() {
 
             {/* PROTECTED ROUTES */}
             <Route element={<ProtectedRoute user={user} />}>
-              <Route path="dashboard" element={<PageTransition><Dashboard user={user} setView={setViewLegacy} logout={() => setUser(null)} /></PageTransition>} />
-              <Route path="seller" element={<PageTransition><SellerStudio lang={lang} setView={setViewLegacy} /></PageTransition>} />
+              <Route path="dashboard" element={<PageTransition><Dashboard user={user} logout={() => setUser(null)} /></PageTransition>} />
+              <Route path="seller" element={<PageTransition><SellerStudio lang={lang} /></PageTransition>} />
             </Route>
 
             {/* Fallback */}
@@ -201,7 +173,7 @@ function AppContent() {
         </AnimatePresence>
 
         {/* Cart Drawer */}
-        <CartDrawer lang={lang} setView={setViewLegacy} />
+        <CartDrawer lang={lang} />
       </Suspense>
     </div >
   );

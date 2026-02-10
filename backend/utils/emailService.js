@@ -5,19 +5,19 @@ const sendEmail = async (options) => {
     // In a real production app, you would configure a transporter here.
 
     // Check if we have credentials (optional for now)
-    if (process.env.SMTP_HOST && process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD) {
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: process.env.SMTP_PORT || 587,
             secure: false, // true for 465, false for other ports
             auth: {
-                user: process.env.SMTP_EMAIL,
-                pass: process.env.SMTP_PASSWORD
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
             }
         });
 
         const message = {
-            from: `${process.env.FROM_NAME || 'HandyLand'} <${process.env.SMTP_EMAIL}>`,
+            from: `${process.env.FROM_NAME || 'HandyLand'} <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
             to: options.email,
             subject: options.subject,
             text: options.message, // Plain text body

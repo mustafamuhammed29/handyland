@@ -12,6 +12,14 @@ interface HeroSettings {
     trustBadge1?: string;
     trustBadge2?: string;
     trustBadge3?: string;
+    heroImage?: string;
+    productLabel?: string;
+    productName?: string;
+    productPrice?: string;
+    stat1Title?: string;
+    stat1Value?: string;
+    stat2Title?: string;
+    stat2Value?: string;
 }
 
 interface ContentSettings {
@@ -44,6 +52,16 @@ interface SectionSettings {
     contact: boolean;
 }
 
+interface FooterSettings {
+    aboutText: string;
+    tagline?: string; // Added
+    copyright?: string; // Added
+    quickLinks: boolean;
+    legalLinks: boolean;
+    newsletter: boolean;
+    socialLinks: boolean;
+}
+
 interface Settings {
     siteName?: string;
     contactEmail?: string;
@@ -63,6 +81,7 @@ interface Settings {
     stats: StatsSettings;
     repairArchive: RepairArchiveSettings;
     sections: SectionSettings;
+    footerSection?: FooterSettings;
 }
 
 interface SettingsContextType {
@@ -83,7 +102,15 @@ const defaultSettings: Settings = {
         buttonValuation: '',
         trustBadge1: '',
         trustBadge2: '',
-        trustBadge3: ''
+        trustBadge3: '',
+        heroImage: '',
+        productLabel: '',
+        productName: '',
+        productPrice: '',
+        stat1Title: '',
+        stat1Value: '',
+        stat2Title: '',
+        stat2Value: ''
     },
     valuation: {
         step1Title: 'Select Manufacturer'
@@ -113,6 +140,15 @@ const defaultSettings: Settings = {
         marketplace: true,
         accessories: true,
         contact: true
+    },
+    footerSection: {
+        aboutText: '',
+        tagline: '', // Added
+        copyright: '', // Added
+        quickLinks: true,
+        legalLinks: true,
+        newsletter: true,
+        socialLinks: true
     }
 };
 

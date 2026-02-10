@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react';
-import { ViewState, LanguageCode, User } from '../types';
+import { LanguageCode, User } from '../types';
 import { translations } from '../i18n';
 import { User as UserIcon, Mail, Lock, ArrowRight, Loader2, Phone, MapPin, KeyRound, ChevronLeft, ShieldCheck, CheckCircle2, RefreshCw } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
 
 interface AuthProps {
-    setView: (view: ViewState) => void;
     lang: LanguageCode;
     setUser: (user: User) => void;
 }
@@ -15,7 +14,7 @@ interface AuthProps {
 type AuthMode = 'login' | 'register' | 'forgot' | 'verify' | 'reset-verify' | 'reset-password';
 
 // ... inside component ...
-export const Auth: React.FC<AuthProps> = ({ setView, lang, setUser }) => {
+export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
     const navigate = useNavigate();
     const [mode, setMode] = useState<AuthMode>('login');
     const [isLoading, setIsLoading] = useState(false);
