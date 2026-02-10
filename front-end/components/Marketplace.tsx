@@ -1,6 +1,6 @@
 import React, { useState, MouseEvent, useEffect } from 'react';
 import { PhoneListing, LanguageCode } from '../types';
-import { Search, ShoppingCart, Cpu, Signal, X, Layers, ChevronRight, Plus, Grid, List, Filter } from 'lucide-react';
+import { Search, ShoppingCart, Cpu, Signal, X, Layers, ChevronRight, Plus, Grid, List, Filter, Heart } from 'lucide-react';
 import { translations } from '../i18n';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
@@ -14,7 +14,6 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [filterBrand, setFilterBrand] = useState('All');
-    const [visibleCount, setVisibleCount] = useState(15);
     const [selectedProduct, setSelectedProduct] = useState<PhoneListing | null>(null);
     const [products, setProducts] = useState<PhoneListing[]>([]);
     const [loading, setLoading] = useState(true);
@@ -32,9 +31,37 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const [selectedStorage, setSelectedStorage] = useState('');
     const [selectedCondition, setSelectedCondition] = useState('');
 
+    const [wishlist, setWishlist] = useState<string[]>(() => {
+        const saved = localStorage.getItem('wishlist');
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    // URL params sync
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('brand')) setFilterBrand(params.get('brand') || 'All');
+        if (params.has('minPrice')) setMinPrice(params.get('minPrice') || '');
+        if (params.has('maxPrice')) setMaxPrice(params.get('maxPrice') || '');
+        if (params.has('condition')) setSelectedCondition(params.get('condition') || '');
+        if (params.has('search')) setSearchTerm(params.get('search') || '');
+    }, []);
+
+    // Update URL on filter change
+    useEffect(() => {
+        const params = new URLSearchParams();
+        if (filterBrand !== 'All') params.set('brand', filterBrand);
+        if (minPrice) params.set('minPrice', minPrice);
+        if (maxPrice) params.set('maxPrice', maxPrice);
+        if (selectedCondition) params.set('condition', selectedCondition);
+        if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
+
+        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }, [filterBrand, minPrice, maxPrice, selectedCondition, debouncedSearchTerm]);
+
     // Dropdown options
     const ramOptions = ['4GB', '6GB', '8GB', '12GB', '16GB'];
     const storageOptions = ['64GB', '128GB', '256GB', '512GB', '1TB'];
+    const conditions = ['new', 'like-new', 'good', 'fair'];
 
     const { addToCart } = useCart();
     const { addToast } = useToast();
@@ -48,6 +75,19 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         }, 500);
         return () => clearTimeout(timer);
     }, [searchTerm]);
+
+    // Save Wishlist
+    useEffect(() => {
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    }, [wishlist]);
+
+    const toggleWishlist = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        setWishlist(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+        addToast(wishlist.includes(id) ? 'Removed from wishlist' : 'Added to wishlist', 'success');
+    };
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -270,6 +310,36 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                             />
                         </div>
                         <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                            <select
+                                value={selectedCondition}
+                                onChange={(e) => setSelectedCondition(e.target.value)}
+                                className="bg-slate-900 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:outline-none focus:border-cyan-500"
+                            >
+                                <option value="">All Conditions</option>
+                                <option value="new">New</option>
+                                <option value="like-new">Like New</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                            </select>
+
+                            <div className="flex items-center gap-2 bg-slate-900 rounded-xl px-2 border border-slate-800">
+                                <input
+                                    type="number"
+                                    placeholder="Min €"
+                                    value={minPrice}
+                                    onChange={(e) => setMinPrice(e.target.value)}
+                                    className="w-16 bg-transparent text-white text-sm py-2 focus:outline-none"
+                                />
+                                <span className="text-slate-500">-</span>
+                                <input
+                                    type="number"
+                                    placeholder="Max €"
+                                    value={maxPrice}
+                                    onChange={(e) => setMaxPrice(e.target.value)}
+                                    className="w-16 bg-transparent text-white text-sm py-2 focus:outline-none"
+                                />
+                            </div>
+
                             {['All', 'Apple', 'Samsung', 'Google', 'Xiaomi'].map(brand => (
                                 <button
                                     key={brand}
@@ -313,7 +383,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                 {/* Product Grid / List */}
                 {loading ? (
                     <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                        {[...Array(6)].map((_, i) => (
+                        {[...Array(itemsPerPage)].map((_, i) => (
                             <div key={i} className={viewMode === 'list' ? 'h-48' : 'h-96'}>
                                 <SkeletonProductCard />
                             </div>
@@ -334,6 +404,12 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                     {phone.condition.toUpperCase()}
                                                 </span>
                                             </div>
+                                            <button
+                                                onClick={(e) => toggleWishlist(e, phone.id)}
+                                                className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md border transition-all ${wishlist.includes(phone.id) ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-black/40 border-white/10 text-white hover:bg-black/60'}`}
+                                            >
+                                                <Heart className={`w-4 h-4 ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
+                                            </button>
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
                                                 <span className="bg-white/10 border border-white/20 text-white px-4 py-2 rounded-full font-bold text-sm backdrop-blur-md flex items-center gap-2">
                                                     <Layers className="w-4 h-4" /> Inspect
@@ -366,7 +442,13 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 </div>
                             ) : (
                                 // LIST CARD
-                                <div key={phone.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex gap-6 hover:border-cyan-500/30 transition-all group">
+                                <div key={phone.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex gap-6 hover:border-cyan-500/30 transition-all group relative">
+                                    <button
+                                        onClick={(e) => toggleWishlist(e, phone.id)}
+                                        className={`absolute top-4 right-4 p-2 rounded-full backdrop-blur-md border transition-all z-10 ${wishlist.includes(phone.id) ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}`}
+                                    >
+                                        <Heart className={`w-4 h-4 ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
+                                    </button>
                                     <div className="w-32 h-32 bg-slate-900 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer" onClick={() => setSelectedProduct(phone)}>
                                         <img src={getProductImage(phone)} alt={phone.model} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                     </div>
@@ -376,7 +458,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                 <div className="text-xs text-cyan-500 font-mono uppercase mb-1">{phone.brand}</div>
                                                 <h3 className="text-xl font-bold text-white hover:text-cyan-400 cursor-pointer" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
                                             </div>
-                                            <div className="text-right">
+                                            <div className="text-right pr-12">
                                                 <div className="text-2xl font-bold text-white">{phone.price}{t.currency}</div>
                                                 <div className={`text-xs font-bold uppercase ${phone.condition === 'new' ? 'text-emerald-400' : 'text-purple-400'}`}>{phone.condition}</div>
                                             </div>

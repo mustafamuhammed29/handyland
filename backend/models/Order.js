@@ -9,7 +9,6 @@ const OrderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
         index: true
     },
     items: [{
@@ -43,6 +42,21 @@ const OrderSchema = new mongoose.Schema({
         type: Number,
         required: true,
         min: 0
+    },
+    tax: {
+        type: Number,
+        default: 0
+    },
+    shippingFee: {
+        type: Number,
+        default: 0
+    },
+    discountAmount: {
+        type: Number,
+        default: 0
+    },
+    couponCode: {
+        type: String
     },
     status: {
         type: String,

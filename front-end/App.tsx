@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import PageTransition from './components/PageTransition';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Accessories } from './components/Accessories';
@@ -41,7 +43,9 @@ import { GlobalLoader } from './components/GlobalLoader';
 const Marketplace = React.lazy(() => import('./components/Marketplace').then(module => ({ default: module.Marketplace })));
 const Repair = React.lazy(() => import('./components/Repair').then(module => ({ default: module.Repair })));
 const ProductDetails = React.lazy(() => import('./components/ProductDetails').then(module => ({ default: module.ProductDetails })));
+
 const Checkout = React.lazy(() => import('./pages/Checkout').then(module => ({ default: module.Checkout })));
+const OrderDetails = React.lazy(() => import('./pages/OrderDetails').then(module => ({ default: module.OrderDetails })));
 
 // Home Component to group Home-related sections
 const Home = ({ setView, lang }: { setView: any, lang: LanguageCode }) => {
@@ -79,10 +83,10 @@ const Home = ({ setView, lang }: { setView: any, lang: LanguageCode }) => {
 // AppContent uses the hooks that require the contexts provided in App
 function AppContent() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [view, setView] = useState<ViewState>(ViewState.HOME);
   const [lang, setLang] = useState<LanguageCode>('de');
   const [showAuth, setShowAuth] = useState(false);
-  const [showCart, setShowCart] = useState(false);
   const { user, setUser } = useAuth(); // Use AuthContext
 
   // Use settings context to check for global load errors
@@ -130,71 +134,76 @@ function AppContent() {
   };
 
   const toggleAuth = () => setShowAuth(!showAuth);
-  const toggleCart = () => setShowCart(!showCart);
 
   return (
     <div className={`min-h-screen font-sans bg-slate-950 selection:bg-blue-500/30 selection:text-blue-200 ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <Suspense fallback={<GlobalLoader />}>
-        <Routes>
-          {/* PUBLIC LAYOUT */}
-          <Route
-            path="/"
-            element={
-              <PublicLayout
-                view={ViewState.HOME}
-                setView={setViewLegacy}
-                lang={lang}
-                user={user}
-                cartCount={10}
-                toggleCart={toggleCart}
-                toggleAuth={toggleAuth}
-              />
-            }
-          >
-            <Route path="/" element={<Home setView={setViewLegacy} lang={lang} />} />
-            <Route path="/marketplace" element={<Marketplace lang={lang} />} />
-            <Route path="/accessories" element={<Accessories lang={lang} />} />
-            <Route path="/repair" element={<Repair lang={lang} />} />
-            <Route path="/valuation" element={<Valuation lang={lang} />} />
-            <Route path="/sell/:quoteRef" element={<SellDevice />} />
-            <Route path="shop" element={<Accessories lang={lang} />} />
-            <Route path="products/:id" element={<ProductDetails lang={lang} />} />
-            <Route path="/contact" element={<Contact lang={lang} />} />
-            <Route path="checkout" element={<Checkout lang={lang} />} />
-            <Route path="payment-success" element={<PaymentSuccess />} />
-            <Route path="login" element={<Auth setView={setViewLegacy} lang={lang} setUser={setUser} />} />
-            <Route path="verify-email" element={<VerifyEmail />} />
-            <Route path="verify-email-notice" element={<VerifyEmailNotice />} />
-            <Route path="reset-password" element={<ResetPassword />} />
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            {/* PUBLIC LAYOUT */}
+            <Route
+              path="/"
+              element={
+                <PublicLayout
+                  view={ViewState.HOME}
+                  setView={setViewLegacy}
+                  lang={lang}
+                  user={user}
+                  cartCount={10}
+                  toggleAuth={toggleAuth}
+                />
+              }
+            >
+              <Route path="/" element={<PageTransition><Home setView={setViewLegacy} lang={lang} /></PageTransition>} />
+              <Route path="/marketplace" element={<Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense>} />
+              <Route path="/marketplace/:id" element={<Suspense fallback={<GlobalLoader />}><ProductDetails lang={lang} /></Suspense>} />
+              <Route path="/orders/:id" element={<ProtectedRoute user={user}><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
+              <Route path="/accessories" element={<PageTransition><Accessories lang={lang} /></PageTransition>} />
+              <Route path="/repair" element={<PageTransition><Repair lang={lang} /></PageTransition>} />
+              <Route path="/valuation" element={<PageTransition><Valuation lang={lang} /></PageTransition>} />
+              <Route path="/sell/:quoteRef" element={<PageTransition><SellDevice /></PageTransition>} />
+              <Route path="shop" element={<PageTransition><Accessories lang={lang} /></PageTransition>} />
+              <Route path="products/:id" element={<PageTransition><ProductDetails lang={lang} /></PageTransition>} />
+              <Route path="contact" element={<PageTransition><Contact lang={lang} /></PageTransition>} />
+              <Route path="checkout" element={<ProtectedRoute user={user}><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout lang={lang} /></Suspense></PageTransition></ProtectedRoute>} />
+              <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
+              <Route path="login" element={<PageTransition><Auth setView={setViewLegacy} lang={lang} setUser={setUser} /></PageTransition>} />
+              <Route path="verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
+              <Route path="verify-email-notice" element={<PageTransition><VerifyEmailNotice /></PageTransition>} />
+              <Route path="reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
 
-            {/* Dynamic Pages */}
-            <Route path="/info" element={<InfoPage lang={lang} />} />
-            {/* 
+              {/* Dynamic Pages */}
+              <Route path="/info" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+              {/* 
                 Use default exports if available, otherwise use InfoPage or correct imports.
                 Assuming TermsAndConditions and PrivacyPolicy are named exports in pages/
              */}
-            <Route path="/agb" element={<TermsAndConditions />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/agb" element={<PageTransition><TermsAndConditions /></PageTransition>} />
+              <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
 
-            <Route path="/datenschutz" element={<InfoPage lang={lang} />} />
-            <Route path="/service" element={<InfoPage lang={lang} />} />
-            <Route path="/kundenservice" element={<InfoPage lang={lang} />} />
-            <Route path="/impressum" element={<InfoPage lang={lang} />} />
-            <Route path="/uber-uns" element={<InfoPage lang={lang} />} />
-            <Route path="/page/:slug" element={<InfoPage lang={lang} />} />
-          </Route>
+              <Route path="/datenschutz" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+              <Route path="/service" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+              <Route path="/kundenservice" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+              <Route path="/impressum" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+              <Route path="/uber-uns" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+              <Route path="/page/:slug" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+            </Route>
 
-          {/* PROTECTED ROUTES */}
-          <Route element={<ProtectedRoute user={user} />}>
-            <Route path="dashboard" element={<Dashboard user={user} setView={setViewLegacy} logout={() => setUser(null)} />} />
-            <Route path="seller" element={<SellerStudio lang={lang} setView={setViewLegacy} />} />
-          </Route>
+            {/* PROTECTED ROUTES */}
+            <Route element={<ProtectedRoute user={user} />}>
+              <Route path="dashboard" element={<PageTransition><Dashboard user={user} setView={setViewLegacy} logout={() => setUser(null)} /></PageTransition>} />
+              <Route path="seller" element={<PageTransition><SellerStudio lang={lang} setView={setViewLegacy} /></PageTransition>} />
+            </Route>
 
-          {/* Fallback */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            {/* Fallback */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AnimatePresence>
+
+        {/* Cart Drawer */}
+        <CartDrawer lang={lang} setView={setViewLegacy} />
       </Suspense>
-    </div>
+    </div >
   );
 }
 

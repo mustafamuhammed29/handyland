@@ -7,6 +7,7 @@ export interface PhoneListing {
   condition: 'new' | 'used' | 'refurbished';
   storage: string;
   color: string;
+  stock: number;
   imageUrl: string;
   images?: string[];
   description: string;
@@ -68,6 +69,16 @@ export interface Coupon {
   isActive: boolean;
 }
 
+export interface Address {
+  _id?: string;
+  street: string;
+  city: string;
+  state?: string;
+  zipCode: string;
+  country: string;
+  isDefault: boolean;
+}
+
 export interface User {
   [x: string]: any;
   id: string;
@@ -76,7 +87,8 @@ export interface User {
   role: 'user' | 'admin';
   token?: string;
   phone?: string;
-  address?: string;
+  address?: string; // Derived from default address or deprecated
+  addresses?: Address[];
   balance?: number;
   points?: number;
 }
@@ -90,6 +102,41 @@ export interface RepairTicket {
   cost: number;
 }
 
+export interface Order {
+  _id: string; // Backend uses _id
+  id?: string; // Frontend might use id
+  orderNumber?: string;
+  user: any;
+  items: any[];
+  totalAmount: number;
+  tax?: number;
+  shippingFee?: number;
+  shippingAddress?: {
+    fullName: string;
+    street: string;
+    city: string;
+    zipCode: string;
+    country: string;
+    phone: string;
+  };
+  paymentMethod?: string;
+  paymentStatus?: string;
+  amount?: number; // Legacy or alternative
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'return_requested' | 'returned';
+  createdAt: string;
+  date?: string; // Legacy or alternative
+}
+
+export interface WalletTransaction {
+  _id: string;
+  amount: number;
+  type: string; // deposit, withdrawal, purchase, refund
+  status: 'pending' | 'completed' | 'failed';
+  date: string;
+  description?: string;
+}
+
+// Deprecated or keep for broader compatibility if needed
 export interface Transaction {
   id: string;
   type: 'purchase' | 'repair' | 'refund';

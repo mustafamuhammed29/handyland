@@ -1,30 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
-import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Truck, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Loader2, Tag, X } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ShieldCheck, Truck, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Loader2, Tag, X, Lock, User, UserPlus } from 'lucide-react';
 import { LanguageCode } from '../types';
 import { translations } from '../i18n';
+import { z } from 'zod';
 
-// Initialize Stripe
-const stripePromise = loadStripe('pk_test_51QoeSII1fjsqJ2kX2XqQU4fTqQvK2q6pQZ8q8q8q8q8q8q8q8q8q8q8q'); // Use env var in production
+// Initialize Stripe (Move to env var in production)
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 interface CheckoutProps {
     lang: LanguageCode;
 }
 
+// Zod Schema for Validation
+const shippingSchema = z.object({
+    fullName: z.string().min(2, "Full name is required"),
+    email: z.string().email("Invalid email address"),
+    address: z.string().min(5, "Address is too short"),
+    city: z.string().min(2, "City is required"),
+    zipCode: z.string().min(4, "Invalid Zip/Postal Code"),
+    country: z.string().min(2, "Country is required"),
+});
+
+type ShippingFormData = z.infer<typeof shippingSchema>;
+
 export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
-    const { cart, cartTotal, clearCart } = useCart();
+    const { cart, cartTotal } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
     const t = translations[lang];
 
-    const [step, setStep] = useState(1); // 1: Shipping, 2: Payment
+    // State
+    const [step, setStep] = useState(1); // 1: Auth Choice, 2: Shipping, 3: Payment
+    const [guestMode, setGuestMode] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [termsAccepted, setTermsAccepted] = useState(false);
+
+    // Form State
+    const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>('standard');
+    const [shippingDetails, setShippingDetails] = useState<ShippingFormData>({
+        fullName: '',
+        email: '',
+        address: '',
+        city: '',
+        zipCode: '',
+        country: 'Germany'
+    });
+    const [formErrors, setFormErrors] = useState<Partial<Record<keyof ShippingFormData, string>>>({});
 
     // Coupon State
     const [couponCode, setCouponCode] = useState('');
@@ -32,44 +60,72 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
 
-    const [shippingDetails, setShippingDetails] = useState({
-        fullName: user?.name || '',
-        email: user?.email || '',
-        address: user?.address || '',
-        city: '',
-        zipCode: '',
-        country: 'Germany'
-    });
-
+    // Initial Check & Load Data
     useEffect(() => {
         if (cart.length === 0) {
             navigate('/');
+            return;
         }
-        // Load saved shipping details
+
+        // Determine initial step based on auth
+        if (user) {
+            setStep(2);
+            setShippingDetails(prev => ({
+                ...prev,
+                fullName: user.name || '',
+                email: user.email || '',
+                address: user.address || ''
+            }));
+        } else {
+            // Check if user already chose guest mode previously in session (optional enhancement)
+        }
+
+        // Load saved shipping details from LocalStorage (overwrites user data if customized previously)
         const saved = localStorage.getItem('checkout_shipping');
         if (saved) {
             setShippingDetails(prev => ({ ...prev, ...JSON.parse(saved) }));
         }
-    }, [cart, navigate]);
+    }, [cart, user, navigate]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Save to LocalStorage on change
+    useEffect(() => {
+        if (step >= 2) {
+            localStorage.setItem('checkout_shipping', JSON.stringify(shippingDetails));
+        }
+    }, [shippingDetails, step]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setShippingDetails(prev => {
-            const updated = { ...prev, [name]: value };
-            localStorage.setItem('checkout_shipping', JSON.stringify(updated));
-            return updated;
-        });
+        setShippingDetails(prev => ({ ...prev, [name]: value }));
+        // Clear error for this field
+        if (formErrors[name as keyof ShippingFormData]) {
+            setFormErrors(prev => ({ ...prev, [name]: undefined }));
+        }
     };
 
     const handleShippingSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Validation logic here
-        if (!shippingDetails.fullName || !shippingDetails.address || !shippingDetails.city || !shippingDetails.zipCode) {
-            setError('Please fill in all shipping fields');
+
+        // Zod Validation
+        const result = shippingSchema.safeParse(shippingDetails);
+        if (!result.success) {
+            const formattedErrors: any = {};
+            // @ts-ignore
+            result.error.errors.forEach(err => {
+                if (err.path[0]) formattedErrors[err.path[0]] = err.message;
+            });
+            setFormErrors(formattedErrors);
             return;
         }
+
+        if (!termsAccepted) {
+            setError("You must accept the Terms & Conditions to proceed.");
+            return;
+        }
+
+        setFormErrors({});
         setError(null);
-        setStep(2);
+        setStep(3); // Go to Payment
     };
 
     const handleApplyCoupon = async () => {
@@ -104,12 +160,15 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     };
 
     const getFinalTotal = () => {
-        const shipping = cartTotal > 100 ? 0 : 5.99;
+        let shipping = cartTotal > 100 ? 0 : 5.99;
+        if (shippingMethod === 'express') {
+            shipping = 15.99; // Flat rate for express
+        }
         const discount = appliedCoupon ? appliedCoupon.discount : 0;
         return Math.max(0, cartTotal + shipping - discount);
     };
 
-    const handlePaymentSuccess = async (paymentMethod: any) => {
+    const handlePaymentSuccess = async () => {
         setLoading(true);
         try {
             const response = await api.post('/api/payment/create-checkout-session', {
@@ -122,8 +181,11 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                     quantity: item.quantity || 1
                 })),
                 shippingAddress: shippingDetails,
-                couponCode: appliedCoupon?.code, // Send coupon code to backend
-                discountAmount: appliedCoupon?.discount // Send discount amount for verification
+                shippingFee: (shippingMethod === 'express' ? 15.99 : (cartTotal > 100 ? 0 : 5.99)).toString(),
+                shippingMethod: shippingMethod,
+                couponCode: appliedCoupon?.code,
+                discountAmount: appliedCoupon?.discount,
+                email: shippingDetails.email // Important for Guest Checkout
             });
 
             if (response.url) {
@@ -138,23 +200,52 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         }
     };
 
+    // --- Render Steps ---
+
+    // Step 1: Auth Choice (Only if not logged in)
+    if (step === 1 && !user && !guestMode) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+                <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-6">
+                    <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto">
+                        <User className="w-8 h-8 text-blue-500" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white">How would you like to proceed?</h2>
+                    <p className="text-slate-400">Log in to save your order to your account, or continue as a guest.</p>
+
+                    <div className="space-y-3">
+                        <button onClick={() => navigate('/login?redirect=/checkout')} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all">
+                            Log In / Register
+                        </button>
+                        <div className="relative py-2">
+                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800"></div></div>
+                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-900 px-2 text-slate-500">Or</span></div>
+                        </div>
+                        <button onClick={() => { setGuestMode(true); setStep(2); }} className="w-full py-3 bg-transparent border border-slate-700 hover:bg-slate-800 text-white font-bold rounded-xl transition-all">
+                            Continue as Guest
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-slate-950 py-20 px-4">
+        <div className="min-h-screen bg-slate-950 py-24 px-4">
             <div className="max-w-6xl mx-auto">
 
-                {/* Stepper */}
+                {/* Progress Stepper */}
                 <div className="flex justify-center mb-12">
                     <div className="flex items-center gap-4">
-                        <div className={`flex items-center gap-2 ${step >= 1 ? 'text-blue-500' : 'text-slate-600'}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-800'}`}>1</div>
+                        <div className={`flex items-center gap-2 ${step >= 2 ? 'text-blue-500' : 'text-slate-600'}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-800'}`}>1</div>
                             <span className="hidden md:inline font-bold">Shipping</span>
                         </div>
                         <div className="w-16 h-1 bg-slate-800">
-                            <div className={`h-full bg-blue-600 transition-all duration-500 ${step >= 2 ? 'w-full' : 'w-0'}`}></div>
+                            <div className={`h-full bg-blue-600 transition-all duration-500 ${step >= 3 ? 'w-full' : 'w-0'}`}></div>
                         </div>
-                        <div className={`flex items-center gap-2 ${step >= 2 ? 'text-blue-500' : 'text-slate-600'}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-800'}`}>2</div>
+                        <div className={`flex items-center gap-2 ${step >= 3 ? 'text-blue-500' : 'text-slate-600'}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 3 ? 'bg-blue-600 text-white' : 'bg-slate-800'}`}>2</div>
                             <span className="hidden md:inline font-bold">Payment</span>
                         </div>
                     </div>
@@ -162,16 +253,16 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                    {/* Main Content */}
+                    {/* Left Column: Forms */}
                     <div className="lg:col-span-2 space-y-6">
                         {error && (
-                            <div className="p-4 bg-red-500/10 border border-red-500/50 text-red-400 rounded-xl flex items-center gap-2">
-                                <ShieldCheck className="w-5 h-5" />
-                                {error}
+                            <div className="p-4 bg-red-500/10 border border-red-500/50 text-red-400 rounded-xl flex items-center gap-2 animate-in slide-in-from-top-2">
+                                <ShieldCheck className="w-5 h-5 flex-shrink-0" />
+                                <span>{error}</span>
                             </div>
                         )}
 
-                        {step === 1 && (
+                        {step === 2 && (
                             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 animate-in fade-in slide-in-from-left-4">
                                 <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
                                     <Truck className="w-6 h-6 text-blue-500" /> Shipping Details
@@ -185,20 +276,22 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 name="fullName"
                                                 value={shippingDetails.fullName}
                                                 onChange={handleInputChange}
-                                                className="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                                className={`w-full bg-black/40 border ${formErrors.fullName ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                                 placeholder="John Doe"
                                             />
+                                            {formErrors.fullName && <p className="text-red-500 text-xs">{formErrors.fullName}</p>}
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-400">Email</label>
+                                            <label className="text-sm font-bold text-slate-400">Email (for order updates)</label>
                                             <input
                                                 type="email"
                                                 name="email"
                                                 value={shippingDetails.email}
                                                 onChange={handleInputChange}
-                                                className="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                                className={`w-full bg-black/40 border ${formErrors.email ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                                 placeholder="john@example.com"
                                             />
+                                            {formErrors.email && <p className="text-red-500 text-xs">{formErrors.email}</p>}
                                         </div>
                                     </div>
                                     <div className="space-y-2">
@@ -208,9 +301,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                             name="address"
                                             value={shippingDetails.address}
                                             onChange={handleInputChange}
-                                            className="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                            className={`w-full bg-black/40 border ${formErrors.address ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                             placeholder="123 Tech Street"
                                         />
+                                        {formErrors.address && <p className="text-red-500 text-xs">{formErrors.address}</p>}
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                         <div className="space-y-2">
@@ -220,9 +314,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 name="city"
                                                 value={shippingDetails.city}
                                                 onChange={handleInputChange}
-                                                className="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                                className={`w-full bg-black/40 border ${formErrors.city ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                                 placeholder="Berlin"
                                             />
+                                            {formErrors.city && <p className="text-red-500 text-xs">{formErrors.city}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-sm font-bold text-slate-400">Zip Code</label>
@@ -231,29 +326,93 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 name="zipCode"
                                                 value={shippingDetails.zipCode}
                                                 onChange={handleInputChange}
-                                                className="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none rtl:text-right"
+                                                className={`w-full bg-black/40 border ${formErrors.zipCode ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none rtl:text-right transition-colors`}
                                                 placeholder="10115"
                                             />
+                                            {formErrors.zipCode && <p className="text-red-500 text-xs">{formErrors.zipCode}</p>}
                                         </div>
                                         <div className="space-y-2 col-span-2 md:col-span-1">
                                             <label className="text-sm font-bold text-slate-400">Country</label>
                                             <select
                                                 name="country"
                                                 value={shippingDetails.country}
-                                                onChange={(e) => setShippingDetails(prev => ({ ...prev, country: e.target.value }))}
-                                                className="w-full bg-black/40 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                                onChange={handleInputChange}
+                                                className={`w-full bg-black/40 border ${formErrors.country ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                             >
                                                 <option value="Germany">Germany</option>
                                                 <option value="Austria">Austria</option>
                                                 <option value="Switzerland">Switzerland</option>
                                             </select>
+                                            {formErrors.country && <p className="text-red-500 text-xs">{formErrors.country}</p>}
                                         </div>
+                                    </div>
+
+                                    {/* Shipping Method Selection */}
+                                    <div className="pt-6 border-t border-slate-800">
+                                        <h3 className="font-bold text-white mb-4">Shipping Method</h3>
+                                        <div className="space-y-3">
+                                            <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${shippingMethod === 'standard' ? 'bg-blue-600/10 border-blue-500' : 'bg-black/20 border-slate-700 hover:border-slate-500'}`}>
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="radio"
+                                                        name="shippingMethod"
+                                                        value="standard"
+                                                        checked={shippingMethod === 'standard'}
+                                                        onChange={() => setShippingMethod('standard')}
+                                                        className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
+                                                    />
+                                                    <div>
+                                                        <div className="font-bold text-white">Standard Delivery</div>
+                                                        <div className="text-xs text-slate-400">3-5 Business Days</div>
+                                                    </div>
+                                                </div>
+                                                <div className="font-bold text-white">
+                                                    {cartTotal > 100 ? 'FREE' : '5.99€'}
+                                                </div>
+                                            </label>
+
+                                            <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${shippingMethod === 'express' ? 'bg-blue-600/10 border-blue-500' : 'bg-black/20 border-slate-700 hover:border-slate-500'}`}>
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="radio"
+                                                        name="shippingMethod"
+                                                        value="express"
+                                                        checked={shippingMethod === 'express'}
+                                                        onChange={() => setShippingMethod('express')}
+                                                        className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
+                                                    />
+                                                    <div>
+                                                        <div className="font-bold text-white">Express Delivery</div>
+                                                        <div className="text-xs text-slate-400">1-2 Business Days</div>
+                                                    </div>
+                                                </div>
+                                                <div className="font-bold text-emerald-400">15.99€</div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Terms & Conditions */}
+                                    <div className="pt-4 pb-2">
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${termsAccepted ? 'bg-blue-500 border-blue-500' : 'border-slate-600 group-hover:border-blue-400'}`}>
+                                                {termsAccepted && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                checked={termsAccepted}
+                                                onChange={e => setTermsAccepted(e.target.checked)}
+                                                className="hidden"
+                                            />
+                                            <span className="text-sm text-slate-400 group-hover:text-slate-300">
+                                                I agree to the <Link to="/agb" target="_blank" className="text-blue-400 hover:underline">Terms & Conditions</Link> and <Link to="/privacy" target="_blank" className="text-blue-400 hover:underline">Privacy Policy</Link>.
+                                            </span>
+                                        </label>
                                     </div>
 
                                     <div className="pt-4 flex justify-end">
                                         <button
                                             type="submit"
-                                            className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center gap-2"
+                                            className="w-full md:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
                                         >
                                             Proceed to Payment <ArrowRight className="w-4 h-4" />
                                         </button>
@@ -262,10 +421,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                             </div>
                         )}
 
-                        {step === 2 && (
+                        {step === 3 && (
                             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 animate-in fade-in slide-in-from-right-4">
                                 <div className="flex items-center gap-4 mb-6">
-                                    <button onClick={() => setStep(1)} className="p-2 hover:bg-slate-800 rounded-full text-slate-400">
+                                    <button onClick={() => setStep(2)} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
                                         <ArrowLeft className="w-5 h-5" />
                                     </button>
                                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -273,92 +432,109 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                     </h2>
                                 </div>
 
-                                <p className="text-slate-400 mb-6">
-                                    You will be redirected to Stripe to securely complete your payment.
-                                </p>
+                                <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 mb-8 text-center">
+                                    <p className="text-slate-400 mb-6">
+                                        You are about to be redirected to our secure payment partner (Stripe) to complete your purchase.
+                                    </p>
 
-                                <button
-                                    onClick={() => handlePaymentSuccess(null)}
-                                    disabled={loading}
-                                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <Loader2 className="animate-spin w-5 h-5" /> Processing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            Pay Securely with Card <ArrowRight className="w-5 h-5" />
-                                        </>
-                                    )}
-                                </button>
+                                    <div className="flex justify-center gap-4 mb-8 grayscale opacity-70">
+                                        {/* Simple CSS placeholders for card icons for now */}
+                                        <div className="h-8 w-12 bg-slate-800 rounded"></div>
+                                        <div className="h-8 w-12 bg-slate-800 rounded"></div>
+                                        <div className="h-8 w-12 bg-slate-800 rounded"></div>
+                                    </div>
 
-                                <div className="mt-4 flex justify-center items-center gap-4 text-slate-600">
-                                    <div className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> SSL Secure</div>
+                                    <button
+                                        onClick={handlePaymentSuccess}
+                                        disabled={loading}
+                                        className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="animate-spin w-5 h-5" /> Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Pay Securely <span className="ml-1">{getFinalTotal().toFixed(2)}{t.currency}</span> <ArrowRight className="w-5 h-5" />
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <div className="flex justify-center items-center gap-6 text-slate-500 text-xs md:text-sm">
+                                    <div className="flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-500" /> 256-bit SSL Encrypted</div>
                                     <div className="w-px h-3 bg-slate-700"></div>
-                                    <div>256-bit Encryption</div>
+                                    <div className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Payment</div>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Order Summary */}
+                    {/* Right Column: Order Summary (Sticky) */}
                     <div className="lg:col-span-1">
-                        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-2xl p-6 sticky top-24">
-                            <h3 className="text-xl font-bold text-white mb-4">Order Summary</h3>
-                            <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 sticky top-28 shadow-2xl">
+                            <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between">
+                                <span>Order Summary</span> //
+                                <span className="text-xs font-normal text-slate-500">{cart.length} Items</span>
+                            </h3>
+
+                            <div className="space-y-4 max-h-80 overflow-y-auto pr-2 custom-scrollbar mb-6">
                                 {cart.map((item, idx) => (
-                                    <div key={idx} className="flex gap-3 items-start">
-                                        <div className="w-16 h-16 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0">
+                                    <div key={idx} className="flex gap-3 items-start group">
+                                        <div className="w-16 h-16 bg-slate-950 rounded-lg overflow-hidden flex-shrink-0 border border-slate-800 relative">
                                             <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                                            {item.quantity && item.quantity > 1 && (
+                                                <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg">
+                                                    x{item.quantity}
+                                                </div>
+                                            )}
                                         </div>
-                                        <div>
-                                            <div className="text-sm font-bold text-white line-clamp-2">{item.title}</div>
-                                            <div className="text-xs text-slate-500">Qty: {item.quantity || 1}</div>
-                                            <div className="text-sm text-blue-400 font-bold">{(item.price * (item.quantity || 1)).toFixed(2)}{t.currency}</div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-sm font-bold text-white line-clamp-1 group-hover:text-blue-400 transition-colors">{item.title}</div>
+                                            <div className="text-xs text-slate-500 line-clamp-1">{item.category}</div>
+                                            <div className="text-sm text-blue-400 font-bold mt-1">{(item.price * (item.quantity || 1)).toFixed(2)}{t.currency}</div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
                             {/* Coupon Input */}
-                            <div className="mt-6 pt-6 border-t border-slate-800">
+                            <div className="pt-6 border-t border-slate-800">
                                 {appliedCoupon ? (
-                                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-center justify-between">
+                                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-center justify-between animate-in fade-in">
                                         <div className="flex items-center gap-2 text-emerald-400">
                                             <Tag className="w-4 h-4" />
                                             <span className="font-bold text-sm">{appliedCoupon.code}</span>
                                         </div>
-                                        <button onClick={removeCoupon} className="text-slate-400 hover:text-white p-1">
+                                        <button onClick={removeCoupon} className="text-slate-400 hover:text-white p-1 transition-colors">
                                             <X className="w-4 h-4" />
                                         </button>
                                     </div>
                                 ) : (
                                     <div className="relative flex gap-2">
                                         <div className="relative flex-1">
-                                            <Tag className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
+                                            <Tag className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
                                             <input
                                                 type="text"
                                                 placeholder="Promo Code"
                                                 value={couponCode}
                                                 onChange={(e) => setCouponCode(e.target.value)}
-                                                className="w-full bg-black/40 border border-slate-700 rounded-xl py-2 pl-10 pr-4 text-white text-sm focus:border-blue-500 outline-none"
+                                                className="w-full bg-black/40 border border-slate-700 rounded-xl py-2 pl-10 pr-4 text-white text-sm focus:border-blue-500 outline-none transition-all"
                                             />
                                         </div>
                                         <button
                                             onClick={handleApplyCoupon}
                                             disabled={!couponCode || couponLoading}
-                                            className="bg-slate-800 hover:bg-slate-700 text-white px-4 rounded-xl text-sm font-bold disabled:opacity-50"
+                                            className="bg-slate-800 hover:bg-slate-700 text-white px-4 rounded-xl text-sm font-bold disabled:opacity-50 transition-colors"
                                         >
                                             {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
                                         </button>
                                     </div>
                                 )}
-                                {couponError && <p className="text-red-400 text-xs mt-2">{couponError}</p>}
+                                {couponError && <p className="text-red-400 text-xs mt-2 animate-in slide-in-from-top-1">{couponError}</p>}
                             </div>
 
-
-                            <div className="mt-6 pt-6 border-t border-slate-800 space-y-2">
+                            <div className="mt-6 pt-6 border-t border-slate-800 space-y-3">
                                 <div className="flex justify-between text-slate-400">
                                     <span>Subtotal</span>
                                     <span>{cartTotal.toFixed(2)}{t.currency}</span>

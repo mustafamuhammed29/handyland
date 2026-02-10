@@ -7,6 +7,10 @@ const { protect, authorize } = require('../middleware/auth');
 router.put('/profile', protect, userController.updateUserProfile);
 router.put('/change-password', protect, userController.changePassword);
 
+router.get('/addresses', protect, userController.getAddresses);
+router.post('/addresses', protect, userController.addAddress);
+router.delete('/addresses/:id', protect, userController.deleteAddress);
+
 // Admin Routes (Require Admin Role)
 router.get('/admin/all', protect, authorize('admin'), userController.getAllUsers);
 router.get('/admin/stats', protect, authorize('admin'), userController.getUserStats);

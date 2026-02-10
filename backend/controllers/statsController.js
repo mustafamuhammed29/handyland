@@ -1,7 +1,10 @@
 const Product = require('../models/Product');
 const Accessory = require('../models/Accessory');
 const RepairDevice = require('../models/RepairDevice');
+
 const RepairCase = require('../models/RepairCase');
+const Review = require('../models/Review'); // Added
+const Question = require('../models/Question'); // Added
 
 exports.getDashboardStats = async (req, res) => {
     try {
@@ -11,21 +14,28 @@ exports.getDashboardStats = async (req, res) => {
             accessoryCount,
             repairDeviceCount,
             repairCaseCount,
-            recentProducts
+            recentProducts,
+            reviewCount,
+            questionCount
         ] = await Promise.all([
             Product.countDocuments(),
             Accessory.countDocuments(),
             RepairDevice.countDocuments(),
             RepairCase.countDocuments(),
-            Product.find().sort({ createdAt: -1 }).limit(5) // Get 5 most recent products
+            Product.find().sort({ createdAt: -1 }).limit(5),
+            Review.countDocuments(),
+            Question.countDocuments()
         ]);
 
         res.json({
+            success: true,
             counts: {
                 products: productCount,
                 accessories: accessoryCount,
                 repairServices: repairDeviceCount,
-                portfolioCases: repairCaseCount
+                portfolioCases: repairCaseCount,
+                reviews: reviewCount,
+                questions: questionCount
             },
             recentActivity: recentProducts
         });
