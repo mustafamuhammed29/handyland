@@ -70,20 +70,36 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         // Determine initial step based on auth
         if (user) {
             setStep(2);
+            let prefilledAddress = '';
+            // Robust check for string address and specifically avoiding "[object Object]"
+            if (typeof user.address === 'string' && user.address !== '[object Object]' && user.address.trim() !== '') {
+                prefilledAddress = user.address;
+            } else if (user.addresses && user.addresses.length > 0) {
+                const defaultAddr = user.addresses.find(a => a.isDefault) || user.addresses[0];
+                prefilledAddress = defaultAddr.street || '';
+            }
+
             setShippingDetails(prev => ({
                 ...prev,
                 fullName: user.name || '',
                 email: user.email || '',
-                address: user.address || ''
+                address: prefilledAddress
             }));
-        } else {
-            // Check if user already chose guest mode previously in session (optional enhancement)
         }
 
         // Load saved shipping details from LocalStorage (overwrites user data if customized previously)
         const saved = localStorage.getItem('checkout_shipping');
         if (saved) {
-            setShippingDetails(prev => ({ ...prev, ...JSON.parse(saved) }));
+            try {
+                const parsed = JSON.parse(saved);
+                // Sanitize [object Object] bug
+                if (parsed.address === '[object Object]') {
+                    parsed.address = '';
+                }
+                setShippingDetails(prev => ({ ...prev, ...parsed }));
+            } catch (e) {
+                console.error("Failed to parse saved checkout details", e);
+            }
         }
     }, [cart, user, navigate]);
 
@@ -109,24 +125,35 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         // Zod Validation
         const result = shippingSchema.safeParse(shippingDetails);
         if (!result.success) {
+            console.log("Validation Failed:", result.error); // Debug log
             const formattedErrors: any = {};
-            // @ts-ignore
-            result.error.errors.forEach(err => {
-                if (err.path[0]) formattedErrors[err.path[0]] = err.message;
-            });
+            // Safer access to errors
+            if (result.error && Array.isArray(result.error.errors)) {
+                result.error.errors.forEach(err => {
+                    if (err.path[0]) formattedErrors[err.path[0]] = err.message;
+                });
+            }
             setFormErrors(formattedErrors);
+            // Scroll to top to show errors
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
         if (!termsAccepted) {
             setError("You must accept the Terms & Conditions to proceed.");
+            // Scroll to top/error area
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
         setFormErrors({});
         setError(null);
         setStep(3); // Go to Payment
+        // Scroll to top for next step
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    // ... (keep handleApplyCoupon, removeCoupon, getFinalTotal, handlePaymentSuccess) ...
 
     const handleApplyCoupon = async () => {
         if (!couponCode) return;
@@ -195,14 +222,16 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         } catch (err: any) {
             console.error(err);
             setError(err.response?.data?.message || 'Payment initiation failed');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
             setLoading(false);
         }
     };
 
-    // --- Render Steps ---
-
-    // Step 1: Auth Choice (Only if not logged in)
+    // ... (Render Steps) ...
+    // Inside render, just ensuring the structure matches what we expect
+    // ...
+    // ... (Step 1 code) ...
     if (step === 1 && !user && !guestMode) {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
@@ -403,7 +432,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 onChange={e => setTermsAccepted(e.target.checked)}
                                                 className="hidden"
                                             />
-                                            <span className="text-sm text-slate-400 group-hover:text-slate-300">
+                                            <span className={`text-sm ${error && !termsAccepted ? 'text-red-400' : 'text-slate-400'} group-hover:text-slate-300`}>
                                                 I agree to the <Link to="/agb" target="_blank" className="text-blue-400 hover:underline">Terms & Conditions</Link> and <Link to="/privacy" target="_blank" className="text-blue-400 hover:underline">Privacy Policy</Link>.
                                             </span>
                                         </label>
