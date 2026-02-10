@@ -82,6 +82,21 @@ interface Settings {
     repairArchive: RepairArchiveSettings;
     sections: SectionSettings;
     footerSection?: FooterSettings;
+    contactSection?: {
+        address?: string;
+        phone?: string;
+        email?: string;
+        mapUrl?: string;
+        formTitle?: string;
+        formButton?: string;
+        socialLinks?: {
+            facebook?: string;
+            instagram?: string;
+            twitter?: string;
+            linkedin?: string;
+            youtube?: string;
+        };
+    };
 }
 
 interface SettingsContextType {

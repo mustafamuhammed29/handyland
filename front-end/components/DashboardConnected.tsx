@@ -145,8 +145,8 @@ export const DashboardConnected: React.FC = () => {
                                     key={item.id}
                                     onClick={() => setActiveTab(item.id as any)}
                                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-medium ${activeTab === item.id
-                                            ? 'bg-blue-600 text-white'
-                                            : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
@@ -338,7 +338,7 @@ export const DashboardConnected: React.FC = () => {
                                         <label className="text-xs text-slate-400 uppercase font-bold">Member Since</label>
                                         <input
                                             type="text"
-                                            defaultValue={new Date(user._id.substring(0, 8), 16).toLocaleDateString()}
+                                            defaultValue={new Date(parseInt(user._id.substring(0, 8), 16) * 1000).toLocaleDateString()}
                                             className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none"
                                             readOnly
                                         />

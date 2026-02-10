@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
-import { ViewState, LanguageCode } from '../types';
+import { LanguageCode } from '../types';
+import { useNavigate } from 'react-router-dom';
 import { CreditCard, Truck, ShieldCheck, Lock, ArrowRight, Wallet, CheckCircle } from 'lucide-react';
 
 interface CheckoutProps {
-    setView: (view: ViewState) => void;
     lang: LanguageCode;
 }
 
-export const Checkout: React.FC<CheckoutProps> = ({ setView, lang }) => {
+export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     const { cart, cartTotal, clearCart } = useCart();
     const { addToast } = useToast();
+    const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
@@ -23,7 +24,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ setView, lang }) => {
             const token = localStorage.getItem('userToken');
             if (!token) {
                 addToast("Please login to complete purchase", "error");
-                setView(ViewState.LOGIN);
+                navigate('/login');
                 return;
             }
 
@@ -86,7 +87,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ setView, lang }) => {
         return (
             <div className="min-h-screen pt-32 text-center">
                 <h2 className="text-2xl text-slate-500">Your cart is empty.</h2>
-                <button onClick={() => setView(ViewState.MARKETPLACE)} className="mt-4 text-cyan-400 hover:underline">Return to Market</button>
+                <button onClick={() => navigate('/marketplace')} className="mt-4 text-cyan-400 hover:underline">Return to Market</button>
             </div>
         );
     }
