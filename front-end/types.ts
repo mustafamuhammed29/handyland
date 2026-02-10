@@ -71,12 +71,15 @@ export interface Coupon {
 
 export interface Address {
   _id?: string;
+  name?: string;
   street: string;
   city: string;
   state?: string;
-  zipCode: string;
+  postalCode?: string;
+  zipCode?: string; // Legacy support
   country: string;
-  isDefault: boolean;
+  phone?: string;
+  isDefault?: boolean;
 }
 
 export interface User {

@@ -38,6 +38,7 @@ import { SettingsProvider, useSettings } from './context/SettingsContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GlobalError } from './components/GlobalError';
 import { GlobalLoader } from './components/GlobalLoader';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Lazy Load Components
 const Marketplace = React.lazy(() => import('./components/Marketplace').then(module => ({ default: module.Marketplace })));
@@ -179,18 +180,31 @@ function AppContent() {
   );
 }
 
+// Create QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 60 * 1000, // 1 minute default
+    },
+  },
+});
+
 // Main App Component that provides context
 function App() {
   return (
-    <ToastProvider>
-      <SettingsProvider>
-        <AuthProvider>
-          <CartProvider>
-            <AppContent />
-          </CartProvider>
-        </AuthProvider>
-      </SettingsProvider>
-    </ToastProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <SettingsProvider>
+          <AuthProvider>
+            <CartProvider>
+              <AppContent />
+            </CartProvider>
+          </AuthProvider>
+        </SettingsProvider>
+      </ToastProvider>
+    </QueryClientProvider>
   );
 }
 
