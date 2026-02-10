@@ -1,5 +1,9 @@
 export const validateEmail = (email: string): boolean => {
-    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    // Stricter regex:
+    // 1. Local part: allows alphanumeric, dots, underscores, plus, hyphen. No consecutive dots.
+    // 2. Domain: allows alphanumeric, hyphen.
+    // 3. TLD: at least 2 chars.
+    const re = /^[a-zA-Z0-9]+([._+-][a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
     return re.test(String(email).toLowerCase());
 };
 

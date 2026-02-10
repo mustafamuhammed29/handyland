@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { CheckCircle, Loader2, AlertCircle, ArrowRight, Download, Package, Home } from 'lucide-react';
 import { useCart } from './context/CartContext';
+import { ENV } from './src/config/env';
 
 interface OrderSummary {
     id: string;
@@ -29,17 +30,12 @@ const PaymentSuccess: React.FC = () => {
         const verifyPayment = async () => {
             try {
                 const token = localStorage.getItem('userToken');
-                // Note: Auth token might be missing if Guest Checkout.
-                // Depending on backend, we might need to allow public verification via Session ID 
-                // OR handle it gracefully. My backend seems to require 'Private' access (protect middleware).
-                // If Guest, token is null. I should probably ensure the backend allows verification without token 
-                // IF the session ID matches. But for now, let's assume user has token or guest logic is handled.
-
                 const headers: any = { 'Content-Type': 'application/json' };
                 if (token) headers['Authorization'] = `Bearer ${token}`;
 
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-                const response = await fetch(`${apiUrl}/api/payment/success`, {
+                // derived base url
+                const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
+                const response = await fetch(`${baseUrl}/api/payment/success`, {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({ sessionId })

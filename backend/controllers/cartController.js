@@ -218,9 +218,68 @@ exports.clearCart = async (req, res) => {
 exports.getAllCarts = async (req, res) => {
     try {
         const carts = await Cart.find().populate('user', 'name email').sort({ updatedAt: -1 });
-        res.json(carts);
+
+        // Manually populate items to handle dynamic refs (Product vs Accessory) matching getCart logic
+        const populatedCarts = await Promise.all(carts.map(async (cart) => {
+            const populatedItems = [];
+            for (const item of cart.items) {
+                // Skip if no product ID
+                if (!item.product) continue;
+
+                let details;
+                try {
+                    if (item.productType === 'Product') {
+                        details = await Product.findById(item.product).select('name price images category');
+                    } else if (item.productType === 'Accessory') {
+                        details = await Accessory.findById(item.product).select('name price images category');
+                    }
+
+                    if (details) {
+                        populatedItems.push({
+                            _id: item._id, // Keep item ID
+                            product: { // Nest details to match common structure or flatten? 
+                                // Admin likely expects "product" object. 
+                                // Let's look at how getCart returns it: it returns a flat list of items.
+                                // But getAllCarts returns a list of Carts.
+                                // So cart.items should be replaced or mapped.
+                                _id: details._id,
+                                name: details.name,
+                                price: details.price,
+                                image: details.images && details.images.length > 0 ? details.images[0] : '',
+                                category: item.productType === 'Product' ? 'device' : 'accessory'
+                            },
+                            quantity: item.quantity,
+                            productType: item.productType
+                        });
+                    } else {
+                        // Product might be deleted. Keep item info or mark as unavailable?
+                        // For Admin, it's useful to see "Unknown Item" or just skip.
+                        // Let's keep ID for reference.
+                        populatedItems.push({
+                            _id: item._id,
+                            product: { name: 'Unknown/Deleted Product', _id: item.product },
+                            quantity: item.quantity,
+                            productType: item.productType
+                        });
+                    }
+                } catch (err) {
+                    console.error(`Error populating cart item ${item.product}:`, err);
+                }
+            }
+
+            // Return cart object with populated items
+            return {
+                _id: cart._id,
+                user: cart.user,
+                items: populatedItems,
+                updatedAt: cart.updatedAt,
+                createdAt: cart.createdAt
+            };
+        }));
+
+        res.json(populatedCarts);
     } catch (err) {
-        console.error(err);
+        console.error("GetAllCarts Error:", err);
         res.status(500).json({ message: 'Server Error' });
     }
 };

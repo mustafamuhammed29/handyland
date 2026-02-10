@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader, CheckCircle } from 'lucide-react';
 import { validateEmail, validateRequired } from './validation';
 
-const API_URL = 'http://localhost:5000/api';
+import { ENV } from './src/config/env';
+const API_URL = ENV.API_URL;
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');

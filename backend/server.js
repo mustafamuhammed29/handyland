@@ -27,7 +27,20 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/handyland',
 const compression = require('compression');
 
 // Security Middleware
-app.use(helmet()); // Secure HTTP headers
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "js.stripe.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+            fontSrc: ["'self'", "fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "blob:", "res.cloudinary.com", "images.unsplash.com"],
+            connectSrc: ["'self'", "api.stripe.com"],
+            frameSrc: ["'self'", "js.stripe.com", "hooks.stripe.com"],
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+})); // Secure HTTP headers with CSP
 app.use(compression()); // Compress responses
 
 // Request logging
@@ -52,8 +65,10 @@ app.use('/api/', limiter);
 const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:5173',
+    'http://localhost:5174', // Admin Panel
     'http://127.0.0.1:3000',
-    'http://127.0.0.1:5173'
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174' // Admin Panel
 ];
 
 app.use(cors({
@@ -108,7 +123,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 // Stricter rate limit for auth endpoints (relaxed for development)
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Strict limit for login/register
+    max: process.env.NODE_ENV === 'development' ? 100 : 5, // Relaxed for dev, strict for prod
     message: {
         success: false,
         message: 'Too many authentication attempts, please try again later.'
@@ -118,7 +133,7 @@ const authLimiter = rateLimit({
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/repairs', repairRoutes);
-app.use('/api/settings', settingsRoutes);
+app.use('/api/settings', require('./routes/settingsRoutes')); // Registered Settings Route
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/users', require('./routes/userRoutes'));
@@ -151,11 +166,29 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/status', (req, res) => {
+    const dbStates = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+    };
+
     res.json({
         status: 'ok',
-        message: 'Backend is operational',
-        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-        uptime: process.uptime()
+        timestamp: Date.now(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development',
+        database: {
+            state: dbStates[mongoose.connection.readyState] || 'unknown',
+            host: mongoose.connection.host,
+            name: mongoose.connection.name
+        },
+        memory: process.memoryUsage(),
+        system: {
+            nodeVersion: process.version,
+            platform: process.platform,
+            arch: process.arch
+        }
     });
 });
 

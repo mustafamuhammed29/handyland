@@ -25,4 +25,8 @@ router.post('/saved', protect, valuationController.saveValuation);
 router.get('/saved', protect, valuationController.getMyValuations);
 router.delete('/saved/:id', protect, valuationController.deleteValuation);
 
+// Public Quote Retrieval & Confirmation
+router.get('/quote/:reference', valuationController.getQuoteByReference);
+router.put('/quote/:reference/confirm', valuationController.confirmQuote);
+
 module.exports = router;

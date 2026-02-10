@@ -42,12 +42,15 @@ const UserSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    address: {
-        street: String,
-        city: String,
-        zipCode: String,
-        country: String
-    },
+    addresses: [{
+        street: { type: String, required: true },
+        city: { type: String, required: true },
+        state: { type: String },
+        zipCode: { type: String, required: true },
+        country: { type: String, required: true },
+        isDefault: { type: Boolean, default: false },
+        type: { type: String, enum: ['Home', 'Work', 'Other'], default: 'Home' }
+    }],
     isActive: {
         type: Boolean,
         default: true

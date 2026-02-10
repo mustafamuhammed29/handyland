@@ -1,4 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { ENV } from '../src/config/env';
+
+// utils/api.ts expects the BASE URL (e.g. localhost:5000), but ENV.API_URL includes /api
+// We strip /api if present to maintain compatibility with existing api.get('/api/...') calls
+const API_URL = ENV.API_URL.endsWith('/api')
+    ? ENV.API_URL.slice(0, -4)
+    : ENV.API_URL;
 
 export class ApiError extends Error {
     constructor(public status: number, public message: string) {

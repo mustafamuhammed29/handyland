@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Phone, MapPin, AlertCircle, Loader, Shield } from 'lucide-react';
 import { validateEmail, validatePassword, validatePhone, validateRequired } from './validation';
 
-const API_URL = 'http://localhost:5000/api';
+import { ENV } from './src/config/env';
+const API_URL = ENV.API_URL;
 
 const Register: React.FC = () => {
     const [formData, setFormData] = useState({
