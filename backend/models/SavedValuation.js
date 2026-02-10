@@ -4,7 +4,12 @@ const SavedValuationSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false // Changed to false to support guest valuations
+    },
+    contact: {
+        name: String,
+        email: String,
+        phone: String
     },
     device: {
         type: String, // e.g., "Samsung Galaxy S23"
@@ -40,6 +45,15 @@ const SavedValuationSchema = new mongoose.Schema({
     isQuote: {
         type: Boolean,
         default: false
+    },
+    paymentDetails: {
+        iban: String,
+        bankName: String
+    },
+    shippingAddress: {
+        address: String,
+        city: String,
+        postalCode: String
     }
 }, {
     timestamps: true

@@ -9,8 +9,11 @@ const errorHandler = (err, req, res, next) => {
         const messages = Object.values(err.errors).map(val => val.message);
         return res.status(400).json({
             success: false,
-            message: 'Validation Error',
-            errors: messages
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: messages
+            }
         });
     }
 
@@ -19,7 +22,10 @@ const errorHandler = (err, req, res, next) => {
         const field = Object.keys(err.keyValue)[0];
         return res.status(400).json({
             success: false,
-            message: `${field} already exists`
+            error: {
+                code: 'DUPLICATE_KEY',
+                message: `${field} already exists`
+            }
         });
     }
 
@@ -27,7 +33,10 @@ const errorHandler = (err, req, res, next) => {
     if (err.name === 'CastError') {
         return res.status(404).json({
             success: false,
-            message: 'Resource not found'
+            error: {
+                code: 'RESOURCE_NOT_FOUND',
+                message: 'Resource not found'
+            }
         });
     }
 
@@ -35,22 +44,31 @@ const errorHandler = (err, req, res, next) => {
     if (err.name === 'JsonWebTokenError') {
         return res.status(401).json({
             success: false,
-            message: 'Invalid token'
+            error: {
+                code: 'INVALID_TOKEN',
+                message: 'Invalid token'
+            }
         });
     }
 
     if (err.name === 'TokenExpiredError') {
         return res.status(401).json({
             success: false,
-            message: 'Token expired'
+            error: {
+                code: 'TOKEN_EXPIRED',
+                message: 'Token expired'
+            }
         });
     }
 
     // Default error
     res.status(err.statusCode || 500).json({
         success: false,
-        message: err.message || 'Server Error',
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+        error: {
+            code: 'SERVER_ERROR',
+            message: err.message || 'Server Error',
+            details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        }
     });
 };
 

@@ -18,18 +18,37 @@ const Product = require('../models/Product');
 const Accessory = require('../models/Accessory');
 const Transaction = require('../models/Transaction');
 
+const Coupon = require('../models/Coupon');
+
 // @desc    Create Stripe checkout session
 // @route   POST /api/payment/create-checkout-session
 // @access  Private
 exports.createCheckoutSession = async (req, res) => {
     try {
-        const { items, shippingAddress } = req.body;
+        const { items, shippingAddress, couponCode } = req.body;
 
-        if (!items || items.length === 0) {
+        if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: 'No items provided'
+                message: 'No items provided or invalid format'
             });
+        }
+
+        // Validate Coupon if provided
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ code: couponCode });
+            if (!coupon) {
+                return res.status(400).json({ success: false, message: 'Invalid coupon code' });
+            }
+            if (!coupon.isActive) {
+                return res.status(400).json({ success: false, message: 'Coupon is inactive' });
+            }
+            if (coupon.validUntil && new Date(coupon.validUntil) < new Date()) {
+                return res.status(400).json({ success: false, message: 'Coupon has expired' });
+            }
+            if (coupon.usageLimit > 0 && coupon.usedCount >= coupon.usageLimit) {
+                return res.status(400).json({ success: false, message: 'Coupon usage limit reached' });
+            }
         }
 
         // Validate Stock
@@ -101,8 +120,10 @@ exports.createCheckoutSession = async (req, res) => {
             customer_email: req.user ? req.user.email : req.body.email, // Use guest email if not logged in
             metadata: {
                 userId: req.user ? req.user.id : 'guest',
-                items: JSON.stringify(items),
-                shippingAddress: JSON.stringify(shippingAddress),
+                customerEmail: req.user ? req.user.email : req.body.email,
+                items: JSON.stringify(items.map(i => ({ id: i.product, name: i.name, q: i.quantity, type: i.productType }))).substring(0, 500), // Truncate to avoid limit
+                fullItems: JSON.stringify(items).substring(0, 500), // Keeping for compatibility but truncated
+                shippingAddress: JSON.stringify(shippingAddress).substring(0, 500),
                 subtotal: subtotal.toString(),
                 shippingFee: shippingFee.toString(),
                 tax: tax.toString(),
@@ -250,11 +271,11 @@ exports.handleWebhook = async (req, res) => {
     }
 
     // Handle the event
-    switch (event.type) {
-        case 'checkout.session.completed':
-            const session = event.data.object;
-            console.log('Payment successful (Webhook):', session.id);
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        console.log('Payment successful (Webhook):', session.id);
 
+        try {
             // Check if order already exists
             const existingOrder = await Order.findOne({ paymentId: session.payment_intent });
             if (existingOrder) {
@@ -263,9 +284,27 @@ exports.handleWebhook = async (req, res) => {
             }
 
             // Create order
-            const { userId, items, shippingAddress, couponCode, discountAmount, shippingFee, tax } = session.metadata;
-            const parsedItems = JSON.parse(items);
-            const parsedAddress = JSON.parse(shippingAddress);
+            const { userId, items, shippingAddress, couponCode, discountAmount, shippingFee, tax, customerEmail } = session.metadata;
+
+            // Safe Parsing
+            let parsedItems = [];
+            let parsedAddress = {};
+            try {
+                // If items was truncated or is just a summary, we might need to rely on the 'fullItems' or fallbacks if implemented.
+                // For now, let's assume 'fullItems' is the one to use if 'items' is the summary version.
+                // Based on previous step, 'items' is the summary (mapped) and 'fullItems' is the raw array.
+                // Let's check which one we have.
+                if (session.metadata.fullItems) {
+                    parsedItems = JSON.parse(session.metadata.fullItems);
+                } else {
+                    parsedItems = JSON.parse(items);
+                }
+                parsedAddress = JSON.parse(shippingAddress);
+            } catch (e) {
+                console.error("Failed to parse metadata JSON", e);
+                // Fallback or critical error? verify later.
+            }
+
             const totalAmount = session.amount_total / 100;
 
             const orderData = {
@@ -293,26 +332,56 @@ exports.handleWebhook = async (req, res) => {
                 orderData.user = userId;
             }
 
-            await Order.create(orderData);
+            // Ensure email is saved in shipping address if not present
+            if (!orderData.shippingAddress.email && customerEmail) {
+                orderData.shippingAddress.email = customerEmail;
+            }
+
+            const order = await Order.create(orderData);
+
+            // Create Transaction Record (only for registered users)
+            if (userId && userId !== 'guest') {
+                await Transaction.create({
+                    user: userId,
+                    order: order._id,
+                    amount: totalAmount,
+                    status: 'completed',
+                    paymentMethod: 'card',
+                    stripePaymentId: session.payment_intent,
+                    description: `Payment for Order #${order.orderNumber || order._id}`
+                });
+            }
 
             // Deduct Stock
             for (const item of parsedItems) {
                 if (item.productType === 'Product') {
-                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
                 } else {
-                    await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+                    await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
                 }
             }
-            break;
 
-        case 'payment_intent.payment_failed':
-            const paymentIntent = event.data.object;
-            console.log('Payment failed:', paymentIntent.id);
-            // Optional: Notify user or log failure
-            break;
+            // Update Coupon Usage
+            if (couponCode) {
+                await Coupon.updateOne({ code: couponCode }, { $inc: { usedCount: 1 } });
+            }
 
-        default:
-            console.log(`Unhandled event type ${event.type}`);
+            // Send Confirmation Email
+            const emailService = require('../utils/emailService');
+            // We pass the order object which now has ID and everything
+            await emailService.sendOrderConfirmation(order);
+
+        } catch (err) {
+            console.error('Error processing webhook order creation:', err);
+            // Don't return 500 to Stripe unless we want it to retry. 
+            // Often better to log and alert admin, but here we might want retry for transient DB errors.
+            return res.status(500).send('Internal Server Error');
+        }
+    } else if (event.type === 'payment_intent.payment_failed') {
+        const paymentIntent = event.data.object;
+        console.log('Payment failed:', paymentIntent.id);
+    } else {
+        console.log(`Unhandled event type ${event.type}`);
     }
 
     res.json({ received: true });

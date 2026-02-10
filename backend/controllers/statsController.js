@@ -8,6 +8,9 @@ const Question = require('../models/Question'); // Added
 
 exports.getDashboardStats = async (req, res) => {
     try {
+        const Order = require('../models/Order');
+        const User = require('../models/User');
+
         // Run count queries in parallel for performance
         const [
             productCount,
@@ -16,7 +19,12 @@ exports.getDashboardStats = async (req, res) => {
             repairCaseCount,
             recentProducts,
             reviewCount,
-            questionCount
+            questionCount,
+            orderCount,
+            userCount,
+            totalRevenueAgg,
+            topSellingProducts,
+            recentOrders
         ] = await Promise.all([
             Product.countDocuments(),
             Accessory.countDocuments(),
@@ -24,8 +32,18 @@ exports.getDashboardStats = async (req, res) => {
             RepairCase.countDocuments(),
             Product.find().sort({ createdAt: -1 }).limit(5),
             Review.countDocuments(),
-            Question.countDocuments()
+            Question.countDocuments(),
+            Order.countDocuments(),
+            User.countDocuments({ role: 'user' }),
+            Order.aggregate([
+                { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
+                { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            ]),
+            Product.find().sort({ sold: -1 }).limit(5).select('name sold image price'),
+            Order.find().sort({ createdAt: -1 }).limit(5).populate('user', 'name')
         ]);
+
+        const totalRevenue = totalRevenueAgg.length > 0 ? totalRevenueAgg[0].total : 0;
 
         res.json({
             success: true,
@@ -35,9 +53,16 @@ exports.getDashboardStats = async (req, res) => {
                 repairServices: repairDeviceCount,
                 portfolioCases: repairCaseCount,
                 reviews: reviewCount,
-                questions: questionCount
+                questions: questionCount,
+                orders: orderCount,
+                users: userCount
             },
-            recentActivity: recentProducts
+            financials: {
+                totalRevenue: totalRevenue
+            },
+            recentActivity: recentProducts,
+            topSellingProducts: topSellingProducts,
+            recentOrders: recentOrders
         });
     } catch (error) {
         console.error('Error fetching dashboard stats:', error);

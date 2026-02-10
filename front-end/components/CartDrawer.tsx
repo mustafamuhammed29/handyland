@@ -108,8 +108,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang, setView }) => {
                 <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
                     {cart.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-60">
-                            <ShoppingCart className="w-16 h-16 mb-4" />
-                            <p>Your cart is empty</p>
+                            <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                                <ShoppingCart className="w-10 h-10 text-slate-600" />
+                            </div>
+                            <p className="text-xl font-bold text-slate-400 mb-2">Your cart is empty</p>
+                            <p className="text-sm text-slate-600 mb-8 max-w-[200px] text-center">Looks like you haven't added anything yet.</p>
+                            <button
+                                onClick={() => setIsCartOpen(false)}
+                                className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors font-bold text-sm"
+                            >
+                                Start Shopping
+                            </button>
                         </div>
                     ) : (
                         cart.map((item, idx) => (

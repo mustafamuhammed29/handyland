@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader, Mail } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api';
+import { ENV } from './src/config/env';
+const API_URL = ENV.API_URL;
 
 const VerifyEmail: React.FC = () => {
     const [searchParams] = useSearchParams();

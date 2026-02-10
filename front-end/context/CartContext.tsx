@@ -153,24 +153,37 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const updateQuantity = async (id: string | number, delta: number) => {
         let newQty = 0;
         let itemCategory = 'device';
+        let shouldRemove = false;
 
-        setCart((prev) => prev.map((item) => {
-            if (item.id === id) {
-                const newQuantity = (item.quantity || 1) + delta;
-                newQty = newQuantity;
-                itemCategory = item.category;
-                return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
+        setCart((prev) => {
+            const existingItem = prev.find(item => item.id === id);
+            if (!existingItem) return prev;
+
+            const newQuantity = (existingItem.quantity || 1) + delta;
+            newQty = newQuantity;
+            itemCategory = existingItem.category;
+
+            if (newQuantity < 1) {
+                shouldRemove = true;
+                return prev.filter(item => item.id !== id);
             }
-            return item;
-        }));
 
-        if (user && newQty > 0) {
+            return prev.map(item =>
+                item.id === id ? { ...item, quantity: newQuantity } : item
+            );
+        });
+
+        if (user) {
             try {
-                await api.put('/api/cart', {
-                    id: id,
-                    productType: itemCategory,
-                    quantity: newQty
-                });
+                if (shouldRemove || newQty < 1) {
+                    await api.delete(`/api/cart/${id}`); // Assuming delete endpoint exists or use put 0
+                } else {
+                    await api.put('/api/cart', {
+                        id: id,
+                        productType: itemCategory,
+                        quantity: newQty
+                    });
+                }
             } catch (err) { console.error(err); }
         }
     };

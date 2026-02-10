@@ -61,7 +61,22 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     const [couponError, setCouponError] = useState<string | null>(null);
 
     // Initial Check & Load Data
+    const [freeShippingThreshold, setFreeShippingThreshold] = useState(100);
+
     useEffect(() => {
+        // Fetch Settings
+        const fetchSettings = async () => {
+            try {
+                const res = await api.get<{ success: boolean, data: { freeShippingThreshold: number } }>('/api/settings');
+                if (res.success && res.data.freeShippingThreshold) {
+                    setFreeShippingThreshold(res.data.freeShippingThreshold);
+                }
+            } catch (err) {
+                console.error("Failed to fetch settings", err);
+            }
+        };
+        fetchSettings();
+
         if (cart.length === 0) {
             navigate('/');
             return;
@@ -204,7 +219,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     };
 
     const getFinalTotal = () => {
-        let shipping = cartTotal > 100 ? 0 : 5.99;
+        let shipping = cartTotal >= freeShippingThreshold ? 0 : 5.99;
         if (shippingMethod === 'express') {
             shipping = 15.99; // Flat rate for express
         }
@@ -213,7 +228,21 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     };
 
     const handlePaymentSuccess = async () => {
+        if (loading) return; // Prevent double submission
+
+        // Token Validation for Logged In Users
+        if (user) {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                setError("Session expired. Please log in again.");
+                navigate('/login?redirect=/checkout');
+                return;
+            }
+        }
+
         setLoading(true);
+        setError(null);
+
         try {
             const response = await api.post('/api/payment/create-checkout-session', {
                 items: cart.map(item => ({
@@ -225,7 +254,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                     quantity: item.quantity || 1
                 })),
                 shippingAddress: shippingDetails,
-                shippingFee: (shippingMethod === 'express' ? 15.99 : (cartTotal > 100 ? 0 : 5.99)).toString(),
+                shippingFee: (shippingMethod === 'express' ? 15.99 : (cartTotal >= freeShippingThreshold ? 0 : 5.99)).toString(),
                 shippingMethod: shippingMethod,
                 couponCode: appliedCoupon?.code,
                 discountAmount: appliedCoupon?.discount,
@@ -234,14 +263,15 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
 
             if (response.url) {
                 window.location.href = response.url;
+            } else {
+                throw new Error("Failed to retrieve payment URL");
             }
 
         } catch (err: any) {
-            console.error(err);
-            setError(err.response?.data?.message || 'Payment initiation failed');
+            console.error("Payment Error:", err);
+            setError(err.response?.data?.message || err.message || 'Payment initiation failed. Please try again.');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        } finally {
-            setLoading(false);
+            setLoading(false); // Only stop loading on error, otherwise we are redirecting
         }
     };
 
@@ -413,7 +443,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                     </div>
                                                 </div>
                                                 <div className="font-bold text-white">
-                                                    {cartTotal > 100 ? 'FREE' : '5.99€'}
+                                                    {cartTotal >= freeShippingThreshold ? 'FREE' : '5.99€'}
                                                 </div>
                                             </label>
 
@@ -601,7 +631,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                 </div>
                                 <div className="flex justify-between text-emerald-400 text-sm">
                                     <span>Shipping</span>
-                                    <span>{cartTotal > 100 ? 'FREE' : `5.99${t.currency}`}</span>
+                                    <span>{cartTotal >= freeShippingThreshold ? 'FREE' : `5.99${t.currency}`}</span>
                                 </div>
                                 {appliedCoupon && (
                                     <div className="flex justify-between text-emerald-400 text-sm">

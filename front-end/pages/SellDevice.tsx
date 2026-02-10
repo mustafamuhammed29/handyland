@@ -20,17 +20,28 @@ export const SellDevice = () => {
     });
 
     useEffect(() => {
-        // In a real app, fetch quote details by ref to validate and display summary
-        // For now, we simulate fetching or just use the ref
-        if (quoteRef) {
-            setLoading(false);
-            setQuote({
-                reference: quoteRef,
-                price: 0, // Ideally fetched
-                model: 'Device from Quote'
-            });
-        }
-    }, [quoteRef]);
+        const fetchQuote = async () => {
+            if (!quoteRef) return;
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/valuation/quote/${quoteRef}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    setQuote(data.quote);
+                } else {
+                    addToast("Invalid or Expired Quote", "error");
+                    setTimeout(() => navigate('/valuation'), 3000);
+                }
+            } catch (err) {
+                console.error(err);
+                addToast("Error fetching quote details", "error");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchQuote();
+    }, [quoteRef, navigate, addToast]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,12 +49,27 @@ export const SellDevice = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        addToast("Sell Order Created! Check your email for shipping label.", "success");
-        // Logic to save order would go here
 
-        setTimeout(() => {
-            navigate('/dashboard');
-        }, 2000);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/valuation/quote/${quoteRef}/confirm`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                addToast("Sell Order Confirmed! Check your email for shipping label.", "success");
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 3000);
+            } else {
+                addToast(data.message || "Failed to confirm sale", "error");
+            }
+        } catch (err) {
+            console.error(err);
+            addToast("Network error. Please try again.", "error");
+        }
     };
 
     useEffect(() => {
@@ -57,7 +83,10 @@ export const SellDevice = () => {
             <div className="max-w-3xl mx-auto">
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl font-bold text-white mb-2">Complete Your Sale</h1>
-                    <p className="text-slate-400">Quote Reference: <span className="text-cyan-400 font-mono">{quoteRef}</span></p>
+                    <p className="text-slate-400">
+                        Reference: <span className="text-cyan-400 font-mono mr-4">{quoteRef}</span>
+                        {quote && <span className="text-emerald-400 font-bold">Offer: €{quote.price}</span>}
+                    </p>
                 </div>
 
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl">
