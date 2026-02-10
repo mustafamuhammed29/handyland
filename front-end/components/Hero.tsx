@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { ViewState, LanguageCode } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { LanguageCode } from '../types';
 import { ArrowRight, ArrowLeft, ShieldCheck, Zap, Smartphone, Search, Star, Hexagon } from 'lucide-react';
 import { translations } from '../i18n';
 import { useSettings } from '../context/SettingsContext';
 
 interface HeroProps {
-    setView: (view: ViewState) => void;
     lang: LanguageCode;
 }
 
-export const Hero: React.FC<HeroProps> = ({ setView, lang }) => {
+export const Hero: React.FC<HeroProps> = ({ lang }) => {
+    const navigate = useNavigate();
     const t = translations[lang];
     const isRTL = lang === 'ar';
     const { settings } = useSettings();
@@ -65,7 +66,7 @@ export const Hero: React.FC<HeroProps> = ({ setView, lang }) => {
 
                     <div className="flex flex-col sm:flex-row gap-4 pt-4">
                         <button
-                            onClick={() => setView(ViewState.MARKETPLACE)}
+                            onClick={() => navigate('/marketplace')}
                             className="group relative px-8 py-4 bg-white text-black font-bold text-lg rounded-full overflow-hidden hover:scale-105 transition-transform duration-300"
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-cyan-300 to-blue-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -75,7 +76,7 @@ export const Hero: React.FC<HeroProps> = ({ setView, lang }) => {
                         </button>
 
                         <button
-                            onClick={() => setView(ViewState.VALUATION)}
+                            onClick={() => navigate('/valuation')}
                             className="px-8 py-4 rounded-full border border-slate-700 text-white font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
                         >
                             <Zap className="w-5 h-5 text-yellow-400" /> {settings.hero.buttonValuation || t.ctaValue}

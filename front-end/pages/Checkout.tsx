@@ -21,6 +21,7 @@ interface CheckoutProps {
 const shippingSchema = z.object({
     fullName: z.string().min(2, "Full name is required"),
     email: z.string().email("Invalid email address"),
+    phone: z.string().min(6, "Phone number is required"), // Added phone
     address: z.string().min(5, "Address is too short"),
     city: z.string().min(2, "City is required"),
     zipCode: z.string().min(4, "Invalid Zip/Postal Code"),
@@ -47,6 +48,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     const [shippingDetails, setShippingDetails] = useState<ShippingFormData>({
         fullName: '',
         email: '',
+        phone: '', // Added phone
         address: '',
         city: '',
         zipCode: '',
@@ -98,6 +100,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                 ...prev,
                 fullName: user.name || '',
                 email: user.email || '',
+                phone: user.phone || '', // Added phone prefill
                 address: prefilledAddress
             }));
         }
@@ -232,7 +235,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
 
         // Token Validation for Logged In Users
         if (user) {
-            const token = localStorage.getItem('userToken');
+            const token = localStorage.getItem('token'); // changed from userToken to token (AuthContext uses 'token')
             if (!token) {
                 setError("Session expired. Please log in again.");
                 navigate('/login?redirect=/checkout');
@@ -242,6 +245,19 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
 
         setLoading(true);
         setError(null);
+
+        // Validate Stock
+        try {
+            await api.post('/api/products/validate-stock', {
+                items: cart.map(item => ({ id: item.id, quantity: item.quantity || 1, name: item.title }))
+            });
+        } catch (err: any) {
+            console.error("Stock Validation Error:", err);
+            setError(err.message || "Some items are out of stock.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setLoading(false);
+            return;
+        }
 
         try {
             const response = await api.post('/api/payment/create-checkout-session', {
@@ -370,6 +386,20 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                             {formErrors.email && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.email}</p>}
                                         </div>
                                     </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-slate-400">Phone</label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            value={shippingDetails.phone}
+                                            onChange={handleInputChange}
+                                            className={`w-full bg-black/40 border ${formErrors.phone ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
+                                            placeholder="+49 123 456789"
+                                        />
+                                        {formErrors.phone && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.phone}</p>}
+                                    </div>
+
                                     <div className="space-y-2">
                                         <label className="text-sm font-bold text-slate-400">Address</label>
                                         <input

@@ -137,7 +137,7 @@ UserSchema.methods.generateResetPasswordToken = function () {
 };
 
 // Add Indexes
-UserSchema.index({ email: 1 });
-UserSchema.index({ role: 1 });
+// UserSchema.index({ email: 1 }); // Already defined in schema
+// UserSchema.index({ role: 1 }); // Already defined in schema
 
 module.exports = mongoose.model('User', UserSchema);

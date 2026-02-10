@@ -17,6 +17,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Accessory = require('../models/Accessory');
 const Transaction = require('../models/Transaction');
+const mongoose = require('mongoose');
 
 const Coupon = require('../models/Coupon');
 
@@ -25,7 +26,7 @@ const Coupon = require('../models/Coupon');
 // @access  Private
 exports.createCheckoutSession = async (req, res) => {
     try {
-        const { items, shippingAddress, couponCode } = req.body;
+        const { items, shippingAddress, couponCode, discountAmount } = req.body;
 
         if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({
@@ -51,22 +52,77 @@ exports.createCheckoutSession = async (req, res) => {
             }
         }
 
-        // Validate Stock
+        // Validate Stock & Build Order Items
+        const orderItems = [];
+
         for (const item of items) {
-            let product;
+            let productDoc;
+
             if (item.productType === 'Product') {
-                product = await Product.findById(item.product);
+                productDoc = await Product.findOne({ id: item.product });
+                if (!productDoc && mongoose.Types.ObjectId.isValid(item.product)) {
+                    productDoc = await Product.findById(item.product);
+                }
             } else {
-                product = await Accessory.findById(item.product);
+                productDoc = await Accessory.findOne({ id: item.product });
+                if (!productDoc && mongoose.Types.ObjectId.isValid(item.product)) {
+                    productDoc = await Accessory.findById(item.product);
+                }
             }
 
-            if (!product) {
+            if (!productDoc) {
                 return res.status(404).json({ success: false, message: `Product not found: ${item.name}` });
             }
-            if (product.stock < item.quantity) {
-                return res.status(400).json({ success: false, message: `Insufficient stock for ${item.name}. Available: ${product.stock}` });
+            if (productDoc.stock < item.quantity) {
+                return res.status(400).json({ success: false, message: `Insufficient stock for ${item.name}. Available: ${productDoc.stock}` });
             }
+
+            orderItems.push({
+                product: productDoc._id,
+                productType: item.productType || 'Product',
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price,
+                image: item.image
+            });
         }
+
+        // Calculate Totals
+        const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        let shippingFee = 0;
+        if (req.body.shippingFee) {
+            shippingFee = parseFloat(req.body.shippingFee);
+        } else {
+            shippingFee = subtotal >= 100 ? 0 : 5.99; // Using >= to match frontend logic
+        }
+
+        const finalDiscount = discountAmount ? parseFloat(discountAmount) : 0;
+        const tax = subtotal * 0.19; // Approximation
+
+        // Create Pending Order
+        const orderData = {
+            user: req.user ? req.user.id : undefined,
+            items: orderItems,
+            totalAmount: (subtotal + shippingFee - finalDiscount),
+            tax,
+            shippingFee,
+            discountAmount: finalDiscount,
+            couponCode,
+            status: 'pending',
+            paymentStatus: 'pending',
+            paymentMethod: 'card',
+            shippingAddress: {
+                fullName: shippingAddress.fullName,
+                email: shippingAddress.email,
+                phone: shippingAddress.phone,
+                street: shippingAddress.address, // Mapping address to street
+                city: shippingAddress.city,
+                zipCode: shippingAddress.zipCode,
+                country: shippingAddress.country
+            }
+        };
+
+        const order = await Order.create(orderData);
 
         // Create line items for Stripe
         const lineItems = items.map(item => ({
@@ -76,23 +132,11 @@ exports.createCheckoutSession = async (req, res) => {
                     name: item.name,
                     images: item.image ? [item.image] : [],
                 },
-                unit_amount: Math.round(item.price * 100), // Convert to cents
+                unit_amount: Math.round(item.price * 100),
             },
             quantity: item.quantity,
         }));
 
-        // Calculate Subtotal FIRST
-        const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-        // Determine Shipping Fee
-        let shippingFee = 0;
-        if (req.body.shippingFee) {
-            shippingFee = parseFloat(req.body.shippingFee);
-        } else {
-            shippingFee = subtotal > 100 ? 0 : 5.99;
-        }
-
-        // Add Shipping to Line Items
         if (shippingFee > 0) {
             lineItems.push({
                 price_data: {
@@ -106,10 +150,6 @@ exports.createCheckoutSession = async (req, res) => {
             });
         }
 
-        // Calculate Totals for Metadata
-
-        const tax = subtotal * 0.19;
-
         // Create checkout session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -117,20 +157,16 @@ exports.createCheckoutSession = async (req, res) => {
             mode: 'payment',
             success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.FRONTEND_URL}/checkout`,
-            customer_email: req.user ? req.user.email : req.body.email, // Use guest email if not logged in
+            customer_email: req.user ? req.user.email : shippingAddress.email,
             metadata: {
-                userId: req.user ? req.user.id : 'guest',
-                customerEmail: req.user ? req.user.email : req.body.email,
-                items: JSON.stringify(items.map(i => ({ id: i.product, name: i.name, q: i.quantity, type: i.productType }))).substring(0, 500), // Truncate to avoid limit
-                fullItems: JSON.stringify(items).substring(0, 500), // Keeping for compatibility but truncated
-                shippingAddress: JSON.stringify(shippingAddress).substring(0, 500),
-                subtotal: subtotal.toString(),
-                shippingFee: shippingFee.toString(),
-                tax: tax.toString(),
-                couponCode: req.body.couponCode || '',
-                discountAmount: req.body.discountAmount ? req.body.discountAmount.toString() : '0'
+                orderId: order._id.toString(),
+                userId: req.user ? req.user.id : 'guest'
             },
         });
+
+        // Update Order with Session ID
+        order.paymentId = session.id;
+        await order.save();
 
         res.status(200).json({
             success: true,
@@ -158,82 +194,31 @@ exports.handlePaymentSuccess = async (req, res) => {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
         if (session.payment_status === 'paid') {
-            // Check if order already exists to prevent duplicates
-            const existingOrder = await Order.findOne({ paymentId: session.payment_intent });
+            // Find the order created in createCheckoutSession
+            // We search by paymentId matching session.id (initial) or session.payment_intent (updated by webhook)
+            const order = await Order.findOne({
+                $or: [
+                    { paymentId: session.id },
+                    { paymentId: session.payment_intent }
+                ]
+            });
 
-            if (existingOrder) {
+            if (order) {
+                // If order exists, return it.
+                // Status might be pending if webhook hasn't fired yet.
+                // That's acceptable. Frontend can show "Processing".
                 return res.status(200).json({
                     success: true,
-                    message: 'Payment successful (Order already processed)',
-                    order: existingOrder
+                    message: 'Payment successful',
+                    order
+                });
+            } else {
+                // Should not happen with new logic, but handled if order creation failed?
+                return res.status(404).json({
+                    success: false,
+                    message: 'Order not found'
                 });
             }
-
-            // Create order in database
-            const { userId, items, shippingAddress, couponCode, discountAmount, shippingFee, tax } = session.metadata;
-
-            const parsedItems = JSON.parse(items);
-            const parsedAddress = JSON.parse(shippingAddress);
-
-            // Calculate total
-            const totalAmount = session.amount_total / 100; // Stripe amount is in cents
-
-            // Create order object
-            const orderData = {
-                items: parsedItems.map(item => ({
-                    product: item.product,
-                    productType: item.productType,
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                    image: item.image
-                })),
-                totalAmount,
-                tax: tax ? parseFloat(tax) : 0,
-                shippingFee: shippingFee ? parseFloat(shippingFee) : 0,
-                shippingAddress: parsedAddress,
-                paymentMethod: 'card',
-                paymentStatus: 'paid',
-                paymentId: session.payment_intent,
-                status: 'processing',
-                couponCode: couponCode || null,
-                discountAmount: discountAmount ? parseFloat(discountAmount) : 0
-            };
-
-            // Only add user if not guest
-            if (userId && userId !== 'guest') {
-                orderData.user = userId;
-            }
-
-            const order = await Order.create(orderData);
-
-            // Create Transaction Record (only for registered users)
-            if (userId && userId !== 'guest') {
-                await Transaction.create({
-                    user: userId,
-                    order: order._id,
-                    amount: totalAmount,
-                    status: 'completed',
-                    paymentMethod: 'card',
-                    stripePaymentId: session.payment_intent,
-                    description: `Payment for Order #${order.orderNumber}`
-                });
-            }
-
-            // Deduct Stock (Ideally this should be in webhook, but valid here too as fallback)
-            for (const item of parsedItems) {
-                if (item.productType === 'Product') {
-                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
-                } else {
-                    await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
-                }
-            }
-
-            res.status(200).json({
-                success: true,
-                message: 'Payment successful',
-                order
-            });
         } else {
             res.status(400).json({
                 success: false,
@@ -276,110 +261,98 @@ exports.handleWebhook = async (req, res) => {
         console.log('Payment successful (Webhook):', session.id);
 
         try {
-            // Check if order already exists
-            const existingOrder = await Order.findOne({ paymentId: session.payment_intent });
-            if (existingOrder) {
-                console.log('Order already processed, skipping.');
+            const orderId = session.metadata.orderId;
+            if (!orderId) {
+                console.error("No orderId in metadata");
+                return res.status(400).send("No orderId in metadata");
+            }
+
+            const order = await Order.findById(orderId);
+            if (!order) {
+                console.error("Order not found:", orderId);
+                return res.status(404).send("Order not found");
+            }
+
+            if (order.status !== 'pending' && order.status !== 'pending_payment') {
+                console.log('Order already processed or not pending:', orderId);
                 return res.json({ received: true });
             }
 
-            // Create order
-            const { userId, items, shippingAddress, couponCode, discountAmount, shippingFee, tax, customerEmail } = session.metadata;
-
-            // Safe Parsing
-            let parsedItems = [];
-            let parsedAddress = {};
-            try {
-                // If items was truncated or is just a summary, we might need to rely on the 'fullItems' or fallbacks if implemented.
-                // For now, let's assume 'fullItems' is the one to use if 'items' is the summary version.
-                // Based on previous step, 'items' is the summary (mapped) and 'fullItems' is the raw array.
-                // Let's check which one we have.
-                if (session.metadata.fullItems) {
-                    parsedItems = JSON.parse(session.metadata.fullItems);
-                } else {
-                    parsedItems = JSON.parse(items);
-                }
-                parsedAddress = JSON.parse(shippingAddress);
-            } catch (e) {
-                console.error("Failed to parse metadata JSON", e);
-                // Fallback or critical error? verify later.
-            }
-
-            const totalAmount = session.amount_total / 100;
-
-            const orderData = {
-                items: parsedItems.map(item => ({
-                    product: item.product,
-                    productType: item.productType,
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                    image: item.image
-                })),
-                totalAmount,
-                tax: tax ? parseFloat(tax) : 0,
-                shippingFee: shippingFee ? parseFloat(shippingFee) : 0,
-                shippingAddress: parsedAddress,
-                paymentMethod: 'card',
-                paymentStatus: 'paid',
-                paymentId: session.payment_intent,
-                status: 'processing',
-                couponCode: couponCode || null,
-                discountAmount: discountAmount ? parseFloat(discountAmount) : 0
-            };
-
-            if (userId && userId !== 'guest') {
-                orderData.user = userId;
-            }
-
-            // Ensure email is saved in shipping address if not present
-            if (!orderData.shippingAddress.email && customerEmail) {
-                orderData.shippingAddress.email = customerEmail;
-            }
-
-            const order = await Order.create(orderData);
+            // Update Order
+            order.status = 'processing';
+            order.paymentStatus = 'paid';
+            order.paymentId = session.payment_intent; // Update with actual payment intent
+            await order.save();
 
             // Create Transaction Record (only for registered users)
-            if (userId && userId !== 'guest') {
+            if (order.user) {
                 await Transaction.create({
-                    user: userId,
+                    user: order.user,
                     order: order._id,
-                    amount: totalAmount,
+                    amount: order.totalAmount,
                     status: 'completed',
                     paymentMethod: 'card',
                     stripePaymentId: session.payment_intent,
-                    description: `Payment for Order #${order.orderNumber || order._id}`
+                    description: `Payment for Order #${order.orderNumber}`
                 });
             }
 
             // Deduct Stock
-            for (const item of parsedItems) {
-                if (item.productType === 'Product') {
-                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
-                } else {
+            for (const item of order.items) {
+                // Note: item.product IS the ObjectId ref if saved correctly. 
+                // But schema says type: ObjectId.
+                // wait, in createCheckoutSession we mapped item.product (which is ID string?)
+                // Schema: product: { type: ObjectId, refPath: ... }
+                // IF we saved STRING ID into ObjectId field, Mongoose casts it IF valid ObjectId.
+                // But Accessory/Product IDs are UUID strings (from Product.js model: id: { type: String }).
+                // Oh no.
+                // Product.js has `id: String` (UUID) AND `_id: ObjectId` (Mongo).
+                // Order.js has `product: ObjectId`.
+                // If I passed UUID string to `product` field in Order creation... Mongoose might fail casting to ObjectId!
+                // I need to check if `createCheckoutSession` saves `_id` or `id`.
+
+                // createCheckoutSession: item.product matches what frontend sent.
+                // Frontend (CartContext) usually uses `id` (UUID).
+                // So Order creation might have failed or saved null if casting failed?
+                // I MUST FIX THIS.
+                // I need to look up the ObjectID from the UUID `id` before creating Order?
+                // Yes.
+
+                // Assuming I fix that in `createCheckoutSession`...
+                // Here in webhook: item.product should be ObjectId.
+                // So I can use findByIdAndUpdate (which uses _id).
+                // But Product.js model says `id: String`. `_id` is implicit.
+                // If item.product is ObjectId, I should use `findByIdAndUpdate`.
+                // If it is UUID, I should use `findOneAndUpdate({ id: ... })`.
+
+                // I will assume I fix `createCheckoutSession` to store ObjectIds.
+                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
+                // Wait, if it's Accessory? Check type.
+                if (item.productType === 'Accessory') {
                     await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
                 }
             }
 
             // Update Coupon Usage
-            if (couponCode) {
-                await Coupon.updateOne({ code: couponCode }, { $inc: { usedCount: 1 } });
+            if (order.couponCode) {
+                await Coupon.updateOne({ code: order.couponCode }, { $inc: { usedCount: 1 } });
             }
 
             // Send Confirmation Email
             const emailService = require('../utils/emailService');
-            // We pass the order object which now has ID and everything
             await emailService.sendOrderConfirmation(order);
 
         } catch (err) {
-            console.error('Error processing webhook order creation:', err);
-            // Don't return 500 to Stripe unless we want it to retry. 
-            // Often better to log and alert admin, but here we might want retry for transient DB errors.
+            console.error('Error processing webhook order update:', err);
             return res.status(500).send('Internal Server Error');
         }
     } else if (event.type === 'payment_intent.payment_failed') {
         const paymentIntent = event.data.object;
         console.log('Payment failed:', paymentIntent.id);
+        // Find order and mark failed?
+        // We might not have orderId in payment_intent metadata if we only put it in session metadata.
+        // Session creates payment_intent. Does it copy metadata? Not by default.
+        // So we might miss marking it failed. But 'pending' is fine.
     } else {
         console.log(`Unhandled event type ${event.type}`);
     }

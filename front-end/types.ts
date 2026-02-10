@@ -147,21 +147,7 @@ export interface Transaction {
   status: 'completed' | 'pending' | 'delivered' | 'shipped';
 }
 
-export enum ViewState {
-  HOME = 'HOME',
-  MARKETPLACE = 'MARKETPLACE',
-  REPAIR = 'REPAIR',
-  VALUATION = 'VALUATION',
-  LOGIN = 'LOGIN',
-  CHECKOUT = 'CHECKOUT',
-  DASHBOARD = 'DASHBOARD',
-  SELLER_STUDIO = 'SELLER_STUDIO',
-  ADMIN = 'ADMIN',
-  AGB = 'AGB',
-  PRIVACY = 'PRIVACY',
-  SERVICE = 'SERVICE',
-  IMPRESSUM = 'IMPRESSUM',
-  ABOUT = 'ABOUT'
-}
+// ViewState enum removed in favor of React Router
+
 
 export type LanguageCode = 'ar' | 'en' | 'de' | 'tr' | 'ru';

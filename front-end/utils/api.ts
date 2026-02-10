@@ -45,8 +45,8 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
 };
 
 export const api = {
-    get: <T = any>(endpoint: string) => request(endpoint, { method: 'GET' }) as Promise<T>,
-    post: <T = any>(endpoint: string, data: any) => request(endpoint, { method: 'POST', body: JSON.stringify(data) }) as Promise<T>,
-    put: <T = any>(endpoint: string, data: any) => request(endpoint, { method: 'PUT', body: JSON.stringify(data) }) as Promise<T>,
-    delete: <T = any>(endpoint: string) => request(endpoint, { method: 'DELETE' }) as Promise<T>,
+    get: <T = any>(endpoint: string, options?: RequestInit) => request(endpoint, { ...options, method: 'GET' }) as Promise<T>,
+    post: <T = any>(endpoint: string, data: any, options?: RequestInit) => request(endpoint, { ...options, method: 'POST', body: JSON.stringify(data) }) as Promise<T>,
+    put: <T = any>(endpoint: string, data: any, options?: RequestInit) => request(endpoint, { ...options, method: 'PUT', body: JSON.stringify(data) }) as Promise<T>,
+    delete: <T = any>(endpoint: string, options?: RequestInit) => request(endpoint, { ...options, method: 'DELETE' }) as Promise<T>,
 };
