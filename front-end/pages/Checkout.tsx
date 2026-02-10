@@ -125,24 +125,41 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         // Zod Validation
         const result = shippingSchema.safeParse(shippingDetails);
         if (!result.success) {
-            console.log("Validation Failed:", result.error); // Debug log
+            const zodError = result.error;
+            console.log("Validation Failed:", zodError); // Debug log
+
             const formattedErrors: any = {};
-            // Safer access to errors
-            if (result.error && Array.isArray(result.error.errors)) {
-                result.error.errors.forEach(err => {
-                    if (err.path[0]) formattedErrors[err.path[0]] = err.message;
-                });
-            }
+
+            // Using logic that adheres to ZodError type
+            zodError.issues.forEach(issue => {
+                if (issue.path[0]) {
+                    formattedErrors[issue.path[0]] = issue.message;
+                }
+            });
+
             setFormErrors(formattedErrors);
-            // Scroll to top to show errors
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Find first error field and scroll to it
+            const firstErrorField = zodError.issues[0]?.path[0];
+            if (firstErrorField) {
+                const element = document.getElementsByName(firstErrorField as string)[0];
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.focus();
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
             return;
         }
 
         if (!termsAccepted) {
             setError("You must accept the Terms & Conditions to proceed.");
-            // Scroll to top/error area
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Scroll to the bottom where terms are
+            const termsElement = document.querySelector('input[type="checkbox"]');
+            if (termsElement) {
+                termsElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return;
         }
 
@@ -305,10 +322,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 name="fullName"
                                                 value={shippingDetails.fullName}
                                                 onChange={handleInputChange}
-                                                className={`w-full bg-black/40 border ${formErrors.fullName ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
+                                                className={`w-full bg-black/40 border ${formErrors.fullName ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                                 placeholder="John Doe"
                                             />
-                                            {formErrors.fullName && <p className="text-red-500 text-xs">{formErrors.fullName}</p>}
+                                            {formErrors.fullName && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.fullName}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-sm font-bold text-slate-400">Email (for order updates)</label>
@@ -317,10 +334,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 name="email"
                                                 value={shippingDetails.email}
                                                 onChange={handleInputChange}
-                                                className={`w-full bg-black/40 border ${formErrors.email ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
+                                                className={`w-full bg-black/40 border ${formErrors.email ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                                 placeholder="john@example.com"
                                             />
-                                            {formErrors.email && <p className="text-red-500 text-xs">{formErrors.email}</p>}
+                                            {formErrors.email && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.email}</p>}
                                         </div>
                                     </div>
                                     <div className="space-y-2">
@@ -330,10 +347,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                             name="address"
                                             value={shippingDetails.address}
                                             onChange={handleInputChange}
-                                            className={`w-full bg-black/40 border ${formErrors.address ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
+                                            className={`w-full bg-black/40 border ${formErrors.address ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                             placeholder="123 Tech Street"
                                         />
-                                        {formErrors.address && <p className="text-red-500 text-xs">{formErrors.address}</p>}
+                                        {formErrors.address && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.address}</p>}
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                         <div className="space-y-2">
@@ -343,10 +360,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 name="city"
                                                 value={shippingDetails.city}
                                                 onChange={handleInputChange}
-                                                className={`w-full bg-black/40 border ${formErrors.city ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
+                                                className={`w-full bg-black/40 border ${formErrors.city ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                                 placeholder="Berlin"
                                             />
-                                            {formErrors.city && <p className="text-red-500 text-xs">{formErrors.city}</p>}
+                                            {formErrors.city && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.city}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-sm font-bold text-slate-400">Zip Code</label>
@@ -355,10 +372,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 name="zipCode"
                                                 value={shippingDetails.zipCode}
                                                 onChange={handleInputChange}
-                                                className={`w-full bg-black/40 border ${formErrors.zipCode ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none rtl:text-right transition-colors`}
+                                                className={`w-full bg-black/40 border ${formErrors.zipCode ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none rtl:text-right transition-colors`}
                                                 placeholder="10115"
                                             />
-                                            {formErrors.zipCode && <p className="text-red-500 text-xs">{formErrors.zipCode}</p>}
+                                            {formErrors.zipCode && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.zipCode}</p>}
                                         </div>
                                         <div className="space-y-2 col-span-2 md:col-span-1">
                                             <label className="text-sm font-bold text-slate-400">Country</label>
@@ -366,13 +383,13 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 name="country"
                                                 value={shippingDetails.country}
                                                 onChange={handleInputChange}
-                                                className={`w-full bg-black/40 border ${formErrors.country ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
+                                                className={`w-full bg-black/40 border ${formErrors.country ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                             >
                                                 <option value="Germany">Germany</option>
                                                 <option value="Austria">Austria</option>
                                                 <option value="Switzerland">Switzerland</option>
                                             </select>
-                                            {formErrors.country && <p className="text-red-500 text-xs">{formErrors.country}</p>}
+                                            {formErrors.country && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.country}</p>}
                                         </div>
                                     </div>
 
@@ -420,19 +437,33 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                         </div>
                                     </div>
 
+                                    <style>{`
+                                        @keyframes shake {
+                                            0%, 100% { transform: translateX(0); }
+                                            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+                                            20%, 40%, 60%, 80% { transform: translateX(4px); }
+                                        }
+                                        .animate-shake {
+                                            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+                                        }
+                                    `}</style>
+
                                     {/* Terms & Conditions */}
-                                    <div className="pt-4 pb-2">
+                                    <div className={`pt-4 pb-2 transition-colors duration-300 rounded-lg p-2 ${error && !termsAccepted ? 'bg-red-500/10 border border-red-500/30 animate-shake' : ''}`}>
                                         <label className="flex items-center gap-3 cursor-pointer group">
-                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${termsAccepted ? 'bg-blue-500 border-blue-500' : 'border-slate-600 group-hover:border-blue-400'}`}>
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${termsAccepted ? 'bg-blue-500 border-blue-500' : (error && !termsAccepted ? 'border-red-500' : 'border-slate-600 group-hover:border-blue-400')}`}>
                                                 {termsAccepted && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                                             </div>
                                             <input
                                                 type="checkbox"
                                                 checked={termsAccepted}
-                                                onChange={e => setTermsAccepted(e.target.checked)}
+                                                onChange={e => {
+                                                    setTermsAccepted(e.target.checked);
+                                                    if (e.target.checked) setError(null);
+                                                }}
                                                 className="hidden"
                                             />
-                                            <span className={`text-sm ${error && !termsAccepted ? 'text-red-400' : 'text-slate-400'} group-hover:text-slate-300`}>
+                                            <span className={`text-sm ${error && !termsAccepted ? 'text-red-400 font-bold' : 'text-slate-400'} group-hover:text-slate-300`}>
                                                 I agree to the <Link to="/agb" target="_blank" className="text-blue-400 hover:underline">Terms & Conditions</Link> and <Link to="/privacy" target="_blank" className="text-blue-400 hover:underline">Privacy Policy</Link>.
                                             </span>
                                         </label>
