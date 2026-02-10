@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     User, Package, Wrench, Settings, LogOut, Activity,
     CreditCard, Bell, Shield, Wallet, ChevronRight,
     BarChart3, Smartphone, FileText, TrendingUp, Plus, MapPin,
-    RotateCcw, Truck, MessageSquare, Download, ChevronLeft, Loader2, Lock
+    RotateCcw, Truck, MessageSquare, Download, ChevronLeft, Loader2, Lock, Trash2, Heart, ShoppingCart, ExternalLink
 } from 'lucide-react';
-import { ViewState, User as UserType, RepairTicket, Transaction, SavedValuation } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { ViewState, User as UserType, RepairTicket, Transaction, SavedValuation, Address, PhoneListing, Order, WalletTransaction } from '../types';
 import { useToast } from '../context/ToastContext';
 import { api } from '../utils/api';
 import { ENV } from '../src/config/env';
@@ -20,13 +22,19 @@ interface DashboardProps {
     logout: () => void;
 }
 
-// Mock Data removed - fetching from API
-
 export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView, logout }) => {
-    const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'repairs' | 'wallet' | 'settings' | 'valuations'>('overview');
+    const navigate = useNavigate();
+    const { addToCart } = useCart();
+    const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'repairs' | 'wallet' | 'settings' | 'valuations' | 'wishlist'>('overview');
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
     const [repairs, setRepairs] = useState<RepairTicket[]>([]);
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [orders, setOrders] = useState<Order[]>([]); // Renamed from transactions
+    const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]); // New
     const [valuations, setValuations] = useState<SavedValuation[]>([]);
+    const [addresses, setAddresses] = useState<Address[]>([]);
+    const [wishlistItems, setWishlistItems] = useState<PhoneListing[]>([]);
     const [userStats, setUserStats] = useState<UserType | null>(initialUser);
     const [promotions, setPromotions] = useState<any[]>([]);
     const [chartData, setChartData] = useState<any>(null);
@@ -40,8 +48,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
     const ordersPerPage = 5;
     // Wallet State
     const [showAddFunds, setShowAddFunds] = useState(false);
+    const [addFundsAmount, setAddFundsAmount] = useState('');
+    const [isAddingFunds, setIsAddingFunds] = useState(false);
     const [showAddCard, setShowAddCard] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Address State
+    const [showAddressModal, setShowAddressModal] = useState(false);
+    const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+    const [addressForm, setAddressForm] = useState<Address>({
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+        isDefault: false
+    });
+    const [isSavingAddress, setIsSavingAddress] = useState(false);
 
     // Profile Update State
     const [profileData, setProfileData] = useState({
@@ -58,7 +81,196 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
     const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
+    // Refund State
+    const [showRefundModal, setShowRefundModal] = useState(false);
+    const [refundOrderId, setRefundOrderId] = useState<string | null>(null);
+    const [refundReason, setRefundReason] = useState("");
+    const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
+
+    // Review State
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [reviewProductId, setReviewProductId] = useState<string | null>(null);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewComment, setReviewComment] = useState("");
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
     const { addToast } = useToast();
+
+    const handleDownloadInvoice = async (orderId: string) => {
+        try {
+            // Check if we can get the token from localStorage
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error("No token");
+
+            // Direct fetch to handle blob response properly
+            const response = await fetch(`${ENV.API_URL}/api/orders/${orderId}/invoice`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error("Failed to generate invoice");
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Invoice_${orderId}.html`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+            addToast("Invoice downloaded", "success");
+        } catch (err) {
+            console.error(err);
+            addToast("Failed to download invoice", "error");
+        }
+    };
+
+    const markNotificationRead = async (id: string) => {
+        try {
+            await api.put(`/api/notifications/${id}/read`, {});
+            setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
+            setUnreadCount(prev => Math.max(0, prev - 1));
+        } catch (error) {
+            console.error("Failed to mark notification read", error);
+        }
+    };
+
+    const markAllNotificationsRead = async () => {
+        try {
+            await api.put(`/api/notifications/read-all`, {});
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            setUnreadCount(0);
+        } catch (error) {
+            console.error("Failed to mark all read", error);
+        }
+    };
+
+    const fetchAddresses = async () => {
+        try {
+            const res = await api.get('/api/addresses');
+            setAddresses(res.data.addresses);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const fetchWalletTransactions = async () => {
+        try {
+            const res = await api.get('/api/transactions');
+            setWalletTransactions(res.data.transactions);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    // ... handleSaveAddress, handleDeleteAddress, handleAddFunds ...
+
+    const handleSaveAddress = async () => {
+        setIsSavingAddress(true);
+        try {
+            if (editingAddressId) {
+                await api.put(`/api/addresses/${editingAddressId}`, addressForm);
+                addToast("Address updated", "success");
+            } else {
+                await api.post('/api/addresses', addressForm);
+                addToast("Address added", "success");
+            }
+            setShowAddressModal(false);
+            setEditingAddressId(null);
+            setAddressForm({ street: '', city: '', state: '', zipCode: '', country: '', isDefault: false });
+            fetchAddresses();
+        } catch (error) {
+            addToast("Failed to save address", "error");
+        } finally {
+            setIsSavingAddress(false);
+        }
+    };
+
+    const handleDeleteAddress = async (id: string) => {
+        if (!confirm("Are you sure?")) return;
+        try {
+            await api.delete(`/api/addresses/${id}`);
+            addToast("Address removed", "success");
+            fetchAddresses();
+        } catch (error) {
+            addToast("Failed to remove address", "error");
+        }
+    };
+
+    useEffect(() => {
+        if (initialUser) {
+            api.get('/api/notifications').then(res => {
+                if (res.data.success) {
+                    setNotifications(res.data.notifications);
+                    setUnreadCount(res.data.notifications.filter((n: any) => !n.read).length);
+                }
+            }).catch(err => console.error(err));
+        }
+    }, [initialUser]);
+
+    const handleAddFunds = async () => {
+        if (!addFundsAmount || isNaN(parseFloat(addFundsAmount)) || parseFloat(addFundsAmount) <= 0) { // Basic validation
+            return addToast("Please enter a valid amount", "error");
+        }
+        setIsAddingFunds(true);
+        try {
+            await api.post('/api/transactions/add-funds', {
+                amount: parseFloat(addFundsAmount),
+                paymentMethod: 'card' // Mock
+            });
+            addToast("Funds added successfully", "success");
+            setShowAddFunds(false);
+            setAddFundsAmount('');
+            fetchWalletTransactions();
+            fetchDashboardData(); // Update balance
+        } catch (error) {
+            addToast("Failed to add funds", "error");
+        } finally {
+            setIsAddingFunds(false);
+        }
+    };
+
+    const handleSubmitRefund = async () => {
+        if (!refundReason.trim()) return addToast("Please provide a reason", "error");
+        setIsSubmittingRefund(true);
+        try {
+            await api.post('/api/orders/request-refund', {
+                orderId: refundOrderId,
+                reason: refundReason,
+                items: [], // For now assuming full refund or backend handles it
+                images: []
+            });
+            addToast("Refund requested successfully", "success");
+            setShowRefundModal(false);
+            setRefundReason("");
+            fetchDashboardData();
+        } catch (error: any) {
+            addToast(error.response?.data?.message || "Failed to request refund", "error");
+        } finally {
+            setIsSubmittingRefund(false);
+        }
+    };
+
+    const handleSubmitReview = async () => {
+        if (!reviewComment.trim()) return addToast("Please write a comment", "error");
+        setIsSubmittingReview(true);
+        try {
+            await api.post('/api/reviews', {
+                productId: reviewProductId,
+                rating: reviewRating,
+                comment: reviewComment
+            });
+            addToast("Review submitted successfully", "success");
+            setShowReviewModal(false);
+            setReviewComment("");
+            setReviewRating(5);
+        } catch (error: any) {
+            addToast(error.response?.data?.message || "Failed to submit review", "error");
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    };
 
     // Custom Simple Line Chart Component
     const SimpleLineChart = ({ data }: { data: any[] }) => {
@@ -95,54 +307,44 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
 
     const fetchDashboardData = async () => {
         try {
-            // User Info
-            const userData = await api.get<any>('/api/auth/me');
-            if (userData.success) {
-                setUserStats(userData.user);
+            setIsLoading(true);
+            const [userRes, ordersRes, repairsRes, valuationsRes, promotionsRes, statsRes, walletRes, addressesRes] = await Promise.all([
+                api.get<any>('/api/auth/me'),
+                api.get('/api/orders').catch(() => ({ data: { orders: [] } })), // Fallback
+                api.get('/api/repairs/my-repairs').catch(() => ({ data: { repairs: [] } })),
+                api.get('/api/valuation/my-valuations').catch(() => ({ data: { valuations: [] } })),
+                api.get<any>('/api/promotions/active').catch(() => ({ data: { promotions: [] } })),
+                api.get<any>('/api/stats/user').catch(() => ({ data: {} })),
+                api.get('/api/transactions').catch(() => ({ data: { transactions: [] } })),
+                api.get('/api/addresses').catch(() => ({ data: { addresses: [] } })),
+            ]);
+
+            if (userRes.data?.success || userRes.success) {
+                const user = userRes.data?.user || userRes.user;
+                setUserStats(user);
                 setProfileData({
-                    name: userData.user.name,
-                    email: userData.user.email,
-                    phone: userData.user.phone || '',
-                    address: userData.user.address || ''
+                    name: user.name || '',
+                    email: user.email || '',
+                    phone: user.phone || '',
+                    address: user.address || ''
                 });
             }
 
-            // Orders
-            const ordersData = await api.get<any>('/api/orders'); // Uses getMyOrders
-            if (ordersData.success) {
-                const formattedOrders: Transaction[] = ordersData.orders.map((order: any) => ({
-                    id: order._id, // MongoDB ID
-                    type: 'purchase',
-                    amount: order.totalAmount,
-                    date: new Date(order.createdAt).toLocaleDateString(),
-                    time: new Date(order.createdAt).toLocaleTimeString(),
-                    status: order.status,
-                    items: order.orderItems // Store items for detail view
-                }));
-                setTransactions(formattedOrders);
-            }
+            setOrders(ordersRes.data?.orders || []);
+            setRepairs(repairsRes.data?.repairs || []);
+            setValuations(valuationsRes.data?.valuations || []);
+            setPromotions(promotionsRes.data?.promotions || []);
+            setChartData(statsRes.data || null);
 
-            // Repairs
-            const repairsData = await api.get<any>('/api/repairs/tickets/my-tickets');
-            if (repairsData.success) setRepairs(repairsData.tickets);
-
-            // Valuations
-            const valData = await api.get<any>('/api/valuation/saved');
-            if (valData.success) setValuations(valData.valuations);
-
-            // Promotions
-            const promoData = await api.get<any>('/api/promotions/active');
-            if (promoData.success) setPromotions(promoData.promotions);
-
-            // Chart Data
-            const statsData = await api.get<any>('/api/stats/user');
-            if (statsData.success) setChartData(statsData);
-
-        } catch (error: any) {
-            console.error("Error fetching dashboard data", error);
-            // Don't toast on every poll failure, only initial or manual
+        } catch (error) {
+            console.error("Dashboard Data Fetch Error", error);
+            // addToast("Failed to load dashboard data", "error");
+        } finally {
+            setIsLoading(false);
         }
     };
+
+
 
     // Initial Fetch & Polling
     React.useEffect(() => {
@@ -282,9 +484,72 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
 
                             <div className="h-px bg-slate-800 my-4"></div>
 
-                            <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-950/30 hover:text-red-300 transition-all">
-                                <LogOut className="w-4 h-4" /> Sign Out
-                            </button>
+                            <div className="flex items-center gap-4">
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowNotifications(!showNotifications)}
+                                        className="p-2 text-slate-400 hover:text-white transition-colors relative"
+                                    >
+                                        <Bell className="w-6 h-6" />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-950"></span>
+                                        )}
+                                    </button>
+
+                                    {/* Notifications Dropdown */}
+                                    {showNotifications && (
+                                        <div className="absolute right-0 top-12 w-80 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                                            <div className="p-4 border-b border-slate-800 flex justify-between items-center">
+                                                <h3 className="font-bold text-white text-sm">Notifications</h3>
+                                                <button onClick={markAllNotificationsRead} className="text-xs text-blue-400 hover:text-blue-300 font-bold">Mark all read</button>
+                                            </div>
+                                            <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                                                {notifications.length > 0 ? (
+                                                    notifications.map(n => (
+                                                        <div
+                                                            key={n._id}
+                                                            className={`p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors ${!n.read ? 'bg-blue-500/5' : ''}`}
+                                                            onClick={() => !n.read && markNotificationRead(n._id)}
+                                                        >
+                                                            <div className="flex gap-3">
+                                                                <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${!n.read ? 'bg-blue-500' : 'bg-slate-600'}`}></div>
+                                                                <div>
+                                                                    <p className={`text-sm ${!n.read ? 'text-white font-medium' : 'text-slate-400'}`}>{n.message}</p>
+                                                                    <div className="flex justify-between items-center mt-2">
+                                                                        <span className="text-xs text-slate-500">{new Date(n.createdAt).toLocaleDateString()}</span>
+                                                                        {n.link && (
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setShowNotifications(false);
+                                                                                    navigate(n.link);
+                                                                                }}
+                                                                                className="text-xs text-blue-400 hover:underline"
+                                                                            >
+                                                                                View
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-8 text-center text-slate-500 text-sm">
+                                                        No notifications
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={logout}
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-950/30 hover:text-red-300 transition-all"
+                                >
+                                    <LogOut className="w-4 h-4" /> Sign Out
+                                </button>
+                            </div>
                         </nav>
                     </div>
                 </div>
@@ -610,33 +875,72 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                     {/* WALLET TAB */}
                     {activeTab === 'wallet' && (
                         <div className="space-y-6 animate-in fade-in">
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-2xl font-bold text-white">Digital Wallet</h2>
-                                <button
-                                    onClick={() => setShowAddFunds(true)}
-                                    className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2"
-                                >
-                                    <Plus className="w-4 h-4" /> Add Funds
-                                </button>
-                            </div>
+                            <h2 className="text-2xl font-bold text-white mb-6">My Wallet</h2>
 
-                            {/* Cards Container */}
-                            <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
-                                {/* Main Card */}
-                                <div className="w-80 h-48 shrink-0 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 p-6 flex flex-col justify-between relative overflow-hidden group">
-                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent"></div>
-                                    <div className="relative z-10 flex justify-between items-start">
-                                        <div className="text-slate-400 text-xs uppercase tracking-widest">Balance</div>
-                                        <Wallet className="w-6 h-6 text-white" />
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {/* Balance Card */}
+                                <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-8 text-white relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                                        <Wallet className="w-32 h-32" />
                                     </div>
                                     <div className="relative z-10">
-                                        <div className="text-3xl font-mono text-white mb-1">€{user.balance?.toFixed(2) || '0.00'}</div>
-                                        <div className="text-xs text-emerald-400">Available to spend</div>
+                                        <div className="text-blue-100 mb-2 font-medium">Available Balance</div>
+                                        <div className="text-4xl font-bold mb-8">€{userStats?.balance?.toFixed(2) || '0.00'}</div>
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setShowAddFunds(true)}
+                                                className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors flex items-center gap-2"
+                                            >
+                                                <Plus className="w-4 h-4" /> Add Funds
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="relative z-10 flex justify-between items-end">
-                                        <div className="text-slate-400 text-xs">JawwalHub Pay</div>
-                                        <div className="text-white font-mono text-sm">•••• 4291</div>
+                                </div>
+
+                                {/* Quick Stats or Actions */}
+                                <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 flex flex-col justify-center">
+                                    <h3 className="font-bold text-white mb-4">Payment Methods</h3>
+                                    <div className="flex items-center gap-4 p-4 bg-black/30 rounded-xl border border-slate-700/50 mb-4">
+                                        <div className="w-10 h-6 bg-slate-700 rounded flex items-center justify-center text-[10px] font-bold text-slate-300">CARD</div>
+                                        <div className="flex-1 text-sm text-slate-300">•••• •••• •••• 4242</div>
+                                        <button className="text-xs text-red-400 font-bold hover:underline">Remove</button>
                                     </div>
+                                    <button className="w-full py-3 border border-slate-700 border-dashed rounded-xl text-slate-400 hover:text-white hover:border-slate-500 transition-colors text-sm font-bold flex items-center justify-center gap-2">
+                                        <Plus className="w-4 h-4" /> Add New Card
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Transactions List */}
+                            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8">
+                                <h3 className="font-bold text-white mb-6">Transaction History</h3>
+                                <div className="space-y-4">
+                                    {walletTransactions.length > 0 ? (
+                                        walletTransactions.map((t) => (
+                                            <div key={t._id} className="flex items-center justify-between p-4 bg-black/30 rounded-xl border border-slate-800">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${t.type === 'deposit' ? 'bg-emerald-500/10 text-emerald-400' :
+                                                        t.type === 'withdrawal' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'
+                                                        }`}>
+                                                        {t.type === 'deposit' ? <TrendingUp className="w-5 h-5" /> :
+                                                            t.type === 'withdrawal' ? <Download className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-white capitalize">{t.description || t.type}</div>
+                                                        <div className="text-xs text-slate-500">{new Date(t.date || Date.now()).toLocaleDateString()}</div>
+                                                    </div>
+                                                </div>
+                                                <div className={`font-bold ${t.type === 'deposit' ? 'text-emerald-400' : 'text-white'
+                                                    }`}>
+                                                    {t.type === 'deposit' ? '+' : '-'}€{t.amount.toFixed(2)}
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-12 text-slate-500">
+                                            No transactions yet
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -701,6 +1005,62 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                     >
                                         {isUpdatingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
                                     </button>
+                                </div>
+                            </div>
+
+                            {/* Address Book */}
+                            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="font-bold text-white flex items-center gap-2">
+                                        <MapPin className="w-5 h-5 text-purple-400" /> Address Book
+                                    </h3>
+                                    <button
+                                        onClick={() => {
+                                            setEditingAddressId(null);
+                                            setAddressForm({ street: '', city: '', state: '', zipCode: '', country: '', isDefault: false });
+                                            setShowAddressModal(true);
+                                        }}
+                                        className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-lg hover:bg-purple-500/20 transition-colors font-bold flex items-center gap-1"
+                                    >
+                                        <Plus className="w-3 h-3" /> Add New
+                                    </button>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    {addresses.map((addr) => (
+                                        <div key={addr._id} className="bg-black/30 border border-slate-800 p-4 rounded-xl relative group">
+                                            {addr.isDefault && (
+                                                <div className="absolute top-2 right-2 px-2 py-0.5 bg-cyan-500/20 text-cyan-400 text-[10px] font-bold rounded-full">
+                                                    DEFAULT
+                                                </div>
+                                            )}
+                                            <div className="font-bold text-white mb-1">{addr.street}</div>
+                                            <div className="text-sm text-slate-400">{addr.zipCode} {addr.city}</div>
+                                            <div className="text-sm text-slate-400 mb-3">{addr.country}</div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setEditingAddressId(addr._id!);
+                                                        setAddressForm(addr);
+                                                        setShowAddressModal(true);
+                                                    }}
+                                                    className="text-xs text-blue-400 hover:text-blue-300 font-bold"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteAddress(addr._id!)}
+                                                    className="text-xs text-red-400 hover:text-red-300 font-bold"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {addresses.length === 0 && (
+                                        <div className="col-span-2 text-center py-8 text-slate-500 text-sm border border-dashed border-slate-800 rounded-xl">
+                                            No addresses saved
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -795,17 +1155,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
 
                             {/* Orders List */}
                             <div className="space-y-4">
-                                {transactions
-                                    .filter(t => t.type === 'purchase')
+                                {orders
                                     .filter(t => orderFilter === 'all' || t.status === orderFilter)
-                                    .filter(t => t.id.toLowerCase().includes(orderSearch.toLowerCase()))
+                                    .filter(t => t._id?.toLowerCase().includes(orderSearch.toLowerCase()) || t.id?.toLowerCase().includes(orderSearch.toLowerCase()))
                                     .slice((currentPage - 1) * ordersPerPage, currentPage * ordersPerPage)
                                     .map(order => (
-                                        <div key={order.id} className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden transition-all duration-300">
+                                        <div key={order._id || order.id} className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden transition-all duration-300">
                                             {/* Card Header (Always Visible) */}
                                             <div
                                                 className="p-6 flex flex-col md:flex-row items-center justify-between gap-4 cursor-pointer hover:bg-slate-800/30"
-                                                onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                                                onClick={() => setExpandedOrderId(expandedOrderId === (order._id || order.id) ? null : (order._id || order.id))}
                                             >
                                                 <div className="flex items-center gap-4 w-full md:w-auto">
                                                     <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center">
@@ -813,22 +1172,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                                     </div>
                                                     <div>
                                                         <div className="font-bold text-white flex items-center gap-2">
-                                                            {order.id}
-                                                            {expandedOrderId === order.id ? <ChevronRight className="w-4 h-4 rotate-90 transition-transform" /> : <ChevronRight className="w-4 h-4 transition-transform" />}
+                                                            {order._id || order.id}
+                                                            {expandedOrderId === (order._id || order.id) ? <ChevronRight className="w-4 h-4 rotate-90 transition-transform" /> : <ChevronRight className="w-4 h-4 transition-transform" />}
                                                         </div>
-                                                        <div className="text-xs text-slate-500">{order.date} • {order.time}</div>
+                                                        <div className="text-xs text-slate-500">{new Date(order.createdAt || order.date).toLocaleDateString()}</div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
                                                     <div className="text-right">
-                                                        <div className="font-bold text-white">€{order.amount}</div>
+                                                        <div className="font-bold text-white">€{order.totalAmount || order.amount}</div>
                                                         <div className={`text-xs capitalize font-bold ${order.status === 'delivered' ? 'text-emerald-400' : 'text-yellow-400'}`}>{order.status}</div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {/* Expanded Details */}
-                                            {expandedOrderId === order.id && (
+                                            {expandedOrderId === (order._id || order.id) && (
                                                 <div className="px-6 pb-6 pt-0 animate-in slide-in-from-top-2">
                                                     <div className="h-px bg-slate-800 mb-6"></div>
                                                     <div className="grid md:grid-cols-2 gap-8">
@@ -836,14 +1195,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                                             <h4 className="text-sm font-bold text-slate-300 mb-4">Items</h4>
                                                             <div className="space-y-3">
                                                                 {(order.items || []).map((item: any) => (
-                                                                    <div key={item._id || item.name} className="flex items-center gap-3">
-                                                                        <div className="w-10 h-10 bg-slate-800 rounded-lg overflow-hidden">
-                                                                            {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
+                                                                    <div key={item._id || item.name} className="flex items-center gap-3 justify-between">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="w-10 h-10 bg-slate-800 rounded-lg overflow-hidden">
+                                                                                {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="text-sm text-white">{item.name}</div>
+                                                                                <div className="text-xs text-slate-500">Qty: {item.quantity} • €{item.price}</div>
+                                                                            </div>
                                                                         </div>
-                                                                        <div>
-                                                                            <div className="text-sm text-white">{item.name}</div>
-                                                                            <div className="text-xs text-slate-500">Qty: {item.quantity} • €{item.price}</div>
-                                                                        </div>
+                                                                        {order.status === 'delivered' && (
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setReviewProductId(item.product);
+                                                                                    setShowReviewModal(true);
+                                                                                }}
+                                                                                className="text-xs text-yellow-400 hover:text-yellow-300 font-bold border border-yellow-400/30 px-2 py-1 rounded-md hover:bg-yellow-400/10 transition-colors"
+                                                                            >
+                                                                                Write Review
+                                                                            </button>
+                                                                        )}
                                                                     </div>
                                                                 ))}
                                                             </div>
@@ -851,12 +1224,34 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                                         <div>
                                                             <h4 className="text-sm font-bold text-slate-300 mb-4">Actions</h4>
                                                             <div className="flex flex-wrap gap-2">
+                                                                <button
+                                                                    onClick={() => navigate(`/orders/${order._id || order.id}`)}
+                                                                    className="w-full mb-2 px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                                                                >
+                                                                    <ExternalLink className="w-4 h-4" /> View Full Details
+                                                                </button>
                                                                 {order.status === 'pending' && (
-                                                                    <button className="px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/20">
+                                                                    <button className="px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/20 transition-colors">
                                                                         Cancel Order
                                                                     </button>
                                                                 )}
-                                                                <button className="px-4 py-2 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-bold hover:bg-slate-700 flex items-center gap-2">
+                                                                {order.status === 'delivered' && (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setRefundOrderId(order._id || order.id);
+                                                                                setShowRefundModal(true);
+                                                                            }}
+                                                                            className="px-4 py-2 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-bold hover:bg-slate-700 hover:text-white transition-colors flex items-center gap-2"
+                                                                        >
+                                                                            <RotateCcw className="w-3 h-3" /> Return Item
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => handleDownloadInvoice(order._id || order.id)}
+                                                                    className="px-4 py-2 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-bold hover:bg-slate-700 hover:text-white transition-colors flex items-center gap-2"
+                                                                >
                                                                     <Download className="w-3 h-3" /> Invoice
                                                                 </button>
                                                             </div>
@@ -868,7 +1263,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                                     ))}
 
                                 {/* Empty State */}
-                                {transactions.filter(t => t.type === 'purchase').length === 0 && (
+                                {orders.length === 0 && (
                                     <div className="text-center py-12">
                                         <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                                             <Package className="w-8 h-8 text-slate-600" />
@@ -883,9 +1278,141 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, setView
                             </div>
                         </div>
                     )}
+
+                    {/* WISHLIST TAB */}
+                    {activeTab === 'wishlist' && (
+                        <div className="space-y-6 animate-in fade-in">
+                            <h2 className="text-2xl font-bold text-white mb-6">My Wishlist</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {wishlistItems.map((item) => (
+                                    <div key={item.id} className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden group hover:border-slate-700 transition-all">
+                                        <div className="relative aspect-square bg-slate-800/50">
+                                            <img src={item.imageUrl} alt={item.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            <button
+                                                onClick={() => {
+                                                    const newWishlist = wishlistItems.filter(i => i.id !== item.id);
+                                                    setWishlistItems(newWishlist);
+                                                    localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+                                                    addToast("Removed from wishlist", "success");
+                                                }}
+                                                className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="font-bold text-white mb-1">{item.model}</h3>
+                                            <div className="flex justify-between items-center">
+                                                <div className="text-cyan-400 font-bold">€{item.price}</div>
+                                                <button
+                                                    onClick={() => {
+                                                        addToCart({
+                                                            id: item.id,
+                                                            title: item.model,
+                                                            subtitle: item.storage || '',
+                                                            price: item.price,
+                                                            image: item.imageUrl,
+                                                            category: 'device',
+                                                            quantity: 1
+                                                        });
+                                                        addToast("Added to cart", "success");
+                                                    }}
+                                                    className="text-xs bg-white text-black px-3 py-1.5 rounded-lg font-bold hover:bg-slate-200 transition-colors flex items-center gap-1"
+                                                >
+                                                    <ShoppingCart className="w-3 h-3" /> Buy
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {wishlistItems.length === 0 && (
+                                    <div className="col-span-full text-center py-20">
+                                        <Heart className="w-16 h-16 text-slate-800 mx-auto mb-4" />
+                                        <h3 className="text-xl font-bold text-white mb-2">Your wishlist is empty</h3>
+                                        <p className="text-slate-400">Save items you want to buy later</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
             {/* Modals for Wallet (Add Funds etc) can be kept or enhanced here */}
+            {/* Refund Modal */}
+            {showRefundModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl">
+                        <h3 className="text-xl font-bold text-white mb-4">Request Refund</h3>
+                        <p className="text-sm text-slate-400 mb-4">
+                            Please describe the reason for your return request. Our team will review it shortly.
+                        </p>
+                        <textarea
+                            value={refundReason}
+                            onChange={(e) => setRefundReason(e.target.value)}
+                            placeholder="Reason for return (e.g., Damaged item, Wrong item sent)..."
+                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-4 text-white focus:border-red-500 outline-none h-32 mb-6 resize-none"
+                        ></textarea>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowRefundModal(false)}
+                                className="px-4 py-2 text-slate-400 hover:text-white font-bold transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmitRefund}
+                                disabled={isSubmittingRefund}
+                                className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-xl font-bold transition-colors flex items-center gap-2"
+                            >
+                                {isSubmittingRefund ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Request'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Review Modal */}
+            {showReviewModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl">
+                        <h3 className="text-xl font-bold text-white mb-4">Write a Review</h3>
+
+                        <div className="flex gap-2 mb-6 justify-center">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    onClick={() => setReviewRating(star)}
+                                    className={`p-2 transition-transform hover:scale-110 ${star <= reviewRating ? 'text-yellow-400' : 'text-slate-600'}`}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill={star <= reviewRating ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                                </button>
+                            ))}
+                        </div>
+
+                        <textarea
+                            value={reviewComment}
+                            onChange={(e) => setReviewComment(e.target.value)}
+                            placeholder="Share your experience..."
+                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-4 text-white focus:border-yellow-500 outline-none h-32 mb-6 resize-none"
+                        ></textarea>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowReviewModal(false)}
+                                className="px-4 py-2 text-slate-400 hover:text-white font-bold transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmitReview}
+                                disabled={isSubmittingReview}
+                                className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-2 rounded-xl font-bold transition-colors flex items-center gap-2"
+                            >
+                                {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Review'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

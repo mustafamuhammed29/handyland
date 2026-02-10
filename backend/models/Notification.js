@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const NotificationSchema = new mongoose.Schema({
+const notificationSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -12,7 +12,7 @@ const NotificationSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['info', 'success', 'warning', 'error', 'order_update', 'repair_update'],
+        enum: ['info', 'success', 'warning', 'error', 'alert'],
         default: 'info'
     },
     read: {
@@ -28,4 +28,4 @@ const NotificationSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Notification', NotificationSchema);
+module.exports = mongoose.model('Notification', notificationSchema);

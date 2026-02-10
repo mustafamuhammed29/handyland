@@ -1,7 +1,17 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
-const Accessory = require('../models/Accessory');
-const Coupon = require('../models/Coupon');
+const Transaction = require('../models/Transaction');
+const RefundRequest = require('../models/RefundRequest'); // Added
+const { createNotification } = require('../controllers/notificationController');
+let stripe;
+if (process.env.STRIPE_SECRET_KEY) {
+    stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+} else {
+    console.warn('STRIPE_SECRET_KEY not found in .env, stripe functionality will be disabled');
+    stripe = {
+        refunds: { create: async () => ({ id: 'mock_refund_id' }) }
+    };
+}
 const { sendEmail, emailTemplates } = require('../utils/emailService');
 
 // @desc    Apply Coupon
@@ -375,6 +385,153 @@ exports.updateOrderStatus = async (req, res) => {
     }
 };
 
+// @desc    Get order invoice (HTML)
+// @route   GET /api/orders/:id/invoice
+// @access  Private
+exports.getInvoice = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id).populate('user', 'name email address');
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        // Authorization
+        if (order.user._id.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        // Format Date
+        const date = new Date(order.createdAt).toLocaleDateString('de-DE', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        // HTML Template
+        const html = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Invoice #${order.orderNumber}</title>
+                <style>
+                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
+                    .invoice-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
+                    .logo { font-size: 24px; font-weight: bold; color: #000; }
+                    .logo span { color: #00bcd4; }
+                    .invoice-details { text-align: right; }
+                    .invoice-title { font-size: 32px; font-weight: bold; color: #333; text-transform: uppercase; margin: 0; }
+                    .bill-to { margin-bottom: 30px; display: flex; justify-content: space-between; }
+                    .bill-to-section { width: 48%; }
+                    h3 { font-size: 14px; text-transform: uppercase; color: #777; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    th { text-align: left; padding: 10px; background: #f9f9f9; border-bottom: 2px solid #ddd; text-transform: uppercase; font-size: 12px; }
+                    td { padding: 10px; border-bottom: 1px solid #eee; }
+                    .text-right { text-align: right; }
+                    .totals { width: 300px; margin-left: auto; }
+                    .totals-row { display: flex; justify-content: space-between; padding: 5px 0; }
+                    .totals-row.grand-total { font-weight: bold; font-size: 18px; border-top: 2px solid #333; margin-top: 10px; padding-top: 10px; }
+                    .footer { text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #777; }
+                    @media print {
+                        body { padding: 0; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="invoice-header">
+                    <div class="logo">Handy<span>Land</span></div>
+                    <div class="invoice-details">
+                        <div class="invoice-title">Invoice</div>
+                        <div>Date: ${date}</div>
+                        <div>Invoice #: ${order.orderNumber}</div>
+                    </div>
+                </div>
+
+                <div class="bill-to">
+                    <div class="bill-to-section">
+                        <h3>Bill To:</h3>
+                        <div>${order.shippingAddress.fullName}</div>
+                        <div>${order.shippingAddress.street}</div>
+                        <div>${order.shippingAddress.zipCode} ${order.shippingAddress.city}</div>
+                        <div>${order.shippingAddress.country}</div>
+                        <div>${order.shippingAddress.phone}</div>
+                    </div>
+                    <div class="bill-to-section">
+                        <h3>Ship To:</h3>
+                        <div>${order.shippingAddress.fullName}</div>
+                        <div>${order.shippingAddress.street}</div>
+                        <div>${order.shippingAddress.zipCode} ${order.shippingAddress.city}</div>
+                        <div>${order.shippingAddress.country}</div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="text-right">Price</th>
+                            <th class="text-right">Qty</th>
+                            <th class="text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${order.items.map(item => `
+                        <tr>
+                            <td>
+                                <div><strong>${item.name}</strong></div>
+                                <div style="font-size: 12px; color: #777;">${item.productType}</div>
+                            </td>
+                            <td class="text-right">${item.price.toFixed(2)}€</td>
+                            <td class="text-right">${item.quantity}</td>
+                            <td class="text-right">${(item.price * item.quantity).toFixed(2)}€</td>
+                        </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <div class="totals">
+                    <div class="totals-row">
+                        <span>Subtotal:</span>
+                        <span>${(order.totalAmount - order.shippingFee - order.tax + order.discountAmount).toFixed(2)}€</span>
+                    </div>
+                    <div class="totals-row">
+                        <span>VAT (19%):</span>
+                        <span>${order.tax.toFixed(2)}€</span>
+                    </div>
+                    <div class="totals-row">
+                        <span>Shipping:</span>
+                        <span>${order.shippingFee.toFixed(2)}€</span>
+                    </div>
+                    ${order.discountAmount > 0 ? `
+                    <div class="totals-row" style="color: green;">
+                        <span>Discount (${order.couponCode || 'Promo'}):</span>
+                        <span>-${order.discountAmount.toFixed(2)}€</span>
+                    </div>
+                    ` : ''}
+                    <div class="totals-row grand-total">
+                        <span>Total:</span>
+                        <span>${order.totalAmount.toFixed(2)}€</span>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <p>Thank you for your business!</p>
+                    <p>HandyLand GmbH - Tech Street 123 - 10115 Berlin - Germany</p>
+                    <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 5px;">Print Invoice</button>
+                    <button class="no-print" onclick="window.close()" style="margin-top: 20px; padding: 10px 20px; background: #ccc; color: #333; border: none; cursor: pointer; border-radius: 5px; margin-left: 10px;">Close</button>
+                </div>
+            </body>
+            </html>
+        `;
+
+        res.send(html);
+
+    } catch (error) {
+        res.status(500).send('Error generating invoice');
+    }
+};
+
 // @desc    Get order statistics (Admin)
 // @route   GET /api/orders/admin/stats
 // @access  Private/Admin
@@ -410,5 +567,234 @@ exports.getOrderStats = async (req, res) => {
             message: 'Error fetching stats',
             error: error.message
         });
+    }
+};
+
+// @desc    Request Refund
+// @route   POST /api/orders/request-refund
+// @access  Private
+exports.requestRefund = async (req, res) => {
+    try {
+        const { orderId, reason, items, images } = req.body;
+        const userId = req.user._id;
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.user.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        // Check if refund already exists
+        const existingRefund = await RefundRequest.findOne({ order: orderId, status: { $in: ['pending', 'approved', 'processing'] } });
+        if (existingRefund) {
+            return res.status(400).json({ success: false, message: 'Refund request already pending for this order' });
+        }
+
+        const refund = await RefundRequest.create({
+            user: userId,
+            order: orderId,
+            reason,
+            items,
+            images,
+            status: 'pending'
+        });
+
+        // Optional: Update order status to 'return_requested' if you have that status
+        order.status = 'return_requested';
+        await order.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'Refund request submitted successfully',
+            refund
+        });
+
+
+
+    } catch (error) {
+        console.error("Refund Request Error:", error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+// @desc    Generate Invoice
+// @route   GET /api/orders/:id/invoice
+// @access  Private
+exports.generateInvoice = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id).populate('user', 'name email');
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        // Generate HTML Invoice
+        const html = `
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+                    .header h1 { color: #333; }
+                    .details { margin-bottom: 20px; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .total { font-weight: bold; text-align: right; margin-top: 20px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>INVOICE</h1>
+                    <div>
+                        <p><strong>Order ID:</strong> ${order._id}</p>
+                        <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <div class="details">
+                    <p><strong>Billed To:</strong> ${order.user.name} (${order.user.email})</p>
+                    <p><strong>Status:</strong> ${order.status.toUpperCase()}</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${order.items.map(item => `
+                            <tr>
+                                <td>${item.name}</td>
+                                <td>${item.quantity}</td>
+                                <td>€${item.price.toFixed(2)}</td>
+                                <td>€${(item.quantity * item.price).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="total">
+                    <p>Total Amount: €${order.totalAmount.toFixed(2)}</p>
+                </div>
+            </body>
+            </html>
+        `;
+
+        res.set('Content-Type', 'text/html');
+        res.send(html);
+
+    } catch (error) {
+        console.error("Generate Invoice Error:", error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+// @desc    Cancel order
+// @route   PUT /api/orders/:id/cancel
+// @access  Private
+exports.cancelOrder = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
+        if (order.status !== 'pending') {
+            return res.status(400).json({ success: false, message: 'Cannot cancel order that is not pending' });
+        }
+
+        order.status = 'cancelled';
+        await order.save();
+
+        res.status(200).json({ success: true, message: 'Order cancelled successfully', order });
+    } catch (error) {
+        console.error("Cancel Order Error:", error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+// @desc    Process refund (Admin)
+// @route   PUT /api/orders/refund/:id
+// @access  Private/Admin
+exports.processRefund = async (req, res) => {
+    try {
+        const { status, adminComments } = req.body; // status: 'approved', 'rejected'
+        const refundRequest = await RefundRequest.findById(req.params.id).populate('order');
+
+        if (!refundRequest) return res.status(404).json({ message: 'Refund request not found' });
+
+        refundRequest.status = status;
+        refundRequest.adminComments = adminComments;
+
+        if (status === 'approved') {
+            // Here you would trigger Stripe refund if implemented
+            // await stripe.refunds.create({ charge: refundRequest.order.paymentResult.id });
+            refundRequest.refundAmount = refundRequest.order.totalAmount; // Confirm amount
+
+            await createNotification(refundRequest.user, `Your refund request for Order #${refundRequest.order._id} has been APPROVED.`, 'success');
+        } else if (status === 'rejected') {
+            await createNotification(refundRequest.user, `Your refund request for Order #${refundRequest.order._id} has been REJECTED.`, 'error');
+        }
+
+        await refundRequest.save();
+        res.json(refundRequest);
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Update order to paid
+// @route   PUT /api/orders/:id/pay
+// @access  Private
+exports.updateOrderToPaid = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (order) {
+            order.isPaid = true;
+            order.paidAt = Date.now();
+            order.status = 'processing';
+            const updatedOrder = await order.save();
+            res.json(updatedOrder);
+        } else {
+            res.status(404).json({ message: 'Order not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Update order to delivered
+// @route   PUT /api/orders/:id/deliver
+// @access  Private/Admin
+exports.updateOrderToDelivered = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (order) {
+            order.isDelivered = true;
+            order.deliveredAt = Date.now();
+            order.status = 'delivered';
+            const updatedOrder = await order.save();
+            res.json(updatedOrder);
+        } else {
+            res.status(404).json({ message: 'Order not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };

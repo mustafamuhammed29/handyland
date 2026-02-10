@@ -129,6 +129,10 @@ app.use('/api/accessories', require('./routes/accessoriesRoutes'));
 app.use('/api/repair-archive', require('./routes/repairArchiveRoutes'));
 app.use('/api/valuation', require('./routes/valuationRoutes'));
 app.use('/api/promotions', require('./routes/promotionsRoutes'));
+app.use('/api/reviews', require('./routes/reviewRoutes')); // Added
+app.use('/api/addresses', require('./routes/addressRoutes')); // Added
+app.use('/api/transactions', require('./routes/transactionRoutes')); // Added
+app.use('/api/notifications', require('./routes/notificationRoutes')); // Added
 
 // Basic Routes
 app.get('/', (req, res) => {

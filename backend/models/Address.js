@@ -6,6 +6,11 @@ const AddressSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    type: {
+        type: String,
+        enum: ['Home', 'Work', 'Other'],
+        default: 'Home'
+    },
     street: {
         type: String,
         required: true
@@ -15,7 +20,8 @@ const AddressSchema = new mongoose.Schema({
         required: true
     },
     state: {
-        type: String
+        type: String,
+        required: true
     },
     zipCode: {
         type: String,
@@ -28,11 +34,7 @@ const AddressSchema = new mongoose.Schema({
     isDefault: {
         type: Boolean,
         default: false
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
     }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Address', AddressSchema);

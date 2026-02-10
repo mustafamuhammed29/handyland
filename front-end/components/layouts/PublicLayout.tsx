@@ -9,13 +9,16 @@ interface PublicLayoutProps {
     setView: (view: ViewState) => void;
     lang: LanguageCode;
     user: User | null;
+    view: ViewState;
+    setView: (view: ViewState) => void;
+    lang: LanguageCode;
+    user: User | null;
     cartCount: number;
-    toggleCart: () => void;
     toggleAuth: () => void;
 }
 
 export const PublicLayout: React.FC<PublicLayoutProps> = ({
-    view, setView, lang, user, cartCount, toggleCart, toggleAuth
+    view, setView, lang, user, cartCount, toggleAuth
 }) => {
     return (
         <div className="min-h-screen bg-slate-900 text-gray-100 font-sans">
@@ -24,7 +27,6 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                 setView={setView}
                 lang={lang}
                 cartCount={cartCount}
-                onCartClick={toggleCart}
                 onAuthClick={toggleAuth}
                 user={user}
             />

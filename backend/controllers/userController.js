@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Address = require('../models/Address'); // Added
 const Order = require('../models/Order');
 const bcrypt = require('bcryptjs');
 
@@ -55,6 +56,58 @@ exports.changePassword = async (req, res) => {
         await user.save();
 
         res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get user addresses
+// @route   GET /api/users/addresses
+// @access  Private
+exports.getAddresses = async (req, res) => {
+    try {
+        const addresses = await Address.find({ user: req.user.id });
+        res.json(addresses);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Add new address
+// @route   POST /api/users/addresses
+// @access  Private
+exports.addAddress = async (req, res) => {
+    try {
+        const { type, street, city, state, zipCode, country } = req.body;
+        const address = await Address.create({
+            user: req.user.id,
+            type,
+            street,
+            city,
+            state,
+            zipCode,
+            country
+        });
+        res.status(201).json(address);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Delete address
+// @route   DELETE /api/users/addresses/:id
+// @access  Private
+exports.deleteAddress = async (req, res) => {
+    try {
+        const address = await Address.findById(req.params.id);
+        if (!address) return res.status(404).json({ message: 'Address not found' });
+
+        if (address.user.toString() !== req.user.id.toString()) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        await address.deleteOne();
+        res.json({ message: 'Address removed' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

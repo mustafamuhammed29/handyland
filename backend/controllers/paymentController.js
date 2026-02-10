@@ -1,7 +1,22 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+let stripe;
+try {
+    if (process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('your_stripe_secret_key')) {
+        stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    } else {
+        throw new Error('Missing or placeholder Stripe key');
+    }
+} catch (error) {
+    console.warn('Stripe initialization failed:', error.message);
+    stripe = {
+        checkout: { sessions: { create: async () => ({ id: 'mock_session_id', url: 'http://localhost:3000/mock-payment' }), retrieve: async () => ({ payment_status: 'paid', amount_total: 1000, metadata: {} }) } },
+        webhooks: { constructEvent: () => ({ type: 'checkout.session.completed', data: { object: {} } }) },
+        refunds: { create: async () => ({ id: 'mock_refund_id' }) }
+    };
+}
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Accessory = require('../models/Accessory');
+const Transaction = require('../models/Transaction');
 
 // @desc    Create Stripe checkout session
 // @route   POST /api/payment/create-checkout-session
@@ -47,6 +62,35 @@ exports.createCheckoutSession = async (req, res) => {
             quantity: item.quantity,
         }));
 
+        // Calculate Subtotal FIRST
+        const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+        // Determine Shipping Fee
+        let shippingFee = 0;
+        if (req.body.shippingFee) {
+            shippingFee = parseFloat(req.body.shippingFee);
+        } else {
+            shippingFee = subtotal > 100 ? 0 : 5.99;
+        }
+
+        // Add Shipping to Line Items
+        if (shippingFee > 0) {
+            lineItems.push({
+                price_data: {
+                    currency: 'eur',
+                    product_data: {
+                        name: 'Shipping Fee',
+                    },
+                    unit_amount: Math.round(shippingFee * 100),
+                },
+                quantity: 1,
+            });
+        }
+
+        // Calculate Totals for Metadata
+
+        const tax = subtotal * 0.19;
+
         // Create checkout session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -54,11 +98,16 @@ exports.createCheckoutSession = async (req, res) => {
             mode: 'payment',
             success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.FRONTEND_URL}/checkout`,
-            customer_email: req.user.email,
+            customer_email: req.user ? req.user.email : req.body.email, // Use guest email if not logged in
             metadata: {
-                userId: req.user.id,
+                userId: req.user ? req.user.id : 'guest',
                 items: JSON.stringify(items),
                 shippingAddress: JSON.stringify(shippingAddress),
+                subtotal: subtotal.toString(),
+                shippingFee: shippingFee.toString(),
+                tax: tax.toString(),
+                couponCode: req.body.couponCode || '',
+                discountAmount: req.body.discountAmount ? req.body.discountAmount.toString() : '0'
             },
         });
 
@@ -88,17 +137,28 @@ exports.handlePaymentSuccess = async (req, res) => {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
         if (session.payment_status === 'paid') {
+            // Check if order already exists to prevent duplicates
+            const existingOrder = await Order.findOne({ paymentId: session.payment_intent });
+
+            if (existingOrder) {
+                return res.status(200).json({
+                    success: true,
+                    message: 'Payment successful (Order already processed)',
+                    order: existingOrder
+                });
+            }
+
             // Create order in database
-            const { userId, items, shippingAddress } = session.metadata;
+            const { userId, items, shippingAddress, couponCode, discountAmount, shippingFee, tax } = session.metadata;
 
             const parsedItems = JSON.parse(items);
             const parsedAddress = JSON.parse(shippingAddress);
 
             // Calculate total
-            const totalAmount = parsedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const totalAmount = session.amount_total / 100; // Stripe amount is in cents
 
-            const order = await Order.create({
-                user: userId,
+            // Create order object
+            const orderData = {
                 items: parsedItems.map(item => ({
                     product: item.product,
                     productType: item.productType,
@@ -108,12 +168,45 @@ exports.handlePaymentSuccess = async (req, res) => {
                     image: item.image
                 })),
                 totalAmount,
+                tax: tax ? parseFloat(tax) : 0,
+                shippingFee: shippingFee ? parseFloat(shippingFee) : 0,
                 shippingAddress: parsedAddress,
                 paymentMethod: 'card',
                 paymentStatus: 'paid',
                 paymentId: session.payment_intent,
-                status: 'processing'
-            });
+                status: 'processing',
+                couponCode: couponCode || null,
+                discountAmount: discountAmount ? parseFloat(discountAmount) : 0
+            };
+
+            // Only add user if not guest
+            if (userId && userId !== 'guest') {
+                orderData.user = userId;
+            }
+
+            const order = await Order.create(orderData);
+
+            // Create Transaction Record (only for registered users)
+            if (userId && userId !== 'guest') {
+                await Transaction.create({
+                    user: userId,
+                    order: order._id,
+                    amount: totalAmount,
+                    status: 'completed',
+                    paymentMethod: 'card',
+                    stripePaymentId: session.payment_intent,
+                    description: `Payment for Order #${order.orderNumber}`
+                });
+            }
+
+            // Deduct Stock (Ideally this should be in webhook, but valid here too as fallback)
+            for (const item of parsedItems) {
+                if (item.productType === 'Product') {
+                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+                } else {
+                    await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+                }
+            }
 
             res.status(200).json({
                 success: true,
@@ -160,16 +253,22 @@ exports.handleWebhook = async (req, res) => {
     switch (event.type) {
         case 'checkout.session.completed':
             const session = event.data.object;
-            console.log('Payment successful:', session.id);
+            console.log('Payment successful (Webhook):', session.id);
 
-            // Update order status
-            const { userId, items, shippingAddress } = session.metadata;
+            // Check if order already exists
+            const existingOrder = await Order.findOne({ paymentId: session.payment_intent });
+            if (existingOrder) {
+                console.log('Order already processed, skipping.');
+                return res.json({ received: true });
+            }
+
+            // Create order
+            const { userId, items, shippingAddress, couponCode, discountAmount, shippingFee, tax } = session.metadata;
             const parsedItems = JSON.parse(items);
             const parsedAddress = JSON.parse(shippingAddress);
-            const totalAmount = parsedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const totalAmount = session.amount_total / 100;
 
-            await Order.create({
-                user: userId,
+            const orderData = {
                 items: parsedItems.map(item => ({
                     product: item.product,
                     productType: item.productType,
@@ -179,12 +278,22 @@ exports.handleWebhook = async (req, res) => {
                     image: item.image
                 })),
                 totalAmount,
+                tax: tax ? parseFloat(tax) : 0,
+                shippingFee: shippingFee ? parseFloat(shippingFee) : 0,
                 shippingAddress: parsedAddress,
                 paymentMethod: 'card',
                 paymentStatus: 'paid',
                 paymentId: session.payment_intent,
-                status: 'processing'
-            });
+                status: 'processing',
+                couponCode: couponCode || null,
+                discountAmount: discountAmount ? parseFloat(discountAmount) : 0
+            };
+
+            if (userId && userId !== 'guest') {
+                orderData.user = userId;
+            }
+
+            await Order.create(orderData);
 
             // Deduct Stock
             for (const item of parsedItems) {
@@ -199,6 +308,7 @@ exports.handleWebhook = async (req, res) => {
         case 'payment_intent.payment_failed':
             const paymentIntent = event.data.object;
             console.log('Payment failed:', paymentIntent.id);
+            // Optional: Notify user or log failure
             break;
 
         default:

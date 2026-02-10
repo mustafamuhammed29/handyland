@@ -16,4 +16,9 @@ router.get('/:id/reviews', productController.getProductReviews);
 // Related Products
 router.get('/:id/related', productController.getRelatedProducts);
 
+// Q&A
+router.get('/:id/questions', productController.getProductQuestions);
+router.post('/:id/questions', protect, productController.askQuestion);
+router.put('/questions/:id/answer', protect, authorize('admin'), productController.answerQuestion);
+
 module.exports = router;

@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const Review = require('../models/Review');
+const Question = require('../models/Question'); // Added
 const { v4: uuidv4 } = require('uuid');
 
 exports.getAllProducts = async (req, res) => {
@@ -210,6 +211,65 @@ exports.getProductReviews = async (req, res) => {
 
         const reviews = await Review.find({ product: product._id }).populate('user', 'name');
         res.json(reviews);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get product questions
+// @route   GET /api/products/:id/questions
+// @access  Public
+exports.getProductQuestions = async (req, res) => {
+    try {
+        const product = await Product.findOne({ id: req.params.id });
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        const questions = await Question.find({ product: product._id })
+            .populate('user', 'name')
+            .sort({ createdAt: -1 });
+
+        res.json(questions);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Ask a question
+// @route   POST /api/products/:id/questions
+// @access  Private
+exports.askQuestion = async (req, res) => {
+    try {
+        const { question } = req.body;
+        const product = await Product.findOne({ id: req.params.id });
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        const newQuestion = await Question.create({
+            user: req.user._id,
+            product: product._id,
+            question
+        });
+
+        res.status(201).json(newQuestion);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Answer a question (Admin)
+// @route   PUT /api/products/questions/:id/answer
+// @access  Private/Admin
+exports.answerQuestion = async (req, res) => {
+    try {
+        const { answer } = req.body;
+        const question = await Question.findById(req.params.id);
+        if (!question) return res.status(404).json({ message: 'Question not found' });
+
+        question.answer = answer;
+        question.isAnswered = true;
+        question.answeredBy = req.user._id;
+        await question.save();
+
+        res.json(question);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

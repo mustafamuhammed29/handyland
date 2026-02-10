@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShoppingCart, ArrowLeft, Cpu, Battery, Smartphone, Shield, Truck, Star, ChevronRight, Check } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Cpu, Battery, Smartphone, Shield, Truck, Star, ChevronRight, Check, X, Share2, ThumbsUp } from 'lucide-react';
+import { useAuth } from '../context/AuthContext'; // Added
+import { api } from '../utils/api'; // Added
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { translations } from '../i18n';
@@ -16,11 +18,21 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
     const [product, setProduct] = useState<PhoneListing | null>(null);
     const [relatedProducts, setRelatedProducts] = useState<PhoneListing[]>([]);
     const [activeImage, setActiveImage] = useState('');
-    const [activeTab, setActiveTab] = useState<'overview' | 'specs' | 'reviews'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'specs' | 'reviews' | 'questions'>('overview');
     const [loading, setLoading] = useState(true);
+    const [quantity, setQuantity] = useState(1);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const [reviews, setReviews] = useState<any[]>([]);
+    const [questions, setQuestions] = useState<any[]>([]); // New state for questions
+    const [showReviewModal, setShowReviewModal] = useState(false); // Review modal state
+    const [newReview, setNewReview] = useState({ rating: 5, comment: '' }); // New review form
+    const [newQuestion, setNewQuestion] = useState(''); // New question form
+
+    // Hooks
     const { addToCart } = useCart();
     const { addToast } = useToast();
     const t = translations[lang];
+    const { user } = useAuth(); // Safe to access now if context provides it
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -41,7 +53,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         camera: data.specs?.camera || 'Pro Camera System'
                     },
                     imageUrl: data.image || data.imageUrl || '',
-                    images: data.images || [data.image || data.imageUrl]
+                    images: data.images?.length > 0 ? data.images : [data.image || data.imageUrl]
                 };
                 setProduct(formatted);
                 setActiveImage(formatted.images?.[0] || formatted.imageUrl || '');
@@ -56,6 +68,28 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         imageUrl: p.image || p.imageUrl || ''
                     }));
                     setRelatedProducts(formattedRelated);
+                }
+
+                // Fetch Reviews
+                try {
+                    const reviewsRes = await fetch(`/api/products/${data.id}/reviews`);
+                    if (reviewsRes.ok) {
+                        const reviewsData = await reviewsRes.json();
+                        setReviews(reviewsData);
+                    }
+                } catch (err) {
+                    console.error("Failed to load reviews", err);
+                }
+
+                // Fetch Questions
+                try {
+                    const questionsRes = await fetch(`/api/products/${data.id}/questions`);
+                    if (questionsRes.ok) {
+                        const questionsData = await questionsRes.json();
+                        setQuestions(questionsData);
+                    }
+                } catch (err) {
+                    console.error("Failed to load questions", err);
                 }
 
             } catch (error) {
@@ -78,9 +112,10 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
             subtitle: `${product.storage} • ${product.color}`,
             price: product.price,
             image: activeImage,
-            category: 'device'
+            category: 'device',
+            quantity: quantity // Assuming addToCart handles quantity, if not it will add 1 by default usually, but context should be updated if needed.
         });
-        addToast(`${product.model} added to cart`, 'success');
+        addToast(`${quantity}x ${product.model} added to cart`, 'success');
     };
 
     const getImageUrl = (url: string) => {
@@ -93,13 +128,33 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
     if (!product) return null;
 
     return (
-        <div className="min-h-screen bg-slate-950 pt-24 pb-12 px-4">
+        <div className="min-h-screen bg-slate-950 pt-24 pb-12 px-4 relative">
+            {/* Lightbox Modal */}
+            {isLightboxOpen && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200"
+                    onClick={() => setIsLightboxOpen(false)}
+                >
+                    <button className="absolute top-8 right-8 text-white hover:text-cyan-400 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <img
+                        src={getImageUrl(activeImage)}
+                        alt="Zoomed Product"
+                        className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
+
             <div className="max-w-7xl mx-auto">
                 {/* Breadcrumbs */}
                 <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8">
                     <button onClick={() => navigate('/marketplace')} className="hover:text-cyan-400 transition-colors">Marketplace</button>
                     <ChevronRight className="w-4 h-4" />
-                    <span className="text-slate-300">{product.brand}</span>
+                    <span className="text-slate-300">{product.brand || 'Brand'}</span>
                     <ChevronRight className="w-4 h-4" />
                     <span className="text-white font-medium">{product.model}</span>
                 </nav>
@@ -107,7 +162,10 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
                     {/* Image Gallery */}
                     <div className="space-y-4">
-                        <div className="aspect-square bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden relative group">
+                        <div
+                            className="aspect-square bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden relative group cursor-zoom-in"
+                            onClick={() => setIsLightboxOpen(true)}
+                        >
                             <img
                                 src={getImageUrl(activeImage)}
                                 alt={product.model}
@@ -117,6 +175,11 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                 <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md ${product.condition === 'new' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'}`}>
                                     {product.condition}
                                 </span>
+                            </div>
+                            <div className="absolute bottom-4 right-4 bg-black/50 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                </svg>
                             </div>
                         </div>
                         <div className="grid grid-cols-5 gap-2">
@@ -134,7 +197,18 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
 
                     {/* Product Info */}
                     <div className="flex flex-col">
-                        <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">{product.model}</h1>
+                        <div className="flex justify-between items-start">
+                            <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">{product.model}</h1>
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(window.location.href);
+                                    addToast("Link copied to clipboard", "success");
+                                }}
+                                className="p-2 bg-slate-900 rounded-full hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+                            >
+                                <Share2 className="w-5 h-5" />
+                            </button>
+                        </div>
 
                         <div className="flex items-center gap-4 mb-6">
                             <div className="flex text-yellow-500">
@@ -145,8 +219,17 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                             <span className="text-slate-400 text-sm">{product.numReviews} Reviews</span>
                         </div>
 
-                        <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-8">
-                            {product.price}{t.currency}
+                        <div className="flex items-end gap-3 mb-8">
+                            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                                {product.price}{t.currency}
+                            </div>
+                            {/* Stock Indicator */}
+                            <div className={`text-sm mb-2 font-medium ${product.stock > 0 ? (product.stock < 5 ? 'text-orange-400' : 'text-green-400') : 'text-red-500'}`}>
+                                {product.stock > 0
+                                    ? (product.stock < 5 ? `Only ${product.stock} left in stock!` : 'In Stock')
+                                    : 'Out of Stock'
+                                }
+                            </div>
                         </div>
 
                         {/* Quick Specs */}
@@ -182,12 +265,35 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         </div>
 
                         <div className="mt-auto space-y-4">
+                            {/* Quantity Selector */}
+                            <div className="flex items-center gap-4 mb-4">
+                                <span className="text-slate-400 text-sm font-medium">Quantity</span>
+                                <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg">
+                                    <button
+                                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                        className="px-3 py-2 text-slate-400 hover:text-white transition-colors hover:bg-slate-800 rounded-l-lg"
+                                        disabled={quantity <= 1}
+                                    >-</button>
+                                    <span className="w-12 text-center font-mono text-white">{quantity}</span>
+                                    <button
+                                        onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
+                                        className="px-3 py-2 text-slate-400 hover:text-white transition-colors hover:bg-slate-800 rounded-r-lg"
+                                        disabled={quantity >= product.stock}
+                                    >+</button>
+                                </div>
+                            </div>
+
                             <div className="flex gap-4">
                                 <button
                                     onClick={handleAddToCart}
-                                    className="flex-1 bg-white hover:bg-slate-200 text-black py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                                    disabled={product.stock === 0}
+                                    className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 
+                                        ${product.stock > 0
+                                            ? 'bg-white hover:bg-slate-200 text-black shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]'
+                                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'}`}
                                 >
-                                    <ShoppingCart className="w-5 h-5" /> Add to Cart
+                                    <ShoppingCart className="w-5 h-5" />
+                                    {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
                                 </button>
                             </div>
                             <div className="flex justify-center gap-6 text-xs text-slate-500">
@@ -200,17 +306,24 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
 
                 {/* Tabs Section */}
                 <div className="mb-16">
-                    <div className="border-b border-slate-800 mb-8 flex gap-8">
+                    <div className="flex overflow-x-auto gap-8 border-b border-slate-800 mb-8 pb-px">
                         {['overview', 'specs', 'reviews'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab as any)}
-                                className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative ${activeTab === tab ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'}`}
+                                className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === tab ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'}`}
                             >
                                 {tab}
                                 {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>}
                             </button>
                         ))}
+                        <button
+                            onClick={() => setActiveTab('questions')}
+                            className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === 'questions' ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                            Q&A
+                            {activeTab === 'questions' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>}
+                        </button>
                     </div>
 
                     <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-8 min-h-[300px]">
@@ -261,15 +374,40 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                             </div>
                         )}
                         {activeTab === 'reviews' && (
-                            <div className="text-center py-12">
-                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 mb-4">
-                                    <Star className="w-8 h-8 text-yellow-500" />
+                            <div>
+                                {reviews.length > 0 ? (
+                                    <div className="space-y-6">
+                                        {reviews.map((review: any) => (
+                                            <div key={review._id} className="border-b border-slate-800 pb-6 last:border-0">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="font-bold text-white">{review.user?.name || 'Anonymous'}</div>
+                                                        <span className="text-xs text-slate-500">• {new Date(review.createdAt).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <div className="flex text-yellow-500">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-slate-700'}`} />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <p className="text-slate-300">{review.comment}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 mb-4">
+                                            <Star className="w-8 h-8 text-yellow-500" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-white mb-2">No Reviews Yet</h3>
+                                        <p className="text-slate-400 mb-6">Be the first to share your experience with this product!</p>
+                                    </div>
+                                )}
+                                <div className="mt-8 text-center">
+                                    <button className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg transition-colors">
+                                        Write a Review
+                                    </button>
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Customer Reviews</h3>
-                                <p className="text-slate-400 mb-6">No reviews yet. Be the first to review this product!</p>
-                                <button className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg transition-colors">
-                                    Write a Review
-                                </button>
                             </div>
                         )}
                     </div>
