@@ -5,7 +5,7 @@ import {
     BarChart3, Smartphone, TrendingUp, Plus, MapPin, Clock
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 interface Order {
     _id: string;

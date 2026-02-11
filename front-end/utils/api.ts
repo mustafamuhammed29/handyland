@@ -12,6 +12,28 @@ export class ApiError extends Error {
     }
 }
 
+// Simple in-memory cache with TTL (60s default)
+const cache = new Map<string, { data: any; expiry: number }>();
+const CACHE_TTL = 60 * 1000; // 60 seconds
+
+const getCached = (key: string) => {
+    const entry = cache.get(key);
+    if (entry && Date.now() < entry.expiry) return entry.data;
+    cache.delete(key);
+    return null;
+};
+
+const setCache = (key: string, data: any) => {
+    cache.set(key, { data, expiry: Date.now() + CACHE_TTL });
+};
+
+export const clearCache = (pattern?: string) => {
+    if (!pattern) { cache.clear(); return; }
+    for (const key of cache.keys()) {
+        if (key.includes(pattern)) cache.delete(key);
+    }
+};
+
 const request = async (endpoint: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('token');
     const headers: HeadersInit = {
@@ -19,6 +41,14 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
     };
+
+    const method = options.method || 'GET';
+
+    // Check cache for GET requests
+    if (method === 'GET') {
+        const cached = getCached(endpoint);
+        if (cached) return cached;
+    }
 
     try {
         const response = await fetch(`${API_URL}${endpoint}`, {
@@ -28,7 +58,7 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
 
         if (response.status === 401) {
             localStorage.removeItem('token');
-            window.location.href = '/login'; // Auto-logout
+            window.location.href = '/login';
             throw new ApiError(401, 'Session expired. Please login again.');
         }
 
@@ -37,7 +67,14 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
             throw new ApiError(response.status, errorData.message || response.statusText);
         }
 
-        return response.json();
+        const data = await response.json();
+
+        // Cache successful GET responses
+        if (method === 'GET') {
+            setCache(endpoint, data);
+        }
+
+        return data;
     } catch (error) {
         if (error instanceof ApiError) throw error;
         throw new Error(error instanceof Error ? error.message : 'Network error');
@@ -50,3 +87,4 @@ export const api = {
     put: <T = any>(endpoint: string, data: any, options?: RequestInit) => request(endpoint, { ...options, method: 'PUT', body: JSON.stringify(data) }) as Promise<T>,
     delete: <T = any>(endpoint: string, options?: RequestInit) => request(endpoint, { ...options, method: 'DELETE' }) as Promise<T>,
 };
+

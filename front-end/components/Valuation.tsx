@@ -20,6 +20,8 @@ import { translations } from '../i18n';
 import { useToast } from '../context/ToastContext';
 import { useSettings } from '../context/SettingsContext';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 interface ValuationProps {
     lang: LanguageCode;
 }
@@ -60,11 +62,13 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
     useEffect(() => {
         const fetchDevices = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/valuation/devices');
+                const res = await fetch(`${API_URL}/valuation/devices`);
                 const data = await res.json();
                 if (Array.isArray(data)) setApiDevices(data);
+                else if (data.data && Array.isArray(data.data)) setApiDevices(data.data);
             } catch (error) {
                 console.error("Failed to fetch devices", error);
+                addToast("Failed to load devices. Please refresh.", "error");
             }
         };
         fetchDevices();
@@ -78,7 +82,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
         if (selectedDevice && formData.storage && formData.condition) {
             const calculate = async () => {
                 try {
-                    const res = await fetch('http://localhost:5000/api/valuation/calculate', {
+                    const res = await fetch(`${API_URL}/valuation/calculate`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formData)
@@ -117,15 +121,14 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
 
         setLoading(true);
         try {
-            // Check auth (simplified for now, ideally check context)
             const token = localStorage.getItem('token');
             if (!token) {
-                addToast("Please login to save your quote", "info");
-                // Store state and redirect to login? For now just warn.
-                // Ideally we'd implement guest quotes or redirect
+                addToast("Please login to save your quote", "error");
+                navigate('/login');
+                return;
             }
 
-            const res = await fetch('http://localhost:5000/api/valuation/quote', {
+            const res = await fetch(`${API_URL}/valuation/quote`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -278,15 +281,24 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                             </h3>
                             <div className="grid grid-cols-3 gap-4">
                                 {[
-                                    { label: 'Like New (>90%)', value: 'new', color: 'emerald', health: 95 },
-                                    { label: 'Good (80-90%)', value: 'good', color: 'yellow', health: 85 },
-                                    { label: 'Service (<80%)', value: 'old', color: 'red', health: 75 }
+                                    {
+                                        label: 'Like New (>90%)', value: 'new', health: 95,
+                                        active: 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
+                                    },
+                                    {
+                                        label: 'Good (80-90%)', value: 'good', health: 85,
+                                        active: 'bg-yellow-500/20 border-yellow-500 text-yellow-300'
+                                    },
+                                    {
+                                        label: 'Service (<80%)', value: 'old', health: 75,
+                                        active: 'bg-red-500/20 border-red-500 text-red-300'
+                                    }
                                 ].map(opt => (
                                     <button
                                         key={opt.value}
                                         onClick={() => setFormData({ ...formData, battery: opt.value, batteryHealth: opt.health })}
                                         className={`py-4 rounded-xl border font-bold transition-all ${formData.battery === opt.value
-                                            ? `bg-${opt.color}-500/20 border-${opt.color}-500 text-${opt.color}-300`
+                                            ? opt.active
                                             : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'}`}
                                     >
                                         {opt.label}
