@@ -19,8 +19,7 @@ import {
 import { translations } from '../i18n';
 import { useToast } from '../context/ToastContext';
 import { useSettings } from '../context/SettingsContext';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { api } from '../utils/api';
 
 interface ValuationProps {
     lang: LanguageCode;
@@ -62,8 +61,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
     useEffect(() => {
         const fetchDevices = async () => {
             try {
-                const res = await fetch(`${API_URL}/valuation/devices`);
-                const data = await res.json();
+                const data = await api.get('/api/valuation/devices');
                 if (Array.isArray(data)) setApiDevices(data);
                 else if (data.data && Array.isArray(data.data)) setApiDevices(data.data);
             } catch (error) {
@@ -82,12 +80,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
         if (selectedDevice && formData.storage && formData.condition) {
             const calculate = async () => {
                 try {
-                    const res = await fetch(`${API_URL}/valuation/calculate`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
-                    });
-                    const data = await res.json();
+                    const data = await api.post('/api/valuation/calculate', formData);
                     if (data.success) setPreviewPrice(data.estimatedValue);
                 } catch (e) {
                     console.error("Calculation failed", e);
@@ -128,15 +121,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                 return;
             }
 
-            const res = await fetch(`${API_URL}/valuation/quote`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            });
-            const data = await res.json();
+            const data = await api.post('/api/valuation/quote', formData);
 
             if (data.success) {
                 setQuoteData(data);

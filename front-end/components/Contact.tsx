@@ -4,6 +4,7 @@ import { translations } from '../i18n';
 import { Send, MapPin, Phone, Mail, Globe, MessageSquare, User, AtSign, Radio, CheckCircle2, Facebook, Instagram, Twitter, Linkedin, Youtube } from 'lucide-react';
 
 import { useSettings } from '../context/SettingsContext';
+import { api } from '../utils/api';
 
 interface ContactProps {
     lang: LanguageCode;
@@ -48,14 +49,19 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
         e.preventDefault();
         setFormState('sending');
         const form = e.currentTarget;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
 
-        // Mock Send
-        setTimeout(() => {
-            console.log("Mock message sent:", new FormData(form));
+        try {
+            await api.post('/api/messages', data);
             setFormState('success');
             form.reset();
             setTimeout(() => setFormState('idle'), 3000);
-        }, 1500);
+        } catch (error) {
+            console.error("Message sending failed:", error);
+            setFormState('idle');
+            // Ideally show an error toast here
+        }
     };
 
     if (loading) {

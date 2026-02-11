@@ -5,3 +5,7 @@ export { DashboardWallet } from './DashboardWallet';
 export { DashboardValuations } from './DashboardValuations';
 export { DashboardWishlist } from './DashboardWishlist';
 export { DashboardSettings } from './DashboardSettings';
+export { DashboardMessages } from './DashboardMessages';
+export { DashboardPages } from './DashboardPages';
+export { DashboardAccessories } from './DashboardAccessories';
+export { DashboardGlobalSettings } from './DashboardGlobalSettings';

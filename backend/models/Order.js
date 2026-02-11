@@ -85,7 +85,13 @@ const OrderSchema = new mongoose.Schema({
         },
         phone: {
             type: String,
-            required: true
+            required: true,
+            validate: {
+                validator: function (v) {
+                    return /^\+?[1-9]\d{1,14}$/.test(v);
+                },
+                message: props => `${props.value} is not a valid phone number!`
+            }
         },
         street: {
             type: String,

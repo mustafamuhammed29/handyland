@@ -34,11 +34,21 @@ export const clearCache = (pattern?: string) => {
     }
 };
 
+const getCookie = (name: string) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift();
+    return null;
+};
+
 const request = async (endpoint: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('token');
+    const xsrfToken = getCookie('XSRF-TOKEN');
+
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(xsrfToken ? { 'X-XSRF-Token': xsrfToken } : {}),
         ...options.headers,
     };
 
@@ -54,6 +64,7 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
         const response = await fetch(`${API_URL}${endpoint}`, {
             ...options,
             headers,
+            credentials: 'include', // Important for cookies
         });
 
         if (response.status === 401) {
