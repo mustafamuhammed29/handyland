@@ -22,6 +22,7 @@ router.post('/calculate', valuationController.calculateValuation);
 // Authorized Quote Management
 router.post('/quote', protect, valuationController.createQuote);
 router.post('/saved', protect, valuationController.saveValuation);
+router.get('/my-valuations', protect, valuationController.getMyValuations); // Alias for frontend
 router.get('/saved', protect, valuationController.getMyValuations);
 router.delete('/saved/:id', protect, valuationController.deleteValuation);
 

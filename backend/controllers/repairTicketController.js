@@ -86,7 +86,7 @@ exports.getMyTickets = async (req, res) => {
         res.status(200).json({
             success: true,
             count: tickets.length,
-            tickets
+            repairs: tickets  // Changed from 'tickets' to 'repairs' for frontend compatibility
         });
     } catch (error) {
         res.status(500).json({

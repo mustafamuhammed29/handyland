@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Save, FileText, Check, AlertCircle } from 'lucide-react';
+import { api } from '../utils/api';
 
 const PAGES = [
     { id: 'agb', label: 'AGB (Terms)' },
@@ -24,12 +25,10 @@ export default function PageManager() {
         setLoading(true);
         setMessage(null);
         try {
-            const res = await fetch(`http://localhost:5000/api/pages/${slug}`);
-            if (!res.ok) throw new Error('Failed to fetch page');
-            const data = await res.json();
-            setContent(data.content || '');
+            const response = await api.get(`/api/pages/${slug}`);
+            setContent(response.data.content || '');
         } catch (error) {
-            console.error(error);
+            console.error('Failed to fetch page:', error);
             setMessage({ type: 'error', text: 'Failed to load page content' });
         } finally {
             setLoading(false);
@@ -40,15 +39,10 @@ export default function PageManager() {
         setSaving(true);
         setMessage(null);
         try {
-            const res = await fetch(`http://localhost:5000/api/pages/${selectedPage}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content })
-            });
-            if (!res.ok) throw new Error('Failed to save');
+            await api.put(`/api/pages/${selectedPage}`, { content });
             setMessage({ type: 'success', text: 'Page updated successfully!' });
         } catch (error) {
-            console.error(error);
+            console.error('Failed to save page:', error);
             setMessage({ type: 'error', text: 'Failed to save changes' });
         } finally {
             setSaving(false);

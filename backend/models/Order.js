@@ -125,9 +125,9 @@ const OrderSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Generate order number before saving
-OrderSchema.pre('save', async function () {
-    if (this.isNew) {
+// Generate order number before validation
+OrderSchema.pre('validate', async function (next) {
+    if (this.isNew && !this.orderNumber) {
         const date = new Date();
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -145,8 +145,13 @@ OrderSchema.pre('save', async function () {
         }
 
         this.orderNumber = `HL-${year}${month}${day}-${String(sequence).padStart(4, '0')}`;
+    }
+    next();
+});
 
-        // Add initial status to history
+// Add initial status to history on save
+OrderSchema.pre('save', function () {
+    if (this.isNew && this.statusHistory.length === 0) {
         this.statusHistory.push({
             status: this.status,
             timestamp: new Date(),

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Trash2, X, Edit2, Save, Search, Headphones, Zap, Shield, Watch } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
+import { api } from '../utils/api';
 
 export default function AccessoriesManager() {
     const [accessories, setAccessories] = useState<any[]>([]);
@@ -23,18 +24,16 @@ export default function AccessoriesManager() {
         specs: { key: '', value: '' }
     });
 
-    const fetchAccessories = () => {
+    const fetchAccessories = async () => {
         setLoading(true);
-        fetch('http://localhost:5000/api/accessories')
-            .then(res => res.json())
-            .then(data => {
-                setAccessories(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("Failed to load", err);
-                setLoading(false);
-            });
+        try {
+            const response = await api.get('/api/accessories');
+            setAccessories(response.data);
+        } catch (err) {
+            console.error("Failed to load accessories:", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -44,10 +43,11 @@ export default function AccessoriesManager() {
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this accessory?')) return;
         try {
-            await fetch(`http://localhost:5000/api/accessories/${id}`, { method: 'DELETE' });
+            await api.delete(`/api/accessories/${id}`);
             fetchAccessories();
         } catch (error) {
-            console.error("Failed to delete", error);
+            console.error("Failed to delete accessory:", error);
+            alert('Failed to delete. Please try again.');
         }
     };
 
@@ -91,21 +91,18 @@ export default function AccessoriesManager() {
                 specs: specObj
             };
 
-            const method = formData.id ? 'PUT' : 'POST';
-            const url = formData.id
-                ? `http://localhost:5000/api/accessories/${formData.id}`
-                : 'http://localhost:5000/api/accessories';
+            if (formData.id) {
+                await api.put(`/api/accessories/${formData.id}`, payload);
+            } else {
+                await api.post('/api/accessories', payload);
+            }
 
-            await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
             setIsModalOpen(false);
             resetForm();
             fetchAccessories();
         } catch (error) {
-            console.error("Failed to save", error);
+            console.error("Failed to save accessory:", error);
+            alert('Failed to save. Please try again.');
         }
     };
 
