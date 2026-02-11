@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from './ToastContext';
-import { api } from '../utils/api';
+import { api, clearCache } from '../utils/api';
 
 interface HeroSettings {
     bgStart: string;
@@ -220,11 +220,27 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Persist to backend
             await api.put('/api/settings', newSettings);
 
+            // Clear cache and refetch to ensure UI matches database
+            clearCache('/api/settings');
+            const freshData = await api.get<Settings>('/api/settings');
+            setSettings(prev => ({
+                ...prev,
+                ...freshData,
+                hero: { ...prev.hero, ...freshData.hero },
+                content: { ...prev.content, ...freshData.content },
+                stats: { ...prev.stats, ...freshData.stats },
+                repairArchive: { ...prev.repairArchive, ...freshData.repairArchive },
+                valuation: { ...prev.valuation, ...freshData.valuation },
+                sections: { ...prev.sections, ...freshData.sections },
+                contactSection: { ...prev.contactSection, ...freshData.contactSection },
+                footerSection: { ...prev.footerSection, ...freshData.footerSection },
+                navbar: { ...prev.navbar, ...freshData.navbar },
+            }));
+
             addToast('Settings updated', 'success');
         } catch (error) {
             console.error("Failed to update settings", error);
             addToast('Failed to update settings', 'error');
-            // could revert here if needed
         }
     };
 

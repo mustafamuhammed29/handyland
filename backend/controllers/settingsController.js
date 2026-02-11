@@ -42,7 +42,12 @@ exports.updateSettings = async (req, res) => {
         if (!settings) {
             settings = await Settings.create(updateData);
         } else {
-            settings = await Settings.findOneAndUpdate({}, { $set: updateData }, { new: true, runValidators: true });
+            // Use findOneAndUpdate to ensure atomic update
+            settings = await Settings.findOneAndUpdate(
+                {},
+                { $set: updateData },
+                { new: true, runValidators: true, upsert: true } // upsert creates if not found
+            );
         }
 
         res.status(200).json(settings);

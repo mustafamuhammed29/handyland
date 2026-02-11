@@ -1,18 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const Page = require('../models/Page');
+const { protect, authorize } = require('../middleware/auth');
 
-// Get all pages (lightweight list)
+// Public - Get all pages (lightweight list)
 router.get('/', async (req, res) => {
     try {
-        const pages = await Page.find().select('slug title lastUpdated');
+        const pages = await Page.find().select('slug title lastUpdated content');
         res.json(pages);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// Get single page by slug
+// Public - Get single page by slug
 router.get('/:slug', async (req, res) => {
     try {
         let page = await Page.findOne({ slug: req.params.slug });
@@ -43,14 +44,14 @@ router.get('/:slug', async (req, res) => {
     }
 });
 
-// Update page content
-router.put('/:slug', async (req, res) => {
+// Admin only - Update page content
+router.put('/:slug', protect, authorize('admin'), async (req, res) => {
     try {
         const { content } = req.body;
         const page = await Page.findOneAndUpdate(
             { slug: req.params.slug },
             { content, lastUpdated: Date.now() },
-            { new: true, upsert: true } // Upsert ensures existence
+            { new: true, upsert: true }
         );
         res.json(page);
     } catch (err) {
