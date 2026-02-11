@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Trash2, Edit, Save, X, Calculator } from 'lucide-react';
+import { api } from '../utils/api';
 
 interface DeviceBlueprint {
     _id: string;
@@ -56,13 +57,13 @@ const ValuationManager = () => {
     const fetchDevices = async () => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5000/api/valuation/devices');
-            const data = await res.json();
-            setDevices(data);
+            const response = await api.get('/api/valuation/devices');
+            setDevices(response.data);
         } catch (error) {
             console.error('Error fetching devices:', error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,35 +89,30 @@ const ValuationManager = () => {
 
     const handleSave = async () => {
         try {
-            const method = editingDevice ? 'PUT' : 'POST';
-            const url = editingDevice
-                ? `http://localhost:5000/api/valuation/devices/${editingDevice._id}`
-                : 'http://localhost:5000/api/valuation/devices';
-
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            if (res.ok) {
-                setIsModalOpen(false);
-                setEditingDevice(null);
-                setFormData({ brand: 'Apple', modelName: '', imageUrl: '', basePrice: 0, validStorages: ['128GB', '256GB'], priceConfig: { storagePrices: {} } });
-                fetchDevices();
+            if (editingDevice) {
+                await api.put(`/api/valuation/devices/${editingDevice._id}`, formData);
+            } else {
+                await api.post('/api/valuation/devices', formData);
             }
+
+            setIsModalOpen(false);
+            setEditingDevice(null);
+            setFormData({ brand: 'Apple', modelName: '', imageUrl: '', basePrice: 0, validStorages: ['128GB', '256GB'], priceConfig: { storagePrices: {} } });
+            fetchDevices();
         } catch (error) {
             console.error('Error saving device:', error);
+            alert('Failed to save device. Please try again.');
         }
     };
 
     const handleDelete = async (id: string) => {
         if (!window.confirm('Are you sure?')) return;
         try {
-            await fetch(`http://localhost:5000/api/valuation/devices/${id}`, { method: 'DELETE' });
+            await api.delete(`/api/valuation/devices/${id}`);
             fetchDevices();
         } catch (error) {
             console.error('Error deleting device:', error);
+            alert('Failed to delete device. Please try again.');
         }
     };
 

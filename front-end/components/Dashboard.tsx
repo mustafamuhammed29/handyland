@@ -94,9 +94,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const handleAddAddress = async (address: any) => {
         try {
             await api.post('/api/addresses', address);
-            addresses.refetch();
+            await addresses.refetch();
         } catch (error) {
             console.error('Error adding address:', error);
+        }
+    };
+
+    const handleUpdateAddress = async (id: string, address: any) => {
+        try {
+            await api.put(`/api/addresses/${id}`, address);
+            await addresses.refetch();
+        } catch (error) {
+            console.error('Error updating address:', error);
+        }
+    };
+
+    const handleDeleteAddress = async (id: string) => {
+        try {
+            await api.delete(`/api/addresses/${id}`);
+            await addresses.refetch();
+        } catch (error) {
+            console.error('Error deleting address:', error);
         }
     };
 
@@ -303,6 +321,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                             onUpdateProfile={handleUpdateProfile}
                             onUpdatePassword={handleUpdatePassword}
                             onAddAddress={handleAddAddress}
+                            onUpdateAddress={handleUpdateAddress}
+                            onDeleteAddress={handleDeleteAddress}
                         />
                     )}
 

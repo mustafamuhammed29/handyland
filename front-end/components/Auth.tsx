@@ -63,16 +63,15 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
         setIsLoading(true);
 
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const authBase = `${API_URL}/auth`;
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             let endpoint = '';
             let body = {};
 
             if (mode === 'login') {
-                endpoint = `${authBase}/login`;
+                endpoint = `${API_URL}/api/auth/login`;
                 body = { email: formData.email, password: formData.password };
             } else if (mode === 'register') {
-                endpoint = `${authBase}/register`;
+                endpoint = `${API_URL}/api/auth/register`;
                 body = {
                     name: formData.name,
                     email: formData.email,
@@ -81,7 +80,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                     address: formData.address
                 };
             } else if (mode === 'forgot') {
-                endpoint = `${authBase}/forgot-password`;
+                endpoint = `${API_URL}/api/auth/forgot-password`;
                 body = { email: formData.email };
             }
 
@@ -91,7 +90,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                 return;
             }
 
-            const res = await fetch(`${API_URL}${endpoint}`, {
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -136,7 +135,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
     const handleResend = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/resend-verification`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/resend-verification`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email })

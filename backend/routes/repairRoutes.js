@@ -11,6 +11,7 @@ router.post('/estimate', repairController.estimateRepairCost); // Replaces getRe
 
 // Protected routes (Tickets)
 router.post('/tickets', protect, repairTicketController.createTicket);
+router.get('/my-repairs', protect, repairTicketController.getMyTickets); // Alias for frontend compatibility
 router.get('/tickets/my-tickets', protect, repairTicketController.getMyTickets);
 router.get('/tickets/:id', protect, repairTicketController.getTicket);
 

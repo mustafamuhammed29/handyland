@@ -33,6 +33,7 @@ router.get('/admin/stats', protect, authorize('admin'), getOrderStats);
 router.put('/admin/:id/status', protect, authorize('admin'), updateOrderStatus);
 
 // User routes (protected)
+router.get('/', protect, getMyOrders); // Convenience route for GET /api/orders
 router.get('/my', protect, getMyOrders);
 router.get('/:id', protect, getOrder);
 router.post('/apply-coupon', protect, applyCoupon);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { api } from '../utils/api';
 
 interface HeroSettings {
     headline: string;
@@ -144,16 +145,17 @@ export default function SettingsManager() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/settings')
-            .then(res => res.json())
-            .then(data => {
-                setSettings(prev => ({ ...prev, ...data }));
+        const fetchSettings = async () => {
+            try {
+                const response = await api.get('/api/settings');
+                setSettings(prev => ({ ...prev, ...response.data }));
+            } catch (err) {
+                console.error('Failed to fetch settings:', err);
+            } finally {
                 setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setLoading(false);
-            });
+            }
+        };
+        fetchSettings();
     }, []);
 
     const handleChange = (section: keyof Settings | null, key: string, value: string | number | boolean | any) => {
@@ -169,14 +171,11 @@ export default function SettingsManager() {
 
     const handleSave = async () => {
         try {
-            await fetch('http://localhost:5000/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings)
-            });
-            alert('Settings saved!');
+            await api.put('/api/settings', settings);
+            alert('Settings saved successfully!');
         } catch (error) {
-            console.error("Failed to save", error);
+            console.error("Failed to save settings:", error);
+            alert('Failed to save settings. Please check console for details.');
         }
     };
 

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageCode } from '../types';
 import { Search, Wrench, Clock, MessageSquare, Zap, Activity, ChevronRight, Cpu, Smartphone, AlertTriangle, Battery, Monitor, Cable, Camera, ScanLine, X, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 // import { getRepairAdvice } from '../services/geminiService'; // Removed
 
 
 import { translations } from '../i18n';
 import { useSettings } from '../context/SettingsContext';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { api } from '../utils/api';
 
 // --- DATA STRUCTURES ---
@@ -49,6 +52,9 @@ interface RepairProps {
 export const Repair: React.FC<RepairProps> = ({ lang }) => {
     const t = translations[lang];
     const { settings } = useSettings();
+    const { isAuthenticated } = useAuth();
+    const { addToast } = useToast();
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [aiAdvice, setAiAdvice] = useState<string | null>(null);
     const [loadingAdvice, setLoadingAdvice] = useState(false);
@@ -101,6 +107,38 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
         if (!url) return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80';
         if (url.startsWith('http')) return url;
         return `http://127.0.0.1:5000${url}`;
+    };
+
+    // Handle Initialize Repair Button
+    const handleInitializeRepair = async (service: RepairServiceItem) => {
+        if (!isAuthenticated) {
+            addToast('Please login to book a repair', 'error');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const repairData = {
+                device: selectedDevice?.model,
+                brand: selectedDevice?.brand,
+                service: service.label,
+                price: service.price,
+                status: 'pending',
+                estimatedDuration: service.duration
+            };
+
+            await api.post('/api/repairs/tickets', repairData);
+            addToast('Repair request submitted successfully!', 'success');
+            setSelectedDevice(null);
+
+            // Redirect to dashboard repairs
+            setTimeout(() => {
+                navigate('/dashboard?tab=repairs');
+            }, 1500);
+        } catch (error) {
+            console.error('Failed to create repair ticket:', error);
+            addToast('Failed to submit repair request. Please try again.', 'error');
+        }
     };
 
     return (
@@ -176,7 +214,10 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                             </div>
                                             <div className="text-right">
                                                 <div className="text-xl font-bold text-blue-400">{service.price}{t.currency}</div>
-                                                <button className="mt-2 text-[10px] font-bold uppercase tracking-wider bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded transition-colors shadow-lg shadow-blue-900/20">
+                                                <button
+                                                    onClick={() => handleInitializeRepair(service)}
+                                                    className="mt-2 text-[10px] font-bold uppercase tracking-wider bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded transition-colors shadow-lg shadow-blue-900/20"
+                                                >
                                                     Initialize
                                                 </button>
                                             </div>
