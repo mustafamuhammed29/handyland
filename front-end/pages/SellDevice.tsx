@@ -11,8 +11,17 @@ const validateIban = (iban: string): { valid: boolean; message?: string } => {
     }
     const countryCode = cleaned.substring(0, 2);
     const lengths: Record<string, number> = { DE: 22, AT: 20, CH: 21 };
+    const patterns: Record<string, RegExp> = {
+        DE: /^DE\d{20}$/,
+        AT: /^AT\d{18}$/,
+        CH: /^CH\d{19}$/
+    };
+
     if (lengths[countryCode] && cleaned.length !== lengths[countryCode]) {
         return { valid: false, message: `${countryCode} IBAN must be exactly ${lengths[countryCode]} characters` };
+    }
+    if (patterns[countryCode] && !patterns[countryCode].test(cleaned)) {
+        return { valid: false, message: `Invalid format for ${countryCode} IBAN` };
     }
     if (!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(cleaned)) {
         return { valid: false, message: 'Invalid IBAN format' };

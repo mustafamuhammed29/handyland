@@ -3,7 +3,9 @@ import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { LanguageCode } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Truck, ShieldCheck, Lock, ArrowRight, Wallet, CheckCircle } from 'lucide-react';
+import { CreditCard, Truck, ShieldCheck, Lock, ArrowRight, Wallet, CheckCircle, AlertCircle } from 'lucide-react';
+import { api } from '../utils/api';
+import { getSecureItem, setSecureItem } from '../utils/storage';
 
 interface CheckoutProps {
     lang: LanguageCode;
@@ -15,46 +17,88 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
+
+    const [shippingInfo, setShippingInfo] = useState({
+        fullName: '',
+        email: '',
+        phone: '',
+        country: 'DE',
+        street: '',
+        city: '',
+        zipCode: ''
+    });
+
+    // Load saved shipping info on mount
+    React.useEffect(() => {
+        const savedInfo = getSecureItem('shippingInfo');
+        if (savedInfo) {
+            setShippingInfo(prev => ({ ...prev, ...savedInfo }));
+        }
+    }, []);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setShippingInfo(prev => {
+            const updated = { ...prev, [name]: value };
+            // Save to secure storage with a slight delay or directly (storage ops are sync but fast enough for text input usually, 
+            // but for better perf we could denounce. For now direct is fine for simple fields)
+            setSecureItem('shippingInfo', updated);
+            return updated;
+        });
+    };
+
+    const validatePhone = (phone: string) => {
+        // Regex for international phone numbers (e.g., +49..., 017...)
+        const phoneRegex = /^(\+|00)[1-9][0-9 \-\(\)\.]{7,32}$|^0[1-9][0-9 \-\(\)\.]{6,32}$/;
+        return phoneRegex.test(phone);
+    };
 
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!termsAccepted) {
+            addToast("Please accept the Terms and Conditions", "error");
+            return;
+        }
+
+        const { fullName, email, phone, street, city, zipCode, country } = shippingInfo;
+        if (!fullName || !email || !phone || !street || !city || !zipCode) {
+            addToast("Please fill in all shipping details", "error");
+            return;
+        }
+
+        if (!validatePhone(phone)) {
+            addToast("Please enter a valid phone number (e.g., +49 123 45678 or 0171 2345678)", "error");
+            return;
+        }
+
         setIsProcessing(true);
 
         try {
-            const token = localStorage.getItem('userToken');
-            if (!token) {
-                addToast("Please login to complete purchase", "error");
-                navigate('/login');
-                return;
-            }
-
             // Map cart to backend expected items format
             const items = cart.map(item => ({
                 name: item.title,
                 price: item.price,
                 image: item.image,
-                quantity: 1, // Assuming 1 for now
-                product: item.id, // Assuming id is the product id
-                productType: 'device' // Defaulting
+                quantity: 1,
+                product: item.id,
+                productType: 'Product'
             }));
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/payment/create-checkout-session`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+            const data = await api.post('/api/payment/create-checkout-session', {
+                items,
+                shippingAddress: {
+                    fullName,
+                    email,
+                    phone,
+                    street,
+                    city,
+                    zipCode,
+                    country
                 },
-                body: JSON.stringify({
-                    items,
-                    shippingAddress: {
-                        line1: "123 Test St", // You might want to collect this from form
-                        city: "Berlin",
-                        country: "DE"
-                    }
-                }),
+                termsAccepted
             });
-
-            const data = await response.json();
 
             if (data.url) {
                 window.location.href = data.url;
@@ -64,6 +108,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         } catch (error: any) {
             console.error('Payment error:', error);
             addToast(error.message || "Failed to initiate payment", "error");
+        } finally {
             setIsProcessing(false);
         }
     };
@@ -108,11 +153,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                             <Truck className="w-5 h-5 text-blue-400" /> Shipping Details
                         </h3>
                         <div className="grid md:grid-cols-2 gap-4">
-                            <input type="text" placeholder="Full Name" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <input type="email" placeholder="Email Address" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <input type="tel" placeholder="Phone Number (+49...)" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <select className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500">
-                                <option value="">Select Country</option>
+                            <input name="fullName" value={shippingInfo.fullName} onChange={handleInputChange} type="text" placeholder="Full Name" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                            <input name="email" value={shippingInfo.email} onChange={handleInputChange} type="email" placeholder="Email Address" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                            <input name="phone" value={shippingInfo.phone} onChange={handleInputChange} type="tel" placeholder="Phone (+49... or 017...)" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                            <select name="country" value={shippingInfo.country} onChange={handleInputChange} className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500">
                                 <option value="DE">🇩🇪 Germany</option>
                                 <option value="AT">🇦🇹 Austria</option>
                                 <option value="CH">🇨🇭 Switzerland</option>
@@ -129,9 +173,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                 <option value="US">🇺🇸 United States</option>
                                 <option value="TR">🇹🇷 Turkey</option>
                             </select>
-                            <input type="text" placeholder="Address Line 1" className="md:col-span-2 bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <input type="text" placeholder="City" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <input type="text" placeholder="Postal Code" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                            <input name="street" value={shippingInfo.street} onChange={handleInputChange} type="text" placeholder="Address (Street, House No.)" className="md:col-span-2 bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                            <input name="city" value={shippingInfo.city} onChange={handleInputChange} type="text" placeholder="City" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                            <input name="zipCode" value={shippingInfo.zipCode} onChange={handleInputChange} type="text" placeholder="Postal Code" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
                         </div>
                     </div>
 
@@ -179,38 +223,59 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                             ))}
                         </div>
 
-                        <div className="border-t border-slate-800 pt-4 space-y-2 mb-6">
-                            <div className="flex justify-between text-slate-400 text-sm">
-                                <span>Subtotal</span>
-                                <span>{cartTotal}€</span>
-                            </div>
-                            <div className="flex justify-between text-slate-400 text-sm">
-                                <span>Shipping</span>
-                                <span className="text-emerald-400">Free</span>
-                            </div>
-                            <div className="flex justify-between text-white font-bold text-lg pt-2">
-                                <span>Total</span>
-                                <span className="text-cyan-400">{cartTotal}€</span>
-                            </div>
-                        </div>
+                    </div>
 
-                        <button
-                            onClick={handlePayment}
-                            disabled={isProcessing}
-                            className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
-                        >
-                            {isProcessing ? (
-                                <span className="animate-pulse">Processing...</span>
-                            ) : (
-                                <>
-                                    Confirm Payment <ArrowRight className="w-5 h-5" />
-                                </>
-                            )}
-                        </button>
+                    {/* Terms */}
+                    <div className="mb-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                        <label className="flex items-start gap-3 cursor-pointer group">
+                            <div className="relative flex items-center mt-1">
+                                <input
+                                    type="checkbox"
+                                    checked={termsAccepted}
+                                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                                    className="sr-only"
+                                />
+                                <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${termsAccepted ? 'bg-cyan-500 border-cyan-500' : 'bg-black/40 border-slate-600 group-hover:border-slate-500'}`}>
+                                    {termsAccepted && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                                </div>
+                            </div>
+                            <span className="text-xs text-slate-400 leading-relaxed">
+                                I agree to the <span className="text-cyan-400 hover:underline">Terms of Service</span> and <span className="text-cyan-400 hover:underline">Privacy Policy</span>. I confirm that all provided shipping information is correct.
+                            </span>
+                        </label>
+                    </div>
 
-                        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
-                            <ShieldCheck className="w-3 h-3" /> SSL Encrypted Transaction
+                    <div className="border-t border-slate-800 pt-4 space-y-2 mb-6">
+                        <div className="flex justify-between text-slate-400 text-sm">
+                            <span>Subtotal</span>
+                            <span>{cartTotal}€</span>
                         </div>
+                        <div className="flex justify-between text-slate-400 text-sm">
+                            <span>Shipping</span>
+                            <span className="text-emerald-400">Free</span>
+                        </div>
+                        <div className="flex justify-between text-white font-bold text-lg pt-2">
+                            <span>Total</span>
+                            <span className="text-cyan-400">{cartTotal}€</span>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handlePayment}
+                        disabled={isProcessing}
+                        className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        {isProcessing ? (
+                            <span className="animate-pulse">Processing...</span>
+                        ) : (
+                            <>
+                                Confirm Payment <ArrowRight className="w-5 h-5" />
+                            </>
+                        )}
+                    </button>
+
+                    <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
+                        <ShieldCheck className="w-3 h-3" /> SSL Encrypted Transaction
                     </div>
                 </div>
             </div>

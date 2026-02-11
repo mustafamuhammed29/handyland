@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     User, Package, Wrench, Settings, LogOut, Activity,
-    Wallet, Bell, Shield, BarChart3
+    Wallet, Bell, Shield, BarChart3, Mail, FileText, Globe, Box
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserType } from '../types';
@@ -13,7 +13,11 @@ import {
     DashboardWallet,
     DashboardValuations,
     DashboardWishlist,
-    DashboardSettings
+    DashboardSettings,
+    DashboardMessages,
+    DashboardPages,
+    DashboardAccessories,
+    DashboardGlobalSettings
 } from './dashboard/index';
 import { api } from '../utils/api';
 
@@ -24,7 +28,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout }) => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'repairs' | 'wallet' | 'settings' | 'valuations' | 'wishlist'>('overview');
+    const [activeTab, setActiveTab] = useState('overview');
     const [showNotifications, setShowNotifications] = useState(false);
 
     // Use the new data fetching hook
@@ -45,6 +49,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     } = dashboardData;
 
     const unreadCount = notifications.data?.filter((n: any) => !n.read).length || 0;
+    const currentUser = user.data || initialUser;
+    const isAdmin = currentUser?.role === 'admin';
 
     // Handler functions
     const handleDownloadInvoice = async (orderId: string) => {
@@ -107,9 +113,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         }
     };
 
-    if (!initialUser) {
+    if (!currentUser) {
         return null;
     }
+
+    const navItems = [
+        { id: 'overview', label: 'Overview', icon: <Activity className="w-4 h-4" /> },
+        { id: 'orders', label: 'My Orders', icon: <Package className="w-4 h-4" /> },
+        { id: 'repairs', label: 'Active Repairs', icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.length || 0 },
+        { id: 'valuations', label: 'My Valuations', icon: <BarChart3 className="w-4 h-4" /> },
+        { id: 'wallet', label: 'Digital Wallet', icon: <Wallet className="w-4 h-4" /> },
+        { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
+    ];
+
+    const adminNavItems = [
+        { id: 'messages', label: 'Messages', icon: <Mail className="w-4 h-4" /> },
+        { id: 'pages', label: 'Pages', icon: <FileText className="w-4 h-4" /> },
+        { id: 'accessories', label: 'Accessories', icon: <Box className="w-4 h-4" /> },
+        { id: 'global-settings', label: 'Site Settings', icon: <Globe className="w-4 h-4" /> },
+    ];
 
     return (
         <div className="min-h-screen pt-28 pb-12 px-4 max-w-7xl mx-auto">
@@ -122,31 +144,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         <div className="flex items-center gap-4 mb-8">
                             <div className="relative">
                                 <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-900/30">
-                                    {(user.data?.name || initialUser.name).charAt(0).toUpperCase()}
+                                    {(currentUser.name).charAt(0).toUpperCase()}
                                 </div>
                                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
                             </div>
                             <div className="overflow-hidden">
-                                <h3 className="text-white font-bold truncate">{user.data?.name || initialUser.name}</h3>
+                                <h3 className="text-white font-bold truncate">{currentUser.name}</h3>
                                 <div className="flex items-center gap-1 text-xs text-cyan-400">
-                                    <Shield className="w-3 h-3" /> Premium
+                                    <Shield className="w-3 h-3" /> {isAdmin ? 'Administrator' : 'Premium Member'}
                                 </div>
                             </div>
                         </div>
 
                         {/* Navigation */}
                         <nav className="space-y-2">
-                            {[
-                                { id: 'overview', label: 'Overview', icon: <Activity className="w-4 h-4" /> },
-                                { id: 'orders', label: 'My Orders', icon: <Package className="w-4 h-4" /> },
-                                { id: 'repairs', label: 'Active Repairs', icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.length || 0 },
-                                { id: 'valuations', label: 'My Valuations', icon: <BarChart3 className="w-4 h-4" /> },
-                                { id: 'wallet', label: 'Digital Wallet', icon: <Wallet className="w-4 h-4" /> },
-                                { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
-                            ].map((item) => (
+                            {navItems.map((item) => (
                                 <button
                                     key={item.id}
-                                    onClick={() => setActiveTab(item.id as any)}
+                                    onClick={() => setActiveTab(item.id)}
                                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 font-medium ${activeTab === item.id
                                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
                                         : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -163,6 +178,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                     )}
                                 </button>
                             ))}
+
+                            {isAdmin && (
+                                <>
+                                    <div className="h-px bg-slate-800 my-4 mx-2"></div>
+                                    <p className="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Admin</p>
+                                    {adminNavItems.map((item) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => setActiveTab(item.id)}
+                                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 font-medium ${activeTab === item.id
+                                                ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20'
+                                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {item.icon}
+                                                <span>{item.label}</span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </>
+                            )}
 
                             <div className="h-px bg-slate-800 my-4"></div>
 
@@ -216,7 +253,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
                 {/* --- MAIN CONTENT --- */}
                 <div className="flex-1 min-w-0">
-                    {/* Overview Tab */}
+                    {/* Public Tabs */}
                     {activeTab === 'overview' && (
                         <DashboardOverview
                             stats={stats.data || {}}
@@ -227,7 +264,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         />
                     )}
 
-                    {/* Orders Tab */}
                     {activeTab === 'orders' && (
                         <DashboardOrders
                             orders={orders.data || []}
@@ -236,7 +272,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         />
                     )}
 
-                    {/* Repairs Tab */}
                     {activeTab === 'repairs' && (
                         <DashboardRepairs
                             repairs={repairs.data || []}
@@ -244,7 +279,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         />
                     )}
 
-                    {/* Valuations Tab */}
                     {activeTab === 'valuations' && (
                         <DashboardValuations
                             valuations={valuations.data || []}
@@ -253,7 +287,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         />
                     )}
 
-                    {/* Wallet Tab */}
                     {activeTab === 'wallet' && (
                         <DashboardWallet
                             balance={(wallet.data as any)?.balance || 0}
@@ -263,10 +296,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         />
                     )}
 
-                    {/* Settings Tab */}
                     {activeTab === 'settings' && (
                         <DashboardSettings
-                            user={user.data || initialUser}
+                            user={currentUser}
                             addresses={addresses.data || []}
                             onUpdateProfile={handleUpdateProfile}
                             onUpdatePassword={handleUpdatePassword}
@@ -274,14 +306,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         />
                     )}
 
-                    {/* Wishlist Tab (if needed) */}
-                    {activeTab === 'wishlist' && (
-                        <DashboardWishlist
-                            wishlistItems={[]}
-                            isLoading={false}
-                            onRemove={handleRemoveWishlistItem}
-                        />
-                    )}
+                    {/* Admin Tabs */}
+                    {isAdmin && activeTab === 'messages' && <DashboardMessages />}
+                    {isAdmin && activeTab === 'pages' && <DashboardPages />}
+                    {isAdmin && activeTab === 'accessories' && <DashboardAccessories />}
+                    {isAdmin && activeTab === 'global-settings' && <DashboardGlobalSettings />}
                 </div>
             </div>
         </div>

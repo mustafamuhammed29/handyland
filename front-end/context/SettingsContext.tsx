@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from './ToastContext';
+import { api } from '../utils/api';
 
 interface HeroSettings {
     bgStart: string;
@@ -54,8 +55,8 @@ interface SectionSettings {
 
 interface FooterSettings {
     aboutText: string;
-    tagline?: string; // Added
-    copyright?: string; // Added
+    tagline?: string;
+    copyright?: string;
     quickLinks: boolean;
     legalLinks: boolean;
     newsletter: boolean;
@@ -110,8 +111,8 @@ const defaultSettings: Settings = {
     hero: {
         bgStart: '#0f172a',
         bgEnd: '#020617',
-        headline: '', // Removed Static Default
-        subheadline: '', // Removed Static Default
+        headline: '',
+        subheadline: '',
         accentColor: '#22d3ee',
         buttonMarket: '',
         buttonValuation: '',
@@ -158,12 +159,17 @@ const defaultSettings: Settings = {
     },
     footerSection: {
         aboutText: '',
-        tagline: '', // Added
-        copyright: '', // Added
+        tagline: '',
+        copyright: '',
         quickLinks: true,
         legalLinks: true,
         newsletter: true,
         socialLinks: true
+    },
+    navbar: {
+        logoText: 'HANDY',
+        logoAccentText: 'LAND',
+        showLanguageSwitcher: true
     }
 };
 
@@ -178,9 +184,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const response = await fetch('/api/settings');
-                if (!response.ok) throw new Error('Failed to fetch settings');
-                const data = await response.json();
+                const data = await api.get<Settings>('/api/settings');
 
                 // Deep merge defaults with fetched data
                 setSettings(prev => ({
@@ -191,14 +195,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     stats: { ...prev.stats, ...data.stats },
                     repairArchive: { ...prev.repairArchive, ...data.repairArchive },
                     valuation: { ...prev.valuation, ...data.valuation },
-                    sections: { ...prev.sections, ...data.sections }
+                    sections: { ...prev.sections, ...data.sections },
+                    contactSection: { ...prev.contactSection, ...data.contactSection },
+                    footerSection: { ...prev.footerSection, ...data.footerSection },
+                    navbar: { ...prev.navbar, ...data.navbar },
                 }));
 
                 setLoading(false);
             } catch (error) {
                 console.error("Failed to load global settings", error);
-                // CRITICAL: Do NOT partial load defaults here if we want to show a global error.
-                // Instead, set an error state.
                 setError(true);
                 setLoading(false);
             }
@@ -208,9 +213,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, []);
 
     const updateSettings = async (newSettings: Settings) => {
-        const optimistic = { ...settings, ...newSettings };
-        setSettings(optimistic);
-        addToast('Settings updated', 'success');
+        try {
+            // Optimistic update
+            setSettings(newSettings);
+
+            // Persist to backend
+            await api.put('/api/settings', newSettings);
+
+            addToast('Settings updated', 'success');
+        } catch (error) {
+            console.error("Failed to update settings", error);
+            addToast('Failed to update settings', 'error');
+            // could revert here if needed
+        }
     };
 
     return (

@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('./utils/logger');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const sanitize = require('./middleware/sanitize');
+const csrfProtection = require('./middleware/csrf');
 
 dotenv.config();
 const validateEnv = require('./config/validateEnv');
@@ -84,7 +85,7 @@ app.use(cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-XSRF-Token']
 }));
 
 // Body parser
@@ -163,6 +164,7 @@ app.use('/api/transactions', require('./routes/transactionRoutes')); // Added
 app.use('/api/notifications', require('./routes/notificationRoutes')); // Added
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
+app.use('/api/messages', require('./routes/messageRoutes')); // Registered Message Routes
 
 // Basic Routes
 app.get('/', (req, res) => {

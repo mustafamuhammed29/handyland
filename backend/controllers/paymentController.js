@@ -26,7 +26,14 @@ const Coupon = require('../models/Coupon');
 // @access  Private
 exports.createCheckoutSession = async (req, res) => {
     try {
-        const { items, shippingAddress, couponCode, discountAmount } = req.body;
+        const { items, shippingAddress, couponCode, discountAmount, termsAccepted } = req.body;
+
+        if (!termsAccepted) {
+            return res.status(400).json({
+                success: false,
+                message: 'You must accept the terms and conditions to proceed'
+            });
+        }
 
         if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({
@@ -115,7 +122,7 @@ exports.createCheckoutSession = async (req, res) => {
                 fullName: shippingAddress.fullName,
                 email: shippingAddress.email,
                 phone: shippingAddress.phone,
-                street: shippingAddress.address, // Mapping address to street
+                street: shippingAddress.street,
                 city: shippingAddress.city,
                 zipCode: shippingAddress.zipCode,
                 country: shippingAddress.country
