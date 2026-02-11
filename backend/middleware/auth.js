@@ -25,6 +25,19 @@ exports.protect = async (req, res, next) => {
         }
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+        // Check token expiry explicitly
+        if (decoded.exp) {
+            const expiresIn = decoded.exp - Math.floor(Date.now() / 1000);
+            if (expiresIn < 300) { // Less than 5 minutes
+                console.warn(`[Auth] Token for user ${decoded.id} expires in ${expiresIn}s`);
+            }
+        } else if (process.env.NODE_ENV === 'production') {
+            return res.status(401).json({
+                success: false,
+                message: 'Token missing expiry claim'
+            });
+        }
+
         // Get user from token
         req.user = await User.findById(decoded.id).select('-password');
 

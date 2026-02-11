@@ -33,4 +33,10 @@ const productSchema = new mongoose.Schema({
     numReviews: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// Performance indexes
+productSchema.index({ category: 1, isActive: 1 });
+productSchema.index({ name: 'text', description: 'text' });
+productSchema.index({ price: 1 });
+productSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Product', productSchema);

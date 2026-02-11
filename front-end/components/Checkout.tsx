@@ -38,7 +38,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                 productType: 'device' // Defaulting
             }));
 
-            const response = await fetch('http://localhost:5000/api/payment/create-checkout-session', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/payment/create-checkout-session`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -110,6 +110,25 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                         <div className="grid md:grid-cols-2 gap-4">
                             <input type="text" placeholder="Full Name" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
                             <input type="email" placeholder="Email Address" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                            <input type="tel" placeholder="Phone Number (+49...)" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                            <select className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500">
+                                <option value="">Select Country</option>
+                                <option value="DE">🇩🇪 Germany</option>
+                                <option value="AT">🇦🇹 Austria</option>
+                                <option value="CH">🇨🇭 Switzerland</option>
+                                <option value="NL">🇳🇱 Netherlands</option>
+                                <option value="BE">🇧🇪 Belgium</option>
+                                <option value="FR">🇫🇷 France</option>
+                                <option value="IT">🇮🇹 Italy</option>
+                                <option value="ES">🇪🇸 Spain</option>
+                                <option value="PL">🇵🇱 Poland</option>
+                                <option value="CZ">🇨🇿 Czech Republic</option>
+                                <option value="DK">🇩🇰 Denmark</option>
+                                <option value="SE">🇸🇪 Sweden</option>
+                                <option value="UK">🇬🇧 United Kingdom</option>
+                                <option value="US">🇺🇸 United States</option>
+                                <option value="TR">🇹🇷 Turkey</option>
+                            </select>
                             <input type="text" placeholder="Address Line 1" className="md:col-span-2 bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
                             <input type="text" placeholder="City" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
                             <input type="text" placeholder="Postal Code" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />

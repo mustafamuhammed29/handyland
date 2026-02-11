@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, User, Phone, MapPin, AlertCircle, Loader, Shield } from 'lucide-react';
+import { Mail, Lock, User, Phone, MapPin, AlertCircle, Loader, Shield, CheckCircle, XCircle } from 'lucide-react';
 import { validateEmail, validatePassword, validatePhone, validateRequired } from './validation';
 
 import { ENV } from './src/config/env';
@@ -206,10 +206,55 @@ const Register: React.FC = () => {
                                         onChange={handleChange}
                                         placeholder="••••••••"
                                         required
-                                        minLength={6}
+                                        minLength={8}
                                         className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                                     />
                                 </div>
+
+                                {/* Password Strength Indicator */}
+                                {formData.password.length > 0 && (() => {
+                                    const checks = {
+                                        length: formData.password.length >= 8,
+                                        upper: /[A-Z]/.test(formData.password),
+                                        number: /[0-9]/.test(formData.password),
+                                        special: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
+                                    };
+                                    const passed = Object.values(checks).filter(Boolean).length;
+                                    const strengthLabel = passed <= 1 ? 'Weak' : passed === 2 ? 'Fair' : passed === 3 ? 'Good' : 'Strong';
+                                    const strengthColor = passed <= 1 ? 'bg-red-500' : passed === 2 ? 'bg-yellow-500' : passed === 3 ? 'bg-blue-500' : 'bg-emerald-500';
+                                    const textColor = passed <= 1 ? 'text-red-400' : passed === 2 ? 'text-yellow-400' : passed === 3 ? 'text-blue-400' : 'text-emerald-400';
+
+                                    return (
+                                        <div className="mt-3 space-y-2">
+                                            {/* Strength Bar */}
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden flex gap-1">
+                                                    {[1, 2, 3, 4].map(i => (
+                                                        <div
+                                                            key={i}
+                                                            className={`h-full flex-1 rounded-full transition-all duration-300 ${i <= passed ? strengthColor : 'bg-slate-700'}`}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <span className={`text-[10px] font-bold uppercase tracking-wider ${textColor}`}>{strengthLabel}</span>
+                                            </div>
+                                            {/* Requirements Checklist */}
+                                            <div className="grid grid-cols-2 gap-1">
+                                                {[
+                                                    { ok: checks.length, label: '8+ characters' },
+                                                    { ok: checks.upper, label: 'Uppercase' },
+                                                    { ok: checks.number, label: 'Number' },
+                                                    { ok: checks.special, label: 'Special char' },
+                                                ].map(req => (
+                                                    <div key={req.label} className={`flex items-center gap-1.5 text-[10px] transition-colors ${req.ok ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                                        {req.ok ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                                        {req.label}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
 
                             {/* Confirm Password */}
@@ -229,6 +274,13 @@ const Register: React.FC = () => {
                                         className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                                     />
                                 </div>
+                                {/* Password Match Indicator */}
+                                {formData.confirmPassword.length > 0 && (
+                                    <div className={`flex items-center gap-1.5 mt-2 text-[10px] transition-colors ${formData.password === formData.confirmPassword ? 'text-emerald-400' : 'text-red-400'}`}>
+                                        {formData.password === formData.confirmPassword ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                        {formData.password === formData.confirmPassword ? 'Passwords match' : 'Passwords do not match'}
+                                    </div>
+                                )}
                             </div>
                         </div>
 

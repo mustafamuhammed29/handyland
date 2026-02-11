@@ -13,6 +13,7 @@ if (process.env.STRIPE_SECRET_KEY) {
     };
 }
 const { sendEmail, emailTemplates } = require('../utils/emailService');
+const { emitOrderUpdate, emitNewOrder } = require('../utils/socket');
 
 // @desc    Apply Coupon
 // @route   POST /api/orders/apply-coupon
@@ -170,13 +171,23 @@ exports.createOrder = async (req, res) => {
 // @access  Private
 exports.getMyOrders = async (req, res) => {
     try {
-        const orders = await Order.find({ user: req.user.id })
+        const { page = 1, limit = 10, status } = req.query;
+        const query = { user: req.user.id };
+        if (status) query.status = status;
+
+        const orders = await Order.find(query)
             .sort({ createdAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
             .populate('user', 'name email');
+
+        const count = await Order.countDocuments(query);
 
         res.status(200).json({
             success: true,
-            count: orders.length,
+            count,
+            totalPages: Math.ceil(count / limit),
+            currentPage: Number(page),
             orders
         });
     } catch (error) {
@@ -369,6 +380,11 @@ exports.updateOrderStatus = async (req, res) => {
             } catch (emailError) {
                 console.error('Email sending failed:', emailError);
             }
+        }
+
+        // Real-time notification via Socket.IO
+        if (status && status !== oldStatus) {
+            emitOrderUpdate(order.user?._id?.toString(), order);
         }
 
         res.status(200).json({

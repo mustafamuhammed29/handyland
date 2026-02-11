@@ -242,6 +242,16 @@ exports.handleWebhook = async (req, res) => {
     const sig = req.headers['stripe-signature'];
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+    if (!webhookSecret) {
+        console.error('[Webhook] STRIPE_WEBHOOK_SECRET is not configured');
+        return res.status(500).send('Webhook secret not configured');
+    }
+
+    if (!sig) {
+        console.error('[Webhook] Missing stripe-signature header');
+        return res.status(400).send('Missing signature');
+    }
+
     let event;
 
     try {
@@ -251,9 +261,11 @@ exports.handleWebhook = async (req, res) => {
             webhookSecret
         );
     } catch (err) {
-        console.error('Webhook signature verification failed:', err.message);
+        console.error('[Webhook] Signature verification failed:', err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+
+    console.log(`[Webhook] Received event: ${event.type} (${event.id})`);
 
     // Handle the event
     if (event.type === 'checkout.session.completed') {
@@ -348,13 +360,50 @@ exports.handleWebhook = async (req, res) => {
         }
     } else if (event.type === 'payment_intent.payment_failed') {
         const paymentIntent = event.data.object;
-        console.log('Payment failed:', paymentIntent.id);
-        // Find order and mark failed?
-        // We might not have orderId in payment_intent metadata if we only put it in session metadata.
-        // Session creates payment_intent. Does it copy metadata? Not by default.
-        // So we might miss marking it failed. But 'pending' is fine.
+        console.log('[Webhook] Payment failed:', paymentIntent.id);
+
+        try {
+            // Find order by payment intent or session metadata
+            const order = await Order.findOne({ paymentId: paymentIntent.id });
+            if (order && (order.status === 'pending' || order.status === 'pending_payment')) {
+                order.status = 'cancelled';
+                order.paymentStatus = 'failed';
+                await order.save();
+                console.log(`[Webhook] Order ${order.orderNumber} marked as failed`);
+            }
+        } catch (err) {
+            console.error('[Webhook] Error handling payment failure:', err);
+        }
+    } else if (event.type === 'charge.refunded') {
+        const charge = event.data.object;
+        console.log('[Webhook] Charge refunded:', charge.id);
+
+        try {
+            const order = await Order.findOne({ paymentId: charge.payment_intent });
+            if (order) {
+                order.paymentStatus = 'refunded';
+                order.status = 'refunded';
+                await order.save();
+
+                // Record refund transaction
+                if (order.user) {
+                    await Transaction.create({
+                        user: order.user,
+                        order: order._id,
+                        amount: -charge.amount_refunded / 100,
+                        status: 'completed',
+                        paymentMethod: 'card',
+                        stripePaymentId: charge.id,
+                        description: `Refund for Order #${order.orderNumber}`
+                    });
+                }
+                console.log(`[Webhook] Order ${order.orderNumber} marked as refunded`);
+            }
+        } catch (err) {
+            console.error('[Webhook] Error handling refund:', err);
+        }
     } else {
-        console.log(`Unhandled event type ${event.type}`);
+        console.log(`[Webhook] Unhandled event type: ${event.type}`);
     }
 
     res.json({ received: true });

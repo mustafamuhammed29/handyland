@@ -3,6 +3,29 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const { protect, authorize } = require('../middleware/auth');
 
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     summary: Get all products
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 12 }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: brand
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: List of products with pagination info
+ */
 router.get('/', productController.getAllProducts);
 router.get('/:id', productController.getProductById);
 router.post('/', productController.createProduct);
