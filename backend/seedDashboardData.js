@@ -150,18 +150,18 @@ const seedDashboardData = async () => {
             {
                 user: testUser._id,
                 device: 'iPhone 12 Pro',
+                specs: '256GB - Unlocked',
                 condition: 'excellent',
-                storage: '256GB',
                 estimatedValue: 450,
-                status: 'saved'
+                status: 'active'
             },
             {
                 user: testUser._id,
                 device: 'iPad Air',
+                specs: '128GB - WiFi',
                 condition: 'good',
-                storage: '128GB',
                 estimatedValue: 280,
-                status: 'saved'
+                status: 'active'
             }
         ]);
         console.log(`✅ Created ${valuations.length} valuations`);
@@ -173,14 +173,16 @@ const seedDashboardData = async () => {
                 type: 'credit',
                 amount: 100,
                 description: 'Initial wallet credit',
-                status: 'completed'
+                status: 'completed',
+                paymentMethod: 'wallet'
             },
             {
                 user: testUser._id,
                 type: 'debit',
                 amount: 25,
                 description: 'Used for purchase',
-                status: 'completed'
+                status: 'completed',
+                paymentMethod: 'wallet'
             }
         ]);
         console.log(`✅ Created ${transactions.length} transactions`);
