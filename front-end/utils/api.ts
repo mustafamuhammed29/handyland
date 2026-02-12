@@ -42,12 +42,11 @@ const getCookie = (name: string) => {
 };
 
 const request = async (endpoint: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem('token');
+    // Token is now in httpOnly cookie, no need to get from localStorage
     const xsrfToken = getCookie('XSRF-TOKEN');
 
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(xsrfToken ? { 'X-XSRF-Token': xsrfToken } : {}),
         ...options.headers,
     };
@@ -68,7 +67,7 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
         });
 
         if (response.status === 401) {
-            localStorage.removeItem('token');
+            // No need to remove token from localStorage anymore
             window.location.href = '/login';
             throw new ApiError(401, 'Session expired. Please login again.');
         }

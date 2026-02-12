@@ -206,7 +206,7 @@ const Register: React.FC = () => {
                                         onChange={handleChange}
                                         placeholder="••••••••"
                                         required
-                                        minLength={8}
+                                        minLength={12}
                                         className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                                     />
                                 </div>
@@ -214,7 +214,7 @@ const Register: React.FC = () => {
                                 {/* Password Strength Indicator */}
                                 {formData.password.length > 0 && (() => {
                                     const checks = {
-                                        length: formData.password.length >= 8,
+                                        length: formData.password.length >= 12,
                                         upper: /[A-Z]/.test(formData.password),
                                         number: /[0-9]/.test(formData.password),
                                         special: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),

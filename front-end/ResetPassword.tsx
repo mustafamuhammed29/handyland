@@ -33,9 +33,9 @@ const ResetPassword: React.FC = () => {
             return;
         }
 
-        if (password.length < 6) {
+        if (password.length < 12) {
             setStatus('error');
-            setMessage('Password must be at least 6 characters');
+            setMessage('Password must be at least 12 characters');
             return;
         }
 
@@ -131,7 +131,7 @@ const ResetPassword: React.FC = () => {
                                             onChange={(e) => setPassword(e.target.value)}
                                             placeholder="••••••••"
                                             required
-                                            minLength={6}
+                                            minLength={12}
                                             className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                                         />
                                     </div>

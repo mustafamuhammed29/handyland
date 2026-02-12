@@ -45,11 +45,11 @@ exports.register = async (req, res) => {
         const verificationToken = crypto.randomBytes(32).toString('hex');
 
         // Check password strength
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{12,}$/;
         if (!passwordRegex.test(password)) {
             return res.status(400).json({
                 success: false,
-                message: 'Password must be at least 8 characters long and include at least one letter, one number, and one special character.'
+                message: 'Password must be at least 12 characters long and include at least one letter, one number, and one special character.'
             });
         }
 
@@ -142,6 +142,14 @@ exports.login = async (req, res) => {
 
         const token = generateToken(user._id);
 
+        // Send access token in HTTP-only cookie
+        res.cookie('accessToken', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000 // 15 minutes
+        });
+
         // Generate Refresh Token (Opaque)
         const refreshToken = crypto.randomBytes(40).toString('hex');
         const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
@@ -163,7 +171,6 @@ exports.login = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            token,
             user: {
                 id: user._id,
                 name: user.name,
@@ -324,10 +331,17 @@ exports.adminLogin = async (req, res) => {
 
         const token = generateToken(user._id);
 
+        // Send access token in HTTP-only cookie
+        res.cookie('accessToken', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000 // 15 minutes
+        });
+
         res.status(200).json({
             success: true,
             message: 'Admin login successful',
-            token,
             user: {
                 id: user._id,
                 name: user.name,
