@@ -47,15 +47,27 @@ const RepairTicketSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Generate Ticket ID
-RepairTicketSchema.pre('save', async function () {
-    if (this.isNew) {
-        const date = new Date();
-        const year = date.getFullYear().toString().substr(-2);
-        const count = await this.constructor.countDocuments();
-        this.ticketId = `REP-${year}-${(count + 1).toString().padStart(4, '0')}`;
+// Generate Ticket ID - FIX
+RepairTicketSchema.pre('validate', async function () {
+    if (this.isNew && !this.ticketId) {
+        const year = new Date().getFullYear().toString().slice(-2);
 
-        // Add initial history
+        // Find last ticket with same year prefix
+        const lastTicket = await this.constructor.findOne({
+            ticketId: new RegExp(`^REP-${year}-`)
+        }).sort({ ticketId: -1 });
+
+        let sequence = 1;
+        if (lastTicket && lastTicket.ticketId) {
+            const lastSeq = parseInt(lastTicket.ticketId.split('-').pop());
+            if (!isNaN(lastSeq)) {
+                sequence = lastSeq + 1;
+            }
+        }
+
+        this.ticketId = `REP-${year}-${String(sequence).padStart(4, '0')}`;
+
+        // Add initial timeline entry
         if (this.timeline.length === 0) {
             this.timeline.push({
                 status: this.status,
