@@ -174,7 +174,7 @@ const seedDashboardData = async () => {
                 amount: 100,
                 description: 'Initial wallet credit',
                 status: 'completed',
-                paymentMethod: 'wallet'
+                paymentMethod: 'card'
             },
             {
                 user: testUser._id,
@@ -182,7 +182,7 @@ const seedDashboardData = async () => {
                 amount: 25,
                 description: 'Used for purchase',
                 status: 'completed',
-                paymentMethod: 'wallet'
+                paymentMethod: 'card'
             }
         ]);
         console.log(`✅ Created ${transactions.length} transactions`);
