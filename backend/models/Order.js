@@ -126,7 +126,7 @@ const OrderSchema = new mongoose.Schema({
 });
 
 // Generate order number before validation
-OrderSchema.pre('validate', async function (next) {
+OrderSchema.pre('validate', async function () {
     if (this.isNew && !this.orderNumber) {
         const date = new Date();
         const year = date.getFullYear();
@@ -146,7 +146,6 @@ OrderSchema.pre('validate', async function (next) {
 
         this.orderNumber = `HL-${year}${month}${day}-${String(sequence).padStart(4, '0')}`;
     }
-    next();
 });
 
 // Add initial status to history on save
