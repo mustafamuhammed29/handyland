@@ -23,7 +23,7 @@ const seedDashboardData = async () => {
 
         // Clear existing data for this user
         await Order.deleteMany({ user: testUser._id });
-        await RepairTicket.deleteMany({ user: testUser._id });
+        await RepairTicket.deleteMany({}); // Delete ALL to avoid ticketId collision
         await SavedValuation.deleteMany({ user: testUser._id });
         await Transaction.deleteMany({ user: testUser._id });
         await Address.deleteMany({ user: testUser._id });
@@ -126,8 +126,7 @@ const seedDashboardData = async () => {
                 device: 'iPhone 13',
                 issue: 'Screen replacement',
                 notes: 'Cracked screen needs replacement',
-                status: 'in_progress',
-                serviceType: 'repair',
+                status: 'repairing',
                 estimatedCost: 199
             },
             {
@@ -136,7 +135,6 @@ const seedDashboardData = async () => {
                 issue: 'Battery replacement',
                 notes: 'Battery drains quickly',
                 status: 'pending',
-                serviceType: 'repair',
                 appointmentDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             }
         ]);
