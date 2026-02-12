@@ -75,7 +75,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Backend Sync on Login
     useEffect(() => {
         const syncCart = async () => {
-            if (user) {
+            if (user && user._id) { // Ensure user has ID
                 try {
                     // Send local cart to server to merge
                     const response = await api.post<CartItem[]>('/api/cart/sync', {
@@ -91,14 +91,15 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     }
                 } catch (error) {
                     console.error("Failed to sync cart:", error);
+                    // If 401, don't retry immediately or clear user here (handled by interceptor)
                 }
             }
         };
 
-        if (user) {
+        if (user && user._id) {
             syncCart();
         }
-    }, [user]); // Run when user logs in
+    }, [user?._id]); // Only run when user ID changes, not just 'user' object reference
 
     // Keep ref for async operations
     const cartRef = React.useRef(cart);

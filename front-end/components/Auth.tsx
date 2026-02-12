@@ -270,6 +270,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                                                 value={digit}
                                                 onChange={(e) => handleOtpChange(i, e.target.value)}
                                                 className="w-12 h-14 bg-black/50 border border-slate-700 rounded-xl text-center text-2xl font-bold text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all"
+                                                aria-label={`Digit ${i + 1} of verification code`}
                                             />
                                         ))}
                                     </div>
