@@ -119,25 +119,30 @@ const seedDashboardData = async () => {
         const orders = [order1, order2];
         console.log(`✅ Created ${orders.length} orders`);
 
-        // Seed Repair Tickets
-        const tickets = await RepairTicket.create([
-            {
-                user: testUser._id,
-                device: 'iPhone 13',
-                issue: 'Screen replacement',
-                notes: 'Cracked screen needs replacement',
-                status: 'repairing',
-                estimatedCost: 199
-            },
-            {
-                user: testUser._id,
-                device: 'MacBook Pro',
-                issue: 'Battery replacement',
-                notes: 'Battery drains quickly',
-                status: 'pending',
-                appointmentDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-            }
-        ]);
+        // Seed Repair Tickets - مع ticketId يدوي
+        const ticket1 = new RepairTicket({
+            ticketId: `REP-${year}-${String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0')}`,
+            user: testUser._id,
+            device: 'iPhone 13',
+            issue: 'Screen replacement',
+            notes: 'Cracked screen needs replacement',
+            status: 'repairing',
+            estimatedCost: 199
+        });
+        await ticket1.save();
+
+        const ticket2 = new RepairTicket({
+            ticketId: `REP-${year}-${String(Math.floor(Math.random() * 9000) + 1001).padStart(4, '0')}`,
+            user: testUser._id,
+            device: 'MacBook Pro',
+            issue: 'Battery replacement',
+            notes: 'Battery drains quickly',
+            status: 'pending',
+            appointmentDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        });
+        await ticket2.save();
+
+        const tickets = [ticket1, ticket2];
         console.log(`✅ Created ${tickets.length} repair tickets`);
 
         // Seed Valuations
