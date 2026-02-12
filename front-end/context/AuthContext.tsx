@@ -14,7 +14,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
 
-    // Refresh Token Function
+    //  Refresh Token Function
     const refreshAccessToken = async () => {
         try {
             // Must include credentials to send cookies
@@ -27,17 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
 
             if (response.ok) {
-                const data = await response.json();
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    // Optionally update user if needed, but token is enough
-                    console.log("Token refreshed successfully");
-                    return true;
-                }
+                // New access token is now in httpOnly cookie
+                console.log("Token refreshed successfully");
+                return true;
             } else {
-                // If refresh fails (e.g. 403), user should probably be logged out effectively
-                // But we don't want to force logout if it's just a network error?
-                // If 403, it means refresh token is invalid.
+                // If refresh fails (e.g. 403), logout user
                 if (response.status === 403 || response.status === 401) {
                     console.log("Refresh token expired or invalid");
                     logout();
@@ -51,21 +45,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('token');
-        if (storedUser && storedToken) {
+        if (storedUser) {
             try {
                 setUser(JSON.parse(storedUser));
             } catch (e) {
                 console.error("Failed to parse stored user", e);
                 localStorage.removeItem('user');
-                localStorage.removeItem('token');
             }
         }
 
         // Setup Interval for Token Refresh (every 4 minutes to be safe before 15m expiry)
         const intervalId = setInterval(() => {
-            const token = localStorage.getItem('token');
-            if (token) {
+            // If user is logged in, refresh token periodically
+            const user = localStorage.getItem('user');
+            if (user) {
                 refreshAccessToken();
             }
         }, 4 * 60 * 1000); // 4 minutes
@@ -84,9 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!response.ok || !data.success) {
             throw new Error(data.message || 'Login failed');
         }
-        if (data.token) {
-            localStorage.setItem('token', data.token);
-        }
+        // Token is now in httpOnly cookie, no need to store it
         if (data.user) {
             localStorage.setItem('user', JSON.stringify(data.user));
             setUser(data.user);
@@ -96,9 +87,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const logout = () => {
         setUser(null);
         localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        // Call backend logout to clear cookie
-        fetch('/api/auth/logout', { method: 'POST' }).catch(err => console.error(err));
+        // Call backend logout to clear httpOnly cookies
+        fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(err => console.error(err));
         window.location.href = '/login';
     };
 

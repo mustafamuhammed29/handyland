@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authLimiter, passwordResetLimiter } = require('../middleware/rateLimiter');
 const authController = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 const { body } = require('express-validator');
@@ -98,7 +99,7 @@ router.get('/verify-email/:token', emailLimiter, authController.verifyEmail);
 router.post('/resend-verification', emailLimiter, authController.resendVerification);
 
 // Admin login (separate endpoint)
-router.post('/admin/login', loginLimiter, authController.adminLogin);
+router.post('/admin/login', authLimiter, authController.adminLogin);
 
 // Protected routes
 router.get('/me', protect, authController.getMe);
