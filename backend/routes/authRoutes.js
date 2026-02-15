@@ -8,23 +8,31 @@ const validate = require('../middleware/validation');
 
 const rateLimit = require('express-rate-limit');
 
-const emailLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 3,
-    message: {
-        success: false,
-        message: 'Too many requests from this IP, please try again after 15 minutes'
-    }
-});
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
-    message: {
-        success: false,
-        message: 'Too many login attempts from this IP, please try again after 15 minutes'
-    }
-});
+const emailLimiter = isDevelopment
+    ? (req, res, next) => next()
+    : rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 3,
+        message: {
+            success: false,
+            message: 'Too many requests from this IP, please try again after 15 minutes'
+        }
+    });
+
+
+
+const loginLimiter = isDevelopment
+    ? (req, res, next) => next()
+    : rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 5,
+        message: {
+            success: false,
+            message: 'Too many login attempts from this IP, please try again after 15 minutes'
+        }
+    });
 
 // Validation rules
 const registerRules = [
@@ -99,7 +107,14 @@ router.get('/verify-email/:token', emailLimiter, authController.verifyEmail);
 router.post('/resend-verification', emailLimiter, authController.resendVerification);
 
 // Admin login (separate endpoint)
-router.post('/admin/login', authLimiter, authController.adminLogin);
+const authLimiterWrapper = isDevelopment ? (req, res, next) => next() : authLimiter;
+router.post('/admin/login', authLimiterWrapper, authController.adminLogin);
+router.get('/admin/users', protect, (req, res, next) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+    next();
+}, authController.getAllUsers);
 
 // Protected routes
 router.get('/me', protect, authController.getMe);

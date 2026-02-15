@@ -1,0 +1,78 @@
+🚀 Starting Security Tests
+
+============================================================
+
+🧪 Test 1: CORS Restrictions
+
+  Test 1.1: Request from allowed origin
+  ✅ Allowed origin accepted
+
+  Test 1.2: Request with no origin (Postman/mobile)
+  ✅ No-origin request accepted (Postman/mobile apps)
+
+  ℹ️  Note: Blocked origin testing requires browser environment
+           You can test manually by opening browser console on
+           http://evil-site.com and making fetch() request
+
+🧪 Test 2: Rate Limiting
+
+  Test 2.1: General API rate limit (should be high in dev mode)
+  ✅ Development mode - rate limits relaxed (100/15min)
+
+  Test 2.2: Auth rate limiting
+  ✅ Development mode - rate limit relaxed (100/15min)
+  ℹ️  To test strict limits, run with NODE_ENV=production
+
+🧪 Test 3: NoSQL Injection Prevention
+
+  Test 3.1: Login with $ne operator (NoSQL injection)
+  ✅ NoSQL injection blocked (sanitization working)
+
+  Test 3.2: Registration with $set operator
+  ✅ $set operator blocked
+
+🧪 Test 4: XSS Prevention
+
+  Test 4.1: XSS in user registration
+  ⚠️  Request failed (might be validation): Request failed with status code 400
+  ⚠️  Request failed (might be validation): Request failed with status code 400
+  ⚠️  Request failed (might be validation): Request failed with status code 400
+  ⚠️  Request failed (might be validation): Request failed with status code 400
+
+🧪 Test 5: JWT Token Security
+
+  Test 5.1: Access protected route without token
+  ✅ Properly rejected (401)
+
+  Test 5.2: Access with invalid token
+  ✅ Invalid token rejected (401)
+
+  Test 5.3: Expired token
+  ✅ Expired token rejected (401)
+
+🧪 Test 6: Cookie Security
+
+  Test 6.1: Cookie security flags
+    HttpOnly: ✅
+    Secure: ✅
+    SameSite: ✅
+  ✅ Cookie security flags correct
+
+🧪 Test 7: Input Validation
+
+  Test 7.1: Email validation
+    ✅ Invalid email rejected: notanemail
+    ✅ Invalid email rejected: @example.com
+    ✅ Invalid email rejected: test@
+    ✅ Invalid email rejected: test..test@example.com
+
+  Test 7.2: Password validation
+    ✅ Weak password rejected: short
+    ✅ Weak password rejected: 12345
+    ✅ Weak password rejected: password
+    ✅ Weak password rejected: abc
+============================================================
+
+✅ SECURITY TESTS COMPLETED
+
+Check security_test.log for detailed results.

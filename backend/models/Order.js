@@ -125,15 +125,15 @@ const OrderSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Generate order number before validation
-OrderSchema.pre('validate', async function () {
+// Generate order number and validate total amount
+OrderSchema.pre('validate', async function (next) {
+    // 1. Generate Order Number
     if (this.isNew && !this.orderNumber) {
         const date = new Date();
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
 
-        // Find last order of the day
         const lastOrder = await this.constructor.findOne({
             orderNumber: new RegExp(`^HL-${year}${month}${day}`)
         }).sort({ orderNumber: -1 });
@@ -146,6 +146,23 @@ OrderSchema.pre('validate', async function () {
 
         this.orderNumber = `HL-${year}${month}${day}-${String(sequence).padStart(4, '0')}`;
     }
+
+    // 2. Integrity Check: Verify Total Amount
+    if (this.items && this.items.length > 0) {
+        const itemsTotal = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        // Assumes tax is included in price (Gross pricing)
+        // So Total = Items + Shipping - Discount
+        const calculatedTotal = itemsTotal + (this.shippingFee || 0) - (this.discountAmount || 0);
+
+        // Allow for small floating point differences (e.g. 0.01)
+        if (Math.abs(this.totalAmount - calculatedTotal) > 0.01) {
+            // Invalidate the document
+            this.invalidate('totalAmount', `Total amount mismatch. Expected: ${calculatedTotal.toFixed(2)}, Received: ${this.totalAmount}`);
+        }
+    }
+
+    // Continue
+    // next(); // Mongoose 5.x+ with async/await doesn't strictly need next() if promises are returned, but safe to just let function end or return
 });
 
 // Add initial status to history on save

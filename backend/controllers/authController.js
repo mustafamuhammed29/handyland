@@ -612,6 +612,22 @@ exports.refreshToken = async (req, res) => {
     }
 };
 
+// @desc    Get all users (Admin)
+// @route   GET /api/auth/admin/users
+// @access  Private/Admin
+exports.getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find();
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving users',
+            error: error.message
+        });
+    }
+};
+
 // @desc    Logout user
 // @route   POST /api/auth/logout
 // @access  Private

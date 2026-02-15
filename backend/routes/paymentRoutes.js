@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/paymentController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, optionalProtect } = require('../middleware/auth');
 
 // User routes (Public for Guest Checkout)
-router.post('/create-checkout-session', paymentController.createCheckoutSession);
+router.post('/create-checkout-session', optionalProtect, paymentController.createCheckoutSession);
 router.post('/success', paymentController.handlePaymentSuccess);
 router.get('/:sessionId', protect, paymentController.getPaymentDetails);
 

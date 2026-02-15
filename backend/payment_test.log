@@ -1,0 +1,33 @@
+💰 Starting Payment Integration Tests...
+
+✅ DB Connected
+
+🔹 Setup: Authenticating...
+   Registering new user: payment_test_1771026052521@example.com
+   User manually verified in DB
+   ✅ Authenticated
+
+Test 1: Create Checkout Session
+   Selected Product: Pixel 7 Pro  (Stock set to 100)
+   ✅ Session Created: mock_session_1771026052716
+   ✅ Order Record Found: HL-20260214-0012
+   ✅ Amount Stored: 25.979999999999997 (Expected ~25.98 with shipping)
+
+Test 2: Webhook - Payment Success
+   ✅ Webhook Sent
+   ✅ Order Updated: Paid & Processing
+   ℹ️  Order Payment ID in DB: pi_test_1771026052505
+   ℹ️  Expected Payment Intent: pi_test_1771026052505
+
+Test 3: Transaction Verification
+   ✅ Transaction Found
+   ✅ Amount: 25.98 (Should be decimal)
+   ✅ Payment Method: card
+   ✅ Amount Conversion Correct
+
+Test 4: Webhook - Payment Failed
+   ✅ Order Cancelled on Payment Failure
+
+Test 5: Webhook - Refund
+
+❌ Payment Tests Failed: Order not refunded: processing

@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const RepairTicketSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+        ref: 'User'
+        // required: true // Removed to allow guest tickets
     },
     ticketId: {
         type: String,
@@ -42,30 +42,31 @@ const RepairTicketSchema = new mongoose.Schema({
             default: Date.now
         },
         note: String
-    }]
+    }],
+    guestContact: {
+        name: String,
+        email: String,
+        phone: String
+    }
 }, {
     timestamps: true
 });
 
+// Import customAlphabet dynamically or require it if using CommonJS
+const { customAlphabet } = require('nanoid');
+const nanoid = customAlphabet('0123456789ABCDEFGHJKLMNPQRSTUVWXYZ', 6);
+
 // Generate Ticket ID - FIX
-RepairTicketSchema.pre('validate', async function () {
+RepairTicketSchema.pre('validate', async function (next) {
+    // Ensure either user or guestContact is present
+    if (!this.user && (!this.guestContact || !this.guestContact.email)) {
+        this.invalidate('user', 'Either a registered user or guest contact details (email) are required.');
+    }
+
     if (this.isNew && !this.ticketId) {
         const year = new Date().getFullYear().toString().slice(-2);
-
-        // Find last ticket with same year prefix
-        const lastTicket = await this.constructor.findOne({
-            ticketId: new RegExp(`^REP-${year}-`)
-        }).sort({ ticketId: -1 });
-
-        let sequence = 1;
-        if (lastTicket && lastTicket.ticketId) {
-            const lastSeq = parseInt(lastTicket.ticketId.split('-').pop());
-            if (!isNaN(lastSeq)) {
-                sequence = lastSeq + 1;
-            }
-        }
-
-        this.ticketId = `REP-${year}-${String(sequence).padStart(4, '0')}`;
+        // Random unique ID: REP-26-A7B3C9
+        this.ticketId = `REP-${year}-${nanoid()}`;
 
         // Add initial timeline entry
         if (this.timeline.length === 0) {
@@ -75,6 +76,7 @@ RepairTicketSchema.pre('validate', async function () {
             });
         }
     }
+    // next();
 });
 
 module.exports = mongoose.model('RepairTicket', RepairTicketSchema);

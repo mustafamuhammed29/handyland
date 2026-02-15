@@ -28,8 +28,8 @@ const { protect, authorize } = require('../middleware/auth');
  */
 router.get('/', productController.getAllProducts);
 router.get('/:id', productController.getProductById);
-router.post('/', productController.createProduct);
-router.put('/:id', productController.updateProduct);
+router.post('/', protect, authorize('admin'), productController.createProduct);
+router.put('/:id', protect, authorize('admin'), productController.updateProduct);
 router.delete('/:id', protect, authorize('admin'), productController.deleteProduct);
 
 // Reviews

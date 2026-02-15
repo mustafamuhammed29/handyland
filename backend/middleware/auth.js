@@ -8,6 +8,8 @@ exports.protect = async (req, res, next) => {
     // Check for token in headers
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies && req.cookies.accessToken) {
+        token = req.cookies.accessToken;
     }
 
     // Make sure token exists
@@ -80,4 +82,32 @@ exports.authorize = (...roles) => {
         }
         next();
     };
+};
+
+// Optional authentication (for Guest/User shared routes)
+exports.optionalProtect = async (req, res, next) => {
+    let token;
+
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies && req.cookies.accessToken) {
+        token = req.cookies.accessToken;
+    }
+
+    if (!token) {
+        return next(); // Proceed as guest
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = await User.findById(decoded.id).select('-password');
+        next();
+    } catch (error) {
+        // If token invalid, return 401 to prevent accidental guest checkout for logged-in users with broken sessions
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid authorization token',
+            error: error.message
+        });
+    }
 };

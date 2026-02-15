@@ -1,0 +1,29 @@
+🚀 Starting Repair Tickets Tests
+
+🔧 Setting up test environment...
+   Registering user: test_repair_1771026441038_175@example.com
+   Registration request sent
+   DB User Count for test_repair_1771026441038_175@example.com: 1
+   User manually verified in DB
+   Login Response Status: 200
+   Login Response Data: {"success":true,"user":{"id":"698fb8094804234c682492e3","name":"Test User","email":"test_repair_1771026441038_175@example.com","role":"user","isVerified":true,"phone":"+14155552671"}}
+   ℹ️  Token extracted from cookie
+   Token received: eyJhbGciOiJIUzI1NiIs...
+✅ Setup complete
+
+🧪 Test 1: Create Repair Ticket (User)
+✅ Created ticket: REP-26-HGLRE0
+
+🧪 Test 2: Create Repair Ticket (Guest)
+✅ Created guest ticket: REP-26-6VHBU9
+
+🧪 Test 3: Concurrent Ticket Creation
+✅ Created 5 concurrent tickets, all unique:
+
+🧪 Test 4: Get My Tickets
+
+🧪 Test 5: Validation
+   ✅ Missing device validation passed
+   ✅ Guest without contact validation passed
+
+✅ ALL TESTS PASSED! 🎉

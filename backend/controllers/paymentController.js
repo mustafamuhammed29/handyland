@@ -6,11 +6,37 @@ try {
         throw new Error('Missing or placeholder Stripe key');
     }
 } catch (error) {
-    console.warn('Stripe initialization failed:', error.message);
+    console.warn('Stripe initialization failed (Using Enhanced Mock):', error.message);
     stripe = {
-        checkout: { sessions: { create: async () => ({ id: 'mock_session_id', url: 'http://localhost:3000/mock-payment' }), retrieve: async () => ({ payment_status: 'paid', amount_total: 1000, metadata: {} }) } },
-        webhooks: { constructEvent: () => ({ type: 'checkout.session.completed', data: { object: {} } }) },
-        refunds: { create: async () => ({ id: 'mock_refund_id' }) }
+        checkout: {
+            sessions: {
+                create: async (params) => ({
+                    id: 'mock_session_' + Date.now(),
+                    url: 'http://localhost:3000/mock-payment',
+                    metadata: params.metadata,
+                    amount_total: params.line_items.reduce((acc, item) => acc + item.price_data.unit_amount * item.quantity, 0),
+                    currency: 'eur',
+                    payment_status: 'unpaid'
+                }),
+                retrieve: async (id) => ({
+                    id,
+                    payment_status: 'paid',
+                    amount_total: 1999,
+                    currency: 'eur',
+                    metadata: { orderId: 'mock_order_id' } // Note: real retrieve would get actual metadata
+                })
+            }
+        },
+        webhooks: {
+            constructEvent: (body, sig, secret) => {
+                // Return body directly to simulate valid event parsing
+                // If body is buffer/string, parse it. If object, return it.
+                if (Buffer.isBuffer(body)) return JSON.parse(body.toString());
+                if (typeof body === 'string') return JSON.parse(body);
+                return body;
+            }
+        },
+        refunds: { create: async () => ({ id: 'mock_refund_id_' + Date.now() }) }
     };
 }
 const Order = require('../models/Order');
