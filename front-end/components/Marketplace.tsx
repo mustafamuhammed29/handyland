@@ -108,7 +108,10 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     condition: selectedCondition
                 });
 
-                if (data.products) {
+                console.log('🛒 Marketplace API Response:', data); // DEBUG log
+
+                if (data && data.products) {
+                    console.log(`✅ Loaded ${data.products.length} products`);
                     const formatted = data.products.map((p: any) => ({
                         ...p,
                         model: p.name || p.model,
@@ -124,6 +127,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     setProducts(formatted);
                     setTotalPages(data.totalPages);
                 } else {
+                    console.warn('⚠️ Marketplace API returned no products or invalid format', data);
                     // Fallback mechanism (keeping existing logic just in case, though service should handle it)
                     const formatted = (Array.isArray(data) ? data : []).map((p: any) => ({
                         ...p,
@@ -141,6 +145,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                 }
             } catch (error) {
                 console.error("Failed to load products", error);
+                addToast('Failed to load marketplace data. Check console.', 'error');
             } finally {
                 setLoading(false);
             }
