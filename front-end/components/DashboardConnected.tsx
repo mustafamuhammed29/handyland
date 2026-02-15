@@ -4,6 +4,8 @@ import {
     Bell, Shield, Wallet, ChevronRight,
     BarChart3, Smartphone, TrendingUp, Plus, MapPin, Clock
 } from 'lucide-react';
+import { authService } from '../services/authService';
+import { orderService } from '../services/orderService';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -46,27 +48,23 @@ export const DashboardConnected: React.FC = () => {
                 }
 
                 // Fetch user profile
-                const userRes = await fetch(`${API_URL}/auth/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
+                try {
+                    const userRes = await authService.getMe();
+                    if (userRes.success) {
+                        setUser(userRes.user as any); // Type cast if necessary matching UserProfile interface
                     }
-                });
-                const userData = await userRes.json();
-
-                if (userData.success) {
-                    setUser(userData.user);
+                } catch (e) {
+                    console.error("Failed to fetch user", e);
                 }
 
                 // Fetch orders
-                const ordersRes = await fetch(`${API_URL}/orders`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
+                try {
+                    const ordersRes = await orderService.getMyOrders();
+                    if (ordersRes.success) {
+                        setOrders(ordersRes.orders as any[]);
                     }
-                });
-                const ordersData = await ordersRes.json();
-
-                if (ordersData.success) {
-                    setOrders(ordersData.orders);
+                } catch (e) {
+                    console.error("Failed to fetch orders", e);
                 }
 
             } catch (err) {
@@ -80,7 +78,12 @@ export const DashboardConnected: React.FC = () => {
         fetchData();
     }, []);
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await authService.logout();
+        } catch (e) {
+            console.error("Logout failed", e);
+        }
         localStorage.removeItem('userToken');
         localStorage.removeItem('userData');
         window.location.reload();
@@ -312,6 +315,7 @@ export const DashboardConnected: React.FC = () => {
                                         <input
                                             type="text"
                                             defaultValue={user.name}
+                                            aria-label="Full Name"
                                             className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none"
                                             readOnly
                                         />
@@ -321,6 +325,7 @@ export const DashboardConnected: React.FC = () => {
                                         <input
                                             type="email"
                                             defaultValue={user.email}
+                                            aria-label="Email"
                                             className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none"
                                             readOnly
                                         />
@@ -330,6 +335,7 @@ export const DashboardConnected: React.FC = () => {
                                         <input
                                             type="text"
                                             defaultValue={user.phone || 'Not set'}
+                                            aria-label="Phone"
                                             className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none"
                                             readOnly
                                         />
@@ -339,6 +345,7 @@ export const DashboardConnected: React.FC = () => {
                                         <input
                                             type="text"
                                             defaultValue={new Date(parseInt(user._id.substring(0, 8), 16) * 1000).toLocaleDateString()}
+                                            aria-label="Member Since"
                                             className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none"
                                             readOnly
                                         />

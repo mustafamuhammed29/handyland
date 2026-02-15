@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 
-import { ENV } from './src/config/env';
-const API_URL = ENV.API_URL;
+import { authService } from './services/authService';
 
 const ForgotPassword: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -16,15 +15,7 @@ const ForgotPassword: React.FC = () => {
         setMessage('');
 
         try {
-            const response = await fetch(`${API_URL}/auth/forgot-password`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email }),
-            });
-
-            const data = await response.json();
+            const data = await authService.forgotPassword(email);
 
             if (data.success) {
                 setStatus('success');

@@ -41,6 +41,22 @@ const getCookie = (name: string) => {
     return null;
 };
 
+// Flag to prevent multiple refresh requests
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
+
+    failedQueue = [];
+};
+
 const request = async (endpoint: string, options: RequestInit = {}) => {
     // Token is now in httpOnly cookie, no need to get from localStorage
     const xsrfToken = getCookie('XSRF-TOKEN');
@@ -67,9 +83,44 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
         });
 
         if (response.status === 401) {
-            // No need to remove token from localStorage anymore
-            window.location.href = '/login';
-            throw new ApiError(401, 'Session expired. Please login again.');
+            // If it's a login or refresh request that failed, don't retry
+            if (endpoint.includes('/auth/login') || endpoint.includes('/auth/refresh')) {
+                throw new ApiError(401, 'Session expired. Please login again.');
+            }
+
+            if (isRefreshing) {
+                return new Promise(function (resolve, reject) {
+                    failedQueue.push({ resolve, reject });
+                }).then(() => {
+                    return request(endpoint, options);
+                }).catch(err => {
+                    return Promise.reject(err);
+                });
+            }
+
+            isRefreshing = true;
+
+            try {
+                // Attempt to refresh token
+                const refreshResponse = await fetch(`${API_URL}/api/auth/refresh`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+
+                if (refreshResponse.ok) {
+                    processQueue(null, 'success');
+                    isRefreshing = false;
+                    return request(endpoint, options);
+                } else {
+                    throw new Error('Refresh failed');
+                }
+            } catch (err) {
+                processQueue(err, null);
+                isRefreshing = false;
+                window.location.href = '/login';
+                throw new ApiError(401, 'Session expired. Please login again.');
+            }
         }
 
         if (!response.ok) {

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader, Mail } from 'lucide-react';
 
-import { ENV } from './src/config/env';
-const API_URL = ENV.API_URL;
+import { authService } from './services/authService';
 
 const VerifyEmail: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -22,11 +21,7 @@ const VerifyEmail: React.FC = () => {
             }
 
             try {
-                const response = await fetch(`${API_URL}/auth/verify-email/${token}`, {
-                    method: 'GET',
-                });
-
-                const data = await response.json();
+                const data = await authService.verifyEmail(token);
 
                 if (data.success) {
                     setStatus('success');

@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../utils/api';
+import { authService } from '../services/authService';
+import { orderService } from '../services/orderService';
 import { Order, RepairTicket, SavedValuation, Address, WalletTransaction, User as UserType } from '../types';
 
 // Query keys
@@ -22,8 +24,8 @@ export function useUserData() {
     return useQuery({
         queryKey: dashboardKeys.user(),
         queryFn: async () => {
-            const res = await api.get<any>('/api/auth/me');
-            return res.data?.user || res.user;
+            const res = await authService.getMe();
+            return res.user;
         },
         staleTime: 5 * 60 * 1000, // 5 minutes
         retry: 2,
@@ -34,8 +36,8 @@ export function useOrders() {
     return useQuery({
         queryKey: dashboardKeys.orders(),
         queryFn: async () => {
-            const res = await api.get<any>('/api/orders');
-            return res.data?.orders || res.orders || [];
+            const res = await orderService.getMyOrders();
+            return res.orders || [];
         },
         staleTime: 2 * 60 * 1000, // 2 minutes
         retry: 2,
@@ -114,8 +116,8 @@ export function useAddresses() {
     return useQuery({
         queryKey: dashboardKeys.addresses(),
         queryFn: async () => {
-            const res = await api.get<any>('/api/addresses');
-            return res.data?.addresses || res.addresses || [];
+            const res = await authService.getAddresses();
+            return res.addresses || [];
         },
         staleTime: 5 * 60 * 1000,
         retry: 2,

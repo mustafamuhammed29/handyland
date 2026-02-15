@@ -3,8 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader, CheckCircle } from 'lucide-react';
 import { validateEmail, validateRequired } from './validation';
 
-import { ENV } from './src/config/env';
-const API_URL = ENV.API_URL;
+import { authService } from './services/authService';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -36,29 +35,25 @@ const Login: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data = await response.json();
+            const data = await authService.login(email, password);
 
             if (data.success) {
                 localStorage.setItem('userToken', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 navigate('/');
             } else {
-                setError(data.message || 'Invalid email or password');
-                if (data.isVerified === false) {
-                    setShowResend(true);
-                }
+                // The authService throws on error usually, but if it returns data with success false (depending on implementation):
+                // However, our service uses api.post which throws ApiError on non-2xx.
+                // So we catch below.
             }
-        } catch (err) {
-            setError('Error connecting to server. Please try again.');
-            console.error('Login error:', err);
+        } catch (err: any) {
+            // Handle ApiError or generic error
+            const errorMessage = err.message || 'Invalid email or password';
+            setError(errorMessage);
+            // Check if it's a verification issue (usually 403 or specific message)
+            if (errorMessage.includes('verify') || (err.data && err.data.isVerified === false)) {
+                setShowResend(true);
+            }
         } finally {
             setLoading(false);
         }
@@ -67,12 +62,7 @@ const Login: React.FC = () => {
     const handleResend = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_URL}/auth/resend-verification`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
-            });
-            const data = await response.json();
+            const data = await authService.resendVerification(email);
             if (data.success) {
                 setError('');
                 alert('Verification email sent! Please check your inbox.');
@@ -80,8 +70,9 @@ const Login: React.FC = () => {
             } else {
                 setError(data.message);
             }
-        } catch (err) {
-            setError('Failed to resend email');
+        } catch (err: any) {
+            const errorMessage = err.message || 'Failed to resend email';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
