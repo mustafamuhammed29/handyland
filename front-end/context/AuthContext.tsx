@@ -53,39 +53,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // I will NOT touch refreshAccessToken yet. I need to add refreshToken to authService first.
 
 
+    // ✅ FIXED: Silent cleanup to prevent infinite loops
     useEffect(() => {
         const initAuth = async () => {
-            console.log('🔐 AuthContext: Initializing...');
+            console.log('🔐 [AuthContext] Initializing authentication...');
+
             const storedUser = localStorage.getItem('user');
+            console.log('👤 [AuthContext] Stored user:', storedUser ? 'Found' : 'Not found');
 
             if (storedUser) {
                 try {
-                    // Basic parse check
-                    JSON.parse(storedUser);
+                    const parsedUser = JSON.parse(storedUser);
+                    console.log('📝 [AuthContext] Parsed user:', parsedUser.email);
 
+                    // Verify session with backend
                     try {
-                        // Verify session with backend
+                        console.log('🔄 [AuthContext] Verifying session with backend...');
                         const { user } = await authService.getMe();
-                        console.log('✅ Session valid:', user.email);
+                        console.log('✅ [AuthContext] Session valid:', user.email);
                         setUser(user);
                         localStorage.setItem('user', JSON.stringify(user));
                     } catch (error) {
-                        console.error('❌ Session invalid (Backend check failed):', error);
-                        // Silent cleanup - DO NOT call logout() here to avoid redirect loops
+                        console.error('❌ [AuthContext] Session verification failed:', error);
+
+                        // ✅ CRITICAL FIX: Silent cleanup WITHOUT calling logout()
                         setUser(null);
                         localStorage.removeItem('user');
+                        // ⚠️ DO NOT call logout() here - it causes redirect loop
                     }
                 } catch (error) {
-                    console.error('❌ Session invalid (Parse error):', error);
+                    console.error('❌ [AuthContext] Failed to parse stored user:', error);
+
+                    // ✅ Silent cleanup
                     setUser(null);
                     localStorage.removeItem('user');
                 }
-            } else {
-                console.log('ℹ️ No stored session found');
             }
 
             setLoading(false);
-            console.log('🔐 AuthContext: Initialization complete');
+            console.log('🏁 [AuthContext] Initialization complete');
         };
 
         initAuth();
@@ -99,6 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (data.success && data.user) {
                 console.log('✅ [AuthContext] Login successful:', data.user.email);
+                console.log('💾 [AuthContext] Saving user to localStorage');
 
                 // Hybrid Auth: Store tokens in localStorage as fallback
                 if (data.token) localStorage.setItem('accessToken', data.token);
@@ -106,6 +113,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 localStorage.setItem('user', JSON.stringify(data.user));
                 setUser(data.user);
+
+                console.log('🔄 [AuthContext] Navigating to dashboard...');
                 navigate('/dashboard', { replace: true });
             } else {
                 console.error('❌ [AuthContext] Login failed: No user data');
@@ -123,7 +132,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        authService.logout().catch(err => console.error('Logout API error:', err));
+
+        authService.logout().catch(err => {
+            console.error('❌ [AuthContext] Logout API error:', err);
+        });
+
         navigate('/login');
         console.log('✅ [AuthContext] Logout complete');
     };
