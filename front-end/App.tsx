@@ -138,7 +138,7 @@ function AppContent() {
               <Route path="/" element={<PageTransition><Home lang={lang} /></PageTransition>} />
               <Route path="/marketplace" element={<Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense>} />
               <Route path="/marketplace/:id" element={<Suspense fallback={<GlobalLoader />}><ProductDetails lang={lang} /></Suspense>} />
-              <Route path="/orders/:id" element={<ProtectedRoute user={user}><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
+              <Route path="/orders/:id" element={<ProtectedRoute><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
               <Route path="/accessories" element={<PageTransition><Accessories lang={lang} /></PageTransition>} />
               <Route path="/repair" element={<PageTransition><Repair lang={lang} /></PageTransition>} />
               <Route path="/valuation" element={<PageTransition><Valuation lang={lang} /></PageTransition>} />
@@ -146,7 +146,7 @@ function AppContent() {
               <Route path="shop" element={<PageTransition><Accessories lang={lang} /></PageTransition>} />
               <Route path="products/:id" element={<PageTransition><ProductDetails lang={lang} /></PageTransition>} />
               <Route path="contact" element={<PageTransition><Contact lang={lang} /></PageTransition>} />
-              <Route path="checkout" element={<ProtectedRoute user={user}><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout lang={lang} /></Suspense></PageTransition></ProtectedRoute>} />
+              <Route path="checkout" element={<ProtectedRoute><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout lang={lang} /></Suspense></PageTransition></ProtectedRoute>} />
               <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
               <Route path="login" element={<PageTransition><Auth lang={lang} setUser={setUser} /></PageTransition>} />
               <Route path="verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
@@ -171,7 +171,7 @@ function AppContent() {
             </Route>
 
             {/* PROTECTED ROUTES */}
-            <Route element={<ProtectedRoute user={user} />}>
+            <Route element={<ProtectedRoute />}>
               <Route path="dashboard" element={<PageTransition><Dashboard user={user} logout={() => setUser(null)} /></PageTransition>} />
               <Route path="seller" element={<PageTransition><SellerStudio lang={lang} /></PageTransition>} />
             </Route>

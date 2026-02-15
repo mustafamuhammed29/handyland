@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { User } from '../types';
 
@@ -8,12 +9,15 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const navigate = useNavigate();
 
     //  Refresh Token Function
     const refreshAccessToken = async () => {
@@ -63,10 +67,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     localStorage.setItem('user', JSON.stringify(user));
                 } catch (error) {
                     console.error("Session invalid or expired", error);
-                    // If check fails (and refresh failed contextually inside api.ts), logout
+                    // If check fails, logout
                     logout();
                 }
             }
+            setLoading(false);
         };
 
         initAuth();
@@ -77,8 +82,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (data.success && data.user) {
             localStorage.setItem('user', JSON.stringify(data.user));
             setUser(data.user);
+            navigate('/dashboard', { replace: true });
         } else {
-            // authService throws on error usually.
             throw new Error('Login failed');
         }
     };
@@ -87,11 +92,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         localStorage.removeItem('user');
         authService.logout().catch(err => console.error(err));
-        window.location.href = '/login';
+        navigate('/login');
     };
 
     return (
-        <AuthContext.Provider value={{ user, setUser, login, logout, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, setUser, login, logout, isAuthenticated: !!user, loading }}>
             {children}
         </AuthContext.Provider>
     );
