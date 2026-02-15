@@ -1,0 +1,19 @@
+🧪 Starting Authentication Tests...
+
+✅ DB Connected for Token Retrieval
+
+Test 1: User Registration
+   ✅ Valid registration passed
+   ✅ Duplicate email validation passed
+   ✅ Invalid email validation passed
+   ✅ Weak password validation passed
+
+Test 2: Email Verification
+   ✅ Invalid token validation passed
+   ✅ (Skipped Real Token) Manually Verified User in DB for next tests
+
+Test 3: Login
+   ✅ Valid login passed (Cookies received)
+   ✅ Wrong password validation passed
+
+❌ Authentication Tests Failed: Non-existent should 401 or 400

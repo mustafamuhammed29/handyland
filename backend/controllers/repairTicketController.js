@@ -5,22 +5,41 @@ const RepairTicket = require('../models/RepairTicket');
 // @access  Private
 exports.createTicket = async (req, res) => {
     try {
-        const { device, issue, notes, appointmentDate, serviceType } = req.body;
+        const { device, issue, notes, appointmentDate, serviceType, guestContact } = req.body;
 
-        const ticket = await RepairTicket.create({
-            user: req.user.id,
+        const ticketData = {
             device,
             issue,
             notes,
             appointmentDate,
             serviceType
-        });
+        };
+
+        if (req.user) {
+            ticketData.user = req.user.id;
+        } else if (guestContact) {
+            ticketData.guestContact = guestContact;
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: 'User authentication or guest contact details are required'
+            });
+        }
+
+        const ticket = await RepairTicket.create(ticketData);
 
         res.status(201).json({
             success: true,
             ticket
         });
     } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation Error',
+                error: error.message
+            });
+        }
         res.status(500).json({
             success: false,
             message: 'Error creating repair ticket',
@@ -127,6 +146,26 @@ exports.getTicket = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error fetching ticket',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Get all tickets (Admin)
+// @route   GET /api/repairs/admin/all
+// @access  Private/Admin
+exports.getAllTickets = async (req, res) => {
+    try {
+        const tickets = await RepairTicket.find().populate('user', 'name email');
+        res.status(200).json({
+            success: true,
+            count: tickets.length,
+            tickets
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving tickets',
             error: error.message
         });
     }

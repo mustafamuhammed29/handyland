@@ -1,0 +1,40 @@
+🚀 Starting Admin Panel Tests
+
+============================================================
+
+🔧 Setting up test environment...
+
+⏳ Checking server availability...
+✅ Server is responding
+
+✅ Connected to database
+✅ Regular user created and logged in
+✅ Admin logged in
+✅ Setup complete
+
+🧪 Test 1: Admin Login & Access Control
+
+  Test 1.1: Verify Admin Token works
+  ✅ Admin token verified
+
+🧪 Test 2: Dashboard Statistics
+
+  Test 2.1: Admin access to statistics
+  ✅ Admin retrieved statistics
+
+🧪 Test 3: Product Management (Admin CRUD)
+
+  Test 3.1: Admin create product
+  ✅ Product created: 93475e68-99f1-4cf4-9dda-c7130e04ffa6
+  ✅ Product cleaned up
+
+🧪 Test 4: Order Management (Admin)
+
+  Test 4.1: Admin get all orders
+  ✅ Admin retrieved orders
+============================================================
+
+✅ ALL ADMIN TESTS PASSED! 🎉
+
+
+📁 Database connection closed

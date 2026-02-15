@@ -11,12 +11,21 @@ const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const logger = require('./utils/logger');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
-const sanitize = require('./middleware/sanitize');
+// const sanitize = require('./middleware/sanitize'); // Removed custom sanitizer
+// Data Sanitization
+const mongoSanitize = require('./middleware/mongoSanitize');
+// const xss = require('xss-clean');
 const csrfProtection = require('./middleware/csrf');
 
 dotenv.config();
 const validateEnv = require('./config/validateEnv');
 validateEnv();
+
+console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
+if (!process.env.NODE_ENV) {
+    process.env.NODE_ENV = 'development';
+    console.log('⚠️  NODE_ENV not set, defaulting to development');
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -55,7 +64,7 @@ if (process.env.NODE_ENV === 'development') {
 // Rate limiting - General API
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // Increased for dev
+    max: parseInt(process.env.RATE_LIMIT_MAX) || 1000,
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
@@ -64,14 +73,17 @@ app.use('/api/', limiter);
 
 // CORS Configuration
 // CORS Configuration
-const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5174', // Admin Panel
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174' // Admin Panel
-];
+// CORS Configuration
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:5174'
+    ];
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -90,8 +102,10 @@ app.use(cors({
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(sanitize); // Protect against NoSQL injection & XSS
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+// Data Sanitization
+app.use(mongoSanitize); // Prevent NoSQL injection
+// app.use(xss()); // Removed causing issues with Express 5
 app.use(cookieParser());
 
 // Ensure uploads directory exists
@@ -130,9 +144,13 @@ const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
 // Stricter rate limit for auth endpoints (relaxed for development)
+// Stricter rate limit for auth endpoints (relaxed for development)
+const isProduction = process.env.NODE_ENV === 'production';
+
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'development' ? 100 : 5, // Relaxed for dev, strict for prod
+    max: isProduction ? 5 : 100, // Strict in production, relaxed in dev/test
+    skipSuccessfulRequests: true, // Only count failed attempts
     message: {
         success: false,
         message: 'Too many authentication attempts, please try again later.'

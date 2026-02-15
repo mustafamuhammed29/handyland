@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const repairController = require('../controllers/repairController');
 const repairTicketController = require('../controllers/repairTicketController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, optionalProtect } = require('../middleware/auth');
 
 // Public routes (Catalog & Estimation)
 router.get('/', repairController.getRepairCatalog);
@@ -10,7 +10,7 @@ router.get('/catalog', repairController.getRepairCatalog);
 router.post('/estimate', repairController.estimateRepairCost); // Replaces getRepairAdvice
 
 // Protected routes (Tickets)
-router.post('/tickets', protect, repairTicketController.createTicket);
+router.post('/tickets', optionalProtect, repairTicketController.createTicket);
 router.get('/my-repairs', protect, repairTicketController.getMyTickets); // Alias for frontend compatibility
 router.get('/tickets/my-tickets', protect, repairTicketController.getMyTickets);
 router.get('/tickets/:id', protect, repairTicketController.getTicket);
@@ -23,5 +23,6 @@ router.put('/devices/:id/services', protect, authorize('admin'), repairControlle
 
 // Admin Ticket Management
 router.put('/tickets/:id/status', protect, authorize('admin'), repairTicketController.updateTicketStatus);
+router.get('/admin/all', protect, authorize('admin'), repairTicketController.getAllTickets);
 
 module.exports = router;
