@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ShoppingCart, User, Clock, Package, AlertCircle } from 'lucide-react';
+import { api } from '../utils/api';
 
 interface CartItem {
     id: string;
@@ -36,25 +37,20 @@ export const ActiveCarts = () => {
 
     const fetchCarts = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/cart/all', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            const data = await response.json();
+            console.log('🛒 Fetching active carts...');
+            // Use the configured API utility which handles Proxy, Auth, and Errors
+            const response = await api.get('/api/cart/all');
 
-            // We need to fetch product details if the backend doesn't populate them.
-            // My controller for `getAllCarts` was simple.
-            // Let's assume we can improve the controller to populate `items.product`.
-            // But `items.product` is dynamic ref (refPath).
-            // Mongoose `populate('items.product')` works with refPath!
-
-            // I should update the backend controller first to ensure data is useful.
-
-            setCarts(data);
+            if (Array.isArray(response.data)) {
+                setCarts(response.data);
+                console.log(`✅ Loaded ${response.data.length} active carts`);
+            } else {
+                console.error('❌ Expected array of carts, got:', response.data);
+                setCarts([]); // Safe fallback
+            }
         } catch (error) {
-            console.error('Failed to fetch carts', error);
+            console.error('❌ Failed to fetch carts:', error);
+            setCarts([]); // Safe fallback on error
         } finally {
             setLoading(false);
         }

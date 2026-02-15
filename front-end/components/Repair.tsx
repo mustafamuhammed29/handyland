@@ -65,11 +65,14 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     useEffect(() => {
         const loadRepairs = async () => {
             try {
-                const data = await api.get<RepairDevice[]>('/api/repairs');
-                if (Array.isArray(data)) {
-                    setRepairCatalog(data);
+                const response = await api.get<RepairDevice[]>('/api/repairs');
+                // Axios returns the data in the .data property
+                const repairsData = response.data;
+
+                if (Array.isArray(repairsData)) {
+                    setRepairCatalog(repairsData);
                 } else {
-                    console.error("Invalid repairs data format", data);
+                    console.error("Invalid repairs data format", repairsData);
                     setRepairCatalog([]);
                 }
             } catch (err) {
