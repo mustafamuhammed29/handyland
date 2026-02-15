@@ -295,11 +295,23 @@ exports.adminLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        console.log('🔐 Admin login attempt for:', email);
+
+        // Validation
+        if (!email || !password) {
+            console.log('❌ Missing credentials');
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide email and password'
+            });
+        }
+
         // Check for user email
         const user = await User.findOne({ email }).select('+password');
 
         if (!user) {
-            return res.status(400).json({
+            console.log('❌ User not found:', email);
+            return res.status(400).json({ // Changed to 400 as requested or kept 401? User asked for 400 in "Invalid credentials" block below, keeping consistent
                 success: false,
                 message: 'Invalid credentials'
             });
@@ -307,17 +319,20 @@ exports.adminLogin = async (req, res) => {
 
         // Check if user is admin
         if (user.role !== 'admin') {
+            console.log('❌ Access denied - User is not admin. Role:', user.role);
             return res.status(403).json({
                 success: false,
-                message: 'Access denied. Admin only.'
+                message: 'Access denied. Admin privileges required.',
+                userRole: user.role
             });
         }
 
-        // Check if user is verified
-        if (!user.isVerified) {
-            return res.status(401).json({
+        // Check if account is active
+        if (user.isActive === false) {
+            console.log('❌ Account deactivated');
+            return res.status(403).json({
                 success: false,
-                message: 'Please verify your email first'
+                message: 'Account is deactivated'
             });
         }
 
@@ -325,6 +340,7 @@ exports.adminLogin = async (req, res) => {
         const isMatch = await user.matchPassword(password);
 
         if (!isMatch) {
+            console.log('❌ Invalid password');
             return res.status(400).json({
                 success: false,
                 message: 'Invalid credentials'
@@ -333,31 +349,37 @@ exports.adminLogin = async (req, res) => {
 
         const token = generateToken(user._id);
 
-        // Send access token in HTTP-only cookie
-        res.cookie('accessToken', token, {
+        // Set cookie
+        const cookieOptions = {
             httpOnly: true,
-            secure: false, // process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 15 * 60 * 1000, // 15 minutes
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
             path: '/'
-        });
+        };
+
+        res.cookie('accessToken', token, cookieOptions);
+
+        console.log('✓ Admin login successful for:', email);
 
         res.status(200).json({
             success: true,
             message: 'Admin login successful',
+            token,
             user: {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                avatar: user.avatar
             }
         });
     } catch (error) {
-        console.error('Admin login error:', error);
+        console.error('❌ Admin Login Error:', error);
         res.status(500).json({
             success: false,
             message: 'Error logging in',
-            error: error.message
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };

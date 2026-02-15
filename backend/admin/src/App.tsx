@@ -101,16 +101,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// Protected Route Component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-};
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppContent() {
   const { isAuthenticated } = useAuth();

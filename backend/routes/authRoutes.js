@@ -24,10 +24,14 @@ const emailLimiter = isDevelopment
 
 
 const loginLimiter = isDevelopment
-    ? (req, res, next) => next()
+    ? (req, res, next) => {
+        console.log('⚠️  Rate limiting disabled in development mode');
+        next();
+    }
     : rateLimit({
         windowMs: 15 * 60 * 1000,
         max: 5,
+        skipSuccessfulRequests: true,
         message: {
             success: false,
             message: 'Too many login attempts from this IP, please try again after 15 minutes'
@@ -107,7 +111,12 @@ router.get('/verify-email/:token', emailLimiter, authController.verifyEmail);
 router.post('/resend-verification', emailLimiter, authController.resendVerification);
 
 // Admin login (separate endpoint)
-const authLimiterWrapper = isDevelopment ? (req, res, next) => next() : authLimiter;
+const authLimiterWrapper = isDevelopment
+    ? (req, res, next) => {
+        // console.log('⚠️  Auth rate limiting disabled in development mode');
+        next();
+    }
+    : authLimiter;
 router.post('/admin/login', authLimiterWrapper, authController.adminLogin);
 router.get('/admin/users', protect, (req, res, next) => {
     if (req.user.role !== 'admin') {

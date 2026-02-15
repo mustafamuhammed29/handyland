@@ -3,9 +3,19 @@ import { ENV } from '../src/config/env';
 
 // utils/api.ts expects the BASE URL (e.g. localhost:5000), but ENV.API_URL includes /api
 // We strip /api if present to maintain compatibility with existing api.get('/api/...') calls
-const API_BASE_URL = ENV.API_URL.endsWith('/api')
-    ? ENV.API_URL.slice(0, -4)
-    : ENV.API_URL;
+// utils/api.ts expects the BASE URL (e.g. localhost:5000), but ENV.API_URL includes /api
+// We strip /api if present to maintain compatibility with existing api.get('/api/...') calls
+console.log('🔧 API Setup - ENV.API_URL:', ENV.API_URL);
+
+let API_BASE_URL = ENV.API_URL;
+
+// If using proxy (starts with /api or is just /api), we want base to be empty
+// because legacy calls already include /api prefix
+if (API_BASE_URL === '/api' || API_BASE_URL.endsWith('/api')) {
+    API_BASE_URL = '';
+}
+
+console.log('🔧 API Setup - Final BASE_URL:', API_BASE_URL || '(empty string)');
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
@@ -16,45 +26,61 @@ export const api = axios.create({
     timeout: 10000,
 });
 
-// Request interceptor (Optional for debugging or adding headers dynamically if needed)
+// Request interceptor - Add token to headers
 api.interceptors.request.use(
     (config) => {
-        // You can add logic here if needed, e.g. logging
+        // const token = localStorage.getItem('token'); // Use cookie
+        // if (token) {
+        //     config.headers.Authorization = `Bearer ${token}`;
+        // }
         return config;
     },
     (error) => {
+        console.error('❌ Request interceptor error:', error);
         return Promise.reject(error);
     }
 );
 
-// Response interceptor for token refresh
+// Response interceptor - Handle errors and token refresh
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
 
-        // Check for 401 and if we haven't retried yet
         if (error.response?.status === 401 && !originalRequest._retry) {
-            // Avoid infinite loops if the refresh endpoint itself fails
-            if (originalRequest.url.includes('/auth/refresh') || originalRequest.url.includes('/auth/login')) {
-                return Promise.reject(error);
+            const errorData = error.response.data;
+
+            // Check specific flags from backend or just general 401
+            if ((errorData?.tokenExpired || errorData?.message === 'Token has expired') && !originalRequest._retry) {
+                originalRequest._retry = true;
+                console.log('🔄 Token expired, attempting refresh...');
+
+                try {
+                    await api.get('/api/auth/refresh');
+                    console.log('✓ Token refreshed successfully');
+                    return api(originalRequest);
+                } catch (refreshError) {
+                    console.error('❌ Token refresh failed:', refreshError);
+                    // Clear auth data and redirect to login
+                    localStorage.removeItem('user');
+                    if (!window.location.pathname.includes('/login')) {
+                        window.location.href = '/login';
+                    }
+                    return Promise.reject(refreshError);
+                }
             }
 
-            originalRequest._retry = true;
-
-            try {
-                // Attempt to refresh the token
-                await api.get('/api/auth/refresh');
-
-                // Retry the original request
-                return api(originalRequest);
-            } catch (refreshError) {
-                // If refresh fails, clear session and reject
-                // Do NOT redirect here, let the caller (AuthContext) handle the cleanup and redirect
-                // to avoid race conditions and infinite loops.
-                localStorage.removeItem('user');
-                return Promise.reject(refreshError);
+            // Not authorized or token invalid (and not expired/refreshable)
+            console.log('❌ Authentication required - redirecting to login');
+            localStorage.removeItem('user');
+            if (!window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
             }
+        }
+
+        // Handle 403 Forbidden
+        if (error.response?.status === 403) {
+            console.error('❌ Access Forbidden:', error.response.data.message);
         }
 
         return Promise.reject(error);
