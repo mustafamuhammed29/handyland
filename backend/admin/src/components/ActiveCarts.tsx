@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ShoppingCart, User, Clock, Package, AlertCircle } from 'lucide-react';
 
 interface CartItem {
