@@ -66,10 +66,13 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
         const loadRepairs = async () => {
             try {
                 const response = await api.get<RepairDevice[]>('/api/repairs');
+                console.log('🔧 Repair API Response:', response); // DEBUG log
+
                 // Axios returns the data in the .data property
-                const repairsData = response.data;
+                const repairsData = response.data || [];
 
                 if (Array.isArray(repairsData)) {
+                    console.log(`✅ Loaded ${repairsData.length} repair devices`);
                     setRepairCatalog(repairsData);
                 } else {
                     console.error("Invalid repairs data format", repairsData);
@@ -77,6 +80,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 }
             } catch (err) {
                 console.error("Failed to load repairs", err);
+                addToast('Failed to load repair catalog. Check console.', 'error');
             } finally {
                 setLoading(false);
             }
@@ -195,7 +199,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                             </div>
 
                             <div className="space-y-3">
-                                {selectedDevice.services.map((service, idx) => (
+                                {(selectedDevice.services || []).map((service, idx) => (
                                     <div
                                         key={idx}
                                         className="group relative bg-black/40 border border-slate-800 hover:border-blue-500/50 rounded-xl p-4 transition-all duration-300 hover:bg-blue-900/5"
