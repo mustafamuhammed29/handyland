@@ -176,10 +176,13 @@ exports.login = async (req, res) => {
             path: '/'
         });
 
+        console.log('✅ AuthController: Sending login response. Token exists:', !!token);
+        if (token) console.log('✅ Token preview:', token.substring(0, 10) + '...');
+
         res.status(200).json({
             success: true,
-            token, // Return access token for fallback
-            refreshToken, // Return refresh token for fallback
+            token: token, // Explicit key-value
+            refreshToken: refreshToken, // Explicit key-value
             user: {
                 id: user._id,
                 name: user.name,
