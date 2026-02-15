@@ -85,7 +85,7 @@ exports.register = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Registration successful! Please check your email.',
-            // token, // Removed auto-login token
+            token, // Return access token
             user: {
                 id: user._id,
                 name: user.name,
@@ -178,6 +178,8 @@ exports.login = async (req, res) => {
 
         res.status(200).json({
             success: true,
+            token, // Return access token for fallback
+            refreshToken, // Return refresh token for fallback
             user: {
                 id: user._id,
                 name: user.name,

@@ -99,6 +99,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (data.success && data.user) {
                 console.log('✅ [AuthContext] Login successful:', data.user.email);
+
+                // Hybrid Auth: Store tokens in localStorage as fallback
+                if (data.token) localStorage.setItem('accessToken', data.token);
+                if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+
                 localStorage.setItem('user', JSON.stringify(data.user));
                 setUser(data.user);
                 navigate('/dashboard', { replace: true });
@@ -116,6 +121,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('🚪 [AuthContext] Logging out...');
         setUser(null);
         localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         authService.logout().catch(err => console.error('Logout API error:', err));
         navigate('/login');
         console.log('✅ [AuthContext] Logout complete');
