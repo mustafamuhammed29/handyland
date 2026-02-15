@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { CartItem } from '../types';
 import { useAuth } from './AuthContext';
 import { api } from '../utils/api';
+import { debounce } from '../utils/debounce';
 
 interface Coupon {
     code: string;
@@ -107,6 +108,31 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         cartRef.current = cart;
     }, [cart]);
 
+    // Debounced API Update to prevent race conditions
+    // Using useMemo to ensure the debounced function distinctive instance persists
+    const debouncedApiUpdate = React.useMemo(
+        () => debounce(async (id: string | number, quantity: number, category: string) => {
+            try {
+                if (quantity === 0) {
+                    await api.put('/api/cart', {
+                        id,
+                        productType: category,
+                        quantity: 0
+                    });
+                } else {
+                    await api.put('/api/cart', {
+                        id,
+                        productType: category,
+                        quantity
+                    });
+                }
+            } catch (err) {
+                console.error("Cart sync failed:", err);
+            }
+        }, 500),
+        []
+    );
+
     // Cart Actions
     const addToCart = async (item: CartItem) => {
         // Optimistic Update first
@@ -142,18 +168,18 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Actually, cartRef.current will always be the latest committed state.
 
         if (user) {
-            // Little delay to let state update happen? No, that's hacky.
-            // Just use the ref and adding 1 is the best approximation without a mutex.
+            // Use current state map to find the item and determine new quantity
             const currentItem = cartRef.current.find(i => i.id === item.id);
-            const newQty = currentItem ? (currentItem.quantity || 1) + 1 : 1;
+            // Since we just updated state optimistically, the Ref might still be old in this closure tick if not careful,
+            // but we can just calculate what the new qty *should* be:
+            // If it existed, prev + 1. If not, 1.
+            // Relying on the optimistic update logic:
+            let newQty = 1;
+            if (currentItem) {
+                newQty = (currentItem.quantity || 1) + 1;
+            }
 
-            try {
-                await api.put('/api/cart', {
-                    id: item.id,
-                    productType: item.category,
-                    quantity: newQty
-                });
-            } catch (err) { console.error(err); }
+            debouncedApiUpdate(item.id, newQty, item.category);
         }
     };
 
@@ -163,13 +189,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setCart((prev) => prev.filter((item) => item.id !== id));
 
         if (user && itemToRemove) {
-            try {
-                await api.put('/api/cart', {
-                    id: id,
-                    productType: itemToRemove.category,
-                    quantity: 0
-                });
-            } catch (err) { console.error(err); }
+            debouncedApiUpdate(id, 0, itemToRemove.category);
         }
     };
 
@@ -191,21 +211,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
 
         if (user) {
-            try {
-                if (shouldRemove) {
-                    await api.put('/api/cart', {
-                        id: id,
-                        productType: itemCategory,
-                        quantity: 0
-                    });
-                } else {
-                    await api.put('/api/cart', {
-                        id: id,
-                        productType: itemCategory,
-                        quantity: newQty
-                    });
-                }
-            } catch (err) { console.error(err); }
+            // If newQty < 1, we send 0 to remove
+            debouncedApiUpdate(id, shouldRemove ? 0 : newQty, itemCategory);
         }
     };
 

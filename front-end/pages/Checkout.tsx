@@ -4,6 +4,8 @@ import { Elements } from '@stripe/react-stripe-js';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
+import { orderService } from '../services/orderService';
+import { productService } from '../services/productService';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, Truck, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Loader2, Tag, X, Lock, User, UserPlus } from 'lucide-react';
 import { LanguageCode } from '../types';
@@ -195,10 +197,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         setCouponLoading(true);
         setCouponError(null);
         try {
-            const response = await api.post<any>('/api/orders/apply-coupon', {
-                code: couponCode,
-                cartTotal: cartTotal
-            });
+            const response = await orderService.applyCoupon(couponCode, cartTotal);
 
             if (response.success) {
                 setAppliedCoupon({
@@ -248,9 +247,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
 
         // Validate Stock
         try {
-            await api.post('/api/products/validate-stock', {
-                items: cart.map(item => ({ id: item.id, quantity: item.quantity || 1, name: item.title }))
-            });
+            await productService.validateStock(
+                cart.map(item => ({ id: item.id, quantity: item.quantity || 1, name: item.title }))
+            );
         } catch (err: any) {
             console.error("Stock Validation Error:", err);
             setError(err.message || "Some items are out of stock.");
@@ -260,7 +259,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         }
 
         try {
-            const response = await api.post('/api/payment/create-checkout-session', {
+            const response = await orderService.createCheckoutSession({
                 items: cart.map(item => ({
                     product: item.id,
                     productType: item.category === 'device' ? 'Product' : 'Accessory',
@@ -443,6 +442,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                                 name="country"
                                                 value={shippingDetails.country}
                                                 onChange={handleInputChange}
+                                                aria-label="Country"
                                                 className={`w-full bg-black/40 border ${formErrors.country ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                                             >
                                                 <option value="Germany">Germany</option>
@@ -544,7 +544,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                         {step === 3 && (
                             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 animate-in fade-in slide-in-from-right-4">
                                 <div className="flex items-center gap-4 mb-6">
-                                    <button onClick={() => setStep(2)} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
+                                    <button onClick={() => setStep(2)} aria-label="Back to shipping" className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
                                         <ArrowLeft className="w-5 h-5" />
                                     </button>
                                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -626,7 +626,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                             <Tag className="w-4 h-4" />
                                             <span className="font-bold text-sm">{appliedCoupon.code}</span>
                                         </div>
-                                        <button onClick={removeCoupon} className="text-slate-400 hover:text-white p-1 transition-colors">
+                                        <button onClick={removeCoupon} aria-label="Remove coupon" className="text-slate-400 hover:text-white p-1 transition-colors">
                                             <X className="w-4 h-4" />
                                         </button>
                                     </div>

@@ -1,10 +1,12 @@
 import React, { useState, MouseEvent, useEffect } from 'react';
 import { PhoneListing, LanguageCode } from '../types';
+import { productService } from '../services/productService';
 import { Search, ShoppingCart, Cpu, Signal, X, Layers, ChevronRight, Plus, Grid, List, Filter, Heart } from 'lucide-react';
 import { translations } from '../i18n';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { SkeletonProductCard } from './SkeletonProductCard';
+import { SEO } from './SEO';
 
 interface MarketplaceProps {
     lang: LanguageCode;
@@ -93,9 +95,9 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                const queryParams = new URLSearchParams({
-                    page: currentPage.toString(),
-                    limit: itemsPerPage.toString(),
+                const data = await productService.getAllProducts({
+                    page: currentPage,
+                    limit: itemsPerPage,
                     search: debouncedSearchTerm,
                     brand: filterBrand,
                     sort,
@@ -105,10 +107,6 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     storage: selectedStorage,
                     condition: selectedCondition
                 });
-
-                const response = await fetch(`/api/products?${queryParams.toString()}`);
-                if (!response.ok) throw new Error('Failed to fetch');
-                const data = await response.json();
 
                 if (data.products) {
                     const formatted = data.products.map((p: any) => ({
@@ -126,7 +124,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     setProducts(formatted);
                     setTotalPages(data.totalPages);
                 } else {
-                    // Fallback mechanism
+                    // Fallback mechanism (keeping existing logic just in case, though service should handle it)
                     const formatted = (Array.isArray(data) ? data : []).map((p: any) => ({
                         ...p,
                         model: p.name || p.model,
@@ -189,6 +187,11 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
 
     return (
         <div className="relative z-10 py-16 min-h-screen" onMouseMove={handleMouseMove}>
+            <SEO
+                title="Marketplace - Buy & Sell Refurbished Phones"
+                description="Browse our wide selection of certified refurbished smartphones. Best prices, warranty included, and thoroughly tested."
+                canonical="https://handyland.com/marketplace"
+            />
 
             {/* --- PRODUCT INSPECTOR MODAL --- */}
             {selectedProduct && (
@@ -198,6 +201,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         {/* Close Button */}
                         <button
                             onClick={() => setSelectedProduct(null)}
+                            aria-label="Close details"
                             className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-white/10 rounded-full text-white transition-colors"
                         >
                             <X className="w-6 h-6" />
@@ -291,9 +295,9 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'}`}><Grid className="w-5 h-5" /></button>
-                            <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'}`}><List className="w-5 h-5" /></button>
-                            <button onClick={() => setShowFilters(!showFilters)} className={`p-2 rounded-lg ${showFilters ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'} md:hidden`}><Filter className="w-5 h-5" /></button>
+                            <button onClick={() => setViewMode('grid')} aria-label="Grid view" className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'}`}><Grid className="w-5 h-5" /></button>
+                            <button onClick={() => setViewMode('list')} aria-label="List view" className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'}`}><List className="w-5 h-5" /></button>
+                            <button onClick={() => setShowFilters(!showFilters)} aria-label="Toggle filters" className={`p-2 rounded-lg ${showFilters ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'} md:hidden`}><Filter className="w-5 h-5" /></button>
                         </div>
                     </div>
 
@@ -313,6 +317,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                             <select
                                 value={selectedCondition}
                                 onChange={(e) => setSelectedCondition(e.target.value)}
+                                aria-label="Filter by condition"
                                 className="bg-slate-900 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:outline-none focus:border-cyan-500"
                             >
                                 <option value="">All Conditions</option>
@@ -357,6 +362,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         <select
                             value={sort}
                             onChange={(e) => setSort(e.target.value)}
+                            aria-label="Sort products"
                             className="bg-slate-900/50 text-white rounded-xl px-4 py-2.5 text-sm border-none focus:ring-1 focus:ring-cyan-500 outline-none min-w-[150px]"
                         >
                             <option value="newest">Newest Arrivals</option>
@@ -369,11 +375,11 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-300 ${showFilters || window.innerWidth >= 768 ? 'block' : 'hidden md:grid'}`}>
                         <input type="number" placeholder="Min Price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
                         <input type="number" placeholder="Max Price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
-                        <select value={selectedRam} onChange={(e) => setSelectedRam(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none">
+                        <select value={selectedRam} onChange={(e) => setSelectedRam(e.target.value)} aria-label="Filter by RAM" className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none">
                             <option value="">RAM: Any</option>
                             {ramOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
-                        <select value={selectedStorage} onChange={(e) => setSelectedStorage(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none">
+                        <select value={selectedStorage} onChange={(e) => setSelectedStorage(e.target.value)} aria-label="Filter by storage" className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none">
                             <option value="">Storage: Any</option>
                             {storageOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
@@ -401,11 +407,12 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                             <img src={getProductImage(phone)} alt={phone.model} loading="lazy" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" />
                                             <div className="absolute top-3 left-3 flex gap-2">
                                                 <span className={`text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border ${phone.condition === 'new' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'}`}>
-                                                    {phone.condition.toUpperCase()}
+                                                    {(phone.condition || 'Used').toUpperCase()}
                                                 </span>
                                             </div>
                                             <button
                                                 onClick={(e) => toggleWishlist(e, phone.id)}
+                                                aria-label={wishlist.includes(phone.id) ? "Remove from wishlist" : "Add to wishlist"}
                                                 className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md border transition-all ${wishlist.includes(phone.id) ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-black/40 border-white/10 text-white hover:bg-black/60'}`}
                                             >
                                                 <Heart className={`w-4 h-4 ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
@@ -434,7 +441,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                         </div>
                                         <div className="mt-auto flex items-center justify-between gap-3">
                                             <div className="text-xl font-bold text-white">{phone.price}{t.currency}</div>
-                                            <button onClick={() => handleAddToCart(phone)} className="bg-slate-800 hover:bg-cyan-600 hover:text-black text-white p-3 rounded-xl font-bold transition-all duration-300 group/btn">
+                                            <button onClick={() => handleAddToCart(phone)} aria-label="Add to cart" className="bg-slate-800 hover:bg-cyan-600 hover:text-black text-white p-3 rounded-xl font-bold transition-all duration-300 group/btn">
                                                 <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
                                             </button>
                                         </div>
@@ -445,6 +452,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 <div key={phone.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex gap-6 hover:border-cyan-500/30 transition-all group relative">
                                     <button
                                         onClick={(e) => toggleWishlist(e, phone.id)}
+                                        aria-label={wishlist.includes(phone.id) ? "Remove from wishlist" : "Add to wishlist"}
                                         className={`absolute top-4 right-4 p-2 rounded-full backdrop-blur-md border transition-all z-10 ${wishlist.includes(phone.id) ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}`}
                                     >
                                         <Heart className={`w-4 h-4 ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
@@ -460,7 +468,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                             </div>
                                             <div className="text-right pr-12">
                                                 <div className="text-2xl font-bold text-white">{phone.price}{t.currency}</div>
-                                                <div className={`text-xs font-bold uppercase ${phone.condition === 'new' ? 'text-emerald-400' : 'text-purple-400'}`}>{phone.condition}</div>
+                                                <div className={`text-xs font-bold uppercase ${phone.condition === 'new' ? 'text-emerald-400' : 'text-purple-400'}`}>{(phone.condition || 'Used').toUpperCase()}</div>
                                             </div>
                                         </div>
                                         <p className="text-slate-400 text-sm line-clamp-2 mb-4">{phone.description}</p>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Truck, CheckCircle, Clock, MapPin, CreditCard, Repeat, AlertTriangle } from 'lucide-react';
 import { api } from '../utils/api';
+import { orderService } from '../services/orderService';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
 import { Order } from '../types';
@@ -20,15 +21,15 @@ export const OrderDetails = () => {
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                const res = await api.get(`/api/orders/${id}`);
-                if (res.data.success) {
-                    setOrder(res.data.order);
+                const res = await orderService.getOrder(id || '');
+                if (res.success) {
+                    setOrder(res.order);
                 } else {
                     setError('Order not found');
                 }
             } catch (err: any) {
                 console.error(err);
-                setError(err.response?.data?.message || 'Failed to load order');
+                setError(err.message || 'Failed to load order');
             } finally {
                 setLoading(false);
             }
@@ -86,15 +87,15 @@ export const OrderDetails = () => {
         <div className="min-h-screen pt-28 pb-12 px-4 max-w-4xl mx-auto">
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
-                <button onClick={() => navigate('/dashboard')} className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors">
+                <button onClick={() => navigate('/dashboard')} aria-label="Back to dashboard" className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors">
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
                     <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                        Order #{order.orderNumber || order._id.slice(-6).toUpperCase()}
+                        Order #{order.orderNumber || (order._id ? order._id.slice(-6).toUpperCase() : '')}
                         <span className={`text-xs px-3 py-1 rounded-full uppercase tracking-wider font-bold border ${isCancelled ? 'bg-red-500/10 text-red-400 border-red-500/30' :
-                                order.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                                    'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                            order.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                                'bg-blue-500/10 text-blue-400 border-blue-500/30'
                             }`}>
                             {order.status}
                         </span>
@@ -151,12 +152,18 @@ export const OrderDetails = () => {
                                 {/* Connector Line */}
                                 <div className="absolute top-4 left-4 right-4 h-0.5 bg-slate-800 -z-10"></div>
                                 <div
-                                    className="absolute top-4 left-4 h-0.5 bg-green-500 transition-all duration-1000 -z-10"
-                                    style={{ width: `${(currentStep / (steps.length - 1)) * 100}%`, right: `${100 - ((currentStep / (steps.length - 1)) * 100)}%` }} // Adjust dynamically
+                                    className="absolute top-4 left-4 h-0.5 bg-green-500 transition-all duration-1000 -z-10 w-[var(--progress-width)] right-[var(--progress-right)]"
+                                    style={{
+                                        '--progress-width': `${(currentStep / (steps.length - 1)) * 100}%`,
+                                        '--progress-right': `${100 - ((currentStep / (steps.length - 1)) * 100)}%`
+                                    } as React.CSSProperties}
                                 ></div>
                                 {/* Better Connector implementation */}
                                 <div className="absolute top-4 left-6 right-6 h-0.5 bg-slate-800 -z-10"></div>
-                                <div className="absolute top-4 left-6 h-0.5 bg-blue-500 -z-10 transition-all duration-500" style={{ width: `${(currentStep / (steps.length - 1)) * 95}%` }}></div>
+                                <div
+                                    className="absolute top-4 left-6 h-0.5 bg-blue-500 -z-10 transition-all duration-500 w-[var(--blue-progress)]"
+                                    style={{ '--blue-progress': `${(currentStep / (steps.length - 1)) * 95}%` } as React.CSSProperties}
+                                ></div>
 
 
                                 <div className="flex justify-between">

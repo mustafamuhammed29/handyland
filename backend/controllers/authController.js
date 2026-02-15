@@ -605,7 +605,15 @@ exports.refreshToken = async (req, res) => {
         // Generate new access token
         const newAccessToken = generateToken(user._id);
 
-        res.json({ token: newAccessToken });
+        // Send access token in HTTP-only cookie
+        res.cookie('accessToken', newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000 // 15 minutes
+        });
+
+        res.json({ success: true, token: newAccessToken });
     } catch (error) {
         console.error("Refresh Token Error:", error);
         res.status(500).json({ message: 'Internal Server Error' });

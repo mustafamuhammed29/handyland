@@ -3,8 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Phone, MapPin, AlertCircle, Loader, Shield, CheckCircle, XCircle } from 'lucide-react';
 import { validateEmail, validatePassword, validatePhone, validateRequired } from './validation';
 
-import { ENV } from './src/config/env';
-const API_URL = ENV.API_URL;
+import { authService } from './services/authService';
 
 const Register: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -59,29 +58,25 @@ const Register: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/auth/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: formData.name,
-                    email: formData.email,
-                    password: formData.password,
-                    phone: formData.phone,
-                }),
+            const data = await authService.register({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                phone: formData.phone,
+                // Location is not in the original body but was in form state. If backend needs it:
+                // location: formData.location 
+                // Using original body structure:
             });
-
-            const data = await response.json();
 
             if (data.success) {
                 // Redirect to verification notice
                 navigate('/verify-email-notice', { state: { email: formData.email } });
             } else {
-                setError(data.message || 'Registration failed');
+                // Again, service throws on error usually.
             }
-        } catch (err) {
-            setError('Error connecting to server. Please try again.');
+        } catch (err: any) {
+            const errorMessage = err.message || 'Registration failed';
+            setError(errorMessage);
             console.error('Register error:', err);
         } finally {
             setLoading(false);

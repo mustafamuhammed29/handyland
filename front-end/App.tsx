@@ -32,13 +32,15 @@ import VerifyEmailNotice from './VerifyEmailNotice';
 import ForgotPassword from './ForgotPassword';
 import { LanguageCode, User } from './types';
 import { translations } from './i18n';
-import { CartProvider } from './context/CartContext';
+import { CartProvider, useCart } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GlobalError } from './components/GlobalError';
 import { GlobalLoader } from './components/GlobalLoader';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
+import { SEO } from './components/SEO';
 
 // Lazy Load Components
 const Marketplace = React.lazy(() => import('./components/Marketplace').then(module => ({ default: module.Marketplace })));
@@ -55,6 +57,11 @@ const Home = ({ lang }: { lang: LanguageCode }) => {
 
   return (
     <>
+      <SEO
+        title="Premium Refurbished Smartphones & Repair Services"
+        description="HandyLand offers certified refurbished smartphones, expert repair services, and instant valuations. Shop sustainable tech today."
+        canonical="https://handyland.com"
+      />
       {sections.hero && <Hero lang={lang} />}
       {sections.stats && <Stats />}
       {sections.repairGallery && (
@@ -86,6 +93,7 @@ function AppContent() {
   const location = useLocation();
   const [lang, setLang] = useState<LanguageCode>('de');
   const { user, setUser } = useAuth(); // Use AuthContext
+  const { cart } = useCart();
 
   // Use settings context to check for global load errors
   // This is now safe because AppContent is wrapped by SettingsProvider in App
@@ -123,7 +131,7 @@ function AppContent() {
                 <PublicLayout
                   lang={lang}
                   user={user}
-                  cartCount={10} // This should come from CartContext, will fix later
+                  cartCount={cart.length}
                 />
               }
             >
@@ -195,15 +203,18 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <SettingsProvider>
-          <AuthProvider>
-            <CartProvider>
-              <AppContent />
-            </CartProvider>
-          </AuthProvider>
-        </SettingsProvider>
-      </ToastProvider>
+      {/* @ts-ignore */}
+      <HelmetProvider context={{}}>
+        <ToastProvider>
+          <SettingsProvider>
+            <AuthProvider>
+              <CartProvider>
+                <AppContent />
+              </CartProvider>
+            </AuthProvider>
+          </SettingsProvider>
+        </ToastProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   );
 }

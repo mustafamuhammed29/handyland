@@ -20,6 +20,8 @@ import {
     DashboardGlobalSettings
 } from './dashboard/index';
 import { api } from '../utils/api';
+import { authService } from '../services/authService';
+import { orderService } from '../services/orderService';
 
 interface DashboardProps {
     user: UserType | null;
@@ -69,6 +71,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
             console.error('Error downloading invoice:', error);
         }
     };
+    // Use orderService.downloadInvoice if it supports blob response handling as expected here.
+    // orderService.downloadInvoice implementation in step 469 opens window.
+    // implementation in Dashboard.tsx creates a blob link.
+    // I should check orderService.downloadInvoice implementation again.
+    // It does window.open(url, '_blank').
+    // The Dashboard implementation downloads it as file.
+    // I will stick to existing implementation for now or update orderService to support this.
+    // For now I'll leave handleDownloadInvoice as is or update it to use orderService if I update orderService.
+    // I'll leave it for now.
 
     const handleSell = (valId: string) => {
         navigate('/marketplace/sell');
@@ -76,7 +87,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
     const handleUpdateProfile = async (data: Partial<UserType>) => {
         try {
-            await api.put('/api/auth/profile', data);
+            await authService.updateProfile(data);
             user.refetch();
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -85,7 +96,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
     const handleUpdatePassword = async (oldPass: string, newPass: string) => {
         try {
-            await api.put('/api/auth/password', { oldPassword: oldPass, newPassword: newPass });
+            await authService.updatePassword({ oldPassword: oldPass, newPassword: newPass });
         } catch (error) {
             console.error('Error updating password:', error);
         }
@@ -93,7 +104,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
     const handleAddAddress = async (address: any) => {
         try {
-            await api.post('/api/addresses', address);
+            await authService.addAddress(address);
             await addresses.refetch();
         } catch (error) {
             console.error('Error adding address:', error);
@@ -102,7 +113,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
     const handleUpdateAddress = async (id: string, address: any) => {
         try {
-            await api.put(`/api/addresses/${id}`, address);
+            await authService.updateAddress(id, address);
             await addresses.refetch();
         } catch (error) {
             console.error('Error updating address:', error);
@@ -111,7 +122,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
     const handleDeleteAddress = async (id: string) => {
         try {
-            await api.delete(`/api/addresses/${id}`);
+            await authService.deleteAddress(id);
             await addresses.refetch();
         } catch (error) {
             console.error('Error deleting address:', error);
@@ -162,7 +173,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         <div className="flex items-center gap-4 mb-8">
                             <div className="relative">
                                 <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-900/30">
-                                    {(currentUser.name).charAt(0).toUpperCase()}
+                                    {(currentUser.name || '?').charAt(0).toUpperCase()}
                                 </div>
                                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
                             </div>
@@ -225,6 +236,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 <div className="relative">
                                     <button
                                         onClick={() => setShowNotifications(!showNotifications)}
+                                        aria-label="Toggle notifications"
                                         className="p-2 text-slate-400 hover:text-white transition-colors relative"
                                     >
                                         <Bell className="w-6 h-6" />
@@ -260,6 +272,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 </div>
                                 <button
                                     onClick={() => { logout(); navigate('/'); }}
+                                    aria-label="Logout"
                                     className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
                                 >
                                     <LogOut className="w-5 h-5" />

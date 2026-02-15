@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft, Cpu, Battery, Smartphone, Shield, Truck, Star, ChevronRight, Check, X, Share2, ThumbsUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext'; // Added
+import { productService } from '../services/productService';
 import { api } from '../utils/api'; // Added
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { translations } from '../i18n';
 import { PhoneListing, LanguageCode } from '../types';
+import { SEO } from './SEO';
 
 interface ProductDetailsProps {
     lang: LanguageCode;
@@ -38,59 +40,65 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
         const fetchProduct = async () => {
             try {
                 window.scrollTo(0, 0);
-                const response = await fetch(`/api/products/${id}`);
-                if (!response.ok) throw new Error('Product not found');
-                const data = await response.json();
+                const data = await productService.getProductById(id || '');
+                // productService returns { success, product } but check if data structure matches
+                // actually getProductById returns { success: boolean; product: PhoneListing }
+                // but the original fetch returned the product object directly? 
+                // Let's check productService: return await api.get(`/api/products/${id}`);
+                // api.get usually returns response.data.
+                // If api.get returns the data directly, then:
+                // Wait, api.ts snippet: response.use(response => response, error => ...)
+                // But typically api.get<T> returns T.
+                // In productService: return await api.get(...)
+                // If the backend returns { product: ... }, then data.product is the product.
+
+                // Let's assume productService.getProductById returns the response data which contains the product.
+                // But wait, the original code did: const response = await fetch... const data = await response.json();
+                // Then used data directly as the product (mostly).
+                // Let's look at original code:
+                // const formatted: PhoneListing = { ...data, ... }
+                // This implies 'data' is the product object itself or contains fields of it.
+
+                // If I use productService.getProductById(id), it returns what api.get returns.
+                // Let's assume consistency with other services.
+
+                let productData: any = data;
+                if (data.product) {
+                    productData = data.product;
+                }
 
                 const formatted: PhoneListing = {
-                    ...data,
-                    model: data.name || data.model,
+                    ...productData,
+                    model: productData.name || productData.model,
                     specs: {
-                        cpu: data.processor || data.specs?.cpu || 'Standard Chip',
-                        battery: data.battery || data.specs?.battery || 'Standard Battery',
-                        screen: data.display || data.specs?.screen || 'HD Display',
-                        ram: data.specs?.ram || 'N/A',
-                        camera: data.specs?.camera || 'Pro Camera System'
+                        cpu: productData.processor || productData.specs?.cpu || 'Standard Chip',
+                        battery: productData.battery || productData.specs?.battery || 'Standard Battery',
+                        screen: productData.display || productData.specs?.screen || 'HD Display',
+                        ram: productData.specs?.ram || 'N/A',
+                        camera: productData.specs?.camera || 'Pro Camera System'
                     },
-                    imageUrl: data.image || data.imageUrl || '',
-                    images: data.images?.length > 0 ? data.images : [data.image || data.imageUrl]
+                    imageUrl: productData.image || productData.imageUrl || '',
+                    images: productData.images?.length > 0 ? productData.images : [productData.image || productData.imageUrl]
                 };
                 setProduct(formatted);
                 setActiveImage(formatted.images?.[0] || formatted.imageUrl || '');
 
                 // Fetch Related
-                const relatedRes = await fetch(`/api/products/${data.id}/related`);
-                if (relatedRes.ok) {
-                    const relatedData = await relatedRes.json();
-                    const formattedRelated = relatedData.map((p: any) => ({
-                        ...p,
-                        model: p.name || p.model,
-                        imageUrl: p.image || p.imageUrl || ''
-                    }));
-                    setRelatedProducts(formattedRelated);
-                }
+                const relatedData = await productService.getRelatedProducts(productData.id || id);
+                const formattedRelated = relatedData.map((p: any) => ({
+                    ...p,
+                    model: p.name || p.model,
+                    imageUrl: p.image || p.imageUrl || ''
+                }));
+                setRelatedProducts(formattedRelated);
 
                 // Fetch Reviews
-                try {
-                    const reviewsRes = await fetch(`/api/products/${data.id}/reviews`);
-                    if (reviewsRes.ok) {
-                        const reviewsData = await reviewsRes.json();
-                        setReviews(reviewsData);
-                    }
-                } catch (err) {
-                    console.error("Failed to load reviews", err);
-                }
+                const reviewsData = await productService.getProductReviews(productData.id || id);
+                setReviews(reviewsData);
 
                 // Fetch Questions
-                try {
-                    const questionsRes = await fetch(`/api/products/${data.id}/questions`);
-                    if (questionsRes.ok) {
-                        const questionsData = await questionsRes.json();
-                        setQuestions(questionsData);
-                    }
-                } catch (err) {
-                    console.error("Failed to load questions", err);
-                }
+                const questionsData = await productService.getProductQuestions(productData.id || id);
+                setQuestions(questionsData);
 
             } catch (error) {
                 console.error("Failed to load product", error);
@@ -129,13 +137,18 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
 
     return (
         <div className="min-h-screen bg-slate-950 pt-24 pb-12 px-4 relative">
+            <SEO
+                title={`${product.model} - ${product.condition} | ${product.storage}`}
+                description={`Buy used, refurbished ${product.brand} ${product.model} - ${product.storage} - ${product.color} in ${product.condition} condition. Certified quality, warranty included.`}
+                ogImage={getImageUrl(activeImage)}
+            />
             {/* Lightbox Modal */}
             {isLightboxOpen && (
                 <div
                     className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200"
                     onClick={() => setIsLightboxOpen(false)}
                 >
-                    <button className="absolute top-8 right-8 text-white hover:text-cyan-400 transition-colors">
+                    <button onClick={() => setIsLightboxOpen(false)} aria-label="Close lightbox" className="absolute top-8 right-8 text-white hover:text-cyan-400 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -187,6 +200,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                 <button
                                     key={idx}
                                     onClick={() => setActiveImage(img)}
+                                    aria-label={`View image ${idx + 1}`}
                                     className={`aspect-square rounded-xl border-2 overflow-hidden transition-all ${activeImage === img ? 'border-cyan-500 opacity-100' : 'border-slate-800 opacity-60 hover:opacity-100'}`}
                                 >
                                     <img src={getImageUrl(img)} alt={`View ${idx}`} className="w-full h-full object-cover" />
@@ -204,6 +218,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                     navigator.clipboard.writeText(window.location.href);
                                     addToast("Link copied to clipboard", "success");
                                 }}
+                                aria-label="Share product"
                                 className="p-2 bg-slate-900 rounded-full hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
                             >
                                 <Share2 className="w-5 h-5" />
