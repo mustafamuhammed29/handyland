@@ -150,3 +150,7 @@
 {"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-02-15T14:48:05.288Z"}
 {"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-02-15T16:31:20.160Z"}
 {"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-02-15T16:57:02.368Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-02-15T17:09:43.182Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-02-15T17:09:45.286Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-02-15T17:09:47.379Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-02-15T17:10:27.273Z"}

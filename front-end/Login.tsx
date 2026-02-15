@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader, CheckCircle } from 'lucide-react';
 import { validateEmail, validateRequired } from './validation';
-
+import { useAuth } from './context/AuthContext';
 import { authService } from './services/authService';
 
 const Login: React.FC = () => {
+    const { login } = useAuth(); // Use login from context
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    // navigate is handled by login function now
 
     const [showResend, setShowResend] = useState(false);
 
@@ -35,17 +36,8 @@ const Login: React.FC = () => {
         setLoading(true);
 
         try {
-            const data = await authService.login(email, password);
-
-            if (data.success) {
-                localStorage.setItem('userToken', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                navigate('/');
-            } else {
-                // The authService throws on error usually, but if it returns data with success false (depending on implementation):
-                // However, our service uses api.post which throws ApiError on non-2xx.
-                // So we catch below.
-            }
+            await login(email, password);
+            // Navigation is handled by login() in AuthContext
         } catch (err: any) {
             // Handle ApiError or generic error
             const errorMessage = err.message || 'Invalid email or password';
