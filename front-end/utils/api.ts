@@ -1,10 +1,71 @@
+import axios from 'axios';
 import { ENV } from '../src/config/env';
 
 // utils/api.ts expects the BASE URL (e.g. localhost:5000), but ENV.API_URL includes /api
 // We strip /api if present to maintain compatibility with existing api.get('/api/...') calls
-const API_URL = ENV.API_URL.endsWith('/api')
+const API_BASE_URL = ENV.API_URL.endsWith('/api')
     ? ENV.API_URL.slice(0, -4)
     : ENV.API_URL;
+
+export const api = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    timeout: 10000,
+});
+
+// Request interceptor (Optional for debugging or adding headers dynamically if needed)
+api.interceptors.request.use(
+    (config) => {
+        // You can add logic here if needed, e.g. logging
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+// Response interceptor for token refresh
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        // Check for 401 and if we haven't retried yet
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            // Avoid infinite loops if the refresh endpoint itself fails
+            if (originalRequest.url.includes('/auth/refresh') || originalRequest.url.includes('/auth/login')) {
+                return Promise.reject(error);
+            }
+
+            originalRequest._retry = true;
+
+            try {
+                // Attempt to refresh the token
+                await api.get('/api/auth/refresh');
+
+                // Retry the original request
+                return api(originalRequest);
+            } catch (refreshError) {
+                // If refresh fails, clear session and reject
+                // Do NOT redirect here, let the caller (AuthContext) handle the cleanup and redirect
+                // to avoid race conditions and infinite loops.
+                localStorage.removeItem('user');
+                return Promise.reject(refreshError);
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+// Compatibility exports
+export const clearCache = (pattern?: string) => {
+    // No-op for now as Axios doesn't have built-in caching like custom fetch wrapper
+    // Can be implemented later if needed
+};
 
 export class ApiError extends Error {
     constructor(public status: number, public message: string) {
@@ -12,140 +73,5 @@ export class ApiError extends Error {
     }
 }
 
-// Simple in-memory cache with TTL (60s default)
-const cache = new Map<string, { data: any; expiry: number }>();
-const CACHE_TTL = 60 * 1000; // 60 seconds
-
-const getCached = (key: string) => {
-    const entry = cache.get(key);
-    if (entry && Date.now() < entry.expiry) return entry.data;
-    cache.delete(key);
-    return null;
-};
-
-const setCache = (key: string, data: any) => {
-    cache.set(key, { data, expiry: Date.now() + CACHE_TTL });
-};
-
-export const clearCache = (pattern?: string) => {
-    if (!pattern) { cache.clear(); return; }
-    for (const key of cache.keys()) {
-        if (key.includes(pattern)) cache.delete(key);
-    }
-};
-
-const getCookie = (name: string) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop()?.split(';').shift();
-    return null;
-};
-
-// Flag to prevent multiple refresh requests
-let isRefreshing = false;
-let failedQueue: any[] = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-    failedQueue.forEach(prom => {
-        if (error) {
-            prom.reject(error);
-        } else {
-            prom.resolve(token);
-        }
-    });
-
-    failedQueue = [];
-};
-
-const request = async (endpoint: string, options: RequestInit = {}) => {
-    // Token is now in httpOnly cookie, no need to get from localStorage
-    const xsrfToken = getCookie('XSRF-TOKEN');
-
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-        ...(xsrfToken ? { 'X-XSRF-Token': xsrfToken } : {}),
-        ...options.headers,
-    };
-
-    const method = options.method || 'GET';
-
-    // Check cache for GET requests
-    if (method === 'GET') {
-        const cached = getCached(endpoint);
-        if (cached) return cached;
-    }
-
-    try {
-        const response = await fetch(`${API_URL}${endpoint}`, {
-            ...options,
-            headers,
-            credentials: 'include', // Important for cookies
-        });
-
-        if (response.status === 401) {
-            // If it's a login or refresh request that failed, don't retry
-            if (endpoint.includes('/auth/login') || endpoint.includes('/auth/refresh')) {
-                throw new ApiError(401, 'Session expired. Please login again.');
-            }
-
-            if (isRefreshing) {
-                return new Promise(function (resolve, reject) {
-                    failedQueue.push({ resolve, reject });
-                }).then(() => {
-                    return request(endpoint, options);
-                }).catch(err => {
-                    return Promise.reject(err);
-                });
-            }
-
-            isRefreshing = true;
-
-            try {
-                // Attempt to refresh token
-                const refreshResponse = await fetch(`${API_URL}/api/auth/refresh`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include'
-                });
-
-                if (refreshResponse.ok) {
-                    processQueue(null, 'success');
-                    isRefreshing = false;
-                    return request(endpoint, options);
-                } else {
-                    throw new Error('Refresh failed');
-                }
-            } catch (err) {
-                processQueue(err, null);
-                isRefreshing = false;
-                window.location.href = '/login';
-                throw new ApiError(401, 'Session expired. Please login again.');
-            }
-        }
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new ApiError(response.status, errorData.message || response.statusText);
-        }
-
-        const data = await response.json();
-
-        // Cache successful GET responses
-        if (method === 'GET') {
-            setCache(endpoint, data);
-        }
-
-        return data;
-    } catch (error) {
-        if (error instanceof ApiError) throw error;
-        throw new Error(error instanceof Error ? error.message : 'Network error');
-    }
-};
-
-export const api = {
-    get: <T = any>(endpoint: string, options?: RequestInit) => request(endpoint, { ...options, method: 'GET' }) as Promise<T>,
-    post: <T = any>(endpoint: string, data: any, options?: RequestInit) => request(endpoint, { ...options, method: 'POST', body: JSON.stringify(data) }) as Promise<T>,
-    put: <T = any>(endpoint: string, data: any, options?: RequestInit) => request(endpoint, { ...options, method: 'PUT', body: JSON.stringify(data) }) as Promise<T>,
-    delete: <T = any>(endpoint: string, options?: RequestInit) => request(endpoint, { ...options, method: 'DELETE' }) as Promise<T>,
-};
+export default api;
 

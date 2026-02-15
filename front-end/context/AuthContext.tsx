@@ -59,12 +59,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (storedUser) {
                 try {
                     const parsedUser = JSON.parse(storedUser);
-                    setUser(parsedUser);
+                    // setUser(parsedUser); // REMOVED: Optimistic update causes "flicker" if session invalid
 
                     // Verify session with backend
-                    const { user } = await authService.getMe();
-                    setUser(user); // Update with fresh data
-                    localStorage.setItem('user', JSON.stringify(user));
+                    try {
+                        const { user } = await authService.getMe();
+                        setUser(user); // Update with fresh data
+                        localStorage.setItem('user', JSON.stringify(user));
+                    } catch (error) {
+                        console.error("Session invalid or expired", error);
+                        // If check fails, logout
+                        logout();
+                    }
+
                 } catch (error) {
                     console.error("Session invalid or expired", error);
                     // If check fails, logout

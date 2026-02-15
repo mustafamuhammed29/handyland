@@ -184,7 +184,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const data = await api.get<Settings>('/api/settings');
+                const response = await api.get<Settings>('/api/settings');
+                const data = response.data;
 
                 // Deep merge defaults with fetched data
                 setSettings(prev => ({
@@ -222,7 +223,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
             // Clear cache and refetch to ensure UI matches database
             clearCache('/api/settings');
-            const freshData = await api.get<Settings>('/api/settings');
+            const response = await api.get<Settings>('/api/settings');
+            const freshData = response.data;
             setSettings(prev => ({
                 ...prev,
                 ...freshData,
