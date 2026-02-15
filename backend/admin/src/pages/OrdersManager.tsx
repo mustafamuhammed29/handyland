@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { api } from '../utils/api';
 
-const API_URL = 'http://localhost:5000/api';
+
 
 interface OrderItem {
     product: string;
@@ -61,40 +62,27 @@ const OrdersManager: React.FC = () => {
     // Fetch orders
     const fetchOrders = async () => {
         try {
-            const token = localStorage.getItem('adminToken');
-            const statusParam = selectedStatus ? `?status=${selectedStatus}` : '';
+            console.log('📦 Fetching orders...');
+            const response = await api.get('/orders/admin/all' + (selectedStatus ? `?status=${selectedStatus}` : ''));
 
-            const response = await fetch(`${API_URL}/orders/admin/all${statusParam}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                setOrders(data.orders);
+            if (response.data.success) {
+                setOrders(response.data.orders);
+                console.log(`✅ Loaded ${response.data.orders.length} orders`);
             }
         } catch (error) {
-            console.error('Error fetching orders:', error);
+            console.error('❌ Error fetching orders:', error);
         }
     };
 
     // Fetch stats
     const fetchStats = async () => {
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`${API_URL}/orders/admin/stats`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                setStats(data.stats);
+            const response = await api.get('/orders/admin/stats');
+            if (response.data.success) {
+                setStats(response.data.stats);
             }
         } catch (error) {
-            console.error('Error fetching stats:', error);
+            console.error('❌ Error fetching stats:', error);
         } finally {
             setLoading(false);
         }
@@ -108,25 +96,19 @@ const OrdersManager: React.FC = () => {
     // Update order status
     const updateStatus = async (orderId: string, newStatus: string, trackingNumber?: string) => {
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`${API_URL}/orders/admin/${orderId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ status: newStatus, trackingNumber })
+            const response = await api.put(`/orders/admin/${orderId}/status`, {
+                status: newStatus,
+                trackingNumber
             });
 
-            const data = await response.json();
-            if (data.success) {
+            if (response.data.success) {
                 alert('Order status updated successfully!');
                 fetchOrders();
                 fetchStats();
                 setSelectedOrder(null);
             }
         } catch (error) {
-            console.error('Error updating order:', error);
+            console.error('❌ Error updating order:', error);
             alert('Error updating order status');
         }
     };
@@ -155,8 +137,8 @@ const OrdersManager: React.FC = () => {
 
     const filteredOrders = orders.filter(order =>
         order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        (order.user?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.user?.email || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     if (loading) {
@@ -265,9 +247,9 @@ const OrdersManager: React.FC = () => {
                                     <div className="text-sm text-gray-500">{order.paymentMethod}</div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <div className="font-medium text-gray-900">{order.user.name}</div>
-                                    <div className="text-sm text-gray-500">{order.user.email}</div>
-                                    <div className="text-sm text-gray-500">{order.user.phone}</div>
+                                    <div className="font-medium text-gray-900">{order.user?.name || 'Unknown User'}</div>
+                                    <div className="text-sm text-gray-500">{order.user?.email || 'No Email'}</div>
+                                    <div className="text-sm text-gray-500">{order.user?.phone || 'No Phone'}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {order.items.length} item(s)
