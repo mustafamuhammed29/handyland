@@ -31,26 +31,39 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-            console.log('🔄 401 Unauthorized (Token missing or expired), attempting refresh...');
+        if (error.response?.status === 401) {
 
-            try {
-                // Attempt to refresh the token using the HTTP-only refreshToken cookie
-                await api.get('/api/auth/refresh');
-                console.log('✓ Token refreshed successfully');
+            // Prevent infinite loop: Don't refresh if the failed request was already a refresh attempt
+            if (originalRequest.url?.includes('/auth/refresh')) {
+                return Promise.reject(error);
+            }
 
-                // Retry the original request
-                return api(originalRequest);
-            } catch (refreshError) {
-                console.error('❌ Token refresh failed:', refreshError);
+            if (!originalRequest._retry) {
+                originalRequest._retry = true;
+                console.log('🔄 401 Unauthorized, attempting refresh...');
 
-                // Only redirect if refresh fails
-                localStorage.removeItem('user');
-                if (!window.location.pathname.includes('/login')) {
-                    window.location.href = '/login';
+                try {
+                    await api.get('/api/auth/refresh');
+                    console.log('✓ Token refreshed successfully');
+                    return api(originalRequest);
+                } catch (refreshError) {
+                    console.error('❌ Token refresh failed:', refreshError);
+
+                    // Clear authentication state
+                    localStorage.removeItem('user');
+
+                    // Only redirect if NOT already on public pages
+                    const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password'];
+                    const currentPath = window.location.pathname;
+                    const isPublicPath = publicPaths.some(path => currentPath.includes(path));
+
+                    if (!isPublicPath) {
+                        // Redirect to login with return URL
+                        const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                        window.location.href = `/login?redirect=${returnUrl}`;
+                    }
+                    return Promise.reject(refreshError);
                 }
-                return Promise.reject(refreshError);
             }
         }
 
