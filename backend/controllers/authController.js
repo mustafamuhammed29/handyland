@@ -143,9 +143,16 @@ exports.login = async (req, res) => {
         const token = generateToken(user._id);
 
         // Send access token in HTTP-only cookie
+        // Force secure: false for localhost/http development
+        // Add detailed logging
+        console.log('🍪 Setting cookies for user:', user.email);
+
+        const isProduction = process.env.NODE_ENV === 'production';
+        console.log('🌍 Environment isProduction:', isProduction);
+
         res.cookie('accessToken', token, {
             httpOnly: true,
-            secure: false, // process.env.NODE_ENV === 'production', // Use false for dev to ensure it works on localhost
+            secure: isProduction, // strict check
             sameSite: 'lax',
             maxAge: 15 * 60 * 1000, // 15 minutes
             path: '/'
@@ -155,17 +162,15 @@ exports.login = async (req, res) => {
         const refreshToken = crypto.randomBytes(40).toString('hex');
         const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-        // Save refresh token to DB
         await RefreshToken.create({
             token: refreshToken,
             user: user._id,
             expiryDate: refreshTokenExpiry
         });
 
-        // Send refresh token in HTTP-only cookie
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: false, // process.env.NODE_ENV === 'production',
+            secure: isProduction,
             sameSite: 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
             path: '/'

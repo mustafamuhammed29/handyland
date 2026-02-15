@@ -26,7 +26,7 @@ export const Login: React.FC = () => {
     const { register, handleSubmit, formState: { errors }, watch } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema)
     });
-    
+
     // Watch email to allow resending verification
     const emailValue = watch("email");
 
@@ -35,14 +35,13 @@ export const Login: React.FC = () => {
         try {
             await login(data.email, data.password);
             addToast("Login successful!", "success");
-            navigate('/dashboard');
+            // Navigation handled by authContext
         } catch (error: any) {
-             console.error("Login Error", error);
-             addToast(error.message || "Login failed", "error");
-             if (error.message === 'Please verify your email first') {
-                 setShowResend(true);
-             }
-        } finally {
+            console.error("Login Error", error);
+            addToast(error.message || "Login failed", "error");
+            if (error.message === 'Please verify your email first') {
+                setShowResend(true);
+            }
             setIsLoading(false);
         }
     };
@@ -65,8 +64,8 @@ export const Login: React.FC = () => {
     };
 
     return (
-        <AuthLayout 
-            title="Login" 
+        <AuthLayout
+            title="Login"
             subtitle="System Access Protocol"
             icon={<UserIcon className="w-10 h-10 text-cyan-400" />}
         >
@@ -75,11 +74,11 @@ export const Login: React.FC = () => {
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Email</label>
                     <div className="relative group">
                         <UserIcon className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-cyan-400 transition-colors" />
-                        <input 
+                        <input
                             {...register("email")}
-                            type="email" 
-                            className={`w-full pl-10 pr-4 py-3 bg-black/40 border ${errors.email ? 'border-red-500' : 'border-slate-800'} rounded-xl text-white focus:border-cyan-500 outline-none transition-all text-sm`} 
-                            placeholder="secure@handyland.com" 
+                            type="email"
+                            className={`w-full pl-10 pr-4 py-3 bg-black/40 border ${errors.email ? 'border-red-500' : 'border-slate-800'} rounded-xl text-white focus:border-cyan-500 outline-none transition-all text-sm`}
+                            placeholder="secure@handyland.com"
                         />
                     </div>
                     {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
@@ -89,11 +88,11 @@ export const Login: React.FC = () => {
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Password</label>
                     <div className="relative group">
                         <Lock className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-cyan-400 transition-colors" />
-                        <input 
+                        <input
                             {...register("password")}
-                            type="password" 
-                            className={`w-full pl-10 pr-4 py-3 bg-black/40 border ${errors.password ? 'border-red-500' : 'border-slate-800'} rounded-xl text-white focus:border-cyan-500 outline-none transition-all text-sm`} 
-                            placeholder="••••••••" 
+                            type="password"
+                            className={`w-full pl-10 pr-4 py-3 bg-black/40 border ${errors.password ? 'border-red-500' : 'border-slate-800'} rounded-xl text-white focus:border-cyan-500 outline-none transition-all text-sm`}
+                            placeholder="••••••••"
                         />
                     </div>
                     {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
@@ -120,7 +119,7 @@ export const Login: React.FC = () => {
             </form>
 
             <div className="mt-6 text-center space-y-3">
-                 {showResend && (
+                {showResend && (
                     <button
                         onClick={handleResend}
                         className="text-yellow-400 hover:text-yellow-300 font-bold text-xs uppercase tracking-widest block mx-auto animate-pulse"

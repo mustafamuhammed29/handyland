@@ -159,6 +159,8 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                         <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
 
                         <button
+                            type="button"
+                            aria-label="Close Details"
                             onClick={() => setSelectedDevice(null)}
                             className="absolute top-4 right-4 z-50 p-2 bg-slate-900 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors border border-slate-700"
                         >

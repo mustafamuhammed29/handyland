@@ -152,17 +152,17 @@ export const OrderDetails = () => {
                                 {/* Connector Line */}
                                 <div className="absolute top-4 left-4 right-4 h-0.5 bg-slate-800 -z-10"></div>
                                 <div
-                                    className="absolute top-4 left-4 h-0.5 bg-green-500 transition-all duration-1000 -z-10 w-[var(--progress-width)] right-[var(--progress-right)]"
+                                    className="absolute top-4 left-4 h-0.5 bg-green-500 transition-all duration-1000 -z-10"
                                     style={{
-                                        '--progress-width': `${(currentStep / (steps.length - 1)) * 100}%`,
-                                        '--progress-right': `${100 - ((currentStep / (steps.length - 1)) * 100)}%`
-                                    } as React.CSSProperties}
+                                        width: `${(currentStep / (steps.length - 1)) * 100}%`,
+                                        right: `${100 - ((currentStep / (steps.length - 1)) * 100)}%`
+                                    }}
                                 ></div>
                                 {/* Better Connector implementation */}
                                 <div className="absolute top-4 left-6 right-6 h-0.5 bg-slate-800 -z-10"></div>
                                 <div
-                                    className="absolute top-4 left-6 h-0.5 bg-blue-500 -z-10 transition-all duration-500 w-[var(--blue-progress)]"
-                                    style={{ '--blue-progress': `${(currentStep / (steps.length - 1)) * 95}%` } as React.CSSProperties}
+                                    className="absolute top-4 left-6 h-0.5 bg-blue-500 -z-10 transition-all duration-500"
+                                    style={{ width: `${(currentStep / (steps.length - 1)) * 95}%` }}
                                 ></div>
 
 

@@ -55,51 +55,70 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         const initAuth = async () => {
+            console.log('🔐 AuthContext: Initializing...');
             const storedUser = localStorage.getItem('user');
+
             if (storedUser) {
                 try {
-                    const parsedUser = JSON.parse(storedUser);
-                    // setUser(parsedUser); // REMOVED: Optimistic update causes "flicker" if session invalid
+                    // Basic parse check
+                    JSON.parse(storedUser);
 
-                    // Verify session with backend
                     try {
+                        // Verify session with backend
                         const { user } = await authService.getMe();
-                        setUser(user); // Update with fresh data
+                        console.log('✅ Session valid:', user.email);
+                        setUser(user);
                         localStorage.setItem('user', JSON.stringify(user));
                     } catch (error) {
-                        console.error("Session invalid or expired", error);
-                        // If check fails, logout
-                        logout();
+                        console.error('❌ Session invalid (Backend check failed):', error);
+                        // Silent cleanup - DO NOT call logout() here to avoid redirect loops
+                        setUser(null);
+                        localStorage.removeItem('user');
                     }
-
                 } catch (error) {
-                    console.error("Session invalid or expired", error);
-                    // If check fails, logout
-                    logout();
+                    console.error('❌ Session invalid (Parse error):', error);
+                    setUser(null);
+                    localStorage.removeItem('user');
                 }
+            } else {
+                console.log('ℹ️ No stored session found');
             }
+
             setLoading(false);
+            console.log('🔐 AuthContext: Initialization complete');
         };
 
         initAuth();
     }, []);
 
     const login = async (email: string, password: string) => {
-        const data = await authService.login(email, password);
-        if (data.success && data.user) {
-            localStorage.setItem('user', JSON.stringify(data.user));
-            setUser(data.user);
-            navigate('/dashboard', { replace: true });
-        } else {
-            throw new Error('Login failed');
+        console.log('🔑 [AuthContext] Login attempt:', email);
+
+        try {
+            const data = await authService.login(email, password);
+
+            if (data.success && data.user) {
+                console.log('✅ [AuthContext] Login successful:', data.user.email);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                setUser(data.user);
+                navigate('/dashboard', { replace: true });
+            } else {
+                console.error('❌ [AuthContext] Login failed: No user data');
+                throw new Error('Login failed');
+            }
+        } catch (error) {
+            console.error('❌ [AuthContext] Login error:', error);
+            throw error;
         }
     };
 
     const logout = () => {
+        console.log('🚪 [AuthContext] Logging out...');
         setUser(null);
         localStorage.removeItem('user');
-        authService.logout().catch(err => console.error(err));
+        authService.logout().catch(err => console.error('Logout API error:', err));
         navigate('/login');
+        console.log('✅ [AuthContext] Logout complete');
     };
 
     return (
