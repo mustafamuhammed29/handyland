@@ -5,8 +5,9 @@ const User = require('../models/User');
 exports.protect = async (req, res, next) => {
     let token;
 
+    // DEBUG LOGGING
     console.log('🔐 Auth Middleware Started');
-    console.log('Cookies:', req.cookies);
+    console.log('Cookies:', req.cookies); // Needs cookie-parser
     console.log('Headers Authorization:', req.headers.authorization);
 
     // Check for token in cookies (PRIORITY)
