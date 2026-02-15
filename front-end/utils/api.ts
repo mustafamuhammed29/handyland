@@ -3,19 +3,9 @@ import { ENV } from '../src/config/env';
 
 // utils/api.ts expects the BASE URL (e.g. localhost:5000), but ENV.API_URL includes /api
 // We strip /api if present to maintain compatibility with existing api.get('/api/...') calls
-// utils/api.ts expects the BASE URL (e.g. localhost:5000), but ENV.API_URL includes /api
-// We strip /api if present to maintain compatibility with existing api.get('/api/...') calls
-console.log('🔧 API Setup - ENV.API_URL:', ENV.API_URL);
-
-let API_BASE_URL = ENV.API_URL;
-
-// If using proxy (starts with /api or is just /api), we want base to be empty
-// because legacy calls already include /api prefix
-if (API_BASE_URL === '/api' || API_BASE_URL.endsWith('/api')) {
-    API_BASE_URL = '';
-}
-
-console.log('🔧 API Setup - Final BASE_URL:', API_BASE_URL || '(empty string)');
+// Force empty baseURL to rely on Vite proxy
+console.log('🔧 API Setup - Forcing BASE_URL to empty string for proxy usage');
+const API_BASE_URL = '';
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
@@ -24,6 +14,12 @@ export const api = axios.create({
         'Content-Type': 'application/json',
     },
     timeout: 10000,
+});
+withCredentials: true,
+    headers: {
+    'Content-Type': 'application/json',
+    },
+timeout: 10000,
 });
 
 // Request interceptor - Add token to headers
