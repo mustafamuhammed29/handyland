@@ -188,18 +188,21 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 const data = response.data;
 
                 // Deep merge defaults with fetched data
+                // ✅ FIXED: Add fallbacks to prevent "Cannot read properties of undefined"
+                const safeData = (data || {}) as Partial<Settings>;
+
                 setSettings(prev => ({
                     ...prev,
-                    ...data,
-                    hero: { ...prev.hero, ...data.hero },
-                    content: { ...prev.content, ...data.content },
-                    stats: { ...prev.stats, ...data.stats },
-                    repairArchive: { ...prev.repairArchive, ...data.repairArchive },
-                    valuation: { ...prev.valuation, ...data.valuation },
-                    sections: { ...prev.sections, ...data.sections },
-                    contactSection: { ...prev.contactSection, ...data.contactSection },
-                    footerSection: { ...prev.footerSection, ...data.footerSection },
-                    navbar: { ...prev.navbar, ...data.navbar },
+                    ...safeData,
+                    hero: { ...prev.hero, ...(safeData.hero || {}) },
+                    content: { ...prev.content, ...(safeData.content || {}) },
+                    stats: { ...prev.stats, ...(safeData.stats || {}) },
+                    repairArchive: { ...prev.repairArchive, ...(safeData.repairArchive || {}) },
+                    valuation: { ...prev.valuation, ...(safeData.valuation || {}) },
+                    sections: { ...prev.sections, ...(safeData.sections || {}) },
+                    contactSection: { ...prev.contactSection, ...(safeData.contactSection || {}) },
+                    footerSection: { ...prev.footerSection, ...(safeData.footerSection || {}) },
+                    navbar: { ...prev.navbar, ...(safeData.navbar || {}) },
                 }));
 
                 setLoading(false);
@@ -224,19 +227,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Clear cache and refetch to ensure UI matches database
             clearCache('/api/settings');
             const response = await api.get<Settings>('/api/settings');
-            const freshData = response.data;
+            const freshData = (response.data || {}) as Partial<Settings>;
+
             setSettings(prev => ({
                 ...prev,
                 ...freshData,
-                hero: { ...prev.hero, ...freshData.hero },
-                content: { ...prev.content, ...freshData.content },
-                stats: { ...prev.stats, ...freshData.stats },
-                repairArchive: { ...prev.repairArchive, ...freshData.repairArchive },
-                valuation: { ...prev.valuation, ...freshData.valuation },
-                sections: { ...prev.sections, ...freshData.sections },
-                contactSection: { ...prev.contactSection, ...freshData.contactSection },
-                footerSection: { ...prev.footerSection, ...freshData.footerSection },
-                navbar: { ...prev.navbar, ...freshData.navbar },
+                hero: { ...prev.hero, ...(freshData.hero || {}) },
+                content: { ...prev.content, ...(freshData.content || {}) },
+                stats: { ...prev.stats, ...(freshData.stats || {}) },
+                repairArchive: { ...prev.repairArchive, ...(freshData.repairArchive || {}) },
+                valuation: { ...prev.valuation, ...(freshData.valuation || {}) },
+                sections: { ...prev.sections, ...(freshData.sections || {}) },
+                contactSection: { ...prev.contactSection, ...(freshData.contactSection || {}) },
+                footerSection: { ...prev.footerSection, ...(freshData.footerSection || {}) },
+                navbar: { ...prev.navbar, ...(freshData.navbar || {}) },
             }));
 
             addToast('Settings updated', 'success');
