@@ -30,10 +30,9 @@ api.interceptors.response.use(
             localStorage.removeItem('adminToken');
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            // Optional: proper redirect handled by router or window
-            if (!window.location.pathname.includes('/login')) {
-                window.location.href = '/login';
-            }
+
+            // Dispatch event for AuthContext to handle
+            window.dispatchEvent(new Event('auth:unauthorized'));
         }
         return Promise.reject(error);
     }

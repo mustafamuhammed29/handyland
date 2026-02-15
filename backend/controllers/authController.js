@@ -145,9 +145,10 @@ exports.login = async (req, res) => {
         // Send access token in HTTP-only cookie
         res.cookie('accessToken', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: false, // process.env.NODE_ENV === 'production', // Use false for dev to ensure it works on localhost
             sameSite: 'lax',
-            maxAge: 15 * 60 * 1000 // 15 minutes
+            maxAge: 15 * 60 * 1000, // 15 minutes
+            path: '/'
         });
 
         // Generate Refresh Token (Opaque)
@@ -164,9 +165,10 @@ exports.login = async (req, res) => {
         // Send refresh token in HTTP-only cookie
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: false, // process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            path: '/'
         });
 
         res.status(200).json({
@@ -334,9 +336,10 @@ exports.adminLogin = async (req, res) => {
         // Send access token in HTTP-only cookie
         res.cookie('accessToken', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: false, // process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 15 * 60 * 1000 // 15 minutes
+            maxAge: 15 * 60 * 1000, // 15 minutes
+            path: '/'
         });
 
         res.status(200).json({
@@ -608,9 +611,10 @@ exports.refreshToken = async (req, res) => {
         // Send access token in HTTP-only cookie
         res.cookie('accessToken', newAccessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: false, // process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 15 * 60 * 1000 // 15 minutes
+            maxAge: 15 * 60 * 1000, // 15 minutes
+            path: '/'
         });
 
         res.json({ success: true, token: newAccessToken });
