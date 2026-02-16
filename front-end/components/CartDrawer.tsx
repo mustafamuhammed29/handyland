@@ -16,7 +16,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
         cart, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen,
         cartTotal, finalTotal,
         coupon, applyCoupon, removeCoupon,
-        addToWishlist, isInWishlist
+        addToWishlist, isInWishlist,
+        freeShippingThreshold
     } = useCart();
 
     const t = translations[lang];
@@ -24,10 +25,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
 
-    // Free Shipping Threshold
-    const FREE_SHIPPING_THRESHOLD = 100;
-    const progress = Math.min((cartTotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
-    const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - cartTotal);
+    // Free Shipping Threshold (Dynamic)
+    const progress = Math.min((cartTotal / freeShippingThreshold) * 100, 100);
+    const remainingForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
 
     const handleCheckout = () => {
         setIsCartOpen(false);

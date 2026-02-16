@@ -78,9 +78,10 @@ exports.getAddresses = async (req, res) => {
 // @access  Private
 exports.addAddress = async (req, res) => {
     try {
-        const { type, street, city, state, zipCode, country } = req.body;
+        const { type, name, street, city, state, zipCode, country } = req.body;
         const address = await Address.create({
             user: req.user.id,
+            name: name || req.user.name, // Use provided name or fallback to user's name
             type,
             street,
             city,

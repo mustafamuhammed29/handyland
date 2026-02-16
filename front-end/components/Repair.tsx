@@ -68,8 +68,9 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 const response = await api.get<RepairDevice[]>('/api/repairs');
                 console.log('🔧 Repair API Response:', response); // DEBUG log
 
-                // Axios returns the data in the .data property
-                const repairsData = response.data || [];
+                // Axios returns the data in the .data property, but interceptor already unwraps it
+                // So 'response' IS the data (RepairDevice[])
+                const repairsData = (Array.isArray(response) ? response : response['data']) || [];
 
                 if (Array.isArray(repairsData)) {
                     console.log(`✅ Loaded ${repairsData.length} repair devices`);
@@ -117,35 +118,9 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     };
 
     // Handle Initialize Repair Button
-    const handleInitializeRepair = async (service: RepairServiceItem) => {
-        if (!isAuthenticated) {
-            addToast('Please login to book a repair', 'error');
-            navigate('/login');
-            return;
-        }
-
-        try {
-            const repairData = {
-                device: selectedDevice?.model,
-                brand: selectedDevice?.brand,
-                service: service.label,
-                price: service.price,
-                status: 'pending',
-                estimatedDuration: service.duration
-            };
-
-            await api.post('/api/repairs/tickets', repairData);
-            addToast('Repair request submitted successfully!', 'success');
-            setSelectedDevice(null);
-
-            // Redirect to dashboard repairs
-            setTimeout(() => {
-                navigate('/dashboard?tab=repairs');
-            }, 1500);
-        } catch (error) {
-            console.error('Failed to create repair ticket:', error);
-            addToast('Failed to submit repair request. Please try again.', 'error');
-        }
+    // Repair functionality disabled by user request - Display Only Mode
+    const handleContactSupport = () => {
+        navigate('/contact');
     };
 
     return (
@@ -223,12 +198,9 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                             </div>
                                             <div className="text-right">
                                                 <div className="text-xl font-bold text-blue-400">{service.price}{t.currency}</div>
-                                                <button
-                                                    onClick={() => handleInitializeRepair(service)}
-                                                    className="mt-2 text-[10px] font-bold uppercase tracking-wider bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded transition-colors shadow-lg shadow-blue-900/20"
-                                                >
-                                                    Initialize
-                                                </button>
+                                                <div className="mt-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-900/50 px-3 py-1.5 rounded border border-slate-800">
+                                                    In-Store Only
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

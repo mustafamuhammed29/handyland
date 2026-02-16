@@ -280,7 +280,15 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 >
                                     <Plus className="w-5 h-5" /> Add to Cart
                                 </button>
-                                <button className="flex-1 border border-slate-700 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-all">
+                                <button
+                                    onClick={() => {
+                                        handleAddToCart(selectedProduct);
+                                        setSelectedProduct(null);
+                                        // Slight delay to allow toast to show and state to update
+                                        setTimeout(() => window.location.href = '/checkout', 100);
+                                    }}
+                                    className="flex-1 border border-slate-700 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-all"
+                                >
                                     Buy Now
                                 </button>
                             </div>

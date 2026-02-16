@@ -174,7 +174,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/emails', require('./routes/emailRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
-app.use('/api/pages', require('./routes/pageRoutes'));
+
 app.use('/api/accessories', require('./routes/accessoriesRoutes'));
 app.use('/api/repair-archive', require('./routes/repairArchiveRoutes'));
 app.use('/api/valuation', require('./routes/valuationRoutes'));
@@ -186,6 +186,8 @@ app.use('/api/notifications', require('./routes/notificationRoutes')); // Added
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes')); // Registered Message Routes
+app.use('/api/shipping-methods', require('./routes/shippingRoutes')); // Added
+app.use('/api/pages', require('./routes/pageRoutes')); // Added
 
 // Basic Routes
 app.get('/', (req, res) => {

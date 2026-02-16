@@ -131,8 +131,8 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Check if user is verified
-        if (!user.isVerified) {
+        // Check if user is verified (unless disabled in dev)
+        if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true' && !user.isVerified) {
             return res.status(401).json({
                 success: false,
                 message: 'Please verify your email first',
@@ -179,6 +179,9 @@ exports.login = async (req, res) => {
         console.log('✅ AuthController: Sending login response. Token exists:', !!token);
         if (token) console.log('✅ Token preview:', token.substring(0, 10) + '...');
 
+        // Fetch addresses
+        const addresses = await require('../models/Address').find({ user: user._id });
+
         res.status(200).json({
             success: true,
             token: token, // Explicit key-value
@@ -190,7 +193,8 @@ exports.login = async (req, res) => {
                 role: user.role,
                 isVerified: user.isVerified,
                 phone: user.phone,
-                address: user.address
+                addresses: addresses, // Include full address list
+                address: user.address // Keep singular for backward compatibility if any
             }
         });
     } catch (error) {
@@ -209,10 +213,14 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
+        const addresses = await require('../models/Address').find({ user: req.user.id });
+
+        const userObj = user.toObject();
+        userObj.addresses = addresses;
 
         res.status(200).json({
             success: true,
-            user
+            user: userObj
         });
     } catch (error) {
         res.status(500).json({

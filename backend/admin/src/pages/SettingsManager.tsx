@@ -101,6 +101,7 @@ interface Settings {
     siteName: string;
     contactEmail: string;
     footerText: string;
+    freeShippingThreshold: number;
     navbar: NavbarSettings;
     hero: HeroSettings;
     valuation: ValuationSettings;
@@ -117,6 +118,7 @@ export default function SettingsManager() {
         siteName: '',
         contactEmail: '',
         footerText: '',
+        freeShippingThreshold: 100,
         navbar: { logoText: 'HANDY', logoAccentText: 'LAND', showLanguageSwitcher: true },
         hero: {
             headline: '', subheadline: '', bgStart: '', bgEnd: '', accentColor: '',
@@ -244,6 +246,7 @@ export default function SettingsManager() {
                             </div>
 
                             <Input label="Contact Email" value={settings.contactEmail} onChange={(v) => handleChange(null, 'contactEmail', v)} />
+                            <Input label="Free Shipping Threshold (€)" value={settings.freeShippingThreshold.toString()} onChange={(v) => handleChange(null, 'freeShippingThreshold', Number(v))} type="number" />
                             <Input label="Footer Text" value={settings.footerText} onChange={(v) => handleChange(null, 'footerText', v)} />
                         </div>
                     )}

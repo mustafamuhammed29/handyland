@@ -52,10 +52,6 @@ const RepairTicketSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Import customAlphabet dynamically or require it if using CommonJS
-const { customAlphabet } = require('nanoid');
-const nanoid = customAlphabet('0123456789ABCDEFGHJKLMNPQRSTUVWXYZ', 6);
-
 // Generate Ticket ID - FIX
 RepairTicketSchema.pre('validate', async function (next) {
     // Ensure either user or guestContact is present
@@ -65,8 +61,9 @@ RepairTicketSchema.pre('validate', async function (next) {
 
     if (this.isNew && !this.ticketId) {
         const year = new Date().getFullYear().toString().slice(-2);
-        // Random unique ID: REP-26-A7B3C9
-        this.ticketId = `REP-${year}-${nanoid()}`;
+        // Random unique ID: REP-26-XXXXXX
+        const randomSuffix = require('crypto').randomBytes(3).toString('hex').toUpperCase();
+        this.ticketId = `REP-${year}-${randomSuffix}`;
 
         // Add initial timeline entry
         if (this.timeline.length === 0) {
@@ -76,7 +73,7 @@ RepairTicketSchema.pre('validate', async function (next) {
             });
         }
     }
-    // next();
+    next();
 });
 
 module.exports = mongoose.model('RepairTicket', RepairTicketSchema);

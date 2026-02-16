@@ -12,8 +12,9 @@ export const productService = {
                     }
                 });
             }
+            // api.get returns response.data directly due to interceptor
             const response = await api.get(`/api/products?${queryParams.toString()}`);
-            return response.data;
+            return response as any;
         } catch (error) {
             console.error('Product Service Get All Error:', error);
             throw error;
@@ -23,7 +24,7 @@ export const productService = {
     getProductById: async (id: string): Promise<{ success: boolean; product: PhoneListing }> => {
         try {
             const response = await api.get(`/api/products/${id}`);
-            return response.data;
+            return response as any;
         } catch (error) {
             console.error('Product Service Get By ID Error:', error);
             throw error;
@@ -33,7 +34,7 @@ export const productService = {
     searchProducts: async (query: string): Promise<{ success: boolean; products: PhoneListing[] }> => {
         try {
             const response = await api.get(`/api/products?search=${encodeURIComponent(query)}`);
-            return response.data;
+            return response as any;
         } catch (error) {
             console.error('Product Service Search Error:', error);
             throw error;
@@ -43,7 +44,7 @@ export const productService = {
     getProductsByCategory: async (category: string): Promise<{ success: boolean; products: PhoneListing[] }> => {
         try {
             const response = await api.get(`/api/products?category=${category}`);
-            return response.data;
+            return response as any;
         } catch (error) {
             console.error('Product Service Get By Category Error:', error);
             throw error;
@@ -54,7 +55,7 @@ export const productService = {
         try {
             // Assuming featured means random or specific logic, defaulting to first 5
             const response = await api.get('/api/products?featured=true&limit=5');
-            return response.data;
+            return response as any;
         } catch (error) {
             console.error('Product Service Get Featured Error:', error);
             throw error;
@@ -64,7 +65,7 @@ export const productService = {
     validateStock: async (items: { id: string | number; quantity: number; name: string }[]): Promise<any> => {
         try {
             const response = await api.post('/api/products/validate-stock', { items });
-            return response.data;
+            return response;
         } catch (error) {
             console.error('Product Service Validate Stock Error:', error);
             throw error;
@@ -74,7 +75,7 @@ export const productService = {
     getRelatedProducts: async (id: string): Promise<PhoneListing[]> => {
         try {
             const response = await api.get(`/api/products/${id}/related`);
-            return Array.isArray(response.data) ? response.data : [];
+            return Array.isArray(response) ? response : [];
         } catch (error) {
             console.error('Product Service Get Related Error:', error);
             // Return empty array instead of throwing to avoid breaking the UI for related products
@@ -85,7 +86,7 @@ export const productService = {
     getProductReviews: async (id: string): Promise<any[]> => {
         try {
             const response = await api.get(`/api/products/${id}/reviews`);
-            return Array.isArray(response.data) ? response.data : [];
+            return Array.isArray(response) ? response : [];
         } catch (error) {
             console.error('Product Service Get Reviews Error:', error);
             return [];
@@ -95,7 +96,7 @@ export const productService = {
     getProductQuestions: async (id: string): Promise<any[]> => {
         try {
             const response = await api.get(`/api/products/${id}/questions`);
-            return Array.isArray(response.data) ? response.data : [];
+            return Array.isArray(response) ? response : [];
         } catch (error) {
             console.error('Product Service Get Questions Error:', error);
             return [];

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, Truck, CreditCard } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import { ActiveCarts } from './components/ActiveCarts';
 import ProductsManager from './pages/ProductsManager';
@@ -12,6 +12,8 @@ import ValuationManager from './pages/ValuationManager';
 import OrdersManager from './pages/OrdersManager';
 import UsersManager from './pages/UsersManager';
 import EmailManager from './pages/EmailManager';
+import ShippingManager from './pages/ShippingManager';
+import PaymentManager from './pages/PaymentManager';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -67,7 +69,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
         )}
 
-        <nav className="flex-1 space-y-2">
+        <nav className="flex-1 space-y-2 overflow-y-auto pr-2 custom-scrollbar">
           <SidebarLink to="/" icon={LayoutDashboard} label="Dashboard" />
           <SidebarLink to="/carts" icon={ShoppingCart} label="Active Carts" />
           <SidebarLink to="/users" icon={Users} label="Users" />
@@ -78,6 +80,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarLink to="/archive" icon={ScanLine} label="Repair Archive" />
           <SidebarLink to="/valuation" icon={FileText} label="Valuation" />
           <SidebarLink to="/pages" icon={FileText} label="Content Pages" />
+          <SidebarLink to="/shipping" icon={Truck} label="Shipping Methods" />
+          <SidebarLink to="/payment" icon={CreditCard} label="Payment Methods" />
           <SidebarLink to="/emails" icon={Mail} label="Emails" />
           <SidebarLink to="/settings" icon={Settings} label="Global Settings" />
         </nav>
@@ -134,6 +138,8 @@ function AppContent() {
                   <Route path="/archive" element={<ArchiveManager />} />
                   <Route path="/valuation" element={<ValuationManager />} />
                   <Route path="/pages" element={<PageManager />} />
+                  <Route path="/shipping" element={<ShippingManager />} />
+                  <Route path="/payment" element={<PaymentManager />} />
                   <Route path="/emails" element={<EmailManager />} />
                   <Route path="/settings" element={<SettingsManager />} />
                 </Routes>

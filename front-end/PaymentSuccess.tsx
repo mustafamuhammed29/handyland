@@ -13,35 +13,68 @@ interface OrderSummary {
 const PaymentSuccess: React.FC = () => {
     const [searchParams] = useSearchParams();
     const sessionId = searchParams.get('session_id');
+    const orderId = searchParams.get('order_id'); // Support for COD/Direct orders
     const navigate = useNavigate();
     const { clearCart } = useCart();
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-    const [message, setMessage] = useState('Verifying payment details...');
+    const [message, setMessage] = useState('Verifying order details...');
     const [order, setOrder] = useState<OrderSummary | null>(null);
 
     useEffect(() => {
-        if (!sessionId) {
+        if (!sessionId && !orderId) {
             setStatus('error');
             setMessage('Invalid session. No transaction ID found.');
             return;
         }
 
-        const verifyPayment = async () => {
+        const verifyOrder = async () => {
             try {
-                const token = localStorage.getItem('userToken');
+                const token = localStorage.getItem('token'); // Changed from userToken to match AuthContext
                 const headers: any = { 'Content-Type': 'application/json' };
                 if (token) headers['Authorization'] = `Bearer ${token}`;
 
-                // derived base url
                 const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
-                const response = await fetch(`${baseUrl}/api/payment/success`, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({ sessionId })
-                });
 
-                const data = await response.json();
+                let data;
+
+                if (sessionId) {
+                    // Stripe Verification
+                    const response = await fetch(`${baseUrl}/api/payment/success`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ sessionId })
+                    });
+                    data = await response.json();
+                } else if (orderId) {
+                    // COD / Direct Order Verification
+                    // We assume if they have the ID and are redirected here, it's valid for now.
+                    // For guests, we can't easily fetch details without a public token.
+                    // If logged in, we fetch the order.
+                    if (token) {
+                        const response = await fetch(`${baseUrl}/api/orders/${orderId}`, {
+                            method: 'GET',
+                            headers
+                        });
+                        const resData = await response.json();
+                        if (resData.success) {
+                            data = { success: true, order: resData.order };
+                        } else {
+                            data = { success: false, message: "Order not found" };
+                        }
+                    } else {
+                        // Guest COD Success - Mock the order summary or just show success
+                        // We can't fetch details securely.
+                        data = {
+                            success: true,
+                            order: {
+                                id: orderId,
+                                totalAmount: 0, // Unknown
+                                items: []
+                            }
+                        };
+                    }
+                }
 
                 if (data.success) {
                     setStatus('success');
@@ -53,14 +86,14 @@ const PaymentSuccess: React.FC = () => {
                     setMessage(data.message || 'Payment verification failed.');
                 }
             } catch (error) {
-                console.error('Payment verification error:', error);
+                console.error('Order verification error:', error);
                 setStatus('error');
                 setMessage('Could not connect to the verification server.');
             }
         };
 
-        verifyPayment();
-    }, [sessionId, clearCart]);
+        verifyOrder();
+    }, [sessionId, orderId, clearCart]);
 
     const handleDownloadInvoice = () => {
         // Mock invoice download

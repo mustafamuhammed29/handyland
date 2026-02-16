@@ -18,7 +18,7 @@ exports.getAddresses = async (req, res) => {
 // @access  Private
 exports.addAddress = async (req, res) => {
     try {
-        const { street, city, state, zipCode, country, isDefault } = req.body;
+        const { name, street, city, state, zipCode, country, isDefault } = req.body;
 
         if (isDefault) {
             await Address.updateMany({ user: req.user.id }, { isDefault: false });
@@ -26,6 +26,7 @@ exports.addAddress = async (req, res) => {
 
         const address = await Address.create({
             user: req.user.id,
+            name,
             street,
             city,
             state,

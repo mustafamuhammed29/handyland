@@ -63,7 +63,15 @@ api.interceptors.response.use(
 
             try {
                 // Try to refresh the access token
-                await api.get('/auth/refresh');
+                const refreshResponse = await api.get('/auth/refresh');
+                const newToken = refreshResponse['token']; // Access token from response
+
+                if (newToken) {
+                    localStorage.setItem('accessToken', newToken);
+                    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+                    originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                }
+
                 console.log('✅ [API] Token refreshed successfully');
 
                 // Retry the original request
