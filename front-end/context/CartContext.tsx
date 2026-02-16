@@ -26,6 +26,7 @@ interface CartContextType {
     addToWishlist: (item: CartItem) => void;
     removeFromWishlist: (id: string | number) => void;
     isInWishlist: (id: string | number) => boolean;
+    freeShippingThreshold: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -63,6 +64,23 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [coupon, setCoupon] = useState<Coupon | null>(null);
+    const [freeShippingThreshold, setFreeShippingThreshold] = useState(100); // Default to 100
+
+    // Fetch Global Settings
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await api.get('/api/settings');
+                const data = res.data || res;
+                if (data.freeShippingThreshold !== undefined) {
+                    setFreeShippingThreshold(data.freeShippingThreshold);
+                }
+            } catch (err) {
+                console.error("Failed to load global settings in Cart:", err);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     // Persistence (Local)
     useEffect(() => {
@@ -260,7 +278,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             isCartOpen, setIsCartOpen,
             cartTotal, finalTotal,
             coupon, applyCoupon, removeCoupon,
-            wishlist, addToWishlist, removeFromWishlist, isInWishlist
+            wishlist, addToWishlist, removeFromWishlist, isInWishlist,
+            freeShippingThreshold
         }}>
             {children}
         </CartContext.Provider>

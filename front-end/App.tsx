@@ -159,8 +159,8 @@ function AppContent() {
                 Use default exports if available, otherwise use InfoPage or correct imports.
                 Assuming TermsAndConditions and PrivacyPolicy are named exports in pages/
              */}
-              <Route path="/agb" element={<PageTransition><TermsAndConditions /></PageTransition>} />
-              <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+              <Route path="/agb" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+              <Route path="/privacy" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
 
               <Route path="/datenschutz" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
               <Route path="/service" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />

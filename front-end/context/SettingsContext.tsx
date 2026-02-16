@@ -185,7 +185,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const fetchSettings = async () => {
             try {
                 const response = await api.get<Settings>('/api/settings');
-                const data = response.data;
+                // The interceptor unwraps the response, so 'response' IS the data.
+                // We cast to 'any' here because TS might expect AxiosResponse structure.
+                const data = response as any;
 
                 // Deep merge defaults with fetched data
                 // ✅ FIXED: Add fallbacks to prevent "Cannot read properties of undefined"
@@ -227,7 +229,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Clear cache and refetch to ensure UI matches database
             clearCache('/api/settings');
             const response = await api.get<Settings>('/api/settings');
-            const freshData = (response.data || {}) as Partial<Settings>;
+            const freshData = (response as any || {}) as Partial<Settings>;
 
             setSettings(prev => ({
                 ...prev,

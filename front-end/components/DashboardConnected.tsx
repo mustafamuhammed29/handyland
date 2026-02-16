@@ -39,7 +39,7 @@ export const DashboardConnected: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem('userToken');
+                const token = localStorage.getItem('accessToken');
 
                 if (!token) {
                     setError('Please login to view dashboard');

@@ -30,6 +30,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [editingAddress, setEditingAddress] = useState<Address | null>(null);
     const [newAddress, setNewAddress] = useState({
+        name: '',
         street: '',
         city: '',
         state: '',
@@ -53,6 +54,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
         onAddAddress(newAddress);
         setShowAddressModal(false);
         setNewAddress({
+            name: '',
             street: '',
             city: '',
             state: '',
@@ -65,6 +67,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
     const handleEditAddress = (address: Address) => {
         setEditingAddress(address);
         setNewAddress({
+            name: address.name || '',
             street: address.street || '',
             city: address.city || '',
             state: address.state || '',
@@ -81,6 +84,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
             setShowAddressModal(false);
             setEditingAddress(null);
             setNewAddress({
+                name: '',
                 street: '',
                 city: '',
                 state: '',
@@ -101,6 +105,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
         setShowAddressModal(false);
         setEditingAddress(null);
         setNewAddress({
+            name: '',
             street: '',
             city: '',
             state: '',
@@ -355,13 +360,26 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
 
                                 <div className="space-y-4">
                                     <div>
+                                        <label className="block text-sm font-medium text-slate-400 mb-2">Recipient Name</label>
+                                        <input
+                                            type="text"
+                                            value={newAddress.name}
+                                            onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
+                                            className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
+                                            placeholder="John Doe"
+                                            title="Recipient Name"
+                                        />
+                                    </div>
+
+                                    <div>
                                         <label className="block text-sm font-medium text-slate-400 mb-2">Street Address</label>
                                         <input
                                             type="text"
                                             value={newAddress.street}
                                             onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
-                                            className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
+                                            className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                             placeholder="123 Main St"
+                                            title="Street Address"
                                         />
                                     </div>
 
@@ -372,8 +390,9 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                                 type="text"
                                                 value={newAddress.city}
                                                 onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
+                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                                 placeholder="Berlin"
+                                                title="City"
                                             />
                                         </div>
                                         <div>
@@ -382,8 +401,9 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                                 type="text"
                                                 value={newAddress.state}
                                                 onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
-                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
+                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                                 placeholder="BE"
+                                                title="State"
                                             />
                                         </div>
                                     </div>
@@ -395,8 +415,9 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                                 type="text"
                                                 value={newAddress.zipCode}
                                                 onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
-                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
+                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                                 placeholder="10115"
+                                                title="Zip Code"
                                             />
                                         </div>
                                         <div>
@@ -405,8 +426,9 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                                 type="text"
                                                 value={newAddress.country}
                                                 onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
-                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
+                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                                 placeholder="Germany"
+                                                title="Country"
                                             />
                                         </div>
                                     </div>
@@ -437,10 +459,10 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div >
                     )}
-                </div>
+                </div >
             )}
-        </div>
+        </div >
     );
 };

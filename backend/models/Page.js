@@ -4,8 +4,7 @@ const pageSchema = new mongoose.Schema({
     slug: {
         type: String,
         required: true,
-        unique: true,
-        enum: ['agb', 'datenschutz', 'impressum', 'kundenservice', 'ueber-uns']
+        unique: true
     },
     title: { type: String, required: true },
     content: { type: String, default: '' },

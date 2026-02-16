@@ -7,7 +7,7 @@ import { api } from '../utils/api';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Truck, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Loader2, Tag, X, Lock, User, UserPlus } from 'lucide-react';
+import { ShieldCheck, Truck, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Loader2, Tag, X, Lock, User, UserPlus, Phone } from 'lucide-react';
 import { LanguageCode } from '../types';
 import { translations } from '../i18n';
 import { z } from 'zod';
@@ -32,6 +32,15 @@ const shippingSchema = z.object({
 
 type ShippingFormData = z.infer<typeof shippingSchema>;
 
+interface ShippingMethod {
+    _id: string;
+    name: string;
+    description: string;
+    price: number;
+    duration: string;
+    isExpress: boolean;
+}
+
 export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     const { cart, cartTotal } = useCart();
     const { user } = useAuth();
@@ -46,11 +55,19 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     const [termsAccepted, setTermsAccepted] = useState(false);
 
     // Form State
-    const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>('standard');
+    const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
+    const [selectedMethodId, setSelectedMethodId] = useState<string>('');
+    const [isLoadingMethods, setIsLoadingMethods] = useState(true);
+
+    // Payment Config State
+    const [paymentConfig, setPaymentConfig] = useState<any | null>(null);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>(''); // 'stripe', 'cod', 'paypal'
+
+
     const [shippingDetails, setShippingDetails] = useState<ShippingFormData>({
         fullName: '',
         email: '',
-        phone: '', // Added phone
+        phone: '',
         address: '',
         city: '',
         zipCode: '',
@@ -68,18 +85,41 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     const [freeShippingThreshold, setFreeShippingThreshold] = useState(100);
 
     useEffect(() => {
-        // Fetch Settings
-        const fetchSettings = async () => {
+        // Fetch Settings & Shipping Methods
+        const fetchData = async () => {
             try {
-                const res = await api.get<{ success: boolean, data: { freeShippingThreshold: number } }>('/api/settings');
-                if (res.success && res.data.freeShippingThreshold) {
-                    setFreeShippingThreshold(res.data.freeShippingThreshold);
+                setIsLoadingMethods(true);
+                const [settingsRes, methodsRes] = await Promise.all([
+                    api.get('/api/settings'),
+                    orderService.fetchShippingMethods()
+                ]);
+
+                // Fetch Settings includes payment config now
+                // Settings endpoint returns the object directly, not wrapped in { success, data }
+                if (settingsRes) {
+                    if (settingsRes.freeShippingThreshold !== undefined) {
+                        setFreeShippingThreshold(settingsRes.freeShippingThreshold);
+                    }
+                    if (settingsRes.payment) {
+                        setPaymentConfig(settingsRes.payment);
+                    }
+                }
+
+                if (Array.isArray(methodsRes)) {
+                    setShippingMethods(methodsRes);
+                    // Select default (lowest price or first)
+                    if (methodsRes.length > 0) {
+                        const defaultMethod = methodsRes.sort((a: any, b: any) => a.price - b.price)[0];
+                        setSelectedMethodId(defaultMethod._id);
+                    }
                 }
             } catch (err) {
-                console.error("Failed to fetch settings", err);
+                console.error("Failed to fetch checkout data", err);
+            } finally {
+                setIsLoadingMethods(false);
             }
         };
-        fetchSettings();
+        fetchData();
 
         if (cart.length === 0) {
             navigate('/');
@@ -221,16 +261,31 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     };
 
     const getFinalTotal = () => {
-        let shipping = cartTotal >= freeShippingThreshold ? 0 : 5.99;
-        if (shippingMethod === 'express') {
-            shipping = 15.99; // Flat rate for express
+        const selectedMethod = shippingMethods.find(m => m._id === selectedMethodId);
+        let shippingCost = selectedMethod ? selectedMethod.price : 5.99;
+
+        if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) {
+            shippingCost = 0;
         }
+
         const discount = appliedCoupon ? appliedCoupon.discount : 0;
-        return Math.max(0, cartTotal + shipping - discount);
+        return Math.max(0, cartTotal + shippingCost - discount);
+    };
+
+    const getShippingCostDisplay = (method: ShippingMethod) => {
+        if (cartTotal >= freeShippingThreshold && !method.isExpress) {
+            return 'FREE';
+        }
+        return `${method.price.toFixed(2)}€`;
     };
 
     const handlePaymentSuccess = async () => {
         if (loading) return; // Prevent double submission
+
+        if (!selectedPaymentMethod) {
+            setError("Please select a payment method.");
+            return;
+        }
 
         // Token Validation for Logged In Users
         if (user) {
@@ -258,28 +313,63 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
             return;
         }
 
-        try {
-            const response = await orderService.createCheckoutSession({
-                items: cart.map(item => ({
-                    product: item.id,
-                    productType: item.category === 'device' ? 'Product' : 'Accessory',
-                    name: item.title,
-                    price: item.price,
-                    image: item.image,
-                    quantity: item.quantity || 1
-                })),
-                shippingAddress: shippingDetails,
-                shippingFee: (shippingMethod === 'express' ? 15.99 : (cartTotal >= freeShippingThreshold ? 0 : 5.99)).toString(),
-                shippingMethod: shippingMethod,
-                couponCode: appliedCoupon?.code,
-                discountAmount: appliedCoupon?.discount,
-                email: shippingDetails.email // Important for Guest Checkout
-            });
+        const selectedMethod = shippingMethods.find(m => m._id === selectedMethodId);
+        let shippingCost = selectedMethod ? selectedMethod.price : 5.99;
+        if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) {
+            shippingCost = 0;
+        }
 
-            if (response.url) {
-                window.location.href = response.url;
+        const commonOrderData = {
+            items: cart.map(item => ({
+                product: item.id,
+                productType: item.category === 'device' ? 'Product' : 'Accessory',
+                name: item.title,
+                price: item.price,
+                image: item.image,
+                quantity: item.quantity || 1
+            })),
+            shippingAddress: shippingDetails,
+            shippingFee: shippingCost.toString(),
+            shippingMethod: selectedMethod?.name || 'Standard',
+            couponCode: appliedCoupon?.code,
+            discountAmount: appliedCoupon?.discount,
+            email: shippingDetails.email // Important for Guest Checkout
+        };
+
+        try {
+            if (selectedPaymentMethod === 'cod') {
+                // Handle Cash on Delivery
+                // Adjust data to match createOrder expected endpoint if necessary
+                // createOrder expects: items, shippingAddress, paymentMethod, notes
+                const r = await orderService.createOrder({
+                    ...commonOrderData,
+                    paymentMethod: 'cash',
+                    notes: `Checkout via Web. Method: COD.`
+                });
+
+                if (r.success) {
+                    // Redirect to success page or order details
+                    // Since we don't have a dedicated "Guest Order Details" yet, verify where to go.
+                    // For now, consistent with Stripe success, go to payment-success?session_id=COD_ORDERID
+                    // But payment-success page expects a stripe session ID usually to verify.
+                    // We might need a special query param.
+                    navigate(`/payment-success?order_id=${r.order._id}&method=cod`);
+                }
+
+            } else if (selectedPaymentMethod === 'stripe') {
+                const response = await orderService.createCheckoutSession({
+                    ...commonOrderData,
+                    termsAccepted: true
+                });
+
+                if (response.url) {
+                    window.location.href = response.url;
+                } else {
+                    throw new Error("Failed to retrieve payment URL");
+                }
             } else {
-                throw new Error("Failed to retrieve payment URL");
+                setError("Selected payment method is not supported yet.");
+                setLoading(false);
             }
 
         } catch (err: any) {
@@ -358,6 +448,62 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                 <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
                                     <Truck className="w-6 h-6 text-blue-500" /> Shipping Details
                                 </h2>
+
+                                {/* Saved Addresses Selection */}
+                                {user && user.addresses && user.addresses.length > 0 && (
+                                    <div className="mb-8 p-4 bg-slate-950/50 rounded-xl border border-dashed border-slate-700">
+                                        <h3 className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider flex items-center gap-2">
+                                            <Tag className="w-3 h-3" /> Select Saved Address
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {user.addresses.map((addr: any, idx: number) => (
+                                                <div
+                                                    key={idx}
+                                                    onClick={() => {
+                                                        setShippingDetails(prev => ({
+                                                            ...prev,
+                                                            fullName: addr.name || prev.fullName,
+                                                            street: addr.street || '', // Using 'street' in DB vs 'address' in form
+                                                            address: addr.street || '', // Fix mapping: form uses 'address'
+                                                            city: addr.city || '',
+                                                            zipCode: addr.zipCode || addr.postalCode || '',
+                                                            country: addr.country || 'Germany',
+                                                            phone: addr.phone || prev.phone
+                                                        }));
+                                                        // Clear errors
+                                                        setFormErrors({});
+                                                    }}
+                                                    className={`relative p-4 rounded-xl border cursor-pointer transition-all group ${shippingDetails.address === addr.street && shippingDetails.fullName === addr.name
+                                                        ? 'bg-blue-600/10 border-blue-500 ring-1 ring-blue-500'
+                                                        : 'bg-black/20 border-slate-700 hover:border-slate-500 hover:bg-slate-800/50'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-start justify-between">
+                                                        <div>
+                                                            <div className="font-bold text-white text-sm">{addr.name}</div>
+                                                            <div className="text-xs text-slate-400 mt-1 leading-relaxed">
+                                                                {addr.street}<br />
+                                                                {addr.zipCode || addr.postalCode} {addr.city}<br />
+                                                                {addr.country}
+                                                            </div>
+                                                            {addr.phone && (
+                                                                <div className="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
+                                                                    <Phone className="w-3 h-3" /> {addr.phone}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        {addr.isDefault && (
+                                                            <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full absolute top-3 right-3 shadow-lg shadow-blue-900/50">
+                                                                Default
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 <form onSubmit={handleShippingSubmit} className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
@@ -457,43 +603,33 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                     <div className="pt-6 border-t border-slate-800">
                                         <h3 className="font-bold text-white mb-4">Shipping Method</h3>
                                         <div className="space-y-3">
-                                            <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${shippingMethod === 'standard' ? 'bg-blue-600/10 border-blue-500' : 'bg-black/20 border-slate-700 hover:border-slate-500'}`}>
-                                                <div className="flex items-center gap-3">
-                                                    <input
-                                                        type="radio"
-                                                        name="shippingMethod"
-                                                        value="standard"
-                                                        checked={shippingMethod === 'standard'}
-                                                        onChange={() => setShippingMethod('standard')}
-                                                        className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
-                                                    />
-                                                    <div>
-                                                        <div className="font-bold text-white">Standard Delivery</div>
-                                                        <div className="text-xs text-slate-400">3-5 Business Days</div>
+                                            {shippingMethods.map((method) => (
+                                                <label key={method._id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${selectedMethodId === method._id ? 'bg-blue-600/10 border-blue-500' : 'bg-black/20 border-slate-700 hover:border-slate-500'}`}>
+                                                    <div className="flex items-center gap-3">
+                                                        <input
+                                                            type="radio"
+                                                            name="shippingMethod"
+                                                            value={method._id}
+                                                            checked={selectedMethodId === method._id}
+                                                            onChange={() => setSelectedMethodId(method._id)}
+                                                            className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
+                                                        />
+                                                        <div>
+                                                            <div className="font-bold text-white">{method.name}</div>
+                                                            <div className="text-xs text-slate-400">{method.duration}</div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="font-bold text-white">
-                                                    {cartTotal >= freeShippingThreshold ? 'FREE' : '5.99€'}
-                                                </div>
-                                            </label>
-
-                                            <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${shippingMethod === 'express' ? 'bg-blue-600/10 border-blue-500' : 'bg-black/20 border-slate-700 hover:border-slate-500'}`}>
-                                                <div className="flex items-center gap-3">
-                                                    <input
-                                                        type="radio"
-                                                        name="shippingMethod"
-                                                        value="express"
-                                                        checked={shippingMethod === 'express'}
-                                                        onChange={() => setShippingMethod('express')}
-                                                        className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
-                                                    />
-                                                    <div>
-                                                        <div className="font-bold text-white">Express Delivery</div>
-                                                        <div className="text-xs text-slate-400">1-2 Business Days</div>
+                                                    <div className={`font-bold ${method.isExpress ? 'text-emerald-400' : 'text-white'}`}>
+                                                        {getShippingCostDisplay(method)}
                                                     </div>
-                                                </div>
-                                                <div className="font-bold text-emerald-400">15.99€</div>
-                                            </label>
+                                                </label>
+                                            ))}
+                                            {shippingMethods.length === 0 && !isLoadingMethods && (
+                                                <div className="text-slate-400 text-sm">No shipping methods available.</div>
+                                            )}
+                                            {isLoadingMethods && (
+                                                <div className="text-slate-400 text-sm flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading shipping methods...</div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -552,21 +688,56 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                     </h2>
                                 </div>
 
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+
+                                    {/* Stripe (Credit Card) */}
+                                    {paymentConfig?.stripe?.enabled && (
+                                        <button
+                                            onClick={() => setSelectedPaymentMethod('stripe')}
+                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'stripe'
+                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
+                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                                                }`}
+                                        >
+                                            <CreditCard className={`w-8 h-8 ${selectedPaymentMethod === 'stripe' ? 'text-blue-400' : 'text-slate-400'}`} />
+                                            <span className="font-bold text-white">Credit Card</span>
+                                        </button>
+                                    )}
+
+                                    {/* Cash on Delivery */}
+                                    {paymentConfig?.cashOnDelivery?.enabled && (
+                                        <button
+                                            onClick={() => setSelectedPaymentMethod('cod')}
+                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'cod'
+                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
+                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                                                }`}
+                                        >
+                                            <Truck className={`w-8 h-8 ${selectedPaymentMethod === 'cod' ? 'text-blue-400' : 'text-slate-400'}`} />
+                                            <span className="font-bold text-white">Cash on Delivery</span>
+                                            <span className="text-xs text-slate-500">Pay when you receive it</span>
+                                        </button>
+                                    )}
+
+                                    {/* PayPal (Coming Soon / Disabled) */}
+                                    {paymentConfig?.paypal?.enabled && (
+                                        <button disabled className="p-6 rounded-xl border bg-black/20 border-slate-800 opacity-50 cursor-not-allowed flex flex-col items-center gap-3">
+                                            <span className="font-bold text-slate-400">PayPal</span>
+                                            <span className="text-xs text-slate-500">Coming Soon</span>
+                                        </button>
+                                    )}
+                                </div>
+
                                 <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 mb-8 text-center">
                                     <p className="text-slate-400 mb-6">
-                                        You are about to be redirected to our secure payment partner (Stripe) to complete your purchase.
+                                        {selectedPaymentMethod === 'stripe' && "You are about to be redirected to our secure payment partner (Stripe) to complete your purchase."}
+                                        {selectedPaymentMethod === 'cod' && "You will pay for your order upon delivery. Please have the exact amount ready."}
+                                        {!selectedPaymentMethod && "Please select a payment method above."}
                                     </p>
-
-                                    <div className="flex justify-center gap-4 mb-8 grayscale opacity-70">
-                                        {/* Simple CSS placeholders for card icons for now */}
-                                        <div className="h-8 w-12 bg-slate-800 rounded"></div>
-                                        <div className="h-8 w-12 bg-slate-800 rounded"></div>
-                                        <div className="h-8 w-12 bg-slate-800 rounded"></div>
-                                    </div>
 
                                     <button
                                         onClick={handlePaymentSuccess}
-                                        disabled={loading}
+                                        disabled={loading || !selectedPaymentMethod}
                                         className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20"
                                     >
                                         {loading ? (
@@ -575,7 +746,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                             </>
                                         ) : (
                                             <>
-                                                Pay Securely <span className="ml-1">{getFinalTotal().toFixed(2)}{t.currency}</span> <ArrowRight className="w-5 h-5" />
+                                                {selectedPaymentMethod === 'cod' ? 'Place Order' : 'Pay Securely'} <span className="ml-1">{getFinalTotal().toFixed(2)}{t.currency}</span> <ArrowRight className="w-5 h-5" />
                                             </>
                                         )}
                                     </button>
@@ -599,6 +770,27 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                             </h3>
 
                             <div className="space-y-4 max-h-80 overflow-y-auto pr-2 custom-scrollbar mb-6">
+                                {/* Free Shipping Progress */}
+                                {cartTotal < freeShippingThreshold && (
+                                    <div className="bg-slate-950/50 rounded-xl p-4 border border-blue-500/30 mb-4">
+                                        <div className="flex justify-between text-xs font-bold mb-2">
+                                            <span className="text-blue-400">Add {(freeShippingThreshold - cartTotal).toFixed(2)}€ for Free Shipping</span>
+                                            <span className="text-slate-500">{Math.round((cartTotal / freeShippingThreshold) * 100)}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div
+                                                className="bg-blue-500 h-full rounded-full transition-all duration-500"
+                                                style={{ width: `${Math.min(100, (cartTotal / freeShippingThreshold) * 100)}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                )}
+                                {cartTotal >= freeShippingThreshold && (
+                                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 mb-4 flex items-center gap-2 text-emerald-400 text-sm font-bold animate-in fade-in">
+                                        <CheckCircle className="w-4 h-4" /> You've qualified for Free Standard Shipping!
+                                    </div>
+                                )}
+
                                 {cart.map((item, idx) => (
                                     <div key={idx} className="flex gap-3 items-start group">
                                         <div className="w-16 h-16 bg-slate-950 rounded-lg overflow-hidden flex-shrink-0 border border-slate-800 relative">
@@ -661,7 +853,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                 </div>
                                 <div className="flex justify-between text-emerald-400 text-sm">
                                     <span>Shipping</span>
-                                    <span>{cartTotal >= freeShippingThreshold ? 'FREE' : `5.99${t.currency}`}</span>
+                                    <span>{(getFinalTotal() - (cartTotal - (appliedCoupon ? appliedCoupon.discount : 0))) === 0 ? 'FREE' : `${(getFinalTotal() - (cartTotal - (appliedCoupon ? appliedCoupon.discount : 0))).toFixed(2)}${t.currency}`}</span>
                                 </div>
                                 {appliedCoupon && (
                                     <div className="flex justify-between text-emerald-400 text-sm">

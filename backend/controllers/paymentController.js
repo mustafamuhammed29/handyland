@@ -1,51 +1,58 @@
-let stripe;
-try {
-    if (process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('your_stripe_secret_key')) {
-        stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-    } else {
-        throw new Error('Missing or placeholder Stripe key');
-    }
-} catch (error) {
-    console.warn('Stripe initialization failed (Using Enhanced Mock):', error.message);
-    stripe = {
-        checkout: {
-            sessions: {
-                create: async (params) => ({
-                    id: 'mock_session_' + Date.now(),
-                    url: 'http://localhost:3000/mock-payment',
-                    metadata: params.metadata,
-                    amount_total: params.line_items.reduce((acc, item) => acc + item.price_data.unit_amount * item.quantity, 0),
-                    currency: 'eur',
-                    payment_status: 'unpaid'
-                }),
-                retrieve: async (id) => ({
-                    id,
-                    payment_status: 'paid',
-                    amount_total: 1999,
-                    currency: 'eur',
-                    metadata: { orderId: 'mock_order_id' } // Note: real retrieve would get actual metadata
-                })
-            }
-        },
-        webhooks: {
-            constructEvent: (body, sig, secret) => {
-                // Return body directly to simulate valid event parsing
-                // If body is buffer/string, parse it. If object, return it.
-                if (Buffer.isBuffer(body)) return JSON.parse(body.toString());
-                if (typeof body === 'string') return JSON.parse(body);
-                return body;
-            }
-        },
-        refunds: { create: async () => ({ id: 'mock_refund_id_' + Date.now() }) }
-    };
-}
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Accessory = require('../models/Accessory');
 const Transaction = require('../models/Transaction');
+const Settings = require('../models/Settings');
 const mongoose = require('mongoose');
-
 const Coupon = require('../models/Coupon');
+
+// Helper to get Stripe instance
+const getStripe = async () => {
+    try {
+        const settings = await Settings.findOne();
+        const secretKey = settings?.payment?.stripe?.secretKey || process.env.STRIPE_SECRET_KEY;
+
+        if (secretKey && !secretKey.includes('your_stripe_secret_key')) {
+            return require('stripe')(secretKey);
+        } else {
+            // Fallback Mock
+            console.warn('Stripe key missing or invalid. Using Mock.');
+            return {
+                checkout: {
+                    sessions: {
+                        create: async (params) => ({
+                            id: 'mock_session_' + Date.now(),
+                            url: 'http://localhost:3000/payment-success?session_id=mock_session_' + Date.now(), // Direct to success for mock
+                            metadata: params.metadata,
+                            amount_total: params.line_items.reduce((acc, item) => acc + item.price_data.unit_amount * item.quantity, 0),
+                            currency: 'eur',
+                            payment_status: 'unpaid'
+                        }),
+                        retrieve: async (id) => ({
+                            id,
+                            payment_status: 'paid',
+                            amount_total: 1999,
+                            currency: 'eur',
+                            metadata: { orderId: 'mock_order_id' }
+                        })
+                    }
+                },
+                webhooks: {
+                    constructEvent: (body, sig, secret) => {
+                        if (Buffer.isBuffer(body)) return JSON.parse(body.toString());
+                        if (typeof body === 'string') return JSON.parse(body);
+                        return body;
+                    }
+                },
+                refunds: { create: async () => ({ id: 'mock_refund_id_' + Date.now() }) }
+            };
+        }
+    } catch (err) {
+        console.error("Error getting Stripe instance:", err);
+        throw err;
+    }
+};
+
 
 // @desc    Create Stripe checkout session
 // @route   POST /api/payment/create-checkout-session
@@ -184,6 +191,7 @@ exports.createCheckoutSession = async (req, res) => {
         }
 
         // Create checkout session
+        const stripe = await getStripe();
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: lineItems,
@@ -224,6 +232,7 @@ exports.handlePaymentSuccess = async (req, res) => {
         const { sessionId } = req.body;
 
         // Retrieve the session from Stripe
+        const stripe = await getStripe();
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
         if (session.payment_status === 'paid') {
@@ -273,7 +282,10 @@ exports.handlePaymentSuccess = async (req, res) => {
 // @access  Public (Stripe only)
 exports.handleWebhook = async (req, res) => {
     const sig = req.headers['stripe-signature'];
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    // Get Webhook Secret from Settings
+    const settings = await Settings.findOne();
+    const webhookSecret = settings?.payment?.stripe?.webhookSecret || process.env.STRIPE_WEBHOOK_SECRET;
 
     if (!webhookSecret) {
         console.error('[Webhook] STRIPE_WEBHOOK_SECRET is not configured');
@@ -288,6 +300,7 @@ exports.handleWebhook = async (req, res) => {
     let event;
 
     try {
+        const stripe = await getStripe();
         event = stripe.webhooks.constructEvent(
             req.body,
             sig,
@@ -447,6 +460,7 @@ exports.handleWebhook = async (req, res) => {
 // @access  Private
 exports.getPaymentDetails = async (req, res) => {
     try {
+        const stripe = await getStripe();
         const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
 
         res.status(200).json({
@@ -475,6 +489,7 @@ exports.createRefund = async (req, res) => {
     try {
         const { paymentIntentId, amount } = req.body;
 
+        const stripe = await getStripe();
         const refund = await stripe.refunds.create({
             payment_intent: paymentIntentId,
             amount: amount ? Math.round(amount * 100) : undefined, // Partial or full refund

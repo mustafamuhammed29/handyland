@@ -101,7 +101,9 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
             if (data.success) {
                 if (mode === 'login') {
                     setUser(data.user);
-                    // Token is now in httpOnly cookie, no need to store in localStorage
+                    if (data.token) {
+                        localStorage.setItem('accessToken', data.token);
+                    }
                     localStorage.setItem('user', JSON.stringify(data.user));
                     addToast(`${t.welcomeBack}, ${data.user.name.split(' ')[0]}!`, 'success');
                     navigate('/dashboard');
