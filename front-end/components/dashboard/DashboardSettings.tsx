@@ -183,6 +183,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                 value={profileData.name}
                                 onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
                                 disabled={!isEditing}
+                                aria-label="Full Name"
                                 className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white disabled:opacity-50"
                             />
                         </div>
@@ -197,6 +198,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                 value={profileData.email}
                                 onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
                                 disabled={!isEditing}
+                                aria-label="Email Address"
                                 className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white disabled:opacity-50"
                             />
                         </div>
@@ -211,6 +213,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                 value={profileData.phone}
                                 onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
                                 disabled={!isEditing}
+                                aria-label="Phone Number"
                                 className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white disabled:opacity-50"
                             />
                         </div>
@@ -231,6 +234,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
+                                    aria-label="Current Password"
                                     className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white pr-12"
                                 />
                                 <button
@@ -248,6 +252,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                             </label>
                             <input
                                 type="password"
+                                aria-label="New Password"
                                 className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
                             />
                         </div>
@@ -258,6 +263,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                             </label>
                             <input
                                 type="password"
+                                aria-label="Confirm New Password"
                                 className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
                             />
                         </div>
@@ -287,7 +293,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                     <p className="text-sm text-slate-400">{item.description}</p>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" className="sr-only peer" defaultChecked={idx < 2} />
+                                    <input type="checkbox" aria-label={item.label} className="sr-only peer" defaultChecked={idx < 2} />
                                     <div className="w-11 h-6 bg-slate-700 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                 </label>
                             </div>
@@ -365,6 +371,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                             type="text"
                                             value={newAddress.name}
                                             onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
+                                            aria-label="Recipient Name"
                                             className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                             placeholder="John Doe"
                                             title="Recipient Name"
@@ -377,6 +384,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                             type="text"
                                             value={newAddress.street}
                                             onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
+                                            aria-label="Street Address"
                                             className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                             placeholder="123 Main St"
                                             title="Street Address"
@@ -390,6 +398,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                                 type="text"
                                                 value={newAddress.city}
                                                 onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                                                aria-label="City"
                                                 className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                                 placeholder="Berlin"
                                                 title="City"
@@ -401,6 +410,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                                 type="text"
                                                 value={newAddress.state}
                                                 onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                                                aria-label="State"
                                                 className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                                 placeholder="BE"
                                                 title="State"
@@ -415,6 +425,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                                 type="text"
                                                 value={newAddress.zipCode}
                                                 onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
+                                                aria-label="Zip Code"
                                                 className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
                                                 placeholder="10115"
                                                 title="Zip Code"
@@ -438,6 +449,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                             type="checkbox"
                                             checked={newAddress.isDefault}
                                             onChange={(e) => setNewAddress({ ...newAddress, isDefault: e.target.checked })}
+                                            aria-label="Set as default address"
                                             className="w-4 h-4 text-blue-600 rounded"
                                         />
                                         <span className="text-sm text-slate-300">Set as default address</span>

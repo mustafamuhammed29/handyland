@@ -405,6 +405,7 @@ export default function SettingsManager() {
                                                     placeholder="ID"
                                                 />
                                                 <button
+                                                    aria-label="Remove Brand"
                                                     onClick={() => {
                                                         const newBrands = settings.valuation.brands.filter((_, i) => i !== idx);
                                                         handleChange('valuation', 'brands', newBrands);
@@ -457,6 +458,7 @@ export default function SettingsManager() {
                                                     type="number"
                                                 />
                                                 <select
+                                                    aria-label="Select Brand"
                                                     value={model.brandId}
                                                     onChange={(e) => {
                                                         const newModels = [...settings.valuation.models];
@@ -471,6 +473,7 @@ export default function SettingsManager() {
                                                     ))}
                                                 </select>
                                                 <button
+                                                    aria-label="Remove Model"
                                                     onClick={() => {
                                                         const newModels = settings.valuation.models.filter((_, i) => i !== idx);
                                                         handleChange('valuation', 'models', newModels);
@@ -595,6 +598,7 @@ const Toggle = ({ label, value, onChange }: { label: string, value: boolean | un
     <div className="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800">
         <span className="text-white font-bold">{label}</span>
         <button
+            aria-label={label}
             onClick={() => onChange(!value)}
             className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-blue-600' : 'bg-slate-700'}`}
         >

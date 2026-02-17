@@ -44,11 +44,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                 cartTotal: cartTotal
             });
 
-            if (response.success) {
-                applyCoupon(response.couponCode, response.discount);
+            if (response.data.success) {
+                applyCoupon(response.data.couponCode, response.data.discount);
                 setCouponCodeIn('');
             } else {
-                setCouponError(response.message || 'Invalid coupon');
+                setCouponError(response.data.message || 'Invalid coupon');
             }
         } catch (err: any) {
             setCouponError(err.response?.data?.message || 'Failed to apply coupon');
@@ -82,7 +82,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                             <Zap className="w-5 h-5 text-cyan-400" /> Global Loadout
                             <span className="bg-slate-800 text-slate-300 text-xs px-2 py-0.5 rounded-full">{cart.length}</span>
                         </h3>
-                        <button onClick={() => setIsCartOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                        <button onClick={() => setIsCartOpen(false)} aria-label="Close cart" className="text-slate-400 hover:text-white transition-colors">
                             <X className="w-6 h-6" />
                         </button>
                     </div>
@@ -98,8 +98,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                         </div>
                         <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-1000"
-                                style={{ width: `${progress}%` }}
+                                className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-1000 w-[var(--progress-w)]"
+                                style={{ '--progress-w': `${progress}%` } as React.CSSProperties}
                             ></div>
                         </div>
                     </div>
@@ -123,7 +123,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                         </div>
                     ) : (
                         cart.map((item, idx) => (
-                            <div key={`${item.id}-${idx}`} className="flex gap-4 p-3 rounded-xl bg-slate-900/50 border border-slate-800 group hover:border-slate-600 transition-all animate-in slide-in-from-right-4 fade-in duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
+                            <div key={`${item.id}-${idx}`} className="flex gap-4 p-3 rounded-xl bg-slate-900/50 border border-slate-800 group hover:border-slate-600 transition-all animate-in slide-in-from-right-4 fade-in duration-300 delay-[var(--anim-delay)]" style={{ '--anim-delay': `${idx * 50}ms` } as React.CSSProperties}>
                                 <div className="w-20 h-20 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0">
                                     <img src={item.image} className="w-full h-full object-cover" alt="" />
                                 </div>
@@ -192,7 +192,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                                         <Tag className="w-4 h-4" />
                                         <span className="font-bold text-sm">Code: {coupon.code}</span>
                                     </div>
-                                    <button onClick={removeCoupon} className="text-slate-400 hover:text-white p-1 transition-colors">
+                                    <button onClick={removeCoupon} aria-label="Remove coupon" className="text-slate-400 hover:text-white p-1 transition-colors">
                                         <X className="w-4 h-4" />
                                     </button>
                                 </div>
