@@ -42,5 +42,6 @@ router.route('/:id/pay').put(protect, updateOrderToPaid);
 router.route('/:id/deliver').put(protect, authorize('admin', 'staff'), updateOrderToDelivered);
 router.route('/:id/refund').post(protect, requestRefund);
 router.route('/refund/:id').put(protect, authorize('admin'), processRefund);
+router.route('/:id/cancel').put(protect, cancelOrder);
 
 module.exports = router;

@@ -153,5 +153,15 @@ export const authService = {
             console.error('Auth Service Delete Address Error:', error);
             throw error;
         }
+    },
+
+    refreshToken: async (): Promise<{ token: string }> => {
+        try {
+            const response = await api.get('/api/auth/refresh');
+            return response as any;
+        } catch (error) {
+            console.error('Auth Service Refresh Token Error:', error);
+            throw error;
+        }
     }
 };
