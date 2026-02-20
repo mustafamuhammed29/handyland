@@ -98,6 +98,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                             <img
                                 src={getImageUrl(selectedItem.image)}
                                 alt={selectedItem.name}
+                                onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
                                 className="relative z-10 w-3/4 max-w-sm drop-shadow-[0_20px_50px_rgba(168,85,247,0.3)] hover:scale-105 transition-transform duration-500"
                             />
                         </div>
@@ -246,6 +247,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                 <img
                                     src={getImageUrl(item.image)}
                                     alt={item.name}
+                                    onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
                                     className={`w-full h-full object-cover transition-transform duration-700 ${hoveredId === item.id ? 'scale-110' : 'scale-100'
                                         }`}
                                 />

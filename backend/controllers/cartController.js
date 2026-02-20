@@ -61,8 +61,8 @@ exports.getCart = async (req, res) => {
 
         res.json(populatedItems);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Cart GET Error:', err);
+        res.status(500).json({ message: 'Server Error', error: err.message });
     }
 };
 

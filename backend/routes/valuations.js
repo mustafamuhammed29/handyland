@@ -17,9 +17,24 @@ router.get('/', protect, async (req, res) => {
 router.post('/', protect, async (req, res) => {
     try {
         const Valuation = require('../models/Valuation');
-        const valuation = await Valuation.create({ ...req.body, user: req.user._id });
+        const { model, condition, storage, batteryHealth, accessories } = req.body;
+
+        // Simple mock calculation if previewPrice wasn't passed, or fetch it.
+        // For testing, just give it a dummy value if missing.
+        const estimatedValue = req.body.estimatedValue || 250;
+
+        const valuation = await Valuation.create({
+            user: req.user._id,
+            deviceName: model || 'Unknown Device',
+            condition,
+            storage,
+            batteryHealth: batteryHealth ? batteryHealth.toString() : 'Unknown',
+            includeAccessories: accessories || false,
+            estimatedValue
+        });
         res.status(201).json({ success: true, data: valuation });
     } catch (err) {
+        console.error('Valuation Create Error:', err);
         res.status(500).json({ success: false, message: err.message });
     }
 });

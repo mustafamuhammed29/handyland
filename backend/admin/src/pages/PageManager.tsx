@@ -39,7 +39,8 @@ export default function PageManager() {
         setSaving(true);
         setMessage(null);
         try {
-            await api.put(`/api/pages/${selectedPage}`, { content });
+            const strippedContent = content.replace(/<[^>]*>/g, '');
+            await api.put(`/api/pages/${selectedPage}`, { content: strippedContent });
             setMessage({ type: 'success', text: 'Page updated successfully!' });
         } catch (error) {
             console.error('Failed to save page:', error);

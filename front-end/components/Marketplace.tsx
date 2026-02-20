@@ -187,7 +187,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const getProductImage = (product: any) => {
         if (product.images && product.images.length > 0) return getImageUrl(product.images[0]);
         if (product.imageUrl) return getImageUrl(product.imageUrl);
-        return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80';
+        return '/images/placeholder.png';
     };
 
     return (
@@ -219,6 +219,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                             <img
                                 src={getProductImage(selectedProduct)}
                                 alt={selectedProduct.model}
+                                onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
                                 loading="lazy"
                                 className="relative z-10 w-3/4 max-w-sm drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                             />
@@ -417,7 +418,13 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                     <div className="spotlight-border"></div>
                                     <div className="relative p-1">
                                         <div className="relative h-72 overflow-hidden rounded-2xl bg-gradient-to-b from-slate-800 to-slate-950 cursor-pointer" onClick={() => setSelectedProduct(phone)}>
-                                            <img src={getProductImage(phone)} alt={phone.model} loading="lazy" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" />
+                                            <img
+                                                src={getProductImage(phone)}
+                                                alt={phone.model}
+                                                onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
+                                                loading="lazy"
+                                                className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                                            />
                                             <div className="absolute top-3 left-3 flex gap-2">
                                                 <span className={`text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border ${phone.condition === 'new' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'}`}>
                                                     {(phone.condition || 'Used').toUpperCase()}
@@ -471,7 +478,12 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                         <Heart className={`w-4 h-4 ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
                                     </button>
                                     <div className="w-32 h-32 bg-slate-900 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer" onClick={() => setSelectedProduct(phone)}>
-                                        <img src={getProductImage(phone)} alt={phone.model} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        <img
+                                            src={getProductImage(phone)}
+                                            alt={phone.model}
+                                            onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
                                     </div>
                                     <div className="flex-1 flex flex-col justify-center">
                                         <div className="flex justify-between items-start mb-2">
