@@ -16,6 +16,7 @@ import { CartDrawer } from './components/CartDrawer';
 import PaymentSuccess from './PaymentSuccess';
 import { Dashboard } from './components/Dashboard';
 import { SellDevice } from './pages/SellDevice';
+import { MyValuations } from './pages/MyValuations';
 import NotFound from './pages/NotFound';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
@@ -173,6 +174,7 @@ function AppContent() {
             {/* PROTECTED ROUTES */}
             <Route element={<ProtectedRoute />}>
               <Route path="dashboard" element={<PageTransition><Dashboard user={user} logout={() => setUser(null)} /></PageTransition>} />
+              <Route path="dashboard/valuations" element={<PageTransition><MyValuations /></PageTransition>} />
               <Route path="seller" element={<PageTransition><SellerStudio lang={lang} /></PageTransition>} />
             </Route>
 
