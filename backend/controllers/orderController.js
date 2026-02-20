@@ -2,6 +2,8 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Transaction = require('../models/Transaction');
 const RefundRequest = require('../models/RefundRequest'); // Added
+const Coupon = require('../models/Coupon');
+const Accessory = require('../models/Accessory');
 const { createNotification } = require('../controllers/notificationController');
 let stripe;
 if (process.env.STRIPE_SECRET_KEY) {

@@ -20,37 +20,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const navigate = useNavigate();
 
     //  Refresh Token Function
-    const refreshAccessToken = async () => {
+    const refreshAccessToken = async (): Promise<boolean> => {
         try {
-            // The api utility handles credentials automatically
-            // But we need a refresh endpoint in authService?
-            // The user checklist included `refreshToken()`.
-            // I didn't add it to authService.ts yet.
-            // Checking authService.ts content from previous steps...
-            // I did NOT add refreshToken to authService.ts.
-            // I should have. 
-            // For now, I will use api.get directly via import?
-            // No, I should add it to authService.
-            // OR I can use `authService.getMe()` if that serves a similar purpose of validating session?
-            // `refreshAccessToken` hits `/api/auth/refresh`.
-            // I will use `api` via `authService` if I can?
-            // I'll add `refreshToken` to authService in a future step or now?
-            // I can't edit authService here.
-
-            // I will use `fetch` here for now to avoid breaking it, but I should really update authService.
-            // Actually, I can use `authService.getMe()` to check validity?
-            // No, refresh token endpoint is specific.
-
-            // I will SKIP updating refreshAccessToken in this tool call and do it after adding refreshToken in authService.
-            // BUT I will update login/logout.
-
-            return false; // Placeholder return to match signature if I were replacing it
+            const data = await authService.refreshToken();
+            if (data?.token) {
+                localStorage.setItem('accessToken', data.token);
+                return true;
+            }
+            return false;
         } catch (error) {
+            console.error('❌ [AuthContext] Token refresh failed:', error);
             return false;
         }
     };
-    // REVERTING THIS CHUNK in thought process.
-    // I will NOT touch refreshAccessToken yet. I need to add refreshToken to authService first.
 
 
     // ✅ FIXED: Silent cleanup to prevent infinite loops
