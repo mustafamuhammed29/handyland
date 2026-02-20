@@ -23,7 +23,7 @@ exports.getAllProducts = async (req, res) => {
 
         // Filters
         if (req.query.brand && req.query.brand !== 'All') {
-            query.brand = { $regex: req.query.brand, $options: 'i' };
+            query.brand = { $regex: new RegExp(`^${req.query.brand}$`, 'i') };
         }
         if (req.query.condition) {
             query.condition = req.query.condition;

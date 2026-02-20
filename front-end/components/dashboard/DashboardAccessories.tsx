@@ -27,8 +27,8 @@ export const DashboardAccessories: React.FC = () => {
 
     const fetchAccessories = async () => {
         try {
-            const data = await api.get<Accessory[]>('/api/accessories');
-            setAccessories(data);
+            const res = await api.get('/api/accessories');
+            setAccessories(res.data || res);
         } catch (error) {
             console.error('Failed to fetch accessories', error);
             addToast('Failed to load accessories', 'error');
@@ -40,11 +40,13 @@ export const DashboardAccessories: React.FC = () => {
     const handleSave = async () => {
         try {
             if (currentAccessory._id) {
-                const updated = await api.put<Accessory>(`/api/accessories/${currentAccessory._id}`, currentAccessory);
+                const res = await api.put(`/api/accessories/${currentAccessory._id}`, currentAccessory);
+                const updated = res.data || res;
                 setAccessories(prev => prev.map(a => a._id === updated._id ? updated : a));
                 addToast('Accessory updated', 'success');
             } else {
-                const created = await api.post<Accessory>('/api/accessories', currentAccessory);
+                const res = await api.post('/api/accessories', currentAccessory);
+                const created = res.data || res;
                 setAccessories(prev => [...prev, created]);
                 addToast('Accessory created', 'success');
             }
@@ -110,7 +112,12 @@ export const DashboardAccessories: React.FC = () => {
                     <div key={acc._id} className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden group hover:border-blue-500/50 transition-all">
                         <div className="aspect-video relative overflow-hidden bg-slate-800">
                             {acc.image ? (
-                                <img src={acc.image} alt={acc.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                <img
+                                    src={acc.image}
+                                    alt={acc.name}
+                                    onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-600">
                                     <Package className="w-12 h-12" />

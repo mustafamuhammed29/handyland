@@ -107,10 +107,12 @@ const UsersManager: React.FC = () => {
         }
     };
 
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = user.name.toLowerCase().includes(search.toLowerCase()) ||
+            user.email.toLowerCase().includes(search.toLowerCase());
+        const matchesRole = roleFilter === '' || user.role === roleFilter;
+        return matchesSearch && matchesRole;
+    });
 
     return (
         <div className="p-6">
