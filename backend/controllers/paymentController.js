@@ -357,36 +357,9 @@ exports.handleWebhook = async (req, res) => {
 
             // Deduct Stock
             for (const item of order.items) {
-                // Note: item.product IS the ObjectId ref if saved correctly. 
-                // But schema says type: ObjectId.
-                // wait, in createCheckoutSession we mapped item.product (which is ID string?)
-                // Schema: product: { type: ObjectId, refPath: ... }
-                // IF we saved STRING ID into ObjectId field, Mongoose casts it IF valid ObjectId.
-                // But Accessory/Product IDs are UUID strings (from Product.js model: id: { type: String }).
-                // Oh no.
-                // Product.js has `id: String` (UUID) AND `_id: ObjectId` (Mongo).
-                // Order.js has `product: ObjectId`.
-                // If I passed UUID string to `product` field in Order creation... Mongoose might fail casting to ObjectId!
-                // I need to check if `createCheckoutSession` saves `_id` or `id`.
-
-                // createCheckoutSession: item.product matches what frontend sent.
-                // Frontend (CartContext) usually uses `id` (UUID).
-                // So Order creation might have failed or saved null if casting failed?
-                // I MUST FIX THIS.
-                // I need to look up the ObjectID from the UUID `id` before creating Order?
-                // Yes.
-
-                // Assuming I fix that in `createCheckoutSession`...
-                // Here in webhook: item.product should be ObjectId.
-                // So I can use findByIdAndUpdate (which uses _id).
-                // But Product.js model says `id: String`. `_id` is implicit.
-                // If item.product is ObjectId, I should use `findByIdAndUpdate`.
-                // If it is UUID, I should use `findOneAndUpdate({ id: ... })`.
-
-                // I will assume I fix `createCheckoutSession` to store ObjectIds.
-                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
-                // Wait, if it's Accessory? Check type.
-                if (item.productType === 'Accessory') {
+                if (item.productType === 'Product') {
+                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
+                } else if (item.productType === 'Accessory') {
                     await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
                 }
             }

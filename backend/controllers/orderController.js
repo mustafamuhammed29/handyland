@@ -349,6 +349,19 @@ exports.updateOrderStatus = async (req, res) => {
 
         if (status) {
             order.status = status;
+
+            // Rollback stock if order is cancelled by admin
+            if (status === 'cancelled' && oldStatus !== 'cancelled') {
+                for (const item of order.items) {
+                    if (item.productType === 'Product') {
+                        const Product = require('../models/Product');
+                        await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+                    } else if (item.productType === 'Accessory') {
+                        const Accessory = require('../models/Accessory');
+                        await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+                    }
+                }
+            }
         }
 
         if (trackingNumber) {
@@ -709,35 +722,6 @@ exports.generateInvoice = async (req, res) => {
 
     } catch (error) {
         console.error("Generate Invoice Error:", error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
-
-// @desc    Cancel order
-// @route   PUT /api/orders/:id/cancel
-// @access  Private
-exports.cancelOrder = async (req, res) => {
-    try {
-        const order = await Order.findById(req.params.id);
-
-        if (!order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
-        }
-
-        if (order.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-            return res.status(401).json({ success: false, message: 'Not authorized' });
-        }
-
-        if (order.status !== 'pending') {
-            return res.status(400).json({ success: false, message: 'Cannot cancel order that is not pending' });
-        }
-
-        order.status = 'cancelled';
-        await order.save();
-
-        res.status(200).json({ success: true, message: 'Order cancelled successfully', order });
-    } catch (error) {
-        console.error("Cancel Order Error:", error);
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
