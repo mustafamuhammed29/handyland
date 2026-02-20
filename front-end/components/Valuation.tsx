@@ -114,18 +114,18 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
 
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('accessToken');
             if (!token) {
                 addToast("Please login to save your quote", "error");
                 navigate('/login');
                 return;
             }
 
-            const data = await api.post('/api/valuation/quote', formData);
+            const data = await api.post('/api/valuations', formData);
 
-            if (data.success) {
-                setQuoteData(data);
+            if (data.success || data.estimatedValue !== undefined) {
                 addToast("Quote generated successfully!", "success");
+                navigate('/dashboard/valuations');
             } else {
                 addToast(data.message || "Failed to generate quote", "error");
             }

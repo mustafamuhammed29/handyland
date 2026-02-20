@@ -178,6 +178,7 @@ app.use('/api/stats', require('./routes/statsRoutes'));
 app.use('/api/accessories', require('./routes/accessoriesRoutes'));
 app.use('/api/repair-archive', require('./routes/repairArchiveRoutes'));
 app.use('/api/valuation', require('./routes/valuationRoutes'));
+app.use('/api/valuations', require('./routes/valuations'));
 app.use('/api/promotions', require('./routes/promotionsRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes')); // Added
 app.use('/api/addresses', require('./routes/addressRoutes')); // Added
