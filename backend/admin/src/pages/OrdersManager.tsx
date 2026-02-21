@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square } from 'lucide-react';
 import { api } from '../utils/api';
 
 
@@ -58,6 +58,7 @@ const OrdersManager: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
 
     // Fetch orders
     const fetchOrders = async () => {
@@ -110,6 +111,40 @@ const OrdersManager: React.FC = () => {
         } catch (error) {
             console.error('❌ Error updating order:', error);
             alert('Error updating order status');
+        }
+    };
+
+    const handleSelectAll = () => {
+        if (selectedOrders.length === orders.length && orders.length > 0) {
+            setSelectedOrders([]);
+        } else {
+            setSelectedOrders(orders.map(o => o._id));
+        }
+    };
+
+    const toggleSelectOrder = (id: string) => {
+        if (selectedOrders.includes(id)) {
+            setSelectedOrders(selectedOrders.filter(oId => oId !== id));
+        } else {
+            setSelectedOrders([...selectedOrders, id]);
+        }
+    };
+
+    const handleBulkStatusChange = async (newStatus: string) => {
+        if (!newStatus) return;
+        if (!window.confirm(`Change status of ${selectedOrders.length} orders to ${newStatus}?`)) return;
+
+        try {
+            await Promise.all(selectedOrders.map(id =>
+                api.put(`/orders/admin/${id}/status`, { status: newStatus })
+            ));
+            alert('Orders updated successfully!');
+            fetchOrders();
+            fetchStats();
+            setSelectedOrders([]);
+        } catch (error) {
+            console.error('❌ Error in bulk status update:', error);
+            alert('Error updating orders');
         }
     };
 
@@ -192,6 +227,31 @@ const OrdersManager: React.FC = () => {
                 </div>
             )}
 
+            {/* Bulk Actions */}
+            {selectedOrders.length > 0 && (
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6 flex items-center justify-between animate-in fade-in slide-in-from-top-4">
+                    <div className="flex items-center gap-2">
+                        <span className="text-indigo-700 font-bold">{selectedOrders.length}</span>
+                        <span className="text-indigo-900">orders selected</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <select
+                            onChange={(e) => handleBulkStatusChange(e.target.value)}
+                            value=""
+                            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                            aria-label="Bulk Change Status"
+                        >
+                            <option value="" disabled>Change Status To...</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            )}
+
             {/* Filters */}
             <div className="bg-white p-4 rounded-lg shadow mb-6">
                 <div className="flex flex-wrap gap-4">
@@ -231,6 +291,20 @@ const OrdersManager: React.FC = () => {
                 <table className="w-full">
                     <thead className="bg-gray-50 border-b">
                         <tr>
+                            <th className="px-6 py-3 text-left w-16">
+                                <button
+                                    onClick={handleSelectAll}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors flex items-center"
+                                    aria-label={selectedOrders.length === orders.length && orders.length > 0 ? "Deselect All" : "Select All"}
+                                    title={selectedOrders.length === orders.length && orders.length > 0 ? "Deselect All" : "Select All"}
+                                >
+                                    {selectedOrders.length === orders.length && orders.length > 0 ? (
+                                        <CheckSquare className="w-5 h-5 text-indigo-600" />
+                                    ) : (
+                                        <Square className="w-5 h-5" />
+                                    )}
+                                </button>
+                            </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
@@ -241,44 +315,60 @@ const OrdersManager: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {filteredOrders.map((order) => (
-                            <tr key={order._id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="font-medium text-gray-900">{order.orderNumber}</div>
-                                    <div className="text-sm text-gray-500">{order.paymentMethod}</div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="font-medium text-gray-900">{order.user?.name || 'Unknown User'}</div>
-                                    <div className="text-sm text-gray-500">{order.user?.email || 'No Email'}</div>
-                                    <div className="text-sm text-gray-500">{order.user?.phone || 'No Phone'}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {order.items.length} item(s)
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="font-semibold text-gray-900">€{order.totalAmount.toFixed(2)}</div>
-                                    <div className="text-xs text-gray-500">{order.paymentStatus}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium text-white ${getStatusColor(order.status)}`}>
-                                        {getStatusIcon(order.status)}
-                                        {order.status}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {new Date(order.createdAt).toLocaleDateString()}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button
-                                        onClick={() => setSelectedOrder(order)}
-                                        className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1"
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                        View
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                        {filteredOrders.map((order) => {
+                            const isSelected = selectedOrders.includes(order._id);
+                            return (
+                                <tr key={order._id} className={`transition-colors ${isSelected ? 'bg-indigo-50' : 'hover:bg-gray-50'}`}>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            onClick={() => toggleSelectOrder(order._id)}
+                                            className="text-gray-400 hover:text-gray-600 transition-colors flex items-center"
+                                            aria-label={isSelected ? "Deselect Order" : "Select Order"}
+                                        >
+                                            {isSelected ? (
+                                                <CheckSquare className="w-5 h-5 text-indigo-600" />
+                                            ) : (
+                                                <Square className="w-5 h-5" />
+                                            )}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="font-medium text-gray-900">{order.orderNumber}</div>
+                                        <div className="text-sm text-gray-500">{order.paymentMethod}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="font-medium text-gray-900">{order.user?.name || 'Unknown User'}</div>
+                                        <div className="text-sm text-gray-500">{order.user?.email || 'No Email'}</div>
+                                        <div className="text-sm text-gray-500">{order.user?.phone || 'No Phone'}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {order.items.length} item(s)
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="font-semibold text-gray-900">€{order.totalAmount.toFixed(2)}</div>
+                                        <div className="text-xs text-gray-500">{order.paymentStatus}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium text-white ${getStatusColor(order.status)}`}>
+                                            {getStatusIcon(order.status)}
+                                            {order.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {new Date(order.createdAt).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        <button
+                                            onClick={() => setSelectedOrder(order)}
+                                            className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
 

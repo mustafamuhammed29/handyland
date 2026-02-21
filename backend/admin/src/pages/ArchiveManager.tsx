@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Trash2, Save, X, Edit, Image as ImageIcon } from 'lucide-react';
+import { Plus, Search, Trash2, Save, X, Edit, Image as ImageIcon, CheckSquare, Square } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
 
 interface RepairCase {
@@ -20,6 +20,7 @@ const ArchiveManager = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [isEditing, setIsEditing] = useState(false);
+    const [selectedCases, setSelectedCases] = useState<string[]>([]);
     const [currentCase, setCurrentCase] = useState<Partial<RepairCase>>({});
 
     useEffect(() => {
@@ -43,8 +44,37 @@ const ArchiveManager = () => {
         try {
             await fetch(`http://localhost:5000/api/repair-archive/${id}`, { method: 'DELETE' });
             setCases(cases.filter(c => c._id !== id));
+            setSelectedCases(selectedCases.filter(cId => cId !== id));
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const handleSelectAll = () => {
+        if (selectedCases.length === cases.length && cases.length > 0) {
+            setSelectedCases([]);
+        } else {
+            setSelectedCases(cases.map(c => c._id));
+        }
+    };
+
+    const toggleSelectCase = (id: string) => {
+        if (selectedCases.includes(id)) {
+            setSelectedCases(selectedCases.filter(cId => cId !== id));
+        } else {
+            setSelectedCases([...selectedCases, id]);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!confirm(`Are you sure you want to delete ${selectedCases.length} selected cases?`)) return;
+        try {
+            await Promise.all(selectedCases.map(id => fetch(`http://localhost:5000/api/repair-archive/${id}`, { method: 'DELETE' })));
+            setCases(cases.filter(c => !selectedCases.includes(c._id)));
+            setSelectedCases([]);
+        } catch (error) {
+            console.error(error);
+            alert('Failed to delete cases.');
         }
     };
 
@@ -95,57 +125,109 @@ const ArchiveManager = () => {
                 </button>
             </div>
 
-            {/* Search */}
-            <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                    type="text"
-                    placeholder="Search cases..."
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
+            {/* Search and Controls */}
+            <div className="flex gap-4 items-center">
+                <button
+                    onClick={handleSelectAll}
+                    className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white px-4 py-3 rounded-xl flex items-center gap-2 transition-colors"
+                    aria-label={selectedCases.length === cases.length && cases.length > 0 ? "Deselect All" : "Select All"}
+                    title={selectedCases.length === cases.length && cases.length > 0 ? "Deselect All" : "Select All"}
+                >
+                    {selectedCases.length === cases.length && cases.length > 0 ? (
+                        <CheckSquare className="w-5 h-5 text-blue-500" />
+                    ) : (
+                        <Square className="w-5 h-5 text-slate-400" />
+                    )}
+                </button>
+                <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input
+                        type="text"
+                        placeholder="Search cases..."
+                        className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
             </div>
+
+            {/* Bulk Actions */}
+            {selectedCases.length > 0 && (
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-4">
+                    <div className="flex items-center gap-2">
+                        <span className="text-blue-400 font-bold">{selectedCases.length}</span>
+                        <span className="text-slate-300">cases selected</span>
+                    </div>
+                    <button
+                        onClick={handleBulkDelete}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-500 hover:bg-red-600/30 rounded-lg transition-colors font-medium"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Selected
+                    </button>
+                </div>
+            )}
 
             {/* List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCases.map((item) => (
-                    <div key={item._id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/50 transition-all">
-                        <div className="relative h-48 bg-black">
-                            <div className="absolute inset-0 flex">
-                                <div className="w-1/2 relative border-r border-white/20">
-                                    <img src={item.imgBefore} className="w-full h-full object-cover opacity-70" alt="Before" />
-                                    <span className="absolute top-2 left-2 text-[10px] bg-red-500/80 text-white px-2 py-0.5 rounded">Before</span>
-                                </div>
-                                <div className="w-1/2 relative">
-                                    <img src={item.imgAfter} className="w-full h-full object-cover" alt="After" />
-                                    <span className="absolute top-2 right-2 text-[10px] bg-emerald-500/80 text-white px-2 py-0.5 rounded">After</span>
-                                </div>
-                            </div>
-                            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {filteredCases.map((item) => {
+                    const isSelected = selectedCases.includes(item._id);
+                    return (
+                        <div key={item._id} className={`bg-slate-900 border ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-800'} rounded-xl overflow-hidden group hover:border-blue-500/50 transition-all relative`}>
+                            {/* Checkbox Overlay */}
+                            <div className="absolute top-3 left-3 z-20">
                                 <button
-                                    onClick={() => { setCurrentCase(item); setIsEditing(true); }}
-                                    className="p-2 bg-slate-900/80 hover:bg-blue-600 text-white rounded-lg"
+                                    onClick={() => toggleSelectCase(item._id)}
+                                    className="bg-slate-900/80 backdrop-blur-sm p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors border border-slate-700/50 shadow-lg"
+                                    aria-label={isSelected ? "Deselect Case" : "Select Case"}
                                 >
-                                    <Edit size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(item._id)}
-                                    className="p-2 bg-slate-900/80 hover:bg-red-600 text-white rounded-lg"
-                                >
-                                    <Trash2 size={16} />
+                                    {isSelected ? (
+                                        <CheckSquare className="w-5 h-5 text-blue-500" />
+                                    ) : (
+                                        <Square className="w-5 h-5" />
+                                    )}
                                 </button>
                             </div>
-                        </div>
-                        <div className="p-4">
-                            <h3 className="font-bold text-white mb-1">{item.title}</h3>
-                            <div className="flex gap-2 text-xs text-slate-400 mb-2">
-                                <span className="bg-slate-800 px-2 py-1 rounded capitalize">{item.category}</span>
-                                <span className="bg-slate-800 px-2 py-1 rounded">Lvl: {item.difficulty}</span>
+                            <div className="relative h-48 bg-black">
+                                <div className="absolute inset-0 flex">
+                                    <div className="w-1/2 relative border-r border-white/20">
+                                        <img src={item.imgBefore} className="w-full h-full object-cover opacity-70" alt="Before" />
+                                        <span className="absolute top-2 left-2 text-[10px] bg-red-500/80 text-white px-2 py-0.5 rounded">Before</span>
+                                    </div>
+                                    <div className="w-1/2 relative">
+                                        <img src={item.imgAfter} className="w-full h-full object-cover" alt="After" />
+                                        <span className="absolute top-2 right-2 text-[10px] bg-emerald-500/80 text-white px-2 py-0.5 rounded">After</span>
+                                    </div>
+                                </div>
+                                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={() => { setCurrentCase(item); setIsEditing(true); }}
+                                        className="p-2 bg-slate-900/80 hover:bg-blue-600 text-white rounded-lg"
+                                        aria-label="Edit Case"
+                                        title="Edit Case"
+                                    >
+                                        <Edit size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(item._id)}
+                                        className="p-2 bg-slate-900/80 hover:bg-red-600 text-white rounded-lg"
+                                        aria-label="Delete Case"
+                                        title="Delete Case"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="p-4">
+                                <h3 className="font-bold text-white mb-1">{item.title}</h3>
+                                <div className="flex gap-2 text-xs text-slate-400 mb-2">
+                                    <span className="bg-slate-800 px-2 py-1 rounded capitalize">{item.category}</span>
+                                    <span className="bg-slate-800 px-2 py-1 rounded">Lvl: {item.difficulty}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Modal */}
@@ -156,7 +238,12 @@ const ArchiveManager = () => {
                             <h2 className="text-xl font-bold text-white">
                                 {currentCase._id ? 'Edit Case' : 'New Repair Case'}
                             </h2>
-                            <button onClick={() => setIsEditing(false)} className="text-slate-400 hover:text-white">
+                            <button
+                                onClick={() => setIsEditing(false)}
+                                className="text-slate-400 hover:text-white"
+                                aria-label="Close Modal"
+                                title="Close Modal"
+                            >
                                 <X size={24} />
                             </button>
                         </div>
@@ -193,6 +280,7 @@ const ArchiveManager = () => {
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={currentCase.category || 'other'}
                                         onChange={e => setCurrentCase({ ...currentCase, category: e.target.value as any })}
+                                        aria-label="Select Category"
                                     >
                                         <option value="screen">Screen</option>
                                         <option value="glass">Rear Glass</option>
@@ -208,6 +296,7 @@ const ArchiveManager = () => {
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={currentCase.difficulty || 'Med'}
                                         onChange={e => setCurrentCase({ ...currentCase, difficulty: e.target.value as any })}
+                                        aria-label="Select Difficulty"
                                     >
                                         <option value="Low">Low</option>
                                         <option value="Med">Medium</option>

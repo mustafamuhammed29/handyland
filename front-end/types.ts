@@ -57,7 +57,9 @@ export interface SavedValuation {
   condition: string;
   estimatedValue: number;
   date: string;
+  quoteReference?: string;
 }
+
 
 
 export interface Coupon {

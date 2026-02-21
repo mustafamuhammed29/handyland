@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { User } from '../types';
@@ -35,49 +35,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
 
-    // ✅ FIXED: Silent cleanup to prevent infinite loops
+    // Guard against React StrictMode double-invocation
     useEffect(() => {
-        const initAuth = async () => {
-            console.log('🔐 [AuthContext] Initializing authentication...');
+        let ignore = false; // cleanup flag to cancel stale invocations
 
+        const initAuth = async () => {
             const storedUser = localStorage.getItem('user');
-            console.log('👤 [AuthContext] Stored user:', storedUser ? 'Found' : 'Not found');
+            const storedToken = localStorage.getItem('accessToken');
+
+            if (!storedUser && !storedToken) {
+                if (!ignore) setLoading(false);
+                return;
+            }
 
             if (storedUser) {
                 try {
                     const parsedUser = JSON.parse(storedUser);
-                    console.log('📝 [AuthContext] Parsed user:', parsedUser.email);
+                    // ✅ Optimistically set user so ProtectedRoute doesn't flash to login
+                    if (!ignore) setUser(parsedUser);
 
                     // Verify session with backend
                     try {
-                        console.log('🔄 [AuthContext] Verifying session with backend...');
                         const { user } = await authService.getMe();
-                        console.log('✅ [AuthContext] Session valid:', user.email);
-                        setUser(user);
-                        localStorage.setItem('user', JSON.stringify(user));
-                    } catch (error) {
-                        console.error('❌ [AuthContext] Session verification failed:', error);
-
-                        // ✅ CRITICAL FIX: Silent cleanup WITHOUT calling logout()
+                        if (!ignore) {
+                            setUser(user);
+                            localStorage.setItem('user', JSON.stringify(user));
+                        }
+                    } catch {
+                        // Try refresh before giving up
+                        const refreshed = await refreshAccessToken();
+                        if (!ignore) {
+                            if (refreshed) {
+                                try {
+                                    const { user } = await authService.getMe();
+                                    setUser(user);
+                                    localStorage.setItem('user', JSON.stringify(user));
+                                } catch {
+                                    setUser(null);
+                                    localStorage.removeItem('user');
+                                    localStorage.removeItem('accessToken');
+                                    localStorage.removeItem('refreshToken');
+                                }
+                            } else {
+                                setUser(null);
+                                localStorage.removeItem('user');
+                                localStorage.removeItem('accessToken');
+                                localStorage.removeItem('refreshToken');
+                            }
+                        }
+                    }
+                } catch (parseError) {
+                    console.error('❌ [AuthContext] Failed to parse stored user:', parseError);
+                    if (!ignore) {
                         setUser(null);
                         localStorage.removeItem('user');
-                        // ⚠️ DO NOT call logout() here - it causes redirect loop
                     }
-                } catch (error) {
-                    console.error('❌ [AuthContext] Failed to parse stored user:', error);
-
-                    // ✅ Silent cleanup
-                    setUser(null);
-                    localStorage.removeItem('user');
                 }
             }
 
-            setLoading(false);
-            console.log('🏁 [AuthContext] Initialization complete');
+            if (!ignore) setLoading(false);
         };
 
         initAuth();
+        return () => { ignore = true; }; // cleanup: cancel stale invocation
     }, []);
+
 
     const login = async (email: string, password: string) => {
         console.log('🔑 [AuthContext] Login attempt:', email);

@@ -88,6 +88,8 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                         <button
                             onClick={() => setSelectedItem(null)}
                             className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-white/10 rounded-full text-white transition-colors"
+                            aria-label="Close Inspector"
+                            title="Close Inspector"
                         >
                             <X className="w-6 h-6" />
                         </button>

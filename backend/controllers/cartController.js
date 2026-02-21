@@ -69,19 +69,18 @@ exports.getCart = async (req, res) => {
 // @desc    Sync local cart with server cart (Merge)
 // @route   POST /api/cart/sync
 // @access  Private
-// @desc    Sync local cart with server cart (Merge)
-// @route   POST /api/cart/sync
-// @access  Private
 exports.syncCart = async (req, res) => {
     try {
-        const { localItems } = req.body; // Expects array of { id, quantity, category }
+        const { localItems } = req.body;
         const mongoose = require('mongoose');
 
-        let cart = await Cart.findOne({ user: req.user.id });
-
-        if (!cart) {
-            cart = new Cart({ user: req.user.id, items: [] });
-        }
+        // Use findOneAndUpdate with upsert to atomically create-or-get cart
+        // This prevents duplicate key errors from concurrent requests (e.g. React StrictMode)
+        let cart = await Cart.findOneAndUpdate(
+            { user: req.user.id },
+            { $setOnInsert: { user: req.user.id, items: [] } },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
 
         // Merge logic
         // 1. Create a map of existing server items
@@ -121,8 +120,6 @@ exports.syncCart = async (req, res) => {
 
         await cart.save();
 
-        // Return updated full cart
-        // We reuse the get logic (refactor later to shared function)
         const populatedItems = [];
         for (const item of cart.items) {
             let details;

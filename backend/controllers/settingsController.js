@@ -32,8 +32,8 @@ exports.getSettings = async (req, res) => {
         ]);
 
         // Calculate Market Experience
-        let marketExperience = 0;
-        if (oldestOrder) {
+        let marketExperience = settings.stats?.marketExperience || 0;
+        if (!marketExperience && oldestOrder) {
             const startYear = oldestOrder.createdAt.getFullYear();
             const currentYear = new Date().getFullYear();
             marketExperience = currentYear - startYear;

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardValuations } from '../components/dashboard/DashboardValuations';
 import { api } from '../utils/api';
 import { SavedValuation } from '../types';
@@ -6,33 +7,42 @@ import { SavedValuation } from '../types';
 export const MyValuations = () => {
     const [valuations, setValuations] = useState<SavedValuation[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
+
+    const fetchValuations = async () => {
+        setIsLoading(true);
+        try {
+            const res: any = await api.get('/api/valuation/my-valuations');
+            const list: any[] = Array.isArray(res) ? res : (res.data || []);
+            const mapped = list.map((v: any) => ({
+                id: v._id,
+                device: v.device || v.deviceName || 'Unknown Device',
+                specs: v.specs || v.storage || '-',
+                condition: v.condition || '-',
+                date: v.createdAt ? new Date(v.createdAt).toLocaleDateString('de-DE') : '-',
+                estimatedValue: v.estimatedValue ?? 0,
+                quoteReference: v.quoteReference
+            }));
+            setValuations(mapped);
+        } catch (error) {
+            console.error('Error fetching valuations:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchValuations = async () => {
-            try {
-                const res = await api.get('/api/valuations');
-                if (res.success && res.data) {
-                    const mapped = res.data.map((v: any) => ({
-                        id: v._id,
-                        device: v.deviceName,
-                        specs: v.storage,
-                        condition: v.condition,
-                        date: new Date(v.createdAt).toLocaleDateString(),
-                        estimatedValue: v.estimatedValue
-                    }));
-                    setValuations(mapped);
-                }
-            } catch (error) {
-                console.error('Error fetching valuations:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         fetchValuations();
     }, []);
 
+    // Navigate to the quote confirmation page
     const handleSell = (valId: string) => {
-        console.log('sell', valId);
+        const val = valuations.find(v => v.id === valId);
+        if (val?.quoteReference) {
+            navigate(`/valuation/confirm/${val.quoteReference}`);
+        } else {
+            navigate('/valuation');
+        }
     };
 
     return (

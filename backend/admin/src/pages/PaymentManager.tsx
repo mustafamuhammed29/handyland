@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Save, CreditCard, Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { Save, CreditCard, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { api } from '../utils/api';
 
 export default function PaymentManager() {
@@ -176,6 +176,8 @@ export default function PaymentManager() {
                             {config.cashOnDelivery.enabled ? 'Enabled' : 'Disabled'}
                         </span>
                         <button
+                            title={config.cashOnDelivery.enabled ? "Disable Cash on Delivery" : "Enable Cash on Delivery"}
+                            aria-label={config.cashOnDelivery.enabled ? "Disable Cash on Delivery" : "Enable Cash on Delivery"}
                             onClick={() => updateConfig('cashOnDelivery', 'enabled', !config.cashOnDelivery.enabled)}
                             className={`w-12 h-6 rounded-full transition-colors relative ${config.cashOnDelivery.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`}
                         >

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Trash2, X, Edit2, Save, Search, Headphones, Zap, Shield, Watch } from 'lucide-react';
+import { Plus, Trash2, X, Edit2, Save, Search, Headphones, Zap, Shield, Watch, CheckSquare, Square } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
 import { api } from '../utils/api';
 
@@ -8,6 +8,7 @@ export default function AccessoriesManager() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
     const [formData, setFormData] = useState({
         id: '',
         name: '',
@@ -45,8 +46,37 @@ export default function AccessoriesManager() {
         try {
             await api.delete(`/api/accessories/${id}`);
             fetchAccessories();
+            setSelectedAccessories(selectedAccessories.filter(aId => aId !== id));
         } catch (error) {
             console.error("Failed to delete accessory:", error);
+            alert('Failed to delete. Please try again.');
+        }
+    };
+
+    const handleSelectAll = () => {
+        if (selectedAccessories.length === accessories.length && accessories.length > 0) {
+            setSelectedAccessories([]);
+        } else {
+            setSelectedAccessories(accessories.map(a => a.id || a._id));
+        }
+    };
+
+    const toggleSelectAccessory = (id: string) => {
+        if (selectedAccessories.includes(id)) {
+            setSelectedAccessories(selectedAccessories.filter(aId => aId !== id));
+        } else {
+            setSelectedAccessories([...selectedAccessories, id]);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!confirm(`Are you sure you want to delete ${selectedAccessories.length} selected accessories?`)) return;
+        try {
+            await Promise.all(selectedAccessories.map(id => api.delete(`/api/accessories/${id}`)));
+            fetchAccessories();
+            setSelectedAccessories([]);
+        } catch (error) {
+            console.error("Failed to perform bulk delete:", error);
             alert('Failed to delete. Please try again.');
         }
     };
@@ -130,6 +160,18 @@ export default function AccessoriesManager() {
                 </div>
 
                 <div className="flex gap-4 w-full md:w-auto">
+                    <button
+                        onClick={handleSelectAll}
+                        className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-3 rounded-xl flex items-center justify-center transition-colors border border-slate-700"
+                        aria-label={selectedAccessories.length === accessories.length && accessories.length > 0 ? "Deselect All" : "Select All"}
+                        title={selectedAccessories.length === accessories.length && accessories.length > 0 ? "Deselect All" : "Select All"}
+                    >
+                        {selectedAccessories.length === accessories.length && accessories.length > 0 ? (
+                            <CheckSquare className="w-5 h-5 text-purple-500" />
+                        ) : (
+                            <Square className="w-5 h-5 text-slate-400" />
+                        )}
+                    </button>
                     <div className="relative group flex-1 md:w-64">
                         <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-purple-400 transition-colors" />
                         <input
@@ -149,6 +191,23 @@ export default function AccessoriesManager() {
                 </div>
             </div>
 
+            {/* Bulk Actions */}
+            {selectedAccessories.length > 0 && (
+                <div className="bg-purple-900/20 border border-purple-500/30 rounded-xl p-4 mb-6 flex items-center justify-between animate-in fade-in slide-in-from-top-4">
+                    <div className="flex items-center gap-2">
+                        <span className="text-purple-400 font-bold">{selectedAccessories.length}</span>
+                        <span className="text-slate-300">accessories selected</span>
+                    </div>
+                    <button
+                        onClick={handleBulkDelete}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-400 hover:bg-red-600/30 rounded-lg transition-colors font-medium"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Selected
+                    </button>
+                </div>
+            )}
+
             {/* List */}
             {loading ? (
                 <div className="text-center py-20 text-slate-500">Loading inventory...</div>
@@ -158,72 +217,93 @@ export default function AccessoriesManager() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredAccessories.map((item) => (
-                        <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative group hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] transition-all flex flex-col h-full">
-                            {/* Actions Overlay */}
-                            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                <button
-                                    onClick={() => handleEdit(item)}
-                                    className="bg-slate-800/90 hover:bg-blue-600 text-white p-2 rounded-lg backdrop-blur-sm transition-colors shadow-lg"
-                                    title="Edit"
-                                >
-                                    <Edit2 size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(item.id)}
-                                    className="bg-slate-800/90 hover:bg-red-600 text-white p-2 rounded-lg backdrop-blur-sm transition-colors shadow-lg"
-                                    title="Delete"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
+                    {filteredAccessories.map((item) => {
+                        const accId = item.id || item._id;
+                        const isSelected = selectedAccessories.includes(accId);
 
-                            <div className="relative mb-4 rounded-xl overflow-hidden bg-slate-950 aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500">
-                                {item.image ? (
-                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-700 bg-slate-950">
-                                        <div className="text-4xl">📦</div>
-                                    </div>
-                                )}
-                                {item.tag && (
-                                    <div className="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg uppercase tracking-wider">
-                                        {item.tag}
-                                    </div>
-                                )}
-                            </div>
+                        return (
+                            <div key={accId} className={`bg-slate-900 border ${isSelected ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-slate-800'} rounded-2xl p-5 relative group hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] transition-all flex flex-col h-full`}>
 
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 px-2 py-1 rounded-md border border-slate-700/50">
-                                        {getCategoryIcon(item.category)}
-                                        {item.category}
-                                    </span>
+                                {/* Selection Overlays */}
+                                <div className="absolute top-4 left-4 z-20">
+                                    <button
+                                        onClick={() => toggleSelectAccessory(accId)}
+                                        className="bg-slate-900/80 backdrop-blur-sm p-2 rounded-lg text-slate-400 hover:text-white transition-colors border border-slate-700/50 shadow-lg"
+                                        aria-label={isSelected ? "Deselect Accessory" : "Select Accessory"}
+                                    >
+                                        {isSelected ? (
+                                            <CheckSquare className="w-5 h-5 text-purple-500" />
+                                        ) : (
+                                            <Square className="w-5 h-5" />
+                                        )}
+                                    </button>
                                 </div>
-                                <h3 className="text-lg font-bold text-white mb-1 leading-tight">{item.name}</h3>
-                                <p className="text-xs text-slate-500 line-clamp-2 mb-3 h-8">{item.description || 'No description provided.'}</p>
 
-                                {/* Specs Mini Grid */}
-                                <div className="grid grid-cols-2 gap-1 mb-4">
-                                    {item.color && (
-                                        <div className="text-[10px] bg-slate-950 px-2 py-1 rounded text-slate-400 truncate">
-                                            <span className="text-slate-600 mr-1">Color:</span> {item.color}
+                                {/* Actions Overlay */}
+                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                    <button
+                                        onClick={() => handleEdit(item)}
+                                        className="bg-slate-800/90 hover:bg-blue-600 text-white p-2 rounded-lg backdrop-blur-sm transition-colors shadow-lg"
+                                        title="Edit"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(item.id)}
+                                        className="bg-slate-800/90 hover:bg-red-600 text-white p-2 rounded-lg backdrop-blur-sm transition-colors shadow-lg"
+                                        title="Delete"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+
+                                <div className="relative mb-4 rounded-xl overflow-hidden bg-slate-950 aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500">
+                                    {item.image ? (
+                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-slate-700 bg-slate-950">
+                                            <div className="text-4xl">📦</div>
                                         </div>
                                     )}
-                                    {item.storage && (
-                                        <div className="text-[10px] bg-slate-950 px-2 py-1 rounded text-slate-400 truncate">
-                                            <span className="text-slate-600 mr-1">Storage:</span> {item.storage}
+                                    {item.tag && (
+                                        <div className="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg uppercase tracking-wider">
+                                            {item.tag}
                                         </div>
                                     )}
                                 </div>
-                            </div>
 
-                            <div className="mt-auto pt-4 border-t border-slate-800 flex justify-between items-center">
-                                <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">€{item.price}</span>
-                                <span className="text-xs text-slate-600 font-mono">ID: {item.id ? item.id.substring(0, 6) : '...'}</span>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 px-2 py-1 rounded-md border border-slate-700/50">
+                                            {getCategoryIcon(item.category)}
+                                            {item.category}
+                                        </span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-white mb-1 leading-tight">{item.name}</h3>
+                                    <p className="text-xs text-slate-500 line-clamp-2 mb-3 h-8">{item.description || 'No description provided.'}</p>
+
+                                    {/* Specs Mini Grid */}
+                                    <div className="grid grid-cols-2 gap-1 mb-4">
+                                        {item.color && (
+                                            <div className="text-[10px] bg-slate-950 px-2 py-1 rounded text-slate-400 truncate">
+                                                <span className="text-slate-600 mr-1">Color:</span> {item.color}
+                                            </div>
+                                        )}
+                                        {item.storage && (
+                                            <div className="text-[10px] bg-slate-950 px-2 py-1 rounded text-slate-400 truncate">
+                                                <span className="text-slate-600 mr-1">Storage:</span> {item.storage}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="mt-auto pt-4 border-t border-slate-800 flex justify-between items-center">
+                                    <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">€{item.price}</span>
+                                    <span className="text-xs text-slate-600 font-mono">ID: {accId.substring(0, 6)}</span>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
@@ -235,7 +315,12 @@ export default function AccessoriesManager() {
                             <h3 className="text-2xl font-bold text-white">
                                 {formData.id ? 'Edit Accessory' : 'New Accessory'}
                             </h3>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white transition-colors bg-slate-800 p-2 rounded-full hover:bg-slate-700">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="text-slate-400 hover:text-white transition-colors bg-slate-800 p-2 rounded-full hover:bg-slate-700"
+                                aria-label="Close Modal"
+                                title="Close Modal"
+                            >
                                 <X size={20} />
                             </button>
                         </div>
@@ -262,6 +347,7 @@ export default function AccessoriesManager() {
                                                 className="input-field"
                                                 value={formData.category}
                                                 onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                                aria-label="Select Category"
                                             >
                                                 <option value="audio">Audio</option>
                                                 <option value="power">Power</option>
