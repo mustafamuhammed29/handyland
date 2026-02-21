@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Search, Edit2, Trash2, Save, X } from 'lucide-react';
+import { Package, Plus, Search, Edit2, Trash2, Save, X, CheckSquare, Square } from 'lucide-react';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -17,6 +17,7 @@ export const DashboardAccessories: React.FC = () => {
     const [accessories, setAccessories] = useState<Accessory[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
     const [currentAccessory, setCurrentAccessory] = useState<Partial<Accessory>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const { addToast } = useToast();
@@ -68,6 +69,34 @@ export const DashboardAccessories: React.FC = () => {
         }
     };
 
+    const handleSelectAll = () => {
+        if (selectedAccessories.length === accessories.length && accessories.length > 0) {
+            setSelectedAccessories([]);
+        } else {
+            setSelectedAccessories(accessories.map(a => a._id));
+        }
+    };
+
+    const toggleSelectAccessory = (id: string) => {
+        if (selectedAccessories.includes(id)) {
+            setSelectedAccessories(selectedAccessories.filter(aId => aId !== id));
+        } else {
+            setSelectedAccessories([...selectedAccessories, id]);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!window.confirm(`Delete ${selectedAccessories.length} selected accessories?`)) return;
+        try {
+            await Promise.all(selectedAccessories.map(id => api.delete(`/api/accessories/${id}`)));
+            setAccessories(prev => prev.filter(a => !selectedAccessories.includes(a._id)));
+            setSelectedAccessories([]);
+            addToast('Accessories deleted', 'success');
+        } catch (error) {
+            addToast('Failed to perform bulk delete', 'error');
+        }
+    };
+
     const filteredAccessories = accessories.filter(a =>
         a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         a.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -94,22 +123,66 @@ export const DashboardAccessories: React.FC = () => {
                 </button>
             </div>
 
-            {/* Search */}
-            <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <input
-                    type="text"
-                    placeholder="Search accessories..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-colors"
-                />
+            {/* Bulk Actions */}
+            {selectedAccessories.length > 0 && (
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-4">
+                    <div className="flex items-center gap-2">
+                        <span className="text-blue-400 font-bold">{selectedAccessories.length}</span>
+                        <span className="text-slate-300">accessories selected</span>
+                    </div>
+                    <button
+                        onClick={handleBulkDelete}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-400 hover:bg-red-600/30 rounded-lg transition-colors font-medium"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Selected
+                    </button>
+                </div>
+            )}
+
+            {/* Controls */}
+            <div className="flex gap-4 items-center">
+                <button
+                    onClick={handleSelectAll}
+                    className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-3 rounded-xl flex items-center gap-2 transition-colors border border-slate-700"
+                    aria-label={selectedAccessories.length === accessories.length && accessories.length > 0 ? "Deselect All" : "Select All"}
+                    title={selectedAccessories.length === accessories.length && accessories.length > 0 ? "Deselect All" : "Select All"}
+                >
+                    {selectedAccessories.length === accessories.length && accessories.length > 0 ? (
+                        <CheckSquare className="w-5 h-5 text-blue-500" />
+                    ) : (
+                        <Square className="w-5 h-5" />
+                    )}
+                </button>
+                <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                    <input
+                        type="text"
+                        placeholder="Search accessories..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                </div>
             </div>
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredAccessories.map(acc => (
-                    <div key={acc._id} className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden group hover:border-blue-500/50 transition-all">
+                    <div key={acc._id} className={`bg-slate-900/50 border ${selectedAccessories.includes(acc._id) ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-800'} rounded-2xl overflow-hidden relative group hover:border-blue-500/50 transition-all`}>
+                        <div className="absolute top-4 left-4 z-10">
+                            <button
+                                onClick={() => toggleSelectAccessory(acc._id)}
+                                className="bg-slate-900/80 backdrop-blur-sm p-2 rounded-lg text-slate-400 hover:text-white transition-colors"
+                                aria-label={selectedAccessories.includes(acc._id) ? "Deselect Accessory" : "Select Accessory"}
+                            >
+                                {selectedAccessories.includes(acc._id) ? (
+                                    <CheckSquare className="w-5 h-5 text-blue-500" />
+                                ) : (
+                                    <Square className="w-5 h-5" />
+                                )}
+                            </button>
+                        </div>
                         <div className="aspect-video relative overflow-hidden bg-slate-800">
                             {acc.image ? (
                                 <img
@@ -150,6 +223,8 @@ export const DashboardAccessories: React.FC = () => {
                                 <button
                                     onClick={() => handleDelete(acc._id)}
                                     className="px-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
+                                    aria-label="Delete Accessory"
+                                    title="Delete Accessory"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                 </button>
@@ -167,7 +242,7 @@ export const DashboardAccessories: React.FC = () => {
                             <h3 className="text-xl font-bold text-white">
                                 {currentAccessory._id ? 'Edit Accessory' : 'New Accessory'}
                             </h3>
-                            <button onClick={() => setIsEditing(false)} className="text-slate-400 hover:text-white">
+                            <button onClick={() => setIsEditing(false)} className="text-slate-400 hover:text-white" aria-label="Close Modal" title="Close Modal">
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
@@ -179,6 +254,8 @@ export const DashboardAccessories: React.FC = () => {
                                     value={currentAccessory.name || ''}
                                     onChange={e => setCurrentAccessory({ ...currentAccessory, name: e.target.value })}
                                     className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                                    aria-label="Accessory Name"
+                                    placeholder="Enter Name"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -189,6 +266,8 @@ export const DashboardAccessories: React.FC = () => {
                                         value={currentAccessory.price || ''}
                                         onChange={e => setCurrentAccessory({ ...currentAccessory, price: Number(e.target.value) })}
                                         className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                                        aria-label="Accessory Price"
+                                        placeholder="Enter Price"
                                     />
                                 </div>
                                 <div>
@@ -198,6 +277,8 @@ export const DashboardAccessories: React.FC = () => {
                                         value={currentAccessory.category || ''}
                                         onChange={e => setCurrentAccessory({ ...currentAccessory, category: e.target.value })}
                                         className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                                        aria-label="Accessory Category"
+                                        placeholder="Enter Category"
                                     />
                                 </div>
                             </div>
@@ -207,6 +288,8 @@ export const DashboardAccessories: React.FC = () => {
                                     value={currentAccessory.description || ''}
                                     onChange={e => setCurrentAccessory({ ...currentAccessory, description: e.target.value })}
                                     className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white h-24 resize-none"
+                                    aria-label="Accessory Description"
+                                    placeholder="Enter Description"
                                 />
                             </div>
                             <div>
@@ -216,6 +299,8 @@ export const DashboardAccessories: React.FC = () => {
                                     value={currentAccessory.image || ''}
                                     onChange={e => setCurrentAccessory({ ...currentAccessory, image: e.target.value })}
                                     className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                                    aria-label="Accessory Image URL"
+                                    placeholder="Enter Image URL"
                                 />
                             </div>
                             <div className="flex items-center gap-2">

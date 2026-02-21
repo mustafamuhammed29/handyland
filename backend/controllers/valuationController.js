@@ -4,93 +4,70 @@ const crypto = require('crypto');
 const { sendEmail, emailTemplates } = require('../utils/emailService');
 const User = require('../models/User');
 
-// Helper: Calculate Price (Moved from Frontend)
+// Helper: Calculate Price (BackMarket Style)
+// Price = (basePrice + storageAddon) * screenMult * bodyMult * functionalityMult
 const calculatePriceInternal = async (details) => {
-    let price = 0;
-    // Find by model name (case-insensitive)
-    const device = await DeviceBlueprint.findOne({ model: { $regex: new RegExp(`^${details.model}$`, 'i') } });
+    const device = await DeviceBlueprint.findOne({
+        model: { $regex: new RegExp(`^${details.model}$`, 'i') }
+    });
 
     if (!device) {
-        console.warn(`Valuation: Device not found for model ${details.model}`);
-        // Fallback to a default safe value or basic calculation if blueprint missing
+        console.warn(`Valuation: Device not found for model "${details.model}"`);
         return { price: 50, device: null, error: null };
     }
 
-    price = device.basePrice || 500;
+    let price = device.basePrice || 200;
 
-    // 2. Storage Logic
-    // Mongoose Map: use .get() if it's a document, or obj access if lean.
-    const storagePrices = device.priceConfig?.storagePrices;
-    const specificPrice = storagePrices ? (storagePrices instanceof Map ? storagePrices.get(details.storage) : storagePrices[details.storage]) : undefined;
+    // 1. Storage Add-on
+    const storagePrices = device.storagePrices;
+    const storageAddon = storagePrices
+        ? (storagePrices instanceof Map ? storagePrices.get(details.storage) : storagePrices[details.storage])
+        : undefined;
+    if (storageAddon !== undefined && storageAddon !== null) {
+        price += storageAddon;
+    }
 
-    if (specificPrice !== undefined) {
-        price += specificPrice;
+    // 2. Screen Condition Multiplier
+    const screenKey = details.screenCondition || 'gut'; // default: gut
+    const screenMods = device.screenModifiers || {};
+    const screenMult = screenMods[screenKey] ?? 0.75;
+    price = price * screenMult;
+
+    // 3. Body Condition Multiplier
+    const bodyKey = details.bodyCondition || 'gut'; // default: gut
+    const bodyMods = device.bodyModifiers || {};
+    const bodyMult = bodyMods[bodyKey] ?? 0.85;
+    price = price * bodyMult;
+
+    // 4. Functionality Multiplier
+    const isFunctional = details.isFunctional !== false; // default: true
+    if (isFunctional) {
+        price = price * (device.functionalMultiplier ?? 1.0);
     } else {
-        // Multiplier fallback
-        let storageMult = 1.0;
-        if (details.storage.includes('256')) storageMult = 1.1;
-        if (details.storage.includes('512')) storageMult = 1.25;
-        if (details.storage.includes('1TB')) storageMult = 1.4;
-        price = price * storageMult;
+        price = price * (device.nonFunctionalMultiplier ?? 0.4);
     }
 
-    // 3. Condition Logic
-    const defaultModifiers = {
-        'new': 1.0,
-        'like_new': 0.9,
-        'good': 0.75,
-        'fair': 0.6,
-        'broken': 0.3
-    };
+    // Floor: minimum 15% of base price
+    const floor = device.basePrice * 0.15;
+    if (price < floor) price = floor;
 
-    let conditionMult = defaultModifiers[details.condition] || 0.75;
-    const conditionModifiers = device.priceConfig?.conditionModifiers;
-    const specificConditionDetails = conditionModifiers ? (conditionModifiers instanceof Map ? conditionModifiers.get(details.condition) : conditionModifiers[details.condition]) : undefined;
-
-    if (specificConditionDetails) {
-        conditionMult = specificConditionDetails;
-    }
-
-    price = price * conditionMult;
-
-    // 4. Battery Logic
-    if (details.batteryHealth) {
-        const health = parseInt(details.batteryHealth);
-        const threshold = device.priceConfig?.batteryPenalty?.threshold || 85;
-        const deduction = device.priceConfig?.batteryPenalty?.deductionPerPercent || 5;
-
-        if (health < threshold) {
-            price -= 50; // Base penalty
-            price -= (threshold - health) * deduction; // Extra penalty
-        }
-    } else if (details.battery === 'old' || details.battery === 'service') {
-        price = price * 0.8;
-    }
-
-    // 5. Accessories
-    if (details.accessories) {
-        price += 25;
-    }
-
-    // Min Value Check
-    const scrapValue = device.basePrice * 0.15;
-    if (price < scrapValue) price = scrapValue;
-
-    // Rounding
+    // Round to nearest 5
     price = Math.round(price / 5) * 5;
 
     return { price, device };
 };
+
+
 
 // @desc    Calculate Valuation (Public/Stateless)
 // @route   POST /api/valuation/calculate
 // @access  Public
 exports.calculateValuation = async (req, res) => {
     try {
-        const { model, storage, condition, battery, batteryHealth, accessories } = req.body;
+        const { model, storage, screenCondition, bodyCondition, isFunctional } = req.body;
 
         const { price, error } = await calculatePriceInternal({
-            model, storage, condition, battery, batteryHealth, accessories
+            model, storage, screenCondition, bodyCondition, isFunctional
         });
 
         if (error) {
@@ -115,7 +92,20 @@ exports.calculateValuation = async (req, res) => {
 exports.getBlueprints = async (req, res) => {
     try {
         const blueprints = await DeviceBlueprint.find().sort({ brand: 1, model: 1 });
-        res.json(blueprints);
+        const mappedBlueprints = blueprints.map(bp => ({
+            _id: bp._id,
+            brand: bp.brand,
+            modelName: bp.model,
+            imageUrl: bp.image,
+            basePrice: bp.basePrice,
+            validStorages: bp.validStorages,
+            storagePrices: bp.storagePrices ? Object.fromEntries(bp.storagePrices) : {},
+            screenModifiers: bp.screenModifiers,
+            bodyModifiers: bp.bodyModifiers,
+            functionalMultiplier: bp.functionalMultiplier,
+            nonFunctionalMultiplier: bp.nonFunctionalMultiplier
+        }));
+        res.json(mappedBlueprints);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -126,7 +116,23 @@ exports.getBlueprints = async (req, res) => {
 // @access  Private/Admin
 exports.createBlueprint = async (req, res) => {
     try {
-        const blueprint = await DeviceBlueprint.create(req.body);
+        const {
+            brand, modelName, basePrice, imageUrl, validStorages,
+            storagePrices, screenModifiers, bodyModifiers,
+            functionalMultiplier, nonFunctionalMultiplier
+        } = req.body;
+        const blueprint = await DeviceBlueprint.create({
+            brand,
+            model: modelName,
+            basePrice,
+            image: imageUrl,
+            validStorages,
+            storagePrices,
+            screenModifiers,
+            bodyModifiers,
+            functionalMultiplier,
+            nonFunctionalMultiplier
+        });
         res.status(201).json(blueprint);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -138,9 +144,27 @@ exports.createBlueprint = async (req, res) => {
 // @access  Private/Admin
 exports.updateBlueprint = async (req, res) => {
     try {
-        const blueprint = await DeviceBlueprint.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
+        const {
+            brand, modelName, basePrice, imageUrl, validStorages,
+            storagePrices, screenModifiers, bodyModifiers,
+            functionalMultiplier, nonFunctionalMultiplier
+        } = req.body;
+        const updateData = {
+            brand,
+            model: modelName,
+            basePrice,
+            image: imageUrl,
+            validStorages,
+            storagePrices,
+            screenModifiers,
+            bodyModifiers,
+            functionalMultiplier,
+            nonFunctionalMultiplier
+        };
+
+        const blueprint = await DeviceBlueprint.findByIdAndUpdate(
+            req.params.id,
+            updateData,
             { new: true }
         );
         if (!blueprint) return res.status(404).json({ message: 'Blueprint not found' });
@@ -155,7 +179,8 @@ exports.updateBlueprint = async (req, res) => {
 // @access  Private/Admin
 exports.deleteBlueprint = async (req, res) => {
     try {
-        const result = await DeviceBlueprint.findOneAndDelete({ id: req.params.id });
+        // Query by MongoDB `_id`
+        const result = await DeviceBlueprint.findByIdAndDelete(req.params.id);
         if (!result) return res.status(404).json({ message: 'Blueprint not found' });
         res.json({ message: 'Blueprint deleted' });
     } catch (error) {
@@ -168,26 +193,24 @@ exports.deleteBlueprint = async (req, res) => {
 // @access  Private
 exports.createQuote = async (req, res) => {
     try {
-        const { model, storage, condition, battery, batteryHealth, accessories, contact } = req.body;
+        const { model, storage, screenCondition, bodyCondition, isFunctional, contact } = req.body;
 
-        // Recalculate price to ensure security
         const { price, device } = await calculatePriceInternal({
-            model, storage, condition, battery, batteryHealth, accessories
+            model, storage, screenCondition, bodyCondition, isFunctional
         });
 
-        // Generate Quote Ref (e.g., HV-1707340800-A3F2)
         const timestamp = Math.floor(Date.now() / 1000);
         const randomPart = crypto.randomBytes(2).toString('hex').toUpperCase();
         const quoteReference = `HV-${timestamp}-${randomPart}`;
 
         const valuationData = {
             device: model,
-            specs: `${storage} - ${condition}`,
-            condition: condition,
+            specs: `${storage} - Screen: ${screenCondition} / Body: ${bodyCondition}`,
+            condition: screenCondition,
             estimatedValue: price,
             quoteReference,
             isQuote: true,
-            expiryDate: Date.now() + 48 * 60 * 60 * 1000 // 48 hours
+            expiryDate: Date.now() + 48 * 60 * 60 * 1000
         };
 
         if (req.user) {
@@ -444,3 +467,73 @@ exports.confirmQuote = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// @desc    Get current user's saved valuations
+// @route   GET /api/valuation/my-valuations
+// @access  Private
+exports.getMyValuations = async (req, res) => {
+    try {
+        const valuations = await SavedValuation.find({ user: req.user._id })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.json(valuations);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Save a new valuation for the logged-in user
+// @route   POST /api/valuation/saved
+// @access  Private
+exports.saveValuation = async (req, res) => {
+    try {
+        const { model, storage, screenCondition, bodyCondition, isFunctional } = req.body;
+
+        // Re-calculate price securely on backend
+        const { price } = await calculatePriceInternal({
+            model, storage, screenCondition, bodyCondition, isFunctional
+        });
+
+        const timestamp = Math.floor(Date.now() / 1000);
+        const randomPart = crypto.randomBytes(2).toString('hex').toUpperCase();
+        const quoteReference = `HV-${timestamp}-${randomPart}`;
+
+        const saved = await SavedValuation.create({
+            user: req.user._id,
+            device: model,
+            specs: `${storage} | Screen: ${screenCondition} | Body: ${bodyCondition}`,
+            condition: screenCondition,
+            estimatedValue: price,
+            quoteReference,
+            isQuote: true,
+            expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000)
+        });
+
+        res.status(201).json({
+            success: true,
+            quoteReference: saved.quoteReference,
+            estimatedValue: saved.estimatedValue
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Delete a user's saved valuation
+// @route   DELETE /api/valuation/saved/:id
+// @access  Private
+exports.deleteValuation = async (req, res) => {
+    try {
+        const result = await SavedValuation.findOneAndDelete({
+            _id: req.params.id,
+            user: req.user._id
+        });
+        if (!result) return res.status(404).json({ success: false, message: 'Valuation not found' });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+

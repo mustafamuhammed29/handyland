@@ -95,15 +95,17 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                 ]);
 
                 // Fetch Settings includes payment config now
-                // Settings endpoint returns the object directly, not wrapped in { success, data }
-                if (settingsRes) {
-                    if (settingsRes.freeShippingThreshold !== undefined) {
-                        setFreeShippingThreshold(settingsRes.freeShippingThreshold);
+                // Settings endpoint returns the object directly (api interceptor unwraps response.data)
+                const settings = settingsRes as any;
+                if (settings) {
+                    if (settings.freeShippingThreshold !== undefined) {
+                        setFreeShippingThreshold(settings.freeShippingThreshold);
                     }
-                    if (settingsRes.payment) {
-                        setPaymentConfig(settingsRes.payment);
+                    if (settings.payment) {
+                        setPaymentConfig(settings.payment);
                     }
                 }
+
 
                 if (Array.isArray(methodsRes)) {
                     setShippingMethods(methodsRes);
@@ -289,7 +291,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
 
         // Token Validation for Logged In Users
         if (user) {
-            const token = localStorage.getItem('token'); // changed from userToken to token (AuthContext uses 'token')
+            const token = localStorage.getItem('accessToken'); // AuthContext stores token as 'accessToken'
             if (!token) {
                 setError("Session expired. Please log in again.");
                 navigate('/login?redirect=/checkout');

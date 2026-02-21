@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Save } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
 
 import { api } from '../utils/api';
@@ -8,6 +8,7 @@ export default function ProductsManager() {
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
     const [formData, setFormData] = useState({
         id: '',
         model: '',
@@ -56,6 +57,34 @@ export default function ProductsManager() {
             fetchProducts();
         } catch (error) {
             console.error("Failed to delete", error);
+        }
+    };
+
+    const handleSelectAll = () => {
+        if (selectedProducts.length === products.length && products.length > 0) {
+            setSelectedProducts([]);
+        } else {
+            setSelectedProducts(products.map(p => p._id || p.id));
+        }
+    };
+
+    const toggleSelectProduct = (id: string) => {
+        if (selectedProducts.includes(id)) {
+            setSelectedProducts(selectedProducts.filter(productId => productId !== id));
+        } else {
+            setSelectedProducts([...selectedProducts, id]);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!confirm(`Are you sure you want to delete ${selectedProducts.length} selected products?`)) return;
+
+        try {
+            await Promise.all(selectedProducts.map(id => api.delete(`/api/products/${id}`)));
+            fetchProducts();
+            setSelectedProducts([]);
+        } catch (error) {
+            console.error("Failed to perform bulk delete", error);
         }
     };
 
@@ -147,11 +176,42 @@ export default function ProductsManager() {
                 </button>
             </div>
 
+            {/* Bulk Actions */}
+            {selectedProducts.length > 0 && (
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 mb-6 flex items-center justify-between animate-in fade-in slide-in-from-top-4">
+                    <div className="flex items-center gap-2">
+                        <span className="text-blue-400 font-bold">{selectedProducts.length}</span>
+                        <span className="text-slate-300">products selected</span>
+                    </div>
+                    <button
+                        onClick={handleBulkDelete}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-400 hover:bg-red-600/30 rounded-lg transition-colors font-medium"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Selected
+                    </button>
+                </div>
+            )}
+
             {/* List */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
                 <table className="w-full text-left text-slate-400">
                     <thead className="bg-slate-950 text-slate-500 uppercase text-xs font-bold">
                         <tr>
+                            <th className="p-6 w-16">
+                                <button
+                                    onClick={handleSelectAll}
+                                    className="text-slate-400 hover:text-white transition-colors flex items-center"
+                                    aria-label={selectedProducts.length === products.length && products.length > 0 ? "Deselect All" : "Select All"}
+                                    title={selectedProducts.length === products.length && products.length > 0 ? "Deselect All" : "Select All"}
+                                >
+                                    {selectedProducts.length === products.length && products.length > 0 ? (
+                                        <CheckSquare className="w-5 h-5 text-blue-500" />
+                                    ) : (
+                                        <Square className="w-5 h-5" />
+                                    )}
+                                </button>
+                            </th>
                             <th className="p-6">Product</th>
                             <th className="p-6">Category</th>
                             <th className="p-6">Price</th>
@@ -164,43 +224,64 @@ export default function ProductsManager() {
                         ) : products.length === 0 ? (
                             <tr><td colSpan={4} className="p-8 text-center">No products found. Start selling!</td></tr>
                         ) : (
-                            products.map((p: any) => (
-                                <tr key={p._id || p.id} className="hover:bg-slate-800/50 transition-colors">
-                                    <td className="p-6 font-bold text-white">
-                                        <div className="flex items-center gap-3">
-                                            {p.image && <img src={p.image} className="w-12 h-12 rounded-lg object-cover bg-slate-800" />}
-                                            <div>
-                                                <div className="text-base">{p.name || p.model}</div>
-                                                <div className="text-xs text-slate-400 font-normal">
-                                                    {p.condition} • {p.color} {p.storage && `• ${p.storage}`} {p.brand && `• ${p.brand}`}
+                            products.map((p: any) => {
+                                const productId = p._id || p.id;
+                                const isSelected = selectedProducts.includes(productId);
+                                return (
+                                    <tr key={productId} className={`transition-colors border-b border-slate-800/50 ${isSelected ? 'bg-blue-900/20' : 'hover:bg-slate-800/50'}`}>
+                                        <td className="p-6">
+                                            <button
+                                                onClick={() => toggleSelectProduct(productId)}
+                                                className="text-slate-400 hover:text-white transition-colors flex items-center"
+                                                aria-label={isSelected ? "Deselect Product" : "Select Product"}
+                                            >
+                                                {isSelected ? (
+                                                    <CheckSquare className="w-5 h-5 text-blue-500" />
+                                                ) : (
+                                                    <Square className="w-5 h-5" />
+                                                )}
+                                            </button>
+                                        </td>
+                                        <td className="p-6 font-bold text-white">
+                                            <div className="flex items-center gap-3">
+                                                {p.image && <img src={p.image} alt={p.name || p.model || "Product"} className="w-12 h-12 rounded-lg object-cover bg-slate-800" />}
+                                                <div>
+                                                    <div className="text-base">{p.name || p.model}</div>
+                                                    <div className="text-xs text-slate-400 font-normal">
+                                                        {p.condition} • {p.color} {p.storage && `• ${p.storage}`} {p.brand && `• ${p.brand}`}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="p-6">
-                                        <span className="bg-slate-800 px-2 py-1 rounded text-xs text-slate-300 border border-slate-700">
-                                            {p.category}
-                                        </span>
-                                    </td>
-                                    <td className="p-6 text-emerald-400 font-mono font-bold">€{p.price}</td>
-                                    <td className="p-6 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <button
-                                                onClick={() => handleEdit(p)}
-                                                className="p-2 hover:bg-blue-500/10 text-blue-400 rounded-lg transition-colors"
-                                            >
-                                                <Edit2 size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(p.id)}
-                                                className="p-2 hover:bg-red-500/10 text-red-400 rounded-lg transition-colors"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
+                                        </td>
+                                        <td className="p-6">
+                                            <span className="bg-slate-800 px-2 py-1 rounded text-xs text-slate-300 border border-slate-700">
+                                                {p.category}
+                                            </span>
+                                        </td>
+                                        <td className="p-6 text-emerald-400 font-mono font-bold">€{p.price}</td>
+                                        <td className="p-6 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    onClick={() => handleEdit(p)}
+                                                    className="p-2 hover:bg-blue-500/10 text-blue-400 rounded-lg transition-colors"
+                                                    title="Edit Product"
+                                                    aria-label="Edit Product"
+                                                >
+                                                    <Edit2 size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(p.id)}
+                                                    className="p-2 hover:bg-red-500/10 text-red-400 rounded-lg transition-colors"
+                                                    title="Delete Product"
+                                                    aria-label="Delete Product"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
@@ -220,6 +301,8 @@ export default function ProductsManager() {
                             onClick={() => setIsModalOpen(false)}
                             className="absolute top-4 right-4 text-slate-400 hover:text-white"
                             style={{ cursor: 'pointer', zIndex: 9999 }}
+                            title="Close Modal"
+                            aria-label="Close Modal"
                         >
                             <X size={24} />
                         </button>
@@ -246,6 +329,7 @@ export default function ProductsManager() {
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={formData.category}
                                         onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                        aria-label="Select Category"
                                     >
                                         <option value="Smartphones">Smartphones</option>
                                         <option value="Tablets">Tablets</option>
@@ -274,6 +358,7 @@ export default function ProductsManager() {
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={formData.brand}
                                         onChange={e => setFormData({ ...formData, brand: e.target.value })}
+                                        aria-label="Select Brand"
                                     >
                                         <option value="">Select Brand...</option>
                                         <option value="Apple">Apple</option>
@@ -292,6 +377,7 @@ export default function ProductsManager() {
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={formData.condition}
                                         onChange={e => setFormData({ ...formData, condition: e.target.value })}
+                                        aria-label="Select Condition"
                                     >
                                         <option value="New">New / Sealed</option>
                                         <option value="Like New">Like New</option>

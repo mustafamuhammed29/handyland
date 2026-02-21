@@ -61,12 +61,23 @@ export function useValuations() {
         queryKey: dashboardKeys.valuations(),
         queryFn: async () => {
             const res = await api.get<any>('/api/valuation/my-valuations');
-            return res.data?.valuations || res.valuations || [];
+            // api interceptor returns response.data directly, so res may be the array itself
+            const list: any[] = Array.isArray(res) ? res : (res?.data?.valuations || res?.valuations || res?.data || []);
+            return list.map((v: any) => ({
+                id: v._id,
+                device: v.device || v.deviceName || 'Unknown Device',
+                specs: v.specs || v.storage || '-',
+                condition: v.condition || '-',
+                date: v.createdAt ? new Date(v.createdAt).toLocaleDateString('de-DE') : '-',
+                estimatedValue: v.estimatedValue ?? 0,
+                quoteReference: v.quoteReference
+            }));
         },
-        staleTime: 5 * 60 * 1000,
+        staleTime: 30 * 1000, // 30 seconds so it stays fresh
         retry: 2,
     });
 }
+
 
 export function usePromotions() {
     return useQuery({

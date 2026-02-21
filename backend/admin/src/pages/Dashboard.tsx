@@ -24,22 +24,22 @@ const Dashboard: React.FC = () => {
     const fetchStats = async () => {
         try {
             // Fetch order stats
-            const orderResponse = await api.get<any>('/api/orders/admin/stats');
-            const orderStats = orderResponse.data?.stats || orderResponse.data;
+            const orderResponse: any = await api.get('/api/orders/admin/stats');
+            const orderStats = orderResponse.stats || orderResponse.data?.stats || orderResponse;
 
             // Fetch user stats
-            const userResponse = await api.get<any>('/api/users/admin/stats');
-            const userStats = userResponse.data?.stats || userResponse.data;
+            const userResponse: any = await api.get('/api/users/admin/stats');
+            const userStats = userResponse.stats || userResponse.data?.stats || userResponse;
 
             // Check keys depending on API response structure
             if (orderStats && userStats) {
                 setStats({
-                    totalUsers: userStats.totalUsers,
-                    activeUsers: userStats.activeUsers,
-                    totalOrders: orderStats.totalOrders,
-                    pendingOrders: orderStats.pendingOrders,
-                    deliveredOrders: orderStats.deliveredOrders,
-                    totalRevenue: orderStats.totalRevenue
+                    totalUsers: userStats.totalUsers || 0,
+                    activeUsers: userStats.activeUsers || 0,
+                    totalOrders: orderStats.totalOrders || 0,
+                    pendingOrders: orderStats.pendingOrders || 0,
+                    deliveredOrders: orderStats.deliveredOrders || 0,
+                    totalRevenue: orderStats.totalRevenue || 0
                 });
             }
         } catch (error) {
