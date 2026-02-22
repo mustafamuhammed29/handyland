@@ -1,6 +1,7 @@
 import React, { useState, MouseEvent, useEffect } from 'react';
 import { PhoneListing, LanguageCode } from '../types';
 import { productService } from '../services/productService';
+import { api } from '../utils/api';
 import { Search, ShoppingCart, Cpu, Signal, X, Layers, ChevronRight, Plus, Grid, List, Filter, Heart } from 'lucide-react';
 import { translations } from '../i18n';
 import { useCart } from '../context/CartContext';
@@ -33,32 +34,24 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const [selectedStorage, setSelectedStorage] = useState('');
     const [selectedCondition, setSelectedCondition] = useState('');
 
-    const [wishlist, setWishlist] = useState<string[]>(() => {
-        const saved = localStorage.getItem('wishlist');
-        return saved ? JSON.parse(saved) : [];
-    });
+    const [wishlist, setWishlist] = useState<string[]>([]);
+    const [loadingWishlistId, setLoadingWishlistId] = useState<string | null>(null);
 
-    // URL params sync
+    // Fetch user wishlist on component mount
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('brand')) setFilterBrand(params.get('brand') || 'All');
-        if (params.has('minPrice')) setMinPrice(params.get('minPrice') || '');
-        if (params.has('maxPrice')) setMaxPrice(params.get('maxPrice') || '');
-        if (params.has('condition')) setSelectedCondition(params.get('condition') || '');
-        if (params.has('search')) setSearchTerm(params.get('search') || '');
+        const fetchWishlist = async () => {
+            try {
+                const res = await api.get<any>('/api/wishlist') as any;
+                const products = res.data?.items || res.data?.products || res.products || res.items || [];
+                // Store array of IDs. Backend stores the actual product reference string in `customId`.
+                setWishlist(products.map((p: any) => p.customId || p.product || p.id || p._id));
+            } catch (error) {
+                console.error("Failed to load wishlist", error);
+                // Graceful degradation, don't crash
+            }
+        };
+        fetchWishlist();
     }, []);
-
-    // Update URL on filter change
-    useEffect(() => {
-        const params = new URLSearchParams();
-        if (filterBrand !== 'All') params.set('brand', filterBrand);
-        if (minPrice) params.set('minPrice', minPrice);
-        if (maxPrice) params.set('maxPrice', maxPrice);
-        if (selectedCondition) params.set('condition', selectedCondition);
-        if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
-
-        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
-    }, [filterBrand, minPrice, maxPrice, selectedCondition, debouncedSearchTerm]);
 
     // Dropdown options
     const ramOptions = ['4GB', '6GB', '8GB', '12GB', '16GB'];
@@ -78,17 +71,39 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         return () => clearTimeout(timer);
     }, [searchTerm]);
 
-    // Save Wishlist
-    useEffect(() => {
-        localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    }, [wishlist]);
-
-    const toggleWishlist = (e: React.MouseEvent, id: string) => {
+    const toggleWishlist = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
+
+        if (loadingWishlistId === id) return; // Prevent double clicks
+        setLoadingWishlistId(id);
+
+        const isWishlisted = wishlist.includes(id);
+        const method = isWishlisted ? 'delete' : 'post';
+        const endpoint = isWishlisted ? `/api/wishlist/${id}` : '/api/wishlist';
+
+        // Optimistic UI update
         setWishlist(prev =>
-            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+            isWishlisted ? prev.filter(item => item !== id) : [...prev, id]
         );
-        addToast(wishlist.includes(id) ? 'Removed from wishlist' : 'Added to wishlist', 'success');
+
+        try {
+            await api({
+                method,
+                url: endpoint,
+                data: isWishlisted ? undefined : { productId: id }
+            });
+            // Update the user's dashboard data so it reflects immediately
+            addToast(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist', 'success');
+        } catch (error) {
+            console.error('Wishlist toggle failed:', error);
+            // Revert on failure
+            setWishlist(prev =>
+                isWishlisted ? [...prev, id] : prev.filter(item => item !== id)
+            );
+            addToast('Action failed. Please try again.', 'error');
+        } finally {
+            setLoadingWishlistId(null);
+        }
     };
 
     useEffect(() => {
@@ -335,10 +350,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 className="bg-slate-900 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:outline-none focus:border-cyan-500"
                             >
                                 <option value="">All Conditions</option>
-                                <option value="new">New</option>
-                                <option value="like-new">Like New</option>
-                                <option value="good">Good</option>
-                                <option value="fair">Fair</option>
+                                {conditions.map(opt => <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
                             </select>
 
                             <div className="flex items-center gap-2 bg-slate-900 rounded-xl px-2 border border-slate-800">
@@ -430,13 +442,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                     {(phone.condition || 'Used').toUpperCase()}
                                                 </span>
                                             </div>
-                                            <button
-                                                onClick={(e) => toggleWishlist(e, phone.id)}
-                                                aria-label={wishlist.includes(phone.id) ? "Remove from wishlist" : "Add to wishlist"}
-                                                className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md border transition-all ${wishlist.includes(phone.id) ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-black/40 border-white/10 text-white hover:bg-black/60'}`}
-                                            >
-                                                <Heart className={`w-4 h-4 ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
-                                            </button>
+
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
                                                 <span className="bg-white/10 border border-white/20 text-white px-4 py-2 rounded-full font-bold text-sm backdrop-blur-md flex items-center gap-2">
                                                     <Layers className="w-4 h-4" /> Inspect
@@ -461,22 +467,26 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                         </div>
                                         <div className="mt-auto flex items-center justify-between gap-3">
                                             <div className="text-xl font-bold text-white">{phone.price}{t.currency}</div>
-                                            <button onClick={() => handleAddToCart(phone)} aria-label="Add to cart" className="bg-slate-800 hover:bg-cyan-600 hover:text-black text-white p-3 rounded-xl font-bold transition-all duration-300 group/btn">
-                                                <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={(e) => toggleWishlist(e, phone.id)}
+                                                    disabled={loadingWishlistId === phone.id}
+                                                    aria-label="Wishlist"
+                                                    className={`p-3 rounded-xl transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-wait ${wishlist.includes(phone.id) ? 'bg-red-500/20 text-red-500 border-red-500/30 hover:bg-red-500/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:bg-slate-700'}`}
+                                                >
+                                                    <Heart className={`w-5 h-5 group-hover/btn:scale-110 transition-transform ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
+                                                </button>
+                                                <button onClick={() => handleAddToCart(phone)} aria-label="Add to cart" className="bg-slate-800 border border-slate-700 hover:bg-cyan-600 hover:text-black hover:border-cyan-500 text-white p-3 rounded-xl font-bold transition-all duration-300 group/btn">
+                                                    <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
                                 // LIST CARD
                                 <div key={phone.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex gap-6 hover:border-cyan-500/30 transition-all group relative">
-                                    <button
-                                        onClick={(e) => toggleWishlist(e, phone.id)}
-                                        aria-label={wishlist.includes(phone.id) ? "Remove from wishlist" : "Add to wishlist"}
-                                        className={`absolute top-4 right-4 p-2 rounded-full backdrop-blur-md border transition-all z-10 ${wishlist.includes(phone.id) ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}`}
-                                    >
-                                        <Heart className={`w-4 h-4 ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
-                                    </button>
+
                                     <div className="w-32 h-32 bg-slate-900 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer" onClick={() => setSelectedProduct(phone)}>
                                         <img
                                             src={getProductImage(phone)}
@@ -498,8 +508,17 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                         </div>
                                         <p className="text-slate-400 text-sm line-clamp-2 mb-4">{phone.description}</p>
                                         <div className="flex gap-3 mt-auto">
-                                            <button onClick={() => handleAddToCart(phone)} className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-lg transition-all text-sm flex items-center gap-2">
+                                            <button aria-label="Add to cart" title="Add to cart" onClick={() => handleAddToCart(phone)} className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-lg transition-all text-sm flex items-center gap-2">
                                                 <ShoppingCart className="w-4 h-4" /> Add to Cart
+                                            </button>
+                                            <button
+                                                onClick={(e) => toggleWishlist(e, phone.id)}
+                                                disabled={loadingWishlistId === phone.id}
+                                                title={wishlist.includes(phone.id) ? "Remove from wishlist" : "Add to wishlist"}
+                                                aria-label={wishlist.includes(phone.id) ? "Remove from wishlist" : "Add to wishlist"}
+                                                className={`px-4 py-2 border rounded-lg transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait ${wishlist.includes(phone.id) ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'border-slate-700 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'}`}
+                                            >
+                                                <Heart className={`w-4 h-4 ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
                                             </button>
                                             <button onClick={() => setSelectedProduct(phone)} className="px-4 py-2 border border-slate-700 hover:bg-slate-800 text-white font-bold rounded-lg transition-all text-sm">
                                                 Details

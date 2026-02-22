@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     User, Package, Wrench, Settings, LogOut, Activity,
-    Wallet, Bell, Shield, BarChart3, Mail, FileText, Globe, Box
+    Wallet, Bell, Shield, BarChart3, Mail, FileText, Globe, Box, Archive, Heart
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserType } from '../types';
@@ -17,7 +17,8 @@ import {
     DashboardMessages,
     DashboardPages,
     DashboardAccessories,
-    DashboardGlobalSettings
+    DashboardGlobalSettings,
+    RepairArchiveManager
 } from './dashboard/index';
 import { api } from '../utils/api';
 import { authService } from '../services/authService';
@@ -45,6 +46,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         promotions,
         addresses,
         stats,
+        wishlist,
         notifications,
         isLoading,
         hasError
@@ -136,7 +138,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const handleRemoveWishlistItem = async (itemId: string) => {
         try {
             await api.delete(`/api/wishlist/${itemId}`);
-            // Assuming wishlist query exists - if not, this will be handled in future iteration
+            await wishlist.refetch(); // Instantly update UI after removal
         } catch (error) {
             console.error('Error removing from wishlist:', error);
         }
@@ -152,6 +154,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         { id: 'repairs', label: 'Active Repairs', icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.length || 0 },
         { id: 'valuations', label: 'My Valuations', icon: <BarChart3 className="w-4 h-4" /> },
         { id: 'wallet', label: 'Digital Wallet', icon: <Wallet className="w-4 h-4" /> },
+        { id: 'wishlist', label: 'Wishlist', icon: <Heart className="w-4 h-4" /> },
         { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
     ];
 
@@ -159,6 +162,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         { id: 'messages', label: 'Messages', icon: <Mail className="w-4 h-4" /> },
         { id: 'pages', label: 'Pages', icon: <FileText className="w-4 h-4" /> },
         { id: 'accessories', label: 'Accessories', icon: <Box className="w-4 h-4" /> },
+        { id: 'repair-archive', label: 'Repair Archive', icon: <Archive className="w-4 h-4" /> },
         { id: 'global-settings', label: 'Site Settings', icon: <Globe className="w-4 h-4" /> },
     ];
 
@@ -327,6 +331,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         />
                     )}
 
+                    {activeTab === 'wishlist' && (
+                        <DashboardWishlist
+                            wishlistItems={wishlist.data || []}
+                            isLoading={wishlist.isLoading}
+                            onRemove={handleRemoveWishlistItem}
+                        />
+                    )}
+
                     {activeTab === 'settings' && (
                         <DashboardSettings
                             user={currentUser}
@@ -343,6 +355,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                     {isAdmin && activeTab === 'messages' && <DashboardMessages />}
                     {isAdmin && activeTab === 'pages' && <DashboardPages />}
                     {isAdmin && activeTab === 'accessories' && <DashboardAccessories />}
+                    {isAdmin && activeTab === 'repair-archive' && <RepairArchiveManager />}
                     {isAdmin && activeTab === 'global-settings' && <DashboardGlobalSettings />}
                 </div>
             </div>

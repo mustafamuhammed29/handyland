@@ -27,6 +27,12 @@ const TransactionSchema = new mongoose.Schema({
         enum: ['pending', 'completed', 'failed', 'refunded'],
         default: 'pending'
     },
+    type: {
+        type: String,
+        enum: ['deposit', 'purchase', 'refund', 'credit', 'debit'],
+        required: true,
+        default: 'purchase'
+    },
     paymentMethod: {
         type: String,
         enum: ['card', 'paypal', 'apple_pay', 'google_pay', 'card_present'],

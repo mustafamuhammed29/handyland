@@ -7,7 +7,11 @@ export default function PaymentManager() {
     const [saving, setSaving] = useState(false);
     const [config, setConfig] = useState({
         stripe: { enabled: false, publicKey: '', secretKey: '', webhookSecret: '' },
-        paypal: { enabled: false, clientId: '' },
+        paypal: { enabled: false, clientId: '', secretKey: '' },
+        klarna: { enabled: false, publicKey: '', secretKey: '' },
+        giropay: { enabled: false, publicKey: '', secretKey: '' },
+        sepa: { enabled: false, publicKey: '', secretKey: '' },
+        sofort: { enabled: false, publicKey: '', secretKey: '' },
         bankTransfer: { enabled: false, instructions: '' },
         cashOnDelivery: { enabled: true }
     });
@@ -29,6 +33,10 @@ export default function PaymentManager() {
                     ...data.payment,
                     stripe: { ...prev.stripe, ...data.payment.stripe },
                     paypal: { ...prev.paypal, ...data.payment.paypal },
+                    klarna: { ...prev.klarna, ...data.payment.klarna },
+                    giropay: { ...prev.giropay, ...data.payment.giropay },
+                    sepa: { ...prev.sepa, ...data.payment.sepa },
+                    sofort: { ...prev.sofort, ...data.payment.sofort },
                     bankTransfer: { ...prev.bankTransfer, ...data.payment.bankTransfer },
                     cashOnDelivery: { ...prev.cashOnDelivery, ...data.payment.cashOnDelivery }
                 }));
@@ -186,12 +194,9 @@ export default function PaymentManager() {
                     </div>
                 </div>
 
-                {/* PayPal (Placeholder for future) */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 opacity-50 relative overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px] z-10">
-                        <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs font-bold border border-slate-700">Coming Soon</span>
-                    </div>
-                    <div className="flex justify-between items-center">
+                {/* PayPal */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-4">
                             <div className="bg-blue-500/20 p-3 rounded-xl text-blue-400">
                                 <span className="font-black italic text-lg">P</span>
@@ -201,10 +206,297 @@ export default function PaymentManager() {
                                 <p className="text-sm text-slate-400">Safe online payments</p>
                             </div>
                         </div>
-                        <div className="w-12 h-6 rounded-full bg-slate-700 relative">
-                            <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform translate-x-0" />
+                        <div className="flex items-center gap-3">
+                            <span className={`text-sm font-bold ${config.paypal.enabled ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {config.paypal.enabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                            <button
+                                onClick={() => updateConfig('paypal', 'enabled', !config.paypal.enabled)}
+                                title={config.paypal.enabled ? "Disable PayPal" : "Enable PayPal"}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${config.paypal.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${config.paypal.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
                         </div>
                     </div>
+
+                    {config.paypal.enabled && (
+                        <div className="space-y-4 border-t border-slate-800 pt-6 animate-in fade-in slide-in-from-top-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Client ID</label>
+                                <input
+                                    type="text"
+                                    value={config.paypal.clientId}
+                                    onChange={(e) => updateConfig('paypal', 'clientId', e.target.value)}
+                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-colors font-mono text-sm"
+                                    placeholder="Client ID..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Secret Key</label>
+                                <div className="relative">
+                                    <input
+                                        type={showSecret ? "text" : "password"}
+                                        value={config.paypal.secretKey}
+                                        onChange={(e) => updateConfig('paypal', 'secretKey', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-colors font-mono text-sm pr-12"
+                                        placeholder={config.paypal.secretKey ? "(Hidden)" : "Secret Key..."}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSecret(!showSecret)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                                    >
+                                        {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Klarna Configuration */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-pink-500/20 p-3 rounded-xl text-pink-400 font-bold">
+                                K.
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Klarna</h3>
+                                <p className="text-sm text-slate-400">Buy now, pay later</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className={`text-sm font-bold ${config.klarna.enabled ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {config.klarna.enabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                            <button
+                                onClick={() => updateConfig('klarna', 'enabled', !config.klarna.enabled)}
+                                title={config.klarna.enabled ? "Disable Klarna" : "Enable Klarna"}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${config.klarna.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${config.klarna.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {config.klarna.enabled && (
+                        <div className="space-y-4 border-t border-slate-800 pt-6 animate-in fade-in slide-in-from-top-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Public Key / UID</label>
+                                <input
+                                    type="text"
+                                    value={config.klarna.publicKey}
+                                    onChange={(e) => updateConfig('klarna', 'publicKey', e.target.value)}
+                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-pink-500 outline-none transition-colors font-mono text-sm"
+                                    placeholder="Public Key..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Secret Key</label>
+                                <div className="relative">
+                                    <input
+                                        type={showSecret ? "text" : "password"}
+                                        value={config.klarna.secretKey}
+                                        onChange={(e) => updateConfig('klarna', 'secretKey', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-pink-500 outline-none transition-colors font-mono text-sm pr-12"
+                                        placeholder={config.klarna.secretKey ? "(Hidden)" : "Secret Key..."}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSecret(!showSecret)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                                    >
+                                        {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Giropay Configuration */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-orange-500/20 p-3 rounded-xl text-orange-400 font-bold">
+                                G
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Giropay</h3>
+                                <p className="text-sm text-slate-400">German online bank transfer</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className={`text-sm font-bold ${config.giropay.enabled ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {config.giropay.enabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                            <button
+                                onClick={() => updateConfig('giropay', 'enabled', !config.giropay.enabled)}
+                                title={config.giropay.enabled ? "Disable Giropay" : "Enable Giropay"}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${config.giropay.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${config.giropay.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {config.giropay.enabled && (
+                        <div className="space-y-4 border-t border-slate-800 pt-6 animate-in fade-in slide-in-from-top-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Merchant ID / Public Key</label>
+                                <input
+                                    type="text"
+                                    value={config.giropay.publicKey}
+                                    onChange={(e) => updateConfig('giropay', 'publicKey', e.target.value)}
+                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-orange-500 outline-none transition-colors font-mono text-sm"
+                                    placeholder="Merchant ID..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Project Password / Secret Key</label>
+                                <div className="relative">
+                                    <input
+                                        type={showSecret ? "text" : "password"}
+                                        value={config.giropay.secretKey}
+                                        onChange={(e) => updateConfig('giropay', 'secretKey', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-orange-500 outline-none transition-colors font-mono text-sm pr-12"
+                                        placeholder={config.giropay.secretKey ? "(Hidden)" : "Secret Key..."}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSecret(!showSecret)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                                    >
+                                        {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* SEPA Configuration */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-blue-600/20 p-3 rounded-xl text-blue-500 font-bold">
+                                €
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white">SEPA Direct Debit</h3>
+                                <p className="text-sm text-slate-400">European bank transfers</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className={`text-sm font-bold ${config.sepa.enabled ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {config.sepa.enabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                            <button
+                                onClick={() => updateConfig('sepa', 'enabled', !config.sepa.enabled)}
+                                title={config.sepa.enabled ? "Disable SEPA" : "Enable SEPA"}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${config.sepa.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${config.sepa.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {config.sepa.enabled && (
+                        <div className="space-y-4 border-t border-slate-800 pt-6 animate-in fade-in slide-in-from-top-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Creditor ID / Public Key</label>
+                                <input
+                                    type="text"
+                                    value={config.sepa.publicKey}
+                                    onChange={(e) => updateConfig('sepa', 'publicKey', e.target.value)}
+                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-colors font-mono text-sm"
+                                    placeholder="Creditor ID..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Secret Key</label>
+                                <div className="relative">
+                                    <input
+                                        type={showSecret ? "text" : "password"}
+                                        value={config.sepa.secretKey}
+                                        onChange={(e) => updateConfig('sepa', 'secretKey', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-colors font-mono text-sm pr-12"
+                                        placeholder={config.sepa.secretKey ? "(Hidden)" : "Secret Key..."}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSecret(!showSecret)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                                    >
+                                        {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Sofort Configuration */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-red-500/20 p-3 rounded-xl text-red-400 font-bold">
+                                S.
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Sofort</h3>
+                                <p className="text-sm text-slate-400">Direct wire transfer</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className={`text-sm font-bold ${config.sofort.enabled ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {config.sofort.enabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                            <button
+                                onClick={() => updateConfig('sofort', 'enabled', !config.sofort.enabled)}
+                                title={config.sofort.enabled ? "Disable Sofort" : "Enable Sofort"}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${config.sofort.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${config.sofort.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {config.sofort.enabled && (
+                        <div className="space-y-4 border-t border-slate-800 pt-6 animate-in fade-in slide-in-from-top-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Project ID / Public Key</label>
+                                <input
+                                    type="text"
+                                    value={config.sofort.publicKey}
+                                    onChange={(e) => updateConfig('sofort', 'publicKey', e.target.value)}
+                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-red-500 outline-none transition-colors font-mono text-sm"
+                                    placeholder="Project ID..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Project Password / Secret Key</label>
+                                <div className="relative">
+                                    <input
+                                        type={showSecret ? "text" : "password"}
+                                        value={config.sofort.secretKey}
+                                        onChange={(e) => updateConfig('sofort', 'secretKey', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-red-500 outline-none transition-colors font-mono text-sm pr-12"
+                                        placeholder={config.sofort.secretKey ? "(Hidden)" : "Secret Key..."}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSecret(!showSecret)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                                    >
+                                        {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
             </div>

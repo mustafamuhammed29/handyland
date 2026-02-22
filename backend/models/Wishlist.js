@@ -17,6 +17,7 @@ const WishlistSchema = new mongoose.Schema({
             default: 'Product'
         },
         // Store snapshot for quick rendering without populate
+        customId: String,
         name: String,
         price: Number,
         image: String,

@@ -305,9 +305,6 @@ const ArchiveManager = () => {
                                     </select>
                                 </div>
                             </div>
-
-                            import ImageUpload from '../components/ImageUpload';
-                            // ...
                             {/* Images */}
                             <div className="space-y-4 pt-4 border-t border-slate-800">
                                 <h3 className="text-white font-bold flex items-center gap-2">

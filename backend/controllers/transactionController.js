@@ -33,10 +33,7 @@ exports.addFunds = async (req, res) => {
         const transaction = await Transaction.create({
             user: user._id,
             amount,
-            type: 'deposit', // You might need to add 'type' to your Transaction model if not present, checking model...
-            // Transaction model has: amount, status, paymentMethod, stripePaymentId, description. It doesn't seem to have 'type'.
-            // I'll assume positive amount is deposit. Or I should update model.
-            // For now, let's just log it. 
+            type: 'deposit', // explicitly set type to deposit
             paymentMethod,
             status: 'completed',
             description: 'Funds added to wallet'

@@ -6,6 +6,7 @@ import { ENV } from './src/config/env';
 
 interface OrderSummary {
     id: string;
+    _id?: string;
     totalAmount: number;
     items: any[];
 }
@@ -93,7 +94,8 @@ const PaymentSuccess: React.FC = () => {
         };
 
         verifyOrder();
-    }, [sessionId, orderId, clearCart]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sessionId, orderId]);
 
     const handleDownloadInvoice = () => {
         // Mock invoice download
@@ -138,7 +140,7 @@ const PaymentSuccess: React.FC = () => {
                             {order && (
                                 <div className="bg-slate-950/50 rounded-xl p-4 mb-8 border border-slate-800 inline-block text-left">
                                     <div className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Order ID</div>
-                                    <div className="text-white font-mono text-lg tracking-wide select-all">#{order.id.slice(-8).toUpperCase()}</div>
+                                    <div className="text-white font-mono text-lg tracking-wide select-all">#{(order._id || order.id || "").slice(-8).toUpperCase()}</div>
                                 </div>
                             )}
 

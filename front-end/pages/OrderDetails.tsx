@@ -242,7 +242,20 @@ export const OrderDetails = () => {
                         <div className="text-sm text-slate-400">
                             <div className="flex justify-between mb-1">
                                 <span>Method</span>
-                                <span className="text-white capitalize">{order.paymentMethod}</span>
+                                <span className="text-white font-medium">
+                                    {(() => {
+                                        switch (order.paymentMethod) {
+                                            case 'stripe': return 'Credit Card (Stripe)';
+                                            case 'paypal': return 'PayPal';
+                                            case 'klarna': return 'Klarna';
+                                            case 'giropay': return 'Giropay';
+                                            case 'sepa_debit': return 'SEPA Direct Debit';
+                                            case 'sofort': return 'Sofort';
+                                            case 'cod': return 'Cash on Delivery';
+                                            default: return order.paymentMethod.charAt(0).toUpperCase() + order.paymentMethod.slice(1);
+                                        }
+                                    })()}
+                                </span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Status</span>
