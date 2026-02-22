@@ -21,6 +21,7 @@ const productSchema = new mongoose.Schema({
     image: String,
     images: [String],
     category: String,
+        brand: String,
     condition: String,
     seller: String,
     battery: String,
