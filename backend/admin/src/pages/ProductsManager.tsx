@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
-
 import { api } from '../utils/api';
 
 export default function ProductsManager() {
@@ -78,7 +77,6 @@ export default function ProductsManager() {
 
     const handleBulkDelete = async () => {
         if (!confirm(`Are you sure you want to delete ${selectedProducts.length} selected products?`)) return;
-
         try {
             await Promise.all(selectedProducts.map(id => api.delete(`/api/products/${id}`)));
             fetchProducts();
@@ -90,11 +88,11 @@ export default function ProductsManager() {
 
     const handleEdit = (product: any) => {
         setFormData({
-            id: product.id,
-            model: product.model || product.name, // Handle seed data naming config
-            brand: product.brand || 'Apple', // Default fallback
-            price: product.price,
-            image: product.image,
+            id: product.id || product._id,
+            model: product.model || product.name || '',
+            brand: product.brand || '', // Removed Apple default fallback
+            price: product.price || '',
+            image: product.image || '',
             condition: product.condition || 'New',
             storage: product.storage || '',
             battery: product.battery || '',
@@ -110,23 +108,17 @@ export default function ProductsManager() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const url = formData.id
-                ? `/api/products/${formData.id}`
-                : '/api/products';
-
-            // Map frontend model field back to name if needed by backend, or adjust backend
-            // Currently backend expects 'name', so we should send 'name'
+            const url = formData.id ? `/api/products/${formData.id}` : '/api/products';
             const payload = {
                 ...formData,
                 name: formData.model // Ensure backend gets 'name' which maps to 'model' in UI
             };
-
+            
             if (formData.id) {
                 await api.put(url, payload);
             } else {
                 await api.post(url, payload);
             }
-
             setIsModalOpen(false);
             resetForm();
             fetchProducts();
@@ -162,11 +154,11 @@ export default function ProductsManager() {
     };
 
     return (
-        <div>
+        <div className="p-8">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h2 className="text-3xl font-black text-white">Product Manager</h2>
-                    <p className="text-slate-400 mt-1">Manage your marketplace inventory</p>
+                    <h2 className="text-3xl font-bold text-white mb-2">Product Manager</h2>
+                    <p className="text-slate-400">Manage your marketplace inventory</p>
                 </div>
                 <button
                     onClick={() => { resetForm(); setIsModalOpen(true); }}
@@ -178,57 +170,57 @@ export default function ProductsManager() {
 
             {/* Bulk Actions */}
             {selectedProducts.length > 0 && (
-                <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 mb-6 flex items-center justify-between animate-in fade-in slide-in-from-top-4">
-                    <div className="flex items-center gap-2">
-                        <span className="text-blue-400 font-bold">{selectedProducts.length}</span>
-                        <span className="text-slate-300">products selected</span>
-                    </div>
+                <div className="mb-6 flex items-center gap-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl animate-in fade-in slide-in-from-top-4">
+                    <span className="text-blue-400 font-medium">
+                        {selectedProducts.length} products selected
+                    </span>
                     <button
                         onClick={handleBulkDelete}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-400 hover:bg-red-600/30 rounded-lg transition-colors font-medium"
+                        className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all"
                     >
-                        <Trash2 className="w-4 h-4" />
-                        Delete Selected
+                        <Trash2 size={16} /> Delete Selected
                     </button>
                 </div>
             )}
 
             {/* List */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-                <table className="w-full text-left text-slate-400">
-                    <thead className="bg-slate-950 text-slate-500 uppercase text-xs font-bold">
-                        <tr>
-                            <th className="p-6 w-16">
-                                <button
-                                    onClick={handleSelectAll}
-                                    className="text-slate-400 hover:text-white transition-colors flex items-center"
-                                    aria-label={selectedProducts.length === products.length && products.length > 0 ? "Deselect All" : "Select All"}
-                                    title={selectedProducts.length === products.length && products.length > 0 ? "Deselect All" : "Select All"}
-                                >
-                                    {selectedProducts.length === products.length && products.length > 0 ? (
-                                        <CheckSquare className="w-5 h-5 text-blue-500" />
-                                    ) : (
-                                        <Square className="w-5 h-5" />
-                                    )}
-                                </button>
-                            </th>
-                            <th className="p-6">Product</th>
-                            <th className="p-6">Category</th>
-                            <th className="p-6">Price</th>
-                            <th className="p-6 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800">
-                        {loading ? (
-                            <tr><td colSpan={4} className="p-8 text-center">Loading inventory...</td></tr>
-                        ) : products.length === 0 ? (
-                            <tr><td colSpan={4} className="p-8 text-center">No products found. Start selling!</td></tr>
-                        ) : (
-                            products.map((p: any) => {
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden backdrop-blur-sm">
+                {loading ? (
+                    <div className="p-20 text-center text-slate-400">Loading inventory...</div>
+                ) : products.length === 0 ? (
+                    <div className="p-20 text-center text-slate-400">No products found. Start selling!</div>
+                ) : (
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="bg-slate-950/50 border-b border-slate-800 text-slate-400 text-sm">
+                                <th className="p-6 w-12">
+                                    <button
+                                        onClick={handleSelectAll}
+                                        className="text-slate-400 hover:text-white transition-colors"
+                                        title={selectedProducts.length === products.length && products.length > 0 ? "Deselect All" : "Select All"}
+                                    >
+                                        {selectedProducts.length === products.length && products.length > 0 ? (
+                                            <CheckSquare size={20} className="text-blue-500" />
+                                        ) : (
+                                            <Square size={20} />
+                                        )}
+                                    </button>
+                                </th>
+                                <th className="p-6">Product</th>
+                                <th className="p-6">Category</th>
+                                <th className="p-6">Price</th>
+                                <th className="p-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800">
+                            {products.map((p: any) => {
                                 const productId = p._id || p.id;
                                 const isSelected = selectedProducts.includes(productId);
                                 return (
-                                    <tr key={productId} className={`transition-colors border-b border-slate-800/50 ${isSelected ? 'bg-blue-900/20' : 'hover:bg-slate-800/50'}`}>
+                                    <tr 
+                                        key={productId}
+                                        className={`transition-colors border-b border-slate-800/50 ${isSelected ? 'bg-blue-900/20' : 'hover:bg-slate-800/50'}`}
+                                    >
                                         <td className="p-6">
                                             <button
                                                 onClick={() => toggleSelectProduct(productId)}
@@ -236,15 +228,21 @@ export default function ProductsManager() {
                                                 aria-label={isSelected ? "Deselect Product" : "Select Product"}
                                             >
                                                 {isSelected ? (
-                                                    <CheckSquare className="w-5 h-5 text-blue-500" />
+                                                    <CheckSquare size={20} className="text-blue-500" />
                                                 ) : (
-                                                    <Square className="w-5 h-5" />
+                                                    <Square size={20} />
                                                 )}
                                             </button>
                                         </td>
                                         <td className="p-6 font-bold text-white">
                                             <div className="flex items-center gap-3">
-                                                {p.image && <img src={p.image} alt={p.name || p.model || "Product"} className="w-12 h-12 rounded-lg object-cover bg-slate-800" />}
+                                                {p.image && (
+                                                    <img 
+                                                        src={p.image} 
+                                                        alt={p.name || p.model || "Product"} 
+                                                        className="w-12 h-12 rounded-lg object-cover bg-slate-800"
+                                                    />
+                                                )}
                                                 <div>
                                                     <div className="text-base">{p.name || p.model}</div>
                                                     <div className="text-xs text-slate-400 font-normal">
@@ -253,27 +251,21 @@ export default function ProductsManager() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-6">
-                                            <span className="bg-slate-800 px-2 py-1 rounded text-xs text-slate-300 border border-slate-700">
-                                                {p.category}
-                                            </span>
-                                        </td>
-                                        <td className="p-6 text-emerald-400 font-mono font-bold">€{p.price}</td>
+                                        <td className="p-6 text-slate-400">{p.category}</td>
+                                        <td className="p-6 text-blue-400 font-bold">€{p.price}</td>
                                         <td className="p-6 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <button
                                                     onClick={() => handleEdit(p)}
                                                     className="p-2 hover:bg-blue-500/10 text-blue-400 rounded-lg transition-colors"
                                                     title="Edit Product"
-                                                    aria-label="Edit Product"
                                                 >
                                                     <Edit2 size={18} />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(p.id)}
+                                                    onClick={() => handleDelete(productId)}
                                                     className="p-2 hover:bg-red-500/10 text-red-400 rounded-lg transition-colors"
                                                     title="Delete Product"
-                                                    aria-label="Delete Product"
                                                 >
                                                     <Trash2 size={18} />
                                                 </button>
@@ -281,39 +273,38 @@ export default function ProductsManager() {
                                         </td>
                                     </tr>
                                 );
-                            })
-                        )}
-                    </tbody>
-                </table>
+                            })}
+                        </tbody>
+                    </table>
+                )}
             </div>
 
             {/* Add/Edit Modal */}
             {isModalOpen && (
-                <div
-                    className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                <div 
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
                     onClick={() => setIsModalOpen(false)}
                 >
-                    <div
-                        className="bg-slate-900 border border-slate-700 p-8 rounded-2xl w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto"
-                        onClick={(e) => e.stopPropagation()}
+                    <div 
+                        className="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl p-8 max-h-[90vh] overflow-y-auto relative shadow-2xl"
+                        onClick={e => e.stopPropagation()}
                     >
-                        <button
+                        <button 
                             onClick={() => setIsModalOpen(false)}
                             className="absolute top-4 right-4 text-slate-400 hover:text-white"
                             style={{ cursor: 'pointer', zIndex: 9999 }}
-                            title="Close Modal"
-                            aria-label="Close Modal"
                         >
                             <X size={24} />
                         </button>
+
                         <h3 className="text-2xl font-bold text-white mb-6">
                             {formData.id ? 'Edit Product' : 'Add New Product'}
                         </h3>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2">
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Product Name / Model</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Product Name / Model</label>
                                     <input
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         placeholder="e.g. iPhone 15 Pro Max"
@@ -322,14 +313,12 @@ export default function ProductsManager() {
                                         required
                                     />
                                 </div>
-
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Category</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Category</label>
                                     <select
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={formData.category}
                                         onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                        aria-label="Select Category"
                                     >
                                         <option value="Smartphones">Smartphones</option>
                                         <option value="Tablets">Tablets</option>
@@ -339,9 +328,8 @@ export default function ProductsManager() {
                                         <option value="Consoles">Consoles</option>
                                     </select>
                                 </div>
-
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Price (€)</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Price (€)</label>
                                     <input
                                         type="number"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
@@ -351,14 +339,12 @@ export default function ProductsManager() {
                                         required
                                     />
                                 </div>
-
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Brand</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Brand</label>
                                     <select
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={formData.brand}
                                         onChange={e => setFormData({ ...formData, brand: e.target.value })}
-                                        aria-label="Select Brand"
                                     >
                                         <option value="">Select Brand...</option>
                                         <option value="Apple">Apple</option>
@@ -370,14 +356,12 @@ export default function ProductsManager() {
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
-
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Condition</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Condition</label>
                                     <select
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={formData.condition}
                                         onChange={e => setFormData({ ...formData, condition: e.target.value })}
-                                        aria-label="Select Condition"
                                     >
                                         <option value="New">New / Sealed</option>
                                         <option value="Like New">Like New</option>
@@ -386,11 +370,8 @@ export default function ProductsManager() {
                                         <option value="Refurbished">Refurbished</option>
                                     </select>
                                 </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Color</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Color</label>
                                     <input
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         placeholder="Titanium Black"
@@ -398,8 +379,8 @@ export default function ProductsManager() {
                                         onChange={e => setFormData({ ...formData, color: e.target.value })}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Storage</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Storage</label>
                                     <input
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         placeholder="256GB"
@@ -407,8 +388,8 @@ export default function ProductsManager() {
                                         onChange={e => setFormData({ ...formData, storage: e.target.value })}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Battery</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Battery</label>
                                     <input
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         placeholder="100% / 4300mAh"
@@ -416,8 +397,8 @@ export default function ProductsManager() {
                                         onChange={e => setFormData({ ...formData, battery: e.target.value })}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Processor</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Processor</label>
                                     <input
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         placeholder="A17 Pro"
@@ -425,8 +406,8 @@ export default function ProductsManager() {
                                         onChange={e => setFormData({ ...formData, processor: e.target.value })}
                                     />
                                 </div>
-                                <div className="col-span-2">
-                                    <label className="block text-sm font-bold text-slate-400 mb-1">Display</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Display</label>
                                     <input
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         placeholder="6.7 inch Super Retina XDR"
@@ -436,16 +417,10 @@ export default function ProductsManager() {
                                 </div>
                             </div>
 
-                            <div>
-                                <ImageUpload
-                                    value={formData.image}
-                                    onChange={(url) => setFormData({ ...formData, image: url })}
-                                    label="Product Image"
-                                />
-                            </div>
+                            <ImageUpload value={formData.image} onChange={url => setFormData({ ...formData, image: url })} label="Product Image" />
 
-                            <div>
-                                <label className="block text-sm font-bold text-slate-400 mb-1">Description</label>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-400">Description</label>
                                 <textarea
                                     className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none h-24"
                                     placeholder="Product details, specs, included accessories..."
@@ -458,14 +433,12 @@ export default function ProductsManager() {
                                 type="submit"
                                 className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
                             >
-                                <Save size={18} />
-                                {formData.id ? 'Save Changes' : 'Create Product'}
+                                <Save size={18} /> {formData.id ? 'Save Changes' : 'Create Product'}
                             </button>
                         </form>
-                    </div >
-                </div >
-            )
-            }
-        </div >
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
