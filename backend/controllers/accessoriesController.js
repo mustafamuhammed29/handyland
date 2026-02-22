@@ -12,7 +12,11 @@ exports.getAccessories = async (req, res) => {
 
 exports.createAccessory = async (req, res) => {
     try {
-        const newAccessory = new Accessory(req.body);
+        const accessoryData = { ...req.body };
+        if (!accessoryData.id) {
+            accessoryData.id = 'acc_' + Date.now() + Math.floor(Math.random() * 1000);
+        }
+        const newAccessory = new Accessory(accessoryData);
         await newAccessory.save();
         res.status(201).json(newAccessory);
     } catch (error) {
@@ -23,8 +27,11 @@ exports.createAccessory = async (req, res) => {
 
 exports.updateAccessory = async (req, res) => {
     try {
-        const accessory = await Accessory.findByIdAndUpdate(
-            req.params.id,
+        const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.id);
+        const query = isObjectId ? { _id: req.params.id } : { id: req.params.id };
+
+        const accessory = await Accessory.findOneAndUpdate(
+            query,
             req.body,
             { new: true, runValidators: true }
         );
@@ -41,7 +48,10 @@ exports.updateAccessory = async (req, res) => {
 
 exports.deleteAccessory = async (req, res) => {
     try {
-        const result = await Accessory.findByIdAndDelete(req.params.id);
+        const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.id);
+        const query = isObjectId ? { _id: req.params.id } : { id: req.params.id };
+
+        const result = await Accessory.findOneAndDelete(query);
         if (result) {
             res.json({ message: "Accessory deleted" });
         } else {

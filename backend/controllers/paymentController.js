@@ -59,7 +59,7 @@ const getStripe = async () => {
 // @access  Private
 exports.createCheckoutSession = async (req, res) => {
     try {
-        const { items, shippingAddress, couponCode, discountAmount, termsAccepted } = req.body;
+        const { items, shippingAddress, couponCode, discountAmount, paymentProvider, termsAccepted } = req.body;
 
         if (!termsAccepted) {
             return res.status(400).json({
@@ -150,7 +150,7 @@ exports.createCheckoutSession = async (req, res) => {
             couponCode,
             status: 'pending',
             paymentStatus: 'pending',
-            paymentMethod: 'card',
+            paymentMethod: paymentProvider || 'card',
             shippingAddress: {
                 fullName: shippingAddress.fullName,
                 email: shippingAddress.email,
@@ -192,8 +192,12 @@ exports.createCheckoutSession = async (req, res) => {
 
         // Create checkout session
         const stripe = await getStripe();
+
+        // Ensure Stripe accepts the provided method type
+        const methodType = paymentProvider === 'stripe' ? 'card' : (paymentProvider || 'card');
+
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
+            payment_method_types: [methodType],
             line_items: lineItems,
             mode: 'payment',
             success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,

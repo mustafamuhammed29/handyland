@@ -49,15 +49,16 @@ exports.addToWishlist = async (req, res) => {
                 products: [{
                     product: productDoc._id,
                     productType,
+                    customId: productDoc.id, // Save actual UI string "id"
                     name: productDoc.name,
                     price: productDoc.price,
                     image: productDoc.image || (productDoc.images && productDoc.images[0])
                 }]
             });
         } else {
-            // Check if already in wishlist
+            // Check if already in wishlist by either native or custom ID
             const exists = wishlist.products.some(p =>
-                p.product.toString() === productDoc._id.toString()
+                p.product.toString() === productDoc._id.toString() || p.customId === productDoc.id
             );
             if (exists) {
                 return res.status(400).json({ success: false, message: 'Already in wishlist' });
@@ -66,6 +67,7 @@ exports.addToWishlist = async (req, res) => {
             wishlist.products.push({
                 product: productDoc._id,
                 productType,
+                customId: productDoc.id, // Save actual UI string "id"
                 name: productDoc.name,
                 price: productDoc.price,
                 image: productDoc.image || (productDoc.images && productDoc.images[0])
@@ -90,7 +92,10 @@ exports.removeFromWishlist = async (req, res) => {
         }
 
         wishlist.products = wishlist.products.filter(
-            p => p._id.toString() !== req.params.itemId && p.product.toString() !== req.params.itemId
+            p =>
+                p._id.toString() !== req.params.itemId &&
+                p.product?.toString() !== req.params.itemId &&
+                p.customId !== req.params.itemId
         );
         await wishlist.save();
 

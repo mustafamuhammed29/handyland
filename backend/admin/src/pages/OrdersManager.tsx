@@ -64,7 +64,7 @@ const OrdersManager: React.FC = () => {
     const fetchOrders = async () => {
         try {
             console.log('📦 Fetching orders...');
-            const response = await api.get('/orders/admin/all' + (selectedStatus ? `?status=${selectedStatus}` : ''));
+            const response = await api.get('/api/orders/admin/all' + (selectedStatus ? `?status=${selectedStatus}` : ''));
 
             if (response.data.success) {
                 setOrders(response.data.orders);
@@ -78,7 +78,7 @@ const OrdersManager: React.FC = () => {
     // Fetch stats
     const fetchStats = async () => {
         try {
-            const response = await api.get('/orders/admin/stats');
+            const response = await api.get('/api/orders/admin/stats');
             if (response.data.success) {
                 setStats(response.data.stats);
             }
@@ -97,7 +97,7 @@ const OrdersManager: React.FC = () => {
     // Update order status
     const updateStatus = async (orderId: string, newStatus: string, trackingNumber?: string) => {
         try {
-            const response = await api.put(`/orders/admin/${orderId}/status`, {
+            const response = await api.put(`/api/orders/admin/${orderId}/status`, {
                 status: newStatus,
                 trackingNumber
             });
@@ -136,7 +136,7 @@ const OrdersManager: React.FC = () => {
 
         try {
             await Promise.all(selectedOrders.map(id =>
-                api.put(`/orders/admin/${id}/status`, { status: newStatus })
+                api.put(`/api/orders/admin/${id}/status`, { status: newStatus })
             ));
             alert('Orders updated successfully!');
             fetchOrders();
@@ -183,6 +183,19 @@ const OrdersManager: React.FC = () => {
             </div>
         );
     }
+
+    const formatPaymentMethod = (method: string) => {
+        switch (method) {
+            case 'stripe': return 'Credit Card (Stripe)';
+            case 'paypal': return 'PayPal';
+            case 'klarna': return 'Klarna';
+            case 'giropay': return 'Giropay';
+            case 'sepa_debit': return 'SEPA Direct Debit';
+            case 'sofort': return 'Sofort';
+            case 'cod': return 'Cash on Delivery';
+            default: return method ? method.charAt(0).toUpperCase() + method.slice(1) : 'Unknown';
+        }
+    };
 
     return (
         <div className="p-6">
@@ -334,7 +347,7 @@ const OrdersManager: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-medium text-gray-900">{order.orderNumber}</div>
-                                        <div className="text-sm text-gray-500">{order.paymentMethod}</div>
+                                        <div className="text-sm text-gray-500">{formatPaymentMethod(order.paymentMethod)}</div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-gray-900">{order.user?.name || 'Unknown User'}</div>
@@ -401,7 +414,7 @@ const OrdersManager: React.FC = () => {
                                         <div><span className="text-gray-600">Order Number:</span> <strong>{selectedOrder.orderNumber}</strong></div>
                                         <div><span className="text-gray-600">Date:</span> {new Date(selectedOrder.createdAt).toLocaleString()}</div>
                                         <div><span className="text-gray-600">Status:</span> <span className={`px-2 py-1 rounded text-white ${getStatusColor(selectedOrder.status)}`}>{selectedOrder.status}</span></div>
-                                        <div><span className="text-gray-600">Payment:</span> {selectedOrder.paymentMethod} ({selectedOrder.paymentStatus})</div>
+                                        <div><span className="text-gray-600">Payment:</span> {formatPaymentMethod(selectedOrder.paymentMethod)} ({selectedOrder.paymentStatus})</div>
                                         {selectedOrder.trackingNumber && (
                                             <div><span className="text-gray-600">Tracking:</span> {selectedOrder.trackingNumber}</div>
                                         )}

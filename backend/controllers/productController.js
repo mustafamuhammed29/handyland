@@ -2,6 +2,7 @@ const Product = require('../models/Product');
 const Review = require('../models/Review');
 const Question = require('../models/Question'); // Added
 const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 
 exports.getAllProducts = async (req, res) => {
     try {
@@ -280,20 +281,30 @@ exports.answerQuestion = async (req, res) => {
 // @access  Public
 exports.validateStock = async (req, res) => {
     try {
-        const { items } = req.body; // Expecting array of { id, quantity }
+        const { items } = req.body; // Expecting array of { id, quantity, category }
         const errors = [];
+        const Accessory = require('../models/Accessory');
 
         for (const item of items) {
-            const product = await Product.findOne({ id: item.id });
-            if (!product) {
-                // Might be an accessory not in Product model? 
-                // If cart has mixed types, we need to handle that.
-                // Checkout.tsx sends productType: 'Product' or 'Accessory'.
-                // But for now, let's assume all main products are in Product.
-                // If not found, maybe ignore or flag? Safe default is flag.
-                errors.push({ id: item.id, message: `Product not found: ${item.name || item.id}` });
-            } else if (product.stock < item.quantity) {
-                errors.push({ id: item.id, message: `Insufficient stock for ${product.name}. Available: ${product.stock}` });
+            let productDoc;
+
+            // Differentiate between Product and Accessory based on category
+            if (item.category === 'accessory') {
+                productDoc = await Accessory.findOne({ id: item.id });
+                if (!productDoc && mongoose.Types.ObjectId.isValid(item.id)) {
+                    productDoc = await Accessory.findById(item.id);
+                }
+            } else {
+                productDoc = await Product.findOne({ id: item.id });
+                if (!productDoc && mongoose.Types.ObjectId.isValid(item.id)) {
+                    productDoc = await Product.findById(item.id);
+                }
+            }
+
+            if (!productDoc) {
+                errors.push({ id: item.id, message: `Item not found: ${item.name || item.id}` });
+            } else if (productDoc.stock < item.quantity) {
+                errors.push({ id: item.id, message: `Insufficient stock for ${productDoc.name || productDoc.title}. Available: ${productDoc.stock}` });
             }
         }
 

@@ -13,7 +13,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
     lang, user, cartCount
 }) => {
     return (
-        <div className="min-h-screen bg-slate-900 text-gray-100 font-sans">
+        <div className="min-h-screen bg-transparent text-gray-100 font-sans flex flex-col">
             <Navbar
                 lang={lang}
                 cartCount={cartCount}

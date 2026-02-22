@@ -48,7 +48,7 @@ export function useRepairs() {
     return useQuery({
         queryKey: dashboardKeys.repairs(),
         queryFn: async () => {
-            const res = await api.get<any>('/api/repairs/my-repairs');
+            const res = await api.get<any>('/api/repairs/my-repairs') as any;
             return res.data?.repairs || res.repairs || [];
         },
         staleTime: 2 * 60 * 1000,
@@ -60,7 +60,7 @@ export function useValuations() {
     return useQuery({
         queryKey: dashboardKeys.valuations(),
         queryFn: async () => {
-            const res = await api.get<any>('/api/valuation/my-valuations');
+            const res = await api.get<any>('/api/valuation/my-valuations') as any;
             // api interceptor returns response.data directly, so res may be the array itself
             const list: any[] = Array.isArray(res) ? res : (res?.data?.valuations || res?.valuations || res?.data || []);
             return list.map((v: any) => ({
@@ -107,7 +107,7 @@ export function useWalletTransactions() {
     return useQuery({
         queryKey: dashboardKeys.wallet(),
         queryFn: async () => {
-            const res = await api.get<any>('/api/transactions');
+            const res = await api.get<any>('/api/transactions') as any;
             const transactions = res.data?.transactions || res.transactions || [];
             // Calculate balance from transactions
             const balance = transactions.reduce((sum: number, t: any) => {
@@ -139,8 +139,19 @@ export function useWishlist() {
     return useQuery({
         queryKey: dashboardKeys.wishlist(),
         queryFn: async () => {
-            const res = await api.get<any>('/api/wishlist');
-            return res.data?.items || [];
+            const res = await api.get<any>('/api/wishlist') as any;
+            // Interceptor may strip the .data wrapper, so check both res and res.data
+            const items = res.data?.products || res.products || res.data?.items || res.items || [];
+            return items.map((item: any) => ({
+                id: item.customId || item.product || item._id, // The actual product string ID
+                _id: item._id,                      // The wishlist item ID
+                model: item.name || 'Unknown',      // Map snapshot name to model
+                images: item.image ? [item.image] : [], // Map snapshot image to images array
+                price: item.price || 0,             // Map snapshot price
+                brand: item.productType || 'Product', // Accessory or Phone
+                storage: '-',                       // Not in snapshot
+                stock: 1                            // Assume in stock for snapshot payload
+            }));
         },
         staleTime: 3 * 60 * 1000,
         retry: 2,

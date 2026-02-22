@@ -305,11 +305,11 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         // Validate Stock
         try {
             await productService.validateStock(
-                cart.map(item => ({ id: item.id, quantity: item.quantity || 1, name: item.title }))
+                cart.map(item => ({ id: item.id, quantity: item.quantity || 1, name: item.title, category: item.category }))
             );
         } catch (err: any) {
             console.error("Stock Validation Error:", err);
-            setError(err.message || "Some items are out of stock.");
+            setError(err.response?.data?.message || err.message || "Some items are out of stock.");
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setLoading(false);
             return;
@@ -330,7 +330,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                 image: item.image,
                 quantity: item.quantity || 1
             })),
-            shippingAddress: shippingDetails,
+            shippingAddress: {
+                ...shippingDetails,
+                street: shippingDetails.address // Fix 400 Bad Request error
+            },
             shippingFee: shippingCost.toString(),
             shippingMethod: selectedMethod?.name || 'Standard',
             couponCode: appliedCoupon?.code,
@@ -358,9 +361,11 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                     navigate(`/payment-success?order_id=${r.order._id}&method=cod`);
                 }
 
-            } else if (selectedPaymentMethod === 'stripe') {
+            } else if (['stripe', 'paypal', 'klarna', 'giropay', 'sepa_debit', 'sofort'].includes(selectedPaymentMethod)) {
+                // Pass the specific provider down to backend to configure Stripe
                 const response = await orderService.createCheckoutSession({
                     ...commonOrderData,
+                    paymentProvider: selectedPaymentMethod,
                     termsAccepted: true
                 });
 
@@ -706,6 +711,76 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                         </button>
                                     )}
 
+                                    {/* PayPal */}
+                                    {paymentConfig?.paypal?.enabled && (
+                                        <button
+                                            onClick={() => setSelectedPaymentMethod('paypal')}
+                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'paypal'
+                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
+                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                                                }`}
+                                        >
+                                            <div className={`w-8 h-8 flex items-center justify-center font-black italic text-xl ${selectedPaymentMethod === 'paypal' ? 'text-blue-400' : 'text-slate-400'}`}>P</div>
+                                            <span className="font-bold text-white">PayPal</span>
+                                        </button>
+                                    )}
+
+                                    {/* Klarna */}
+                                    {paymentConfig?.klarna?.enabled && (
+                                        <button
+                                            onClick={() => setSelectedPaymentMethod('klarna')}
+                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'klarna'
+                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
+                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                                                }`}
+                                        >
+                                            <div className={`w-8 h-8 flex items-center justify-center font-black ${selectedPaymentMethod === 'klarna' ? 'text-[#FFB3C7]' : 'text-slate-400'}`}>K.</div>
+                                            <span className="font-bold text-white">Klarna</span>
+                                        </button>
+                                    )}
+
+                                    {/* Giropay */}
+                                    {paymentConfig?.giropay?.enabled && (
+                                        <button
+                                            onClick={() => setSelectedPaymentMethod('giropay')}
+                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'giropay'
+                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
+                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                                                }`}
+                                        >
+                                            <div className={`w-8 h-8 flex items-center justify-center font-bold ${selectedPaymentMethod === 'giropay' ? 'text-blue-400' : 'text-slate-400'}`}>Giro</div>
+                                            <span className="font-bold text-white">Giropay</span>
+                                        </button>
+                                    )}
+
+                                    {/* SEPA Direct Debit */}
+                                    {paymentConfig?.sepa?.enabled && (
+                                        <button
+                                            onClick={() => setSelectedPaymentMethod('sepa_debit')}
+                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'sepa_debit'
+                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
+                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                                                }`}
+                                        >
+                                            <CreditCard className={`w-8 h-8 ${selectedPaymentMethod === 'sepa_debit' ? 'text-blue-400' : 'text-slate-400'}`} />
+                                            <span className="font-bold text-white">SEPA Direct</span>
+                                        </button>
+                                    )}
+
+                                    {/* Sofort */}
+                                    {paymentConfig?.sofort?.enabled && (
+                                        <button
+                                            onClick={() => setSelectedPaymentMethod('sofort')}
+                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'sofort'
+                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
+                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                                                }`}
+                                        >
+                                            <div className={`w-8 h-8 flex items-center justify-center font-bold ${selectedPaymentMethod === 'sofort' ? 'text-blue-400' : 'text-slate-400'}`}>S.</div>
+                                            <span className="font-bold text-white">Sofort</span>
+                                        </button>
+                                    )}
+
                                     {/* Cash on Delivery */}
                                     {paymentConfig?.cashOnDelivery?.enabled && (
                                         <button
@@ -720,19 +795,11 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                             <span className="text-xs text-slate-500">Pay when you receive it</span>
                                         </button>
                                     )}
-
-                                    {/* PayPal (Coming Soon / Disabled) */}
-                                    {paymentConfig?.paypal?.enabled && (
-                                        <button disabled className="p-6 rounded-xl border bg-black/20 border-slate-800 opacity-50 cursor-not-allowed flex flex-col items-center gap-3">
-                                            <span className="font-bold text-slate-400">PayPal</span>
-                                            <span className="text-xs text-slate-500">Coming Soon</span>
-                                        </button>
-                                    )}
                                 </div>
 
                                 <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 mb-8 text-center">
                                     <p className="text-slate-400 mb-6">
-                                        {selectedPaymentMethod === 'stripe' && "You are about to be redirected to our secure payment partner (Stripe) to complete your purchase."}
+                                        {['stripe', 'paypal', 'klarna', 'giropay', 'sepa_debit', 'sofort'].includes(selectedPaymentMethod) && "You are about to be redirected to our secure payment partner (Stripe) to complete your purchase using your selected method."}
                                         {selectedPaymentMethod === 'cod' && "You will pay for your order upon delivery. Please have the exact amount ready."}
                                         {!selectedPaymentMethod && "Please select a payment method above."}
                                     </p>

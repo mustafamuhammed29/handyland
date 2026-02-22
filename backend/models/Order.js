@@ -65,7 +65,7 @@ const OrderSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['cash', 'card', 'paypal', 'stripe'],
+        enum: ['cash', 'card', 'paypal', 'stripe', 'klarna', 'giropay', 'sepa_debit', 'sofort'],
         default: 'cash'
     },
     paymentStatus: {
