@@ -349,7 +349,184 @@ exports.adminLogin = async (req, res) => {
         if (user.isActive === false) {
             console.log('❌ Account deactivated');
             return res.status(403).json({
-                success: false,
+                success: false,ctrl+const User = require('../models/User');
+const RefreshToken = require('../models/RefreshToken');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { validationResult } = require('express-validator');
+const { sendEmail, emailTemplates } = require('../utils/emailService');
+
+const generateToken = (id) => {
+    if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET not defined');
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+};
+
+const generateRefreshToken = (id) => {
+    if (!process.env.REFRESH_TOKEN_SECRET) throw new Error('REFRESH_TOKEN_SECRET not defined');
+    return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+};
+
+const getDeviceInfo = (req) => ({
+    userAgent: req.headers['user-agent'] || 'Unknown',
+    ip: req.ip || req.connection.remoteAddress || 'Unknown',
+    lastSeen: new Date()
+});
+
+exports.register = async (req, res) => {
+    try {
+        const { name, email, password, phone, address } = req.body;
+        const userExists = await User.findOne({ email });
+        if (userExists) return res.status(400).json({ success: false, message: 'User already exists' });
+
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const user = await User.create({
+            name, email, password, phone, address,
+            verificationToken,
+            verificationTokenExpire: Date.now() + 24*60*60*1000,
+            isVerified: false,
+            deviceInfo: getDeviceInfo(req)
+        });
+
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'Verify Email - HandyLand',
+                html: emailTemplates.verification(user.name, verificationUrl)
+            });
+        } catch (e) { console.error('Email error:', e); }
+
+        res.status(201).json({ success: true, message: 'Verify your email', token: generateToken(user._id) });
+    } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+};
+
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email }).select('+password');
+        if (!user || !(await user.matchPassword(password))) {
+            return res.status(400).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true' && !user.isVerified) {
+            return res.status(401).json({ success: false, message: 'Please verify email', isVerified: false });
+        }
+
+        user.deviceInfo = getDeviceInfo(req);
+        await user.save();
+
+        const token = generateToken(user._id);
+        const refreshToken = crypto.randomBytes(40).toString('hex');
+        await RefreshToken.create({ token: refreshToken, user: user._id, expiryDate: new Date(Date.now() + 7*24*60*60*1000) });
+
+        const isProd = process.env.NODE_ENV === 'production';
+        res.cookie('accessToken', token, { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: 15*60*1000, path: '/' });
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: 7*24*60*60*1000, path: '/' });
+
+        res.status(200).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, deviceInfo: user.deviceInfo } });
+    } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+};
+
+exports.getMe = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        res.status(200).json({ success: true, user });
+    } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+};
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(req.user.id, req.body, { new: true, runValidators: true });
+        res.status(200).json({ success: true, user });
+    } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+};
+
+exports.changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.id).select('+password');
+        if (!(await user.matchPassword(currentPassword))) return res.status(400).json({ success: false, message: 'Wrong password' });
+        user.password = newPassword;
+        await user.save();
+        res.status(200).json({ success: true, message: 'Password updated' });
+    } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+};
+
+exports.verifyEmail = async (req, res) => {
+    try {
+        const user = await User.findOne({ verificationToken: req.params.token, verificationTokenExpire: { $gt: Date.now() } });
+        if (!user) return res.status(400).json({ success: false, message: 'Invalid token' });
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        user.verificationTokenExpire = undefined;
+        await user.save();
+        res.status(200).json({ success: true, message: 'Verified' });
+    } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+};
+
+exports.forgotPassword = async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.body.email });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpire = Date.now() + 3600000;
+        await user.save();
+        const url = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+        await sendEmail({ email: user.email, subject: 'Reset Password', html: emailTemplates.passwordReset(user.name, url) });
+        res.status(200).json({ success: true, message: 'Email sent' });
+    } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const user = await User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpire: { $gt: Date.now() } });
+        if (!user) return res.status(400).json({ success: false, message: 'Invalid token' });
+        user.password = req.body.password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+        res.status(200).json({ success: true, message: 'Success' });
+    } catch (error) { res.status(500).json({ success: false, message: 'Error' }); }
+};
+
+exports.resendVerification = async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.body.email });
+        if (!user || user.isVerified) return res.status(400).json({ success: false, message: 'Invalid request' });
+        const token = crypto.randomBytes(32).toString('hex');
+        user.verificationToken = token;
+        user.verificationTokenExpire = Date.now() + 24*60*60*1000;
+        await user.save();
+        const url = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+        await sendEmail({ email: user.email, subject: 'Verify Email', html: emailTemplates.verification(user.name, url) });
+        res.status(200).json({ success: true, message: 'Sent' });
+    } catch (error) { res.status(500).json({ success: false, message: 'Error' }); }
+};
+
+exports.refreshToken = async (req, res) => {
+    try {
+        const token = req.cookies.refreshToken;
+        if (!token) return res.status(401).json({ message: 'No token' });
+        const doc = await RefreshToken.findOne({ token });
+        if (!doc || RefreshToken.verifyExpiration(doc)) return res.status(403).json({ message: 'Invalid/Expired' });
+        const accessToken = generateToken(doc.user);
+        res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, sameSite: 'lax', maxAge: 15*60*1000, path: '/' });
+        res.json({ success: true, token: accessToken });
+    } catch (error) { res.status(500).json({ message: 'Error' }); }
+};
+
+exports.logout = async (req, res) => {
+    try {
+        if (req.cookies.refreshToken) await RefreshToken.deleteOne({ token: req.cookies.refreshToken });
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
+        res.status(200).json({ message: 'Logged out' });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+module.exports = exports;
+
                 message: 'Account is deactivated'
             });
         }
