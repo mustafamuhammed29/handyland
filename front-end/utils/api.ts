@@ -30,7 +30,6 @@ api.interceptors.request.use(
 );
 
 // Response interceptor - Handle errors and token refresh
-// Response interceptor - Handle errors and token refresh
 api.interceptors.response.use(
     (response) => response.data, // ✅ Directly return data as per user instructions
     async (error) => {
@@ -62,8 +61,8 @@ api.interceptors.response.use(
             console.log('🔄 [API] 401 Unauthorized, attempting token refresh...');
 
             try {
-                // Try to refresh the access token
-                const refreshResponse = await api.get('/auth/refresh');
+                // Try to refresh the access token - use correct /api/auth/refresh endpoint
+                const refreshResponse = await api.get('/api/auth/refresh');
                 const newToken = refreshResponse['token']; // Access token from response
 
                 if (newToken) {
@@ -78,7 +77,6 @@ api.interceptors.response.use(
                 return api.request(originalRequest);
             } catch (refreshError) {
                 console.error('❌ [API] Token refresh failed:', refreshError);
-
                 // Clear authentication state
                 localStorage.removeItem('user');
                 localStorage.removeItem('accessToken');
