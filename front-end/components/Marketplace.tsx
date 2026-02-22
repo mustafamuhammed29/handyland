@@ -56,7 +56,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     // Dropdown options
     const ramOptions = ['4GB', '6GB', '8GB', '12GB', '16GB'];
     const storageOptions = ['64GB', '128GB', '256GB', '512GB', '1TB'];
-    const conditions = ['new', 'like-new', 'good', 'fair'];
+        const conditions = ['New', 'Like New', 'Very Good', 'Good', 'Refurbished']; // Match DB values exactly
 
     const { addToCart } = useCart();
     const { addToast } = useToast();
