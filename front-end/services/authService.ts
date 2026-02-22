@@ -5,7 +5,68 @@ interface LoginResponse {
     success: boolean;
     token: string;
     refreshToken: string; // If applicable
+    user: User;ctrl+import { api } from '../utils/api';
+import { User } from '../types';
+
+interface LoginResponse {
+    success: boolean;
+    token: string;
+    refreshToken: string;
+    user: User & { deviceInfo?: any };
+}
+
+interface RegisterResponse {
+    success: boolean;
+    token: string;
     user: User;
+}
+
+export const authService = {
+    login: async (email: string, password: string): Promise<LoginResponse> => {
+        const response = await api.post('/api/auth/login', { email, password });
+        return response as any;
+    },
+    register: async (userData: any): Promise<RegisterResponse> => {
+        const response = await api.post('/api/auth/register', userData);
+        return response as any;
+    },
+    logout: async (): Promise<void> => {
+        await api.post('/api/auth/logout', {});
+    },
+    verifyEmail: async (token: string): Promise<any> => {
+        const response = await api.get(`/api/auth/verifyemail/${token}`);
+        return response as any;Update authService: align endpoints with refactored backend
+    },
+    resendVerification: async (email: string): Promise<any> => {
+        const response = await api.post('/api/auth/resend-verification', { email });
+        return response as any;
+    },
+    forgotPassword: async (email: string): Promise<any> => {
+        const response = await api.post('/api/auth/forgotpassword', { email });
+        return response as any;
+    },
+    resetPassword: async (token: string, password: string): Promise<any> => {
+        const response = await api.put(`/api/auth/resetpassword/${token}`, { password });
+        return response as any;
+    },
+    getMe: async (): Promise<{ success: boolean; user: User }> => {
+        const response = await api.get('/api/auth/me');
+        return response as any;
+    },
+    updateProfile: async (data: any): Promise<any> => {
+        const response = await api.put('/api/auth/profile', data);
+        return response as any;
+    },
+    updatePassword: async (passwords: any): Promise<any> => {
+        const response = await api.put('/api/auth/password', passwords);
+        return response as any;
+    },
+    refreshToken: async (): Promise<{ token: string }> => {
+        const response = await api.get('/api/auth/refresh');
+        return response as any;
+    }
+};
+
 }
 
 interface RegisterResponse {
