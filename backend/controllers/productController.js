@@ -26,11 +26,12 @@ exports.getAllProducts = async (req, res) => {
         if (req.query.brand && req.query.brand !== 'All') {
             query.brand = { $regex: new RegExp(`^${req.query.brand}$`, 'i') };
         }
+        // Condition filter - case-insensitive match
         if (req.query.condition) {
-            query.condition = req.query.condition;
+            query.condition = { $regex: new RegExp(`^${req.query.condition}$`, 'i') };
         }
         if (req.query.storage) {
-            query.storage = req.query.storage;
+            query.storage = { $regex: new RegExp(req.query.storage, 'i') };
         }
         if (req.query.ram) {
             query['specs.ram'] = req.query.ram;
@@ -91,11 +92,7 @@ exports.createProduct = async (req, res) => {
         if (!name || !price || !category) {
             return res.status(400).json({ message: "Name, price, and category are required" });
         }
-
-        const newProduct = new Product({
-            ...req.body,
-            id: uuidv4()
-        });
+        const newProduct = new Product({ ...req.body, id: uuidv4() });
         await newProduct.save();
         res.status(201).json(newProduct);
     } catch (error) {
@@ -133,20 +130,15 @@ exports.deleteProduct = async (req, res) => {
     }
 };
 
-
-
-
-
-// @desc    Get related products
-// @route   GET /api/products/:id/related
-// @access  Public
+// @desc Get related products
+// @route GET /api/products/:id/related
+// @access Public
 exports.getRelatedProducts = async (req, res) => {
     try {
         const product = await Product.findOne({ id: req.params.id });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
-
         const related = await Product.find({
             $or: [
                 { category: product.category },
@@ -154,62 +146,50 @@ exports.getRelatedProducts = async (req, res) => {
             ],
             id: { $ne: product.id }
         }).limit(4);
-
         res.json(related);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Create new review
-// @route   POST /api/products/:id/reviews
-// @access  Private
+// @desc Create new review
+// @route POST /api/products/:id/reviews
+// @access Private
 exports.createProductReview = async (req, res) => {
     try {
         const { rating, comment } = req.body;
         const product = await Product.findOne({ id: req.params.id });
-
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
-
-        const alreadyReviewed = await Review.findOne({
-            user: req.user.id,
-            product: product._id
-        });
-
+        const alreadyReviewed = await Review.findOne({ user: req.user.id, product: product._id });
         if (alreadyReviewed) {
             return res.status(400).json({ message: 'Product already reviewed' });
         }
-
         const review = await Review.create({
             user: req.user.id,
             product: product._id,
             rating: Number(rating),
             comment
         });
-
         // Update Product stats
         const reviews = await Review.find({ product: product._id });
         product.numReviews = reviews.length;
         product.rating = reviews.reduce((acc, item) => item.rating + acc, 0) / reviews.length;
-
-        await product.save(); // Note: Product schema doesn't have rating/numReviews yet, might need update
-
+        await product.save();
         res.status(201).json({ message: 'Review added' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Get product reviews
-// @route   GET /api/products/:id/reviews
-// @access  Public
+// @desc Get product reviews
+// @route GET /api/products/:id/reviews
+// @access Public
 exports.getProductReviews = async (req, res) => {
     try {
         const product = await Product.findOne({ id: req.params.id });
         if (!product) return res.status(404).json({ message: 'Product not found' });
-
         const reviews = await Review.find({ product: product._id }).populate('user', 'name');
         res.json(reviews);
     } catch (error) {
@@ -217,78 +197,70 @@ exports.getProductReviews = async (req, res) => {
     }
 };
 
-// @desc    Get product questions
-// @route   GET /api/products/:id/questions
-// @access  Public
+// @desc Get product questions
+// @route GET /api/products/:id/questions
+// @access Public
 exports.getProductQuestions = async (req, res) => {
     try {
         const product = await Product.findOne({ id: req.params.id });
         if (!product) return res.status(404).json({ message: 'Product not found' });
-
         const questions = await Question.find({ product: product._id })
             .populate('user', 'name')
             .sort({ createdAt: -1 });
-
         res.json(questions);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Ask a question
-// @route   POST /api/products/:id/questions
-// @access  Private
+// @desc Ask a question
+// @route POST /api/products/:id/questions
+// @access Private
 exports.askQuestion = async (req, res) => {
     try {
         const { question } = req.body;
         const product = await Product.findOne({ id: req.params.id });
         if (!product) return res.status(404).json({ message: 'Product not found' });
-
         const newQuestion = await Question.create({
             user: req.user._id,
             product: product._id,
             question
         });
-
         res.status(201).json(newQuestion);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Answer a question (Admin)
-// @route   PUT /api/products/questions/:id/answer
-// @access  Private/Admin
+// @desc Answer a question (Admin)
+// @route PUT /api/products/questions/:id/answer
+// @access Private/Admin
 exports.answerQuestion = async (req, res) => {
     try {
         const { answer } = req.body;
         const question = await Question.findById(req.params.id);
         if (!question) return res.status(404).json({ message: 'Question not found' });
-
         question.answer = answer;
         question.isAnswered = true;
         question.answeredBy = req.user._id;
         await question.save();
-
         res.json(question);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Validate stock for checkout
-// @route   POST /api/products/validate-stock
-// @access  Public
+// @desc Validate stock for checkout
+// @route POST /api/products/validate-stock
+// @access Public
 exports.validateStock = async (req, res) => {
     try {
-        const { items } = req.body; // Expecting array of { id, quantity, category }
+        const { items } = req.body;
         const errors = [];
         const Accessory = require('../models/Accessory');
 
         for (const item of items) {
             let productDoc;
-
-            // Differentiate between Product and Accessory based on category
             if (item.category === 'accessory') {
                 productDoc = await Accessory.findOne({ id: item.id });
                 if (!productDoc && mongoose.Types.ObjectId.isValid(item.id)) {
