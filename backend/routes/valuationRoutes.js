@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const valuationController = require('../controllers/valuationController');
-const { protect, admin } = require('../middleware/auth'); // Assuming admin middleware exists or just use protect for now
+const { protect, authorize } = require('../middleware/auth');
 
 // ==========================================
 // BLUEPRINT MANAGEMENT (ADMIN)
@@ -29,5 +29,11 @@ router.delete('/saved/:id', protect, valuationController.deleteValuation);
 // Public Quote Retrieval & Confirmation
 router.get('/quote/:reference', valuationController.getQuoteByReference);
 router.put('/quote/:reference/confirm', valuationController.confirmQuote);
+
+// ==========================================
+// ADMIN QUOTES MANAGEMENT
+// ==========================================
+router.get('/admin/quotes', protect, authorize('admin'), valuationController.getAdminQuotes);
+router.put('/admin/quotes/:id/status', protect, authorize('admin'), valuationController.updateQuoteStatus);
 
 module.exports = router;

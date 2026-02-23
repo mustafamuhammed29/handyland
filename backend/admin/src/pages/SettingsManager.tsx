@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight } from 'lucide-react';
+import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
 
@@ -113,6 +113,28 @@ interface Settings {
     footerSection: FooterSettings;
 }
 
+interface EmailTemplateData {
+    _id: string;
+    name: string;
+    description: string;
+    subject: string;
+    html: string;
+    variables: string[];
+    isActive: boolean;
+}
+
+const EMAIL_TEMPLATE_LABELS: Record<string, string> = {
+    verify_email: '✉️ تأكيد البريد الإلكتروني',
+    reset_password: '🔑 إعادة تعيين كلمة المرور',
+    order_confirmation: '🛒 تأكيد الطلب',
+};
+
+const EMAIL_TEMPLATE_ICONS: Record<string, string> = {
+    verify_email: '✉️',
+    reset_password: '🔑',
+    order_confirmation: '🛒',
+};
+
 export default function SettingsManager() {
     const [settings, setSettings] = useState<Settings>({
         siteName: '',
@@ -146,6 +168,17 @@ export default function SettingsManager() {
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
 
+    // Email Templates State
+    const [emailTemplates, setEmailTemplates] = useState<EmailTemplateData[]>([]);
+    const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<EmailTemplateData | null>(null);
+    const [emailEditMode, setEmailEditMode] = useState(false);
+    const [editSubject, setEditSubject] = useState('');
+    const [editHtml, setEditHtml] = useState('');
+    const [emailPreview, setEmailPreview] = useState(false);
+    const [emailSaving, setEmailSaving] = useState(false);
+    const [emailNotification, setEmailNotification] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [emailLoading, setEmailLoading] = useState(false);
+
     useEffect(() => {
         const fetchSettings = async () => {
             try {
@@ -158,6 +191,9 @@ export default function SettingsManager() {
             }
         };
         fetchSettings();
+
+        // Fetch Email Templates whenever tab becomes active
+        fetchEmailTemplates();
     }, []);
 
     const handleChange = (section: keyof Settings | null, key: string, value: string | number | boolean | any) => {
@@ -181,12 +217,65 @@ export default function SettingsManager() {
         }
     };
 
+    const fetchEmailTemplates = async () => {
+        setEmailLoading(true);
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch('http://localhost:5000/api/email-templates', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) setEmailTemplates(data.data);
+        } catch (err) {
+            console.error('Failed to load email templates', err);
+        } finally {
+            setEmailLoading(false);
+        }
+    };
+
+    const showEmailNotification = (type: 'success' | 'error', text: string) => {
+        setEmailNotification({ type, text });
+        setTimeout(() => setEmailNotification(null), 4000);
+    };
+
+    const startEmailEdit = (template: EmailTemplateData) => {
+        setSelectedEmailTemplate(template);
+        setEditSubject(template.subject);
+        setEditHtml(template.html);
+        setEmailEditMode(true);
+        setEmailPreview(false);
+    };
+
+    const saveEmailTemplate = async () => {
+        if (!selectedEmailTemplate) return;
+        setEmailSaving(true);
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await fetch(`http://localhost:5000/api/email-templates/${selectedEmailTemplate._id}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subject: editSubject, html: editHtml })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showEmailNotification('success', '✅ تم حفظ القالب بنجاح!');
+                setEmailTemplates(prev => prev.map(t => t._id === selectedEmailTemplate._id ? data.data : t));
+                setEmailEditMode(false);
+            } else {
+                showEmailNotification('error', data.message || 'Failed to save');
+            }
+        } catch (err) {
+            showEmailNotification('error', 'Error saving template');
+        } finally {
+            setEmailSaving(false);
+        }
+    };
+
     const tabs = [
         { id: 'general', label: 'General', icon: Layers },
         { id: 'hero', label: 'Hero Section', icon: MonitorPlay },
         { id: 'stats', label: 'Live Stats', icon: BarChart },
         { id: 'archive', label: 'Repair Archive', icon: ScanLine },
-        { id: 'valuation', label: 'Valuation', icon: LayoutTemplate },
         { id: 'content', label: 'Content', icon: MessageSquare },
         { id: 'contact', label: 'Contact Info', icon: MessageSquare },
         { id: 'layout', label: 'Layout Control', icon: LayoutTemplate },
@@ -542,19 +631,132 @@ export default function SettingsManager() {
                         </div>
                     )}
 
-                    {activeTab === 'layout' && (
+                    {activeTab === 'email-templates' && (
                         <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-white mb-4">Site Layout Control</h3>
-                            <p className="text-slate-400 text-sm mb-6">Toggle visibility of home page sections.</p>
+                            {/* Notification */}
+                            {emailNotification && (
+                                <div className={`flex items-center gap-3 px-5 py-3 rounded-xl border text-sm font-semibold ${emailNotification.type === 'success'
+                                    ? 'bg-green-600/20 border-green-500/50 text-green-300'
+                                    : 'bg-red-600/20 border-red-500/50 text-red-300'
+                                    }`}>
+                                    {emailNotification.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                                    {emailNotification.text}
+                                </div>
+                            )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Toggle label="Hero Section (Header)" value={settings.sections?.hero} onChange={(v) => handleChange('sections', 'hero', v)} />
-                                <Toggle label="Live Stats Bar" value={settings.sections?.stats} onChange={(v) => handleChange('sections', 'stats', v)} />
-                                <Toggle label="Repair Services Gallery" value={settings.sections?.repairGallery} onChange={(v) => handleChange('sections', 'repairGallery', v)} />
-                                <Toggle label="Marketplace Highlights" value={settings.sections?.marketplace} onChange={(v) => handleChange('sections', 'marketplace', v)} />
-                                <Toggle label="Accessories Section" value={settings.sections?.accessories} onChange={(v) => handleChange('sections', 'accessories', v)} />
-                                <Toggle label="Contact / Footer Section" value={settings.sections?.contact} onChange={(v) => handleChange('sections', 'contact', v)} />
-                            </div>
+                            {emailEditMode && selectedEmailTemplate ? (
+                                /* ── Edit View ── */
+                                <div className="space-y-5">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-lg font-bold text-white">
+                                                {EMAIL_TEMPLATE_LABELS[selectedEmailTemplate.name] || selectedEmailTemplate.name}
+                                            </h3>
+                                            <p className="text-slate-400 text-sm">{selectedEmailTemplate.description}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setEmailPreview(!emailPreview)}
+                                                className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm transition-colors"
+                                            >
+                                                {emailPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                {emailPreview ? 'Editor' : 'Preview'}
+                                            </button>
+                                            <button
+                                                onClick={() => setEmailEditMode(false)}
+                                                className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm transition-colors"
+                                            >
+                                                <X className="w-4 h-4" /> Cancel
+                                            </button>
+                                            <button
+                                                onClick={saveEmailTemplate}
+                                                disabled={emailSaving}
+                                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold disabled:opacity-50"
+                                            >
+                                                <Save className="w-4 h-4" /> {emailSaving ? 'Saving...' : 'Save'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Subject */}
+                                    <div>
+                                        <label className="block text-slate-400 text-sm font-bold mb-2">عنوان الرسالة (Subject)</label>
+                                        <input
+                                            type="text"
+                                            aria-label="عنوان الرسالة"
+                                            placeholder="أدخل عنوان الرسالة..."
+                                            value={editSubject}
+                                            onChange={e => setEditSubject(e.target.value)}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+
+                                    {/* Variables hint */}
+                                    <div className="flex flex-wrap gap-2 items-center">
+                                        <span className="text-xs text-slate-500 font-medium">المتغيرات:</span>
+                                        {selectedEmailTemplate.variables.map(v => (
+                                            <span key={v} className="text-xs font-mono bg-blue-600/10 border border-blue-500/30 text-blue-400 px-2 py-0.5 rounded">{v}</span>
+                                        ))}
+                                    </div>
+
+                                    {/* HTML Editor / Preview */}
+                                    <div className="border border-slate-800 rounded-xl overflow-hidden">
+                                        <div className="px-4 py-2 bg-slate-950 border-b border-slate-800 text-xs text-slate-400 font-semibold">
+                                            {emailPreview ? '👁 Preview' : '✏️ HTML Editor'}
+                                        </div>
+                                        {emailPreview ? (
+                                            <div className="p-6 bg-white rounded-b-xl min-h-[200px]">
+                                                <div dangerouslySetInnerHTML={{ __html: editHtml }} />
+                                            </div>
+                                        ) : (
+                                            <textarea
+                                                value={editHtml}
+                                                onChange={e => setEditHtml(e.target.value)}
+                                                rows={14}
+                                                className="w-full px-4 py-3 bg-slate-950 text-slate-200 font-mono text-sm focus:outline-none resize-y"
+                                                placeholder="Enter HTML content..."
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                /* ── List View ── */
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-6">📧 قوالب البريد الإلكتروني</h3>
+                                    {emailLoading ? (
+                                        <div className="flex justify-center py-10">
+                                            <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            {emailTemplates.map(template => (
+                                                <div key={template._id} className="bg-slate-950 border border-slate-800 rounded-xl p-5 hover:border-slate-600 transition-all group">
+                                                    <div className="flex items-start justify-between mb-3">
+                                                        <span className="text-2xl">{EMAIL_TEMPLATE_ICONS[template.name] || '📧'}</span>
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${template.isActive ? 'bg-green-600/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}>
+                                                            {template.isActive ? 'نشط' : 'معطّل'}
+                                                        </span>
+                                                    </div>
+                                                    <h4 className="text-white font-bold mb-1 text-sm">{EMAIL_TEMPLATE_LABELS[template.name] || template.name}</h4>
+                                                    <p className="text-slate-500 text-xs mb-3">{template.description}</p>
+                                                    <p className="text-xs font-mono text-slate-500 truncate mb-4">📌 {template.subject}</p>
+                                                    <div className="flex flex-wrap gap-1 mb-4">
+                                                        {template.variables.map(v => (
+                                                            <span key={v} className="text-xs font-mono bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">{v}</span>
+                                                        ))}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => startEmailEdit(template)}
+                                                        className="w-full py-2 flex items-center justify-center gap-2 bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-600/20 rounded-lg text-xs font-semibold transition-all"
+                                                    >
+                                                        <Edit3 className="w-3.5 h-3.5" /> تعديل القالب
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

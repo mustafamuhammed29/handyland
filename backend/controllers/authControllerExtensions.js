@@ -1,6 +1,6 @@
 // Add these NEW endpoints at the end of authController.js
 
-const { sendEmail, emailTemplates } = require('../utils/emailService');
+const { sendEmail, sendTemplateEmail } = require('../utils/emailService');
 const crypto = require('crypto');
 
 // @desc    Verify Email
@@ -63,10 +63,9 @@ exports.forgotPassword = async (req, res) => {
         const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
         try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Password Reset Request - HandyLand',
-                html: emailTemplates.passwordReset(user.name, resetUrl)
+            await sendTemplateEmail(user.email, 'reset_password', {
+                userName: user.name,
+                resetUrl: resetUrl
             });
 
             res.status(200).json({
@@ -170,10 +169,9 @@ exports.resendVerification = async (req, res) => {
         const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
         try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Verify Your Email - HandyLand',
-                html: emailTemplates.verification(user.name, verificationUrl)
+            await sendTemplateEmail(user.email, 'verify_email', {
+                userName: user.name,
+                verificationUrl: verificationUrl
             });
 
             res.status(200).json({

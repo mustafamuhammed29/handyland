@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ValuationRequest, LanguageCode } from '../types';
+import { LanguageCode } from '../types';
 import {
     ChevronLeft,
     CheckCircle2,
@@ -51,6 +51,8 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
     const [previewPrice, setPreviewPrice] = useState<number | null>(null);
     const [quoteData, setQuoteData] = useState<any | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [countdown, setCountdown] = useState<string>('');
+    const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const [formData, setFormData] = useState({
         model: '',
@@ -80,14 +82,30 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
         (device.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
 
-    // Helper: Map the UI selections to backend condition keys
-    const getBackendCondition = () => {
-        if (!formData.isFunctional) return 'broken';
-        if (formData.screenCondition === 'hervorragend' && formData.bodyCondition === 'hervorragend') return 'like_new';
-        if (formData.screenCondition === 'gut' || formData.bodyCondition === 'gut') return 'good';
-        if (formData.screenCondition === 'beschadigt' || formData.bodyCondition === 'beschadigt') return 'fair';
-        return 'good';
-    };
+    // Countdown timer for offer expiry (48h from when result is shown)
+    useEffect(() => {
+        if (!quoteData) {
+            setCountdown('');
+            if (countdownRef.current) clearInterval(countdownRef.current);
+            return;
+        }
+        const expiresAt = quoteData.expiresAt || (Date.now() + 48 * 60 * 60 * 1000);
+        const updateCountdown = () => {
+            const remaining = expiresAt - Date.now();
+            if (remaining <= 0) {
+                setCountdown('Abgelaufen');
+                if (countdownRef.current) clearInterval(countdownRef.current);
+                return;
+            }
+            const h = Math.floor(remaining / 3600000);
+            const m = Math.floor((remaining % 3600000) / 60000);
+            const s = Math.floor((remaining % 60000) / 1000);
+            setCountdown(`${h}h ${m}m ${s}s`);
+        };
+        updateCountdown();
+        countdownRef.current = setInterval(updateCountdown, 1000);
+        return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
+    }, [quoteData]);
 
     // Auto-calculate preview price on the fly
     useEffect(() => {
@@ -142,12 +160,17 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                 storage: formData.storage,
                 screenCondition: formData.screenCondition,
                 bodyCondition: formData.bodyCondition,
-                isFunctional: functional   // use the value directly, avoid state race
+                isFunctional: functional
             };
             const data: any = await api.post('/api/valuation/calculate', payload);
             if (data.success || data.estimatedValue !== undefined) {
                 setFormData(prev => ({ ...prev, isFunctional: functional }));
-                setQuoteData({ estimatedValue: data.estimatedValue, ...payload });
+                setQuoteData({
+                    estimatedValue: data.estimatedValue,
+                    quoteReference: data.quoteReference,  // real temp ref from backend
+                    expiresAt: Date.now() + 48 * 60 * 60 * 1000,
+                    ...payload
+                });
                 setStep(5);
             } else {
                 addToast(data.message || "Fehler bei der Preisberechnung", "error");
@@ -163,13 +186,17 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
     const handleSubmitQuote = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
+            // Save current quote to sessionStorage so we can restore after login
+            sessionStorage.setItem('pendingValuationQuote', JSON.stringify({
+                quoteData,
+                formData
+            }));
             addToast("Bitte melde dich an, um das Angebot zu bestätigen", "info");
             navigate('/login');
             return;
         }
         setLoading(true);
         try {
-            // Use quoteData which was set by handleCalculateOffer — avoids stale formData
             const payload = {
                 model: quoteData?.model || formData.model,
                 storage: quoteData?.storage || formData.storage,
@@ -177,18 +204,18 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                 bodyCondition: quoteData?.bodyCondition || formData.bodyCondition,
                 isFunctional: quoteData?.isFunctional ?? formData.isFunctional
             };
-            console.log('💾 Saving valuation:', payload);
             const data: any = await api.post('/api/valuation/saved', payload);
-            console.log('✅ Save response:', data);
             if (data.success || data.quoteReference) {
+                // Clear any pending sessionStorage
+                sessionStorage.removeItem('pendingValuationQuote');
                 addToast("Angebot erfolgreich gespeichert!", "success");
-                navigate('/dashboard/valuations');
+                // Navigate to the sell page with the real reference
+                navigate(`/sell/${data.quoteReference}`);
             } else {
                 addToast(data.message || "Fehler beim Speichern", "error");
             }
         } catch (error: any) {
             const msg = error?.response?.data?.message || error?.message || "Netzwerkfehler";
-            console.error('❌ Save error:', msg);
             addToast(msg, "error");
         } finally {
             setLoading(false);
@@ -459,7 +486,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                 <div className="w-full max-w-4xl mx-auto animate-in zoom-in-95 duration-500">
                     <AppFrame
                         title="Dein Angebot ist da!"
-                        subtitle={`Referenznummer: ${quoteData.quoteReference}`}
+                        subtitle={`Referenznummer: ${quoteData.quoteReference || '…'}`}
                         icon={<BadgeEuro className="w-6 h-6" />}
                     >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -514,6 +541,13 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                                     <div className="text-6xl sm:text-7xl font-black tracking-tight text-slate-900 dark:text-white mb-2">
                                         {quoteData.estimatedValue} €
                                     </div>
+
+                                    {/* Countdown Timer */}
+                                    {countdown && (
+                                        <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-600 dark:text-amber-400 text-xs font-bold">
+                                            <ShieldCheck size={12} /> Gültig noch: {countdown}
+                                        </div>
+                                    )}
 
                                     <div className="flex items-center justify-center gap-4 mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
                                         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">

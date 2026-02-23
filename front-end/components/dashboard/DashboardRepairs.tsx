@@ -108,12 +108,23 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                             {/* Footer */}
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-4">
-                                    <div className="text-xs text-slate-500">
-                                        Est. Completion: <span className="text-white font-bold">Today, 6:00 PM</span>
-                                    </div>
-                                    <div className="text-xs text-slate-500">
-                                        Cost: <span className="text-cyan-400 font-bold">€{ticket.cost}</span>
-                                    </div>
+                                    {ticket.estimatedCompletion ? (
+                                        <div className="text-xs text-slate-500">
+                                            Est. Fertigstellung:{' '}
+                                            <span className="text-white font-bold">
+                                                {new Date(ticket.estimatedCompletion).toLocaleDateString('de-DE', {
+                                                    weekday: 'short', day: '2-digit', month: 'short'
+                                                })}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="text-xs text-slate-600">Fertigstellung: noch kein Datum</div>
+                                    )}
+                                    {ticket.cost !== undefined && ticket.cost !== null && (
+                                        <div className="text-xs text-slate-500">
+                                            Kosten: <span className="text-cyan-400 font-bold">€{ticket.cost}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <button
                                     onClick={() => setExpandedRepairId(expandedRepairId === ticket.id ? null : ticket.id)}
@@ -131,16 +142,22 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                 <div className="h-px bg-slate-800 mb-6"></div>
                                 <div>
                                     <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
-                                        <MessageSquare className="w-4 h-4" /> Technician Notes
+                                        <MessageSquare className="w-4 h-4" /> Techniker-Notizen
                                     </h4>
-                                    <div className="bg-black/30 rounded-xl p-4 border border-slate-800/50">
-                                        <p className="text-sm text-slate-400 leading-relaxed">
-                                            Device successfully opened. Found moderate water damage on the logic board near the charging port. Cleaning needed before screen replacement.
-                                        </p>
-                                        <div className="mt-2 text-[10px] text-slate-600 font-mono text-right">
-                                            Added 2 hours ago by Alex
+                                    {ticket.technicianNotes ? (
+                                        <div className="bg-black/30 rounded-xl p-4 border border-slate-800/50">
+                                            <p className="text-sm text-slate-400 leading-relaxed">{ticket.technicianNotes}</p>
+                                            {ticket.updatedAt && (
+                                                <div className="mt-2 text-[10px] text-slate-600 font-mono text-right">
+                                                    Zuletzt aktualisiert: {new Date(ticket.updatedAt).toLocaleString('de-DE')}
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="bg-black/20 rounded-xl p-4 border border-slate-800/30 text-slate-600 text-sm italic">
+                                            Noch keine Notizen vom Techniker.
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

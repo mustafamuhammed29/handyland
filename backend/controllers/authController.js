@@ -3,7 +3,7 @@ const RefreshToken = require('../models/RefreshToken');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
-const { sendEmail, emailTemplates } = require('../utils/emailService');
+const { sendEmail, sendTemplateEmail } = require('../utils/emailService');
 
 // Generate Access Token
 const generateToken = (id) => {
@@ -349,21 +349,57 @@ exports.adminLogin = async (req, res) => {
         if (user.isActive === false) {
             console.log('❌ Account deactivated');
             return res.status(403).json({
-                success: false,ctrl+const User = require('../models/User');
-const RefreshToken = require('../models/RefreshToken');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const { validationResult } = require('express-validator');
-const { sendEmail, emailTemplates } = require('../utils/emailService');
+                success: false,
+                message: 'Your account has been deactivated. Please contact support.'
+            });
+        }
 
-const generateToken = (id) => {
-    if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET not defined');
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '15m' });
-};
+        // Check password
+        const isMatch = await user.matchPassword(password);
 
-const generateRefreshToken = (id) => {
-    if (!process.env.REFRESH_TOKEN_SECRET) throw new Error('REFRESH_TOKEN_SECRET not defined');
-    return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+        if (!isMatch) {
+            console.log('❌ Invalid password');
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid credentials'
+            });
+        }
+
+        const token = generateToken(user._id);
+
+        // Set cookie
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+            path: '/'
+        };
+
+        res.cookie('accessToken', token, cookieOptions);
+
+        console.log('✓ Admin login successful for:', email);
+
+        res.status(200).json({
+            success: true,
+            message: 'Admin login successful',
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                avatar: user.avatar
+            }
+        });
+    } catch (error) {
+        console.error('Admin Login error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error during admin login',
+            error: error.message
+        });
+    }
 };
 
 const getDeviceInfo = (req) => ({
@@ -382,17 +418,16 @@ exports.register = async (req, res) => {
         const user = await User.create({
             name, email, password, phone, address,
             verificationToken,
-            verificationTokenExpire: Date.now() + 24*60*60*1000,
+            verificationTokenExpire: Date.now() + 24 * 60 * 60 * 1000,
             isVerified: false,
             deviceInfo: getDeviceInfo(req)
         });
 
         const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
         try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Verify Email - HandyLand',
-                html: emailTemplates.verification(user.name, verificationUrl)
+            await sendTemplateEmail(user.email, 'verify_email', {
+                userName: user.name,
+                verificationUrl: verificationUrl
             });
         } catch (e) { console.error('Email error:', e); }
 
@@ -417,11 +452,11 @@ exports.login = async (req, res) => {
 
         const token = generateToken(user._id);
         const refreshToken = crypto.randomBytes(40).toString('hex');
-        await RefreshToken.create({ token: refreshToken, user: user._id, expiryDate: new Date(Date.now() + 7*24*60*60*1000) });
+        await RefreshToken.create({ token: refreshToken, user: user._id, expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
 
         const isProd = process.env.NODE_ENV === 'production';
-        res.cookie('accessToken', token, { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: 15*60*1000, path: '/' });
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: 7*24*60*60*1000, path: '/' });
+        res.cookie('accessToken', token, { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: 15 * 60 * 1000, path: '/' });
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000, path: '/' });
 
         res.status(200).json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, deviceInfo: user.deviceInfo } });
     } catch (error) { res.status(500).json({ success: false, message: error.message }); }
@@ -473,9 +508,16 @@ exports.forgotPassword = async (req, res) => {
         user.resetPasswordExpire = Date.now() + 3600000;
         await user.save();
         const url = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-        await sendEmail({ email: user.email, subject: 'Reset Password', html: emailTemplates.passwordReset(user.name, url) });
+        await sendEmail({
+            email: user.email,
+            subject: 'Reset Password',
+            html: `<h1>Password Reset</h1><p>Hi ${user.name},</p><p>You requested a password reset. Please click <a href="${url}">here</a> to reset it. This link expires in 1 hour.</p>`
+        });
         res.status(200).json({ success: true, message: 'Email sent' });
-    } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
+    } catch (error) {
+        console.error('Forgot Password Error:', error);
+        res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+    }
 };
 
 exports.resetPassword = async (req, res) => {
@@ -496,10 +538,14 @@ exports.resendVerification = async (req, res) => {
         if (!user || user.isVerified) return res.status(400).json({ success: false, message: 'Invalid request' });
         const token = crypto.randomBytes(32).toString('hex');
         user.verificationToken = token;
-        user.verificationTokenExpire = Date.now() + 24*60*60*1000;
+        user.verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000;
         await user.save();
         const url = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
-        await sendEmail({ email: user.email, subject: 'Verify Email', html: emailTemplates.verification(user.name, url) });
+        await sendEmail({
+            email: user.email,
+            subject: 'Verify Email',
+            html: `<h1>Welcome to HandyLand!</h1><p>Hi ${user.name},</p><p>Please verify your email by clicking <a href="${url}">here</a>.</p>`
+        });
         res.status(200).json({ success: true, message: 'Sent' });
     } catch (error) { res.status(500).json({ success: false, message: 'Error' }); }
 };
@@ -511,7 +557,7 @@ exports.refreshToken = async (req, res) => {
         const doc = await RefreshToken.findOne({ token });
         if (!doc || RefreshToken.verifyExpiration(doc)) return res.status(403).json({ message: 'Invalid/Expired' });
         const accessToken = generateToken(doc.user);
-        res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, sameSite: 'lax', maxAge: 15*60*1000, path: '/' });
+        res.cookie('accessToken', accessToken, { httpOnly: true, secure: false, sameSite: 'lax', maxAge: 15 * 60 * 1000, path: '/' });
         res.json({ success: true, token: accessToken });
     } catch (error) { res.status(500).json({ message: 'Error' }); }
 };
@@ -526,58 +572,6 @@ exports.logout = async (req, res) => {
 };
 
 module.exports = exports;
-
-                message: 'Account is deactivated'
-            });
-        }
-
-        // Check password
-        const isMatch = await user.matchPassword(password);
-
-        if (!isMatch) {
-            console.log('❌ Invalid password');
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid credentials'
-            });
-        }
-
-        const token = generateToken(user._id);
-
-        // Set cookie
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            path: '/'
-        };
-
-        res.cookie('accessToken', token, cookieOptions);
-
-        console.log('✓ Admin login successful for:', email);
-
-        res.status(200).json({
-            success: true,
-            message: 'Admin login successful',
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                avatar: user.avatar
-            }
-        });
-    } catch (error) {
-        console.error('❌ Admin Login Error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error logging in',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-    }
-};
 
 // @desc    Verify Email
 // @route   GET /api/auth/verify-email/:token
@@ -659,10 +653,9 @@ exports.forgotPassword = async (req, res) => {
         const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
         try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Password Reset Request - HandyLand',
-                html: emailTemplates.passwordReset(user.name, resetUrl)
+            await sendTemplateEmail(user.email, 'reset_password', {
+                userName: user.name,
+                resetUrl: resetUrl
             });
 
             res.status(200).json({
@@ -670,13 +663,15 @@ exports.forgotPassword = async (req, res) => {
                 message: 'Password reset email sent! Please check your email.'
             });
         } catch (emailError) {
+            console.error('Detailed Email Error:', emailError);
             user.resetPasswordToken = undefined;
             user.resetPasswordExpire = undefined;
             await user.save();
 
             return res.status(500).json({
                 success: false,
-                message: 'Error sending email. Please try again later.'
+                message: 'Error sending email. Please try again later.',
+                error: emailError.message
             });
         }
     } catch (error) {
@@ -767,10 +762,9 @@ exports.resendVerification = async (req, res) => {
         const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
         try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Verify Your Email - HandyLand',
-                html: emailTemplates.verification(user.name, verificationUrl)
+            await sendTemplateEmail(user.email, 'verify_email', {
+                userName: user.name,
+                verificationUrl: verificationUrl
             });
 
             res.status(200).json({
@@ -778,9 +772,11 @@ exports.resendVerification = async (req, res) => {
                 message: 'Verification email sent! Please check your email.'
             });
         } catch (emailError) {
+            console.error('Detailed Verification Email Error:', emailError);
             return res.status(500).json({
                 success: false,
-                message: 'Error sending email. Please try again later.'
+                message: 'Error sending email. Please try again later.',
+                error: emailError.message
             });
         }
     } catch (error) {

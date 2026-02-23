@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     User, Package, Wrench, Settings, LogOut, Activity,
-    Wallet, Bell, Shield, BarChart3, Mail, FileText, Globe, Box, Archive, Heart
+    Wallet, Bell, Shield, BarChart3, Heart, ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserType } from '../types';
@@ -14,11 +14,6 @@ import {
     DashboardValuations,
     DashboardWishlist,
     DashboardSettings,
-    DashboardMessages,
-    DashboardPages,
-    DashboardAccessories,
-    DashboardGlobalSettings,
-    RepairArchiveManager
 } from './dashboard/index';
 import { api } from '../utils/api';
 import { authService } from '../services/authService';
@@ -158,13 +153,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
     ];
 
-    const adminNavItems = [
-        { id: 'messages', label: 'Messages', icon: <Mail className="w-4 h-4" /> },
-        { id: 'pages', label: 'Pages', icon: <FileText className="w-4 h-4" /> },
-        { id: 'accessories', label: 'Accessories', icon: <Box className="w-4 h-4" /> },
-        { id: 'repair-archive', label: 'Repair Archive', icon: <Archive className="w-4 h-4" /> },
-        { id: 'global-settings', label: 'Site Settings', icon: <Globe className="w-4 h-4" /> },
-    ];
+    const ADMIN_PANEL_URL = 'http://localhost:3001';
 
     return (
         <div className="min-h-screen pt-28 pb-12 px-4 max-w-7xl mx-auto">
@@ -184,7 +173,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                             <div className="overflow-hidden">
                                 <h3 className="text-white font-bold truncate">{currentUser.name}</h3>
                                 <div className="flex items-center gap-1 text-xs text-cyan-400">
-                                    <Shield className="w-3 h-3" /> {isAdmin ? 'Administrator' : 'Premium Member'}
+                                    <Shield className="w-3 h-3" /> {isAdmin ? 'Administrator' : (
+                                        currentUser.createdAt
+                                            ? `Mitglied seit ${new Date(currentUser.createdAt).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}`
+                                            : 'Verifiziertes Mitglied'
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -215,22 +208,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                             {isAdmin && (
                                 <>
                                     <div className="h-px bg-slate-800 my-4 mx-2"></div>
-                                    <p className="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Admin</p>
-                                    {adminNavItems.map((item) => (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => setActiveTab(item.id)}
-                                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 font-medium ${activeTab === item.id
-                                                ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20'
-                                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                {item.icon}
-                                                <span>{item.label}</span>
-                                            </div>
-                                        </button>
-                                    ))}
+                                    <a
+                                        href={ADMIN_PANEL_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-purple-600/10 border border-purple-600/30 hover:bg-purple-600/20 hover:border-purple-500/50 text-purple-400 font-bold transition-all duration-300 group"
+                                    >
+                                        <Shield className="w-4 h-4" />
+                                        <span>Admin-Konsole</span>
+                                        <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-60 group-hover:opacity-100" />
+                                    </a>
                                 </>
                             )}
 
@@ -295,6 +282,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                             orders={orders.data || []}
                             repairs={repairs.data || []}
                             promotions={promotions.data || []}
+                            valuations={valuations.data || []}
                             isLoading={isLoading}
                         />
                     )}
@@ -351,12 +339,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         />
                     )}
 
-                    {/* Admin Tabs */}
-                    {isAdmin && activeTab === 'messages' && <DashboardMessages />}
-                    {isAdmin && activeTab === 'pages' && <DashboardPages />}
-                    {isAdmin && activeTab === 'accessories' && <DashboardAccessories />}
-                    {isAdmin && activeTab === 'repair-archive' && <RepairArchiveManager />}
-                    {isAdmin && activeTab === 'global-settings' && <DashboardGlobalSettings />}
+
                 </div>
             </div>
         </div>

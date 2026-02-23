@@ -132,12 +132,12 @@ exports.createOrder = async (req, res) => {
             notes
         });
 
-        // Update Stock
+        // Update Stock and Sold
         for (const item of orderItems) {
             if (item.productType === 'Product') {
-                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
             } else if (item.productType === 'Accessory') {
-                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
             }
         }
 
@@ -270,12 +270,12 @@ exports.cancelOrder = async (req, res) => {
         order.status = 'cancelled';
         await order.save();
 
-        // Rollback Stock
+        // Rollback Stock and Sold
         for (const item of order.items) {
             if (item.productType === 'Product') {
-                await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+                await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
             } else if (item.productType === 'Accessory') {
-                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
             }
         }
 
@@ -352,15 +352,15 @@ exports.updateOrderStatus = async (req, res) => {
         if (status) {
             order.status = status;
 
-            // Rollback stock if order is cancelled by admin
+            // Rollback stock and sold count if order is cancelled by admin
             if (status === 'cancelled' && oldStatus !== 'cancelled') {
                 for (const item of order.items) {
                     if (item.productType === 'Product') {
                         const Product = require('../models/Product');
-                        await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+                        await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
                     } else if (item.productType === 'Accessory') {
                         const Accessory = require('../models/Accessory');
-                        await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+                        await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
                     }
                 }
             }

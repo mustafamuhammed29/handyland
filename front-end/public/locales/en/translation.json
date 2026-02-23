@@ -1,0 +1,15 @@
+{
+    "nav": {
+        "marketplace": "Marketplace",
+        "repair": "Repair",
+        "sell": "Sell",
+        "login": "Login",
+        "register": "Register",
+        "dashboard": "Dashboard"
+    },
+    "auth": {
+        "loginTitle": "Welcome back",
+        "emailLabel": "Email Address",
+        "passwordLabel": "Password"
+    }
+}

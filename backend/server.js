@@ -32,7 +32,15 @@ const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/handyland', {})
-    .then(() => console.log('✅ MongoDB Connected'))
+    .then(async () => {
+        console.log('✅ MongoDB Connected');
+        try {
+            const EmailTemplate = require('./models/EmailTemplate');
+            await EmailTemplate.seedDefaults();
+        } catch (seedErr) {
+            console.error('⚠️ Could not seed email templates:', seedErr.message);
+        }
+    })
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 const compression = require('compression');
@@ -170,15 +178,15 @@ app.use('/api/payment', paymentRoutes);
 // Swagger Documentation
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpecs = require('./config/swagger');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/emails', require('./routes/emailRoutes'));
+app.use('/api/email-templates', require('./routes/emailTemplateRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
 
 app.use('/api/accessories', require('./routes/accessoriesRoutes'));
 app.use('/api/repair-archive', require('./routes/repairArchiveRoutes'));
 app.use('/api/valuation', require('./routes/valuationRoutes'));
-app.use('/api/valuations', require('./routes/valuations'));
 app.use('/api/promotions', require('./routes/promotionsRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes')); // Added
 app.use('/api/addresses', require('./routes/addressRoutes')); // Added
