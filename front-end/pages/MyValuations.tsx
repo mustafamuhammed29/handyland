@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardValuations } from '../components/dashboard/DashboardValuations';
 import { api } from '../utils/api';
-import { SavedValuation } from '../types';
 
 export const MyValuations = () => {
-    const [valuations, setValuations] = useState<SavedValuation[]>([]);
+    const [valuations, setValuations] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
@@ -21,7 +20,10 @@ export const MyValuations = () => {
                 condition: v.condition || '-',
                 date: v.createdAt ? new Date(v.createdAt).toLocaleDateString('de-DE') : '-',
                 estimatedValue: v.estimatedValue ?? 0,
-                quoteReference: v.quoteReference
+                quoteReference: v.quoteReference,
+                // Pass status and expiresAt for the enhanced dashboard view
+                status: v.status || 'active',
+                expiresAt: v.expiresAt || v.expiryDate || null
             }));
             setValuations(mapped);
         } catch (error) {
@@ -39,7 +41,7 @@ export const MyValuations = () => {
     const handleSell = (valId: string) => {
         const val = valuations.find(v => v.id === valId);
         if (val?.quoteReference) {
-            navigate(`/valuation/confirm/${val.quoteReference}`);
+            navigate(`/sell/${val.quoteReference}`);
         } else {
             navigate('/valuation');
         }

@@ -1,0 +1,15 @@
+{
+    "nav": {
+        "marketplace": "المتجر",
+        "repair": "الصيانة",
+        "sell": "بيع جهازك",
+        "login": "تسجيل الدخول",
+        "register": "إنشاء حساب",
+        "dashboard": "لوحة التحكم"
+    },
+    "auth": {
+        "loginTitle": "مرحباً بعودتك",
+        "emailLabel": "البريد الإلكتروني",
+        "passwordLabel": "كلمة المرور"
+    }
+}

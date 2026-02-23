@@ -118,7 +118,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 localStorage.setItem('user', JSON.stringify(data.user));
                 setUser(data.user);
 
-                console.log('🔄 [AuthContext] Navigating to dashboard...');
+                console.log('🔄 [AuthContext] Navigating...');
+                // Check if user was redirected from valuation flow
+                const pendingQuote = sessionStorage.getItem('pendingValuationQuote');
+                if (pendingQuote) {
+                    try {
+                        const { quoteData } = JSON.parse(pendingQuote);
+                        if (quoteData?.quoteReference) {
+                            // Don't clear here; SellDevice will clear after loading
+                            navigate(`/sell/${quoteData.quoteReference}`, { replace: true });
+                            return;
+                        }
+                    } catch {
+                        sessionStorage.removeItem('pendingValuationQuote');
+                    }
+                }
                 navigate('/dashboard', { replace: true });
             } else {
                 console.error('❌ [AuthContext] Login failed: No user data');

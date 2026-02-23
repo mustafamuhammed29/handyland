@@ -13,6 +13,11 @@ exports.getAllProducts = async (req, res) => {
         // Build Filter Query
         const query = {};
 
+        // Only show in-stock items unless explicitly requested (for admin)
+        if (req.query.includeOutOfStock !== 'true') {
+            query.stock = { $gt: 0 };
+        }
+
         // Search
         if (req.query.search) {
             query.$or = [

@@ -39,7 +39,8 @@ export function useOrders() {
             const res = await orderService.getMyOrders();
             return res.orders || [];
         },
-        staleTime: 2 * 60 * 1000, // 2 minutes
+        staleTime: 30 * 1000, // 30 seconds — refetches quickly after returning from checkout
+        refetchOnWindowFocus: true, // Refresh when user returns to the tab
         retry: 2,
     });
 }
@@ -70,7 +71,9 @@ export function useValuations() {
                 condition: v.condition || '-',
                 date: v.createdAt ? new Date(v.createdAt).toLocaleDateString('de-DE') : '-',
                 estimatedValue: v.estimatedValue ?? 0,
-                quoteReference: v.quoteReference
+                quoteReference: v.quoteReference,
+                status: v.status || 'active',
+                expiresAt: v.expiresAt || v.expiry || null
             }));
         },
         staleTime: 30 * 1000, // 30 seconds so it stays fresh

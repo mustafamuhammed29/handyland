@@ -1,5 +1,5 @@
 const express = require('express');
-const { getTransactions, addFunds } = require('../controllers/transactionController');
+const { getTransactions, createTopUpSession, confirmTopUp } = require('../controllers/transactionController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', getTransactions);
-router.post('/add-funds', addFunds);
+router.post('/create-topup-session', createTopUpSession);
+router.post('/confirm-topup', confirmTopUp);
 
 module.exports = router;

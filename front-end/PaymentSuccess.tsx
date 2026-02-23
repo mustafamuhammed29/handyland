@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { CheckCircle, Loader2, AlertCircle, ArrowRight, Download, Package, Home } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle, Download, Package, Home } from 'lucide-react';
 import { useCart } from './context/CartContext';
 import { ENV } from './src/config/env';
+import { useQueryClient } from '@tanstack/react-query';
+import { dashboardKeys } from './hooks/useDashboardData';
 
 interface OrderSummary {
     id: string;
@@ -14,9 +16,10 @@ interface OrderSummary {
 const PaymentSuccess: React.FC = () => {
     const [searchParams] = useSearchParams();
     const sessionId = searchParams.get('session_id');
-    const orderId = searchParams.get('order_id'); // Support for COD/Direct orders
+    const orderId = searchParams.get('order_id');
     const navigate = useNavigate();
     const { clearCart } = useCart();
+    const queryClient = useQueryClient();
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [message, setMessage] = useState('Verifying order details...');
@@ -31,7 +34,8 @@ const PaymentSuccess: React.FC = () => {
 
         const verifyOrder = async () => {
             try {
-                const token = localStorage.getItem('token'); // Changed from userToken to match AuthContext
+                // FIX: Use correct token key 'accessToken' (not 'token')
+                const token = localStorage.getItem('accessToken');
                 const headers: any = { 'Content-Type': 'application/json' };
                 if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -81,7 +85,11 @@ const PaymentSuccess: React.FC = () => {
                     setStatus('success');
                     setOrder(data.order);
                     clearCart();
-                    localStorage.removeItem('checkout_shipping'); // Clear saved shipping info
+                    localStorage.removeItem('checkout_shipping');
+
+                    // Invalidate React Query cache so dashboard shows new order immediately
+                    queryClient.invalidateQueries({ queryKey: dashboardKeys.orders() });
+                    queryClient.invalidateQueries({ queryKey: dashboardKeys.stats() });
                 } else {
                     setStatus('error');
                     setMessage(data.message || 'Payment verification failed.');
@@ -97,9 +105,23 @@ const PaymentSuccess: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sessionId, orderId]);
 
-    const handleDownloadInvoice = () => {
-        // Mock invoice download
-        alert("Invoice download started... (Feature coming soon)");
+    const handleDownloadInvoice = async () => {
+        if (!order) return;
+        const id = order._id || order.id;
+        if (!id) return alert('Bestellungs-ID nicht gefunden');
+        try {
+            const token = localStorage.getItem('accessToken');
+            const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
+            const response = await fetch(`${baseUrl}/api/orders/${id}/invoice`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const html = await response.text();
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        } catch {
+            alert('Rechnung konnte nicht geladen werden.');
+        }
     };
 
     return (

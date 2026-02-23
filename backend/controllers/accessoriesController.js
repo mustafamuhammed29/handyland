@@ -2,7 +2,8 @@ const Accessory = require('../models/Accessory');
 
 exports.getAccessories = async (req, res) => {
     try {
-        const accessories = await Accessory.find();
+        const query = req.query.includeOutOfStock === 'true' ? {} : { stock: { $gt: 0 } };
+        const accessories = await Accessory.find(query);
         res.json(accessories);
     } catch (error) {
         console.error("Get Accessories Error:", error);

@@ -10,6 +10,7 @@ interface DashboardOverviewProps {
     orders: any[];
     repairs: any[];
     promotions: any[];
+    valuations?: any[];
     isLoading: boolean;
 }
 
@@ -18,6 +19,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     orders,
     repairs,
     promotions,
+    valuations = [],
     isLoading
 }) => {
     const navigate = useNavigate();
@@ -146,41 +148,85 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Recent Activity — combined orders + repairs + valuations */}
             <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-white mb-6">Recent Activity</h3>
-                <div className="space-y-4">
-                    {orders.slice(0, 3).map((order, idx) => (
-                        <div
-                            key={idx}
-                            className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center">
-                                    <Package className="w-5 h-5 text-blue-400" />
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-cyan-400" />
+                    Letzte Aktivitäten
+                </h3>
+                <div className="space-y-3">
+                    {/* Build unified activity feed */}
+                    {(() => {
+                        const activities = [
+                            ...orders.slice(0, 3).map((o: any) => ({
+                                key: `order-${o._id}`,
+                                icon: <Package className="w-5 h-5 text-blue-400" />,
+                                iconBg: 'bg-blue-600/20',
+                                title: `Bestellung #${o._id?.slice(-6)}`,
+                                sub: `${o.items?.length || 0} Artikel · €${o.totalAmount?.toFixed(2)}`,
+                                badge: o.status,
+                                badgeColor: o.status === 'delivered' ? 'text-emerald-400' :
+                                    o.status === 'processing' ? 'text-blue-400' : 'text-amber-400',
+                                date: o.createdAt
+                            })),
+                            ...repairs.slice(0, 2).map((r: any) => ({
+                                key: `repair-${r.id}`,
+                                icon: <Wrench className="w-5 h-5 text-cyan-400" />,
+                                iconBg: 'bg-cyan-600/20',
+                                title: `Reparatur: ${r.device}`,
+                                sub: r.issue || 'Reparaturticket',
+                                badge: r.status,
+                                badgeColor: r.status === 'ready' ? 'text-emerald-400' :
+                                    r.status === 'repairing' ? 'text-blue-400' : 'text-purple-400',
+                                date: r.date || r.createdAt
+                            })),
+                            ...valuations.slice(0, 2).map((v: any) => ({
+                                key: `val-${v.id}`,
+                                icon: <BarChart3 className="w-5 h-5 text-purple-400" />,
+                                iconBg: 'bg-purple-600/20',
+                                title: `Angebot: ${v.device}`,
+                                sub: `€${v.estimatedValue} · ${v.specs || ''}`,
+                                badge: v.status || 'active',
+                                badgeColor: v.status === 'paid' ? 'text-emerald-400' :
+                                    v.status === 'received' ? 'text-blue-400' : 'text-amber-400',
+                                date: v.date
+                            }))
+                        ].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()).slice(0, 5);
+
+                        if (activities.length === 0) {
+                            return (
+                                <div className="text-center py-8 text-slate-500">
+                                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                    <p className="font-medium">Noch keine Aktivitäten</p>
+                                    <p className="text-sm mt-1">Starte mit deiner ersten Bestellung oder Reparatur</p>
+                                    <div className="flex gap-3 justify-center mt-4">
+                                        <button onClick={() => navigate('/marketplace')} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-white text-sm font-bold transition-colors">Marketplace</button>
+                                        <button onClick={() => navigate('/repair')} className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-white text-sm font-bold transition-colors">Reparatur</button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-white font-medium">Order #{order._id?.slice(-6)}</p>
-                                    <p className="text-sm text-slate-400">{order.items?.length || 0} items</p>
+                            );
+                        }
+
+                        return activities.map(item => (
+                            <div key={item.key} className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-10 h-10 rounded-lg ${item.iconBg} flex items-center justify-center flex-shrink-0`}>
+                                        {item.icon}
+                                    </div>
+                                    <div>
+                                        <p className="text-white font-medium text-sm">{item.title}</p>
+                                        <p className="text-xs text-slate-400">{item.sub}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                    <p className={`text-xs font-bold ${item.badgeColor}`}>{item.badge}</p>
+                                    <p className="text-[10px] text-slate-600 mt-0.5">
+                                        {item.date ? new Date(item.date).toLocaleDateString('de-DE') : ''}
+                                    </p>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <p className="text-white font-bold">€{order.totalAmount?.toFixed(2)}</p>
-                                <p className={`text-xs font-medium ${order.status === 'delivered' ? 'text-emerald-400' :
-                                    order.status === 'processing' ? 'text-blue-400' :
-                                        'text-yellow-400'
-                                    }`}>
-                                    {order.status}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                    {orders.length === 0 && (
-                        <div className="text-center py-8 text-slate-500">
-                            <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                            <p>No orders yet</p>
-                        </div>
-                    )}
+                        ));
+                    })()}
                 </div>
             </div>
 

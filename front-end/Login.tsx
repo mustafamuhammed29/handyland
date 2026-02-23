@@ -4,9 +4,11 @@ import { Mail, Lock, AlertCircle, Loader, CheckCircle } from 'lucide-react';
 import { validateEmail, validateRequired } from './validation';
 import { useAuth } from './context/AuthContext';
 import { authService } from './services/authService';
+import { useTranslation } from 'react-i18next';
 
 const Login: React.FC = () => {
     const { login } = useAuth(); // Use login from context
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -78,7 +80,7 @@ const Login: React.FC = () => {
                     <div className="inline-block p-4 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl shadow-2xl shadow-blue-900/50 mb-4">
                         <Lock className="w-12 h-12 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black text-white mb-2">Welcome Back</h1>
+                    <h1 className="text-4xl font-black text-white mb-2">{t('auth.loginTitle', 'Welcome Back')}</h1>
                     <p className="text-slate-400 uppercase tracking-wider text-sm">HandyLand User Portal</p>
                 </div>
 
@@ -108,7 +110,7 @@ const Login: React.FC = () => {
                         {/* Email Field */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Email Address
+                                {t('auth.emailLabel', 'Email Address')}
                             </label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
@@ -126,7 +128,7 @@ const Login: React.FC = () => {
                         {/* Password Field */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Password
+                                {t('auth.passwordLabel', 'Password')}
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />

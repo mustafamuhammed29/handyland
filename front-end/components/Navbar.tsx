@@ -1,11 +1,13 @@
 
 import React, { useState } from 'react';
-import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, LayoutGrid, ShoppingCart } from 'lucide-react';
+import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home } from 'lucide-react';
 import { LanguageCode, User } from '../types';
 import { translations } from '../i18n';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { Link, useLocation } from 'react-router-dom';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 interface NavbarProps {
   lang: LanguageCode;
@@ -14,20 +16,18 @@ interface NavbarProps {
   cartCount: number; // Add cartCount as it was passed in PublicLayout
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, user, cartCount }) => {
+export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const { cart, setIsCartOpen } = useCart();
   const { settings } = useSettings(); // Use Global Settings
   const location = useLocation();
-
-  const t = translations[lang];
+  const { t } = useTranslation();
 
   const navItems = [
-    { label: t.home, path: '/', icon: <LayoutGrid className="w-4 h-4" /> },
-    { label: t.market, path: '/marketplace', icon: <ShoppingBag className="w-4 h-4" /> },
-    { label: t.valuation, path: '/valuation', icon: <BarChart3 className="w-4 h-4" /> },
-    { label: t.repair, path: '/repair', icon: <Wrench className="w-4 h-4" /> },
+    { label: t('nav.home', 'Startseite'), path: '/', icon: <Home className="w-4 h-4" /> },
+    { label: t('nav.marketplace', 'Marketplace'), path: '/marketplace', icon: <ShoppingBag className="w-4 h-4" /> },
+    { label: t('nav.repair', 'Reparatur'), path: '/repair', icon: <Wrench className="w-4 h-4" /> },
+    { label: t('nav.sell', 'Verkaufen'), path: '/valuation', icon: <BarChart3 className="w-4 h-4" /> },
   ];
 
   return (
@@ -66,27 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, user, cartCount }
           <div className="flex items-center gap-3">
             {/* Language Switcher */}
             {(settings.navbar?.showLanguageSwitcher !== false) && (
-              <div className="relative">
-                <button
-                  onClick={() => setLangMenuOpen(!langMenuOpen)}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500 transition-colors text-slate-400 font-bold text-xs"
-                >
-                  {lang.toUpperCase()}
-                </button>
-                {langMenuOpen && (
-                  <div className="absolute top-12 right-0 rtl:right-auto rtl:left-0 bg-slate-900 border border-slate-800 rounded-xl p-2 shadow-xl flex flex-col gap-1 min-w-[80px]">
-                    {['de', 'en', 'ar'].map((l) => (
-                      <button
-                        key={l}
-                        onClick={() => { setLang(l as LanguageCode); setLangMenuOpen(false); }}
-                        className={`px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-800 ${lang === l ? 'text-cyan-400 bg-slate-800' : 'text-slate-400'}`}
-                      >
-                        {l.toUpperCase()}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <LanguageSwitcher />
             )}
 
             <button onClick={() => setIsCartOpen(true)} className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500 transition-colors group">

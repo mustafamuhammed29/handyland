@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Wallet, Plus, TrendingUp, TrendingDown, Download, X, CreditCard, CheckCircle, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Wallet, Plus, TrendingUp, TrendingDown, Download, X, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { WalletTransaction } from '../../types';
 import { api } from '../../utils/api';
 import { useDashboardData } from '../../hooks/useDashboardData';
@@ -21,18 +21,67 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
     const { refetch } = useDashboardData().wallet;
     const { addToast } = useToast();
 
-    // Modal State
     const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false);
     const [amount, setAmount] = useState<string>('50');
     const [customAmount, setCustomAmount] = useState<string>('');
-    const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
 
     const presetAmounts = ['20', '50', '100', '200'];
 
+    // Handle redirect back from Stripe
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const walletStatus = params.get('wallet');
+        const sessionId = params.get('session_id');
+
+        if (walletStatus === 'success' && sessionId) {
+            // Remove query params from URL cleanly
+            window.history.replaceState({}, '', window.location.pathname);
+
+            // Confirm the top-up with the backend
+            api.post('/api/transactions/confirm-topup', { sessionId })
+                .then(() => {
+                    addToast('Wallet erfolgreich aufgeladen! 🎉', 'success');
+                    refetch();
+                })
+                .catch((err: any) => {
+                    const msg = err?.response?.data?.message;
+                    if (msg && msg.includes('Bereits verarbeitet')) {
+                        // Already processed via webhook — just refresh
+                        refetch();
+                    } else {
+                        addToast(msg || 'Fehler beim Bestätigen der Zahlung', 'error');
+                    }
+                });
+        } else if (walletStatus === 'cancelled') {
+            window.history.replaceState({}, '', window.location.pathname);
+            addToast('Zahlung wurde abgebrochen.', 'info');
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleExportCSV = () => {
+        if (transactions.length === 0) return;
+        const rows = [
+            ['Datum', 'Typ', 'Beschreibung', 'Betrag (€)', 'Status'],
+            ...transactions.map(t => [
+                new Date(t.date || (t as any).createdAt || Date.now()).toLocaleDateString('de-DE'),
+                t.type,
+                t.description || '',
+                (t.type === 'deposit' || t.type === 'credit' || t.type === 'refund' ? '+' : '-') + (t.amount?.toFixed(2) ?? '0.00'),
+                t.status
+            ])
+        ];
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wallet-transaktionen-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     const handleAddFundsClick = () => {
-        setIsSuccess(false);
         setIsAddFundsModalOpen(true);
     };
 
@@ -40,33 +89,28 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
         const finalAmount = amount === 'custom' ? parseFloat(customAmount) : parseFloat(amount);
 
         if (isNaN(finalAmount) || finalAmount < 5) {
-            addToast('Please enter a valid amount (minimum €5)', 'error');
+            addToast('Mindestbetrag ist 5 €', 'error');
+            return;
+        }
+        if (finalAmount > 5000) {
+            addToast('Maximalbetrag ist 5.000 €', 'error');
             return;
         }
 
         setIsProcessing(true);
 
         try {
-            await api.post('/api/transactions/add-funds', {
-                amount: finalAmount,
-                paymentMethod: paymentMethod
-            });
-
-            setIsSuccess(true);
-            addToast('Funds successfully added to your wallet!', 'success');
-
-            // Refresh wallet data silently
-            refetch();
-
-            // Auto-close after success
-            setTimeout(() => {
-                setIsAddFundsModalOpen(false);
-                setIsProcessing(false);
-            }, 2000);
-
+            const res = await api.post('/api/transactions/create-topup-session', { amount: finalAmount }) as any;
+            const url = res?.data?.url || res?.url;
+            if (url) {
+                // Redirect to Stripe Checkout
+                window.location.href = url;
+            } else {
+                throw new Error('Keine Checkout-URL erhalten');
+            }
         } catch (error: any) {
-            console.error('Add funds error:', error);
-            addToast(error.response?.data?.message || 'Failed to process payment. Please try again.', 'error');
+            console.error('Top-up session error:', error);
+            addToast(error?.response?.data?.message || 'Stripe ist nicht konfiguriert. Bitte Admin kontaktieren.', 'error');
             setIsProcessing(false);
         }
     };
@@ -126,9 +170,14 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold text-white">Recent Transactions</h3>
-                    <button className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-2">
+                    <button
+                        onClick={handleExportCSV}
+                        disabled={transactions.length === 0}
+                        title="CSV herunterladen"
+                        className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
                         <Download className="w-4 h-4" />
-                        Export
+                        Exportieren
                     </button>
                 </div>
 
@@ -199,113 +248,62 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                             </button>
                         </div>
 
-                        {/* Body - Success State */}
-                        {isSuccess ? (
-                            <div className="p-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-300">
-                                <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mb-6">
-                                    <CheckCircle className="w-10 h-10 text-emerald-500" />
-                                </div>
-                                <h4 className="text-2xl font-bold text-white mb-2">Deposit Successful</h4>
-                                <p className="text-slate-400">Your wallet balance has been updated.</p>
+                        {/* Body */}
+                        <div className="p-6 space-y-6">
+                            {/* Info banner */}
+                            <div className="flex items-start gap-3 p-3 bg-blue-600/10 border border-blue-500/30 rounded-xl">
+                                <AlertTriangle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                                <p className="text-xs text-blue-300">
+                                    Du wirst zu <strong>Stripe</strong> weitergeleitet, um die Zahlung sicher abzuschließen. Dein Guthaben wird nach erfolgreicher Zahlung automatisch gutgeschrieben.
+                                </p>
                             </div>
-                        ) : (
-                            <div className="p-6 space-y-6">
-                                {/* Amount Selection */}
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-400 mb-3">Select Amount</label>
-                                    <div className="grid grid-cols-2 gap-3 mb-3">
-                                        {presetAmounts.map((preset) => (
-                                            <button
-                                                key={preset}
-                                                onClick={() => setAmount(preset)}
-                                                className={`py-3 rounded-xl border font-bold transition-all ${amount === preset
+
+                            {/* Amount Selection */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-3">Betrag auswählen</label>
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    {presetAmounts.map((preset) => (
+                                        <button
+                                            key={preset}
+                                            onClick={() => setAmount(preset)}
+                                            className={`py-3 rounded-xl border font-bold transition-all ${amount === preset
                                                     ? 'bg-blue-600/20 border-blue-500 text-blue-400'
                                                     : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
-                                                    }`}
-                                            >
-                                                €{preset}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="relative">
-                                        <button
-                                            onClick={() => setAmount('custom')}
-                                            className={`absolute inset-y-0 left-0 pl-4 flex items-center transition-opacity ${amount === 'custom' ? 'opacity-100' : 'opacity-0 pointer-events-none'
                                                 }`}
                                         >
-                                            <span className="text-slate-400 font-bold">€</span>
+                                            €{preset}
                                         </button>
-                                        <input
-                                            type="number"
-                                            value={customAmount}
-                                            onChange={(e) => {
-                                                setAmount('custom');
-                                                setCustomAmount(e.target.value);
-                                            }}
-                                            onFocus={() => setAmount('custom')}
-                                            placeholder="Custom Amount"
-                                            className={`w-full py-3 rounded-xl border transition-all bg-slate-950 font-bold focus:outline-none ${amount === 'custom'
-                                                ? 'pl-8 pr-4 border-blue-500 text-blue-400 ring-2 ring-blue-500/20'
-                                                : 'px-4 border-slate-800 text-slate-300'
-                                                }`}
-                                        />
-                                    </div>
+                                    ))}
                                 </div>
-
-                                {/* Payment Method (Mock) */}
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-400 mb-3">Payment Method</label>
-                                    <div className="space-y-3">
-                                        <button
-                                            onClick={() => setPaymentMethod('card')}
-                                            className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${paymentMethod === 'card'
-                                                ? 'bg-blue-600/10 border-blue-500'
-                                                : 'bg-slate-950 border-slate-800 hover:border-slate-700'
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <CreditCard className={`w-5 h-5 ${paymentMethod === 'card' ? 'text-blue-400' : 'text-slate-500'}`} />
-                                                <span className={paymentMethod === 'card' ? 'text-white font-medium' : 'text-slate-300'}>Credit Card</span>
-                                            </div>
-                                            <div className={`w-4 h-4 rounded-full border-2 ${paymentMethod === 'card' ? 'border-blue-500 bg-blue-500' : 'border-slate-600'}`}></div>
-                                        </button>
-                                        <button
-                                            onClick={() => setPaymentMethod('paypal')}
-                                            className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${paymentMethod === 'paypal'
-                                                ? 'bg-blue-600/10 border-blue-500'
-                                                : 'bg-slate-950 border-slate-800 hover:border-slate-700'
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <svg className={`w-5 h-5 ${paymentMethod === 'paypal' ? 'text-blue-400' : 'text-slate-500'}`} viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zM18.846 6.82v-.006c-.475-1.196-1.554-1.854-3.411-1.854H8.76l-1.996 11.666h2.894L10.74 9.77a.64.64 0 0 1 .633-.544h1.725c2.81 0 5.462-1.258 6.138-4.996.064-.325.074-.632.062-.916h.005c0-.005.003-.01.003-.017v-.002-2.474z" />
-                                                </svg>
-                                                <span className={paymentMethod === 'paypal' ? 'text-white font-medium' : 'text-slate-300'}>PayPal</span>
-                                            </div>
-                                            <div className={`w-4 h-4 rounded-full border-2 ${paymentMethod === 'paypal' ? 'border-blue-500 bg-blue-500' : 'border-slate-600'}`}></div>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Action */}
-                                <button
-                                    onClick={handleProcessPayment}
-                                    disabled={isProcessing}
-                                    className="w-full py-4 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
-                                >
-                                    {isProcessing ? (
-                                        <>
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            Pay €{amount === 'custom' ? (customAmount || '0') : amount}
-                                        </>
-                                    )}
-                                </button>
+                                <input
+                                    type="number"
+                                    value={customAmount}
+                                    onChange={(e) => { setAmount('custom'); setCustomAmount(e.target.value); }}
+                                    onFocus={() => setAmount('custom')}
+                                    placeholder="Eigener Betrag (min. €5)"
+                                    title="Eigener Betrag"
+                                    min="5"
+                                    max="5000"
+                                    className={`w-full px-4 py-3 rounded-xl border transition-all bg-slate-950 font-bold focus:outline-none ${amount === 'custom'
+                                            ? 'border-blue-500 text-blue-400 ring-2 ring-blue-500/20'
+                                            : 'border-slate-800 text-slate-300'
+                                        }`}
+                                />
                             </div>
-                        )}
+
+                            {/* Submit */}
+                            <button
+                                onClick={handleProcessPayment}
+                                disabled={isProcessing}
+                                className="w-full py-4 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {isProcessing ? (
+                                    <><Loader2 className="w-5 h-5 animate-spin" /> Weiterleitung zu Stripe... </>
+                                ) : (
+                                    <>Mit Stripe bezahlen — €{amount === 'custom' ? (customAmount || '0') : amount}</>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

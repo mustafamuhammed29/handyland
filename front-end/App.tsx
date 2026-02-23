@@ -98,13 +98,26 @@ function AppContent() {
 
   // Use settings context to check for global load errors
   // This is now safe because AppContent is wrapped by SettingsProvider in App
-  const { loading: settingsLoading, error: settingsError } = useSettings();
+  const { settings, loading: settingsLoading, error: settingsError } = useSettings();
 
   // Load language preference
   useEffect(() => {
     const savedLang = localStorage.getItem('handyland_lang') as LanguageCode;
     if (savedLang) setLang(savedLang);
   }, []);
+
+  // Sync Document properties with current language
+  useEffect(() => {
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  // Dynamically update browser tab title from admin settings
+  useEffect(() => {
+    if (settings?.siteName) {
+      document.title = settings.siteName;
+    }
+  }, [settings?.siteName]);
 
   // Handle Global Error
   if (settingsError) {

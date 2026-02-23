@@ -80,9 +80,11 @@ exports.getUserStats = async (req, res) => {
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
+        const mongoose = require('mongoose');
         const revenueAgg = await Order.aggregate([
             {
                 $match: {
+                    user: new mongoose.Types.ObjectId(req.user.id),
                     createdAt: { $gte: sixMonthsAgo },
                     status: { $nin: ['cancelled', 'pending'] } // Only count processed/completed
                 }
@@ -106,6 +108,7 @@ exports.getUserStats = async (req, res) => {
         // 2. Spending Distribution (Products vs Accessories vs Repairs)
         // Aggregate Order Items
         const orderDistAgg = await Order.aggregate([
+            { $match: { user: new mongoose.Types.ObjectId(req.user.id) } },
             { $unwind: "$items" },
             {
                 $group: {
@@ -122,6 +125,7 @@ exports.getUserStats = async (req, res) => {
         // For simplicity reusing this agg. 
         // Better Agg:
         const refinedOrderDist = await Order.aggregate([
+            { $match: { user: new mongoose.Types.ObjectId(req.user.id) } },
             { $unwind: "$items" },
             {
                 $group: {
@@ -139,7 +143,7 @@ exports.getUserStats = async (req, res) => {
         // Repairs Spend (Estimate from Tickets)
         // Assuming completed tickets are paid
         const repairAgg = await RepairTicket.aggregate([
-            { $match: { status: 'completed' } },
+            { $match: { user: new mongoose.Types.ObjectId(req.user.id), status: 'completed' } },
             { $group: { _id: null, total: { $sum: "$estimatedCost" } } }
         ]);
         const repairSpend = repairAgg.length > 0 ? repairAgg[0].total : 0;

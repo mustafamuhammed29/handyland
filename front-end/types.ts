@@ -104,7 +104,10 @@ export interface RepairTicket {
   issue: string;
   status: 'received' | 'diagnosing' | 'repairing' | 'testing' | 'ready' | 'attention';
   date: string;
-  cost: number;
+  cost?: number;
+  estimatedCompletion?: string;  // ISO date string from backend
+  technicianNotes?: string;      // Real notes from technician
+  updatedAt?: string;            // Last update timestamp
 }
 
 export interface Order {

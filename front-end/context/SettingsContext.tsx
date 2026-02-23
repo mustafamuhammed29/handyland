@@ -176,8 +176,22 @@ const defaultSettings: Settings = {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [settings, setSettings] = useState<Settings>(defaultSettings);
-    const [loading, setLoading] = useState(true);
+    // Read cached settings from localStorage for instant render without flash
+    const getCachedSettings = (): Settings => {
+        try {
+            const cached = localStorage.getItem('handyland_settings');
+            if (cached) return { ...defaultSettings, ...JSON.parse(cached) };
+        } catch { }
+        return defaultSettings;
+    };
+
+    const hasCachedSettings = (): boolean => {
+        try { return !!localStorage.getItem('handyland_settings'); } catch { return false; }
+    };
+
+    const [settings, setSettings] = useState<Settings>(getCachedSettings);
+    // If we have cached settings, skip the loading screen — API will refresh silently
+    const [loading, setLoading] = useState(!hasCachedSettings());
     const [error, setError] = useState(false);
     const { addToast } = useToast();
 
@@ -185,29 +199,31 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const fetchSettings = async () => {
             try {
                 const response = await api.get<Settings>('/api/settings');
-                // The interceptor unwraps the response, so 'response' IS the data.
-                // We cast to 'any' here because TS might expect AxiosResponse structure.
                 const data = response as any;
-
-                // Deep merge defaults with fetched data
-                // ✅ FIXED: Add fallbacks to prevent "Cannot read properties of undefined"
                 const safeData = (data || {}) as Partial<Settings>;
 
-                setSettings(prev => ({
-                    ...prev,
+                const merged: Settings = {
+                    ...defaultSettings,
                     ...safeData,
-                    hero: { ...prev.hero, ...(safeData.hero || {}) },
-                    content: { ...prev.content, ...(safeData.content || {}) },
-                    stats: { ...prev.stats, ...(safeData.stats || {}) },
-                    repairArchive: { ...prev.repairArchive, ...(safeData.repairArchive || {}) },
-                    valuation: { ...prev.valuation, ...(safeData.valuation || {}) },
-                    sections: { ...prev.sections, ...(safeData.sections || {}) },
-                    contactSection: { ...prev.contactSection, ...(safeData.contactSection || {}) },
-                    footerSection: { ...prev.footerSection, ...(safeData.footerSection || {}) },
-                    navbar: { ...prev.navbar, ...(safeData.navbar || {}) },
-                }));
+                    hero: { ...defaultSettings.hero, ...(safeData.hero || {}) },
+                    content: { ...defaultSettings.content, ...(safeData.content || {}) },
+                    stats: { ...defaultSettings.stats, ...(safeData.stats || {}) },
+                    repairArchive: { ...defaultSettings.repairArchive, ...(safeData.repairArchive || {}) },
+                    valuation: { ...defaultSettings.valuation, ...(safeData.valuation || {}) },
+                    sections: { ...defaultSettings.sections, ...(safeData.sections || {}) },
+                    contactSection: { ...defaultSettings.contactSection, ...(safeData.contactSection || {}) },
+                    footerSection: { ...defaultSettings.footerSection, ...(safeData.footerSection || {}) },
+                    navbar: { ...defaultSettings.navbar, ...(safeData.navbar || {}) },
+                };
 
+                setSettings(merged);
                 setLoading(false);
+
+                // Cache full settings for instant restore on next page load (no flash)
+                try { localStorage.setItem('handyland_settings', JSON.stringify(merged)); } catch { }
+                if (merged.siteName) {
+                    localStorage.setItem('handyland_sitename', merged.siteName);
+                }
             } catch (error) {
                 console.error("Failed to load global settings", error);
                 setError(true);

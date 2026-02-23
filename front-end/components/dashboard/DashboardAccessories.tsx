@@ -28,7 +28,7 @@ export const DashboardAccessories: React.FC = () => {
 
     const fetchAccessories = async () => {
         try {
-            const res = await api.get('/api/accessories');
+            const res = await api.get('/api/accessories?includeOutOfStock=true');
             setAccessories(res.data || res);
         } catch (error) {
             console.error('Failed to fetch accessories', error);
