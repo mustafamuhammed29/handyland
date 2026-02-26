@@ -11,7 +11,7 @@ const seedAdmin = async () => {
         console.log('MongoDB Connected');
 
         const adminEmail = 'admin@handyland.com';
-        const adminPass = 'admin123';
+        const adminPass = process.env.ADMIN_DEFAULT_PASSWORD || 'HandyLand!Secure2024$';
 
         // Manual hashing since hooks are disabled for debug
         const salt = await bcrypt.genSalt(10);

@@ -1,6 +1,7 @@
 # 🚀 HandyLand - Quick Start Guide
 
 ## Prerequisites
+
 - Node.js installed
 - MongoDB installed and running
 - Stripe account (for payments)
@@ -8,12 +9,14 @@
 ## 🏃‍♂️ Quick Start (Development)
 
 ### 1. Start MongoDB
+
 ```bash
 # Open a terminal and run:
 mongod
 ```
 
 ### 2. Start Backend Server
+
 ```bash
 cd backend
 npm install
@@ -23,6 +26,7 @@ node server.js
 **Backend will run on:** `http://localhost:5000`
 
 ### 3. Start Admin Panel
+
 ```bash
 cd backend/admin
 npm install
@@ -32,6 +36,7 @@ npm run dev
 **Admin Panel will run on:** `http://localhost:5174` (or 5173)
 
 ### 4. Start Frontend (Optional)
+
 ```bash
 cd front-end
 npm install
@@ -44,21 +49,24 @@ npm run dev
 
 ## 🔐 Default Credentials
 
-### Admin Access:
-- **URL:** http://localhost:5174/login
-- **Email:** admin@handyland.com
-- **Password:** admin123
+### Admin Access
+
+- **URL:** <http://localhost:5174/login>
+- **Email:** <admin@handyland.com>
+- **Password:** (Set via ADMIN_DEFAULT_PASSWORD in .env or defaults to a secure value in setup scripts)
 
 ---
 
 ## 🧪 Testing the System
 
-### Manual Testing:
-1. **Admin Panel:** Go to http://localhost:5174/login
+### Manual Testing
+
+1. **Admin Panel:** Go to <http://localhost:5174/login>
 2. **Login with admin credentials**
 3. **Navigate through:** Dashboard, Products, Orders, Settings
 
-### Automated Testing:
+### Automated Testing
+
 ```bash
 cd backend
 powershell -ExecutionPolicy Bypass -File test-api.ps1
@@ -71,6 +79,7 @@ powershell -ExecutionPolicy Bypass -File test-api.ps1
 ### Base URL: `http://localhost:5000/api`
 
 ### Authentication (9 endpoints)
+
 - `POST /auth/register` - Register new user
 - `POST /auth/login` - User login
 - `POST /auth/admin/login` - Admin login
@@ -82,6 +91,7 @@ powershell -ExecutionPolicy Bypass -File test-api.ps1
 - `POST /auth/verify/:token` - Verify email
 
 ### Orders (7 endpoints)
+
 - `POST /orders` - Create order (User)
 - `GET /orders` - Get my orders (User)
 - `GET /orders/:id` - Get single order (User)
@@ -91,6 +101,7 @@ powershell -ExecutionPolicy Bypass -File test-api.ps1
 - `GET /orders/admin/stats` - Get statistics (Admin)
 
 ### Payment (5 endpoints)
+
 - `POST /payment/create-checkout-session` - Create Stripe checkout (User)
 - `POST /payment/success` - Handle payment success (User)
 - `GET /payment/:sessionId` - Get payment details (User)
@@ -134,6 +145,13 @@ FROM_NAME=HandyLand
 
 ---
 
+## 🚀 Getting Started
+
+```bash
+git clone https://github.com/mustafamuhammed29/handyland.git
+cd handyland
+```
+
 ## 📦 Project Structure
 
 ```
@@ -168,7 +186,8 @@ handyland/
 
 ## 🐛 Troubleshooting
 
-### Backend won't start:
+### Backend won't start
+
 ```bash
 # Check if MongoDB is running
 mongod
@@ -182,12 +201,14 @@ rm -rf node_modules
 npm install
 ```
 
-### Admin Panel won't connect:
+### Admin Panel won't connect
+
 1. **Check backend is running** on port 5000
 2. **Check CORS settings** in `server.js`
 3. **Clear browser cache** and reload
 
-### Database connection error:
+### Database connection error
+
 1. **Ensure MongoDB is running:** `mongod`
 2. **Check MONGO_URI** in `.env` file
 3. **Verify database name:** `handyland`
@@ -196,7 +217,8 @@ npm install
 
 ## 🚀 Production Deployment
 
-### Before deploying:
+### Before deploying
+
 1. Change `JWT_SECRET` to strong random value
 2. Replace Stripe test keys with **live keys**
 3. Set `NODE_ENV=production`
@@ -211,6 +233,7 @@ npm install
 ## 📞 Support
 
 For issues or questions:
+
 - Check logs in backend console
 - Review error messages in browser console
 - Verify all environment variables are set

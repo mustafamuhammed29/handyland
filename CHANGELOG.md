@@ -161,7 +161,7 @@ This changelog documents all improvements, fixes, and features developed to brin
 
 ### User Documentation
 
-3. **ADMIN_GUIDE.md** (Non-technical admin manual)
+1. **ADMIN_GUIDE.md** (Non-technical admin manual)
    - Getting started
    - Dashboard overview
    - Managing products
@@ -288,7 +288,7 @@ This changelog documents all improvements, fixes, and features developed to brin
 ### For Administrators
 
 - See `ADMIN_GUIDE.md` for daily operations
-- Default admin credentials: <admin@handyland.com> / admin123
+- Default admin credentials: <admin@handyland.com> / (See environment variables or setup scripts for the secure default password)
 - Change password immediately after first login
 
 ### For End Users

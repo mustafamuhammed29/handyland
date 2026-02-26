@@ -23,7 +23,7 @@ const createAdminUser = async () => {
         const admin = await User.create({
             name: 'Admin User',
             email: 'admin@handyland.com',
-            password: 'admin123',
+            password: process.env.ADMIN_DEFAULT_PASSWORD || 'HandyLand!Secure2024$',
             role: 'admin',
             isVerified: true,
             phone: '+49 123 456 7890',
@@ -37,7 +37,7 @@ const createAdminUser = async () => {
 
         console.log('✅ Admin user created successfully!');
         console.log('Email:', admin.email);
-        console.log('Password: admin123');
+        console.log(`Password: ${process.env.ADMIN_DEFAULT_PASSWORD || 'HandyLand!Secure2024$'}`);
         console.log('Role:', admin.role);
         console.log('\nYou can now login with these credentials.');
 

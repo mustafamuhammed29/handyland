@@ -122,7 +122,7 @@ const Login: React.FC = () => {
                     <div className="mt-6 p-4 bg-slate-800/30 border border-slate-700/50 rounded-lg">
                         <p className="text-xs text-slate-400 mb-2">Development Credentials:</p>
                         <p className="text-xs font-mono text-slate-300">admin@handyland.com</p>
-                        <p className="text-xs font-mono text-slate-300">admin123</p>
+                        <p className="text-xs font-mono text-slate-300">(Check your environment configuration)</p>
                     </div>
                 </div>
 
