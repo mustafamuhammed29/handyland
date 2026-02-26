@@ -100,25 +100,29 @@ exports.syncCart = async (req, res) => {
                     continue;
                 }
 
-                const productType = local.category === 'device' ? 'Product' : 'Accessory';
+                const productType = local.category === 'device' ? 'Product' : (local.category === 'Accessory' ? 'Accessory' : 'Product');
                 const productId = local.id;
 
                 if (serverMap.has(productId)) {
-                    // Update quantity (User preference: maybe max of both? or local overrides? usually local is fresher if just logged in)
+                    // Update quantity atomically
                     const existing = serverMap.get(productId);
-                    existing.quantity = local.quantity || existing.quantity;
+                    const newQuantity = local.quantity || existing.quantity;
+                    await Cart.findOneAndUpdate(
+                        { user: req.user.id, "items.product": productId },
+                        { $set: { "items.$.quantity": newQuantity } }
+                    );
                 } else {
-                    // Add new item
-                    cart.items.push({
-                        product: productId,
-                        productType,
-                        quantity: local.quantity || 1
-                    });
+                    // Add new item atomically
+                    await Cart.findOneAndUpdate(
+                        { user: req.user.id },
+                        { $push: { items: { product: productId, productType, quantity: local.quantity || 1 } } }
+                    );
                 }
             }
         }
 
-        await cart.save();
+        // Re-fetch the fully updated cart
+        cart = await Cart.findOne({ user: req.user.id });
 
         const populatedItems = [];
         for (const item of cart.items) {
@@ -165,31 +169,38 @@ exports.updateCart = async (req, res) => {
     try {
         const { id, productType, quantity } = req.body; // id is productId
 
-        let cart = await Cart.findOne({ user: req.user.id });
-        if (!cart) {
-            cart = new Cart({ user: req.user.id, items: [] });
-        }
-
         if (quantity <= 0) {
-            // Remove item
-            cart.items = cart.items.filter(item => item.product.toString() !== id);
+            // Remove item atomically
+            await Cart.findOneAndUpdate(
+                { user: req.user.id },
+                { $pull: { items: { product: id } } }
+            );
         } else {
-            // Update or Add
-            const existingIndex = cart.items.findIndex(item => item.product.toString() === id);
+            // Check if item exists first
+            const existing = await Cart.findOne({ user: req.user.id, "items.product": id });
 
-            if (existingIndex > -1) {
-                cart.items[existingIndex].quantity = quantity;
+            if (existing) {
+                // Update quantity atomically
+                await Cart.findOneAndUpdate(
+                    { user: req.user.id, "items.product": id },
+                    { $set: { "items.$.quantity": quantity } }
+                );
             } else {
-                cart.items.push({
-                    product: id,
-                    productType: productType === 'device' ? 'Product' : 'Accessory',
-                    quantity
-                });
+                // Determine model reference
+                const typeToSave = productType === 'device' ? 'Product' : (productType === 'Accessory' ? 'Accessory' : 'Product');
+
+                // Add new item atomically
+                await Cart.findOneAndUpdate(
+                    { user: req.user.id },
+                    { $push: { items: { product: id, productType: typeToSave, quantity } } },
+                    { upsert: true, setDefaultsOnInsert: true }
+                );
             }
         }
 
-        await cart.save();
-        res.json({ success: true, cart: cart.items }); // Simple ack
+        // Return the updated cart for frontend validation
+        const updatedCart = await Cart.findOne({ user: req.user.id }) || { items: [] };
+        res.json({ success: true, cart: updatedCart.items });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server Error' });
