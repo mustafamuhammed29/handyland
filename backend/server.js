@@ -81,7 +81,7 @@ app.use('/api/', limiter);
 
 // CORS Configuration
 // CORS Configuration
-const allowedOrigins = [
+const defaultOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:5173',
@@ -91,6 +91,10 @@ const allowedOrigins = [
     'http://127.0.0.1:5173',
     'http://127.0.0.1:5174'
 ];
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : defaultOrigins;
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -269,15 +273,12 @@ app.use(notFound);
 app.use(errorHandler);
 
 const http = require('http');
-const { initSocket } = require('./utils/socket');
 
 const server = http.createServer(app);
-initSocket(server);
 
 server.listen(PORT, () => {
     logger.info(`🚀 Server running on http://localhost:${PORT}`);
     logger.info(`📊 Admin Panel: http://localhost:3001`);
     logger.info(`🌐 Frontend: http://localhost:3000`);
     logger.info(`🔐 Environment: ${process.env.NODE_ENV || 'development'}`);
-    logger.info(`🔌 Socket.IO ready`);
 });
