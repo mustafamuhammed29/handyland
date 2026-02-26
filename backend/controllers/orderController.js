@@ -601,6 +601,60 @@ exports.getOrderStats = async (req, res) => {
     }
 };
 
+// @desc    Get order sales timeline (Admin)
+// @route   GET /api/orders/admin/timeline
+// @access  Private/Admin
+exports.getOrderTimeline = async (req, res) => {
+    try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const timeline = await Order.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: thirtyDaysAgo },
+                    status: { $ne: 'cancelled' }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    sales: { $sum: "$totalAmount" }
+                }
+            },
+            {
+                $sort: { _id: 1 }
+            }
+        ]);
+
+        // Fill in missing days
+        const tData = [];
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toISOString().split('T')[0]; // format YYYY-MM-DD
+            const formattedDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            const dayData = timeline.find(t => t._id === dateStr);
+            tData.push({
+                date: formattedDate,
+                sales: dayData ? dayData.sales : 0
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            timeline: tData
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching order timeline',
+            error: error.message
+        });
+    }
+};
+
 // @desc    Request Refund
 // @route   POST /api/orders/request-refund
 // @access  Private

@@ -5,6 +5,7 @@ const validate = require('../middleware/validation');
 const {
     getAllOrders,
     getOrderStats,
+    getOrderTimeline,
     updateOrderStatus,
     applyCoupon,
     createOrder,
@@ -32,6 +33,7 @@ const createOrderRules = [
 // Admin routes (protected + admin only)
 router.get('/admin/all', protect, authorize('admin'), getAllOrders);
 router.get('/admin/stats', protect, authorize('admin'), getOrderStats);
+router.get('/admin/timeline', protect, authorize('admin'), getOrderTimeline);
 router.put('/admin/:id/status', protect, authorize('admin'), updateOrderStatus);
 
 // User routes (protected)

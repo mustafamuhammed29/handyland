@@ -46,17 +46,14 @@ const Dashboard: React.FC = () => {
                 });
             }
 
-            // Generate mock timeline data for sales
-            const tData = [];
-            for (let i = 29; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                tData.push({
-                    date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                    sales: Math.floor(Math.random() * 500) + 100
-                });
+            // Fetch timeline data
+            try {
+                const timelineRes: any = await api.get('/api/orders/admin/timeline');
+                const tData = timelineRes.timeline || timelineRes.data?.timeline || [];
+                setTimelineData(tData);
+            } catch (err) {
+                console.warn('Failed to fetch timeline data', err);
             }
-            setTimelineData(tData);
 
             // Fetch repair stats
             try {
