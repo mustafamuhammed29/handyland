@@ -6,24 +6,10 @@ const { protect, authorize, optionalProtect } = require('../middleware/auth');
 // @desc    Submit a new message
 // @route   POST /api/messages
 // @access  Public (Optional Auth)
-router.post('/', async (req, res) => {
+router.post('/', optionalProtect, async (req, res) => {
     try {
         const { name, email, message } = req.body;
-        // Optionally get user if authenticated (depends on optionalProtect setup, if not, we can check headers ourselves or just use full protect)
-        // We'll trust the frontend to send the token if logged in, but not block if missing
-
-        let userId = null;
-        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-            const jwt = require('jsonwebtoken');
-            const User = require('../models/User');
-            try {
-                const token = req.headers.authorization.split(' ')[1];
-                const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                userId = decoded.id;
-            } catch (err) {
-                // Ignore invalid token for public route
-            }
-        }
+        const userId = req.user ? req.user._id : null;
 
         if (!name || !email || !message) {
             return res.status(400).json({ message: 'All fields are required' });
