@@ -47,7 +47,7 @@ router.get('/my-messages', protect, async (req, res) => {
 router.get('/', protect, authorize('admin'), async (req, res) => {
     try {
         const messages = await Message.find({ isArchived: false }).sort({ createdAt: -1 });
-        res.json(messages);
+        res.json({ success: true, count: messages.length, data: messages });
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
     }

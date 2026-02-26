@@ -42,6 +42,7 @@ import { GlobalLoader } from './components/GlobalLoader';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { SEO } from './components/SEO';
+import { WhatsAppWidget } from './components/WhatsAppWidget';
 
 // Lazy Load Components
 const Marketplace = React.lazy(() => import('./components/Marketplace').then(module => ({ default: module.Marketplace })));
@@ -199,6 +200,9 @@ function AppContent() {
 
         {/* Cart Drawer */}
         <CartDrawer lang={lang} />
+
+        {/* WhatsApp Floating Icon */}
+        <WhatsAppWidget />
       </Suspense>
     </div >
   );
