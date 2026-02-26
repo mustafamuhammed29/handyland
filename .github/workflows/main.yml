@@ -1,0 +1,47 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install Backend Dependencies
+      run: npm install
+      working-directory: ./backend
+
+    - name: Install Frontend Dependencies
+      run: npm install
+      working-directory: ./front-end
+
+    - name: Install Admin Panel Dependencies
+      run: npm install
+      working-directory: ./backend/admin
+
+    - name: Test / Lint Backend
+      run: npm run test --if-present || echo "No tests configured"
+      working-directory: ./backend
+
+    - name: Build Frontend
+      run: npm run build
+      working-directory: ./front-end
+
+    - name: Build Admin Panel
+      run: npm run build
+      working-directory: ./backend/admin

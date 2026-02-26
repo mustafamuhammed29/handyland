@@ -213,6 +213,30 @@ app.get('/', (req, res) => {
     });
 });
 
+// Health Check Endpoint
+app.get('/health', async (req, res) => {
+    try {
+        // Ping database
+        if (mongoose.connection.readyState !== 1) {
+            throw new Error('Database not connected');
+        }
+        await mongoose.connection.db.admin().ping();
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Server is healthy and connected to database',
+            uptime: process.uptime(),
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(503).json({
+            status: 'error',
+            message: 'Service Unavailable',
+            error: error.message
+        });
+    }
+});
+
 app.get('/api/status', (req, res) => {
     const dbStates = {
         0: 'disconnected',

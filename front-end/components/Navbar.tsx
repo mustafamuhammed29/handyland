@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home, Bell } from 'lucide-react';
 import { LanguageCode, User } from '../types';
 import { translations } from '../i18n';
 import { useCart } from '../context/CartContext';
@@ -8,6 +8,7 @@ import { useSettings } from '../context/SettingsContext';
 import { Link, useLocation } from 'react-router-dom';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import { api } from '../utils/api';
 
 interface NavbarProps {
   lang: LanguageCode;
@@ -18,10 +19,54 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const { cart, setIsCartOpen } = useCart();
   const { settings } = useSettings(); // Use Global Settings
   const location = useLocation();
   const { t } = useTranslation();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.get('/api/notifications/my-notifications') as any;
+        if (res.success) {
+          setNotifications(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch notifications', err);
+      }
+    };
+
+    fetchNotifications();
+    const intervalId = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(intervalId);
+  }, [user]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleReadNotification = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      await api.put(`/api/notifications/${id}/read`, {});
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
+    } catch (err) {
+      console.error('Error marking as read', err);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const navItems = [
     { label: t('nav.home', 'Startseite'), path: '/', icon: <Home className="w-4 h-4" /> },
@@ -67,6 +112,55 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
             {/* Language Switcher */}
             {(settings.navbar?.showLanguageSwitcher !== false) && (
               <LanguageSwitcher />
+            )}
+
+            {user && (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500 transition-colors group"
+                >
+                  <Bell className="w-5 h-5 text-slate-400 group-hover:text-cyan-400" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 rtl:right-auto rtl:-left-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border border-black">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <div className="absolute right-0 top-14 w-80 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                    <div className="px-4 py-2 border-b border-slate-800 flex justify-between items-center">
+                      <h3 className="font-bold text-white">Notifications</h3>
+                      <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-full">{unreadCount} New</span>
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                      {notifications.length === 0 ? (
+                        <div className="p-6 text-center text-slate-500 text-sm">No new notifications</div>
+                      ) : (
+                        notifications.map(notif => (
+                          <div
+                            key={notif._id}
+                            onClick={(e) => handleReadNotification(notif._id, e)}
+                            className={`px-4 py-3 border-b border-slate-800/50 cursor-pointer transition-colors ${notif.read ? 'opacity-60 hover:opacity-100 hover:bg-slate-800/50' : 'bg-slate-800/20 hover:bg-slate-800/80'}`}
+                          >
+                            <div className="flex gap-3">
+                              <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${notif.read ? 'bg-transparent' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`} />
+                              <div>
+                                <p className={`text-sm ${notif.read ? 'text-slate-300' : 'text-white font-medium'}`}>{notif.title}</p>
+                                <p className="text-xs text-slate-400 mt-1 line-clamp-2">{notif.message}</p>
+                                <p className="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
+                                  {new Date(notif.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
 
             <button onClick={() => setIsCartOpen(true)} className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500 transition-colors group">

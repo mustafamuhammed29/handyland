@@ -74,7 +74,7 @@ exports.getAllProducts = async (req, res) => {
             totalProducts: total
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Error fetching products', error: error.message });
     }
 };
 
@@ -87,7 +87,7 @@ exports.getProductById = async (req, res) => {
             res.status(404).json({ message: "Product not found" });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -101,7 +101,7 @@ exports.createProduct = async (req, res) => {
         await newProduct.save();
         res.status(201).json(newProduct);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ success: false, message: 'Error creating product', error: error.message });
     }
 };
 
@@ -118,7 +118,7 @@ exports.updateProduct = async (req, res) => {
             res.status(404).json({ message: "Product not found" });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -131,7 +131,7 @@ exports.deleteProduct = async (req, res) => {
             res.status(404).json({ message: "Product not found" });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -153,7 +153,7 @@ exports.getRelatedProducts = async (req, res) => {
         }).limit(4);
         res.json(related);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -184,7 +184,7 @@ exports.createProductReview = async (req, res) => {
         await product.save();
         res.status(201).json({ message: 'Review added' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -198,7 +198,7 @@ exports.getProductReviews = async (req, res) => {
         const reviews = await Review.find({ product: product._id }).populate('user', 'name');
         res.json(reviews);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -214,7 +214,7 @@ exports.getProductQuestions = async (req, res) => {
             .sort({ createdAt: -1 });
         res.json(questions);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -233,7 +233,7 @@ exports.askQuestion = async (req, res) => {
         });
         res.status(201).json(newQuestion);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -251,7 +251,7 @@ exports.answerQuestion = async (req, res) => {
         await question.save();
         res.json(question);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -292,6 +292,6 @@ exports.validateStock = async (req, res) => {
 
         res.json({ success: true });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };

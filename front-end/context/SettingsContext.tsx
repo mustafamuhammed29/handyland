@@ -196,7 +196,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const { addToast } = useToast();
 
     useEffect(() => {
-        const fetchSettings = async () => {
+        const fetchSettings = async (isBackgroundPolling = false) => {
             try {
                 const response = await api.get<Settings>('/api/settings');
                 const data = response as any;
@@ -217,7 +217,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 };
 
                 setSettings(merged);
-                setLoading(false);
+                if (!isBackgroundPolling) setLoading(false);
 
                 // Cache full settings for instant restore on next page load (no flash)
                 try { localStorage.setItem('handyland_settings', JSON.stringify(merged)); } catch { }
@@ -226,12 +226,21 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 }
             } catch (error) {
                 console.error("Failed to load global settings", error);
-                setError(true);
-                setLoading(false);
+                if (!isBackgroundPolling) {
+                    setError(true);
+                    setLoading(false);
+                }
             }
         };
 
         fetchSettings();
+
+        // Implement polling every 30 seconds to keep settings in sync
+        const pollInterval = setInterval(() => {
+            fetchSettings(true);
+        }, 30000);
+
+        return () => clearInterval(pollInterval);
     }, []);
 
     const updateSettings = async (newSettings: Settings) => {

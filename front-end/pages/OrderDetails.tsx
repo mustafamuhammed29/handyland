@@ -17,6 +17,7 @@ export const OrderDetails = () => {
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [cancelling, setCancelling] = useState(false);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -56,6 +57,22 @@ export const OrderDetails = () => {
         });
         addToast("All items added to cart", "success");
         // Open cart drawer? (optional, requires context update or ref)
+    };
+
+    const handleCancelOrder = async () => {
+        if (!order || !window.confirm('Are you sure you want to cancel this order?')) return;
+        setCancelling(true);
+        try {
+            const res = await orderService.cancelOrder(order._id);
+            if (res.success) {
+                setOrder({ ...order, status: 'cancelled' });
+                addToast('Order cancelled successfully', 'success');
+            }
+        } catch (err: any) {
+            addToast(err.response?.data?.message || 'Failed to cancel order', 'error');
+        } finally {
+            setCancelling(false);
+        }
     };
 
     if (loading) {
@@ -266,12 +283,26 @@ export const OrderDetails = () => {
                         </div>
                     </div>
 
-                    <button className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors font-bold text-sm">
+                    <button
+                        onClick={() => orderService.downloadInvoice(order._id)}
+                        className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors font-bold text-sm"
+                    >
                         Download Invoice
                     </button>
-                    <button className="w-full py-3 border border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-500/30 rounded-xl transition-colors font-bold text-sm">
-                        Request Return / Refund
-                    </button>
+                    {order.status === 'pending' && (
+                        <button
+                            onClick={handleCancelOrder}
+                            disabled={cancelling}
+                            className="w-full py-3 border border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-500/30 rounded-xl transition-colors font-bold text-sm disabled:opacity-50"
+                        >
+                            {cancelling ? 'Cancelling...' : 'Cancel Order'}
+                        </button>
+                    )}
+                    {order.status === 'delivered' && (
+                        <button className="w-full py-3 border border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-500/30 rounded-xl transition-colors font-bold text-sm">
+                            Request Return / Refund
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
