@@ -41,11 +41,15 @@ export const ActiveCarts = () => {
             // Use the configured API utility which handles Proxy, Auth, and Errors
             const response = await api.get('/api/cart/all');
 
-            if (Array.isArray(response.data)) {
-                setCarts(response.data);
-                console.log(`✅ Loaded ${response.data.length} active carts`);
+            // api.ts interceptor already unwraps response.data
+            // So 'response' here IS the actual data from backend
+            const data = response.data || response;
+
+            if (Array.isArray(data)) {
+                setCarts(data);
+                console.log(`✅ Loaded ${data.length} active carts`);
             } else {
-                console.error('❌ Expected array of carts, got:', response.data);
+                console.error('❌ Expected array of carts, got:', data);
                 setCarts([]); // Safe fallback
             }
         } catch (error) {
