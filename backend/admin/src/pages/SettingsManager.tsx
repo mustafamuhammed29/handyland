@@ -84,6 +84,8 @@ interface ContactSettings {
         linkedin: string;
         youtube: string;
     };
+    whatsappPhone: string;
+    whatsappMessage: string;
 }
 
 interface NavbarSettings {
@@ -161,7 +163,8 @@ export default function SettingsManager() {
         sections: { hero: true, stats: true, repairGallery: true, marketplace: true, accessories: true, contact: true },
         contactSection: {
             address: '', phone: '', email: '', formTitle: '', formButton: '', mapUrl: '',
-            socialLinks: { facebook: '', instagram: '', twitter: '', linkedin: '', youtube: '' }
+            socialLinks: { facebook: '', instagram: '', twitter: '', linkedin: '', youtube: '' },
+            whatsappPhone: '', whatsappMessage: ''
         },
         footerSection: { tagline: '', copyright: '' }
     });
@@ -610,6 +613,13 @@ export default function SettingsManager() {
                                 <div className="grid grid-cols-2 gap-4 mt-4">
                                     <Input label="Form Title" value={settings.contactSection?.formTitle} onChange={(v) => handleChange('contactSection', 'formTitle', v)} />
                                     <Input label="Form Button Text" value={settings.contactSection?.formButton} onChange={(v) => handleChange('contactSection', 'formButton', v)} />
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-slate-700">
+                                    <h4 className="text-green-500 font-bold mb-4 flex items-center gap-2"><MessageSquare size={18} /> WhatsApp Widget Settings</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <Input label="WhatsApp Number (e.g. 4915123456789)" value={settings.contactSection?.whatsappPhone} onChange={(v) => handleChange('contactSection', 'whatsappPhone', v)} placeholder="4915123456789" />
+                                        <Input label="Default Welcome Message" value={settings.contactSection?.whatsappMessage} onChange={(v) => handleChange('contactSection', 'whatsappMessage', v)} placeholder="Hello, I need help" />
+                                    </div>
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-slate-700">
                                     <h4 className="text-blue-400 font-bold mb-4 text-sm uppercase">Social Media Links</h4>

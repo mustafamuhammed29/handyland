@@ -97,6 +97,8 @@ interface Settings {
             linkedin?: string;
             youtube?: string;
         };
+        whatsappPhone?: string;
+        whatsappMessage?: string;
     };
 }
 
