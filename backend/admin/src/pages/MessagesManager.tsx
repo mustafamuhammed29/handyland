@@ -19,7 +19,8 @@ export default function MessagesManager() {
             const res = await axios.get(`${API_URL}/messages`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setMessages(res.data);
+            // The backend returns an array directly, so res.data is the array
+            setMessages(Array.isArray(res.data) ? res.data : (res.data.data || []));
         } catch (err) {
             console.error(err);
         } finally {
