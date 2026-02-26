@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, FileText, Edit3, Save, X, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { Edit3, Save, X, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -99,8 +99,8 @@ const EmailManager: React.FC = () => {
             {/* Notification */}
             {notification && (
                 <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border text-sm font-semibold transition-all animate-pulse ${notification.type === 'success'
-                        ? 'bg-green-600/20 border-green-500/50 text-green-300'
-                        : 'bg-red-600/20 border-red-500/50 text-red-300'
+                    ? 'bg-green-600/20 border-green-500/50 text-green-300'
+                    : 'bg-red-600/20 border-red-500/50 text-red-300'
                     }`}>
                     {notification.type === 'success'
                         ? <CheckCircle className="w-5 h-5" />
