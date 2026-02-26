@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Users, ShoppingCart, DollarSign, TrendingUp, Package, Mail } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as LineTooltip, ResponsiveContainer, PieChart, Pie, Cell, Tooltip as PieTooltip, Legend } from 'recharts';
 import { api } from '../utils/api';
@@ -206,30 +207,30 @@ const Dashboard: React.FC = () => {
             <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-xl p-6">
                 <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <a
-                        href="/users"
+                    <Link
+                        to="/users"
                         className="p-4 bg-blue-600/10 border border-blue-600/20 rounded-lg hover:bg-blue-600/20 transition-all group"
                     >
                         <Users className="w-8 h-8 text-blue-400 mb-2" />
                         <h3 className="font-bold text-white group-hover:text-blue-400">Manage Users</h3>
                         <p className="text-sm text-slate-400">View and manage all users</p>
-                    </a>
-                    <a
-                        href="/orders"
+                    </Link>
+                    <Link
+                        to="/orders"
                         className="p-4 bg-purple-600/10 border border-purple-600/20 rounded-lg hover:bg-purple-600/20 transition-all group"
                     >
                         <ShoppingCart className="w-8 h-8 text-purple-400 mb-2" />
                         <h3 className="font-bold text-white group-hover:text-purple-400">View Orders</h3>
                         <p className="text-sm text-slate-400">Manage all orders</p>
-                    </a>
-                    <a
-                        href="/emails"
+                    </Link>
+                    <Link
+                        to="/emails"
                         className="p-4 bg-cyan-600/10 border border-cyan-600/20 rounded-lg hover:bg-cyan-600/20 transition-all group"
                     >
                         <Mail className="w-8 h-8 text-cyan-400 mb-2" />
                         <h3 className="font-bold text-white group-hover:text-cyan-400">Email Templates</h3>
                         <p className="text-sm text-slate-400">Manage email templates</p>
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>
