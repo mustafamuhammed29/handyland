@@ -35,7 +35,7 @@ exports.updateUserProfile = async (req, res) => {
             res.status(404).json({ message: 'User not found' });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Error updating user profile', error: error.message });
     }
 };
 
@@ -57,7 +57,7 @@ exports.changePassword = async (req, res) => {
 
         res.json({ message: 'Password updated successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Error changing password', error: error.message });
     }
 };
 
@@ -69,7 +69,7 @@ exports.getAddresses = async (req, res) => {
         const addresses = await Address.find({ user: req.user.id });
         res.json(addresses);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -91,7 +91,7 @@ exports.addAddress = async (req, res) => {
         });
         res.status(201).json(address);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Error adding address', error: error.message });
     }
 };
 
@@ -110,7 +110,7 @@ exports.deleteAddress = async (req, res) => {
         await address.deleteOne();
         res.json({ message: 'Address removed' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 

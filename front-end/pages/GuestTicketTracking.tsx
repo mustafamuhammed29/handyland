@@ -1,0 +1,146 @@
+import React, { useState } from 'react';
+import { api } from '../utils/api';
+import { Search, Loader2, Wrench, CheckCircle, Clock } from 'lucide-react';
+import { SEO } from '../components/SEO';
+
+export const GuestTicketTracking: React.FC = () => {
+    const [ticketId, setTicketId] = useState('');
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [ticket, setTicket] = useState<any | null>(null);
+
+    const handleTrack = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+        setTicket(null);
+
+        try {
+            const res = await api.post('/api/repairs/track-guest', { ticketId: ticketId.trim(), email: email.trim() }) as any;
+            if (res.success && res.ticket) {
+                setTicket(res.ticket);
+            } else {
+                setError('Failed to retrieve ticket information.');
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Ticket not found or email doesn\'t match.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getStatusConfig = (status: string) => {
+        switch (status) {
+            case 'pending': return { text: 'Pending', icon: <Clock className="w-5 h-5 text-yellow-500" />, bg: 'bg-yellow-500/20' };
+            case 'in_progress': return { text: 'In Progress', icon: <Wrench className="w-5 h-5 text-blue-500" />, bg: 'bg-blue-500/20' };
+            case 'completed': return { text: 'Completed', icon: <CheckCircle className="w-5 h-5 text-emerald-500" />, bg: 'bg-emerald-500/20' };
+            case 'cancelled': return { text: 'Cancelled', icon: <div className="w-3 h-3 rounded-full bg-red-500" />, bg: 'bg-red-500/20' };
+            default: return { text: status, icon: <div className="w-3 h-3 rounded-full bg-slate-500" />, bg: 'bg-slate-500/20' };
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-950 pt-32 pb-12 px-4 flex flex-col items-center">
+            <SEO
+                title="Track Repair Ticket"
+                description="Track the status of your device repair with HandyLand."
+            />
+
+            <div className="max-w-md w-full text-center mb-8">
+                <Wrench className="w-12 h-12 text-cyan-500 mx-auto mb-4" />
+                <h1 className="text-3xl font-black text-white mb-2 tracking-tight">Track Your Repair</h1>
+                <p className="text-slate-400">Enter your ticket ID and email to check the status of your device repair.</p>
+            </div>
+
+            <div className="w-full max-w-md">
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl mb-8">
+                    <form onSubmit={handleTrack} className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400 mb-2">Ticket ID</label>
+                            <input
+                                type="text"
+                                required
+                                value={ticketId}
+                                onChange={e => setTicketId(e.target.value)}
+                                placeholder="e.g. 5f8d04f2b5..."
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400 mb-2">Email Address</label>
+                            <input
+                                type="email"
+                                required
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                placeholder="Email used for the repair"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={loading || !ticketId || !email}
+                            className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Search className="w-5 h-5" /> Track Ticket</>}
+                        </button>
+                    </form>
+                </div>
+
+                {ticket && (
+                    <div className="bg-slate-900 border border-cyan-500/30 rounded-3xl p-8 shadow-[0_0_30px_rgba(6,182,212,0.1)] relative overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full"></div>
+
+                        <div className="flex justify-between items-start mb-6 border-b border-slate-800 pb-6">
+                            <div>
+                                <h3 className="text-xl font-bold text-white">{ticket.device}</h3>
+                                <p className="text-slate-400 text-sm font-mono mt-1">Ticket #{ticket._id.substring(0, 8)}</p>
+                            </div>
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${getStatusConfig(ticket.status).bg}`}>
+                                {getStatusConfig(ticket.status).icon}
+                                <span className="font-bold text-sm text-white capitalize">{getStatusConfig(ticket.status).text}</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6 relative z-10">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Issue Description</label>
+                                <p className="text-slate-300 mt-1">{ticket.issue}</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Date Created</label>
+                                    <p className="text-slate-300 mt-1">{new Date(ticket.createdAt).toLocaleDateString()}</p>
+                                </div>
+                                {ticket.estimatedCost && (
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Est. Cost</label>
+                                        <p className="text-cyan-400 font-bold mt-1 text-lg">€{ticket.estimatedCost}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {ticket.notes && (
+                                <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Latest Notes</label>
+                                    <p className="text-slate-300 text-sm whitespace-pre-wrap">{ticket.notes}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default GuestTicketTracking;

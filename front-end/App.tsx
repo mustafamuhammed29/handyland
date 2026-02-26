@@ -50,6 +50,7 @@ const ProductDetails = React.lazy(() => import('./components/ProductDetails').th
 
 const Checkout = React.lazy(() => import('./pages/Checkout').then(module => ({ default: module.Checkout })));
 const OrderDetails = React.lazy(() => import('./pages/OrderDetails').then(module => ({ default: module.OrderDetails })));
+const GuestTicketTracking = React.lazy(() => import('./pages/GuestTicketTracking').then(module => ({ default: module.GuestTicketTracking })));
 
 // Home Component to group Home-related sections
 const Home = ({ lang }: { lang: LanguageCode }) => {
@@ -157,8 +158,7 @@ function AppContent() {
               <Route path="/repair" element={<PageTransition><Repair lang={lang} /></PageTransition>} />
               <Route path="/valuation" element={<PageTransition><Valuation lang={lang} /></PageTransition>} />
               <Route path="/sell/:quoteRef" element={<PageTransition><SellDevice /></PageTransition>} />
-              <Route path="shop" element={<PageTransition><Accessories lang={lang} /></PageTransition>} />
-              <Route path="products/:id" element={<PageTransition><ProductDetails lang={lang} /></PageTransition>} />
+              <Route path="/products/:id" element={<PageTransition><ProductDetails lang={lang} /></PageTransition>} />
               <Route path="contact" element={<PageTransition><Contact lang={lang} /></PageTransition>} />
               <Route path="checkout" element={<ProtectedRoute><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout lang={lang} /></Suspense></PageTransition></ProtectedRoute>} />
               <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
@@ -166,6 +166,7 @@ function AppContent() {
               <Route path="verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
               <Route path="verify-email-notice" element={<PageTransition><VerifyEmailNotice /></PageTransition>} />
               <Route path="reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+              <Route path="/track-repair" element={<PageTransition><Suspense fallback={<GlobalLoader />}><GuestTicketTracking /></Suspense></PageTransition>} />
 
               {/* Dynamic Pages */}
               <Route path="/info" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />

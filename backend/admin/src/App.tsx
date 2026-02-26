@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import { ActiveCarts } from './components/ActiveCarts';
 import ProductsManager from './pages/ProductsManager';
@@ -14,10 +14,11 @@ import UsersManager from './pages/UsersManager';
 import EmailManager from './pages/EmailManager';
 import PaymentManager from './pages/PaymentManager';
 import ShippingManager from './pages/ShippingManager';
+import MessagesManager from './pages/MessagesManager';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-const SidebarLink = ({ to, icon: Icon, label }: { to: string, icon: any, label: string }) => {
+const SidebarLink = ({ to, icon: Icon, label }: { to: string, icon: React.ElementType, label: string }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
   return (
@@ -79,6 +80,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarLink to="/repairs" icon={Wrench} label="Repairs" />
           <SidebarLink to="/archive" icon={ScanLine} label="Repair Archive" />
           <SidebarLink to="/valuation" icon={FileText} label="Valuation" />
+          <SidebarLink to="/messages" icon={MessageSquare} label="Inbox" />
           <SidebarLink to="/pages" icon={FileText} label="Content Pages" />
 
           <SidebarLink to="/payment" icon={CreditCard} label="Payment Methods" />
@@ -138,6 +140,7 @@ function AppContent() {
                   <Route path="/repairs" element={<RepairManager />} />
                   <Route path="/archive" element={<ArchiveManager />} />
                   <Route path="/valuation" element={<ValuationManager />} />
+                  <Route path="/messages" element={<MessagesManager />} />
                   <Route path="/pages" element={<PageManager />} />
 
                   <Route path="/payment" element={<PaymentManager />} />

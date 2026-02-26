@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShoppingCart, ArrowLeft, Cpu, Battery, Smartphone, Shield, Truck, Star, ChevronRight, Check, X, Share2, ThumbsUp } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Cpu, Battery, Smartphone, Shield, Truck, Star, ChevronRight, Check, X, Share2, ThumbsUp, Heart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext'; // Added
 import { productService } from '../services/productService';
 import { api } from '../utils/api'; // Added
@@ -35,6 +35,57 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
     const { addToast } = useToast();
     const t = translations[lang];
     const { user } = useAuth(); // Safe to access now if context provides it
+
+    const [wishlist, setWishlist] = useState<string[]>([]);
+    const [loadingWishlistId, setLoadingWishlistId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchWishlist = async () => {
+            try {
+                if (!user) return;
+                const res = await api.get<any>('/api/wishlist') as any;
+                const products = res.data?.items || res.data?.products || res.products || res.items || [];
+                setWishlist(products.map((p: any) => p.customId || p.product || p.id || p._id));
+            } catch (error) {
+                console.error("Failed to load wishlist", error);
+            }
+        };
+        fetchWishlist();
+    }, [user]);
+
+    const toggleWishlist = async (targetId: string | undefined) => {
+        if (!targetId || !user) {
+            addToast("Please login to use wishlist", "error");
+            return;
+        }
+        if (loadingWishlistId === targetId) return;
+        setLoadingWishlistId(targetId);
+
+        const isWishlisted = wishlist.includes(targetId);
+        const method = isWishlisted ? 'delete' : 'post';
+        const endpoint = isWishlisted ? `/api/wishlist/${targetId}` : '/api/wishlist';
+
+        setWishlist(prev =>
+            isWishlisted ? prev.filter(item => item !== targetId) : [...prev, targetId]
+        );
+
+        try {
+            await api({
+                method,
+                url: endpoint,
+                data: isWishlisted ? undefined : { productId: targetId }
+            });
+            addToast(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist', 'success');
+        } catch (error) {
+            console.error('Wishlist toggle failed:', error);
+            setWishlist(prev =>
+                isWishlisted ? [...prev, targetId] : prev.filter(item => item !== targetId)
+            );
+            addToast('Action failed. Please try again.', 'error');
+        } finally {
+            setLoadingWishlistId(null);
+        }
+    };
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -111,6 +162,32 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
 
         if (id) fetchProduct();
     }, [id, navigate, addToast]);
+
+    const handleSubmitReview = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user) {
+            addToast("Please login to write a review", "error");
+            navigate('/login');
+            return;
+        }
+        if (!newReview.comment.trim()) return;
+
+        try {
+            const endpointId = product?.id || (product as any)?._id || id;
+            const res = await api.post(`/api/products/${endpointId}/reviews`, newReview) as any;
+            if (res.success || res.review) {
+                addToast("Review submitted successfully!", "success");
+                setShowReviewModal(false);
+                setNewReview({ rating: 5, comment: '' });
+
+                // Fetch reviews again to ensure data consistency
+                const reviewsData = await productService.getProductReviews(endpointId as string);
+                setReviews(reviewsData);
+            }
+        } catch (err: any) {
+            addToast(err.response?.data?.message || err.message || "Failed to submit review", "error");
+        }
+    };
 
     const handleAddToCart = () => {
         if (!product) return;
@@ -226,12 +303,15 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         </div>
 
                         <div className="flex items-center gap-4 mb-6">
-                            <div className="flex text-yellow-500">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className={`w-5 h-5 ${i < Math.round(product.rating || 5) ? 'fill-current' : 'text-slate-700'}`} />
-                                ))}
+                            <div className="flex items-center gap-2 text-yellow-500">
+                                <span className="font-bold text-white text-lg">{product.rating ? Number(product.rating).toFixed(1) : '5.0'}</span>
+                                <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} className={`w-5 h-5 ${i < Math.round(product.rating || 5) ? 'fill-current' : 'text-slate-700'}`} />
+                                    ))}
+                                </div>
                             </div>
-                            <span className="text-slate-400 text-sm">{product.numReviews} Reviews</span>
+                            <span className="text-slate-400 text-sm">{product.numReviews || reviews.length} Reviews</span>
                         </div>
 
                         <div className="flex items-end gap-3 mb-8">
@@ -299,6 +379,18 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                             </div>
 
                             <div className="flex gap-4">
+                                <button
+                                    onClick={() => toggleWishlist(product.id || (product as any)._id)}
+                                    disabled={loadingWishlistId === (product.id || (product as any)._id)}
+                                    title={wishlist.includes(product.id || (product as any)._id) ? "Remove from wishlist" : "Add to wishlist"}
+                                    aria-label={wishlist.includes(product.id || (product as any)._id) ? "Remove from wishlist" : "Add to wishlist"}
+                                    className={`p-4 rounded-xl border transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-wait ${wishlist.includes(product.id || (product as any)._id)
+                                        ? 'bg-red-500/10 text-red-500 border-red-500/30'
+                                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white hover:bg-slate-800'
+                                        }`}
+                                >
+                                    <Heart className={`w-6 h-6 ${wishlist.includes(product.id || (product as any)._id) ? 'fill-current' : ''}`} />
+                                </button>
                                 <button
                                     onClick={handleAddToCart}
                                     disabled={product.stock === 0}
@@ -419,7 +511,10 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                     </div>
                                 )}
                                 <div className="mt-8 text-center">
-                                    <button className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg transition-colors">
+                                    <button
+                                        onClick={() => setShowReviewModal(true)}
+                                        className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg transition-colors"
+                                    >
                                         Write a Review
                                     </button>
                                 </div>
@@ -446,6 +541,66 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                     </div>
                 )}
             </div>
+
+            {/* Review Modal */}
+            {showReviewModal && (
+                <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative">
+                        <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+                            <h3 className="text-xl font-bold text-white">Write a Review</h3>
+                            <button onClick={() => setShowReviewModal(false)} aria-label="Close review modal" title="Close review modal" className="text-slate-500 hover:text-white transition-colors">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSubmitReview} className="p-6 space-y-6">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-400 mb-3">Your Rating</label>
+                                <div className="flex gap-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setNewReview({ ...newReview, rating: star })}
+                                            aria-label={`Rate ${star} stars`}
+                                            title={`Rate ${star} stars`}
+                                            className="focus:outline-none transition-transform hover:scale-110"
+                                        >
+                                            <Star className={`w-8 h-8 ${star <= newReview.rating ? 'fill-yellow-500 text-yellow-500' : 'text-slate-700'}`} />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-400 mb-2">Your Review</label>
+                                <textarea
+                                    required
+                                    rows={4}
+                                    value={newReview.comment}
+                                    onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white focus:border-cyan-500 outline-none transition-colors"
+                                    placeholder="What do you think about this product?"
+                                />
+                            </div>
+                            <div className="flex gap-4 pt-4 border-t border-slate-800">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowReviewModal(false)}
+                                    className="flex-1 py-3 px-4 font-bold rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={!newReview.comment.trim()}
+                                    className="flex-1 py-3 px-4 font-bold rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition-colors disabled:opacity-50"
+                                >
+                                    Submit
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

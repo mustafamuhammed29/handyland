@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
     User, Package, Wrench, Settings, LogOut, Activity,
-    Wallet, Bell, Shield, BarChart3, Heart, ExternalLink
+    Wallet, Bell, Shield, BarChart3, Heart, ExternalLink, Mail
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserType } from '../types';
 import { useDashboardData } from '../hooks/useDashboardData';
+import { ContactInbox } from './ContactInbox';
 import {
     DashboardOverview,
     DashboardOrders,
@@ -150,6 +151,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         { id: 'valuations', label: 'My Valuations', icon: <BarChart3 className="w-4 h-4" /> },
         { id: 'wallet', label: 'Digital Wallet', icon: <Wallet className="w-4 h-4" /> },
         { id: 'wishlist', label: 'Wishlist', icon: <Heart className="w-4 h-4" /> },
+        { id: 'messages', label: 'Messages', icon: <Mail className="w-4 h-4" /> },
         { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
     ];
 
@@ -339,6 +341,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         />
                     )}
 
+                    {activeTab === 'messages' && <ContactInbox />}
 
                 </div>
             </div>

@@ -170,3 +170,51 @@ exports.getAllTickets = async (req, res) => {
         });
     }
 };
+
+// @desc    Track repair ticket for guests
+// @route   POST /api/repairs/track-guest
+// @access  Public
+exports.trackGuestTicket = async (req, res) => {
+    try {
+        const { ticketId, email } = req.body;
+
+        if (!ticketId || !email) {
+            return res.status(400).json({ success: false, message: 'Ticket ID and email are required' });
+        }
+
+        let ticket;
+        // Check if ticketId is valid MongoDB ObjectID
+        if (ticketId.match(/^[0-9a-fA-F]{24}$/)) {
+            ticket = await RepairTicket.findById(ticketId).populate('user', 'email');
+        } else {
+            // Or if it's some custom ID if implemented
+            return res.status(400).json({ success: false, message: 'Invalid ticket ID format' });
+        }
+
+        if (!ticket) {
+            return res.status(404).json({ success: false, message: 'Ticket not found' });
+        }
+
+        let isMatch = false;
+        if (ticket.guestContact && ticket.guestContact.email && ticket.guestContact.email.toLowerCase() === email.toLowerCase()) {
+            isMatch = true;
+        } else if (ticket.user && ticket.user.email && ticket.user.email.toLowerCase() === email.toLowerCase()) {
+            isMatch = true;
+        }
+
+        if (!isMatch) {
+            return res.status(403).json({ success: false, message: 'Invalid ticket ID or email' });
+        }
+
+        res.status(200).json({
+            success: true,
+            ticket
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error tracking ticket',
+            error: error.message
+        });
+    }
+};

@@ -24,7 +24,9 @@ const createOrderRules = [
     body('items').isArray({ min: 1 }).withMessage('Order must have at least one item'),
     body('items.*.product').notEmpty().withMessage('Product ID is required'),
     body('items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
-    body('shippingAddress.street').notEmpty().withMessage('Shipping address is required'),
+    body('shippingAddress.fullName').notEmpty().withMessage('Full name is required'),
+    body('shippingAddress.street').notEmpty().withMessage('Street is required'),
+    body('paymentMethod').notEmpty().withMessage('Payment method is required'),
 ];
 
 // Admin routes (protected + admin only)

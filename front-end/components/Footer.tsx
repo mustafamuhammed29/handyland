@@ -86,6 +86,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
 
           {/* Legal Links (Dynamic) */}
           <div className="flex flex-wrap justify-center gap-6">
+            <Link to="/track-repair" className="hover:text-cyan-400 uppercase transition-colors text-cyan-500 font-bold">Track Repair</Link>
             <Link to="/agb" className="hover:text-white uppercase transition-colors">AGB</Link>
             <Link to="/datenschutz" className="hover:text-white uppercase transition-colors">Datenschutz</Link>
             <Link to="/impressum" className="hover:text-white uppercase transition-colors">Impressum</Link>

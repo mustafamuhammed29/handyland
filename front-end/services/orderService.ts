@@ -89,7 +89,7 @@ export const orderService = {
 
     applyCoupon: async (code: string, cartTotal: number): Promise<any> => {
         try {
-            const response = await api.post('/api/orders/apply-coupon', { code, cartTotal });
+            const response = await api.post('/api/coupons/validate', { code, cartTotal });
             return response as any;
         } catch (error) {
             // Allow 400 errors to propagate naturally as they contain the message

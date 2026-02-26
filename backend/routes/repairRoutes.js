@@ -8,6 +8,7 @@ const { protect, authorize, optionalProtect } = require('../middleware/auth');
 router.get('/', repairController.getRepairCatalog);
 router.get('/catalog', repairController.getRepairCatalog);
 router.post('/estimate', repairController.estimateRepairCost); // Replaces getRepairAdvice
+router.post('/track-guest', repairTicketController.trackGuestTicket);
 
 // Protected routes (Tickets)
 router.post('/tickets', optionalProtect, repairTicketController.createTicket);
