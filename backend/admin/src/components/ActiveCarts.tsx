@@ -33,11 +33,13 @@ export const ActiveCarts = () => {
 
     useEffect(() => {
         fetchCarts();
+        // Poll every 10 seconds
+        const interval = setInterval(fetchCarts, 10000);
+        return () => clearInterval(interval);
     }, []);
 
     const fetchCarts = async () => {
         try {
-            console.log('🛒 Fetching active carts...');
             // Use the configured API utility which handles Proxy, Auth, and Errors
             const response = await api.get('/api/cart/all');
 
@@ -47,7 +49,6 @@ export const ActiveCarts = () => {
 
             if (Array.isArray(data)) {
                 setCarts(data);
-                console.log(`✅ Loaded ${data.length} active carts`);
             } else {
                 console.error('❌ Expected array of carts, got:', data);
                 setCarts([]); // Safe fallback

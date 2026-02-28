@@ -56,7 +56,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     // Dropdown options
     const ramOptions = ['4GB', '6GB', '8GB', '12GB', '16GB'];
     const storageOptions = ['64GB', '128GB', '256GB', '512GB', '1TB'];
-        const conditions = ['New', 'Like New', 'Very Good', 'Good', 'Refurbished']; // Match DB values exactly
+    const conditions = ['New', 'Like New', 'Very Good', 'Good', 'Refurbished']; // Match DB values exactly
 
     const { addToCart } = useCart();
     const { addToast } = useToast();
@@ -123,10 +123,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     condition: selectedCondition
                 });
 
-                console.log('🛒 Marketplace API Response:', data); // DEBUG log
-
                 if (data && data.products) {
-                    console.log(`✅ Loaded ${data.products.length} products`);
                     const formatted = data.products.map((p: any) => ({
                         ...p,
                         model: p.name || p.model,
@@ -142,7 +139,6 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     setProducts(formatted);
                     setTotalPages(data.totalPages);
                 } else {
-                    console.warn('⚠️ Marketplace API returned no products or invalid format', data);
                     // Fallback mechanism (keeping existing logic just in case, though service should handle it)
                     const formatted = (Array.isArray(data) ? data : []).map((p: any) => ({
                         ...p,
@@ -172,12 +168,13 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const handleAddToCart = (phone: any) => {
         const imageUrl = phone.images?.[0] || phone.imageUrl || '';
         addToCart({
-            id: phone.id,
+            id: phone._id || phone.id,
             title: phone.model,
             subtitle: `${phone.storage} • ${phone.color}`,
             price: phone.price,
             image: imageUrl,
-            category: 'device'
+            category: 'device',
+            stock: phone.stock ?? 0
         });
         addToast(`${phone.model} added to cart`, 'success');
     };
@@ -476,7 +473,12 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                 >
                                                     <Heart className={`w-5 h-5 group-hover/btn:scale-110 transition-transform ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
                                                 </button>
-                                                <button onClick={() => handleAddToCart(phone)} aria-label="Add to cart" className="bg-slate-800 border border-slate-700 hover:bg-cyan-600 hover:text-black hover:border-cyan-500 text-white p-3 rounded-xl font-bold transition-all duration-300 group/btn">
+                                                <button
+                                                    onClick={() => handleAddToCart(phone)}
+                                                    disabled={phone.stock === 0}
+                                                    aria-label="Add to cart"
+                                                    className={`p-3 rounded-xl font-bold transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-not-allowed ${phone.stock > 0 ? 'bg-slate-800 border-slate-700 hover:bg-cyan-600 hover:text-black hover:border-cyan-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
+                                                >
                                                     <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
                                                 </button>
                                             </div>
@@ -508,8 +510,14 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                         </div>
                                         <p className="text-slate-400 text-sm line-clamp-2 mb-4">{phone.description}</p>
                                         <div className="flex gap-3 mt-auto">
-                                            <button aria-label="Add to cart" title="Add to cart" onClick={() => handleAddToCart(phone)} className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-lg transition-all text-sm flex items-center gap-2">
-                                                <ShoppingCart className="w-4 h-4" /> Add to Cart
+                                            <button
+                                                aria-label="Add to cart"
+                                                title={phone.stock > 0 ? "Add to cart" : "Out of stock"}
+                                                disabled={phone.stock === 0}
+                                                onClick={() => handleAddToCart(phone)}
+                                                className={`px-6 py-2 font-bold rounded-lg transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${phone.stock > 0 ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white' : 'bg-slate-800 text-slate-500'}`}
+                                            >
+                                                <ShoppingCart className="w-4 h-4" /> {phone.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
                                             </button>
                                             <button
                                                 onClick={(e) => toggleWishlist(e, phone.id)}

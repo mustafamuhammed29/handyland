@@ -32,9 +32,9 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
 
     const fetchNotifications = async () => {
       try {
-        const res = await api.get('/api/notifications/my-notifications') as any;
+        const res = await api.get('/api/notifications') as any;
         if (res.success) {
-          setNotifications(res.data);
+          setNotifications(Array.isArray(res.data) ? res.data : []);
         }
       } catch (err) {
         console.error('Failed to fetch notifications', err);
@@ -66,14 +66,20 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = (notifications || []).filter(n => !n.read).length;
 
-  const navItems = [
-    { label: t('nav.home', 'Startseite'), path: '/', icon: <Home className="w-4 h-4" /> },
-    { label: t('nav.marketplace', 'Marketplace'), path: '/marketplace', icon: <ShoppingBag className="w-4 h-4" /> },
-    { label: t('nav.repair', 'Reparatur'), path: '/repair', icon: <Wrench className="w-4 h-4" /> },
-    { label: t('nav.sell', 'Verkaufen'), path: '/valuation', icon: <BarChart3 className="w-4 h-4" /> },
-  ];
+  const iconMap: Record<string, React.ReactNode> = {
+    Home: <Home className="w-4 h-4" />,
+    ShoppingBag: <ShoppingBag className="w-4 h-4" />,
+    Wrench: <Wrench className="w-4 h-4" />,
+    BarChart3: <BarChart3 className="w-4 h-4" />
+  };
+
+  const navItems = (settings.navbar?.links || []).map(link => ({
+    label: link.labelKey ? t(link.labelKey, link.defaultLabel) : link.defaultLabel,
+    path: link.path,
+    icon: link.iconName && iconMap[link.iconName] ? iconMap[link.iconName] : <Home className="w-4 h-4" />
+  }));
 
   return (
     <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50 rtl:left-auto rtl:right-1/2 rtl:translate-x-1/2">
@@ -170,13 +176,60 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
 
             <Link
               to={user ? '/dashboard' : '/login'}
-              className={`w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 ${user ? 'bg-emerald-600 shadow-emerald-900/20' : 'bg-cyan-600 shadow-cyan-900/20'
+              aria-label={user ? 'Go to dashboard' : 'Log in'}
+              className={`w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 hidden md:flex ${user ? 'bg-emerald-600 shadow-emerald-900/20' : 'bg-cyan-600 shadow-cyan-900/20'
                 }`}
             >
               <UserIcon className="w-5 h-5" />
             </Link>
+
+            {/* Mobile Menu Toggle Button */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              aria-expanded={isOpen ? 'true' : 'false'}
+              aria-label="Toggle navigation menu"
+              aria-controls="mobile-menu"
+              className="w-10 h-10 flex md:hidden items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 bg-slate-900 border border-slate-800 hover:border-cyan-500 group"
+            >
+              {isOpen ? (
+                <X className="w-5 h-5 text-slate-400 group-hover:text-cyan-400" />
+              ) : (
+                <Menu className="w-5 h-5 text-slate-400 group-hover:text-cyan-400" />
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Nav Menu */}
+        {isOpen && (
+          <div id="mobile-menu" className="md:hidden mt-4 pt-4 border-t border-slate-800/50 flex flex-col gap-2 animate-in fade-in slide-in-from-top-4 duration-300">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsOpen(false)}
+                className={`flex items-center px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 ${location.pathname === item.path
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
+                  : 'bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+              >
+                <span className="me-3">{item.icon}</span>
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              to={user ? '/dashboard' : '/login'}
+              onClick={() => setIsOpen(false)}
+              className={`flex mt-2 items-center px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 ${user
+                ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-600/30'
+                : 'bg-cyan-600/20 text-cyan-400 border border-cyan-600/30'
+                }`}
+            >
+              <UserIcon className="w-4 h-4 me-3" />
+              {user ? 'Dashboard' : 'Login'}
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );

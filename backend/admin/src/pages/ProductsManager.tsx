@@ -21,7 +21,8 @@ export default function ProductsManager() {
         color: '',
         display: '',
         description: '',
-        category: 'Smartphones'
+        category: 'Smartphones',
+        stock: 0
     });
 
     const fetchProducts = async () => {
@@ -100,7 +101,8 @@ export default function ProductsManager() {
             color: product.color || '',
             display: product.display || '',
             description: product.description || '',
-            category: product.category || 'Smartphones'
+            category: product.category || 'Smartphones',
+            stock: product.stock ?? 0
         });
         setIsModalOpen(true);
     };
@@ -113,7 +115,7 @@ export default function ProductsManager() {
                 ...formData,
                 name: formData.model // Ensure backend gets 'name' which maps to 'model' in UI
             };
-            
+
             if (formData.id) {
                 await api.put(url, payload);
             } else {
@@ -149,7 +151,8 @@ export default function ProductsManager() {
             color: '',
             display: '',
             description: '',
-            category: 'Smartphones'
+            category: 'Smartphones',
+            stock: 0
         });
     };
 
@@ -209,6 +212,7 @@ export default function ProductsManager() {
                                 <th className="p-6">Product</th>
                                 <th className="p-6">Category</th>
                                 <th className="p-6">Price</th>
+                                <th className="p-6">Stock</th>
                                 <th className="p-6 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -217,7 +221,7 @@ export default function ProductsManager() {
                                 const productId = p._id || p.id;
                                 const isSelected = selectedProducts.includes(productId);
                                 return (
-                                    <tr 
+                                    <tr
                                         key={productId}
                                         className={`transition-colors border-b border-slate-800/50 ${isSelected ? 'bg-blue-900/20' : 'hover:bg-slate-800/50'}`}
                                     >
@@ -237,9 +241,9 @@ export default function ProductsManager() {
                                         <td className="p-6 font-bold text-white">
                                             <div className="flex items-center gap-3">
                                                 {p.image && (
-                                                    <img 
-                                                        src={p.image} 
-                                                        alt={p.name || p.model || "Product"} 
+                                                    <img
+                                                        src={p.image}
+                                                        alt={p.name || p.model || "Product"}
                                                         className="w-12 h-12 rounded-lg object-cover bg-slate-800"
                                                     />
                                                 )}
@@ -253,6 +257,11 @@ export default function ProductsManager() {
                                         </td>
                                         <td className="p-6 text-slate-400">{p.category}</td>
                                         <td className="p-6 text-blue-400 font-bold">€{p.price}</td>
+                                        <td className="p-6">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${p.stock > 0 ? (p.stock < 5 ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30') : 'bg-red-500/20 text-red-500 border border-red-500/30'}`}>
+                                                {p.stock}
+                                            </span>
+                                        </td>
                                         <td className="p-6 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <button
@@ -281,16 +290,17 @@ export default function ProductsManager() {
 
             {/* Add/Edit Modal */}
             {isModalOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
                     onClick={() => setIsModalOpen(false)}
                 >
-                    <div 
+                    <div
                         className="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl p-8 max-h-[90vh] overflow-y-auto relative shadow-2xl"
                         onClick={e => e.stopPropagation()}
                     >
-                        <button 
+                        <button
                             onClick={() => setIsModalOpen(false)}
+                            aria-label="Close modal"
                             className="absolute top-4 right-4 text-slate-400 hover:text-white"
                             style={{ cursor: 'pointer', zIndex: 9999 }}
                         >
@@ -304,8 +314,9 @@ export default function ProductsManager() {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Product Name / Model</label>
+                                    <label htmlFor="pm-model" className="text-sm font-medium text-slate-400">Product Name / Model</label>
                                     <input
+                                        id="pm-model"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         placeholder="e.g. iPhone 15 Pro Max"
                                         value={formData.model}
@@ -314,10 +325,12 @@ export default function ProductsManager() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Category</label>
+                                    <label htmlFor="pm-category" className="text-sm font-medium text-slate-400">Category</label>
                                     <select
+                                        id="pm-category"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={formData.category}
+                                        title="Select item category"
                                         onChange={e => setFormData({ ...formData, category: e.target.value })}
                                     >
                                         <option value="Smartphones">Smartphones</option>
@@ -340,10 +353,24 @@ export default function ProductsManager() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Brand</label>
+                                    <label className="text-sm font-medium text-slate-400">Stock (Quantity)</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                        placeholder="0"
+                                        value={formData.stock}
+                                        onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="pm-brand" className="text-sm font-medium text-slate-400">Brand</label>
                                     <select
+                                        id="pm-brand"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={formData.brand}
+                                        title="Select item brand"
                                         onChange={e => setFormData({ ...formData, brand: e.target.value })}
                                     >
                                         <option value="">Select Brand...</option>
@@ -357,10 +384,12 @@ export default function ProductsManager() {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-400">Condition</label>
+                                    <label htmlFor="pm-condition" className="text-sm font-medium text-slate-400">Condition</label>
                                     <select
+                                        id="pm-condition"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                         value={formData.condition}
+                                        title="Select item condition"
                                         onChange={e => setFormData({ ...formData, condition: e.target.value })}
                                     >
                                         <option value="New">New / Sealed</option>

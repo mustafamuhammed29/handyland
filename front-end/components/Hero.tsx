@@ -30,9 +30,9 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
     return (
         <div
-            className="relative min-h-[90vh] flex items-center justify-center overflow-hidden perspective-container transition-colors duration-700"
+            className="relative min-h-[90vh] flex items-center justify-center overflow-hidden perspective-container transition-colors duration-300"
             style={{
-                background: `linear-gradient(to bottom right, ${settings.hero.bgStart}, ${settings.hero.bgEnd})`
+                background: `linear-gradient(to bottom right, ${settings.hero.bgStart || '#0f172a'}, ${settings.hero.bgEnd || '#020617'})`
             }}
         >
 

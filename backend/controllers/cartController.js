@@ -71,6 +71,7 @@ exports.getCart = async (req, res) => {
 // @access  Private
 exports.syncCart = async (req, res) => {
     try {
+        console.log("SYNC CART CALLED WITH BODY:", JSON.stringify(req.body));
         const { localItems } = req.body;
         const mongoose = require('mongoose');
 
@@ -100,7 +101,8 @@ exports.syncCart = async (req, res) => {
                     continue;
                 }
 
-                const productType = local.category === 'device' ? 'Product' : (local.category === 'Accessory' ? 'Accessory' : 'Product');
+                const productCategory = local.category ? local.category.toLowerCase() : '';
+                const productType = (productCategory === 'device' || productCategory === 'phone') ? 'Product' : (productCategory === 'accessory' ? 'Accessory' : 'Product');
                 const productId = local.id;
 
                 if (serverMap.has(productId)) {
@@ -187,7 +189,8 @@ exports.updateCart = async (req, res) => {
                 );
             } else {
                 // Determine model reference
-                const typeToSave = productType === 'device' ? 'Product' : (productType === 'Accessory' ? 'Accessory' : 'Product');
+                const catLower = productType ? productType.toLowerCase() : '';
+                const typeToSave = (catLower === 'device' || catLower === 'phone') ? 'Product' : (catLower === 'accessory' ? 'Accessory' : 'Product');
 
                 // Add new item atomically
                 await Cart.findOneAndUpdate(
@@ -225,7 +228,7 @@ exports.clearCart = async (req, res) => {
 // @access  Private/Admin
 exports.getAllCarts = async (req, res) => {
     try {
-        const carts = await Cart.find().populate('user', 'name email').sort({ updatedAt: -1 });
+        const carts = await Cart.find({ "items.0": { $exists: true } }).populate('user', 'name email').sort({ updatedAt: -1 });
 
         // Manually populate items to handle dynamic refs (Product vs Accessory) matching getCart logic
         const populatedCarts = await Promise.all(carts.map(async (cart) => {

@@ -5,6 +5,7 @@ import { Send, MapPin, Phone, Mail, Globe, MessageSquare, User, AtSign, Radio, C
 
 import { useSettings } from '../context/SettingsContext';
 import { api } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 interface ContactProps {
     lang: LanguageCode;
@@ -13,6 +14,7 @@ interface ContactProps {
 export const Contact: React.FC<ContactProps> = ({ lang }) => {
     const t = translations[lang];
     const { settings: globalSettings } = useSettings();
+    const { addToast } = useToast();
     const [formState, setFormState] = useState<'idle' | 'sending' | 'success'>('idle');
 
     // Merge global settings with defaults if necessary, or just use them directly
@@ -55,12 +57,13 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
         try {
             await api.post('/api/messages', data);
             setFormState('success');
+            addToast('Nachricht erfolgreich gesendet!', 'success');
             form.reset();
             setTimeout(() => setFormState('idle'), 3000);
         } catch (error) {
             console.error("Message sending failed:", error);
             setFormState('idle');
-            // Ideally show an error toast here
+            addToast('Fehler beim Senden der Nachricht. Bitte versuche es später noch einmal.', 'error');
         }
     };
 
@@ -111,6 +114,7 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
                                     loading="lazy"
                                     referrerPolicy="no-referrer-when-downgrade"
                                     className="absolute inset-0"
+                                    title="Google Maps Location"
                                 ></iframe>
                             ) : (
                                 <>
@@ -164,6 +168,8 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className={`w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 transition-all hover:scale-110 hover:border-slate-600 ${social.color}`}
+                                            title={`Visit our ${social.icon.name || 'social media'} page`}
+                                            aria-label={`Visit our ${social.icon.name || 'social media'} page`}
                                         >
                                             <social.icon size={20} />
                                         </a>

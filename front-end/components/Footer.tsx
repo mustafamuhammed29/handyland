@@ -17,11 +17,11 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
   const settings = {
     companyInfo: {
       name: (globalSettings?.siteName || 'HANDYLAND').toUpperCase(),
-      tagline: globalSettings?.footerSection?.tagline || 'The premier digital ecosystem for smartphone assets.',
-      copyright: globalSettings?.footerSection?.copyright || '© 2026 HANDYLAND DIGITAL TRADEFIX GMBH'
+      tagline: globalSettings?.footerSection?.tagline || 'The global standard for premium device trading and repair.',
+      copyright: globalSettings?.footerSection?.copyright || '© 2026 HANDYLAND'
     },
-    columns: [],
-    bottomLinks: []
+    columns: globalSettings?.footerSection?.columns || [],
+    bottomLinks: globalSettings?.footerSection?.bottomLinks || []
   };
 
   const [loading, setLoading] = useState(false);
