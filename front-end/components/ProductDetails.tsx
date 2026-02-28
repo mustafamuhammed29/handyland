@@ -120,6 +120,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
 
                 const formatted: PhoneListing = {
                     ...productData,
+                    id: productData.id || productData._id || id,
                     model: productData.name || productData.model,
                     specs: {
                         cpu: productData.processor || productData.specs?.cpu || 'Standard Chip',
@@ -198,7 +199,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
             price: product.price,
             image: activeImage,
             category: 'device',
-            quantity: quantity // Assuming addToCart handles quantity, if not it will add 1 by default usually, but context should be updated if needed.
+            quantity: quantity,
+            stock: product.stock ?? 0
         });
         addToast(`${quantity}x ${product.model} added to cart`, 'success');
     };
@@ -252,9 +254,10 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
                     {/* Image Gallery */}
                     <div className="space-y-4">
-                        <div
-                            className="aspect-square bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden relative group cursor-zoom-in"
+                        <button
+                            className="aspect-square bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden relative group cursor-zoom-in w-full text-left focus:outline-none focus:ring-2 focus:ring-cyan-500 block"
                             onClick={() => setIsLightboxOpen(true)}
+                            aria-label={`Enlarge image of ${product.model}`}
                         >
                             <img
                                 src={getImageUrl(activeImage)}
@@ -271,7 +274,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                                 </svg>
                             </div>
-                        </div>
+                        </button>
                         <div className="grid grid-cols-5 gap-2">
                             {product.images?.map((img, idx) => (
                                 <button
@@ -413,10 +416,14 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
 
                 {/* Tabs Section */}
                 <div className="mb-16">
-                    <div className="flex overflow-x-auto gap-8 border-b border-slate-800 mb-8 pb-px">
+                    <div className="flex overflow-x-auto gap-8 border-b border-slate-800 mb-8 pb-px" role="tablist">
                         {['overview', 'specs', 'reviews'].map((tab) => (
                             <button
                                 key={tab}
+                                role="tab"
+                                aria-selected={activeTab === tab ? "true" : "false"}
+                                aria-controls={`tabpanel-${tab}`}
+                                id={`tab-${tab}`}
                                 onClick={() => setActiveTab(tab as any)}
                                 className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === tab ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'}`}
                             >
@@ -425,6 +432,10 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                             </button>
                         ))}
                         <button
+                            role="tab"
+                            aria-selected={activeTab === 'questions' ? "true" : "false"}
+                            aria-controls="tabpanel-questions"
+                            id="tab-questions"
                             onClick={() => setActiveTab('questions')}
                             className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === 'questions' ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'}`}
                         >

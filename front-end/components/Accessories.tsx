@@ -32,7 +32,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
         fetch('/api/accessories')
             .then(res => res.json())
             .then(data => {
-                setAccessories(data);
+                setAccessories(Array.isArray(data) ? data : (data?.accessories || []));
                 setLoading(false);
             })
             .catch(err => {
@@ -49,7 +49,8 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
             subtitle: item.category,
             price: item.price,
             image: imageUrl,
-            category: 'accessory'
+            category: 'accessory',
+            stock: item.stock ?? 0
         });
         addToast(`${item.name} added to cart!`, 'success');
     };
@@ -171,9 +172,10 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                         handleAddToCart(selectedItem);
                                         setSelectedItem(null);
                                     }}
-                                    className="flex-1 bg-white hover:bg-slate-200 text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all"
+                                    disabled={selectedItem.stock === 0}
+                                    className={`flex-1 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${selectedItem.stock > 0 ? 'bg-white hover:bg-slate-200 text-black' : 'bg-slate-800 text-slate-500'}`}
                                 >
-                                    <Plus className="w-5 h-5" /> Equip
+                                    <Plus className="w-5 h-5" /> {selectedItem.stock > 0 ? t.equip : 'Out of Stock'}
                                 </button>
                             </div>
                         </div>
@@ -276,10 +278,11 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleAddToCart(item)}
-                                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-purple-600 text-slate-300 hover:text-white transition-all text-xs font-bold uppercase"
+                                            disabled={item.stock === 0}
+                                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-all text-xs font-bold uppercase disabled:opacity-50 disabled:cursor-not-allowed ${item.stock > 0 ? 'bg-slate-800 hover:bg-purple-600 text-slate-300 hover:text-white' : 'bg-slate-900 border border-slate-800 text-slate-600'}`}
                                         >
                                             <ShoppingCart className="w-3 h-3" />
-                                            {t.equip}
+                                            {item.stock > 0 ? t.equip : 'Out of Stock'}
                                         </button>
                                     </div>
                                 </div>

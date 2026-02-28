@@ -21,6 +21,7 @@ import {
 import { translations } from '../i18n';
 import { useToast } from '../context/ToastContext';
 import { api } from '../utils/api';
+import { useSettings } from '../context/SettingsContext';
 
 interface ValuationProps {
     lang: LanguageCode;
@@ -39,6 +40,21 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
     const t = translations[lang];
     const { addToast } = useToast();
     const navigate = useNavigate();
+    const { settings } = useSettings();
+
+    const screenConditions = settings?.valuation?.screenConditions || [
+        { id: 'hervorragend', title: 'Hervorragend', desc: 'Keine sichtbaren Kratzer. Wie neu.' },
+        { id: 'sehr_gut', title: 'Sehr Gut', desc: 'Leichte Gebrauchsspuren, nicht sichtbar aus 20 cm.' },
+        { id: 'gut', title: 'Gut', desc: 'Sichtbare Kratzer, kein Riss.' },
+        { id: 'beschadigt', title: 'Beschädigt', desc: 'Risse, gebrochenes Glas oder defekte Pixel.' }
+    ];
+
+    const bodyConditions = settings?.valuation?.bodyConditions || [
+        { id: 'hervorragend', title: 'Hervorragend', desc: 'Keine sichtbaren Gebrauchsspuren, wie neu aus der Box.' },
+        { id: 'sehr_gut', title: 'Sehr Gut', desc: 'Leichte Spuren die bei normalem Abstand nicht sichtbar sind.' },
+        { id: 'gut', title: 'Gut', desc: 'Sichtbare Kratzer oder leichte Gebrauchsspuren, keine Dellen.' },
+        { id: 'beschadigt', title: 'Beschädigt', desc: 'Tiefe Kratzer, Risse auf der Rückseite oder Dellen am Rahmen.' }
+    ];
 
     // The two main modes: 'landing' or 'wizard'
     const [mode, setMode] = useState<'landing' | 'wizard'>('landing');
@@ -385,12 +401,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                                 <div className="animate-in slide-in-from-right-8 duration-300">
                                     <h2 className="text-2xl md:text-3xl font-bold mb-8 text-slate-900 dark:text-white text-center">In welchem Zustand befindet sich der Bildschirm?</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {[
-                                            { id: 'hervorragend', title: 'Hervorragend', desc: 'Keine sichtbaren Kratzer. Wie neu.' },
-                                            { id: 'sehr_gut', title: 'Sehr Gut', desc: 'Leichte Gebrauchsspuren, nicht sichtbar aus 20 cm.' },
-                                            { id: 'gut', title: 'Gut', desc: 'Sichtbare Kratzer, kein Riss.' },
-                                            { id: 'beschadigt', title: 'Beschädigt', desc: 'Risse, gebrochenes Glas oder defekte Pixel.' }
-                                        ].map(c => (
+                                        {screenConditions.map((c: any) => (
                                             <button
                                                 key={c.id}
                                                 onClick={() => { setFormData({ ...formData, screenCondition: c.id }); handleNextStep(); }}
@@ -412,12 +423,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                                 <div className="animate-in slide-in-from-right-8 duration-300">
                                     <h2 className="text-2xl md:text-3xl font-bold mb-8 text-slate-900 dark:text-white text-center">Wie ist der Zustand des Gehäuses?</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {[
-                                            { id: 'hervorragend', title: 'Hervorragend', desc: 'Keine sichtbaren Gebrauchsspuren, wie neu aus der Box.' },
-                                            { id: 'sehr_gut', title: 'Sehr Gut', desc: 'Leichte Spuren die bei normalem Abstand nicht sichtbar sind.' },
-                                            { id: 'gut', title: 'Gut', desc: 'Sichtbare Kratzer oder leichte Gebrauchsspuren, keine Dellen.' },
-                                            { id: 'beschadigt', title: 'Beschädigt', desc: 'Tiefe Kratzer, Risse auf der Rückseite oder Dellen am Rahmen.' }
-                                        ].map(c => (
+                                        {bodyConditions.map((c: any) => (
                                             <button
                                                 key={c.id}
                                                 onClick={() => { setFormData({ ...formData, bodyCondition: c.id }); handleNextStep(); }}

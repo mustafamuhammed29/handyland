@@ -66,21 +66,17 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
         const loadRepairs = async () => {
             try {
                 const response = await api.get<RepairDevice[]>('/api/repairs');
-                console.log('🔧 Repair API Response:', response); // DEBUG log
 
                 // Axios returns the data in the .data property, but interceptor already unwraps it
                 // So 'response' IS the data (RepairDevice[])
                 const repairsData = (Array.isArray(response) ? response : response['data']) || [];
 
                 if (Array.isArray(repairsData)) {
-                    console.log(`✅ Loaded ${repairsData.length} repair devices`);
                     setRepairCatalog(repairsData);
                 } else {
-                    console.error("Invalid repairs data format", repairsData);
                     setRepairCatalog([]);
                 }
             } catch (err) {
-                console.error("Failed to load repairs", err);
                 addToast('Failed to load repair catalog. Check console.', 'error');
             } finally {
                 setLoading(false);

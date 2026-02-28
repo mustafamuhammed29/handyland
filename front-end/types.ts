@@ -48,6 +48,7 @@ export interface CartItem {
   image: string;
   category: 'device' | 'accessory';
   quantity?: number;
+  stock?: number;
 }
 
 export interface SavedValuation {

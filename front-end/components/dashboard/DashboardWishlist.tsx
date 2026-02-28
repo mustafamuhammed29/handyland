@@ -26,7 +26,7 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
             subtitle: item.brand,
             image: item.images?.[0] || item.imageUrl,
             price: item.price,
-            category: 'phone',
+            category: 'device',
             quantity: 1
         };
         addToCart(cartItem);
@@ -67,6 +67,8 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                             )}
                             <button
                                 onClick={() => onRemove(item.id)}
+                                aria-label="Remove item from wishlist"
+                                title="Remove from wishlist"
                                 className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-full transition-colors"
                             >
                                 <Trash2 className="w-4 h-4" />
@@ -101,6 +103,8 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                                 </button>
                                 <button
                                     onClick={() => navigate(`/product/${item.id}`)}
+                                    aria-label="View product details"
+                                    title="View product"
                                     className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors"
                                 >
                                     <ExternalLink className="w-4 h-4" />

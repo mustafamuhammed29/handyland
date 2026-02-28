@@ -53,6 +53,13 @@ const Checkout = React.lazy(() => import('./pages/Checkout').then(module => ({ d
 const OrderDetails = React.lazy(() => import('./pages/OrderDetails').then(module => ({ default: module.OrderDetails })));
 const GuestTicketTracking = React.lazy(() => import('./pages/GuestTicketTracking').then(module => ({ default: module.GuestTicketTracking })));
 
+const AdminRedirect = () => {
+  useEffect(() => {
+    window.location.href = 'http://localhost:5174';
+  }, []);
+  return null;
+};
+
 // Home Component to group Home-related sections
 const Home = ({ lang }: { lang: LanguageCode }) => {
   const { settings } = useSettings();
@@ -168,6 +175,13 @@ function AppContent() {
               <Route path="verify-email-notice" element={<PageTransition><VerifyEmailNotice /></PageTransition>} />
               <Route path="reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
               <Route path="/track-repair" element={<PageTransition><Suspense fallback={<GlobalLoader />}><GuestTicketTracking /></Suspense></PageTransition>} />
+
+              {/* UX Report Redirects */}
+              <Route path="/products" element={<Navigate to="/marketplace" replace />} />
+              <Route path="/register" element={<Navigate to="/login" replace />} />
+              <Route path="/cart" element={<Navigate to="/" replace />} />
+              <Route path="/about" element={<Navigate to="/uber-uns" replace />} />
+              <Route path="/admin" element={<AdminRedirect />} />
 
               {/* Dynamic Pages */}
               <Route path="/info" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />

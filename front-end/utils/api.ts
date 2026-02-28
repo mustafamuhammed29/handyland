@@ -2,7 +2,6 @@ import axios from 'axios';
 import { ENV } from '../src/config/env';
 
 // Force empty baseURL to rely on Vite proxy for all API calls
-console.log('🔧 API Setup - Using Vite proxy for all API calls');
 const API_BASE_URL = '';
 
 export const api = axios.create({
@@ -24,7 +23,6 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
-        console.error('❌ Request interceptor error:', error);
         return Promise.reject(error);
     }
 );
@@ -37,7 +35,6 @@ api.interceptors.response.use(
 
         // ✅ CRITICAL: If refresh endpoint itself fails, don't retry
         if (error.config.url?.includes('/auth/refresh')) {
-            console.error('❌ [API] Refresh endpoint failed');
             localStorage.removeItem('user');
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
@@ -58,8 +55,6 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
-            console.log('🔄 [API] 401 Unauthorized, attempting token refresh...');
-
             try {
                 // Try to refresh the access token - use correct /api/auth/refresh endpoint
                 const refreshResponse = await api.get('/api/auth/refresh');
@@ -71,12 +66,9 @@ api.interceptors.response.use(
                     originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
                 }
 
-                console.log('✅ [API] Token refreshed successfully');
-
                 // Retry the original request
                 return api.request(originalRequest);
             } catch (refreshError) {
-                console.error('❌ [API] Token refresh failed:', refreshError);
                 // Clear authentication state
                 localStorage.removeItem('user');
                 localStorage.removeItem('accessToken');
@@ -88,7 +80,6 @@ api.interceptors.response.use(
                 const isPublicPath = publicPaths.some(path => currentPath.includes(path));
 
                 if (!isPublicPath) {
-                    console.log('🔄 [API] Redirecting to login...');
                     window.location.href = '/login';
                 }
 

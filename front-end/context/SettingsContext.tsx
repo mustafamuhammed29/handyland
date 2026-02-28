@@ -61,6 +61,8 @@ interface FooterSettings {
     legalLinks: boolean;
     newsletter: boolean;
     socialLinks: boolean;
+    columns?: { title: string; links: { label: string; url: string }[] }[];
+    bottomLinks?: { label: string; url: string }[];
 }
 
 interface Settings {
@@ -71,12 +73,15 @@ interface Settings {
         logoText?: string;
         logoAccentText?: string;
         showLanguageSwitcher?: boolean;
+        links?: { labelKey?: string; defaultLabel: string; path: string; iconName?: string }[];
     };
     hero: HeroSettings;
     valuation: {
         step1Title: string;
         step2Title?: string;
         step3Title?: string;
+        screenConditions?: { id: string; title: string; desc: string; }[];
+        bodyConditions?: { id: string; title: string; desc: string; }[];
     };
     content: ContentSettings;
     stats: StatsSettings;
@@ -166,12 +171,37 @@ const defaultSettings: Settings = {
         quickLinks: true,
         legalLinks: true,
         newsletter: true,
-        socialLinks: true
+        socialLinks: true,
+        columns: [
+            {
+                title: 'Shop',
+                links: [
+                    { label: 'Marketplace', url: '/marketplace' },
+                    { label: 'Accessories', url: '/accessories' },
+                    { label: 'Sell Device', url: '/valuation' }
+                ]
+            },
+            {
+                title: 'Services',
+                links: [
+                    { label: 'Repair', url: '/repair' },
+                    { label: 'Track Repair', url: '/track-repair' },
+                    { label: 'Support', url: '/contact' }
+                ]
+            }
+        ],
+        bottomLinks: []
     },
     navbar: {
         logoText: 'HANDY',
         logoAccentText: 'LAND',
-        showLanguageSwitcher: true
+        showLanguageSwitcher: true,
+        links: [
+            { labelKey: 'home', defaultLabel: 'Home', path: '/', iconName: 'Home' },
+            { labelKey: 'market', defaultLabel: 'Marketplace', path: '/marketplace', iconName: 'ShoppingBag' },
+            { labelKey: 'repair', defaultLabel: 'Repair', path: '/repair', iconName: 'Wrench' },
+            { labelKey: 'valuation', defaultLabel: 'Sell', path: '/valuation', iconName: 'BarChart3' }
+        ]
     }
 };
 
@@ -182,7 +212,22 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const getCachedSettings = (): Settings => {
         try {
             const cached = localStorage.getItem('handyland_settings');
-            if (cached) return { ...defaultSettings, ...JSON.parse(cached) };
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                return {
+                    ...defaultSettings,
+                    ...parsed,
+                    hero: { ...defaultSettings.hero, ...(parsed.hero || {}) },
+                    content: { ...defaultSettings.content, ...(parsed.content || {}) },
+                    stats: { ...defaultSettings.stats, ...(parsed.stats || {}) },
+                    repairArchive: { ...defaultSettings.repairArchive, ...(parsed.repairArchive || {}) },
+                    valuation: { ...defaultSettings.valuation, ...(parsed.valuation || {}) },
+                    sections: { ...defaultSettings.sections, ...(parsed.sections || {}) },
+                    contactSection: { ...defaultSettings.contactSection, ...(parsed.contactSection || {}) },
+                    footerSection: { ...defaultSettings.footerSection, ...(parsed.footerSection || {}) },
+                    navbar: { ...defaultSettings.navbar, ...(parsed.navbar || {}) },
+                };
+            }
         } catch { }
         return defaultSettings;
     };

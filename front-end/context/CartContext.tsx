@@ -91,26 +91,37 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.setItem('handyland_wishlist', JSON.stringify(wishlist));
     }, [wishlist]);
 
-    // Backend Sync on Login
+    // Backend Sync on Login / Refresh
     useEffect(() => {
         const syncCart = async () => {
-            if (user && user._id) { // Ensure user has ID
+            if (user && user._id) {
                 try {
-                    // Send local cart to server to merge
-                    const response = await api.post<CartItem[]>('/api/cart/sync', {
-                        localItems: cart.map(item => ({
-                            id: item.id,
-                            quantity: item.quantity,
-                            category: item.category
-                        }))
-                    });
+                    // Send local cart ONLY IF it has items, otherwise just GET the cart.
+                    // If we send an empty localItems array, the backend merge logic might
+                    // not wipe it depending on implementation, but it's safer to just fetch 
+                    // if local is empty to avoid overwriting the server's preserved cart.
+                    if (cart.length > 0) {
+                        const response = await api.post<CartItem[]>('/api/cart/sync', {
+                            localItems: cart.map(item => ({
+                                id: item.id,
+                                quantity: item.quantity,
+                                category: item.category
+                            }))
+                        });
 
-                    if (Array.isArray(response)) {
-                        setCart(response);
+                        if (Array.isArray(response)) {
+                            setCart(response);
+                        }
+                    } else {
+                        // Local is empty (e.g., fresh login or page refresh)
+                        // Fetch from server directly instead of syncing an empty array
+                        const response = await api.get<CartItem[]>('/api/cart');
+                        if (Array.isArray(response) && response.length > 0) {
+                            setCart(response);
+                        }
                     }
                 } catch (error) {
-                    console.error("Failed to sync cart:", error);
-                    // If 401, don't retry immediately or clear user here (handled by interceptor)
+                    console.error("Failed to sync/fetch cart:", error);
                 }
             }
         };
@@ -118,7 +129,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (user && user._id) {
             syncCart();
         }
-    }, [user?._id]); // Only run when user ID changes, not just 'user' object reference
+    }, [user?._id]); // Run when user ID is established
 
     // Keep ref for async operations
     const cartRef = React.useRef(cart);
@@ -157,9 +168,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setCart((prev) => {
             const existing = prev.find((i) => i.id === item.id);
             if (existing) {
-                return prev.map((i) =>
-                    i.id === item.id ? { ...i, quantity: (i.quantity || 1) + 1 } : i
-                );
+                return prev.map((i) => {
+                    if (i.id === item.id) {
+                        const maxAllowed = i.stock ?? Infinity;
+                        const qty = Math.min((i.quantity || 1) + 1, maxAllowed);
+                        return { ...i, quantity: qty };
+                    }
+                    return i;
+                });
             }
             return [...prev, { ...item, quantity: 1 }];
         });
@@ -194,7 +210,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // Relying on the optimistic update logic:
             let newQty = 1;
             if (currentItem) {
-                newQty = (currentItem.quantity || 1) + 1;
+                const maxAllowed = currentItem.stock ?? Infinity;
+                newQty = Math.min((currentItem.quantity || 1) + 1, maxAllowed);
             }
 
             debouncedApiUpdate(item.id, newQty, item.category);
@@ -217,7 +234,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!itemToUpdate) return;
 
         const itemCategory = itemToUpdate.category;
-        const newQty = (itemToUpdate.quantity || 1) + delta;
+        const maxAllowed = itemToUpdate.stock ?? Infinity;
+        const requestedQty = (itemToUpdate.quantity || 1) + delta;
+        const newQty = Math.min(requestedQty, maxAllowed);
         const shouldRemove = newQty < 1;
 
         if (shouldRemove) {

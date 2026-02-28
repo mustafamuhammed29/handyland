@@ -29,7 +29,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             return false;
         } catch (error) {
-            console.error('❌ [AuthContext] Token refresh failed:', error);
             return false;
         }
     };
@@ -85,7 +84,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         }
                     }
                 } catch (parseError) {
-                    console.error('❌ [AuthContext] Failed to parse stored user:', parseError);
                     if (!ignore) {
                         setUser(null);
                         localStorage.removeItem('user');
@@ -102,14 +100,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
     const login = async (email: string, password: string) => {
-        console.log('🔑 [AuthContext] Login attempt:', email);
 
         try {
             const data = await authService.login(email, password);
 
             if (data.success && data.user) {
-                console.log('✅ [AuthContext] Login successful:', data.user.email);
-                console.log('💾 [AuthContext] Saving user to localStorage');
 
                 // Hybrid Auth: Store tokens in localStorage as fallback
                 if (data.token) localStorage.setItem('accessToken', data.token);
@@ -118,7 +113,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 localStorage.setItem('user', JSON.stringify(data.user));
                 setUser(data.user);
 
-                console.log('🔄 [AuthContext] Navigating...');
                 // Check if user was redirected from valuation flow
                 const pendingQuote = sessionStorage.getItem('pendingValuationQuote');
                 if (pendingQuote) {
@@ -135,28 +129,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
                 navigate('/dashboard', { replace: true });
             } else {
-                console.error('❌ [AuthContext] Login failed: No user data');
                 throw new Error('Login failed');
             }
         } catch (error) {
-            console.error('❌ [AuthContext] Login error:', error);
             throw error;
         }
     };
 
     const logout = () => {
-        console.log('🚪 [AuthContext] Logging out...');
         setUser(null);
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
 
         authService.logout().catch(err => {
-            console.error('❌ [AuthContext] Logout API error:', err);
         });
 
         navigate('/login');
-        console.log('✅ [AuthContext] Logout complete');
     };
 
     return (

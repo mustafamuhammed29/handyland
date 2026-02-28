@@ -76,7 +76,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
             <div className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-slate-900/95 backdrop-blur-xl border-l border-slate-700 transform transition-transform duration-500 z-[70] flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 
                 {/* Header */}
-                <div className="p-6 border-b border-slate-800 bg-black/40">
+                <div
+                    className="p-6 border-b border-slate-800 bg-black/40"
+                    aria-live="polite"
+                    aria-atomic="true"
+                >
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
                             <Zap className="w-5 h-5 text-cyan-400" /> Global Loadout
@@ -137,6 +141,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                                                     onClick={() => handleMoveToWishlist(item)}
                                                     className="text-slate-500 hover:text-pink-400 transition-colors"
                                                     title="Move to Wishlist"
+                                                    aria-label={`Move ${item.title} to wishlist`}
                                                 >
                                                     <Heart className="w-4 h-4" />
                                                 </button>
@@ -144,6 +149,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                                                     onClick={() => removeFromCart(item.id)}
                                                     className="text-slate-500 hover:text-red-400 transition-colors"
                                                     title="Remove"
+                                                    aria-label={`Remove ${item.title} from cart`}
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </button>
@@ -164,7 +170,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                                             <span className="text-sm font-mono font-bold text-white w-4 text-center">{item.quantity || 1}</span>
                                             <button
                                                 onClick={() => updateQuantity(item.id, 1)}
-                                                className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
+                                                className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                disabled={(item.quantity || 1) >= (item.stock ?? Infinity)}
                                             >
                                                 +
                                             </button>

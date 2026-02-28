@@ -22,6 +22,7 @@ export default function AccessoriesManager() {
         color: '',
         display: '',
         storage: '',
+        stock: 0,
         specs: { key: '', value: '' }
     });
 
@@ -98,6 +99,7 @@ export default function AccessoriesManager() {
             color: item.color || '',
             display: item.display || '',
             storage: item.storage || '',
+            stock: item.stock ?? 0,
             specs: { key: specKey, value: specValue }
         });
         setIsModalOpen(true);
@@ -106,7 +108,7 @@ export default function AccessoriesManager() {
     const resetForm = () => {
         setFormData({
             id: '', name: '', category: 'audio', price: '', image: '', description: '', tag: '',
-            battery: '', processor: '', color: '', display: '', storage: '',
+            battery: '', processor: '', color: '', display: '', storage: '', stock: 0,
             specs: { key: '', value: '' }
         });
     };
@@ -299,7 +301,12 @@ export default function AccessoriesManager() {
 
                                 <div className="mt-auto pt-4 border-t border-slate-800 flex justify-between items-center">
                                     <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">€{item.price}</span>
-                                    <span className="text-xs text-slate-600 font-mono">ID: {accId.substring(0, 6)}</span>
+                                    <div className="flex flex-col items-end gap-1">
+                                        <span className="text-xs text-slate-600 font-mono">ID: {accId.substring(0, 6)}</span>
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.stock > 0 ? (item.stock < 5 ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400') : 'bg-red-500/20 text-red-500'}`}>
+                                            Stock: {item.stock || 0}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         );
@@ -363,6 +370,18 @@ export default function AccessoriesManager() {
                                                 placeholder="99.99"
                                                 value={formData.price}
                                                 onChange={e => setFormData({ ...formData, price: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Stock (Qty)</label>
+                                            <input
+                                                type="number"
+                                                className="input-field"
+                                                placeholder="0"
+                                                min="0"
+                                                value={formData.stock}
+                                                onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
                                                 required
                                             />
                                         </div>

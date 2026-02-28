@@ -116,7 +116,6 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                     }
                 }
             } catch (err) {
-                console.error("Failed to fetch checkout data", err);
             } finally {
                 setIsLoadingMethods(false);
             }
@@ -160,7 +159,6 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                 }
                 setShippingDetails(prev => ({ ...prev, ...parsed }));
             } catch (e) {
-                console.error("Failed to parse saved checkout details", e);
             }
         }
     }, [cart, user, navigate]);
@@ -188,7 +186,6 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         const result = shippingSchema.safeParse(shippingDetails);
         if (!result.success) {
             const zodError = result.error;
-            console.log("Validation Failed:", zodError); // Debug log
 
             const formattedErrors: any = {};
 
@@ -308,7 +305,6 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                 cart.map(item => ({ id: item.id, quantity: item.quantity || 1, name: item.title, category: item.category }))
             );
         } catch (err: any) {
-            console.error("Stock Validation Error:", err);
             setError(err.response?.data?.message || err.message || "Some items are out of stock.");
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setLoading(false);
@@ -380,7 +376,6 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
             }
 
         } catch (err: any) {
-            console.error("Payment Error:", err);
             setError(err.response?.data?.message || err.message || 'Payment initiation failed. Please try again.');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setLoading(false); // Only stop loading on error, otherwise we are redirecting

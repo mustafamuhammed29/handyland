@@ -44,6 +44,7 @@ export const SellDevice = () => {
     const { addToast } = useToast();
 
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [quote, setQuote] = useState<any>(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -196,11 +197,12 @@ export const SellDevice = () => {
     };
 
     const handleSubmit = async () => {
-        setShowConfirm(false);
+        setIsSubmitting(true);
         const token = localStorage.getItem('accessToken');
         if (!token) {
             addToast('Bitte melde dich an, um den Verkauf abzuschließen', 'error');
             navigate('/login');
+            setIsSubmitting(false);
             return;
         }
         try {
@@ -209,13 +211,16 @@ export const SellDevice = () => {
                 iban: formData.iban.replace(/\s/g, ''),
             });
             if (data.success) {
+                setShowConfirm(false);
                 addToast('Verkauf bestätigt! Du erhältst eine E-Mail mit dem Versandlabel.', 'success');
                 setTimeout(() => navigate('/dashboard'), 3000);
             } else {
                 addToast(data.message || 'Fehler bei der Bestätigung', 'error');
+                setIsSubmitting(false);
             }
         } catch {
             addToast('Netzwerkfehler. Bitte versuche es erneut.', 'error');
+            setIsSubmitting(false);
         }
     };
 
@@ -284,9 +289,11 @@ export const SellDevice = () => {
                             </button>
                             <button
                                 onClick={handleSubmit}
-                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold transition-all flex items-center justify-center gap-1.5"
+                                disabled={isSubmitting}
+                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
                             >
-                                <ShieldCheck className="w-4 h-4" /> Bestätigen
+                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
+                                {isSubmitting ? 'Wird bearbeitet...' : 'Bestätigen'}
                             </button>
                         </div>
                     </div>
@@ -359,8 +366,8 @@ export const SellDevice = () => {
                                                 type="button"
                                                 onClick={() => handleSelectAddress(addr)}
                                                 className={`text-left p-4 rounded-xl border transition-all ${selectedAddressId === addr._id && !useManual
-                                                        ? 'border-purple-500 bg-purple-600/10'
-                                                        : 'border-slate-700 bg-slate-950 hover:border-slate-600'
+                                                    ? 'border-purple-500 bg-purple-600/10'
+                                                    : 'border-slate-700 bg-slate-950 hover:border-slate-600'
                                                     }`}
                                             >
                                                 <div className="flex items-start gap-3">
@@ -390,8 +397,8 @@ export const SellDevice = () => {
                                             type="button"
                                             onClick={handleManualMode}
                                             className={`text-left p-4 rounded-xl border transition-all ${useManual
-                                                    ? 'border-cyan-500 bg-cyan-600/10'
-                                                    : 'border-slate-700 border-dashed bg-slate-950 hover:border-slate-600'
+                                                ? 'border-cyan-500 bg-cyan-600/10'
+                                                : 'border-slate-700 border-dashed bg-slate-950 hover:border-slate-600'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-3">
