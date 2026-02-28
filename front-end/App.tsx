@@ -43,6 +43,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { SEO } from './components/SEO';
 import { WhatsAppWidget } from './components/WhatsAppWidget';
+import { AnnouncementBanner } from './components/AnnouncementBanner';
+import { OfflineBanner } from './components/OfflineBanner';
 
 // Lazy Load Components
 const Marketplace = React.lazy(() => import('./components/Marketplace').then(module => ({ default: module.Marketplace })));
@@ -144,6 +146,8 @@ function AppContent() {
 
   return (
     <div className={`min-h-screen font-sans bg-slate-950 selection:bg-blue-500/30 selection:text-blue-200 ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      <AnnouncementBanner />
+      <OfflineBanner />
       <Suspense fallback={<GlobalLoader />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
@@ -189,8 +193,8 @@ function AppContent() {
                 Use default exports if available, otherwise use InfoPage or correct imports.
                 Assuming TermsAndConditions and PrivacyPolicy are named exports in pages/
              */}
-              <Route path="/agb" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
-              <Route path="/privacy" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+              <Route path="/agb" element={<PageTransition><TermsAndConditions /></PageTransition>} />
+              <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
 
               <Route path="/datenschutz" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
               <Route path="/service" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />

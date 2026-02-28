@@ -98,19 +98,24 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-2 bg-black/30 rounded-full p-1 border border-slate-800/50">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 ${location.pathname === item.path
-                  ? 'bg-white text-black shadow-lg scale-105'
-                  : 'text-slate-400 hover:text-white'
-                  }`}
-              >
-                <span className="me-2">{item.icon}</span>
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive = item.path === '/'
+                ? location.pathname === '/'
+                : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 ${isActive
+                    ? 'bg-white text-black shadow-lg scale-105'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
+                >
+                  <span className="me-2">{item.icon}</span>
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Actions */}
@@ -186,7 +191,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              aria-expanded={isOpen ? 'true' : 'false'}
+              aria-expanded={isOpen}
               aria-label="Toggle navigation menu"
               aria-controls="mobile-menu"
               className="w-10 h-10 flex md:hidden items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 bg-slate-900 border border-slate-800 hover:border-cyan-500 group"
@@ -203,20 +208,25 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
         {/* Mobile Nav Menu */}
         {isOpen && (
           <div id="mobile-menu" className="md:hidden mt-4 pt-4 border-t border-slate-800/50 flex flex-col gap-2 animate-in fade-in slide-in-from-top-4 duration-300">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 ${location.pathname === item.path
-                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
-                  : 'bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white'
-                  }`}
-              >
-                <span className="me-3">{item.icon}</span>
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isMobileActive = item.path === '/'
+                ? location.pathname === '/'
+                : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 ${isMobileActive
+                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
+                    : 'bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                >
+                  <span className="me-3">{item.icon}</span>
+                  {item.label}
+                </Link>
+              );
+            })}
             <Link
               to={user ? '/dashboard' : '/login'}
               onClick={() => setIsOpen(false)}

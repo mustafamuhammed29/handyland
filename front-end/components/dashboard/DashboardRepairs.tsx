@@ -165,9 +165,18 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                 ))}
 
                 {repairs.length === 0 && (
-                    <div className="text-center py-12 text-slate-500">
-                        <Wrench className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                        <p className="text-lg font-medium">No active repairs</p>
+                    <div className="text-center py-16 border-2 border-dashed border-slate-800 rounded-2xl">
+                        <Wrench className="w-16 h-16 mx-auto mb-4 text-slate-700" />
+                        <p className="text-lg font-bold text-white mb-1">No active repairs</p>
+                        <p className="text-sm text-slate-500 mb-6">
+                            Need a repair? Browse our service catalog and contact us to get started.
+                        </p>
+                        <a
+                            href="/repair"
+                            className="inline-block px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-sm font-bold transition-colors"
+                        >
+                            View Repair Services →
+                        </a>
                     </div>
                 )}
             </div>

@@ -1,10 +1,15 @@
 import React from 'react';
 import { FileText } from 'lucide-react';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 const TermsAndConditions: React.FC = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-28 pb-12 px-4">
             <div className="max-w-4xl mx-auto">
+                <Breadcrumbs items={[
+                    { label: 'Home', path: '/' },
+                    { label: 'Terms & Conditions' }
+                ]} className="mb-6" />
                 <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8">
                     <div className="flex items-center gap-3 mb-8">
                         <FileText className="w-10 h-10 text-blue-500" />

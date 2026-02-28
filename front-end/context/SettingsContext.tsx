@@ -105,6 +105,15 @@ interface Settings {
         whatsappPhone?: string;
         whatsappMessage?: string;
     };
+    announcementBanner?: {
+        enabled?: boolean;
+        text?: string;
+        color?: string;
+        dismissible?: boolean;
+        link?: string;
+        linkText?: string;
+    };
+    freeShippingThreshold?: number;
 }
 
 interface SettingsContextType {

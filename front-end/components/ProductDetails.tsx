@@ -9,6 +9,8 @@ import { useToast } from '../context/ToastContext';
 import { translations } from '../i18n';
 import { PhoneListing, LanguageCode } from '../types';
 import { SEO } from './SEO';
+import { getImageUrl } from '../utils/imageUrl';
+import { Breadcrumbs } from './Breadcrumbs';
 
 interface ProductDetailsProps {
     lang: LanguageCode;
@@ -205,12 +207,6 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
         addToast(`${quantity}x ${product.model} added to cart`, 'success');
     };
 
-    const getImageUrl = (url: string) => {
-        if (!url) return '';
-        if (url.startsWith('http')) return url;
-        return `http://127.0.0.1:5000${url}`;
-    };
-
     if (loading) return <div className="min-h-screen pt-32 text-center text-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div></div>;
     if (!product) return null;
 
@@ -221,6 +217,14 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                 description={`Buy used, refurbished ${product.brand} ${product.model} - ${product.storage} - ${product.color} in ${product.condition} condition. Certified quality, warranty included.`}
                 ogImage={getImageUrl(activeImage)}
             />
+            {/* Breadcrumbs */}
+            <div className="max-w-7xl mx-auto mb-6">
+                <Breadcrumbs items={[
+                    { label: 'Home', path: '/' },
+                    { label: 'Marketplace', path: '/marketplace' },
+                    { label: `${product.brand} ${product.model}` }
+                ]} />
+            </div>
             {/* Lightbox Modal */}
             {isLightboxOpen && (
                 <div
@@ -374,7 +378,13 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                     >-</button>
                                     <span className="w-12 text-center font-mono text-white">{quantity}</span>
                                     <button
-                                        onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
+                                        onClick={() => {
+                                            if (quantity >= product.stock) {
+                                                addToast(`Maximum available stock: ${product.stock}`, 'error');
+                                            } else {
+                                                setQuantity(q => q + 1);
+                                            }
+                                        }}
                                         className="px-3 py-2 text-slate-400 hover:text-white transition-colors hover:bg-slate-800 rounded-r-lg"
                                         disabled={quantity >= product.stock}
                                     >+</button>
@@ -421,7 +431,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                             <button
                                 key={tab}
                                 role="tab"
-                                aria-selected={activeTab === tab ? "true" : "false"}
+                                aria-selected={activeTab === tab}
                                 aria-controls={`tabpanel-${tab}`}
                                 id={`tab-${tab}`}
                                 onClick={() => setActiveTab(tab as any)}
@@ -433,7 +443,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         ))}
                         <button
                             role="tab"
-                            aria-selected={activeTab === 'questions' ? "true" : "false"}
+                            aria-selected={activeTab === 'questions'}
                             aria-controls="tabpanel-questions"
                             id="tab-questions"
                             onClick={() => setActiveTab('questions')}

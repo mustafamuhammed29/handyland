@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { LanguageCode } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Truck, ShieldCheck, Lock, ArrowRight, Wallet, CheckCircle, AlertCircle } from 'lucide-react';
+import { CreditCard, Truck, ShieldCheck, Lock, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { api } from '../utils/api';
 import { getSecureItem, setSecureItem } from '../utils/storage';
 
@@ -86,7 +86,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                 productType: 'Product'
             }));
 
-            const data = await api.post('/api/payment/create-checkout-session', {
+            const res = await api.post('/api/payment/create-checkout-session', {
                 items,
                 shippingAddress: {
                     fullName,
@@ -98,15 +98,15 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                     country
                 },
                 termsAccepted
-            });
+            }) as any;
 
-            if (data.url) {
-                window.location.href = data.url;
+            const url = res?.data?.url || res?.url;
+            if (url) {
+                window.location.href = url;
             } else {
-                throw new Error(data.message || 'Payment failed');
+                throw new Error(res?.data?.message || res?.message || 'Payment failed');
             }
         } catch (error: any) {
-            console.error('Payment error:', error);
             addToast(error.message || "Failed to initiate payment", "error");
         } finally {
             setIsProcessing(false);
@@ -120,8 +120,8 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                     <div className="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)]">
                         <CheckCircle className="w-12 h-12 text-emerald-400" />
                     </div>
-                    <h2 className="text-4xl font-black text-white">Payment Secure</h2>
-                    <p className="text-slate-400">Transaction ID: {Math.random().toString(36).substring(7).toUpperCase()}</p>
+                    <h2 className="text-4xl font-black text-white">Order Placed! 🎉</h2>
+                    <p className="text-slate-400">You'll receive a confirmation email shortly.</p>
                     <p className="text-sm text-cyan-400 font-mono animate-pulse">Redirecting to Dashboard...</p>
                 </div>
             </div>
@@ -156,7 +156,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                             <input name="fullName" value={shippingInfo.fullName} onChange={handleInputChange} type="text" placeholder="Full Name" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
                             <input name="email" value={shippingInfo.email} onChange={handleInputChange} type="email" placeholder="Email Address" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
                             <input name="phone" value={shippingInfo.phone} onChange={handleInputChange} type="tel" placeholder="Phone (+49... or 017...)" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <select name="country" value={shippingInfo.country} onChange={handleInputChange} className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500">
+                            <select name="country" title="Shipping country" value={shippingInfo.country} onChange={handleInputChange} className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500">
                                 <option value="DE">🇩🇪 Germany</option>
                                 <option value="AT">🇦🇹 Austria</option>
                                 <option value="CH">🇨🇭 Switzerland</option>
@@ -179,29 +179,21 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                         </div>
                     </div>
 
-                    {/* Payment */}
+                    {/* Payment via Stripe */}
                     <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
                         <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                            <CreditCard className="w-5 h-5 text-purple-400" /> Payment Method
+                            <CreditCard className="w-5 h-5 text-purple-400" /> Secure Payment
                         </h3>
-                        <div className="grid grid-cols-3 gap-3 mb-4">
-                            <button className="p-4 border border-cyan-500 bg-cyan-900/20 rounded-xl text-white font-bold text-sm flex flex-col items-center gap-2">
-                                <CreditCard className="w-6 h-6" /> Card
-                            </button>
-                            <button className="p-4 border border-slate-700 bg-black/40 rounded-xl text-slate-400 hover:border-slate-500 font-bold text-sm flex flex-col items-center gap-2">
-                                <Wallet className="w-6 h-6" /> Crypto
-                            </button>
-                            <button className="p-4 border border-slate-700 bg-black/40 rounded-xl text-slate-400 hover:border-slate-500 font-bold text-sm flex flex-col items-center gap-2">
-                                <span className="text-lg font-serif">P</span> PayPal
-                            </button>
-                        </div>
-
-                        <div className="space-y-3">
-                            <input type="text" placeholder="Card Number" className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <div className="grid grid-cols-2 gap-4">
-                                <input type="text" placeholder="MM/YY" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                                <input type="text" placeholder="CVC" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                        <div className="flex items-start gap-4 p-4 rounded-xl bg-blue-600/10 border border-blue-500/20">
+                            <ShieldCheck className="w-8 h-8 text-blue-400 shrink-0 mt-0.5" />
+                            <div>
+                                <p className="text-white font-bold mb-1">Pay securely via Stripe</p>
+                                <p className="text-slate-400 text-sm">After confirming, you'll be redirected to Stripe's encrypted checkout to complete payment with card, Apple Pay, or Google Pay.</p>
                             </div>
+                        </div>
+                        <div className="mt-4 flex items-center gap-3">
+                            <Lock className="w-4 h-4 text-slate-500" />
+                            <span className="text-xs text-slate-500">256-bit SSL · PCI-DSS Compliant · Powered by Stripe</span>
                         </div>
                     </div>
                 </div>

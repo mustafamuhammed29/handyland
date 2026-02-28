@@ -26,9 +26,9 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
         formspreeEndpoint: '',
         title: globalSettings?.contactSection?.formTitle || 'Secure Message Channel',
         labels: {
-            name: 'Agent Name...',
-            email: 'Secure Frequency...',
-            message: 'Enter your query parameters here...'
+            name: 'Your full name...',
+            email: 'Your email address...',
+            message: 'How can we help you?'
         },
         buttonText: globalSettings?.contactSection?.formButton || 'Protokoll senden',
         socialLinks: [

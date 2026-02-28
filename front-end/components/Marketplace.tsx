@@ -8,6 +8,7 @@ import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { SkeletonProductCard } from './SkeletonProductCard';
 import { SEO } from './SEO';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface MarketplaceProps {
     lang: LanguageCode;
@@ -45,9 +46,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                 const products = res.data?.items || res.data?.products || res.products || res.items || [];
                 // Store array of IDs. Backend stores the actual product reference string in `customId`.
                 setWishlist(products.map((p: any) => p.customId || p.product || p.id || p._id));
-            } catch (error) {
-                console.error("Failed to load wishlist", error);
-                // Graceful degradation, don't crash
+            } catch {
+                // Graceful degradation — user just won't see heart state pre-filled
             }
         };
         fetchWishlist();
@@ -94,8 +94,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
             });
             // Update the user's dashboard data so it reflects immediately
             addToast(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist', 'success');
-        } catch (error) {
-            console.error('Wishlist toggle failed:', error);
+        } catch {
             // Revert on failure
             setWishlist(prev =>
                 isWishlisted ? [...prev, id] : prev.filter(item => item !== id)
@@ -154,9 +153,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     }));
                     setProducts(formatted);
                 }
-            } catch (error) {
-                console.error("Failed to load products", error);
-                addToast('Failed to load marketplace data. Check console.', 'error');
+            } catch {
+                addToast('Failed to load marketplace data.', 'error');
             } finally {
                 setLoading(false);
             }
@@ -188,12 +186,6 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
             (card as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
             (card as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
         }
-    };
-
-    const getImageUrl = (url: string) => {
-        if (!url) return '';
-        if (url.startsWith('http')) return url;
-        return `http://127.0.0.1:5000${url}`;
     };
 
     const getProductImage = (product: any) => {

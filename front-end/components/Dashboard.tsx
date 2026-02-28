@@ -80,7 +80,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     // I'll leave it for now.
 
     const handleSell = (valId: string) => {
-        navigate('/marketplace/sell');
+        const val = valuations.data?.find((v: any) => v.id === valId || v._id === valId);
+        if (val?.quoteReference) {
+            navigate(`/sell/${val.quoteReference}`);
+        } else {
+            navigate('/valuation');
+        }
     };
 
     const handleUpdateProfile = async (data: Partial<UserType>) => {
@@ -128,7 +133,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     };
 
     const handleAddFunds = () => {
-        navigate('/wallet/add-funds');
+        // Wallet top-up can be done via the admin or a future payment flow.
+        // For now, redirect customer to contact us.
+        navigate('/contact');
     };
 
     const handleRemoveWishlistItem = async (itemId: string) => {

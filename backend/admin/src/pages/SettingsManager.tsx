@@ -113,6 +113,14 @@ interface Settings {
     sections: SectionsSettings;
     contactSection: ContactSettings;
     footerSection: FooterSettings;
+    announcementBanner: {
+        enabled: boolean;
+        text: string;
+        color: string;
+        dismissible: boolean;
+        link: string;
+        linkText: string;
+    };
 }
 
 interface EmailTemplateData {
@@ -166,7 +174,8 @@ export default function SettingsManager() {
             socialLinks: { facebook: '', instagram: '', twitter: '', linkedin: '', youtube: '' },
             whatsappPhone: '', whatsappMessage: ''
         },
-        footerSection: { tagline: '', copyright: '' }
+        footerSection: { tagline: '', copyright: '' },
+        announcementBanner: { enabled: false, text: '', color: 'blue', dismissible: true, link: '', linkText: '' }
     });
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
@@ -282,6 +291,7 @@ export default function SettingsManager() {
         { id: 'content', label: 'Content', icon: MessageSquare },
         { id: 'contact', label: 'Contact Info', icon: MessageSquare },
         { id: 'layout', label: 'Layout Control', icon: LayoutTemplate },
+        { id: 'banner', label: '📢 Announcement', icon: Layers },
     ];
 
     if (loading) return <div className="text-white">Loading...</div>;
@@ -769,9 +779,57 @@ export default function SettingsManager() {
                             )}
                         </div>
                     )}
+                    {activeTab === 'banner' && (
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-bold text-white mb-4">📢 Announcement Banner</h3>
+                            <p className="text-slate-400 text-sm">Shows a dismissible banner at the top of every page for all visitors.</p>
+
+                            <div className="p-4 border border-slate-700 rounded-xl space-y-4">
+                                <Toggle label="Enable Banner" value={settings.announcementBanner?.enabled || false} onChange={(v) => setSettings(prev => ({ ...prev, announcementBanner: { ...prev.announcementBanner, enabled: v } }))} />
+                                <Input label="Banner Text" value={settings.announcementBanner?.text} onChange={(v) => setSettings(prev => ({ ...prev, announcementBanner: { ...prev.announcementBanner, text: v } }))} placeholder="🔥 Free shipping on orders over €50 this weekend!" />
+
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Banner Color</label>
+                                    <div className="flex gap-2">
+                                        {['blue', 'green', 'yellow', 'red', 'purple', 'cyan'].map(color => (
+                                            <button
+                                                key={color}
+                                                onClick={() => setSettings(prev => ({ ...prev, announcementBanner: { ...prev.announcementBanner, color } }))}
+                                                className={`w-8 h-8 rounded-lg border-2 transition-all ${settings.announcementBanner?.color === color ? 'border-white scale-110' : 'border-transparent opacity-70'
+                                                    }`}
+                                                style={{ backgroundColor: color === 'cyan' ? '#0891b2' : color === 'blue' ? '#2563eb' : color === 'green' ? '#059669' : color === 'yellow' ? '#d97706' : color === 'red' ? '#dc2626' : '#9333ea' }}
+                                                aria-label={`Set banner color to ${color}`}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input label="Link URL (optional)" value={settings.announcementBanner?.link} onChange={(v) => setSettings(prev => ({ ...prev, announcementBanner: { ...prev.announcementBanner, link: v } }))} placeholder="https://..." />
+                                    <Input label="Link Text" value={settings.announcementBanner?.linkText} onChange={(v) => setSettings(prev => ({ ...prev, announcementBanner: { ...prev.announcementBanner, linkText: v } }))} placeholder="Learn More" />
+                                </div>
+
+                                <Toggle label="Allow users to dismiss banner" value={settings.announcementBanner?.dismissible !== false} onChange={(v) => setSettings(prev => ({ ...prev, announcementBanner: { ...prev.announcementBanner, dismissible: v } }))} />
+                            </div>
+
+                            {/* Live Preview */}
+                            {settings.announcementBanner?.enabled && settings.announcementBanner?.text && (
+                                <div className="p-4 border border-slate-700 rounded-xl">
+                                    <p className="text-slate-400 text-xs font-bold mb-2 uppercase">Preview</p>
+                                    <div
+                                        className="px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm font-medium"
+                                        style={{ backgroundColor: settings.announcementBanner.color === 'yellow' ? '#d97706' : settings.announcementBanner.color === 'green' ? '#059669' : settings.announcementBanner.color === 'red' ? '#dc2626' : settings.announcementBanner.color === 'purple' ? '#9333ea' : settings.announcementBanner.color === 'cyan' ? '#0891b2' : '#2563eb', color: settings.announcementBanner.color === 'yellow' ? 'black' : 'white' }}
+                                    >
+                                        📢 {settings.announcementBanner.text}
+                                        {settings.announcementBanner.linkText && <span className="underline font-bold ml-2">{settings.announcementBanner.linkText} →</span>}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
-        </div >
+        </div>
     );
 }
 
