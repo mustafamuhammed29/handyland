@@ -69,6 +69,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         />
                     </div>
                     <select
+                        title="Filter orders by status"
                         value={orderFilter}
                         onChange={(e) => setOrderFilter(e.target.value)}
                         className="px-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
@@ -111,6 +112,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                         </span>
                                     </div>
                                     <button
+                                        aria-label={expandedOrderId === order._id ? 'Collapse order' : 'Expand order'}
                                         onClick={() => setExpandedOrderId(expandedOrderId === order._id ? null : order._id)}
                                         className="text-slate-400 hover:text-white transition-colors"
                                     >
@@ -164,10 +166,20 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                 ))}
 
                 {filteredOrders.length === 0 && (
-                    <div className="text-center py-12 text-slate-500">
-                        <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                        <p className="text-lg font-medium">No orders found</p>
-                        <p className="text-sm">Try adjusting your filters or search</p>
+                    <div className="text-center py-16 border-2 border-dashed border-slate-800 rounded-2xl">
+                        <Package className="w-16 h-16 mx-auto mb-4 text-slate-700" />
+                        <p className="text-lg font-bold text-white mb-1">No orders yet</p>
+                        <p className="text-sm text-slate-500 mb-6">
+                            {orderSearch || orderFilter !== 'all' ? 'Try adjusting your filters or search.' : 'Browse our marketplace and place your first order!'}
+                        </p>
+                        {!orderSearch && orderFilter === 'all' && (
+                            <button
+                                onClick={() => navigate('/marketplace')}
+                                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-colors"
+                            >
+                                Browse Marketplace →
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

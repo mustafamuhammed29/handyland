@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
 import { Order } from '../types';
 import { ENV } from '../src/config/env';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export const OrderDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -102,6 +103,12 @@ export const OrderDetails = () => {
 
     return (
         <div className="min-h-screen pt-28 pb-12 px-4 max-w-4xl mx-auto">
+            {/* Breadcrumbs */}
+            <Breadcrumbs items={[
+                { label: 'Home', path: '/' },
+                { label: 'Dashboard', path: '/dashboard' },
+                { label: `Order #${order.orderNumber || order._id?.slice(-6).toUpperCase() || ''}` }
+            ]} className="mb-6" />
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
                 <button onClick={() => navigate('/dashboard')} aria-label="Back to dashboard" className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors">

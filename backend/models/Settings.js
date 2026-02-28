@@ -52,6 +52,17 @@ const settingsSchema = new mongoose.Schema({
     contactSection: {
         type: mongoose.Schema.Types.Mixed,
         default: {}
+    },
+    announcementBanner: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            enabled: false,
+            text: '',
+            color: 'blue',
+            dismissible: true,
+            link: '',
+            linkText: ''
+        }
     }
 }, { timestamps: true });
 

@@ -10,6 +10,7 @@ import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../utils/api';
+import { getImageUrl } from '../utils/imageUrl';
 
 // --- DATA STRUCTURES ---
 
@@ -56,8 +57,6 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     const { addToast } = useToast();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
-    const [aiAdvice, setAiAdvice] = useState<string | null>(null);
-    const [loadingAdvice, setLoadingAdvice] = useState(false);
     const [selectedDevice, setSelectedDevice] = useState<RepairDevice | null>(null);
     const [repairCatalog, setRepairCatalog] = useState<RepairDevice[]>([]);
     const [loading, setLoading] = useState(true);
@@ -85,36 +84,15 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
         loadRepairs();
     }, []);
 
-    // Backend fetch removed as per cleanup request
-    const fetchRepairCatalog = () => { };
+    const handleGetAdvice = () => {
+        navigate('/contact');
+    };
 
     const filteredDevices = repairCatalog.filter(device =>
         device.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
         device.brand.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleGetAdvice = async () => {
-        if (!searchTerm) return;
-
-        setLoadingAdvice(true);
-        setAiAdvice('');
-
-        // Mock Advice
-        setTimeout(() => {
-            setAiAdvice(`(Mock AI Advice) based on your search for ${searchTerm}: Ensure you back up your data locally. Diagnostic scan recommended.`);
-            setLoadingAdvice(false);
-        }, 1500);
-    };
-
-    // Helper to get image URL
-    const getImageUrl = (url: string) => {
-        if (!url) return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80';
-        if (url.startsWith('http')) return url;
-        return `http://127.0.0.1:5000${url}`;
-    };
-
-    // Handle Initialize Repair Button
-    // Repair functionality disabled by user request - Display Only Mode
     const handleContactSupport = () => {
         navigate('/contact');
     };
@@ -217,8 +195,8 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
-                            <Wrench className="w-6 h-6 text-blue-500 animate-spin-slow" />
-                            <span className="text-blue-500 font-mono text-sm tracking-widest uppercase">Maintenance_Ops_V4</span>
+                            <Wrench className="w-6 h-6 text-blue-500" />
+                            <span className="text-blue-500 font-mono text-sm tracking-widest uppercase">Repair Service</span>
                         </div>
                         <h2 className="text-4xl lg:text-5xl font-black text-white">
                             {settings?.content?.repairTitle || t.repairTitle}
@@ -228,17 +206,16 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                         </p>
                     </div>
 
-                    {/* AI Diagnostic Button */}
+                    {/* Contact Support CTA (replaces AI diagnostic) */}
                     {searchTerm && (
                         <button
                             onClick={handleGetAdvice}
-                            disabled={loadingAdvice}
                             className="group relative px-6 py-3 bg-blue-900/20 border border-blue-500/30 rounded-xl overflow-hidden hover:bg-blue-900/40 transition-all"
                         >
                             <div className="absolute inset-0 bg-blue-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                             <div className="relative flex items-center gap-2 text-blue-400 font-bold text-sm">
-                                {loadingAdvice ? <Activity className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
-                                {loadingAdvice ? 'ANALYZING_DATA...' : t.getAdvice}
+                                <MessageSquare className="w-4 h-4" />
+                                Contact an Expert
                             </div>
                         </button>
                     )}
@@ -265,28 +242,6 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                     </div>
                 </div>
 
-                {/* AI Output Console */}
-                {aiAdvice && (
-                    <div className="mb-10 animate-in fade-in slide-in-from-top-4">
-                        <div className="bg-black border border-blue-500/30 rounded-2xl overflow-hidden shadow-2xl relative">
-                            <div className="bg-slate-900/80 px-4 py-2 border-b border-slate-800 flex items-center gap-2">
-                                <div className="flex gap-1.5">
-                                    <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
-                                    <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                                    <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
-                                </div>
-                                <span className="text-xs text-blue-400 font-mono ml-2">AI_TECHNICIAN_LOG</span>
-                            </div>
-                            <div className="p-6 font-mono text-sm leading-relaxed text-blue-100">
-                                <div className="flex gap-2 text-blue-500 mb-2">
-                                    <span>{'>'}</span>
-                                    <span className="animate-pulse">_</span>
-                                </div>
-                                {aiAdvice}
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* DEVICE CATALOG GRID */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

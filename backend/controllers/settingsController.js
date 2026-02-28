@@ -75,7 +75,8 @@ exports.updateSettings = async (req, res) => {
         const allowedFields = [
             'siteName', 'contactEmail', 'footerText', 'navbar',
             'hero', 'stats', 'valuation', 'content',
-            'repairArchive', 'sections', 'contactSection', 'footerSection', 'freeShippingThreshold', 'payment'
+            'repairArchive', 'sections', 'contactSection', 'footerSection',
+            'freeShippingThreshold', 'payment', 'announcementBanner'
         ];
 
         allowedFields.forEach(field => {

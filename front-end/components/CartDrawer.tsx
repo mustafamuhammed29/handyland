@@ -83,7 +83,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                 >
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            <Zap className="w-5 h-5 text-cyan-400" /> Global Loadout
+                            <ShoppingCart className="w-5 h-5 text-cyan-400" /> {t.cart || 'Your Cart'}
                             <span className="bg-slate-800 text-slate-300 text-xs px-2 py-0.5 rounded-full">{cart.length}</span>
                         </h3>
                         <button onClick={() => setIsCartOpen(false)} aria-label="Close cart" className="text-slate-400 hover:text-white transition-colors">
@@ -119,10 +119,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                             <p className="text-xl font-bold text-slate-400 mb-2">Your cart is empty</p>
                             <p className="text-sm text-slate-600 mb-8 max-w-[200px] text-center">Looks like you haven't added anything yet.</p>
                             <button
-                                onClick={() => setIsCartOpen(false)}
+                                onClick={() => { setIsCartOpen(false); navigate('/marketplace'); }}
                                 className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors font-bold text-sm"
                             >
-                                Start Shopping
+                                {t.shopNow || 'Start Shopping'}
                             </button>
                         </div>
                     ) : (

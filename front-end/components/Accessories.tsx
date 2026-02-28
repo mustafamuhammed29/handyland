@@ -5,6 +5,8 @@ import { Headphones, Zap, Shield, Watch, Plus, Sparkles, X, Layers, ShoppingCart
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { useSettings } from '../context/SettingsContext';
+import { api } from '../utils/api';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface AccessoriesProps {
     lang: LanguageCode;
@@ -29,16 +31,12 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
 
     useEffect(() => {
-        fetch('/api/accessories')
-            .then(res => res.json())
-            .then(data => {
+        api.get<any>('/api/accessories')
+            .then((data: any) => {
                 setAccessories(Array.isArray(data) ? data : (data?.accessories || []));
                 setLoading(false);
             })
-            .catch(err => {
-                console.error("Failed to load accessories", err);
-                setLoading(false);
-            });
+            .catch(() => setLoading(false));
     }, []);
 
     const handleAddToCart = (item: any) => {
@@ -69,12 +67,6 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
         return matchesCategory && matchesSearch;
     });
 
-    // Helper to get image URL
-    const getImageUrl = (url: string) => {
-        if (!url) return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80'; // Default fallback
-        if (url.startsWith('http')) return url;
-        return `http://127.0.0.1:5000${url}`;
-    };
 
     return (
         <section className="py-24 relative bg-slate-900 border-t border-slate-800 overflow-hidden">
