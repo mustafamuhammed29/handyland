@@ -11,6 +11,7 @@ const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const logger = require('./utils/logger');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
+const { passport } = require('./config/passport'); // Social OAuth
 // const sanitize = require('./middleware/sanitize'); // Removed custom sanitizer
 // Data Sanitization
 const mongoSanitize = require('./middleware/mongoSanitize');
@@ -122,6 +123,7 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(mongoSanitize); // Prevent NoSQL injection
 // app.use(xss()); // Removed causing issues with Express 5
 app.use(cookieParser());
+app.use(passport.initialize()); // Social OAuth init
 
 // Ensure uploads directory exists
 const uploadDir = path.join(__dirname, 'uploads');
@@ -173,6 +175,7 @@ const authLimiter = rateLimit({
 });
 
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth', require('./routes/socialAuthRoutes')); // Social OAuth routes
 app.use('/api/products', productRoutes);
 app.use('/api/repairs', repairRoutes);
 app.use('/api/settings', require('./routes/settingsRoutes')); // Registered Settings Route

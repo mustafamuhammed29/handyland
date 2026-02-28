@@ -31,6 +31,7 @@ import Login from './Login';
 import Register from './Register';
 import VerifyEmailNotice from './VerifyEmailNotice';
 import ForgotPassword from './ForgotPassword';
+import SocialAuthCallback from './pages/SocialAuthCallback';
 import { LanguageCode, User } from './types';
 import { translations } from './i18n';
 import { CartProvider, useCart } from './context/CartContext';
@@ -174,15 +175,17 @@ function AppContent() {
               <Route path="contact" element={<PageTransition><Contact lang={lang} /></PageTransition>} />
               <Route path="checkout" element={<ProtectedRoute><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout lang={lang} /></Suspense></PageTransition></ProtectedRoute>} />
               <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
-              <Route path="login" element={<PageTransition><Auth lang={lang} setUser={setUser} /></PageTransition>} />
+              <Route path="login" element={<PageTransition><Login /></PageTransition>} />
               <Route path="verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
               <Route path="verify-email-notice" element={<PageTransition><VerifyEmailNotice /></PageTransition>} />
               <Route path="reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+              <Route path="forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+              <Route path="register" element={<PageTransition><Register /></PageTransition>} />
+              <Route path="auth/callback" element={<SocialAuthCallback />} />
               <Route path="/track-repair" element={<PageTransition><Suspense fallback={<GlobalLoader />}><GuestTicketTracking /></Suspense></PageTransition>} />
 
               {/* UX Report Redirects */}
               <Route path="/products" element={<Navigate to="/marketplace" replace />} />
-              <Route path="/register" element={<Navigate to="/login" replace />} />
               <Route path="/cart" element={<Navigate to="/" replace />} />
               <Route path="/about" element={<Navigate to="/uber-uns" replace />} />
               <Route path="/admin" element={<AdminRedirect />} />

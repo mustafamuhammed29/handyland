@@ -32,17 +32,25 @@ exports.register = async (req, res) => {
     try {
         const { name, email, password, phone, address } = req.body;
 
-        // Check if user exists
-        const userExists = await User.findOne({ email });
-        if (userExists) {
+        // Check if email already registered
+        const emailExists = await User.findOne({ email });
+        if (emailExists) {
             return res.status(400).json({
                 success: false,
                 message: 'User already exists with this email'
             });
         }
 
-        // Generate verification token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
+        // Check if phone already registered
+        if (phone) {
+            const phoneExists = await User.findOne({ phone });
+            if (phoneExists) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'This phone number is already registered'
+                });
+            }
+        }
 
         // Check password strength
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{12,}$/;
@@ -52,6 +60,9 @@ exports.register = async (req, res) => {
                 message: 'Password must be at least 12 characters long and include at least one letter, one number, and one special character.'
             });
         }
+
+        // Generate verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
 
         // Create user
         const user = await User.create({
@@ -66,26 +77,39 @@ exports.register = async (req, res) => {
         });
 
         // Send verification email
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
+
+        console.log('📧 Attempting to send verification email to:', user.email);
+        console.log('🔗 Verification URL:', verificationUrl);
 
         try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Verify Your Email - HandyLand',
-                html: emailTemplates.verification(user.name, verificationUrl)
+            const sent = await sendTemplateEmail(user.email, 'verify_email', {
+                userName: user.name,
+                verificationUrl
             });
+            if (!sent) {
+                console.log('⚠️  No verify_email template in DB, sending fallback HTML email...');
+                // Fallback: send a basic HTML email
+                await sendEmail({
+                    email: user.email,
+                    subject: 'Verify Your Email - HandyLand',
+                    html: `<h2>Welcome to HandyLand, ${user.name}!</h2>
+                           <p>Please verify your email by clicking the link below:</p>
+                           <a href="${verificationUrl}" style="display:inline-block;padding:12px 24px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;">Verify Email</a>
+                           <p>This link expires in 24 hours.</p>`
+                });
+            } else {
+                console.log('✅ Verification email sent successfully (via template).');
+            }
         } catch (emailError) {
-            console.error('Error sending verification email:', emailError);
+            console.error('❌ Error sending verification email:', emailError.message);
             // Don't fail registration if email fails
         }
 
-        // Generate JWT token
-        const token = generateToken(user._id);
-
         res.status(201).json({
             success: true,
-            message: 'Registration successful! Please check your email.',
-            token, // Return access token
+            message: 'Registration successful! Please check your email to verify your account.',
             user: {
                 id: user._id,
                 name: user.name,

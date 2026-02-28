@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Please add a password'],
+        required: function () { return !this.googleId && !this.facebookId; },
         minlength: [12, 'Password must be at least 12 characters'],
         select: false // Don't return password by default
     },
@@ -40,7 +40,25 @@ const UserSchema = new mongoose.Schema({
     resetPasswordExpire: Date,
     phone: {
         type: String,
-        trim: true
+        trim: true,
+        sparse: true // allow multiple null values
+    },
+    // Social Auth
+    provider: {
+        type: String,
+        enum: ['local', 'google', 'facebook'],
+        default: 'local'
+    },
+    googleId: {
+        type: String,
+        sparse: true
+    },
+    facebookId: {
+        type: String,
+        sparse: true
+    },
+    avatar: {
+        type: String // URL from social provider or upload
     },
     addresses: [{
         street: { type: String, required: true },
