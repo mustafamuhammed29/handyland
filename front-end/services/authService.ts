@@ -47,7 +47,7 @@ export const authService = {
 
     verifyEmail: async (token: string): Promise<any> => {
         try {
-            const response = await api.get(`/api/auth/verifyemail/${token}`);
+            const response = await api.get(`/api/auth/verify-email/${token}`);
             return response as any;
         } catch (error) {
             console.error('Auth Service Verify Email Error:', error);
@@ -67,7 +67,7 @@ export const authService = {
 
     forgotPassword: async (email: string): Promise<any> => {
         try {
-            const response = await api.post('/api/auth/forgotpassword', { email });
+            const response = await api.post('/api/auth/forgot-password', { email });
             return response as any;
         } catch (error) {
             console.error('Auth Service Forgot Password Error:', error);
@@ -77,7 +77,7 @@ export const authService = {
 
     resetPassword: async (token: string, password: string): Promise<any> => {
         try {
-            const response = await api.put(`/api/auth/resetpassword/${token}`, { password });
+            const response = await api.post(`/api/auth/reset-password/${token}`, { password });
             return response as any;
         } catch (error) {
             console.error('Auth Service Reset Password Error:', error);

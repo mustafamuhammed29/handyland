@@ -7,6 +7,7 @@ interface AuthContextType {
     user: User | null;
     setUser: (user: User | null) => void;
     login: (email: string, password: string) => Promise<void>;
+    loginWithToken: (token: string) => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
     loading: boolean;
@@ -99,6 +100,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
 
+    const loginWithToken = async (token: string) => {
+        localStorage.setItem('accessToken', token);
+        const { user: userData } = await authService.getMe();
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+    };
+
     const login = async (email: string, password: string) => {
 
         try {
@@ -149,7 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{ user, setUser, login, logout, isAuthenticated: !!user, loading }}>
+        <AuthContext.Provider value={{ user, setUser, login, loginWithToken, logout, isAuthenticated: !!user, loading }}>
             {children}
         </AuthContext.Provider>
     );
