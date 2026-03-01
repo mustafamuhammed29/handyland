@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useSettings } from '../context/SettingsContext';
 
 interface SEOProps {
     title: string;
@@ -18,7 +19,9 @@ export const SEO: React.FC<SEOProps> = ({
     ogType = 'website',
     twitterHandle = '@handyland'
 }) => {
-    const siteTitle = 'HandyLand';
+    const { settings } = useSettings();
+    // Use settings siteName, fallback to cached localStorage value, fallback to 'HandyLand'
+    const siteTitle = settings?.siteName || localStorage.getItem('handyland_sitename') || 'HandyLand';
     const fullTitle = `${title} | ${siteTitle}`;
 
     return (

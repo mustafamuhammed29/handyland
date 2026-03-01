@@ -133,3 +133,20 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* React Phone Number Input Dark Theme Overrides */
+.PhoneInputCountrySelect {
+  background-color: #1e293b; /* slate-800 */
+  color: #ffffff; /* white text */
+}
+
+/* Ensure options inside the select dropdown are visible */
+.PhoneInputCountrySelect option {
+  background-color: #1e293b;
+  color: #ffffff;
+}
+
+/* The divider line */
+.PhoneInputCountrySelectArrow {
+  opacity: 0.7;
+}

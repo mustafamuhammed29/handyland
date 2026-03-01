@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Lock, CheckCircle, AlertCircle, Loader, Eye, EyeOff, XCircle } from 'lucide-react';
-import { ENV } from './src/config/env';
 
-const API_URL = ENV.API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 
 const ResetPassword: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -55,7 +55,7 @@ const ResetPassword: React.FC = () => {
         setStatus('loading');
 
         try {
-            const response = await fetch(`${API_URL}/auth/reset-password/${token}`, {
+            const response = await fetch(`${API_URL}/api/auth/reset-password/${token}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password }),

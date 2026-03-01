@@ -107,9 +107,14 @@ const seed = async () => {
             }
         };
 
-        // Update settings but preserve existing ID if any
-        await Settings.findOneAndUpdate({}, defaultSettings, { upsert: true, new: true });
-        console.log('Settings Updated/Seeded');
+        // Update settings but ONLY if no settings document exists yet (don't overwrite admin changes)
+        const existingSettings = await Settings.findOne({});
+        if (!existingSettings) {
+            await Settings.create(defaultSettings);
+            console.log('Settings Created with defaults (first time setup)');
+        } else {
+            console.log('Settings already exist — skipping to preserve admin changes');
+        }
 
         process.exit();
     } catch (error) {

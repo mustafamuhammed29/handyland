@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader, Eye, EyeOff } from 'lucide-react';
-import { validateEmail, validateRequired } from './validation';
-import { useAuth } from './context/AuthContext';
-import { authService } from './services/authService';
+import { validateEmail, validateRequired } from '../validation';
+import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
+import { authService } from '../services/authService';
 import { useTranslation } from 'react-i18next';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -39,6 +40,7 @@ const SocialButton: React.FC<{ provider: 'google' | 'facebook'; disabled?: boole
 
 const Login: React.FC = () => {
     const { login } = useAuth();
+    const { settings } = useSettings();
     const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -91,7 +93,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center pt-32 p-4 pb-12">
             <div className="w-full max-w-md">
                 {/* Logo & Title */}
                 <div className="text-center mb-8">
@@ -194,18 +196,21 @@ const Login: React.FC = () => {
                         </button>
                     </form>
 
-                    {/* Social Divider */}
-                    <div className="my-6 flex items-center gap-3">
-                        <div className="flex-1 h-px bg-slate-700" />
-                        <span className="text-slate-500 text-xs uppercase tracking-wider">or continue with</span>
-                        <div className="flex-1 h-px bg-slate-700" />
-                    </div>
+                    {/* Social Login */}
+                    {(settings.socialAuth?.google || settings.socialAuth?.facebook) && (
+                        <>
+                            <div className="my-6 flex items-center gap-3">
+                                <div className="flex-1 h-px bg-slate-700" />
+                                <span className="text-slate-500 text-xs uppercase tracking-wider">or continue with</span>
+                                <div className="flex-1 h-px bg-slate-700" />
+                            </div>
 
-                    {/* Social Buttons */}
-                    <div className="space-y-3">
-                        <SocialButton provider="google" />
-                        <SocialButton provider="facebook" />
-                    </div>
+                            <div className="space-y-3">
+                                {settings.socialAuth?.google && <SocialButton provider="google" />}
+                                {settings.socialAuth?.facebook && <SocialButton provider="facebook" />}
+                            </div>
+                        </>
+                    )}
 
                     {/* Register Link */}
                     <div className="mt-6 pt-6 border-t border-slate-800">

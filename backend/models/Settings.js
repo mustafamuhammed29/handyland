@@ -63,6 +63,23 @@ const settingsSchema = new mongoose.Schema({
             link: '',
             linkText: ''
         }
+    },
+    promoPopup: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            enabled: false,
+            title: '',
+            message: '',
+            couponCode: '',
+            delay: 5
+        }
+    },
+    socialAuth: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            google: false,
+            facebook: false
+        }
     }
 }, { timestamps: true });
 

@@ -70,17 +70,6 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('combined'));
 }
 
-// Rate limiting - General API (Cache cleared)
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX) || 1000,
-    message: 'Too many requests from this IP, please try again later.',
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-app.use('/api/', limiter);
-
-// CORS Configuration
 // CORS Configuration
 const defaultOrigins = [
     'http://localhost:3000',
@@ -115,6 +104,18 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-XSRF-Token'],
     exposedHeaders: ['Set-Cookie']
 }));
+
+// Rate limiting - General API (Cache cleared)
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: parseInt(process.env.RATE_LIMIT_MAX) || 1000,
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS' || process.env.NODE_ENV === 'development',
+});
+app.use('/api/', limiter);
+
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));
@@ -204,6 +205,7 @@ app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes')); // Registered Message Routes
 app.use('/api/shipping-methods', require('./routes/shippingRoutes')); // Added
 app.use('/api/pages', require('./routes/pageRoutes')); // Added
+app.use('/api/coupons', require('./routes/couponRoutes')); // Added Coupon Routes
 
 // Basic Routes
 app.get('/', (req, res) => {

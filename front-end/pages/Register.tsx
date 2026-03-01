@@ -4,8 +4,11 @@ import {
     Mail, Lock, User, Phone, AlertCircle, Loader,
     Shield, CheckCircle, XCircle, Eye, EyeOff
 } from 'lucide-react';
-import { validateEmail, validatePassword, validatePhone, validateRequired } from './validation';
-import { authService } from './services/authService';
+import { validateEmail, validatePassword, validatePhone, validateRequired } from '../validation';
+import { authService } from '../services/authService';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
+import { useSettings } from '../context/SettingsContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -74,6 +77,7 @@ const PasswordInput: React.FC<{
 };
 
 const Register: React.FC = () => {
+    const { settings } = useSettings();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -87,6 +91,10 @@ const Register: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handlePhoneChange = (value?: string) => {
+        setFormData({ ...formData, phone: value || '' });
     };
 
     const handleRegister = async (e: React.FormEvent) => {
@@ -133,7 +141,7 @@ const Register: React.FC = () => {
     const textColor = passed <= 1 ? 'text-red-400' : passed === 2 ? 'text-yellow-400' : passed === 3 ? 'text-blue-400' : 'text-emerald-400';
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center pt-32 p-4 pb-12">
             <div className="w-full max-w-2xl">
                 {/* Logo & Title */}
                 <div className="text-center mb-8">
@@ -173,11 +181,12 @@ const Register: React.FC = () => {
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">Phone Number</label>
                                 <div className="relative">
-                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                                    <input
-                                        type="tel" name="phone" value={formData.phone} onChange={handleChange}
-                                        placeholder="+49..."
-                                        className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                    <PhoneInput
+                                        international
+                                        defaultCountry="DE"
+                                        value={formData.phone}
+                                        onChange={handlePhoneChange}
+                                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg text-white transition-all [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:text-white [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:p-3 [&_.PhoneInputCountryIcon]:ml-3"
                                     />
                                 </div>
                             </div>
@@ -257,17 +266,21 @@ const Register: React.FC = () => {
                         </button>
                     </form>
 
-                    {/* Social Divider */}
-                    <div className="my-6 flex items-center gap-3">
-                        <div className="flex-1 h-px bg-slate-700" />
-                        <span className="text-slate-500 text-xs uppercase tracking-wider">or sign up with</span>
-                        <div className="flex-1 h-px bg-slate-700" />
-                    </div>
+                    {/* Social Login */}
+                    {(settings.socialAuth?.google || settings.socialAuth?.facebook) && (
+                        <>
+                            <div className="my-6 flex items-center gap-3">
+                                <div className="flex-1 h-px bg-slate-700" />
+                                <span className="text-slate-500 text-xs uppercase tracking-wider">or sign up with</span>
+                                <div className="flex-1 h-px bg-slate-700" />
+                            </div>
 
-                    <div className="space-y-3">
-                        <SocialButton provider="google" />
-                        <SocialButton provider="facebook" />
-                    </div>
+                            <div className="space-y-3">
+                                {settings.socialAuth?.google && <SocialButton provider="google" />}
+                                {settings.socialAuth?.facebook && <SocialButton provider="facebook" />}
+                            </div>
+                        </>
+                    )}
 
                     {/* Login Link */}
                     <div className="mt-6 pt-6 border-t border-slate-800">

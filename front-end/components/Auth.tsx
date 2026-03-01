@@ -93,6 +93,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
             const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(body)
             });
 
@@ -101,9 +102,6 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
             if (data.success) {
                 if (mode === 'login') {
                     setUser(data.user);
-                    if (data.token) {
-                        localStorage.setItem('accessToken', data.token);
-                    }
                     localStorage.setItem('user', JSON.stringify(data.user));
                     addToast(`${t.welcomeBack}, ${data.user.name.split(' ')[0]}!`, 'success');
                     navigate('/dashboard');
@@ -140,6 +138,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
             const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/resend-verification`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ email: formData.email })
             });
             const data = await res.json();

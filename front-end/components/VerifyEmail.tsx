@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
-import { api } from '../utils/api';
+import { authService } from '../services/authService';
 
 export const VerifyEmail = () => {
     const [searchParams] = useSearchParams();
@@ -9,6 +9,7 @@ export const VerifyEmail = () => {
     const token = searchParams.get('token');
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [message, setMessage] = useState('Verifying your email...');
+    const hasAttempted = React.useRef(false);
 
     useEffect(() => {
         if (!token) {
@@ -17,16 +18,28 @@ export const VerifyEmail = () => {
             return;
         }
 
+        if (hasAttempted.current) return;
+        hasAttempted.current = true;
+
         const verify = async () => {
             try {
-                // Call actual API
-                const response = await api.get<{ message: string }>(`/api/auth/verify-email/${token}`);
+                // Call authService
+                const response = await authService.verifyEmail(token);
                 setStatus('success');
                 setMessage(response.message || 'Email verified successfully!');
                 setTimeout(() => navigate('/login'), 3000); // Redirect to login
             } catch (error: any) {
-                setStatus('error');
-                setMessage(error.message || 'Verification failed. Link may be expired.');
+                const errorMessage = error.message || 'Verification failed. Link may be expired.';
+
+                // If it's already verified, don't show an error
+                if (errorMessage.toLowerCase().includes('already verified')) {
+                    setStatus('success');
+                    setMessage('Email is already verified. You can now login.');
+                    setTimeout(() => navigate('/login'), 3000);
+                } else {
+                    setStatus('error');
+                    setMessage(errorMessage);
+                }
             }
         };
 

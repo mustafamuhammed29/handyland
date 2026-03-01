@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Review = require('../models/Review');
 const RepairTicket = require('../models/RepairTicket');
 const Order = require('../models/Order');
+const Coupon = require('../models/Coupon');
 
 // @desc    Get global settings
 // @route   GET /api/settings
@@ -57,6 +58,20 @@ exports.getSettings = async (req, res) => {
             settingsObj.payment.stripe.webhookSecret = undefined; // Do not expose webhook secret
         }
 
+        // Fetch Coupon Details for Promo Popup
+        if (settingsObj.promoPopup && settingsObj.promoPopup.enabled && settingsObj.promoPopup.couponCode) {
+            const coupon = await Coupon.findOne({ code: settingsObj.promoPopup.couponCode.toUpperCase(), isActive: true });
+            if (coupon) {
+                settingsObj.promoPopup.couponDetails = {
+                    discountType: coupon.discountType,
+                    discountValue: coupon.discountValue || coupon.amount,
+                    validUntil: coupon.validUntil,
+                    usageLimit: coupon.usageLimit,
+                    usedCount: coupon.usedCount,
+                };
+            }
+        }
+
         res.status(200).json(settingsObj);
     } catch (error) {
         console.error("Error fetching settings:", error);
@@ -76,7 +91,7 @@ exports.updateSettings = async (req, res) => {
             'siteName', 'contactEmail', 'footerText', 'navbar',
             'hero', 'stats', 'valuation', 'content',
             'repairArchive', 'sections', 'contactSection', 'footerSection',
-            'freeShippingThreshold', 'payment', 'announcementBanner'
+            'freeShippingThreshold', 'payment', 'announcementBanner', 'promoPopup', 'socialAuth'
         ];
 
         allowedFields.forEach(field => {

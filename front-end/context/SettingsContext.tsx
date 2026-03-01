@@ -113,6 +113,24 @@ interface Settings {
         link?: string;
         linkText?: string;
     };
+    promoPopup?: {
+        enabled?: boolean;
+        title?: string;
+        message?: string;
+        couponCode?: string;
+        delay?: number;
+        couponDetails?: {
+            discountType: 'percentage' | 'fixed';
+            discountValue: number;
+            validUntil: string;
+            usageLimit: number | null;
+            usedCount: number;
+        };
+    };
+    socialAuth?: {
+        google?: boolean;
+        facebook?: boolean;
+    };
     freeShippingThreshold?: number;
 }
 
@@ -143,6 +161,13 @@ const defaultSettings: Settings = {
         stat1Value: '',
         stat2Title: '',
         stat2Value: ''
+    },
+    promoPopup: {
+        enabled: false,
+        title: '',
+        message: '',
+        couponCode: '',
+        delay: 5
     },
     valuation: {
         step1Title: 'Select Manufacturer'
@@ -211,6 +236,10 @@ const defaultSettings: Settings = {
             { labelKey: 'repair', defaultLabel: 'Repair', path: '/repair', iconName: 'Wrench' },
             { labelKey: 'valuation', defaultLabel: 'Sell', path: '/valuation', iconName: 'BarChart3' }
         ]
+    },
+    socialAuth: {
+        google: false,
+        facebook: false
     }
 };
 
@@ -221,7 +250,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const getCachedSettings = (): Settings => {
         try {
             const cached = localStorage.getItem('handyland_settings');
+            const cachedAt = localStorage.getItem('handyland_settings_at');
             if (cached) {
+                // Only use cache if it's less than 5 minutes old to prevent stale flash
+                const ageMs = Date.now() - parseInt(cachedAt || '0', 10);
+                if (ageMs > 5 * 60 * 1000) return defaultSettings; // Cache too old, use defaults
+
                 const parsed = JSON.parse(cached);
                 return {
                     ...defaultSettings,
@@ -235,19 +269,27 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     contactSection: { ...defaultSettings.contactSection, ...(parsed.contactSection || {}) },
                     footerSection: { ...defaultSettings.footerSection, ...(parsed.footerSection || {}) },
                     navbar: { ...defaultSettings.navbar, ...(parsed.navbar || {}) },
+                    socialAuth: { ...defaultSettings.socialAuth, ...(parsed.socialAuth || {}) },
+                    announcementBanner: { ...defaultSettings.announcementBanner, ...(parsed.announcementBanner || {}) },
+                    promoPopup: { ...defaultSettings.promoPopup, ...(parsed.promoPopup || {}) },
                 };
             }
         } catch { }
         return defaultSettings;
     };
 
-    const hasCachedSettings = (): boolean => {
-        try { return !!localStorage.getItem('handyland_settings'); } catch { return false; }
+    const hasFreshCache = (): boolean => {
+        try {
+            const cachedAt = localStorage.getItem('handyland_settings_at');
+            if (!cachedAt) return false;
+            const ageMs = Date.now() - parseInt(cachedAt, 10);
+            return ageMs < 5 * 60 * 1000; // Fresh if less than 5 minutes old
+        } catch { return false; }
     };
 
     const [settings, setSettings] = useState<Settings>(getCachedSettings);
-    // If we have cached settings, skip the loading screen — API will refresh silently
-    const [loading, setLoading] = useState(!hasCachedSettings());
+    // Only skip loading spinner if we have a FRESH cache (< 5 mins old)
+    const [loading, setLoading] = useState(!hasFreshCache());
     const [error, setError] = useState(false);
     const { addToast } = useToast();
 
@@ -270,13 +312,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     contactSection: { ...defaultSettings.contactSection, ...(safeData.contactSection || {}) },
                     footerSection: { ...defaultSettings.footerSection, ...(safeData.footerSection || {}) },
                     navbar: { ...defaultSettings.navbar, ...(safeData.navbar || {}) },
+                    socialAuth: { ...defaultSettings.socialAuth, ...(safeData.socialAuth || {}) },
+                    announcementBanner: { ...defaultSettings.announcementBanner, ...(safeData.announcementBanner || {}) },
+                    promoPopup: { ...defaultSettings.promoPopup, ...(safeData.promoPopup || {}) },
                 };
 
                 setSettings(merged);
                 if (!isBackgroundPolling) setLoading(false);
 
-                // Cache full settings for instant restore on next page load (no flash)
-                try { localStorage.setItem('handyland_settings', JSON.stringify(merged)); } catch { }
+                // Cache full settings AND store timestamp for freshness check
+                try {
+                    localStorage.setItem('handyland_settings', JSON.stringify(merged));
+                    localStorage.setItem('handyland_settings_at', Date.now().toString());
+                } catch { }
                 if (merged.siteName) {
                     localStorage.setItem('handyland_sitename', merged.siteName);
                 }
@@ -324,6 +372,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 contactSection: { ...prev.contactSection, ...(freshData.contactSection || {}) },
                 footerSection: { ...prev.footerSection, ...(freshData.footerSection || {}) },
                 navbar: { ...prev.navbar, ...(freshData.navbar || {}) },
+                socialAuth: { ...prev.socialAuth, ...(freshData.socialAuth || {}) },
             }));
 
             addToast('Settings updated', 'success');

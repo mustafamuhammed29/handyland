@@ -52,17 +52,23 @@ exports.register = async (req, res) => {
             }
         }
 
-        // Check password strength
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{12,}$/;
-        if (!passwordRegex.test(password)) {
+        // Check password strength - match frontend and route validation
+        // (At least 12 chars, one letter, one number, one special character)
+        const hasLetter = /[A-Za-z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasSpecial = /[@$!%*#?&]/.test(password);
+
+        if (password.length < 12 || !hasLetter || !hasNumber || !hasSpecial) {
             return res.status(400).json({
                 success: false,
                 message: 'Password must be at least 12 characters long and include at least one letter, one number, and one special character.'
             });
         }
 
-        // Generate verification token
+        // Generate verification token (unhashed version for email)
         const verificationToken = crypto.randomBytes(32).toString('hex');
+        // Hash it before saving to DB
+        const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
 
         // Create user
         const user = await User.create({
@@ -71,7 +77,7 @@ exports.register = async (req, res) => {
             password,
             phone,
             address,
-            verificationToken,
+            verificationToken: hashedVerificationToken,
             verificationTokenExpire: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
             isVerified: false
         });
@@ -155,8 +161,9 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Check if user is verified (unless disabled in dev)
-        if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true' && !user.isVerified) {
+        // Require email verification by default; set REQUIRE_EMAIL_VERIFICATION=false to skip
+        const skipVerification = process.env.REQUIRE_EMAIL_VERIFICATION === 'false';
+        if (!skipVerification && !user.isVerified) {
             return res.status(401).json({
                 success: false,
                 message: 'Please verify your email first',
@@ -431,16 +438,18 @@ exports.verifyEmail = async (req, res) => {
         const { token } = req.params;
         console.log("Verifying email with token:", token);
 
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
         // Find user with matching token and valid expiration
         const user = await User.findOne({
-            verificationToken: token,
+            verificationToken: hashedToken,
             verificationTokenExpire: { $gt: Date.now() }
         });
 
         if (!user) {
             console.log("Verify failed: Invalid or expired token");
             // Check if token exists but expired
-            const expiredUser = await User.findOne({ verificationToken: token });
+            const expiredUser = await User.findOne({ verificationToken: hashedToken });
             if (expiredUser) {
                 console.log("Token found but expired. Expiry:", expiredUser.verificationTokenExpire, "Now:", Date.now());
             } else {
@@ -495,7 +504,7 @@ exports.forgotPassword = async (req, res) => {
         // Generate reset token
         const resetToken = crypto.randomBytes(32).toString('hex');
 
-        user.resetPasswordToken = resetToken;
+        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
         user.resetPasswordExpire = Date.now() + 3600000; // 1 hour
         await user.save();
 
@@ -548,8 +557,9 @@ exports.resetPassword = async (req, res) => {
             });
         }
 
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
         const user = await User.findOne({
-            resetPasswordToken: token,
+            resetPasswordToken: hashedToken,
             resetPasswordExpire: { $gt: Date.now() }
         });
 
@@ -604,7 +614,9 @@ exports.resendVerification = async (req, res) => {
 
         // Generate new verification token
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        user.verificationToken = verificationToken;
+        const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+
+        user.verificationToken = hashedVerificationToken;
         user.verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
         await user.save();
 
