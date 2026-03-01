@@ -26,11 +26,11 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicLayout } from './components/layouts/PublicLayout';
 import { InfoPage } from './components/InfoPage';
 import { VerifyEmail } from './components/VerifyEmail';
-import { ResetPassword } from './components/ResetPassword';
-import Login from './Login';
-import Register from './Register';
-import VerifyEmailNotice from './VerifyEmailNotice';
-import ForgotPassword from './ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import VerifyEmailNotice from './pages/VerifyEmailNotice';
+import ForgotPassword from './pages/ForgotPassword';
 import SocialAuthCallback from './pages/SocialAuthCallback';
 import { LanguageCode, User } from './types';
 import { translations } from './i18n';
@@ -46,6 +46,7 @@ import { SEO } from './components/SEO';
 import { WhatsAppWidget } from './components/WhatsAppWidget';
 import { AnnouncementBanner } from './components/AnnouncementBanner';
 import { OfflineBanner } from './components/OfflineBanner';
+import { PromoModal } from './components/PromoModal';
 
 // Lazy Load Components
 const Marketplace = React.lazy(() => import('./components/Marketplace').then(module => ({ default: module.Marketplace })));
@@ -149,6 +150,7 @@ function AppContent() {
     <div className={`min-h-screen font-sans bg-slate-950 selection:bg-blue-500/30 selection:text-blue-200 ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <AnnouncementBanner />
       <OfflineBanner />
+      <PromoModal />
       <Suspense fallback={<GlobalLoader />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>

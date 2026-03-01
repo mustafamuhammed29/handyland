@@ -29,28 +29,38 @@ exports.applyCoupon = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Invalid coupon code' });
         }
 
-        if (!coupon.isValid()) {
-            return res.status(400).json({ success: false, message: 'Coupon expired or limit reached' });
+        // Manual validity checks (coupon.isValid() does not exist)
+        if (!coupon.isActive) {
+            return res.status(400).json({ success: false, message: 'This coupon is no longer active' });
         }
 
-        if (cartTotal < coupon.minOrderAmount) {
-            return res.status(400).json({ success: false, message: `Minimum order amount is ${coupon.minOrderAmount}€` });
+        if (coupon.validUntil && new Date() > new Date(coupon.validUntil)) {
+            return res.status(400).json({ success: false, message: 'Coupon has expired' });
+        }
+
+        if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
+            return res.status(400).json({ success: false, message: 'Coupon usage limit reached' });
+        }
+
+        if (cartTotal && coupon.minOrderValue && cartTotal < coupon.minOrderValue) {
+            return res.status(400).json({ success: false, message: `Minimum order amount is €${coupon.minOrderValue}` });
         }
 
         let discount = 0;
         if (coupon.discountType === 'percentage') {
-            discount = (cartTotal * coupon.amount) / 100;
+            discount = ((cartTotal || 0) * coupon.discountValue) / 100;
+            if (coupon.maxDiscount) discount = Math.min(discount, coupon.maxDiscount);
         } else {
-            discount = coupon.amount;
+            discount = coupon.discountValue;
         }
 
         // Cap discount at total amount
-        if (discount > cartTotal) discount = cartTotal;
+        discount = Math.min(discount, cartTotal || discount);
 
         res.json({
             success: true,
-            discount,
-            totalAfterDiscount: cartTotal - discount,
+            discount: parseFloat(discount.toFixed(2)),
+            totalAfterDiscount: parseFloat(((cartTotal || 0) - discount).toFixed(2)),
             couponCode: coupon.code
         });
 
@@ -58,6 +68,7 @@ exports.applyCoupon = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 // @desc    Create new order
 // @route   POST /api/orders

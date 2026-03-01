@@ -19,9 +19,9 @@ export const authService = {
         try {
             const response = await api.post('/api/auth/login', { email, password });
             return response as any;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Auth Service Login Error:', error);
-            throw error;
+            throw error.response?.data || { message: error.message || 'Login failed' };
         }
     },
 
@@ -29,9 +29,9 @@ export const authService = {
         try {
             const response = await api.post('/api/auth/register', userData);
             return response as any;
-        } catch (error) {
-            console.error('Auth Service Register Error:', error);
-            throw error;
+        } catch (error: any) {
+            console.error('Auth Service Register Error:', error.response?.data || error);
+            throw error.response?.data || { message: error.message || 'Registration failed' };
         }
     },
 
@@ -39,9 +39,9 @@ export const authService = {
         try {
             const response = await api.post('/api/auth/logout', {});
             return response as any;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Auth Service Logout Error:', error);
-            throw error;
+            throw error.response?.data || { message: error.message || 'Logout failed' };
         }
     },
 
@@ -49,9 +49,9 @@ export const authService = {
         try {
             const response = await api.get(`/api/auth/verify-email/${token}`);
             return response as any;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Auth Service Verify Email Error:', error);
-            throw error;
+            throw error.response?.data || { message: error.message || 'Verification failed' };
         }
     },
 
@@ -59,9 +59,9 @@ export const authService = {
         try {
             const response = await api.post('/api/auth/resend-verification', { email });
             return response as any;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Auth Service Resend Verification Error:', error);
-            throw error;
+            throw error.response?.data || { message: error.message || 'Resend verification failed' };
         }
     },
 

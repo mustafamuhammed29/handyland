@@ -184,7 +184,7 @@ const EmailManager: React.FC = () => {
                             </h3>
                         </div>
                         {preview ? (
-                            <div className="p-6 bg-white rounded-b-xl">
+                            <div className="p-6 bg-white text-slate-900 rounded-b-xl">
                                 <div dangerouslySetInnerHTML={{ __html: editHtml }} />
                             </div>
                         ) : (

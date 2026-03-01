@@ -42,7 +42,11 @@ const loginLimiter = isDevelopment
 const registerRules = [
     body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 100 }).withMessage('Name too long'),
     body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+    body('password')
+        .isLength({ min: 12 }).withMessage('Password must be at least 12 characters')
+        .matches(/[A-Za-z]/).withMessage('Password must contain at least one letter')
+        .matches(/\d/).withMessage('Password must contain at least one number')
+        .matches(/[@$!%*#?&]/).withMessage('Password must contain at least one special character'),
     body('phone').optional().isMobilePhone('any').withMessage('Invalid phone number'),
 ];
 

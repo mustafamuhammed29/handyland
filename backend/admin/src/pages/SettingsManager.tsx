@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, CheckCircle, AlertCircle, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
 
@@ -99,6 +99,11 @@ interface FooterSettings {
     copyright: string;
 }
 
+interface SocialAuthSettings {
+    google: boolean;
+    facebook: boolean;
+}
+
 interface Settings {
     siteName: string;
     contactEmail: string;
@@ -121,6 +126,14 @@ interface Settings {
         link: string;
         linkText: string;
     };
+    promoPopup: {
+        enabled: boolean;
+        title: string;
+        message: string;
+        couponCode: string;
+        delay: number;
+    };
+    socialAuth: SocialAuthSettings;
 }
 
 interface EmailTemplateData {
@@ -175,7 +188,9 @@ export default function SettingsManager() {
             whatsappPhone: '', whatsappMessage: ''
         },
         footerSection: { tagline: '', copyright: '' },
-        announcementBanner: { enabled: false, text: '', color: 'blue', dismissible: true, link: '', linkText: '' }
+        announcementBanner: { enabled: false, text: '', color: 'blue', dismissible: true, link: '', linkText: '' },
+        promoPopup: { enabled: false, title: '', message: '', couponCode: '', delay: 5 },
+        socialAuth: { google: false, facebook: false }
     });
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
@@ -195,7 +210,14 @@ export default function SettingsManager() {
         const fetchSettings = async () => {
             try {
                 const response = await api.get('/api/settings');
-                setSettings(prev => ({ ...prev, ...response.data }));
+                // Admin API interceptor does NOT unwrap response.data, so we need to handle both cases
+                const data = (response as any)?.data || response;
+                setSettings(prev => ({
+                    ...prev,
+                    ...data,
+                    promoPopup: { ...prev.promoPopup, ...(data.promoPopup || {}) },
+                    announcementBanner: { ...prev.announcementBanner, ...(data.announcementBanner || {}) },
+                }));
             } catch (err) {
                 console.error('Failed to fetch settings:', err);
             } finally {
@@ -209,7 +231,7 @@ export default function SettingsManager() {
     }, []);
 
     const handleChange = (section: keyof Settings | null, key: string, value: string | number | boolean | any) => {
-        if (section === 'hero' || section === 'valuation' || section === 'content' || section === 'stats' || section === 'repairArchive' || section === 'sections' || section === 'contactSection' || section === 'footerSection' || section === 'navbar') {
+        if (section === 'hero' || section === 'valuation' || section === 'content' || section === 'stats' || section === 'repairArchive' || section === 'sections' || section === 'contactSection' || section === 'footerSection' || section === 'navbar' || section === 'socialAuth' || section === 'promoPopup') {
             setSettings(prev => ({
                 ...prev,
                 [section]: { ...prev[section], [key]: value }
@@ -292,6 +314,8 @@ export default function SettingsManager() {
         { id: 'contact', label: 'Contact Info', icon: MessageSquare },
         { id: 'layout', label: 'Layout Control', icon: LayoutTemplate },
         { id: 'banner', label: '📢 Announcement', icon: Layers },
+        { id: 'promo', label: '🎁 Promo Popup', icon: Layers },
+        { id: 'auth', label: 'Authentication', icon: Shield },
     ];
 
     if (loading) return <div className="text-white">Loading...</div>;
@@ -350,6 +374,31 @@ export default function SettingsManager() {
                             <Input label="Contact Email" value={settings.contactEmail} onChange={(v) => handleChange(null, 'contactEmail', v)} />
                             <Input label="Free Shipping Threshold (€)" value={settings.freeShippingThreshold.toString()} onChange={(v) => handleChange(null, 'freeShippingThreshold', Number(v))} type="number" />
                             <Input label="Footer Text" value={settings.footerText} onChange={(v) => handleChange(null, 'footerText', v)} />
+                        </div>
+                    )}
+
+                    {activeTab === 'auth' && (
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-bold text-white mb-4">Social Login & Authentication</h3>
+                            <p className="text-slate-400 text-sm">Control which login methods are available to your users.</p>
+
+                            <div className="p-4 border border-slate-700 rounded-xl space-y-4 bg-slate-900/50">
+                                <h4 className="text-blue-400 font-bold mb-4">Social Auth Providers</h4>
+                                <Toggle
+                                    label="Enable Google Login"
+                                    value={settings.socialAuth?.google || false}
+                                    onChange={(v) => handleChange('socialAuth', 'google', v)}
+                                />
+                                <Toggle
+                                    label="Enable Facebook Login"
+                                    value={settings.socialAuth?.facebook || false}
+                                    onChange={(v) => handleChange('socialAuth', 'facebook', v)}
+                                />
+                                <div className="mt-4 p-3 bg-blue-900/20 border border-blue-800 rounded-lg text-sm text-blue-300 flex gap-2">
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
+                                    <p>Note: To use social login, ensure you have configured your Client IDs and Secrets in the backend <code>.env</code> file.</p>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -825,6 +874,29 @@ export default function SettingsManager() {
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {activeTab === 'promo' && (
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-bold text-white mb-4">🎁 Promotional Popup</h3>
+                            <p className="text-slate-400 text-sm">Configure a centered popup that appears to visitors offering a discount or special message.</p>
+
+                            <div className="p-4 border border-slate-700 rounded-xl space-y-4">
+                                <Toggle label="Enable Promo Popup" value={settings.promoPopup?.enabled || false} onChange={(v) => handleChange('promoPopup', 'enabled', v)} />
+
+                                <Input label="Popup Title" value={settings.promoPopup?.title} onChange={(v) => handleChange('promoPopup', 'title', v)} placeholder="Special Offer!" />
+                                <Input textarea label="Popup Message" value={settings.promoPopup?.message} onChange={(v) => handleChange('promoPopup', 'message', v)} placeholder="Get 10% off your first repair with our exclusive coupon code." />
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input label="Coupon Code to Display" value={settings.promoPopup?.couponCode} onChange={(v) => handleChange('promoPopup', 'couponCode', v)} placeholder="WELCOME10" />
+                                    <Input type="number" label="Delay before appearing (Seconds)" value={settings.promoPopup?.delay?.toString()} onChange={(v) => handleChange('promoPopup', 'delay', Number(v))} placeholder="5" />
+                                </div>
+                                <div className="mt-4 p-3 bg-blue-900/20 border border-blue-800 rounded-lg text-sm text-blue-300 flex gap-2">
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
+                                    <p>The popup will only be shown once per visitor session to avoid spamming the user.</p>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

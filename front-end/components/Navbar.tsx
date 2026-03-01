@@ -81,8 +81,10 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
     icon: link.iconName && iconMap[link.iconName] ? iconMap[link.iconName] : <Home className="w-4 h-4" />
   }));
 
+  const hasBanner = settings.announcementBanner?.enabled && settings.announcementBanner?.text;
+
   return (
-    <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50 rtl:left-auto rtl:right-1/2 rtl:translate-x-1/2">
+    <nav className={`fixed left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50 rtl:left-auto rtl:right-1/2 rtl:translate-x-1/2 transition-all duration-300 ${hasBanner ? 'top-14' : 'top-6'}`}>
       <div className="glass-modern rounded-3xl px-6 py-4 border border-slate-700/50 shadow-2xl">
         <div className="flex justify-between items-center">
 

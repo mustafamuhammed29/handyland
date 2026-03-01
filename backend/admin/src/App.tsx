@@ -15,6 +15,7 @@ import EmailManager from './pages/EmailManager';
 import PaymentManager from './pages/PaymentManager';
 import ShippingManager from './pages/ShippingManager';
 import MessagesManager from './pages/MessagesManager';
+import CouponManager from './pages/CouponManager';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -77,6 +78,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarLink to="/orders" icon={Package} label="Orders" />
           <SidebarLink to="/products" icon={Smartphone} label="Products" />
           <SidebarLink to="/accessories" icon={Headphones} label="Accessories" />
+          <SidebarLink to="/coupons" icon={ScanLine} label="Coupons" />
           <SidebarLink to="/repairs" icon={Wrench} label="Repairs" />
           <SidebarLink to="/archive" icon={ScanLine} label="Repair Archive" />
           <SidebarLink to="/valuation" icon={FileText} label="Valuation" />
@@ -137,6 +139,7 @@ function AppContent() {
                   <Route path="/orders" element={<OrdersManager />} />
                   <Route path="/products" element={<ProductsManager />} />
                   <Route path="/accessories" element={<AccessoriesManager />} />
+                  <Route path="/coupons" element={<CouponManager />} />
                   <Route path="/repairs" element={<RepairManager />} />
                   <Route path="/archive" element={<ArchiveManager />} />
                   <Route path="/valuation" element={<ValuationManager />} />
