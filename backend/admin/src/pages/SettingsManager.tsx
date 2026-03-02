@@ -104,6 +104,12 @@ interface SocialAuthSettings {
     facebook: boolean;
 }
 
+interface PaymentSettings {
+    paypal: { enabled: boolean; clientId: string; clientSecret: string; mode: string };
+    bankTransfer: { enabled: boolean; instructions: string; bankName: string; accountHolder: string; iban: string; bic: string };
+    cashOnDelivery: { enabled: boolean };
+}
+
 interface Settings {
     siteName: string;
     contactEmail: string;
@@ -114,6 +120,7 @@ interface Settings {
     valuation: ValuationSettings;
     content: ContentSettings;
     stats: StatsSettings;
+    payment: PaymentSettings;
     repairArchive: RepairArchiveSettings;
     sections: SectionsSettings;
     contactSection: ContactSettings;
@@ -180,6 +187,11 @@ export default function SettingsManager() {
         },
         content: { accessoriesTitle: '', accessoriesSubtitle: '', repairTitle: '', repairSubtitle: '' },
         stats: { devicesRepaired: 0, happyCustomers: 0, averageRating: 0, marketExperience: 0 },
+        payment: {
+            paypal: { enabled: false, clientId: '', clientSecret: '', mode: 'sandbox' },
+            bankTransfer: { enabled: false, instructions: '', bankName: '', accountHolder: '', iban: '', bic: '' },
+            cashOnDelivery: { enabled: true }
+        },
         repairArchive: { title: '', subtitle: '', buttonText: '', totalRepairs: 0 },
         sections: { hero: true, stats: true, repairGallery: true, marketplace: true, accessories: true, contact: true },
         contactSection: {
@@ -231,7 +243,24 @@ export default function SettingsManager() {
     }, []);
 
     const handleChange = (section: keyof Settings | null, key: string, value: string | number | boolean | any) => {
-        if (section === 'hero' || section === 'valuation' || section === 'content' || section === 'stats' || section === 'repairArchive' || section === 'sections' || section === 'contactSection' || section === 'footerSection' || section === 'navbar' || section === 'socialAuth' || section === 'promoPopup') {
+        if (section === 'payment') {
+            setSettings(prev => {
+                const parts = key.split('.'); // e.g., 'bankTransfer.enabled'
+                if (parts.length === 2) {
+                    return {
+                        ...prev,
+                        payment: {
+                            ...prev.payment,
+                            [parts[0]]: {
+                                ...prev.payment[parts[0] as keyof PaymentSettings],
+                                [parts[1]]: value
+                            }
+                        }
+                    }
+                }
+                return prev;
+            });
+        } else if (section === 'hero' || section === 'valuation' || section === 'content' || section === 'stats' || section === 'repairArchive' || section === 'sections' || section === 'contactSection' || section === 'footerSection' || section === 'navbar' || section === 'socialAuth' || section === 'promoPopup') {
             setSettings(prev => ({
                 ...prev,
                 [section]: { ...prev[section], [key]: value }
@@ -307,6 +336,8 @@ export default function SettingsManager() {
 
     const tabs = [
         { id: 'general', label: 'General', icon: Layers },
+        { id: 'payments', label: 'Payment Methods', icon: Shield },
+        { id: 'auth', label: 'Authentication', icon: Shield },
         { id: 'hero', label: 'Hero Section', icon: MonitorPlay },
         { id: 'stats', label: 'Live Stats', icon: BarChart },
         { id: 'archive', label: 'Repair Archive', icon: ScanLine },
@@ -315,7 +346,6 @@ export default function SettingsManager() {
         { id: 'layout', label: 'Layout Control', icon: LayoutTemplate },
         { id: 'banner', label: '📢 Announcement', icon: Layers },
         { id: 'promo', label: '🎁 Promo Popup', icon: Layers },
-        { id: 'auth', label: 'Authentication', icon: Shield },
     ];
 
     if (loading) return <div className="text-white">Loading...</div>;
@@ -399,6 +429,84 @@ export default function SettingsManager() {
                                     <p>Note: To use social login, ensure you have configured your Client IDs and Secrets in the backend <code>.env</code> file.</p>
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'payments' && (
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-bold text-white mb-4">Payment Providers Configuration</h3>
+                            <p className="text-slate-400 text-sm">Set up your receiving bank account and API keys for payment processing.</p>
+
+                            {/* Bank Transfer */}
+                            <div className="p-4 border border-slate-700 rounded-xl space-y-4 bg-slate-900/50">
+                                <h4 className="text-blue-400 font-bold mb-4 flex items-center justify-between">
+                                    Bank Transfer (Vorkasse)
+                                    <div className="w-32">
+                                        <Toggle
+                                            label={settings.payment?.bankTransfer?.enabled ? 'Enabled' : 'Disabled'}
+                                            value={settings.payment?.bankTransfer?.enabled || false}
+                                            onChange={(v) => handleChange('payment', 'bankTransfer.enabled', v)}
+                                        />
+                                    </div>
+                                </h4>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input label="Bank Name" value={settings.payment?.bankTransfer?.bankName} onChange={(v) => handleChange('payment', 'bankTransfer.bankName', v)} placeholder="Sparkasse, Commerzbank, etc." />
+                                    <Input label="Account Holder" value={settings.payment?.bankTransfer?.accountHolder} onChange={(v) => handleChange('payment', 'bankTransfer.accountHolder', v)} placeholder="Your Company Name" />
+                                    <Input label="IBAN" value={settings.payment?.bankTransfer?.iban} onChange={(v) => handleChange('payment', 'bankTransfer.iban', v)} placeholder="DE00 0000 0000 0000 0000 00" />
+                                    <Input label="BIC / SWIFT" value={settings.payment?.bankTransfer?.bic} onChange={(v) => handleChange('payment', 'bankTransfer.bic', v)} placeholder="XXXXDE00XXX" />
+                                </div>
+                                <Input label="Customer Instructions" value={settings.payment?.bankTransfer?.instructions} onChange={(v) => handleChange('payment', 'bankTransfer.instructions', v)} placeholder="Please transfer the money to this account. Mention the Order Number as reference (Verwendungszweck)." textarea />
+                            </div>
+
+                            {/* PayPal */}
+                            <div className="p-4 border border-slate-700 rounded-xl space-y-4 bg-slate-900/50">
+                                <h4 className="text-blue-400 font-bold mb-4 flex items-center justify-between">
+                                    PayPal Express Checkout
+                                    <div className="w-32">
+                                        <Toggle
+                                            label={settings.payment?.paypal?.enabled ? 'Enabled' : 'Disabled'}
+                                            value={settings.payment?.paypal?.enabled || false}
+                                            onChange={(v) => handleChange('payment', 'paypal.enabled', v)}
+                                        />
+                                    </div>
+                                </h4>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div>
+                                        <label className="block text-slate-400 text-sm font-bold mb-2">Environment Mode</label>
+                                        <select
+                                            value={settings.payment?.paypal?.mode || 'sandbox'}
+                                            onChange={(e) => handleChange('payment', 'paypal.mode', e.target.value)}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                        >
+                                            <option value="sandbox">Sandbox (Testing)</option>
+                                            <option value="live">Live (Production)</option>
+                                        </select>
+                                    </div>
+                                    <Input label="Client ID" value={settings.payment?.paypal?.clientId} onChange={(v) => handleChange('payment', 'paypal.clientId', v)} placeholder="AbCdEfGhIjKlMnOpQrStUvWxYz..." />
+                                    <Input label="Client Secret" value={settings.payment?.paypal?.clientSecret || ''} onChange={(v) => handleChange('payment', 'paypal.clientSecret', v)} placeholder="Enter new secret if changing..." type="password" />
+                                </div>
+                                <div className="mt-4 p-3 bg-blue-900/20 border border-blue-800 rounded-lg text-sm text-blue-300 flex gap-2">
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
+                                    <p>The <b>Client Secret</b> is hidden for security. Typing a new value will replace the existing one. Leave blank to keep the current secret.</p>
+                                </div>
+                            </div>
+
+                            {/* Cash on Delivery */}
+                            <div className="p-4 border border-slate-700 rounded-xl space-y-4 bg-slate-900/50">
+                                <h4 className="text-blue-400 font-bold mb-4 flex items-center justify-between">
+                                    Cash on Delivery (Nachnahme)
+                                    <div className="w-32">
+                                        <Toggle
+                                            label={settings.payment?.cashOnDelivery?.enabled ? 'Enabled' : 'Disabled'}
+                                            value={settings.payment?.cashOnDelivery?.enabled || false}
+                                            onChange={(v) => handleChange('payment', 'cashOnDelivery.enabled', v)}
+                                        />
+                                    </div>
+                                </h4>
+                            </div>
+
                         </div>
                     )}
 

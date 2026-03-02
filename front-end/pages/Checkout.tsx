@@ -11,6 +11,7 @@ import { ShieldCheck, Truck, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Loa
 import { LanguageCode } from '../types';
 import { translations } from '../i18n';
 import { z } from 'zod';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 // Initialize Stripe (Move to env var in production)
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
@@ -42,7 +43,7 @@ interface ShippingMethod {
 }
 
 export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
-    const { cart, cartTotal } = useCart();
+    const { cart, cartTotal, coupon, applyCoupon, removeCoupon } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
     const t = translations[lang];
@@ -75,9 +76,8 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     });
     const [formErrors, setFormErrors] = useState<Partial<Record<keyof ShippingFormData, string>>>({});
 
-    // Coupon State
+    // Coupon State (coupon itself lives in CartContext so it's shared with CartDrawer)
     const [couponCode, setCouponCode] = useState('');
-    const [appliedCoupon, setAppliedCoupon] = useState<{ code: string, discount: number } | null>(null);
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
 
@@ -239,10 +239,8 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
             const response = await orderService.applyCoupon(couponCode, cartTotal);
 
             if (response.success) {
-                setAppliedCoupon({
-                    code: response.couponCode,
-                    discount: response.discount
-                });
+                // Save to CartContext so CartDrawer also reflects the coupon
+                applyCoupon(response.couponCode, response.discount);
                 setCouponCode('');
             } else {
                 setCouponError(response.message || 'Invalid coupon');
@@ -254,8 +252,8 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         }
     };
 
-    const removeCoupon = () => {
-        setAppliedCoupon(null);
+    const handleRemoveCoupon = () => {
+        removeCoupon(); // removes from CartContext (shared state)
         setCouponCode('');
     };
 
@@ -267,7 +265,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
             shippingCost = 0;
         }
 
-        const discount = appliedCoupon ? appliedCoupon.discount : 0;
+        const discount = coupon ? coupon.discount : 0;
         return Math.max(0, cartTotal + shippingCost - discount);
     };
 
@@ -332,29 +330,21 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
             },
             shippingFee: shippingCost.toString(),
             shippingMethod: selectedMethod?.name || 'Standard',
-            couponCode: appliedCoupon?.code,
-            discountAmount: appliedCoupon?.discount,
+            couponCode: coupon?.code,
+            discountAmount: coupon?.discount,
             email: shippingDetails.email // Important for Guest Checkout
         };
 
         try {
-            if (selectedPaymentMethod === 'cod') {
-                // Handle Cash on Delivery
-                // Adjust data to match createOrder expected endpoint if necessary
-                // createOrder expects: items, shippingAddress, paymentMethod, notes
+            if (selectedPaymentMethod === 'cod' || selectedPaymentMethod === 'bank_transfer') {
                 const r = await orderService.createOrder({
                     ...commonOrderData,
-                    paymentMethod: 'cash',
-                    notes: `Checkout via Web. Method: COD.`
+                    paymentMethod: selectedPaymentMethod === 'cod' ? 'cash' : 'bank_transfer',
+                    notes: `Checkout via Web. Method: ${selectedPaymentMethod === 'cod' ? 'COD' : 'Bank Transfer'}.`
                 });
 
                 if (r.success) {
-                    // Redirect to success page or order details
-                    // Since we don't have a dedicated "Guest Order Details" yet, verify where to go.
-                    // For now, consistent with Stripe success, go to payment-success?session_id=COD_ORDERID
-                    // But payment-success page expects a stripe session ID usually to verify.
-                    // We might need a special query param.
-                    navigate(`/payment-success?order_id=${r.order._id}&method=cod`);
+                    navigate(`/payment-success?order_id=${r.order._id}&method=${selectedPaymentMethod}`);
                 }
 
             } else if (['stripe', 'paypal', 'klarna', 'giropay', 'sepa_debit', 'sofort'].includes(selectedPaymentMethod)) {
@@ -689,131 +679,184 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                         <CreditCard className="w-6 h-6 text-emerald-500" /> Payment
                                     </h2>
                                 </div>
+                                <h3 className="font-bold text-white mb-4">Payment Method</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-
-                                    {/* Stripe (Credit Card) */}
-                                    {paymentConfig?.stripe?.enabled && (
-                                        <button
-                                            onClick={() => setSelectedPaymentMethod('stripe')}
-                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'stripe'
-                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
-                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
-                                                }`}
-                                        >
-                                            <CreditCard className={`w-8 h-8 ${selectedPaymentMethod === 'stripe' ? 'text-blue-400' : 'text-slate-400'}`} />
-                                            <span className="font-bold text-white">Credit Card</span>
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => setSelectedPaymentMethod('bank_transfer')}
+                                        className={`p-6 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${selectedPaymentMethod === 'bank_transfer'
+                                            ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500 shadow-lg shadow-blue-900/20'
+                                            : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                                            }`}
+                                    >
+                                        <div className={`w-12 h-12 flex items-center justify-center rounded-full ${selectedPaymentMethod === 'bank_transfer' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-400'}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                                            </svg>
+                                        </div>
+                                        <div className="text-center">
+                                            <span className="font-bold text-white block">Bank Transfer</span>
+                                            <span className="text-xs text-slate-400">Vorkasse / Überweisung</span>
+                                        </div>
+                                    </button>
 
                                     {/* PayPal */}
-                                    {paymentConfig?.paypal?.enabled && (
+                                    {paymentConfig?.paypal?.enabled && paymentConfig?.paypal?.clientId && (
                                         <button
                                             onClick={() => setSelectedPaymentMethod('paypal')}
-                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'paypal'
-                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
+                                            className={`p-6 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${selectedPaymentMethod === 'paypal'
+                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500 shadow-lg shadow-blue-900/20'
                                                 : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
                                                 }`}
                                         >
-                                            <div className={`w-8 h-8 flex items-center justify-center font-black italic text-xl ${selectedPaymentMethod === 'paypal' ? 'text-blue-400' : 'text-slate-400'}`}>P</div>
-                                            <span className="font-bold text-white">PayPal</span>
+                                            <div className={`w-12 h-12 flex items-center justify-center rounded-full ${selectedPaymentMethod === 'paypal' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-400'}`}>
+                                                <svg className="w-6 h-6" viewBox="0 0 256 256" fill="currentColor">
+                                                    <path d="M208.2,74.7c-4.4-17.7-18.7-27.1-41-28.7c-3.1-0.2-6.5-0.3-10-0.3H82.4c-6.8,0-12.7,5-13.8,11.8L40,245.8c-0.2,1.3,0.8,2.4,2,2.4 h41.8c6.1,0,11.3-4.5,12.3-10.5l8.5-59.3h27.4c29.1,0,52.3-11.8,59-42.3C195.9,114.3,197,93.6,193.3,77.5L208.2,74.7z M144.2,143.7 c-4.6,23.3-25.7,23.3-43,23.3H87.1l14.9-103.7h27.6c11.6,0,22,0.6,28.3,7C163.6,76.1,161.4,103.1,144.2,143.7z" />
+                                                </svg>
+                                            </div>
+                                            <div className="text-center">
+                                                <span className="font-bold text-white block">PayPal</span>
+                                                <span className="text-xs text-slate-400">Fast & Secure</span>
+                                            </div>
                                         </button>
                                     )}
 
-                                    {/* Klarna */}
-                                    {paymentConfig?.klarna?.enabled && (
-                                        <button
-                                            onClick={() => setSelectedPaymentMethod('klarna')}
-                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'klarna'
-                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
-                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
-                                                }`}
-                                        >
-                                            <div className={`w-8 h-8 flex items-center justify-center font-black ${selectedPaymentMethod === 'klarna' ? 'text-[#FFB3C7]' : 'text-slate-400'}`}>K.</div>
-                                            <span className="font-bold text-white">Klarna</span>
-                                        </button>
-                                    )}
-
-                                    {/* Giropay */}
-                                    {paymentConfig?.giropay?.enabled && (
-                                        <button
-                                            onClick={() => setSelectedPaymentMethod('giropay')}
-                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'giropay'
-                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
-                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
-                                                }`}
-                                        >
-                                            <div className={`w-8 h-8 flex items-center justify-center font-bold ${selectedPaymentMethod === 'giropay' ? 'text-blue-400' : 'text-slate-400'}`}>Giro</div>
-                                            <span className="font-bold text-white">Giropay</span>
-                                        </button>
-                                    )}
-
-                                    {/* SEPA Direct Debit */}
-                                    {paymentConfig?.sepa?.enabled && (
-                                        <button
-                                            onClick={() => setSelectedPaymentMethod('sepa_debit')}
-                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'sepa_debit'
-                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
-                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
-                                                }`}
-                                        >
-                                            <CreditCard className={`w-8 h-8 ${selectedPaymentMethod === 'sepa_debit' ? 'text-blue-400' : 'text-slate-400'}`} />
-                                            <span className="font-bold text-white">SEPA Direct</span>
-                                        </button>
-                                    )}
-
-                                    {/* Sofort */}
-                                    {paymentConfig?.sofort?.enabled && (
-                                        <button
-                                            onClick={() => setSelectedPaymentMethod('sofort')}
-                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'sofort'
-                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
-                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
-                                                }`}
-                                        >
-                                            <div className={`w-8 h-8 flex items-center justify-center font-bold ${selectedPaymentMethod === 'sofort' ? 'text-blue-400' : 'text-slate-400'}`}>S.</div>
-                                            <span className="font-bold text-white">Sofort</span>
-                                        </button>
-                                    )}
-
-                                    {/* Cash on Delivery */}
-                                    {paymentConfig?.cashOnDelivery?.enabled && (
+                                    {/* Cash on Delivery (Nachnahme) */}
+                                    {paymentConfig?.cashOnDelivery?.enabled !== false && (
                                         <button
                                             onClick={() => setSelectedPaymentMethod('cod')}
-                                            className={`p-6 rounded-xl border flex flex-col items-center gap-3 transition-all ${selectedPaymentMethod === 'cod'
-                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500'
+                                            className={`p-6 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${selectedPaymentMethod === 'cod'
+                                                ? 'bg-emerald-600/20 border-emerald-500 ring-1 ring-emerald-500 shadow-lg shadow-emerald-900/20'
                                                 : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
                                                 }`}
                                         >
-                                            <Truck className={`w-8 h-8 ${selectedPaymentMethod === 'cod' ? 'text-blue-400' : 'text-slate-400'}`} />
-                                            <span className="font-bold text-white">Cash on Delivery</span>
-                                            <span className="text-xs text-slate-500">Pay when you receive it</span>
+                                            <div className={`w-12 h-12 flex items-center justify-center rounded-full ${selectedPaymentMethod === 'cod' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
+                                                <Truck className="w-6 h-6" />
+                                            </div>
+                                            <div className="text-center">
+                                                <span className="font-bold text-white block">Cash on Delivery</span>
+                                                <span className="text-xs text-slate-400">Nachnahme / Barzahlung</span>
+                                            </div>
                                         </button>
                                     )}
                                 </div>
 
                                 <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 mb-8 text-center">
-                                    <p className="text-slate-400 mb-6">
-                                        {['stripe', 'paypal', 'klarna', 'giropay', 'sepa_debit', 'sofort'].includes(selectedPaymentMethod) && "You are about to be redirected to our secure payment partner (Stripe) to complete your purchase using your selected method."}
-                                        {selectedPaymentMethod === 'cod' && "You will pay for your order upon delivery. Please have the exact amount ready."}
-                                        {!selectedPaymentMethod && "Please select a payment method above."}
+                                    <p className="text-slate-400 mb-6 text-sm">
+                                        {selectedPaymentMethod === 'bank_transfer' && (paymentConfig?.bankTransfer?.instructions || "You will receive our bank details (IBAN/BIC) via email after placing the order. Your order will be shipped once the payment is received.")}
+                                        {selectedPaymentMethod === 'cod' && "You will pay for your order directly to the courier upon delivery. Please have the exact amount ready."}
+                                        {selectedPaymentMethod === 'paypal' && "You will be securely redirected to PayPal to complete your purchase."}
+                                        {!selectedPaymentMethod && "Please select a payment method to continue."}
                                     </p>
 
-                                    <button
-                                        onClick={handlePaymentSuccess}
-                                        disabled={loading || !selectedPaymentMethod}
-                                        className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20"
-                                    >
-                                        {loading ? (
-                                            <>
-                                                <Loader2 className="animate-spin w-5 h-5" /> Processing...
-                                            </>
-                                        ) : (
-                                            <>
-                                                {selectedPaymentMethod === 'cod' ? 'Place Order' : 'Pay Securely'} <span className="ml-1">{getFinalTotal().toFixed(2)}{t.currency}</span> <ArrowRight className="w-5 h-5" />
-                                            </>
-                                        )}
-                                    </button>
+                                    {selectedPaymentMethod === 'paypal' && paymentConfig?.paypal?.clientId ? (
+                                        <PayPalScriptProvider options={{ clientId: paymentConfig.paypal.clientId, currency: "EUR", intent: "capture" }}>
+                                            <PayPalButtons
+                                                style={{ layout: "vertical", shape: "rect", color: "blue" }}
+                                                createOrder={async () => {
+                                                    const selectedMethod = shippingMethods.find(m => m._id === selectedMethodId);
+                                                    let shippingCost = selectedMethod ? selectedMethod.price : 5.99;
+                                                    if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) {
+                                                        shippingCost = 0;
+                                                    }
+
+                                                    const commonOrderData = {
+                                                        items: cart.map(item => ({
+                                                            product: item.id,
+                                                            productType: item.category === 'device' ? 'Product' : 'Accessory',
+                                                            name: item.title,
+                                                            price: item.price,
+                                                            image: item.image,
+                                                            quantity: item.quantity || 1
+                                                        })),
+                                                        shippingAddress: {
+                                                            ...shippingDetails,
+                                                            street: shippingDetails.address
+                                                        },
+                                                        shippingFee: shippingCost,
+                                                        couponCode: coupon?.code,
+                                                        discountAmount: coupon?.discount
+                                                    };
+
+                                                    try {
+                                                        const res = await api.post('/api/payment/paypal/create-order', commonOrderData);
+                                                        if (res.data.success) {
+                                                            return res.data.id;
+                                                        } else {
+                                                            setError("Error initiating PayPal checkout");
+                                                            return "";
+                                                        }
+                                                    } catch (error: any) {
+                                                        setError(error.response?.data?.message || "Failed to initiate PayPal");
+                                                        return "";
+                                                    }
+                                                }}
+                                                onApprove={async (data, actions) => {
+                                                    try {
+                                                        setLoading(true);
+                                                        const selectedMethod = shippingMethods.find(m => m._id === selectedMethodId);
+                                                        let shippingCost = selectedMethod ? selectedMethod.price : 5.99;
+                                                        if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) {
+                                                            shippingCost = 0;
+                                                        }
+
+                                                        const commonOrderData = {
+                                                            items: cart.map(item => ({
+                                                                product: item.id,
+                                                                productType: item.category === 'device' ? 'Product' : 'Accessory',
+                                                                name: item.title,
+                                                                price: item.price,
+                                                                image: item.image,
+                                                                quantity: item.quantity || 1
+                                                            })),
+                                                            shippingAddress: {
+                                                                ...shippingDetails,
+                                                                street: shippingDetails.address
+                                                            },
+                                                            shippingFee: shippingCost,
+                                                            couponCode: coupon?.code,
+                                                            discountAmount: coupon?.discount
+                                                        };
+
+                                                        const captureRes = await api.post('/api/payment/paypal/capture-order', {
+                                                            orderID: data.orderID,
+                                                            orderData: commonOrderData
+                                                        });
+
+                                                        if (captureRes.data.success) {
+                                                            navigate(`/payment-success?order_id=${captureRes.data.order._id}&method=paypal`);
+                                                        } else {
+                                                            setError("Failed to capture PayPal payment.");
+                                                            setLoading(false);
+                                                        }
+                                                    } catch (error: any) {
+                                                        setError(error.response?.data?.message || "Error finalizing PayPal transaction.");
+                                                        setLoading(false);
+                                                    }
+                                                }}
+                                                onError={(err) => {
+                                                    console.error("PayPal Checkout Error:", err);
+                                                    setError("An error occurred during PayPal checkout.");
+                                                }}
+                                            />
+                                        </PayPalScriptProvider>
+                                    ) : (
+                                        <button
+                                            onClick={handlePaymentSuccess}
+                                            disabled={loading || !selectedPaymentMethod}
+                                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20"
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <Loader2 className="animate-spin w-5 h-5" /> Processing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Place Order Securely <span className="ml-1">{getFinalTotal().toFixed(2)}{t.currency}</span> <ArrowRight className="w-5 h-5" />
+                                                </>
+                                            )}
+                                        </button>
+                                    )}
                                 </div>
 
                                 <div className="flex justify-center items-center gap-6 text-slate-500 text-xs md:text-sm">
@@ -876,13 +919,13 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
 
                             {/* Coupon Input */}
                             <div className="pt-6 border-t border-slate-800">
-                                {appliedCoupon ? (
+                                {coupon ? (
                                     <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-center justify-between animate-in fade-in">
                                         <div className="flex items-center gap-2 text-emerald-400">
                                             <Tag className="w-4 h-4" />
-                                            <span className="font-bold text-sm">{appliedCoupon.code}</span>
+                                            <span className="font-bold text-sm">{coupon.code}</span>
                                         </div>
-                                        <button onClick={removeCoupon} aria-label="Remove coupon" className="text-slate-400 hover:text-white p-1 transition-colors">
+                                        <button onClick={handleRemoveCoupon} aria-label="Remove coupon" className="text-slate-400 hover:text-white p-1 transition-colors">
                                             <X className="w-4 h-4" />
                                         </button>
                                     </div>
@@ -917,12 +960,12 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                 </div>
                                 <div className="flex justify-between text-emerald-400 text-sm">
                                     <span>Shipping</span>
-                                    <span>{(getFinalTotal() - (cartTotal - (appliedCoupon ? appliedCoupon.discount : 0))) === 0 ? 'FREE' : `${(getFinalTotal() - (cartTotal - (appliedCoupon ? appliedCoupon.discount : 0))).toFixed(2)}${t.currency}`}</span>
+                                    <span>{(getFinalTotal() - (cartTotal - (coupon ? coupon.discount : 0))) === 0 ? 'FREE' : `${(getFinalTotal() - (cartTotal - (coupon ? coupon.discount : 0))).toFixed(2)}${t.currency}`}</span>
                                 </div>
-                                {appliedCoupon && (
+                                {coupon && (
                                     <div className="flex justify-between text-emerald-400 text-sm">
                                         <span>Discount</span>
-                                        <span>- {appliedCoupon.discount.toFixed(2)}{t.currency}</span>
+                                        <span>- {coupon.discount.toFixed(2)}{t.currency}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between text-white font-bold text-xl pt-4 border-t border-slate-800 mt-2">

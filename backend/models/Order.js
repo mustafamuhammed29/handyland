@@ -65,7 +65,7 @@ const OrderSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['cash', 'card', 'paypal', 'stripe', 'klarna', 'giropay', 'sepa_debit', 'sofort'],
+        enum: ['cash', 'card', 'paypal', 'stripe', 'klarna', 'giropay', 'sepa_debit', 'sofort', 'bank_transfer'],
         default: 'cash'
     },
     paymentStatus: {
@@ -74,6 +74,7 @@ const OrderSchema = new mongoose.Schema({
         default: 'pending'
     },
     paymentId: String,
+    paymentReceipt: String,
     shippingAddress: {
         fullName: {
             type: String,
