@@ -60,15 +60,7 @@ const UserSchema = new mongoose.Schema({
     avatar: {
         type: String // URL from social provider or upload
     },
-    addresses: [{
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        state: { type: String },
-        zipCode: { type: String, required: true },
-        country: { type: String, required: true },
-        isDefault: { type: Boolean, default: false },
-        type: { type: String, enum: ['Home', 'Work', 'Other'], default: 'Home' }
-    }],
+
     isActive: {
         type: Boolean,
         default: true
@@ -86,14 +78,7 @@ const UserSchema = new mongoose.Schema({
         type: Number,
         default: 1 // 1=Regular, 2=Silver, 3=Gold, 4=Platinum
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    },
+
     // Encryption for refreshToken
     refreshToken: {
         type: String,

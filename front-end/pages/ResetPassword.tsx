@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Lock, CheckCircle, AlertCircle, Loader, Eye, EyeOff, XCircle } from 'lucide-react';
+import { authService } from '../services/authService';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -55,12 +56,7 @@ const ResetPassword: React.FC = () => {
         setStatus('loading');
 
         try {
-            const response = await fetch(`${API_URL}/api/auth/reset-password/${token}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password }),
-            });
-            const data = await response.json();
+            const data = await authService.resetPassword(token as string, password);
 
             if (data.success) {
                 setStatus('success');

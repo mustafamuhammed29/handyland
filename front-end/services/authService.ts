@@ -97,7 +97,7 @@ export const authService = {
 
     updateProfile: async (data: Partial<User>): Promise<{ success: boolean; user: User }> => {
         try {
-            const response = await api.put('/api/auth/profile', data);
+            const response = await api.put('/api/auth/updateprofile', data);
             return response as any;
         } catch (error) {
             console.error('Auth Service Update Profile Error:', error);
@@ -107,7 +107,7 @@ export const authService = {
 
     updatePassword: async (passwords: { oldPassword: string, newPassword: string }): Promise<{ success: boolean; message: string }> => {
         try {
-            const response = await api.put('/api/auth/password', passwords);
+            const response = await api.put('/api/auth/changepassword', { currentPassword: passwords.oldPassword, newPassword: passwords.newPassword });
             return response as any;
         } catch (error) {
             console.error('Auth Service Update Password Error:', error);
