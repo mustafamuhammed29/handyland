@@ -53,9 +53,14 @@ exports.getSettings = async (req, res) => {
         };
 
         // Secure Payment Config (Mask Secret Key and Webhook Secret)
-        if (settingsObj.payment && settingsObj.payment.stripe) {
-            settingsObj.payment.stripe.secretKey = undefined; // Do not expose secret key
-            settingsObj.payment.stripe.webhookSecret = undefined; // Do not expose webhook secret
+        if (settingsObj.payment) {
+            if (settingsObj.payment.stripe) {
+                settingsObj.payment.stripe.secretKey = undefined; // Do not expose secret key
+                settingsObj.payment.stripe.webhookSecret = undefined; // Do not expose webhook secret
+            }
+            if (settingsObj.payment.paypal) {
+                settingsObj.payment.paypal.clientSecret = undefined; // Do not expose PayPal secret
+            }
         }
 
         // Fetch Coupon Details for Promo Popup

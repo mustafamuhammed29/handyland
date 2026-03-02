@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, Download, ChevronRight, Search, Filter } from 'lucide-react';
+import { Package, Download, ChevronRight, Search, Filter, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Order } from '../../types';
 
@@ -144,7 +144,16 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex gap-3">
+                                <div className="flex flex-wrap gap-3">
+                                    {(order.paymentMethod === 'bank_transfer' && order.paymentStatus !== 'paid') && (
+                                        <button
+                                            onClick={() => navigate(`/orders/${order._id}`)}
+                                            className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-xl text-sm font-bold transition-colors"
+                                        >
+                                            <Upload className="w-4 h-4" />
+                                            Upload Receipt
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => onDownloadInvoice(order._id)}
                                         className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition-colors"
@@ -153,7 +162,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                         Download Invoice
                                     </button>
                                     <button
-                                        onClick={() => navigate(`/order/${order._id}`)}
+                                        onClick={() => navigate(`/orders/${order._id}`)}
                                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-colors"
                                     >
                                         View Details

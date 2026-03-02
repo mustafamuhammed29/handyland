@@ -18,7 +18,8 @@ const {
     updateOrderToPaid,
     updateOrderToDelivered
 } = require('../controllers/orderController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, optionalProtect } = require('../middleware/auth');
+const upload = require('../utils/imageUpload');
 
 // Validation rules
 const createOrderRules = [
@@ -35,13 +36,15 @@ router.get('/admin/all', protect, authorize('admin'), getAllOrders);
 router.get('/admin/stats', protect, authorize('admin'), getOrderStats);
 router.get('/admin/timeline', protect, authorize('admin'), getOrderTimeline);
 router.put('/admin/:id/status', protect, authorize('admin'), updateOrderStatus);
+router.put('/admin/:id/approve-bank-transfer', protect, authorize('admin'), require('../controllers/orderController').approveBankTransfer);
 
-// User routes (protected)
+// User routes (protected or optionally protected for guests)
 router.get('/', protect, getMyOrders); // Convenience route for GET /api/orders
 router.get('/my', protect, getMyOrders);
-router.get('/:id', protect, getOrder);
+router.get('/:id', optionalProtect, getOrder);
 router.post('/apply-coupon', protect, applyCoupon);
 router.post('/', protect, validate(createOrderRules), createOrder);
+router.post('/:id/receipt', optionalProtect, upload.single('receipt'), require('../controllers/orderController').uploadPaymentReceipt);
 router.route('/:id/pay').put(protect, updateOrderToPaid);
 router.route('/:id/deliver').put(protect, authorize('admin', 'staff'), updateOrderToDelivered);
 router.route('/:id/refund').post(protect, requestRefund);

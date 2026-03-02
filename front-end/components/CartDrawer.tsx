@@ -39,16 +39,23 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
         setCouponLoading(true);
         setCouponError(null);
         try {
-            const response = await api.post<any>('/api/orders/apply-coupon', {
+            // api interceptor returns response.data directly, so type it accordingly
+            interface CouponValidateResponse {
+                success: boolean;
+                couponCode: string;
+                discount: number;
+                message?: string;
+            }
+            const data = await api.post('/api/coupons/validate', {
                 code: couponCodeIn,
                 cartTotal: cartTotal
-            });
+            }) as unknown as CouponValidateResponse;
 
-            if (response.data.success) {
-                applyCoupon(response.data.couponCode, response.data.discount);
+            if (data.success) {
+                applyCoupon(data.couponCode, data.discount);
                 setCouponCodeIn('');
             } else {
-                setCouponError(response.data.message || 'Invalid coupon');
+                setCouponError(data.message || 'Invalid coupon');
             }
         } catch (err: any) {
             setCouponError(err.response?.data?.message || 'Failed to apply coupon');

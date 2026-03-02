@@ -32,8 +32,15 @@ const settingsSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Mixed,
         default: {
             stripe: { enabled: false, publicKey: '', secretKey: '', webhookSecret: '' },
-            paypal: { enabled: false, clientId: '' },
-            bankTransfer: { enabled: false, instructions: '' },
+            paypal: { enabled: false, clientId: '', clientSecret: '', mode: 'sandbox' },
+            bankTransfer: {
+                enabled: false,
+                instructions: '',
+                bankName: '',
+                accountHolder: '',
+                iban: '',
+                bic: ''
+            },
             cashOnDelivery: { enabled: true }
         }
     },

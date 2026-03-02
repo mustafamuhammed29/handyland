@@ -472,16 +472,149 @@ exports.createRefund = async (req, res) => {
             amount: amount ? Math.round(amount * 100) : undefined, // Partial or full refund
         });
 
-        res.status(200).json({
-            success: true,
-            message: 'Refund created successfully',
-            refund
-        });
     } catch (error) {
         console.error('Refund error:', error);
         res.status(500).json({
             success: false,
             message: 'Error creating refund',
+            error: error.message
+        });
+    }
+};
+
+// ==========================================
+// PayPal Integration
+// ==========================================
+const paypal = require('@paypal/checkout-server-sdk');
+
+const getPayPalClient = async () => {
+    const settings = await Settings.findOne();
+    const clientId = settings?.payment?.paypal?.clientId || process.env.PAYPAL_CLIENT_ID;
+    const clientSecret = settings?.payment?.paypal?.clientSecret || process.env.PAYPAL_CLIENT_SECRET;
+    const environment = settings?.payment?.paypal?.mode === 'live'
+        ? new paypal.core.LiveEnvironment(clientId, clientSecret)
+        : new paypal.core.SandboxEnvironment(clientId, clientSecret);
+
+    return new paypal.core.PayPalHttpClient(environment);
+};
+
+// @desc    Create PayPal Order
+// @route   POST /api/payment/paypal/create-order
+// @access  Private
+exports.createPayPalOrder = async (req, res) => {
+    try {
+        const { items, shippingAddress, couponCode, discountAmount } = req.body;
+        // Simplified totals calculation for PayPal creation
+        const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        let shippingFee = subtotal >= 100 ? 0 : 5.99;
+        if (req.body.shippingFee) shippingFee = parseFloat(req.body.shippingFee);
+        const finalDiscount = discountAmount ? parseFloat(discountAmount) : 0;
+
+        const total = (subtotal + shippingFee - finalDiscount).toFixed(2);
+
+        const request = new paypal.orders.OrdersCreateRequest();
+        request.prefer("return=representation");
+        request.requestBody({
+            intent: "CAPTURE",
+            purchase_units: [{
+                amount: {
+                    currency_code: "EUR",
+                    value: total
+                }
+            }]
+        });
+
+        const client = await getPayPalClient();
+        const order = await client.execute(request);
+
+        res.status(200).json({
+            success: true,
+            id: order.result.id
+        });
+    } catch (error) {
+        console.error('PayPal create order error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error creating PayPal order',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Capture PayPal Order
+// @route   POST /api/payment/paypal/capture-order
+// @access  Private
+exports.capturePayPalOrder = async (req, res) => {
+    try {
+        const { orderID, orderData } = req.body;
+
+        const request = new paypal.orders.OrdersCaptureRequest(orderID);
+        request.requestBody({});
+
+        const client = await getPayPalClient();
+        const capture = await client.execute(request);
+
+        if (capture.result.status === 'COMPLETED') {
+
+            // Re-validate and create the local Order in DB now that payment is confirmed
+            const orderItems = orderData.items.map(item => ({
+                product: item.product || item.id, // Support different object formats
+                productType: item.category === 'device' ? 'Product' : (item.productType || 'Accessory'),
+                name: item.title || item.name,
+                quantity: item.quantity,
+                price: item.price,
+                image: item.image
+            }));
+
+            const finalOrder = await Order.create({
+                user: req.user ? req.user.id : undefined,
+                items: orderItems,
+                totalAmount: parseFloat(capture.result.purchase_units[0].payments.captures[0].amount.value),
+                tax: 0, // Simplify for now or calculate properly
+                shippingFee: orderData.shippingFee || 0,
+                discountAmount: orderData.discountAmount || 0,
+                couponCode: orderData.couponCode,
+                status: 'processing',
+                paymentStatus: 'paid',
+                paymentMethod: 'paypal',
+                paymentId: capture.result.id, // Store PayPal Capture ID
+                shippingAddress: orderData.shippingAddress
+            });
+
+            // Update Stock and Sold
+            for (const item of orderItems) {
+                if (item.productType === 'Product') {
+                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
+                } else if (item.productType === 'Accessory') {
+                    await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
+                }
+            }
+
+            // Record coupon usage
+            if (orderData.couponCode && req.user) {
+                const { recordCouponUsage } = require('./couponController');
+                await recordCouponUsage(orderData.couponCode, req.user.id, req.user.email);
+            }
+
+            // Send Email
+            try {
+                const emailService = require('../utils/emailService');
+                await emailService.sendOrderConfirmation(finalOrder);
+            } catch (e) { console.error('Email sending failed', e); }
+
+            res.status(200).json({
+                success: true,
+                message: 'Payment successful',
+                order: finalOrder
+            });
+        } else {
+            res.status(400).json({ success: false, message: 'Payment capture not completed' });
+        }
+    } catch (error) {
+        console.error('PayPal capture error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error capturing PayPal order',
             error: error.message
         });
     }

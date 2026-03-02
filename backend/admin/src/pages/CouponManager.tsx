@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, Plus, Trash2, Edit3, CheckCircle, XCircle } from 'lucide-react';
+import { Tag, Plus, Trash2, Edit3, CheckCircle, XCircle, Power, User } from 'lucide-react';
 import { api } from '../utils/api';
 
 interface Coupon {
@@ -15,12 +15,18 @@ interface Coupon {
     usageLimit: number | null;
     usedCount: number;
     isActive: boolean;
+    usedBy?: Array<{
+        user?: { _id: string, name: string, email: string };
+        email?: string;
+        usedAt: string;
+    }>;
 }
 
 export default function CouponManager() {
     const [coupons, setCoupons] = useState<Coupon[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
+    const [expandedCouponId, setExpandedCouponId] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         code: '',
@@ -75,6 +81,16 @@ export default function CouponManager() {
         }
     };
 
+    const handleToggleStatus = async (id: string) => {
+        try {
+            await api.patch(`/api/coupons/${id}/toggle`);
+            fetchCoupons();
+        } catch (error) {
+            console.error('Error toggling coupon status:', error);
+            alert('Failed to toggle coupon status');
+        }
+    };
+
     if (loading) return <div className="text-slate-400">Loading coupons...</div>;
 
     return (
@@ -85,7 +101,7 @@ export default function CouponManager() {
                         <Tag className="w-6 h-6 text-emerald-500" />
                         Coupon Manager
                     </h2>
-                    <p className="text-slate-400 mt-1">Create and manage discount codes</p>
+                    <p className="text-slate-400 mt-1">Create and manage discount codes. Each account can use a coupon only once.</p>
                 </div>
                 <button
                     onClick={() => setShowForm(!showForm)}
@@ -192,46 +208,96 @@ export default function CouponManager() {
                     </thead>
                     <tbody className="divide-y divide-slate-800">
                         {coupons.map(coupon => (
-                            <tr key={coupon._id} className="hover:bg-slate-800/20">
-                                <td className="p-4">
-                                    <span className="bg-slate-800 text-white px-2 py-1 rounded font-mono font-bold text-sm tracking-widest">
-                                        {coupon.code}
-                                    </span>
-                                </td>
-                                <td className="p-4 text-white font-medium">
-                                    {(coupon.discountValue || coupon.amount) || 0}
-                                    {coupon.discountType === 'percentage' ? '%' : '€'}
-                                </td>
-                                <td className="p-4 text-slate-300">
-                                    €{coupon.minOrderAmount?.toFixed(2) || '0.00'}
-                                </td>
-                                <td className="p-4 text-slate-300">
-                                    {new Date(coupon.validUntil).toLocaleDateString()}
-                                </td>
-                                <td className="p-4 text-slate-300">
-                                    {coupon.usedCount || 0} {coupon.usageLimit ? `/ ${coupon.usageLimit}` : ''}
-                                </td>
-                                <td className="p-4">
-                                    {coupon.isActive && new Date(coupon.validUntil) > new Date() ? (
-                                        <span className="flex items-center gap-1 text-emerald-400 text-xs font-bold uppercase">
-                                            <CheckCircle className="w-3 h-3" /> Active
-                                        </span>
-                                    ) : (
-                                        <span className="flex items-center gap-1 text-red-400 text-xs font-bold uppercase">
-                                            <XCircle className="w-3 h-3" /> Inactive/Expired
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="p-4 text-right">
-                                    <button
-                                        onClick={() => handleDelete(coupon._id)}
-                                        className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-colors"
-                                        title="Delete Coupon"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </td>
-                            </tr>
+                            <React.Fragment key={coupon._id}>
+                                <tr className="hover:bg-slate-800/20">
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-2">
+                                            <span className="bg-slate-800 text-white px-2 py-1 rounded font-mono font-bold text-sm tracking-widest">
+                                                {coupon.code}
+                                            </span>
+                                            {coupon.usedBy && coupon.usedBy.length > 0 && (
+                                                <button
+                                                    onClick={() => setExpandedCouponId(expandedCouponId === coupon._id ? null : coupon._id)}
+                                                    className="text-xs bg-slate-800 text-slate-300 hover:text-white px-2 py-1 rounded border border-slate-700"
+                                                >
+                                                    {expandedCouponId === coupon._id ? 'Hide Uses' : 'View Uses'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="p-4 text-white font-medium">
+                                        {(coupon.discountValue || coupon.amount) || 0}
+                                        {coupon.discountType === 'percentage' ? '%' : '€'}
+                                    </td>
+                                    <td className="p-4 text-slate-300">
+                                        €{coupon.minOrderAmount?.toFixed(2) || '0.00'}
+                                    </td>
+                                    <td className="p-4 text-slate-300">
+                                        {new Date(coupon.validUntil).toLocaleDateString()}
+                                    </td>
+                                    <td className="p-4 text-slate-300">
+                                        {coupon.usedCount || 0} {coupon.usageLimit ? `/ ${coupon.usageLimit}` : ''}
+                                    </td>
+                                    <td className="p-4">
+                                        {coupon.isActive && new Date(coupon.validUntil) > new Date() ? (
+                                            <span className="flex items-center gap-1 text-emerald-400 text-xs font-bold uppercase">
+                                                <CheckCircle className="w-3 h-3" /> Active
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-1 text-red-400 text-xs font-bold uppercase">
+                                                <XCircle className="w-3 h-3" /> Inactive/Expired
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={() => handleToggleStatus(coupon._id)}
+                                                className={`p-2 rounded-lg transition-colors flex items-center justify-center ${coupon.isActive
+                                                        ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white'
+                                                        : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white'
+                                                    }`}
+                                                title={coupon.isActive ? "Disable Coupon" : "Enable Coupon"}
+                                            >
+                                                <Power className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(coupon._id)}
+                                                className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-colors"
+                                                title="Delete Coupon"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {expandedCouponId === coupon._id && coupon.usedBy && coupon.usedBy.length > 0 && (
+                                    <tr>
+                                        <td colSpan={7} className="p-0 border-t border-slate-800/50 bg-slate-950/30">
+                                            <div className="p-4 bg-slate-900/50">
+                                                <h4 className="text-sm font-bold text-slate-400 mb-2 flex items-center gap-1">
+                                                    <User className="w-4 h-4" /> Usage History (One per Account)
+                                                </h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                    {coupon.usedBy.map((usage, idx) => (
+                                                        <div key={idx} className="bg-slate-800 p-3 rounded-lg border border-slate-700 flex flex-col gap-1">
+                                                            <div className="text-sm font-medium text-white">
+                                                                {usage.user ? usage.user.name : 'Guest User'}
+                                                            </div>
+                                                            <div className="text-xs text-slate-400">
+                                                                {usage.email || (usage.user ? usage.user.email : 'No email')}
+                                                            </div>
+                                                            <div className="text-xs text-slate-500 mt-1">
+                                                                Used: {new Date(usage.usedAt).toLocaleString()}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
                         ))}
                         {coupons.length === 0 && (
                             <tr>

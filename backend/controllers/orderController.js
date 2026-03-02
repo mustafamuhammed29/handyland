@@ -75,7 +75,7 @@ exports.applyCoupon = async (req, res) => {
 // @access  Private
 exports.createOrder = async (req, res) => {
     try {
-        const { items, shippingAddress, paymentMethod, notes } = req.body;
+        const { items, shippingAddress, paymentMethod, notes, couponCode, discountAmount } = req.body;
 
         if (!items || items.length === 0) {
             return res.status(400).json({
@@ -128,8 +128,9 @@ exports.createOrder = async (req, res) => {
         const taxRate = 0.19; // 19% Tax
         const shippingFee = totalAmount > 100 ? 0 : 5.99; // Free shipping over 100
         const taxAmount = totalAmount * taxRate;
+        const appliedDiscount = discountAmount ? parseFloat(discountAmount) : 0;
 
-        const finalAmount = totalAmount + shippingFee; // Tax is usually included in price in EU, but if not: + taxAmount
+        const finalAmount = Math.max(0, totalAmount + shippingFee - appliedDiscount);
 
         // Create order
         const order = await Order.create({
@@ -140,7 +141,9 @@ exports.createOrder = async (req, res) => {
             shippingFee,
             shippingAddress,
             paymentMethod,
-            notes
+            notes,
+            couponCode: couponCode || undefined,
+            discountAmount: appliedDiscount
         });
 
         // Update Stock and Sold
@@ -150,6 +153,12 @@ exports.createOrder = async (req, res) => {
             } else if (item.productType === 'Accessory') {
                 await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
             }
+        }
+
+        // Record coupon usage (per-account tracking)
+        if (couponCode) {
+            const { recordCouponUsage } = require('./couponController');
+            await recordCouponUsage(couponCode, req.user.id, req.user.email);
         }
 
         // Send order confirmation email
@@ -178,6 +187,7 @@ exports.createOrder = async (req, res) => {
         });
     }
 };
+
 
 // @desc    Get all orders for logged in user
 // @route   GET /api/orders
@@ -227,12 +237,14 @@ exports.getOrder = async (req, res) => {
             });
         }
 
-        // Make sure user is order owner or admin
-        if (order.user._id.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({
-                success: false,
-                message: 'Not authorized to view this order'
-            });
+        // Make sure user is order owner or admin (if the order has a user)
+        if (order.user) {
+            if (!req.user || (order.user._id.toString() !== req.user.id && req.user.role !== 'admin')) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Not authorized to view this order'
+                });
+            }
         }
 
         res.status(200).json({
@@ -863,5 +875,77 @@ exports.updateOrderToDelivered = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Upload Payment Receipt (for Bank Transfer)
+// @route   POST /api/orders/:id/receipt
+// @access  Private
+exports.uploadPaymentReceipt = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        // Verify order belongs to user (or allow if it's a guest order)
+        if (order.user) {
+            if (!req.user || (order.user.toString() !== req.user.id && req.user.role !== 'admin')) {
+                return res.status(403).json({ success: false, message: 'Not authorized for this order' });
+            }
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Please upload an image file' });
+        }
+
+        // Construct URL for the uploaded file
+        // Ensure your server handles serving standard static files from /uploads
+        const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+
+        order.paymentReceipt = fileUrl;
+        order.statusHistory.push({
+            status: order.status,
+            note: 'Payment receipt uploaded by customer'
+        });
+
+        await order.save();
+
+        res.json({ success: true, message: 'Receipt uploaded successfully', receiptUrl: fileUrl });
+    } catch (error) {
+        console.error("Receipt upload error:", error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+// @desc    Approve Bank Transfer Payment
+// @route   PUT /api/orders/admin/:id/approve-bank-transfer
+// @access  Private/Admin
+exports.approveBankTransfer = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.paymentMethod !== 'bank_transfer') {
+            return res.status(400).json({ success: false, message: 'Order is not a bank transfer' });
+        }
+
+        order.paymentStatus = 'paid';
+        order.status = 'processing';
+        order.statusHistory.push({
+            status: 'processing',
+            note: 'Bank transfer payment verified and approved by admin'
+        });
+
+        await order.save();
+
+        res.json({ success: true, message: 'Payment verified successfully', order });
+    } catch (error) {
+        console.error("Approve payment error:", error);
+        res.status(500).json({ success: false, message: 'Server Error' });
     }
 };

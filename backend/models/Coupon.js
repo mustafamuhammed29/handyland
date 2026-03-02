@@ -42,7 +42,15 @@ const CouponSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
-    }
+    },
+    // Per-user tracking: each account can only use the coupon once
+    usedBy: [
+        {
+            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            usedAt: { type: Date, default: Date.now },
+            email: { type: String } // Store email for guest/display purposes
+        }
+    ]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Coupon', CouponSchema);

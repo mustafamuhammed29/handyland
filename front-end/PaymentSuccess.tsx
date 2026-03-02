@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { CheckCircle, Loader2, AlertCircle, Download, Package, Home } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle, Download, Package, Home, Upload } from 'lucide-react';
 import { useCart } from './context/CartContext';
 import { ENV } from './src/config/env';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,6 +24,11 @@ const PaymentSuccess: React.FC = () => {
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [message, setMessage] = useState('Verifying order details...');
     const [order, setOrder] = useState<OrderSummary | null>(null);
+
+    const method = searchParams.get('method');
+    const [paymentConfig, setPaymentConfig] = useState<any>(null);
+    const [uploading, setUploading] = useState(false);
+    const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
 
     useEffect(() => {
         if (!sessionId && !orderId) {
@@ -102,8 +107,58 @@ const PaymentSuccess: React.FC = () => {
         };
 
         verifyOrder();
+
+        // Fetch Bank Transfer settings if method is bank_transfer
+        if (method === 'bank_transfer') {
+            const fetchSettings = async () => {
+                try {
+                    const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
+                    const res = await fetch(`${baseUrl}/api/settings`);
+                    const data = await res.json();
+                    if (data && data.payment && data.payment.bankTransfer) {
+                        setPaymentConfig(data.payment.bankTransfer);
+                    }
+                } catch (e) {
+                    console.error("Error fetching settings", e);
+                }
+            };
+            fetchSettings();
+        }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [sessionId, orderId]);
+    }, [sessionId, orderId, method]);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || !e.target.files[0]) return;
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('receipt', file);
+        try {
+            setUploading(true);
+            const token = localStorage.getItem('accessToken');
+            const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
+
+            const headers: any = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const res = await fetch(`${baseUrl}/api/orders/${orderId}/receipt`, {
+                method: 'POST',
+                headers,
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                setReceiptUrl(data.receiptUrl);
+                alert('Receipt uploaded successfully! We will process your order soon.');
+            } else {
+                alert(data.message || 'Failed to upload receipt');
+            }
+        } catch (err) {
+            alert('Error uploading receipt');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleDownloadInvoice = async () => {
         if (!order) return;
@@ -160,9 +215,61 @@ const PaymentSuccess: React.FC = () => {
                             </p>
 
                             {order && (
-                                <div className="bg-slate-950/50 rounded-xl p-4 mb-8 border border-slate-800 inline-block text-left">
-                                    <div className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Order ID</div>
-                                    <div className="text-white font-mono text-lg tracking-wide select-all">#{(order._id || order.id || "").slice(-8).toUpperCase()}</div>
+                                <div className="bg-slate-950/50 rounded-xl p-4 mb-4 border border-slate-800 inline-block text-center">
+                                    <div className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Order Number (Reference)</div>
+                                    <div className="text-white font-mono text-2xl font-black tracking-wide select-all">#{(order._id || order.id || "").slice(-8).toUpperCase()}</div>
+                                </div>
+                            )}
+
+                            {method === 'bank_transfer' && (
+                                <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6 mb-8 text-left max-w-lg mx-auto">
+                                    <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                                        Bank Transfer Instructions
+                                    </h3>
+                                    <p className="text-slate-300 text-sm mb-4">
+                                        {paymentConfig?.instructions || "Please transfer the total amount to the following bank account. Include the Order Number as the reference (Verwendungszweck)."}
+                                    </p>
+
+                                    <div className="bg-slate-900 rounded-lg p-4 space-y-2 mb-6">
+                                        <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
+                                            <span className="text-slate-400 text-sm">Bank:</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.bankName || "Pending Configuration"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
+                                            <span className="text-slate-400 text-sm">Account Holder:</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.accountHolder || "Your Company"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
+                                            <span className="text-slate-400 text-sm">IBAN:</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.iban || "DE00 0000 0000 0000 0000 00"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
+                                            <span className="text-slate-400 text-sm">BIC:</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.bic || "XXXXXXXX"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center bg-blue-500/20 p-2 rounded border border-blue-500/30 mt-4">
+                                            <span className="text-blue-300 text-sm font-bold">Reference:</span>
+                                            <span className="text-white font-bold font-mono text-lg select-all">#{(order?._id || order?.id || "").slice(-8).toUpperCase()}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t border-slate-700/50 pt-4">
+                                        <h4 className="font-bold text-white mb-2 text-sm">Upload Payment Receipt</h4>
+                                        <p className="text-xs text-slate-400 mb-4">To speed up processing, you can upload a screenshot or photo of your transfer receipt here.</p>
+
+                                        {receiptUrl ? (
+                                            <div className="flex items-center gap-2 text-emerald-400 font-bold bg-emerald-500/10 p-3 rounded-lg">
+                                                <CheckCircle className="w-5 h-5" />
+                                                Receipt Uploaded Successfully
+                                            </div>
+                                        ) : (
+                                            <label className="flex items-center justify-center gap-2 cursor-pointer bg-slate-800 hover:bg-slate-700 p-3 rounded-lg border border-dashed border-slate-600 transition-colors">
+                                                {uploading ? <Loader2 className="w-5 h-5 animate-spin text-white" /> : <Upload className="w-5 h-5 text-slate-400" />}
+                                                <span className="text-white text-sm font-medium">{uploading ? 'Uploading...' : 'Choose File'}</span>
+                                                <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} disabled={uploading} />
+                                            </label>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 

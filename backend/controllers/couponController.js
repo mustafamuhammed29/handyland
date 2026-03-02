@@ -27,13 +27,38 @@ exports.createCoupon = async (req, res) => {
     }
 };
 
-// @desc    Get all coupons
+// @desc    Get all coupons (with usedBy populated)
 // @route   GET /api/coupons
 // @access  Private/Admin
 exports.getCoupons = async (req, res) => {
     try {
-        const coupons = await Coupon.find({}).sort({ createdAt: -1 });
+        const coupons = await Coupon.find({})
+            .populate('usedBy.user', 'name email')
+            .sort({ createdAt: -1 });
         res.json(coupons);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Toggle coupon active status (enable/disable)
+// @route   PATCH /api/coupons/:id/toggle
+// @access  Private/Admin
+exports.toggleCoupon = async (req, res) => {
+    try {
+        const coupon = await Coupon.findById(req.params.id);
+
+        if (!coupon) {
+            return res.status(404).json({ message: 'Coupon not found' });
+        }
+
+        coupon.isActive = !coupon.isActive;
+        await coupon.save();
+
+        res.json({
+            message: `Coupon ${coupon.isActive ? 'enabled' : 'disabled'} successfully`,
+            isActive: coupon.isActive
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -57,9 +82,9 @@ exports.deleteCoupon = async (req, res) => {
     }
 };
 
-// @desc    Validate a coupon code and calculate discount
-// @route   POST /api/coupons/validate  (also used via /api/orders/apply-coupon)
-// @access  Private
+// @desc    Validate a coupon code and calculate discount (enforces one-per-account)
+// @route   POST /api/coupons/validate
+// @access  Public (guests + logged-in users)
 exports.validateCoupon = async (req, res) => {
     try {
         const { code, cartTotal } = req.body;
@@ -93,6 +118,16 @@ exports.validateCoupon = async (req, res) => {
             });
         }
 
+        // One-per-account enforcement: check if logged-in user already used it
+        if (req.user) {
+            const alreadyUsed = coupon.usedBy.some(
+                entry => entry.user && entry.user.toString() === req.user._id.toString()
+            );
+            if (alreadyUsed) {
+                return res.status(400).json({ success: false, message: 'You have already used this coupon' });
+            }
+        }
+
         // Calculate discount amount
         let discount = 0;
         if (coupon.discountType === 'percentage') {
@@ -115,5 +150,36 @@ exports.validateCoupon = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Record coupon usage after order is placed (called internally)
+// @param   couponCode, userId, userEmail
+exports.recordCouponUsage = async (couponCode, userId, userEmail) => {
+    try {
+        if (!couponCode) return;
+        const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+        if (!coupon) return;
+
+        // Increment usedCount
+        coupon.usedCount = (coupon.usedCount || 0) + 1;
+
+        // Record the user if provided
+        if (userId) {
+            // Avoid duplicate recording
+            const alreadyRecorded = coupon.usedBy.some(
+                entry => entry.user && entry.user.toString() === userId.toString()
+            );
+            if (!alreadyRecorded) {
+                coupon.usedBy.push({ user: userId, email: userEmail, usedAt: new Date() });
+            }
+        } else if (userEmail) {
+            // Guest - record by email
+            coupon.usedBy.push({ email: userEmail, usedAt: new Date() });
+        }
+
+        await coupon.save();
+    } catch (err) {
+        console.error('Failed to record coupon usage:', err);
     }
 };
