@@ -7,8 +7,6 @@ exports.protect = async (req, res, next) => {
 
     // DEBUG LOGGING
     console.log('🔐 Auth Middleware Started');
-    console.log('Cookies:', req.cookies); // Needs cookie-parser
-    console.log('Headers Authorization:', req.headers.authorization);
 
     // Check for token in cookies (PRIORITY)
     if (req.cookies && req.cookies.accessToken) {

@@ -11,11 +11,14 @@ export const validatePassword = (password: string): { isValid: boolean; message?
     if (password.length < 12) {
         return { isValid: false, message: 'Password must be at least 12 characters long.' };
     }
-    if (!/[A-Z]/.test(password)) {
-        return { isValid: false, message: 'Password must contain at least one uppercase letter.' };
+    if (!/[A-Za-z]/.test(password)) {
+        return { isValid: false, message: 'Password must contain at least one letter.' };
     }
     if (!/[0-9]/.test(password)) {
         return { isValid: false, message: 'Password must contain at least one number.' };
+    }
+    if (!/[@$!%*#?&]/.test(password)) {
+        return { isValid: false, message: 'Password must contain at least one special character' };
     }
     return { isValid: true };
 };

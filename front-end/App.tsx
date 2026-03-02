@@ -59,7 +59,7 @@ const GuestTicketTracking = React.lazy(() => import('./pages/GuestTicketTracking
 
 const AdminRedirect = () => {
   useEffect(() => {
-    window.location.href = 'http://localhost:5174';
+    window.location.href = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174';
   }, []);
   return null;
 };
@@ -106,7 +106,7 @@ const Home = ({ lang }: { lang: LanguageCode }) => {
 function AppContent() {
   const location = useLocation();
   const [lang, setLang] = useState<LanguageCode>('de');
-  const { user, setUser } = useAuth(); // Use AuthContext
+  const { user, setUser, logout } = useAuth(); // Use AuthContext
   const { cart } = useCart();
 
   // Use settings context to check for global load errors
@@ -211,7 +211,7 @@ function AppContent() {
 
             {/* PROTECTED ROUTES */}
             <Route element={<ProtectedRoute />}>
-              <Route path="dashboard" element={<PageTransition><Dashboard user={user} logout={() => setUser(null)} /></PageTransition>} />
+              <Route path="dashboard" element={<PageTransition><Dashboard user={user} logout={logout} /></PageTransition>} />
               <Route path="dashboard/valuations" element={<PageTransition><MyValuations /></PageTransition>} />
               <Route path="seller" element={<PageTransition><SellerStudio lang={lang} /></PageTransition>} />
             </Route>

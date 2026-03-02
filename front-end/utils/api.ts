@@ -58,7 +58,11 @@ api.interceptors.response.use(
             try {
                 // Try to refresh the access token - use correct /api/auth/refresh endpoint
                 const refreshResponse = await api.get('/api/auth/refresh');
-                const newToken = refreshResponse['token']; // Access token from response
+                const newToken = (refreshResponse as any)?.token; // Access token from response
+
+                if (!newToken) {
+                    throw new Error('No refresh token returned');
+                }
 
                 if (newToken) {
                     localStorage.setItem('accessToken', newToken);

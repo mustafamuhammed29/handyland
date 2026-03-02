@@ -92,7 +92,7 @@ app.use(cors({
         if (!origin) return callback(null, true);
 
         // Check allowed origins match
-        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+        if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
@@ -144,7 +144,8 @@ const uploadLimiter = rateLimit({
     max: 30,
     message: { success: false, message: 'Too many uploads, please try again later.' }
 });
-app.post('/api/upload', uploadLimiter, upload.single('image'), (req, res) => {
+const { protect } = require('./middleware/auth');
+app.post('/api/upload', uploadLimiter, protect, upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
@@ -179,7 +180,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/auth', require('./routes/socialAuthRoutes')); // Social OAuth routes
 app.use('/api/products', productRoutes);
 app.use('/api/repairs', repairRoutes);
-app.use('/api/settings', require('./routes/settingsRoutes')); // Registered Settings Route
+app.use('/api/settings', settingsRoutes); // Registered Settings Route
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', paymentRoutes);
 
