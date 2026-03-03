@@ -35,7 +35,7 @@ const TransactionSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['card', 'paypal', 'apple_pay', 'google_pay', 'card_present'],
+        enum: ['card', 'paypal', 'apple_pay', 'google_pay', 'card_present', 'bank_transfer'],
         required: true
     },
     stripePaymentId: {

@@ -22,8 +22,8 @@ const variantStyles = {
         button: 'bg-amber-600 hover:bg-amber-500',
     },
     info: {
-        icon: 'text-cyan-400',
-        button: 'bg-cyan-600 hover:bg-cyan-500',
+        icon: 'text-brand-primary',
+        button: 'bg-brand-primary hover:bg-brand-primary',
     },
 };
 

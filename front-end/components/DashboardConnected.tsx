@@ -131,7 +131,7 @@ export const DashboardConnected: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="text-white font-bold">{user.name}</h3>
-                                <div className="text-xs text-cyan-400 flex items-center gap-1">
+                                <div className="text-xs text-brand-primary flex items-center gap-1">
                                     <Shield className="w-3 h-3" /> Member
                                 </div>
                             </div>
@@ -188,7 +188,7 @@ export const DashboardConnected: React.FC = () => {
                                 <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-3xl">
                                     <div className="text-slate-500 text-sm mb-1">Total Orders</div>
                                     <div className="text-3xl font-black text-white">{orders.length}</div>
-                                    <div className="text-xs text-cyan-400 mt-2 flex items-center gap-1">
+                                    <div className="text-xs text-brand-primary mt-2 flex items-center gap-1">
                                         <Package className="w-3 h-3" /> All time
                                     </div>
                                 </div>
@@ -307,7 +307,7 @@ export const DashboardConnected: React.FC = () => {
 
                             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8">
                                 <h3 className="font-bold text-white mb-6 flex items-center gap-2">
-                                    <User className="w-5 h-5 text-cyan-400" /> Personal Information
+                                    <User className="w-5 h-5 text-brand-primary" /> Personal Information
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
@@ -316,7 +316,7 @@ export const DashboardConnected: React.FC = () => {
                                             type="text"
                                             defaultValue={user.name}
                                             aria-label="Full Name"
-                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none"
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none"
                                             readOnly
                                         />
                                     </div>
@@ -326,7 +326,7 @@ export const DashboardConnected: React.FC = () => {
                                             type="email"
                                             defaultValue={user.email}
                                             aria-label="Email"
-                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none"
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none"
                                             readOnly
                                         />
                                     </div>
@@ -336,7 +336,7 @@ export const DashboardConnected: React.FC = () => {
                                             type="text"
                                             defaultValue={user.phone || 'Not set'}
                                             aria-label="Phone"
-                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none"
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none"
                                             readOnly
                                         />
                                     </div>
@@ -346,7 +346,7 @@ export const DashboardConnected: React.FC = () => {
                                             type="text"
                                             defaultValue={new Date(parseInt(user._id.substring(0, 8), 16) * 1000).toLocaleDateString()}
                                             aria-label="Member Since"
-                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-cyan-500 outline-none"
+                                            className="w-full bg-black/50 border border-slate-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none"
                                             readOnly
                                         />
                                     </div>

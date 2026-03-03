@@ -104,11 +104,6 @@ interface SocialAuthSettings {
     facebook: boolean;
 }
 
-interface PaymentSettings {
-    paypal: { enabled: boolean; clientId: string; clientSecret: string; mode: string };
-    bankTransfer: { enabled: boolean; instructions: string; bankName: string; accountHolder: string; iban: string; bic: string };
-    cashOnDelivery: { enabled: boolean };
-}
 
 interface Settings {
     siteName: string;
@@ -120,7 +115,6 @@ interface Settings {
     valuation: ValuationSettings;
     content: ContentSettings;
     stats: StatsSettings;
-    payment: PaymentSettings;
     repairArchive: RepairArchiveSettings;
     sections: SectionsSettings;
     contactSection: ContactSettings;
@@ -141,6 +135,7 @@ interface Settings {
         delay: number;
     };
     socialAuth: SocialAuthSettings;
+    quickReplies?: string[];
 }
 
 interface EmailTemplateData {
@@ -187,11 +182,6 @@ export default function SettingsManager() {
         },
         content: { accessoriesTitle: '', accessoriesSubtitle: '', repairTitle: '', repairSubtitle: '' },
         stats: { devicesRepaired: 0, happyCustomers: 0, averageRating: 0, marketExperience: 0 },
-        payment: {
-            paypal: { enabled: false, clientId: '', clientSecret: '', mode: 'sandbox' },
-            bankTransfer: { enabled: false, instructions: '', bankName: '', accountHolder: '', iban: '', bic: '' },
-            cashOnDelivery: { enabled: true }
-        },
         repairArchive: { title: '', subtitle: '', buttonText: '', totalRepairs: 0 },
         sections: { hero: true, stats: true, repairGallery: true, marketplace: true, accessories: true, contact: true },
         contactSection: {
@@ -202,7 +192,13 @@ export default function SettingsManager() {
         footerSection: { tagline: '', copyright: '' },
         announcementBanner: { enabled: false, text: '', color: 'blue', dismissible: true, link: '', linkText: '' },
         promoPopup: { enabled: false, title: '', message: '', couponCode: '', delay: 5 },
-        socialAuth: { google: false, facebook: false }
+        socialAuth: { google: false, facebook: false },
+        quickReplies: [
+            "We have received your message and are looking into it.",
+            "Please provide us with your order number so we can investigate further.",
+            "Your repair is currently in progress. We will update you soon.",
+            "Thank you for reaching out. Your issue has been resolved."
+        ]
     });
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
@@ -243,27 +239,10 @@ export default function SettingsManager() {
     }, []);
 
     const handleChange = (section: keyof Settings | null, key: string, value: string | number | boolean | any) => {
-        if (section === 'payment') {
-            setSettings(prev => {
-                const parts = key.split('.'); // e.g., 'bankTransfer.enabled'
-                if (parts.length === 2) {
-                    return {
-                        ...prev,
-                        payment: {
-                            ...prev.payment,
-                            [parts[0]]: {
-                                ...prev.payment[parts[0] as keyof PaymentSettings],
-                                [parts[1]]: value
-                            }
-                        }
-                    }
-                }
-                return prev;
-            });
-        } else if (section === 'hero' || section === 'valuation' || section === 'content' || section === 'stats' || section === 'repairArchive' || section === 'sections' || section === 'contactSection' || section === 'footerSection' || section === 'navbar' || section === 'socialAuth' || section === 'promoPopup') {
+        if (section) {
             setSettings(prev => ({
                 ...prev,
-                [section]: { ...prev[section], [key]: value }
+                [section]: { ...(prev[section] as any), [key]: value }
             }));
         } else {
             setSettings(prev => ({ ...prev, [key]: value }));
@@ -336,7 +315,6 @@ export default function SettingsManager() {
 
     const tabs = [
         { id: 'general', label: 'General', icon: Layers },
-        { id: 'payments', label: 'Payment Methods', icon: Shield },
         { id: 'auth', label: 'Authentication', icon: Shield },
         { id: 'hero', label: 'Hero Section', icon: MonitorPlay },
         { id: 'stats', label: 'Live Stats', icon: BarChart },
@@ -346,6 +324,7 @@ export default function SettingsManager() {
         { id: 'layout', label: 'Layout Control', icon: LayoutTemplate },
         { id: 'banner', label: '📢 Announcement', icon: Layers },
         { id: 'promo', label: '🎁 Promo Popup', icon: Layers },
+        { id: 'scripts', label: '💬 Support Scripts', icon: MessageSquare },
     ];
 
     if (loading) return <div className="text-white">Loading...</div>;
@@ -432,83 +411,7 @@ export default function SettingsManager() {
                         </div>
                     )}
 
-                    {activeTab === 'payments' && (
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-white mb-4">Payment Providers Configuration</h3>
-                            <p className="text-slate-400 text-sm">Set up your receiving bank account and API keys for payment processing.</p>
 
-                            {/* Bank Transfer */}
-                            <div className="p-4 border border-slate-700 rounded-xl space-y-4 bg-slate-900/50">
-                                <h4 className="text-blue-400 font-bold mb-4 flex items-center justify-between">
-                                    Bank Transfer (Vorkasse)
-                                    <div className="w-32">
-                                        <Toggle
-                                            label={settings.payment?.bankTransfer?.enabled ? 'Enabled' : 'Disabled'}
-                                            value={settings.payment?.bankTransfer?.enabled || false}
-                                            onChange={(v) => handleChange('payment', 'bankTransfer.enabled', v)}
-                                        />
-                                    </div>
-                                </h4>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Input label="Bank Name" value={settings.payment?.bankTransfer?.bankName} onChange={(v) => handleChange('payment', 'bankTransfer.bankName', v)} placeholder="Sparkasse, Commerzbank, etc." />
-                                    <Input label="Account Holder" value={settings.payment?.bankTransfer?.accountHolder} onChange={(v) => handleChange('payment', 'bankTransfer.accountHolder', v)} placeholder="Your Company Name" />
-                                    <Input label="IBAN" value={settings.payment?.bankTransfer?.iban} onChange={(v) => handleChange('payment', 'bankTransfer.iban', v)} placeholder="DE00 0000 0000 0000 0000 00" />
-                                    <Input label="BIC / SWIFT" value={settings.payment?.bankTransfer?.bic} onChange={(v) => handleChange('payment', 'bankTransfer.bic', v)} placeholder="XXXXDE00XXX" />
-                                </div>
-                                <Input label="Customer Instructions" value={settings.payment?.bankTransfer?.instructions} onChange={(v) => handleChange('payment', 'bankTransfer.instructions', v)} placeholder="Please transfer the money to this account. Mention the Order Number as reference (Verwendungszweck)." textarea />
-                            </div>
-
-                            {/* PayPal */}
-                            <div className="p-4 border border-slate-700 rounded-xl space-y-4 bg-slate-900/50">
-                                <h4 className="text-blue-400 font-bold mb-4 flex items-center justify-between">
-                                    PayPal Express Checkout
-                                    <div className="w-32">
-                                        <Toggle
-                                            label={settings.payment?.paypal?.enabled ? 'Enabled' : 'Disabled'}
-                                            value={settings.payment?.paypal?.enabled || false}
-                                            onChange={(v) => handleChange('payment', 'paypal.enabled', v)}
-                                        />
-                                    </div>
-                                </h4>
-
-                                <div className="grid grid-cols-1 gap-4">
-                                    <div>
-                                        <label className="block text-slate-400 text-sm font-bold mb-2">Environment Mode</label>
-                                        <select
-                                            value={settings.payment?.paypal?.mode || 'sandbox'}
-                                            onChange={(e) => handleChange('payment', 'paypal.mode', e.target.value)}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
-                                        >
-                                            <option value="sandbox">Sandbox (Testing)</option>
-                                            <option value="live">Live (Production)</option>
-                                        </select>
-                                    </div>
-                                    <Input label="Client ID" value={settings.payment?.paypal?.clientId} onChange={(v) => handleChange('payment', 'paypal.clientId', v)} placeholder="AbCdEfGhIjKlMnOpQrStUvWxYz..." />
-                                    <Input label="Client Secret" value={settings.payment?.paypal?.clientSecret || ''} onChange={(v) => handleChange('payment', 'paypal.clientSecret', v)} placeholder="Enter new secret if changing..." type="password" />
-                                </div>
-                                <div className="mt-4 p-3 bg-blue-900/20 border border-blue-800 rounded-lg text-sm text-blue-300 flex gap-2">
-                                    <AlertCircle className="w-5 h-5 shrink-0" />
-                                    <p>The <b>Client Secret</b> is hidden for security. Typing a new value will replace the existing one. Leave blank to keep the current secret.</p>
-                                </div>
-                            </div>
-
-                            {/* Cash on Delivery */}
-                            <div className="p-4 border border-slate-700 rounded-xl space-y-4 bg-slate-900/50">
-                                <h4 className="text-blue-400 font-bold mb-4 flex items-center justify-between">
-                                    Cash on Delivery (Nachnahme)
-                                    <div className="w-32">
-                                        <Toggle
-                                            label={settings.payment?.cashOnDelivery?.enabled ? 'Enabled' : 'Disabled'}
-                                            value={settings.payment?.cashOnDelivery?.enabled || false}
-                                            onChange={(v) => handleChange('payment', 'cashOnDelivery.enabled', v)}
-                                        />
-                                    </div>
-                                </h4>
-                            </div>
-
-                        </div>
-                    )}
 
                     {activeTab === 'hero' && (
                         <div className="space-y-6">
@@ -804,6 +707,58 @@ export default function SettingsManager() {
                                 <h4 className="text-blue-400 font-bold mb-4">Footer Settings</h4>
                                 <Input label="Footer Tagline" value={settings.footerSection?.tagline} onChange={(v) => handleChange('footerSection', 'tagline', v)} />
                                 <Input label="Copyright Text" value={settings.footerSection?.copyright} onChange={(v) => handleChange('footerSection', 'copyright', v)} />
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'scripts' && (
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-bold text-white mb-4">Support Scripts & Quick Replies</h3>
+                            <p className="text-slate-400 text-sm mb-4">Manage predefined responses to answer customer queries quickly.</p>
+
+                            <div className="p-4 border border-slate-700 rounded-xl bg-slate-900/50">
+                                <h4 className="text-white font-bold mb-4 flex justify-between items-center">
+                                    Quick Replies
+                                    <button
+                                        onClick={() => {
+                                            const newReplies = [...(settings.quickReplies || []), "New Quick Reply"];
+                                            handleChange(null, 'quickReplies', newReplies);
+                                        }}
+                                        className="text-xs bg-cyan-600 px-3 py-1.5 rounded text-white hover:bg-cyan-500 flex items-center gap-1 font-bold"
+                                    >
+                                        + Add Reply
+                                    </button>
+                                </h4>
+                                <div className="space-y-3">
+                                    {(settings.quickReplies || []).map((reply, idx) => (
+                                        <div key={idx} className="flex gap-3 items-start bg-slate-800 p-3 rounded-lg border border-slate-700">
+                                            <textarea
+                                                value={reply}
+                                                onChange={(e) => {
+                                                    const newReplies = [...(settings.quickReplies || [])];
+                                                    newReplies[idx] = e.target.value;
+                                                    handleChange(null, 'quickReplies', newReplies);
+                                                }}
+                                                className="bg-slate-950 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white flex-1 resize-y outline-none focus:border-blue-500"
+                                                placeholder="Enter predefined response..."
+                                                rows={2}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const newReplies = (settings.quickReplies || []).filter((_, i) => i !== idx);
+                                                    handleChange(null, 'quickReplies', newReplies);
+                                                }}
+                                                className="text-red-400 hover:text-white hover:bg-red-500/20 p-2 rounded transition-colors mt-2"
+                                                title="Delete Reply"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {(!settings.quickReplies || settings.quickReplies.length === 0) && (
+                                        <p className="text-slate-500 text-sm text-center py-4">No quick replies defined.</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

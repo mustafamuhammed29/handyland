@@ -29,10 +29,14 @@ const messageSchema = new mongoose.Schema({
     replies: [replySchema],
     status: {
         type: String,
-        enum: ['unread', 'read', 'replied'],
+        enum: ['unread', 'read', 'replied', 'closed'],
         default: 'unread'
     },
     isArchived: {
+        type: Boolean,
+        default: false
+    },
+    initiatedByAdmin: {
         type: Boolean,
         default: false
     }

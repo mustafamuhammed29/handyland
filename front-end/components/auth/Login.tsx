@@ -67,17 +67,17 @@ export const Login: React.FC = () => {
         <AuthLayout
             title="Login"
             subtitle="System Access Protocol"
-            icon={<UserIcon className="w-10 h-10 text-cyan-400" />}
+            icon={<UserIcon className="w-10 h-10 text-brand-primary" />}
         >
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-1 animate-in slide-in-from-top-4">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Email</label>
                     <div className="relative group">
-                        <UserIcon className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-cyan-400 transition-colors" />
+                        <UserIcon className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
                         <input
                             {...register("email")}
                             type="email"
-                            className={`w-full pl-10 pr-4 py-3 bg-black/40 border ${errors.email ? 'border-red-500' : 'border-slate-800'} rounded-xl text-white focus:border-cyan-500 outline-none transition-all text-sm`}
+                            className={`w-full pl-10 pr-4 py-3 bg-black/40 border ${errors.email ? 'border-red-500' : 'border-slate-800'} rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm`}
                             placeholder="secure@handyland.com"
                         />
                     </div>
@@ -87,11 +87,11 @@ export const Login: React.FC = () => {
                 <div className="space-y-1 animate-in slide-in-from-top-4">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Password</label>
                     <div className="relative group">
-                        <Lock className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-cyan-400 transition-colors" />
+                        <Lock className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
                         <input
                             {...register("password")}
                             type="password"
-                            className={`w-full pl-10 pr-4 py-3 bg-black/40 border ${errors.password ? 'border-red-500' : 'border-slate-800'} rounded-xl text-white focus:border-cyan-500 outline-none transition-all text-sm`}
+                            className={`w-full pl-10 pr-4 py-3 bg-black/40 border ${errors.password ? 'border-red-500' : 'border-slate-800'} rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm`}
                             placeholder="••••••••"
                         />
                     </div>
@@ -99,7 +99,7 @@ export const Login: React.FC = () => {
                 </div>
 
                 <div className="flex justify-end">
-                    <Link to="/forgot-password" className="text-[10px] font-black text-slate-500 hover:text-cyan-400 uppercase tracking-widest transition-colors">
+                    <Link to="/forgot-password" className="text-[10px] font-black text-slate-500 hover:text-brand-primary uppercase tracking-widest transition-colors">
                         Lost Key?
                     </Link>
                 </div>
@@ -107,7 +107,7 @@ export const Login: React.FC = () => {
                 <button
                     disabled={isLoading}
                     type="submit"
-                    className="w-full py-4 rounded-2xl font-black text-white shadow-xl flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 mt-4 uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500"
+                    className="w-full py-4 rounded-2xl font-black text-white shadow-xl flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 mt-4 uppercase tracking-widest bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary"
                 >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                         <>
@@ -129,7 +129,7 @@ export const Login: React.FC = () => {
                 )}
                 <p className="text-slate-500 text-xs font-medium">
                     No account? {' '}
-                    <Link to="/register" className="text-cyan-400 hover:text-cyan-300 font-black ml-1 uppercase">
+                    <Link to="/register" className="text-brand-primary hover:text-brand-primary font-black ml-1 uppercase">
                         Register
                     </Link>
                 </p>

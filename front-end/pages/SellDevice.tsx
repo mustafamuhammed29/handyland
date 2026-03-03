@@ -218,8 +218,9 @@ export const SellDevice = () => {
                 addToast(data.message || 'Fehler bei der Bestätigung', 'error');
                 setIsSubmitting(false);
             }
-        } catch {
-            addToast('Netzwerkfehler. Bitte versuche es erneut.', 'error');
+        } catch (err: any) {
+            const errorMsg = err.response?.data?.message || 'Netzwerkfehler. Bitte versuche es erneut.';
+            addToast(errorMsg, 'error');
             setIsSubmitting(false);
         }
     };
@@ -232,7 +233,7 @@ export const SellDevice = () => {
         return (
             <div className="min-h-screen pt-32 flex items-center justify-center text-white">
                 <div className="text-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-cyan-400 mx-auto mb-3" />
+                    <Loader2 className="w-10 h-10 animate-spin text-brand-primary mx-auto mb-3" />
                     <p className="text-slate-400">Angebot wird geladen...</p>
                 </div>
             </div>
@@ -305,7 +306,7 @@ export const SellDevice = () => {
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl font-bold text-white mb-2">Verkauf abschließen</h1>
                     <p className="text-slate-400">
-                        Referenz: <span className="text-cyan-400 font-mono mr-4">{quoteRef}</span>
+                        Referenz: <span className="text-brand-primary font-mono mr-4">{quoteRef}</span>
                         {quote && <span className="text-emerald-400 font-bold">Angebot: €{quote.price}</span>}
                     </p>
                 </div>
@@ -316,7 +317,7 @@ export const SellDevice = () => {
                         {/* Contact Info */}
                         <div>
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <User className="w-5 h-5 text-cyan-400" /> Kontaktdaten
+                                <User className="w-5 h-5 text-brand-primary" /> Kontaktdaten
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -327,7 +328,7 @@ export const SellDevice = () => {
                                         title="Vollständiger Name"
                                         placeholder="Vor- und Nachname"
                                         value={formData.fullName}
-                                        className={`w-full bg-slate-950 border ${errors.fullName ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-cyan-500 outline-none`}
+                                        className={`w-full bg-slate-950 border ${errors.fullName ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-brand-primary outline-none`}
                                         onChange={handleChange}
                                     />
                                     {errors.fullName && <p className="text-red-400 text-xs">{errors.fullName}</p>}
@@ -341,7 +342,7 @@ export const SellDevice = () => {
                                         title="E-Mail-Adresse"
                                         placeholder="ihre@email.de"
                                         value={formData.email}
-                                        className={`w-full bg-slate-950 border ${errors.email ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-cyan-500 outline-none`}
+                                        className={`w-full bg-slate-950 border ${errors.email ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-brand-primary outline-none`}
                                         onChange={handleChange}
                                     />
                                     {errors.email && <p className="text-red-400 text-xs">{errors.email}</p>}
@@ -397,13 +398,13 @@ export const SellDevice = () => {
                                             type="button"
                                             onClick={handleManualMode}
                                             className={`text-left p-4 rounded-xl border transition-all ${useManual
-                                                ? 'border-cyan-500 bg-cyan-600/10'
+                                                ? 'border-brand-primary bg-brand-primary/10'
                                                 : 'border-slate-700 border-dashed bg-slate-950 hover:border-slate-600'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <Plus className={`w-4 h-4 ${useManual ? 'text-cyan-400' : 'text-slate-500'}`} />
-                                                <span className={`text-sm font-medium ${useManual ? 'text-cyan-400' : 'text-slate-400'}`}>
+                                                <Plus className={`w-4 h-4 ${useManual ? 'text-brand-primary' : 'text-slate-500'}`} />
+                                                <span className={`text-sm font-medium ${useManual ? 'text-brand-primary' : 'text-slate-400'}`}>
                                                     Andere Adresse eingeben
                                                 </span>
                                             </div>
@@ -421,7 +422,7 @@ export const SellDevice = () => {
                                             placeholder="Straße und Hausnummer"
                                             required
                                             value={formData.address}
-                                            className={`w-full bg-slate-950 border ${errors.address ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-cyan-500 outline-none`}
+                                            className={`w-full bg-slate-950 border ${errors.address ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-brand-primary outline-none`}
                                             onChange={handleChange}
                                         />
                                         {errors.address && <p className="text-red-400 text-xs mt-1">{errors.address}</p>}
@@ -433,7 +434,7 @@ export const SellDevice = () => {
                                                 placeholder="Stadt"
                                                 required
                                                 value={formData.city}
-                                                className={`w-full bg-slate-950 border ${errors.city ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-cyan-500 outline-none`}
+                                                className={`w-full bg-slate-950 border ${errors.city ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-brand-primary outline-none`}
                                                 onChange={handleChange}
                                             />
                                             {errors.city && <p className="text-red-400 text-xs mt-1">{errors.city}</p>}
@@ -444,7 +445,7 @@ export const SellDevice = () => {
                                                 placeholder="Postleitzahl"
                                                 required
                                                 value={formData.postalCode}
-                                                className={`w-full bg-slate-950 border ${errors.postalCode ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-cyan-500 outline-none`}
+                                                className={`w-full bg-slate-950 border ${errors.postalCode ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-brand-primary outline-none`}
                                                 onChange={handleChange}
                                             />
                                             {errors.postalCode && <p className="text-red-400 text-xs mt-1">{errors.postalCode}</p>}
@@ -478,7 +479,7 @@ export const SellDevice = () => {
                                         placeholder="Bankname"
                                         required
                                         value={formData.bankName}
-                                        className={`w-full bg-slate-950 border ${errors.bankName ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-cyan-500 outline-none`}
+                                        className={`w-full bg-slate-950 border ${errors.bankName ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-brand-primary outline-none`}
                                         onChange={handleChange}
                                     />
                                     {errors.bankName && <p className="text-red-400 text-xs mt-1">{errors.bankName}</p>}
@@ -489,7 +490,7 @@ export const SellDevice = () => {
                                         placeholder="IBAN (z.B. DE89 3704 0044 0532 0130 00)"
                                         required
                                         value={formData.iban}
-                                        className={`w-full bg-slate-950 border ${errors.iban ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white font-mono text-sm focus:border-cyan-500 outline-none`}
+                                        className={`w-full bg-slate-950 border ${errors.iban ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white font-mono text-sm focus:border-brand-primary outline-none`}
                                         onChange={handleChange}
                                     />
                                     {errors.iban && <p className="text-red-400 text-xs mt-1">{errors.iban}</p>}
@@ -504,7 +505,7 @@ export const SellDevice = () => {
 
                         {/* Shipping Info */}
                         <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 flex items-start gap-4">
-                            <Truck className="w-6 h-6 text-cyan-400 shrink-0" />
+                            <Truck className="w-6 h-6 text-brand-primary shrink-0" />
                             <div className="text-sm text-slate-400">
                                 <p className="text-white font-bold mb-1">Kostenloser Versand inklusive</p>
                                 Wir schicken dir sofort ein vorfrankiertes Versandetikett per E-Mail.
@@ -514,7 +515,7 @@ export const SellDevice = () => {
 
                         <button
                             type="submit"
-                            className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg shadow-lg shadow-cyan-900/20 transition-all flex items-center justify-center gap-2"
+                            className="w-full py-4 rounded-xl bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold text-lg shadow-lg shadow-cyan-900/20 transition-all flex items-center justify-center gap-2"
                         >
                             Prüfen & Verkauf bestätigen <ArrowRight className="w-5 h-5" />
                         </button>

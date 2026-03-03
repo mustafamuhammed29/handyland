@@ -1,4 +1,5 @@
 import React, { useState, MouseEvent, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PhoneListing, LanguageCode } from '../types';
 import { productService } from '../services/productService';
 import { api } from '../utils/api';
@@ -15,9 +16,19 @@ interface MarketplaceProps {
 }
 
 export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-    const [filterBrand, setFilterBrand] = useState('All');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const initialSearch = searchParams.get('search') || '';
+    const initialBrand = searchParams.get('brand') || 'All';
+    const initialMinPrice = searchParams.get('minPrice') || '';
+    const initialMaxPrice = searchParams.get('maxPrice') || '';
+    const initialCondition = searchParams.get('condition') || '';
+    const initialRam = searchParams.get('ram') || '';
+    const initialStorage = searchParams.get('storage') || '';
+    const initialSort = searchParams.get('sort') || 'newest';
+
+    const [searchTerm, setSearchTerm] = useState(initialSearch);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(initialSearch);
+    const [filterBrand, setFilterBrand] = useState(initialBrand);
     const [selectedProduct, setSelectedProduct] = useState<PhoneListing | null>(null);
     const [products, setProducts] = useState<PhoneListing[]>([]);
     const [loading, setLoading] = useState(true);
@@ -28,12 +39,12 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showFilters, setShowFilters] = useState(false);
 
-    const [minPrice, setMinPrice] = useState('');
-    const [maxPrice, setMaxPrice] = useState('');
-    const [sort, setSort] = useState('newest');
-    const [selectedRam, setSelectedRam] = useState('');
-    const [selectedStorage, setSelectedStorage] = useState('');
-    const [selectedCondition, setSelectedCondition] = useState('');
+    const [minPrice, setMinPrice] = useState(initialMinPrice);
+    const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
+    const [sort, setSort] = useState(initialSort);
+    const [selectedRam, setSelectedRam] = useState(initialRam);
+    const [selectedStorage, setSelectedStorage] = useState(initialStorage);
+    const [selectedCondition, setSelectedCondition] = useState(initialCondition);
 
     const [wishlist, setWishlist] = useState<string[]>([]);
     const [loadingWishlistId, setLoadingWishlistId] = useState<string | null>(null);
@@ -62,14 +73,40 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const { addToast } = useToast();
     const t = translations[lang];
 
-    // Debounce search term
+    // Debounce search term and map ALL FILTERS to URL param
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm);
-            setCurrentPage(1); // Reset to page 1 on new search
+            setCurrentPage(1); // Reset to page 1 on new search/filter
+
+            // Sync with URL silently
+            if (searchTerm) searchParams.set('search', searchTerm); else searchParams.delete('search');
+            if (filterBrand !== 'All') searchParams.set('brand', filterBrand); else searchParams.delete('brand');
+            if (minPrice) searchParams.set('minPrice', minPrice); else searchParams.delete('minPrice');
+            if (maxPrice) searchParams.set('maxPrice', maxPrice); else searchParams.delete('maxPrice');
+            if (selectedCondition) searchParams.set('condition', selectedCondition); else searchParams.delete('condition');
+            if (selectedRam) searchParams.set('ram', selectedRam); else searchParams.delete('ram');
+            if (selectedStorage) searchParams.set('storage', selectedStorage); else searchParams.delete('storage');
+            if (sort !== 'newest') searchParams.set('sort', sort); else searchParams.delete('sort');
+
+            setSearchParams(searchParams, { replace: true });
+
         }, 500);
         return () => clearTimeout(timer);
-    }, [searchTerm]);
+    }, [searchTerm, filterBrand, minPrice, maxPrice, selectedCondition, selectedRam, selectedStorage, sort, searchParams, setSearchParams]);
+
+    // Sync external URL changes into the state (e.g if user shares link)
+    useEffect(() => {
+        const urlSearch = searchParams.get('search') || '';
+        if (urlSearch !== searchTerm) {
+            setSearchTerm(urlSearch);
+            setDebouncedSearchTerm(urlSearch);
+        }
+
+        // Also sync other params if navigated back/forward
+        const urlBrand = searchParams.get('brand');
+        if (urlBrand && urlBrand !== filterBrand) setFilterBrand(urlBrand);
+    }, [searchParams]);
 
     const toggleWishlist = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
@@ -219,7 +256,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         {/* Left: Holographic Visual */}
                         <div className="w-full md:w-1/2 relative bg-gradient-to-br from-slate-900 to-black p-8 flex items-center justify-center overflow-hidden">
                             <div className="absolute inset-0 tech-grid opacity-30"></div>
-                            <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500/50 shadow-[0_0_15px_#06b6d4] animate-[scan_2s_linear_infinite]"></div>
+                            <div className="absolute top-0 left-0 w-full h-1 bg-brand-primary/50 shadow-[0_0_15px_#06b6d4] animate-[scan_2s_linear_infinite]"></div>
                             <img
                                 src={getProductImage(selectedProduct)}
                                 alt={selectedProduct.model}
@@ -245,14 +282,14 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         {/* Right: Data & Actions */}
                         <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto bg-slate-950">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full ${selectedProduct.condition === 'new' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' : 'bg-purple-500/10 text-purple-400 border border-purple-500/30'}`}>
+                                <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full ${selectedProduct.condition === 'new' ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/30' : 'bg-purple-500/10 text-purple-400 border border-purple-500/30'}`}>
                                     {selectedProduct.condition}
                                 </span>
                                 <span className="text-xs text-slate-500 font-mono">ID: {selectedProduct.id.substring(0, 8)}</span>
                             </div>
 
                             <h2 className="text-4xl font-black text-white mb-2 leading-tight">{selectedProduct.model}</h2>
-                            <div className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 font-bold mb-6">
+                            <div className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-brand-secondary font-bold mb-6">
                                 {selectedProduct.price}{t.currency}
                             </div>
 
@@ -308,27 +345,27 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                 <div className="flex flex-col gap-8 mb-8">
                     <div className="flex flex-col md:flex-row justify-between items-end gap-4">
                         <div>
-                            <h2 className="text-5xl font-black text-white mb-2 tracking-tight">MARKET<span className="text-cyan-500">PLACE</span></h2>
-                            <div className="h-1 w-24 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"></div>
+                            <h2 className="text-5xl font-black text-white mb-2 tracking-tight">MARKET<span className="text-brand-primary">PLACE</span></h2>
+                            <div className="h-1 w-24 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full"></div>
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <button onClick={() => setViewMode('grid')} aria-label="Grid view" className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'}`}><Grid className="w-5 h-5" /></button>
-                            <button onClick={() => setViewMode('list')} aria-label="List view" className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'}`}><List className="w-5 h-5" /></button>
-                            <button onClick={() => setShowFilters(!showFilters)} aria-label="Toggle filters" className={`p-2 rounded-lg ${showFilters ? 'bg-slate-800 text-cyan-400' : 'text-slate-500 hover:text-white'} md:hidden`}><Filter className="w-5 h-5" /></button>
+                            <button onClick={() => setViewMode('grid')} aria-label="Grid view" className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-slate-800 text-brand-primary' : 'text-slate-500 hover:text-white'}`}><Grid className="w-5 h-5" /></button>
+                            <button onClick={() => setViewMode('list')} aria-label="List view" className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-slate-800 text-brand-primary' : 'text-slate-500 hover:text-white'}`}><List className="w-5 h-5" /></button>
+                            <button onClick={() => setShowFilters(!showFilters)} aria-label="Toggle filters" className={`p-2 rounded-lg ${showFilters ? 'bg-slate-800 text-brand-primary' : 'text-slate-500 hover:text-white'} md:hidden`}><Filter className="w-5 h-5" /></button>
                         </div>
                     </div>
 
                     {/* Search & Main Filter Bar */}
                     <div className="glass-modern p-2 rounded-2xl flex flex-col md:flex-row items-center gap-4 border border-slate-800">
                         <div className="relative flex-1 w-full">
-                            <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-cyan-400 transition-colors" />
+                            <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-brand-primary transition-colors" />
                             <input
                                 type="text"
                                 placeholder="Search Devices (e.g. iPhone 13 Pro)..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-slate-900/50 text-white rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-cyan-500 outline-none border border-transparent placeholder-slate-600"
+                                className="w-full bg-slate-900/50 text-white rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-brand-primary outline-none border border-transparent placeholder-slate-600"
                             />
                         </div>
                         <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
@@ -336,7 +373,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 value={selectedCondition}
                                 onChange={(e) => setSelectedCondition(e.target.value)}
                                 aria-label="Filter by condition"
-                                className="bg-slate-900 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:outline-none focus:border-cyan-500"
+                                className="bg-slate-900 text-white rounded-xl px-3 py-2 text-sm border border-slate-800 focus:outline-none focus:border-brand-primary"
                             >
                                 <option value="">All Conditions</option>
                                 {conditions.map(opt => <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
@@ -365,7 +402,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                     key={brand}
                                     onClick={() => setFilterBrand(brand)}
                                     className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${filterBrand === brand
-                                        ? 'bg-cyan-900/30 text-cyan-400 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
+                                        ? 'bg-cyan-900/30 text-brand-primary border border-brand-primary/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
                                         : 'bg-slate-900 text-slate-500 hover:text-white hover:bg-slate-800 border border-slate-800'
                                         }`}
                                 >
@@ -378,7 +415,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                             value={sort}
                             onChange={(e) => setSort(e.target.value)}
                             aria-label="Sort products"
-                            className="bg-slate-900/50 text-white rounded-xl px-4 py-2.5 text-sm border-none focus:ring-1 focus:ring-cyan-500 outline-none min-w-[150px]"
+                            className="bg-slate-900/50 text-white rounded-xl px-4 py-2.5 text-sm border-none focus:ring-1 focus:ring-brand-primary outline-none min-w-[150px]"
                         >
                             <option value="newest">Newest Arrivals</option>
                             <option value="price_asc">Price: Low to High</option>
@@ -388,13 +425,13 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
 
                     {/* Expanded Filters */}
                     <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-300 ${showFilters || window.innerWidth >= 768 ? 'block' : 'hidden md:grid'}`}>
-                        <input type="number" placeholder="Min Price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
-                        <input type="number" placeholder="Max Price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none" />
-                        <select value={selectedRam} onChange={(e) => setSelectedRam(e.target.value)} aria-label="Filter by RAM" className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none">
+                        <input type="number" placeholder="Min Price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-brand-primary outline-none" />
+                        <input type="number" placeholder="Max Price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-brand-primary outline-none" />
+                        <select value={selectedRam} onChange={(e) => setSelectedRam(e.target.value)} aria-label="Filter by RAM" className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-brand-primary outline-none">
                             <option value="">RAM: Any</option>
                             {ramOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
-                        <select value={selectedStorage} onChange={(e) => setSelectedStorage(e.target.value)} aria-label="Filter by storage" className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-cyan-500 outline-none">
+                        <select value={selectedStorage} onChange={(e) => setSelectedStorage(e.target.value)} aria-label="Filter by storage" className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-brand-primary outline-none">
                             <option value="">Storage: Any</option>
                             {storageOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
@@ -441,8 +478,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                     </div>
                                     <div className="p-5 flex-1 flex flex-col">
                                         <div className="mb-3">
-                                            <div className="text-[10px] text-cyan-500 font-mono uppercase mb-1 tracking-wider">{phone.brand}</div>
-                                            <h3 className="text-xl font-bold text-white hover:text-cyan-400 transition-colors cursor-pointer" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
+                                            <div className="text-[10px] text-brand-primary font-mono uppercase mb-1 tracking-wider">{phone.brand}</div>
+                                            <h3 className="text-xl font-bold text-white hover:text-brand-primary transition-colors cursor-pointer" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2 mb-6">
                                             <div className="bg-slate-900/50 rounded-lg p-2 border border-slate-800 flex items-center gap-2">
@@ -469,7 +506,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                     onClick={() => handleAddToCart(phone)}
                                                     disabled={phone.stock === 0}
                                                     aria-label="Add to cart"
-                                                    className={`p-3 rounded-xl font-bold transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-not-allowed ${phone.stock > 0 ? 'bg-slate-800 border-slate-700 hover:bg-cyan-600 hover:text-black hover:border-cyan-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
+                                                    className={`p-3 rounded-xl font-bold transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-not-allowed ${phone.stock > 0 ? 'bg-slate-800 border-slate-700 hover:bg-brand-primary hover:text-black hover:border-brand-primary text-white' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
                                                 >
                                                     <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
                                                 </button>
@@ -479,7 +516,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 </div>
                             ) : (
                                 // LIST CARD
-                                <div key={phone.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex gap-6 hover:border-cyan-500/30 transition-all group relative">
+                                <div key={phone.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex gap-6 hover:border-brand-primary/30 transition-all group relative">
 
                                     <div className="w-32 h-32 bg-slate-900 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer" onClick={() => setSelectedProduct(phone)}>
                                         <img
@@ -492,8 +529,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                     <div className="flex-1 flex flex-col justify-center">
                                         <div className="flex justify-between items-start mb-2">
                                             <div>
-                                                <div className="text-xs text-cyan-500 font-mono uppercase mb-1">{phone.brand}</div>
-                                                <h3 className="text-xl font-bold text-white hover:text-cyan-400 cursor-pointer" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
+                                                <div className="text-xs text-brand-primary font-mono uppercase mb-1">{phone.brand}</div>
+                                                <h3 className="text-xl font-bold text-white hover:text-brand-primary cursor-pointer" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
                                             </div>
                                             <div className="text-right pr-12">
                                                 <div className="text-2xl font-bold text-white">{phone.price}{t.currency}</div>
@@ -507,7 +544,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                 title={phone.stock > 0 ? "Add to cart" : "Out of stock"}
                                                 disabled={phone.stock === 0}
                                                 onClick={() => handleAddToCart(phone)}
-                                                className={`px-6 py-2 font-bold rounded-lg transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${phone.stock > 0 ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white' : 'bg-slate-800 text-slate-500'}`}
+                                                className={`px-6 py-2 font-bold rounded-lg transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${phone.stock > 0 ? 'bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white' : 'bg-slate-800 text-slate-500'}`}
                                             >
                                                 <ShoppingCart className="w-4 h-4" /> {phone.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
                                             </button>

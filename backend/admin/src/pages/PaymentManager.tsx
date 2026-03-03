@@ -12,7 +12,7 @@ export default function PaymentManager() {
         giropay: { enabled: false, publicKey: '', secretKey: '' },
         sepa: { enabled: false, publicKey: '', secretKey: '' },
         sofort: { enabled: false, publicKey: '', secretKey: '' },
-        bankTransfer: { enabled: false, instructions: '' },
+        bankTransfer: { enabled: false, instructions: '', bankName: '', accountHolder: '', iban: '', bic: '' },
         cashOnDelivery: { enabled: true }
     });
     const [showSecret, setShowSecret] = useState(false);
@@ -163,6 +163,90 @@ export default function PaymentManager() {
                                 <p className="text-xs text-slate-500 mt-2">
                                     Required for payment verification. Found in Stripe Dashboard Developers &gt; Webhooks.
                                 </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Bank Transfer (Vorkasse) */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-yellow-500/20 p-3 rounded-xl text-yellow-400">
+                                <span className="font-black text-lg">€</span>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Bank Transfer</h3>
+                                <p className="text-sm text-slate-400">Manual wire transfer instructions</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className={`text-sm font-bold ${config.bankTransfer.enabled ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {config.bankTransfer.enabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                            <button
+                                aria-label={config.bankTransfer.enabled ? "Disable Bank Transfer" : "Enable Bank Transfer"}
+                                onClick={() => updateConfig('bankTransfer', 'enabled', !config.bankTransfer.enabled)}
+                                title={config.bankTransfer.enabled ? "Disable Bank Transfer" : "Enable Bank Transfer"}
+                                className={`w-12 h-6 rounded-full transition-colors relative ${config.bankTransfer.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${config.bankTransfer.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {config.bankTransfer.enabled && (
+                        <div className="space-y-4 border-t border-slate-800 pt-6 animate-in fade-in slide-in-from-top-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Bank Name</label>
+                                    <input
+                                        type="text"
+                                        value={config.bankTransfer.bankName || ''}
+                                        onChange={(e) => updateConfig('bankTransfer', 'bankName', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 outline-none transition-colors text-sm"
+                                        placeholder="Sparkasse, Commerzbank, etc."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Account Holder</label>
+                                    <input
+                                        type="text"
+                                        value={config.bankTransfer.accountHolder || ''}
+                                        onChange={(e) => updateConfig('bankTransfer', 'accountHolder', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 outline-none transition-colors text-sm"
+                                        placeholder="Your Company Name"
+                                    />
+                                </div>
+                                <div className="col-span-2 md:col-span-1">
+                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-2">IBAN</label>
+                                    <input
+                                        type="text"
+                                        value={config.bankTransfer.iban || ''}
+                                        onChange={(e) => updateConfig('bankTransfer', 'iban', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 outline-none transition-colors font-mono text-sm"
+                                        placeholder="DE00 0000 0000 0000 0000 00"
+                                    />
+                                </div>
+                                <div className="col-span-2 md:col-span-1">
+                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-2">BIC / SWIFT</label>
+                                    <input
+                                        type="text"
+                                        value={config.bankTransfer.bic || ''}
+                                        onChange={(e) => updateConfig('bankTransfer', 'bic', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 outline-none transition-colors font-mono text-sm"
+                                        placeholder="XXXXDE00XXX"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Customer Instructions</label>
+                                <textarea
+                                    value={config.bankTransfer.instructions || ''}
+                                    onChange={(e) => updateConfig('bankTransfer', 'instructions', e.target.value)}
+                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 outline-none transition-colors text-sm h-24 resize-none"
+                                    placeholder="Please transfer the money to this account. Mention the Order Number as reference (Verwendungszweck)."
+                                />
                             </div>
                         </div>
                     )}

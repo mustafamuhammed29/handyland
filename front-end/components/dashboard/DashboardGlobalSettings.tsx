@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, Save, Layout, Phone, Type, Image as ImageIcon } from 'lucide-react';
+import { Globe, Save, Layout, Phone, Type, Image as ImageIcon, Palette } from 'lucide-react';
 import { useSettings } from '../../context/SettingsContext';
 
 export const DashboardGlobalSettings: React.FC = () => {
@@ -18,11 +18,11 @@ export const DashboardGlobalSettings: React.FC = () => {
 
     const handleChange = (section: string, field: string, value: any) => {
         setLocalSettings(prev => {
-            const currentSection = prev[section as keyof typeof prev] || {};
+            const currentSection = (prev as any)[section] || {};
             return {
                 ...prev,
                 [section]: {
-                    ...currentSection,
+                    ...(currentSection as any),
                     [field]: value
                 }
             };
@@ -32,6 +32,7 @@ export const DashboardGlobalSettings: React.FC = () => {
     if (loading) return <div className="text-white">Loading settings...</div>;
 
     const sections = [
+        { id: 'theme', label: 'Theme Colors', icon: <Palette className="w-4 h-4" /> },
         { id: 'hero', label: 'Hero Section', icon: <Layout className="w-4 h-4" /> },
         { id: 'contact', label: 'Contact Info', icon: <Phone className="w-4 h-4" /> },
         { id: 'content', label: 'Text Content', icon: <Type className="w-4 h-4" /> },
@@ -72,6 +73,52 @@ export const DashboardGlobalSettings: React.FC = () => {
 
             {/* Content */}
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+                {activeTab === 'theme' && (
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-bold text-white mb-4">Color Palette</h3>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">Primary Color</label>
+                                <div className="flex gap-3 items-center bg-slate-800 border border-slate-700 rounded-lg p-2">
+                                    <input
+                                        type="color"
+                                        value={localSettings.theme?.primaryColor || '#06b6d4'} // Default to a cyan/blue
+                                        onChange={e => handleChange('theme', 'primaryColor', e.target.value)}
+                                        className="h-10 w-12 rounded cursor-pointer bg-transparent border-0 p-0"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={localSettings.theme?.primaryColor || '#06b6d4'}
+                                        onChange={e => handleChange('theme', 'primaryColor', e.target.value)}
+                                        className="w-full bg-transparent text-white border-0 outline-none font-mono"
+                                        placeholder="#06b6d4"
+                                    />
+                                </div>
+                                <p className="text-xs text-slate-500 mt-2">Used for main buttons, active links, and prominent highlights.</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">Secondary Color</label>
+                                <div className="flex gap-3 items-center bg-slate-800 border border-slate-700 rounded-lg p-2">
+                                    <input
+                                        type="color"
+                                        value={localSettings.theme?.secondaryColor || '#3b82f6'} // Default to a standard blue
+                                        onChange={e => handleChange('theme', 'secondaryColor', e.target.value)}
+                                        className="h-10 w-12 rounded cursor-pointer bg-transparent border-0 p-0"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={localSettings.theme?.secondaryColor || '#3b82f6'}
+                                        onChange={e => handleChange('theme', 'secondaryColor', e.target.value)}
+                                        className="w-full bg-transparent text-white border-0 outline-none font-mono"
+                                        placeholder="#3b82f6"
+                                    />
+                                </div>
+                                <p className="text-xs text-slate-500 mt-2">Used for secondary buttons, gradients, and subtle accents.</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {activeTab === 'hero' && (
                     <div className="space-y-4">
                         <h3 className="text-lg font-bold text-white mb-4">Hero Configuration</h3>

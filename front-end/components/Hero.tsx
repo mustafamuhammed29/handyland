@@ -124,7 +124,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                             <div className="absolute bottom-8 left-6 right-6">
                                 <div className="flex justify-between items-end mb-4">
                                     <div>
-                                        <div className="text-cyan-400 text-xs font-bold mb-1">{settings.hero.productLabel || 'CURRENT OFFER'}</div>
+                                        <div className="text-brand-primary text-xs font-bold mb-1">{settings.hero.productLabel || 'CURRENT OFFER'}</div>
                                         <div className="text-white text-2xl font-black">{settings.hero.productName || 'iPhone 15 Pro'}</div>
                                     </div>
                                     <div className="text-white text-xl font-bold">{settings.hero.productPrice || '€950'}</div>

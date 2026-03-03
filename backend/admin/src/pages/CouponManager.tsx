@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, Plus, Trash2, Edit3, CheckCircle, XCircle, Power, User } from 'lucide-react';
+import {
+    Tag,
+    Plus,
+    Trash2,
+    CheckCircle,
+    XCircle,
+    Power,
+    User
+} from 'lucide-react';
 import { api } from '../utils/api';
 
 interface Coupon {
@@ -254,8 +262,8 @@ export default function CouponManager() {
                                             <button
                                                 onClick={() => handleToggleStatus(coupon._id)}
                                                 className={`p-2 rounded-lg transition-colors flex items-center justify-center ${coupon.isActive
-                                                        ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white'
-                                                        : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white'
+                                                    ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white'
+                                                    : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white'
                                                     }`}
                                                 title={coupon.isActive ? "Disable Coupon" : "Enable Coupon"}
                                             >

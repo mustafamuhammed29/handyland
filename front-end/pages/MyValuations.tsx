@@ -23,7 +23,11 @@ export const MyValuations = () => {
                 quoteReference: v.quoteReference,
                 // Pass status and expiresAt for the enhanced dashboard view
                 status: v.status || 'active',
-                expiresAt: v.expiresAt || v.expiryDate || null
+                expiresAt: v.expiresAt || v.expiryDate || null,
+                // Extra conditions for the Details Modal
+                screenCondition: v.screenCondition,
+                bodyCondition: v.bodyCondition,
+                isFunctional: v.isFunctional !== undefined ? v.isFunctional : true
             }));
             setValuations(mapped);
         } catch (error) {
@@ -47,9 +51,25 @@ export const MyValuations = () => {
         }
     };
 
+    // Handle deletion of a quote
+    const handleDelete = async (valId: string) => {
+        try {
+            await api.delete(`/api/valuation/saved/${valId}`);
+            setValuations(prev => prev.filter(v => v.id !== valId));
+        } catch (error) {
+            console.error('Error deleting valuation:', error);
+            // Optionally could use Toast here if we had access to it easily
+        }
+    };
+
     return (
         <div className="p-4 md:p-8">
-            <DashboardValuations valuations={valuations} isLoading={isLoading} onSell={handleSell} />
+            <DashboardValuations
+                valuations={valuations}
+                isLoading={isLoading}
+                onSell={handleSell}
+                onDelete={handleDelete}
+            />
         </div>
     );
 };

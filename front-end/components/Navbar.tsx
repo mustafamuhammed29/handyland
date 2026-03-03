@@ -9,6 +9,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api';
+import { GlobalSearchBar } from './GlobalSearchBar';
 
 interface NavbarProps {
   lang: LanguageCode;
@@ -90,11 +91,11 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
 
           {/* Logo - Dynamic from Settings */}
           <Link to="/" className="flex items-center cursor-pointer group">
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center me-3 shadow-lg group-hover:rotate-12 transition-transform">
+            <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-xl flex items-center justify-center me-3 shadow-lg group-hover:rotate-12 transition-transform">
               <Smartphone className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-black text-white tracking-tighter uppercase">
-              {settings.navbar?.logoText || 'HANDY'}<span className="text-cyan-400">{settings.navbar?.logoAccentText || 'LAND'}</span>
+              {settings.navbar?.logoText || 'HANDY'}<span className="text-brand-primary">{settings.navbar?.logoAccentText || 'LAND'}</span>
             </span>
           </Link>
 
@@ -120,6 +121,10 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
             })}
           </div>
 
+          <div className="hidden lg:block ml-4 flex-1">
+            <GlobalSearchBar />
+          </div>
+
           {/* Actions */}
           <div className="flex items-center gap-3">
             {/* Language Switcher */}
@@ -131,9 +136,9 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500 transition-colors group"
+                  className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-brand-primary transition-colors group"
                 >
-                  <Bell className="w-5 h-5 text-slate-400 group-hover:text-cyan-400" />
+                  <Bell className="w-5 h-5 text-slate-400 group-hover:text-brand-primary" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 rtl:right-auto rtl:-left-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border border-black">
                       {unreadCount}
@@ -176,32 +181,31 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
               </div>
             )}
 
-            <button onClick={() => setIsCartOpen(true)} className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500 transition-colors group">
-              <ShoppingCart className="w-5 h-5 text-slate-400 group-hover:text-cyan-400" />
-              {cart.length > 0 && <span className="absolute -top-1 -right-1 rtl:right-auto rtl:-left-1 w-4 h-4 bg-cyan-500 text-black text-[10px] font-black rounded-full flex items-center justify-center border border-black">{cart.length}</span>}
+            <button onClick={() => setIsCartOpen(true)} className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-brand-primary transition-colors group">
+              <ShoppingCart className="w-5 h-5 text-slate-400 group-hover:text-brand-primary" />
+              {cart.length > 0 && <span className="absolute -top-1 -right-1 rtl:right-auto rtl:-left-1 w-4 h-4 bg-brand-primary text-black text-[10px] font-black rounded-full flex items-center justify-center border border-black">{cart.length}</span>}
             </button>
 
             <Link
               to={user ? '/dashboard' : '/login'}
               aria-label={user ? 'Go to dashboard' : 'Log in'}
-              className={`w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 hidden md:flex ${user ? 'bg-emerald-600 shadow-emerald-900/20' : 'bg-cyan-600 shadow-cyan-900/20'
+              className={`w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 hidden md:flex ${user ? 'bg-emerald-600 shadow-emerald-900/20' : 'bg-brand-primary shadow-brand-primary/20'
                 }`}
             >
               <UserIcon className="w-5 h-5" />
             </Link>
 
-            {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               aria-expanded={isOpen}
               aria-label="Toggle navigation menu"
               aria-controls="mobile-menu"
-              className="w-10 h-10 flex md:hidden items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 bg-slate-900 border border-slate-800 hover:border-cyan-500 group"
+              className="w-10 h-10 flex md:hidden items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 bg-slate-900 border border-slate-800 hover:border-brand-primary group"
             >
               {isOpen ? (
-                <X className="w-5 h-5 text-slate-400 group-hover:text-cyan-400" />
+                <X className="w-5 h-5 text-slate-400 group-hover:text-brand-primary" />
               ) : (
-                <Menu className="w-5 h-5 text-slate-400 group-hover:text-cyan-400" />
+                <Menu className="w-5 h-5 text-slate-400 group-hover:text-brand-primary" />
               )}
             </button>
           </div>
@@ -220,7 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
                   to={item.path}
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 ${isMobileActive
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
+                    ? 'bg-gradient-to-r from-brand-primary to-brand-secondary text-white shadow-lg'
                     : 'bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white'
                     }`}
                 >
@@ -234,7 +238,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
               onClick={() => setIsOpen(false)}
               className={`flex mt-2 items-center px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 ${user
                 ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-600/30'
-                : 'bg-cyan-600/20 text-cyan-400 border border-cyan-600/30'
+                : 'bg-brand-primary/20 text-brand-primary border border-brand-primary/30'
                 }`}
             >
               <UserIcon className="w-4 h-4 me-3" />

@@ -35,7 +35,7 @@ const ForgotPassword: React.FC = () => {
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
-                    <div className="inline-block p-4 bg-gradient-to-br from-purple-600 to-blue-500 rounded-2xl shadow-2xl shadow-purple-900/50 mb-4">
+                    <div className="inline-block p-4 bg-gradient-to-br from-purple-600 to-brand-secondary rounded-2xl shadow-2xl shadow-purple-900/50 mb-4">
                         <Mail className="w-12 h-12 text-white" />
                     </div>
                     <h1 className="text-4xl font-black text-white mb-2">Forgot Password?</h1>
@@ -89,7 +89,7 @@ const ForgotPassword: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={status === 'loading'}
-                                    className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white font-bold rounded-lg shadow-lg hover:from-purple-500 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="w-full py-3 bg-gradient-to-r from-purple-600 to-brand-secondary text-white font-bold rounded-lg shadow-lg hover:from-purple-500 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {status === 'loading' ? (
                                         <>

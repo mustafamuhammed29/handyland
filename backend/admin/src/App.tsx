@@ -17,6 +17,7 @@ import ShippingManager from './pages/ShippingManager';
 import MessagesManager from './pages/MessagesManager';
 import CouponManager from './pages/CouponManager';
 import Login from './pages/Login';
+import WalletManager from './pages/WalletManager';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const SidebarLink = ({ to, icon: Icon, label }: { to: string, icon: React.ElementType, label: string }) => {
@@ -75,6 +76,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarLink to="/" icon={LayoutDashboard} label="Dashboard" />
           <SidebarLink to="/carts" icon={ShoppingCart} label="Active Carts" />
           <SidebarLink to="/users" icon={Users} label="Users" />
+          <SidebarLink to="/wallet" icon={CreditCard} label="Wallet Manager" />
           <SidebarLink to="/orders" icon={Package} label="Orders" />
           <SidebarLink to="/products" icon={Smartphone} label="Products" />
           <SidebarLink to="/accessories" icon={Headphones} label="Accessories" />
@@ -136,6 +138,7 @@ function AppContent() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/carts" element={<ActiveCarts />} />
                   <Route path="/users" element={<UsersManager />} />
+                  <Route path="/wallet" element={<WalletManager />} />
                   <Route path="/orders" element={<OrdersManager />} />
                   <Route path="/products" element={<ProductsManager />} />
                   <Route path="/accessories" element={<AccessoriesManager />} />

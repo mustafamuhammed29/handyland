@@ -30,7 +30,7 @@ export const DashboardPages: React.FC = () => {
 
     const fetchPages = async () => {
         try {
-            const data = await api.get<Page[]>('/api/pages');
+            const data = (await api.get<Page[]>('/api/pages')) as unknown as Page[];
             setPages(data);
             if (data.length > 0 && !selectedPage) {
                 setSelectedPage(data[0]);
@@ -81,8 +81,8 @@ export const DashboardPages: React.FC = () => {
                                 key={page._id}
                                 onClick={() => setSelectedPage(page)}
                                 className={`w-full text-left px-4 py-3 rounded-xl transition-all ${selectedPage?._id === page._id
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                                     }`}
                             >
                                 <div className="font-medium">{page.title}</div>

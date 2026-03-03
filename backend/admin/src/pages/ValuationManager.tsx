@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Plus, Search, Trash2, Edit, Save, X, Calculator, ClipboardList, Package, Banknote, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Trash2, Edit, Save, X, Calculator, ClipboardList, Package, Banknote, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
 
 interface ScreenModifiers {
@@ -83,6 +84,11 @@ const ValuationManager = () => {
     const [quotesLoading, setQuotesLoading] = useState(false);
     const [quoteStats, setQuoteStats] = useState({ todayCount: 0, totalPaidValue: 0, pendingCount: 0, totalCount: 0 });
     const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+    const [expandedQuoteId, setExpandedQuoteId] = useState<string | null>(null);
+
+    // Sorting State
+    const [sortConfig, setSortConfig] = useState<{ key: keyof DeviceBlueprint, direction: 'asc' | 'desc' } | null>(null);
+    const [quoteSortConfig, setQuoteSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
 
     // Simulator
     const [simState, setSimState] = useState({
@@ -127,8 +133,7 @@ const ValuationManager = () => {
         try {
             await api.put(`/api/valuation/admin/quotes/${quoteId}/status`, { status: newStatus });
             setQuotes(prev => prev.map(q => q._id === quoteId ? { ...q, status: newStatus } : q));
-            // Update stats locally
-            fetchQuotes();
+            fetchQuotes(); // Update stats locally
         } catch (error) {
             console.error('Error updating status:', error);
         } finally {
@@ -199,7 +204,6 @@ const ValuationManager = () => {
                 ? current.filter(s => s !== storage)
                 : [...current, storage];
 
-            // Also init price for new storage
             const newPrices = { ...(prev.storagePrices || {}) };
             if (!current.includes(storage)) newPrices[storage] = 0;
 
@@ -248,10 +252,55 @@ const ValuationManager = () => {
         return Math.max(0, Math.round(price / 5) * 5);
     };
 
-    const filteredDevices = devices.filter(d =>
+    // --- SORTING LOGIC ---
+    const handleSort = (key: keyof DeviceBlueprint) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
+        setSortConfig({ key, direction });
+    };
+
+    const sortedDevices = [...devices].sort((a, b) => {
+        if (!sortConfig) return 0;
+        const aVal = a[sortConfig.key] || '';
+        const bVal = b[sortConfig.key] || '';
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const filteredDevices = sortedDevices.filter(d =>
         (selectedBrand === 'All' || d.brand === selectedBrand) &&
         (d.modelName?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+
+    const handleQuoteSort = (key: string) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (quoteSortConfig && quoteSortConfig.key === key && quoteSortConfig.direction === 'asc') direction = 'desc';
+        setQuoteSortConfig({ key, direction });
+    };
+
+    const sortedQuotes = [...quotes].sort((a: any, b: any) => {
+        if (!quoteSortConfig) return 0;
+
+        let aVal = a[quoteSortConfig.key];
+        let bVal = b[quoteSortConfig.key];
+
+        // Handle nested or derived sort values
+        if (quoteSortConfig.key === 'customer') {
+            aVal = a.user ? `${a.user.firstName || ''} ${a.user.lastName || ''}` : a.contact?.name || '';
+            bVal = b.user ? `${b.user.firstName || ''} ${b.user.lastName || ''}` : b.contact?.name || '';
+        } else if (quoteSortConfig.key === 'estimatedValue') {
+            aVal = Number(aVal) || 0;
+            bVal = Number(bVal) || 0;
+        } else if (quoteSortConfig.key === 'createdAt') {
+            aVal = new Date(aVal).getTime();
+            bVal = new Date(bVal).getTime();
+        }
+
+        if (aVal < bVal) return quoteSortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return quoteSortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
 
     const tabs = [
         { id: 'general', label: '📱 General' },
@@ -317,7 +366,7 @@ const ValuationManager = () => {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 aria-label="Search models"
-                                className="w-full bg-slate-800 border-none rounded-lg pl-10 pr-4 py-2 text-white focus:ring-2 focus:ring-cyan-500"
+                                className="w-full bg-slate-800 border-none rounded-lg pl-10 pr-4 py-2 text-white outline-none focus:ring-2 focus:ring-cyan-500"
                             />
                         </div>
                         <select
@@ -325,7 +374,7 @@ const ValuationManager = () => {
                             title="Filter by brand"
                             value={selectedBrand}
                             onChange={(e) => setSelectedBrand(e.target.value)}
-                            className="bg-slate-800 rounded-lg px-4 py-2 text-white border-none focus:ring-2 focus:ring-cyan-500"
+                            className="bg-slate-800 rounded-lg px-4 py-2 text-white border-none outline-none focus:ring-2 focus:ring-cyan-500"
                         >
                             <option value="All">All Brands</option>
                             {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
@@ -338,9 +387,15 @@ const ValuationManager = () => {
                             <table className="w-full text-left">
                                 <thead className="bg-slate-800 text-slate-400">
                                     <tr>
-                                        <th className="p-4">Brand</th>
-                                        <th className="p-4">Model</th>
-                                        <th className="p-4">Base Price</th>
+                                        <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('brand')}>
+                                            <div className="flex items-center gap-2">Brand {sortConfig?.key === 'brand' && (sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
+                                        </th>
+                                        <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('modelName')}>
+                                            <div className="flex items-center gap-2">Model {sortConfig?.key === 'modelName' && (sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
+                                        </th>
+                                        <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('basePrice')}>
+                                            <div className="flex items-center gap-2">Base Price {sortConfig?.key === 'basePrice' && (sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
+                                        </th>
                                         <th className="p-4">Storages</th>
                                         <th className="p-4 text-right">Actions</th>
                                     </tr>
@@ -353,9 +408,9 @@ const ValuationManager = () => {
                                     ) : (
                                         filteredDevices.map(device => (
                                             <tr key={device._id} className="hover:bg-slate-800/50 transition-colors">
-                                                <td className="p-4"><span className="px-2 py-1 bg-slate-800 rounded text-sm">{device.brand}</span></td>
+                                                <td className="p-4"><span className="px-2 py-1 bg-slate-800 rounded text-sm text-slate-300 font-medium">{device.brand}</span></td>
                                                 <td className="p-4 font-bold text-white">{device.modelName}</td>
-                                                <td className="p-4 text-green-400 font-mono">€{device.basePrice}</td>
+                                                <td className="p-4 text-emerald-400 font-mono font-bold">€{device.basePrice}</td>
                                                 <td className="p-4 text-sm text-slate-400">{(device.validStorages || []).join(', ')}</td>
                                                 <td className="p-4 text-right space-x-2">
                                                     <button onClick={() => openEdit(device)} aria-label={`Edit ${device.modelName}`} title="Edit" className="p-2 text-blue-400 hover:bg-blue-900/30 rounded-lg transition-colors"><Edit size={16} /></button>
@@ -382,78 +437,208 @@ const ValuationManager = () => {
                             { label: 'Gesamt', value: quoteStats.totalCount, icon: <ClipboardList size={18} className="text-blue-400" />, color: 'text-blue-400' },
                             { label: 'Ausgezahlt', value: `€${quoteStats.totalPaidValue}`, icon: <Banknote size={18} className="text-emerald-400" />, color: 'text-emerald-400' },
                         ].map(s => (
-                            <div key={s.label} className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                            <div key={s.label} className="bg-slate-900/50 border border-slate-700 rounded-xl p-4 transition-transform hover:-translate-y-1 hover:shadow-lg">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs text-slate-400">{s.label}</span>
+                                    <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">{s.label}</span>
                                     {s.icon}
                                 </div>
-                                <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
+                                <div className={`text-3xl font-black ${s.color}`}>{s.value}</div>
                             </div>
                         ))}
                     </div>
 
                     {/* Quotes Table */}
-                    <div className="bg-slate-900/50 border border-slate-700 rounded-xl overflow-hidden">
+                    <div className="bg-slate-900/50 border border-slate-700 rounded-xl overflow-hidden shadow-xl">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead className="bg-slate-800 text-slate-400 text-xs uppercase tracking-wider">
                                     <tr>
-                                        <th className="p-4">Referenz</th>
-                                        <th className="p-4">Gerät</th>
-                                        <th className="p-4">Kunde</th>
-                                        <th className="p-4">Preis</th>
-                                        <th className="p-4">Status</th>
-                                        <th className="p-4">Datum</th>
+                                        <th className="p-4 w-10"></th>
+                                        <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleQuoteSort('quoteReference')}>
+                                            <div className="flex items-center gap-2">Referenz {quoteSortConfig?.key === 'quoteReference' && (quoteSortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
+                                        </th>
+                                        <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleQuoteSort('device')}>
+                                            <div className="flex items-center gap-2">Gerät {quoteSortConfig?.key === 'device' && (quoteSortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
+                                        </th>
+                                        <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleQuoteSort('customer')}>
+                                            <div className="flex items-center gap-2">Kunde {quoteSortConfig?.key === 'customer' && (quoteSortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
+                                        </th>
+                                        <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleQuoteSort('estimatedValue')}>
+                                            <div className="flex items-center gap-2">Preis {quoteSortConfig?.key === 'estimatedValue' && (quoteSortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
+                                        </th>
+                                        <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleQuoteSort('status')}>
+                                            <div className="flex items-center gap-2">Status {quoteSortConfig?.key === 'status' && (quoteSortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
+                                        </th>
+                                        <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleQuoteSort('createdAt')}>
+                                            <div className="flex items-center gap-2">Datum {quoteSortConfig?.key === 'createdAt' && (quoteSortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700">
                                     {quotesLoading ? (
-                                        <tr><td colSpan={6} className="p-8 text-center text-slate-500">Lädt...</td></tr>
-                                    ) : quotes.length === 0 ? (
-                                        <tr><td colSpan={6} className="p-8 text-center text-slate-500">Keine Angebote vorhanden.</td></tr>
+                                        <tr><td colSpan={7} className="p-8 text-center text-slate-500">Lädt...</td></tr>
+                                    ) : sortedQuotes.length === 0 ? (
+                                        <tr><td colSpan={7} className="p-8 text-center text-slate-500">Keine Angebote vorhanden.</td></tr>
                                     ) : (
-                                        quotes.map(quote => {
+                                        sortedQuotes.map((quote: any) => {
                                             const customerName = quote.user
                                                 ? `${quote.user.firstName || ''} ${quote.user.lastName || ''}`.trim()
                                                 : quote.contact?.name || '—';
                                             const customerEmail = quote.user?.email || quote.contact?.email || '—';
 
                                             const STATUS_COLORS: Record<string, string> = {
-                                                pending_shipment: 'text-amber-400 bg-amber-500/10',
-                                                received: 'text-blue-400 bg-blue-500/10',
-                                                paid: 'text-emerald-400 bg-emerald-500/10',
-                                                active: 'text-slate-400 bg-slate-500/10'
+                                                pending_shipment: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                                                received: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+                                                paid: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                                                active: 'text-slate-400 bg-slate-500/10 border-slate-500/20'
                                             };
 
+                                            const isExpanded = expandedQuoteId === quote._id;
+
                                             return (
-                                                <tr key={quote._id} className="hover:bg-slate-800/50 transition-colors">
-                                                    <td className="p-4">
-                                                        <span className="font-mono text-xs text-cyan-400">{quote.quoteReference}</span>
-                                                    </td>
-                                                    <td className="p-4 font-bold text-white">{quote.device}</td>
-                                                    <td className="p-4">
-                                                        <div className="text-sm text-white">{customerName}</div>
-                                                        <div className="text-xs text-slate-500">{customerEmail}</div>
-                                                    </td>
-                                                    <td className="p-4 font-mono font-bold text-green-400">€{quote.estimatedValue}</td>
-                                                    <td className="p-4">
-                                                        <select
-                                                            aria-label={`Status für ${quote.quoteReference}`}
-                                                            title={`Status: ${quote.status}`}
-                                                            value={quote.status}
-                                                            disabled={updatingStatus === quote._id}
-                                                            onChange={(e) => handleStatusChange(quote._id, e.target.value)}
-                                                            className={`text-xs font-bold px-2 py-1.5 rounded-lg border-0 cursor-pointer ${STATUS_COLORS[quote.status] || STATUS_COLORS.active} bg-opacity-10 focus:ring-1 focus:ring-cyan-500 disabled:opacity-50`}
-                                                        >
-                                                            <option value="pending_shipment">📦 Versand ausstehend</option>
-                                                            <option value="received">✅ Erhalten</option>
-                                                            <option value="paid">💶 Bezahlt</option>
-                                                        </select>
-                                                    </td>
-                                                    <td className="p-4 text-xs text-slate-400">
-                                                        {new Date(quote.createdAt).toLocaleDateString('de-DE')}
-                                                    </td>
-                                                </tr>
+                                                <React.Fragment key={quote._id}>
+                                                    <tr
+                                                        onClick={() => setExpandedQuoteId(isExpanded ? null : quote._id)}
+                                                        className={`hover:bg-slate-800/80 transition-colors cursor-pointer ${isExpanded ? 'bg-slate-800/40' : ''}`}
+                                                    >
+                                                        <td className="p-4 text-slate-500 h-full flex items-center justify-center">
+                                                            <div className="p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                                                                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-4">
+                                                            <span className="font-mono text-xs font-medium text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded inline-block">{quote.quoteReference}</span>
+                                                        </td>
+                                                        <td className="p-4 font-bold text-white">{quote.device}</td>
+                                                        <td className="p-4">
+                                                            <div className="text-sm font-medium text-slate-200">{customerName}</div>
+                                                            <div className="text-xs text-slate-500">{customerEmail}</div>
+                                                        </td>
+                                                        <td className="p-4 font-mono font-black text-emerald-400 text-lg">€{quote.estimatedValue}</td>
+                                                        <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                                                            <div className="relative">
+                                                                <select
+                                                                    aria-label={`Status für ${quote.quoteReference}`}
+                                                                    title={`Status: ${quote.status}`}
+                                                                    value={quote.status}
+                                                                    disabled={updatingStatus === quote._id}
+                                                                    onChange={(e) => handleStatusChange(quote._id, e.target.value)}
+                                                                    className={`text-xs font-bold px-3 py-2 rounded-lg border cursor-pointer appearance-none pr-8 ${STATUS_COLORS[quote.status] || STATUS_COLORS.active} outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 w-full`}
+                                                                >
+                                                                    <option value="pending_shipment">📦 Versand ausstehend</option>
+                                                                    <option value="received">✅ Erhalten</option>
+                                                                    <option value="paid">💶 Bezahlt</option>
+                                                                    <option value="active">⏳ Aktiv</option>
+                                                                </select>
+                                                                <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" />
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-4 text-xs font-medium text-slate-400">
+                                                            {new Date(quote.createdAt).toLocaleDateString('de-DE', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                        </td>
+                                                    </tr>
+
+                                                    {/* Expandable Details Row */}
+                                                    <AnimatePresence>
+                                                        {isExpanded && (
+                                                            <tr>
+                                                                <td colSpan={7} className="p-0 border-t-0">
+                                                                    <motion.div
+                                                                        initial={{ height: 0, opacity: 0 }}
+                                                                        animate={{ height: 'auto', opacity: 1 }}
+                                                                        exit={{ height: 0, opacity: 0 }}
+                                                                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                                                                        className="overflow-hidden bg-slate-800/30"
+                                                                    >
+                                                                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                                                            {/* Configuration */}
+                                                                            <div className="space-y-3">
+                                                                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 pb-2">Konfiguration</h4>
+                                                                                <div className="space-y-2 text-sm">
+                                                                                    <div className="flex justify-between">
+                                                                                        <span className="text-slate-400">Speicher:</span>
+                                                                                        <span className="font-medium text-white">{quote.selections?.storage || 'N/A'}</span>
+                                                                                    </div>
+                                                                                    <div className="flex justify-between">
+                                                                                        <span className="text-slate-400">Display:</span>
+                                                                                        <span className="font-medium text-white">{quote.selections?.screenCondition === 'hervorragend' ? 'Wie Neu' : quote.selections?.screenCondition === 'sehr_gut' ? 'Sehr Gut' : quote.selections?.screenCondition === 'gut' ? 'Gut' : quote.selections?.screenCondition === 'beschadigt' ? 'Beschädigt' : 'N/A'}</span>
+                                                                                    </div>
+                                                                                    <div className="flex justify-between">
+                                                                                        <span className="text-slate-400">Gehäuse:</span>
+                                                                                        <span className="font-medium text-white">{quote.selections?.bodyCondition === 'hervorragend' ? 'Wie Neu' : quote.selections?.bodyCondition === 'sehr_gut' ? 'Sehr Gut' : quote.selections?.bodyCondition === 'gut' ? 'Gut' : quote.selections?.bodyCondition === 'beschadigt' ? 'Beschädigt' : 'N/A'}</span>
+                                                                                    </div>
+                                                                                    <div className="flex justify-between">
+                                                                                        <span className="text-slate-400">Funktionalität:</span>
+                                                                                        <span className="font-medium text-emerald-400">{quote.selections?.isFunctional ? '✅ Voll funktionsfähig' : '❌ Defekt'}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* Contact Info */}
+                                                                            <div className="space-y-3">
+                                                                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 pb-2">Kontaktdaten</h4>
+                                                                                <div className="space-y-2 text-sm">
+                                                                                    <div className="flex flex-col">
+                                                                                        <span className="text-slate-400 text-xs">Name</span>
+                                                                                        <span className="font-medium text-white">{customerName}</span>
+                                                                                    </div>
+                                                                                    <div className="flex flex-col mt-2">
+                                                                                        <span className="text-slate-400 text-xs">Email</span>
+                                                                                        <span className="font-medium text-blue-400">{customerEmail}</span>
+                                                                                    </div>
+                                                                                    {quote.contact?.phone && (
+                                                                                        <div className="flex flex-col mt-2">
+                                                                                            <span className="text-slate-400 text-xs">Telefon</span>
+                                                                                            <span className="font-medium text-slate-300">{quote.contact.phone}</span>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* Address Info */}
+                                                                            <div className="space-y-3">
+                                                                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 pb-2">Versandadresse</h4>
+                                                                                {quote.shippingAddress ? (
+                                                                                    <div className="text-sm text-slate-300 leading-relaxed">
+                                                                                        {quote.shippingAddress.address}<br />
+                                                                                        {quote.shippingAddress.postalCode} {quote.shippingAddress.city}
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <span className="text-sm text-slate-500 italic">Keine Adresse hinterlegt</span>
+                                                                                )}
+                                                                            </div>
+
+                                                                            {/* Payment Info */}
+                                                                            <div className="space-y-3">
+                                                                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 pb-2">Auszahlung</h4>
+                                                                                {quote.paymentDetails ? (
+                                                                                    <div className="space-y-2 text-sm">
+                                                                                        <div className="flex flex-col">
+                                                                                            <span className="text-slate-400 text-xs">IBAN</span>
+                                                                                            <span className="font-mono bg-slate-900/50 px-2 py-1 rounded inline-block mt-1 text-slate-300">
+                                                                                                {quote.paymentDetails.iban?.replace(/(.{4})/g, '$1 ').trim()}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div className="flex justify-between items-center mt-2">
+                                                                                            <span className="text-slate-400">Bank:</span>
+                                                                                            <span className="font-medium text-white">{quote.paymentDetails.bankName || '—'}</span>
+                                                                                        </div>
+                                                                                        <div className="flex justify-between items-center">
+                                                                                            <span className="text-slate-400">Kontoinhaber:</span>
+                                                                                            <span className="font-medium text-slate-300">{quote.paymentDetails.accountHolderName || customerName}</span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <span className="text-sm text-slate-500 italic">Keine Bankdaten hinterlegt</span>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </motion.div>
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </React.Fragment>
                                             );
                                         })
                                     )}
@@ -465,315 +650,360 @@ const ValuationManager = () => {
             )}
 
             {/* Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
-                        {/* Modal Header */}
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Calculator className="text-cyan-400" />
-                                {editingDevice ? 'Edit Blueprint' : 'New Blueprint'}
-                            </h2>
-                            <button onClick={closeModal} aria-label="Close modal" title="Close" className="text-slate-500 hover:text-white"><X size={20} /></button>
-                        </div>
-
-                        {/* Tabs */}
-                        <div className="flex gap-1 flex-wrap border-b border-slate-700 pb-2 mb-4 shrink-0">
-                            {tabs.map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setModalTab(tab.id)}
-                                    className={`pb-1 px-3 text-xs rounded-lg transition-all ${modalTab === tab.id ? 'bg-cyan-500/20 text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'}`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Tab Content */}
-                        <div className="overflow-y-auto pr-2 grow custom-scrollbar">
-
-                            {/* ── GENERAL ── */}
-                            {modalTab === 'general' && (
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-xs text-slate-400 mb-1 block">Brand</label>
-                                            <select
-                                                aria-label="Select brand" title="Select brand"
-                                                value={formData.brand}
-                                                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white"
-                                            >
-                                                {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="text-xs text-slate-400 mb-1 block">Model Name</label>
-                                            <input
-                                                aria-label="Model Name" value={formData.modelName}
-                                                onChange={(e) => setFormData({ ...formData, modelName: e.target.value })}
-                                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white"
-                                                placeholder="e.g. iPhone 15"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-xs text-slate-400 mb-1 block">Device Image</label>
-                                        <div className="flex items-center gap-4">
-                                            {formData.imageUrl && (
-                                                <div className="w-16 h-16 bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-                                                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                                                </div>
-                                            )}
-                                            <div className="flex-1">
-                                                <input
-                                                    type="file" aria-label="Upload device image" title="Upload device image"
-                                                    onChange={handleImageUpload} accept="image/*"
-                                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/10 file:text-cyan-400 hover:file:bg-cyan-500/20"
-                                                />
-                                                <input
-                                                    type="text" aria-label="Image URL" placeholder="Or paste image URL..."
-                                                    value={formData.imageUrl || ''}
-                                                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                                                    className="w-full mt-2 bg-slate-900/50 border-none rounded text-xs text-slate-400 px-2 py-1"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-xs text-slate-400 mb-1 block">Base Price (€) — for lowest storage, perfect condition</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">€</span>
-                                            <input
-                                                type="number" aria-label="Base Price" title="Base Price"
-                                                value={formData.basePrice}
-                                                onChange={(e) => setFormData({ ...formData, basePrice: Number(e.target.value) })}
-                                                className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-white font-mono"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-xs text-slate-400 mb-2 block">Supported Storage Options</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {STORAGE_OPTIONS.map(opt => (
-                                                <button
-                                                    key={opt} onClick={() => toggleStorage(opt)} type="button"
-                                                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border ${formData.validStorages?.includes(opt)
-                                                        ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50'
-                                                        : 'bg-slate-800 text-slate-500 border-slate-700 hover:border-slate-500'}`}
-                                                >
-                                                    {opt}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ── STORAGE PRICES ── */}
-                            {modalTab === 'storage' && (
-                                <div className="space-y-3">
-                                    <p className="text-xs text-slate-400">Enter the price ADD-ON (€) for each storage tier. The base price is added on top.</p>
-                                    {(formData.validStorages || []).map(storage => (
-                                        <div key={storage} className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700">
-                                            <div>
-                                                <span className="text-sm font-bold text-white">{storage}</span>
-                                                <span className="text-xs text-slate-500 ml-2">add-on</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-slate-500 text-sm">+€</span>
-                                                <input
-                                                    type="number" aria-label={`Storage add-on for ${storage}`} title={`Price for ${storage}`}
-                                                    value={(formData.storagePrices || {})[storage] ?? 0}
-                                                    onChange={(e) => setStoragePrice(storage, Number(e.target.value))}
-                                                    className="w-24 bg-slate-900 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-right font-mono text-white"
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {(formData.validStorages || []).length === 0 && (
-                                        <p className="text-slate-500 text-sm text-center py-4">← Add storage options in the General tab first</p>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* ── SCREEN MODIFIERS ── */}
-                            {modalTab === 'screen' && (
-                                <div className="space-y-3">
-                                    <p className="text-xs text-slate-400">Set the price multiplier for each screen condition. <span className="text-cyan-400">1.0 = 100% of price, 0.5 = 50%</span></p>
-                                    {(Object.keys(CONDITION_LABELS) as (keyof ScreenModifiers)[]).map(key => (
-                                        <div key={key} className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700">
-                                            <div>
-                                                <span className="text-sm font-bold text-white">{CONDITION_LABELS[key]}</span>
-                                                <div className="h-1 mt-1 rounded-full bg-slate-700 w-32">
-                                                    <div className="h-1 rounded-full bg-cyan-500" style={{ width: `${((formData.screenModifiers as ScreenModifiers)?.[key] ?? 0.75) * 100}%` }} />
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-slate-500 text-sm">×</span>
-                                                <input
-                                                    type="number" step="0.05" min="0.1" max="1.5"
-                                                    aria-label={`Screen multiplier for ${CONDITION_LABELS[key]}`}
-                                                    title={`Screen multiplier for ${CONDITION_LABELS[key]}`}
-                                                    value={(formData.screenModifiers as ScreenModifiers)?.[key] ?? 0.75}
-                                                    onChange={(e) => setScreenMod(key, Number(e.target.value))}
-                                                    className="w-20 bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-right font-mono text-white"
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* ── BODY MODIFIERS ── */}
-                            {modalTab === 'body' && (
-                                <div className="space-y-3">
-                                    <p className="text-xs text-slate-400">Set the price multiplier for each body (Gehäuse) condition.</p>
-                                    {(Object.keys(CONDITION_LABELS) as (keyof BodyModifiers)[]).map(key => (
-                                        <div key={key} className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700">
-                                            <div>
-                                                <span className="text-sm font-bold text-white">{CONDITION_LABELS[key]}</span>
-                                                <div className="h-1 mt-1 rounded-full bg-slate-700 w-32">
-                                                    <div className="h-1 rounded-full bg-blue-500" style={{ width: `${((formData.bodyModifiers as BodyModifiers)?.[key] ?? 0.85) * 100}%` }} />
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-slate-500 text-sm">×</span>
-                                                <input
-                                                    type="number" step="0.05" min="0.1" max="1.5"
-                                                    aria-label={`Body multiplier for ${CONDITION_LABELS[key]}`}
-                                                    title={`Body multiplier for ${CONDITION_LABELS[key]}`}
-                                                    value={(formData.bodyModifiers as BodyModifiers)?.[key] ?? 0.85}
-                                                    onChange={(e) => setBodyMod(key, Number(e.target.value))}
-                                                    className="w-20 bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-right font-mono text-white"
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* ── FUNCTIONALITY ── */}
-                            {modalTab === 'functionality' && (
-                                <div className="space-y-4">
-                                    <p className="text-xs text-slate-400">Set multipliers for functional (Ja) vs. non-functional (Nein) devices.</p>
-                                    <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <span className="text-sm font-bold text-white">✅ Functional (Ja)</span>
-                                                <p className="text-xs text-slate-400 mt-0.5">Device works perfectly</p>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-slate-500 text-sm">×</span>
-                                                <input
-                                                    type="number" step="0.05" min="0.1" max="2"
-                                                    aria-label="Functional multiplier" title="Functional multiplier"
-                                                    value={formData.functionalMultiplier ?? 1.0}
-                                                    onChange={(e) => setFormData({ ...formData, functionalMultiplier: Number(e.target.value) })}
-                                                    className="w-20 bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-right font-mono text-white"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <span className="text-sm font-bold text-white">❌ Non-Functional (Nein)</span>
-                                                <p className="text-xs text-slate-400 mt-0.5">Broken or locked device</p>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-slate-500 text-sm">×</span>
-                                                <input
-                                                    type="number" step="0.05" min="0.05" max="1"
-                                                    aria-label="Non-functional multiplier" title="Non-functional multiplier"
-                                                    value={formData.nonFunctionalMultiplier ?? 0.4}
-                                                    onChange={(e) => setFormData({ ...formData, nonFunctionalMultiplier: Number(e.target.value) })}
-                                                    className="w-20 bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-right font-mono text-white"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ── SIMULATOR ── */}
-                            {modalTab === 'simulator' && (
-                                <div className="space-y-4 bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                                    <p className="text-xs text-slate-500 text-center">Preview the calculated offer based on the current settings.</p>
-
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="text-xs text-slate-500 mb-1 block">Storage</label>
-                                            <select
-                                                aria-label="Simulator storage" title="Simulator storage"
-                                                value={simState.storage}
-                                                onChange={(e) => setSimState({ ...simState, storage: e.target.value })}
-                                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-sm text-white"
-                                            >
-                                                {(formData.validStorages || []).map(s => <option key={s} value={s}>{s}</option>)}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="text-xs text-slate-500 mb-1 block">Screen Condition</label>
-                                            <select
-                                                aria-label="Simulator screen condition" title="Simulator screen condition"
-                                                value={simState.screenCondition}
-                                                onChange={(e) => setSimState({ ...simState, screenCondition: e.target.value })}
-                                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-sm text-white"
-                                            >
-                                                {Object.entries(CONDITION_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="text-xs text-slate-500 mb-1 block">Body Condition</label>
-                                            <select
-                                                aria-label="Simulator body condition" title="Simulator body condition"
-                                                value={simState.bodyCondition}
-                                                onChange={(e) => setSimState({ ...simState, bodyCondition: e.target.value })}
-                                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-sm text-white"
-                                            >
-                                                {Object.entries(CONDITION_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="text-xs text-slate-500 mb-1 block">Functionality</label>
-                                            <select
-                                                aria-label="Simulator functionality" title="Simulator functionality"
-                                                value={simState.isFunctional ? 'true' : 'false'}
-                                                onChange={(e) => setSimState({ ...simState, isFunctional: e.target.value === 'true' })}
-                                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-sm text-white"
-                                            >
-                                                <option value="true">✅ Ja (Functional)</option>
-                                                <option value="false">❌ Nein (Broken)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="text-center pt-4 border-t border-slate-800">
-                                        <p className="text-sm text-slate-400 mb-1">Estimated Offer</p>
-                                        <div className="text-5xl font-mono font-black text-emerald-400">€{calculateSimulatedPrice()}</div>
-                                        <p className="text-xs text-slate-600 mt-2">
-                                            (€{formData.basePrice} + €{(formData.storagePrices || {})[simState.storage] || 0}) × {(formData.screenModifiers as ScreenModifiers)?.[simState.screenCondition as keyof ScreenModifiers]?.toFixed(2)} × {(formData.bodyModifiers as BodyModifiers)?.[simState.bodyCondition as keyof BodyModifiers]?.toFixed(2)} × {simState.isFunctional ? formData.functionalMultiplier : formData.nonFunctionalMultiplier}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Save Button */}
-                        <button
-                            onClick={handleSave}
-                            className="w-full mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-cyan-900/20 transition-all flex items-center justify-center gap-2 shrink-0"
+            <AnimatePresence>
+                {isModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                            transition={{ type: "spring", duration: 0.4 }}
+                            className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]"
                         >
-                            <Save size={18} /> Save Blueprint
-                        </button>
-                    </div>
-                </div>
-            )}
+                            {/* Modal Header */}
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <Calculator className="text-cyan-400" />
+                                    {editingDevice ? 'Edit Blueprint' : 'New Blueprint'}
+                                </h2>
+                                <button onClick={closeModal} aria-label="Close modal" title="Close" className="text-slate-500 hover:text-white transition-colors"><X size={20} /></button>
+                            </div>
+
+                            {/* Tabs */}
+                            <div className="flex gap-1 flex-wrap border-b border-slate-700 pb-2 mb-4 shrink-0 relative">
+                                {tabs.map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setModalTab(tab.id)}
+                                        className={`pb-1 px-3 text-xs rounded-lg transition-all relative z-10 ${modalTab === tab.id ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'}`}
+                                    >
+                                        {modalTab === tab.id && (
+                                            <motion.div
+                                                layoutId="activeTabIndicator"
+                                                className="absolute inset-0 bg-cyan-500/20 rounded-lg -z-10"
+                                                transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                                            />
+                                        )}
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Tab Content */}
+                            <div className="overflow-y-auto pr-2 grow custom-scrollbar">
+
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={modalTab}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        {/* ── GENERAL ── */}
+                                        {modalTab === 'general' && (
+                                            <div className="space-y-4">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="text-xs text-slate-400 mb-1 block">Brand</label>
+                                                        <select
+                                                            aria-label="Select brand" title="Select brand"
+                                                            value={formData.brand}
+                                                            onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                                                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-cyan-500"
+                                                        >
+                                                            {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-slate-400 mb-1 block">Model Name</label>
+                                                        <input
+                                                            aria-label="Model Name" value={formData.modelName}
+                                                            onChange={(e) => setFormData({ ...formData, modelName: e.target.value })}
+                                                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-cyan-500"
+                                                            placeholder="e.g. iPhone 15"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="text-xs text-slate-400 mb-1 block">Device Image</label>
+                                                    <div className="flex items-center gap-4">
+                                                        {formData.imageUrl && (
+                                                            <div className="w-16 h-16 bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                                                                <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                                            </div>
+                                                        )}
+                                                        <div className="flex-1">
+                                                            <input
+                                                                type="file" aria-label="Upload device image" title="Upload device image"
+                                                                onChange={handleImageUpload} accept="image/*"
+                                                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/10 file:text-cyan-400 hover:file:bg-cyan-500/20 file:cursor-pointer p-0"
+                                                            />
+                                                            <input
+                                                                type="text" aria-label="Image URL" placeholder="Or paste image URL..."
+                                                                value={formData.imageUrl || ''}
+                                                                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                                                                className="w-full mt-2 bg-slate-900/50 outline-none focus:ring-2 focus:ring-cyan-500 border border-slate-700 rounded-lg text-xs text-slate-400 px-3 py-2"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="text-xs text-slate-400 mb-1 block">Base Price (€) — for lowest storage, perfect condition</label>
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">€</span>
+                                                        <input
+                                                            type="number" aria-label="Base Price" title="Base Price"
+                                                            value={formData.basePrice}
+                                                            onChange={(e) => setFormData({ ...formData, basePrice: Number(e.target.value) })}
+                                                            className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-white font-mono outline-none focus:ring-2 focus:ring-cyan-500"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="text-xs text-slate-400 mb-2 block">Supported Storage Options</label>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {STORAGE_OPTIONS.map(opt => (
+                                                            <button
+                                                                key={opt} onClick={() => toggleStorage(opt)} type="button"
+                                                                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border ${formData.validStorages?.includes(opt)
+                                                                    ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50'
+                                                                    : 'bg-slate-800 text-slate-500 border-slate-700 hover:border-slate-500'}`}
+                                                            >
+                                                                {opt}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* ── STORAGE PRICES ── */}
+                                        {modalTab === 'storage' && (
+                                            <div className="space-y-3">
+                                                <p className="text-xs text-slate-400">Enter the price ADD-ON (€) for each storage tier. The base price is added on top.</p>
+                                                {(formData.validStorages || []).map(storage => (
+                                                    <div key={storage} className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700">
+                                                        <div>
+                                                            <span className="text-sm font-bold text-white">{storage}</span>
+                                                            <span className="text-xs text-slate-500 ml-2">add-on</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-slate-500 text-sm">+€</span>
+                                                            <input
+                                                                type="number" aria-label={`Storage add-on for ${storage}`} title={`Price for ${storage}`}
+                                                                value={(formData.storagePrices || {})[storage] ?? 0}
+                                                                onChange={(e) => setStoragePrice(storage, Number(e.target.value))}
+                                                                className="w-24 bg-slate-900 border border-slate-600 outline-none focus:border-cyan-500 rounded-lg px-3 py-1.5 text-sm text-right font-mono text-white"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {(formData.validStorages || []).length === 0 && (
+                                                    <p className="text-slate-500 text-sm text-center py-4">← Add storage options in the General tab first</p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* ── SCREEN MODIFIERS ── */}
+                                        {modalTab === 'screen' && (
+                                            <div className="space-y-3">
+                                                <p className="text-xs text-slate-400">Set the price multiplier for each screen condition. <span className="text-cyan-400">1.0 = 100% of price, 0.5 = 50%</span></p>
+                                                {(Object.keys(CONDITION_LABELS) as (keyof ScreenModifiers)[]).map(key => (
+                                                    <div key={key} className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700">
+                                                        <div>
+                                                            <span className="text-sm font-bold text-white">{CONDITION_LABELS[key]}</span>
+                                                            <div className="h-1 mt-1 rounded-full bg-slate-700 w-32 overflow-hidden">
+                                                                <motion.div
+                                                                    initial={{ width: 0 }}
+                                                                    animate={{ width: `${((formData.screenModifiers as ScreenModifiers)?.[key] ?? 0.75) * 100}%` }}
+                                                                    className="h-full rounded-full bg-cyan-500"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-slate-500 text-sm">×</span>
+                                                            <input
+                                                                type="number" step="0.05" min="0.1" max="1.5"
+                                                                aria-label={`Screen multiplier for ${CONDITION_LABELS[key]}`}
+                                                                title={`Screen multiplier for ${CONDITION_LABELS[key]}`}
+                                                                value={(formData.screenModifiers as ScreenModifiers)?.[key] ?? 0.75}
+                                                                onChange={(e) => setScreenMod(key, Number(e.target.value))}
+                                                                className="w-20 bg-slate-900 border border-slate-600 outline-none focus:border-cyan-500 rounded-lg px-2 py-1.5 text-sm text-right font-mono text-white"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* ── BODY MODIFIERS ── */}
+                                        {modalTab === 'body' && (
+                                            <div className="space-y-3">
+                                                <p className="text-xs text-slate-400">Set the price multiplier for each body (Gehäuse) condition.</p>
+                                                {(Object.keys(CONDITION_LABELS) as (keyof BodyModifiers)[]).map(key => (
+                                                    <div key={key} className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700">
+                                                        <div>
+                                                            <span className="text-sm font-bold text-white">{CONDITION_LABELS[key]}</span>
+                                                            <div className="h-1 mt-1 rounded-full bg-slate-700 w-32 overflow-hidden">
+                                                                <motion.div
+                                                                    initial={{ width: 0 }}
+                                                                    animate={{ width: `${((formData.bodyModifiers as BodyModifiers)?.[key] ?? 0.85) * 100}%` }}
+                                                                    className="h-full rounded-full bg-blue-500"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-slate-500 text-sm">×</span>
+                                                            <input
+                                                                type="number" step="0.05" min="0.1" max="1.5"
+                                                                aria-label={`Body multiplier for ${CONDITION_LABELS[key]}`}
+                                                                title={`Body multiplier for ${CONDITION_LABELS[key]}`}
+                                                                value={(formData.bodyModifiers as BodyModifiers)?.[key] ?? 0.85}
+                                                                onChange={(e) => setBodyMod(key, Number(e.target.value))}
+                                                                className="w-20 bg-slate-900 border border-slate-600 outline-none focus:border-cyan-500 rounded-lg px-2 py-1.5 text-sm text-right font-mono text-white"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* ── FUNCTIONALITY ── */}
+                                        {modalTab === 'functionality' && (
+                                            <div className="space-y-4">
+                                                <p className="text-xs text-slate-400">Set multipliers for functional (Ja) vs. non-functional (Nein) devices.</p>
+                                                <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <span className="text-sm font-bold text-white">✅ Functional (Ja)</span>
+                                                            <p className="text-xs text-slate-400 mt-0.5">Device works perfectly</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-slate-500 text-sm">×</span>
+                                                            <input
+                                                                type="number" step="0.05" min="0.1" max="2"
+                                                                aria-label="Functional multiplier" title="Functional multiplier"
+                                                                value={formData.functionalMultiplier ?? 1.0}
+                                                                onChange={(e) => setFormData({ ...formData, functionalMultiplier: Number(e.target.value) })}
+                                                                className="w-20 bg-slate-900 border border-slate-600 outline-none focus:border-cyan-500 rounded-lg px-2 py-1.5 text-sm text-right font-mono text-white"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <span className="text-sm font-bold text-white">❌ Non-Functional (Nein)</span>
+                                                            <p className="text-xs text-slate-400 mt-0.5">Broken or locked device</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-slate-500 text-sm">×</span>
+                                                            <input
+                                                                type="number" step="0.05" min="0.05" max="1"
+                                                                aria-label="Non-functional multiplier" title="Non-functional multiplier"
+                                                                value={formData.nonFunctionalMultiplier ?? 0.4}
+                                                                onChange={(e) => setFormData({ ...formData, nonFunctionalMultiplier: Number(e.target.value) })}
+                                                                className="w-20 bg-slate-900 border border-slate-600 outline-none focus:border-cyan-500 rounded-lg px-2 py-1.5 text-sm text-right font-mono text-white"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* ── SIMULATOR ── */}
+                                        {modalTab === 'simulator' && (
+                                            <div className="space-y-4 bg-slate-950 p-6 rounded-2xl border border-slate-800">
+                                                <p className="text-xs text-slate-500 text-center">Preview the calculated offer based on the current settings.</p>
+
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="text-xs text-slate-500 mb-1 block">Storage</label>
+                                                        <select
+                                                            aria-label="Simulator storage" title="Simulator storage"
+                                                            value={simState.storage}
+                                                            onChange={(e) => setSimState({ ...simState, storage: e.target.value })}
+                                                            className="w-full bg-slate-900 border border-slate-700 outline-none focus:border-cyan-500 rounded-lg px-2 py-2 text-sm text-white"
+                                                        >
+                                                            {(formData.validStorages || []).map(s => <option key={s} value={s}>{s}</option>)}
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-slate-500 mb-1 block">Screen Condition</label>
+                                                        <select
+                                                            aria-label="Simulator screen condition" title="Simulator screen condition"
+                                                            value={simState.screenCondition}
+                                                            onChange={(e) => setSimState({ ...simState, screenCondition: e.target.value })}
+                                                            className="w-full bg-slate-900 border border-slate-700 outline-none focus:border-cyan-500 rounded-lg px-2 py-2 text-sm text-white"
+                                                        >
+                                                            {Object.entries(CONDITION_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-slate-500 mb-1 block">Body Condition</label>
+                                                        <select
+                                                            aria-label="Simulator body condition" title="Simulator body condition"
+                                                            value={simState.bodyCondition}
+                                                            onChange={(e) => setSimState({ ...simState, bodyCondition: e.target.value })}
+                                                            className="w-full bg-slate-900 border border-slate-700 outline-none focus:border-cyan-500 rounded-lg px-2 py-2 text-sm text-white"
+                                                        >
+                                                            {Object.entries(CONDITION_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-slate-500 mb-1 block">Functionality</label>
+                                                        <select
+                                                            aria-label="Simulator functionality" title="Simulator functionality"
+                                                            value={simState.isFunctional ? 'true' : 'false'}
+                                                            onChange={(e) => setSimState({ ...simState, isFunctional: e.target.value === 'true' })}
+                                                            className="w-full bg-slate-900 border border-slate-700 outline-none focus:border-cyan-500 rounded-lg px-2 py-2 text-sm text-white"
+                                                        >
+                                                            <option value="true">✅ Ja (Functional)</option>
+                                                            <option value="false">❌ Nein (Broken)</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div className="text-center pt-4 border-t border-slate-800">
+                                                    <p className="text-sm text-slate-400 mb-1">Estimated Offer</p>
+                                                    <motion.div
+                                                        key={`sim-price-${calculateSimulatedPrice()}`}
+                                                        initial={{ scale: 0.8, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        className="text-5xl font-mono font-black text-emerald-400"
+                                                    >
+                                                        €{calculateSimulatedPrice()}
+                                                    </motion.div>
+                                                    <p className="text-xs text-slate-600 mt-2">
+                                                        (€{formData.basePrice} + €{(formData.storagePrices || {})[simState.storage] || 0}) × {(formData.screenModifiers as ScreenModifiers)?.[simState.screenCondition as keyof ScreenModifiers]?.toFixed(2)} × {(formData.bodyModifiers as BodyModifiers)?.[simState.bodyCondition as keyof BodyModifiers]?.toFixed(2)} × {simState.isFunctional ? formData.functionalMultiplier : formData.nonFunctionalMultiplier}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Save Button */}
+                            <button
+                                onClick={handleSave}
+                                className="w-full mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-cyan-900/20 transition-all flex items-center justify-center gap-2 shrink-0"
+                            >
+                                <Save size={18} /> Save Blueprint
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

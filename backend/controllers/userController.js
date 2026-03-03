@@ -61,6 +61,52 @@ exports.changePassword = async (req, res) => {
     }
 };
 
+// @desc    Get notification preferences
+// @route   GET /api/users/notifications
+// @access  Private
+exports.getNotificationPrefs = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('notificationPrefs');
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        // Fallback defaults if the field doesn't exist yet (old accounts)
+        res.json({
+            success: true,
+            data: user.notificationPrefs || {
+                orderUpdates: true,
+                repairStatus: true,
+                promotions: false,
+                newsletter: false
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    }
+};
+
+// @desc    Update notification preferences
+// @route   PUT /api/users/notifications
+// @access  Private
+exports.updateNotificationPrefs = async (req, res) => {
+    try {
+        const { orderUpdates, repairStatus, promotions, newsletter } = req.body;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Only update provided keys
+        user.notificationPrefs = {
+            orderUpdates: orderUpdates !== undefined ? !!orderUpdates : (user.notificationPrefs?.orderUpdates ?? true),
+            repairStatus: repairStatus !== undefined ? !!repairStatus : (user.notificationPrefs?.repairStatus ?? true),
+            promotions: promotions !== undefined ? !!promotions : (user.notificationPrefs?.promotions ?? false),
+            newsletter: newsletter !== undefined ? !!newsletter : (user.notificationPrefs?.newsletter ?? false),
+        };
+
+        await user.save();
+        res.json({ success: true, data: user.notificationPrefs });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error saving preferences', error: error.message });
+    }
+};
+
 // @desc    Get user addresses
 // @route   GET /api/users/addresses
 // @access  Private
@@ -362,6 +408,61 @@ exports.getUserStats = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error fetching user statistics',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Adjust user wallet balance (Admin)
+// @route   POST /api/users/admin/:id/wallet
+// @access  Private/Admin
+exports.adjustWalletBalance = async (req, res) => {
+    try {
+        const { amount, note } = req.body; // Amount can be positive or negative
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const adjustmentAmount = parseFloat(amount);
+        if (isNaN(adjustmentAmount)) {
+            return res.status(400).json({ success: false, message: 'Invalid amount' });
+        }
+
+        // Apply adjustment
+        user.balance = (user.balance || 0) + adjustmentAmount;
+
+        // Ensure balance does not go negative if you don't allow it. 
+        // For now, let's allow negative if admins specifically want it, or restrict to 0.
+        if (user.balance < 0) {
+            user.balance = 0; // Prevent negative balances
+        }
+
+        await user.save();
+
+        // Create transaction record
+        const Transaction = require('../models/Transaction');
+        await Transaction.create({
+            user: user._id,
+            amount: Math.abs(adjustmentAmount),
+            type: adjustmentAmount > 0 ? 'deposit' : 'debit',
+            paymentMethod: 'bank_transfer', // or create a 'manual' enum type if you added one, 'bank_transfer' works for now
+            status: 'completed',
+            description: `Admin Adjustment: ${note || (adjustmentAmount > 0 ? 'Manual Credit' : 'Manual Debit')}`
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `User balance adjusted by ${adjustmentAmount > 0 ? '+' : ''}${adjustmentAmount}€`,
+            newBalance: user.balance
+        });
+
+    } catch (error) {
+        console.error('Admin Wallet Adjustment error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error adjusting wallet balance',
             error: error.message
         });
     }

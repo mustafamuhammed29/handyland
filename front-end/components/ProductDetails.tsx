@@ -207,7 +207,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
         addToast(`${quantity}x ${product.model} added to cart`, 'success');
     };
 
-    if (loading) return <div className="min-h-screen pt-32 text-center text-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div></div>;
+    if (loading) return <div className="min-h-screen pt-32 text-center text-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div></div>;
     if (!product) return null;
 
     return (
@@ -231,7 +231,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                     className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200"
                     onClick={() => setIsLightboxOpen(false)}
                 >
-                    <button onClick={() => setIsLightboxOpen(false)} aria-label="Close lightbox" className="absolute top-8 right-8 text-white hover:text-cyan-400 transition-colors">
+                    <button onClick={() => setIsLightboxOpen(false)} aria-label="Close lightbox" className="absolute top-8 right-8 text-white hover:text-brand-primary transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -248,7 +248,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
             <div className="max-w-7xl mx-auto">
                 {/* Breadcrumbs */}
                 <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8">
-                    <button onClick={() => navigate('/marketplace')} className="hover:text-cyan-400 transition-colors">Marketplace</button>
+                    <button onClick={() => navigate('/marketplace')} className="hover:text-brand-primary transition-colors">Marketplace</button>
                     <ChevronRight className="w-4 h-4" />
                     <span className="text-slate-300">{product.brand || 'Brand'}</span>
                     <ChevronRight className="w-4 h-4" />
@@ -259,7 +259,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                     {/* Image Gallery */}
                     <div className="space-y-4">
                         <button
-                            className="aspect-square bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden relative group cursor-zoom-in w-full text-left focus:outline-none focus:ring-2 focus:ring-cyan-500 block"
+                            className="aspect-square bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden relative group cursor-zoom-in w-full text-left focus:outline-none focus:ring-2 focus:ring-brand-primary block"
                             onClick={() => setIsLightboxOpen(true)}
                             aria-label={`Enlarge image of ${product.model}`}
                         >
@@ -269,7 +269,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                 className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-105"
                             />
                             <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4">
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md ${product.condition === 'new' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'}`}>
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md ${product.condition === 'new' ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'}`}>
                                     {product.condition}
                                 </span>
                             </div>
@@ -285,7 +285,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                     key={idx}
                                     onClick={() => setActiveImage(img)}
                                     aria-label={`View image ${idx + 1}`}
-                                    className={`aspect-square rounded-xl border-2 overflow-hidden transition-all ${activeImage === img ? 'border-cyan-500 opacity-100' : 'border-slate-800 opacity-60 hover:opacity-100'}`}
+                                    className={`aspect-square rounded-xl border-2 overflow-hidden transition-all ${activeImage === img ? 'border-brand-primary opacity-100' : 'border-slate-800 opacity-60 hover:opacity-100'}`}
                                 >
                                     <img src={getImageUrl(img)} alt={`View ${idx}`} className="w-full h-full object-cover" />
                                 </button>
@@ -322,7 +322,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         </div>
 
                         <div className="flex items-end gap-3 mb-8">
-                            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-brand-secondary">
                                 {product.price}{t.currency}
                             </div>
                             {/* Stock Indicator */}
@@ -337,7 +337,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         {/* Quick Specs */}
                         <div className="grid grid-cols-2 gap-4 mb-8">
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800">
-                                <Cpu className="w-5 h-5 text-cyan-400" />
+                                <Cpu className="w-5 h-5 text-brand-primary" />
                                 <div>
                                     <div className="text-xs text-slate-500">Processor</div>
                                     <div className="text-sm font-bold text-slate-200">{product.specs?.cpu}</div>
@@ -435,7 +435,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                 aria-controls={`tabpanel-${tab}`}
                                 id={`tab-${tab}`}
                                 onClick={() => setActiveTab(tab as any)}
-                                className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === tab ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'}`}
+                                className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === tab ? 'text-brand-primary' : 'text-slate-500 hover:text-slate-300'}`}
                             >
                                 {tab}
                                 {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>}
@@ -447,7 +447,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                             aria-controls="tabpanel-questions"
                             id="tab-questions"
                             onClick={() => setActiveTab('questions')}
-                            className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === 'questions' ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'}`}
+                            className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === 'questions' ? 'text-brand-primary' : 'text-slate-500 hover:text-slate-300'}`}
                         >
                             Q&A
                             {activeTab === 'questions' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>}
@@ -464,7 +464,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {['Professional Inspection', 'New Battery Installed', 'Original Accessories', 'Sanitized & Cleaned'].map((feat, i) => (
                                         <li key={i} className="flex items-center gap-3 text-slate-300">
-                                            <div className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center"><Check className="w-3 h-3" /></div>
+                                            <div className="w-6 h-6 rounded-full bg-brand-primary/20 text-brand-primary flex items-center justify-center"><Check className="w-3 h-3" /></div>
                                             {feat}
                                         </li>
                                     ))}
@@ -550,12 +550,12 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         <h2 className="text-2xl font-bold text-white mb-8">You Might Also Like</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                             {relatedProducts.map((related) => (
-                                <div key={related.id} onClick={() => navigate(`/products/${related.id}`)} className="group cursor-pointer bg-slate-900/40 border border-slate-800 rounded-2xl p-4 transition-all hover:-translate-y-2 hover:border-cyan-500/50">
+                                <div key={related.id} onClick={() => navigate(`/products/${related.id}`)} className="group cursor-pointer bg-slate-900/40 border border-slate-800 rounded-2xl p-4 transition-all hover:-translate-y-2 hover:border-brand-primary/50">
                                     <div className="aspect-[4/5] bg-slate-900 rounded-xl overflow-hidden mb-4 relative">
                                         <img src={getImageUrl(related.imageUrl)} alt={related.model} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                                     </div>
                                     <h4 className="font-bold text-white mb-1 truncate">{related.model}</h4>
-                                    <div className="text-cyan-400 font-bold">{related.price}{t.currency}</div>
+                                    <div className="text-brand-primary font-bold">{related.price}{t.currency}</div>
                                 </div>
                             ))}
                         </div>
@@ -598,7 +598,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                     rows={4}
                                     value={newReview.comment}
                                     onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white focus:border-cyan-500 outline-none transition-colors"
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white focus:border-brand-primary outline-none transition-colors"
                                     placeholder="What do you think about this product?"
                                 />
                             </div>
@@ -613,7 +613,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                 <button
                                     type="submit"
                                     disabled={!newReview.comment.trim()}
-                                    className="flex-1 py-3 px-4 font-bold rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition-colors disabled:opacity-50"
+                                    className="flex-1 py-3 px-4 font-bold rounded-xl bg-brand-primary hover:bg-brand-primary text-white transition-colors disabled:opacity-50"
                                 >
                                     Submit
                                 </button>

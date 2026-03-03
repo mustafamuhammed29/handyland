@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-    User, Mail, Phone, MapPin, Bell, Shield,
-    CreditCard, Globe, Save, Eye, EyeOff
+    User, Mail, Phone, Bell, Shield, MapPin, Save, Eye, EyeOff,
+    Check, X, Loader2, Plus, Pencil, Trash2, Star, AlertCircle,
+    ShoppingBag, Wrench, Tag, Newspaper, Lock, ChevronRight
 } from 'lucide-react';
 import { User as UserType, Address } from '../../types';
+import { api } from '../../utils/api';
 
 interface DashboardSettingsProps {
     user: UserType;
@@ -15,6 +17,56 @@ interface DashboardSettingsProps {
     onDeleteAddress: (id: string) => void;
 }
 
+type Tab = 'profile' | 'security' | 'notifications' | 'addresses';
+
+const EMPTY_ADDRESS = { name: '', street: '', city: '', state: '', zipCode: '', country: '', isDefault: false };
+
+function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+    return (
+        <button
+            role="switch"
+            title={label}
+            aria-checked={checked ? 'true' : 'false'}
+            onClick={() => onChange(!checked)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-blue-600' : 'bg-slate-700'}`}
+        >
+            <span className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${checked ? 'translate-x-5' : 'translate-x-1'}`} />
+        </button>
+    );
+}
+
+function PasswordStrength({ password }: { password: string }) {
+    const checks = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[^A-Za-z0-9]/.test(password),
+    };
+    const score = Object.values(checks).filter(Boolean).length;
+    const bar = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-emerald-500'];
+    const label = ['Weak', 'Fair', 'Good', 'Strong'];
+    if (!password) return null;
+    return (
+        <div className="mt-2 space-y-2">
+            <div className="flex gap-1">
+                {[0, 1, 2, 3].map(i => (
+                    <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i < score ? bar[score - 1] : 'bg-slate-700'}`} />
+                ))}
+            </div>
+            <div className="flex gap-4 flex-wrap">
+                {Object.entries({ '8+ chars': checks.length, 'Uppercase': checks.uppercase, 'Number': checks.number, 'Symbol': checks.special }).map(([k, v]) => (
+                    <span key={k} className={`text-[11px] flex items-center gap-1 ${v ? 'text-emerald-400' : 'text-slate-500'}`}>
+                        {v ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />} {k}
+                    </span>
+                ))}
+            </div>
+            <p className={`text-xs font-medium ${bar[score - 1]?.replace('bg-', 'text-') || 'text-slate-500'}`}>
+                {score > 0 ? label[score - 1] : ''}
+            </p>
+        </div>
+    );
+}
+
 export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
     user,
     addresses,
@@ -24,457 +76,534 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
     onUpdateAddress,
     onDeleteAddress
 }) => {
-    const [activeSection, setActiveSection] = useState('profile');
-    const [showPassword, setShowPassword] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [showAddressModal, setShowAddressModal] = useState(false);
-    const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-    const [newAddress, setNewAddress] = useState({
-        name: '',
-        street: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: '',
-        isDefault: false
-    });
+    const [tab, setTab] = useState<Tab>('profile');
 
-    const [profileData, setProfileData] = useState({
-        name: user.name || '',
-        email: user.email || '',
-        phone: user.phone || ''
-    });
+    // ── Profile ──
+    const [profileForm, setProfileForm] = useState({ name: user.name || '', email: user.email || '', phone: (user as any).phone || '' });
+    const [profileSaving, setProfileSaving] = useState(false);
+    const [profileMsg, setProfileMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+    const [profileEditing, setProfileEditing] = useState(false);
 
-    const handleSaveProfile = () => {
-        onUpdateProfile(profileData);
-        setIsEditing(false);
-    };
+    useEffect(() => {
+        setProfileForm({ name: user.name || '', email: user.email || '', phone: (user as any).phone || '' });
+    }, [user]);
 
-    const handleSaveAddress = () => {
-        onAddAddress(newAddress);
-        setShowAddressModal(false);
-        setNewAddress({
-            name: '',
-            street: '',
-            city: '',
-            state: '',
-            zipCode: '',
-            country: '',
-            isDefault: false
-        });
-    };
-
-    const handleEditAddress = (address: Address) => {
-        setEditingAddress(address);
-        setNewAddress({
-            name: address.name || '',
-            street: address.street || '',
-            city: address.city || '',
-            state: address.state || '',
-            zipCode: address.zipCode || '',
-            country: address.country || '',
-            isDefault: address.isDefault || false
-        });
-        setShowAddressModal(true);
-    };
-
-    const handleUpdateAddress = () => {
-        if (editingAddress && editingAddress._id) {
-            onUpdateAddress(editingAddress._id, newAddress);
-            setShowAddressModal(false);
-            setEditingAddress(null);
-            setNewAddress({
-                name: '',
-                street: '',
-                city: '',
-                state: '',
-                zipCode: '',
-                country: '',
-                isDefault: false
-            });
+    const saveProfile = async () => {
+        setProfileSaving(true);
+        setProfileMsg(null);
+        try {
+            const res = await api.put('/api/users/profile', profileForm) as any;
+            onUpdateProfile(res?.user || res?.data || profileForm);
+            setProfileMsg({ type: 'ok', text: 'Profile updated successfully!' });
+            setProfileEditing(false);
+        } catch (err: any) {
+            setProfileMsg({ type: 'err', text: err?.response?.data?.message || 'Failed to update profile.' });
+        } finally {
+            setProfileSaving(false);
         }
     };
 
-    const handleDeleteAddress = (id: string) => {
-        if (confirm('Are you sure you want to delete this address?')) {
-            onDeleteAddress(id);
+    // ── Security ──
+    const [pwForm, setPwForm] = useState({ current: '', newPw: '', confirm: '' });
+    const [showPw, setShowPw] = useState({ current: false, new: false, confirm: false });
+    const [pwSaving, setPwSaving] = useState(false);
+    const [pwMsg, setPwMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+
+    const savePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setPwMsg(null);
+        if (pwForm.newPw !== pwForm.confirm) { setPwMsg({ type: 'err', text: 'New passwords do not match.' }); return; }
+        if (pwForm.newPw.length < 8) { setPwMsg({ type: 'err', text: 'Password must be at least 8 characters.' }); return; }
+        setPwSaving(true);
+        try {
+            await api.put('/api/users/change-password', { currentPassword: pwForm.current, newPassword: pwForm.newPw });
+            onUpdatePassword(pwForm.current, pwForm.newPw);
+            setPwMsg({ type: 'ok', text: 'Password updated successfully!' });
+            setPwForm({ current: '', newPw: '', confirm: '' });
+        } catch (err: any) {
+            setPwMsg({ type: 'err', text: err?.response?.data?.message || 'Failed to update password.' });
+        } finally {
+            setPwSaving(false);
         }
     };
 
-    const handleCloseModal = () => {
-        setShowAddressModal(false);
-        setEditingAddress(null);
-        setNewAddress({
-            name: '',
-            street: '',
-            city: '',
-            state: '',
-            zipCode: '',
-            country: '',
-            isDefault: false
-        });
+    // ── Notifications ──
+    const NOTIF_KEYS = ['orderUpdates', 'repairStatus', 'promotions', 'newsletter'] as const;
+    type NotifKey = typeof NOTIF_KEYS[number];
+    const NOTIF_ITEMS: { key: NotifKey; label: string; desc: string; icon: React.ReactNode; def: boolean }[] = [
+        { key: 'orderUpdates', label: 'Order Updates', desc: 'Get notified when your order status changes', icon: <ShoppingBag className="w-5 h-5" />, def: true },
+        { key: 'repairStatus', label: 'Repair Status', desc: 'Updates on your repair and service tickets', icon: <Wrench className="w-5 h-5" />, def: true },
+        { key: 'promotions', label: 'Promotions & Deals', desc: 'Special offers and exclusive discounts', icon: <Tag className="w-5 h-5" />, def: false },
+        { key: 'newsletter', label: 'Newsletter', desc: 'Weekly product updates and news', icon: <Newspaper className="w-5 h-5" />, def: false },
+    ];
+
+    const [notifs, setNotifs] = useState<Record<NotifKey, boolean>>({
+        orderUpdates: true, repairStatus: true, promotions: false, newsletter: false
+    });
+    const [notifLoading, setNotifLoading] = useState(true);
+    const [notifSaving, setNotifSaving] = useState(false);
+    const [notifSaved, setNotifSaved] = useState(false);
+    const [notifError, setNotifError] = useState<string | null>(null);
+    const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Load from server when notifications tab opens
+    useEffect(() => {
+        if (tab !== 'notifications') return;
+        setNotifLoading(true);
+        api.get('/api/users/notifications')
+            .then((res: any) => {
+                const prefs = res?.data || res;
+                setNotifs(prev => ({ ...prev, ...(prefs || {}) }));
+            })
+            .catch(() => { /* use defaults silently */ })
+            .finally(() => setNotifLoading(false));
+    }, [tab]);
+
+    const saveNotifsToServer = async (updated: Record<NotifKey, boolean>) => {
+        setNotifSaving(true);
+        setNotifError(null);
+        try {
+            await api.put('/api/users/notifications', updated);
+            setNotifSaved(true);
+            setTimeout(() => setNotifSaved(false), 2500);
+        } catch {
+            setNotifError('Failed to save. Will retry on next change.');
+        } finally {
+            setNotifSaving(false);
+        }
     };
+
+    const toggleNotif = (key: NotifKey, val: boolean) => {
+        const updated = { ...notifs, [key]: val };
+        setNotifs(updated);
+        // Also keep localStorage as local cache
+        localStorage.setItem('notifPrefs', JSON.stringify(updated));
+        // Debounce: wait 600ms after last toggle before saving
+        if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = setTimeout(() => saveNotifsToServer(updated), 600);
+    };
+
+    // ── Addresses ──
+    const [showAddrModal, setShowAddrModal] = useState(false);
+    const [editingAddr, setEditingAddr] = useState<Address | null>(null);
+    const [addrForm, setAddrForm] = useState<typeof EMPTY_ADDRESS>({ ...EMPTY_ADDRESS });
+    const [addrSaving, setAddrSaving] = useState(false);
+
+    const openAddAddr = () => { setEditingAddr(null); setAddrForm({ ...EMPTY_ADDRESS }); setShowAddrModal(true); };
+    const openEditAddr = (a: Address) => {
+        setEditingAddr(a);
+        setAddrForm({ name: a.name || '', street: a.street || '', city: a.city || '', state: a.state || '', zipCode: a.zipCode || (a as any).postalCode || '', country: a.country || '', isDefault: a.isDefault || false });
+        setShowAddrModal(true);
+    };
+    const closeAddrModal = () => { setShowAddrModal(false); setEditingAddr(null); setAddrForm({ ...EMPTY_ADDRESS }); };
+
+    const submitAddr = async () => {
+        setAddrSaving(true);
+        try {
+            if (editingAddr && editingAddr._id) {
+                onUpdateAddress(editingAddr._id, addrForm);
+            } else {
+                onAddAddress(addrForm);
+            }
+            closeAddrModal();
+        } finally {
+            setAddrSaving(false);
+        }
+    };
+
+    const deleteAddr = (id: string) => { if (window.confirm('Delete this address?')) onDeleteAddress(id); };
+
+    const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+        { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
+        { id: 'security', label: 'Security', icon: <Shield className="w-4 h-4" /> },
+        { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
+        { id: 'addresses', label: 'Addresses', icon: <MapPin className="w-4 h-4" /> },
+    ];
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Settings</h2>
+            <div>
+                <h2 className="text-2xl font-bold text-white">Account Settings</h2>
+                <p className="text-slate-400 text-sm mt-1">Manage your profile, security and preferences.</p>
+            </div>
 
-            {/* Settings Navigation */}
-            <div className="flex gap-2 overflow-x-auto pb-2">
-                {[
-                    { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
-                    { id: 'security', label: 'Security', icon: <Shield className="w-4 h-4" /> },
-                    { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
-                    { id: 'addresses', label: 'Addresses', icon: <MapPin className="w-4 h-4" /> },
-                ].map(section => (
-                    <button
-                        key={section.id}
-                        onClick={() => setActiveSection(section.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${activeSection === section.id
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-800 text-slate-400 hover:text-white'
-                            }`}
+            {/* Tab Bar */}
+            <div className="flex gap-2 overflow-x-auto pb-1">
+                {TABS.map(t => (
+                    <button key={t.id} onClick={() => setTab(t.id)}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${tab === t.id
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30'
+                            : 'bg-slate-800/60 border border-slate-700/40 text-slate-400 hover:text-white hover:bg-slate-800'}`}
                     >
-                        {section.icon}
-                        {section.label}
+                        {t.icon} {t.label}
                     </button>
                 ))}
             </div>
 
-            {/* Profile Section */}
-            {activeSection === 'profile' && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-bold text-white">Profile Information</h3>
-                        {!isEditing ? (
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-                            >
-                                Edit
+            {/* ──────────── PROFILE ──────────── */}
+            {tab === 'profile' && (
+                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+                    <div className="p-6 border-b border-slate-800/60 flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Profile Information</h3>
+                            <p className="text-slate-400 text-sm mt-0.5">Update your personal details</p>
+                        </div>
+                        {!profileEditing ? (
+                            <button onClick={() => setProfileEditing(true)}
+                                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 bg-blue-400/5 hover:bg-blue-400/10 px-3 py-1.5 rounded-xl transition-colors border border-blue-400/20">
+                                <Pencil className="w-3.5 h-3.5" /> Edit
                             </button>
                         ) : (
                             <div className="flex gap-2">
-                                <button
-                                    onClick={() => setIsEditing(false)}
-                                    className="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm"
-                                >
+                                <button onClick={() => { setProfileEditing(false); setProfileForm({ name: user.name || '', email: user.email || '', phone: (user as any).phone || '' }); setProfileMsg(null); }}
+                                    className="px-3 py-1.5 text-sm rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors">
                                     Cancel
                                 </button>
-                                <button
-                                    onClick={handleSaveProfile}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold flex items-center gap-2"
-                                >
-                                    <Save className="w-4 h-4" />
+                                <button onClick={saveProfile} disabled={profileSaving}
+                                    className="flex items-center gap-2 px-4 py-1.5 text-sm rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold disabled:opacity-50 transition-colors">
+                                    {profileSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                                     Save
                                 </button>
                             </div>
                         )}
                     </div>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-2">
-                                <User className="w-4 h-4 inline mr-2" />
-                                Full Name
-                            </label>
-                            <input
-                                type="text"
-                                value={profileData.name}
-                                onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                                disabled={!isEditing}
-                                aria-label="Full Name"
-                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white disabled:opacity-50"
-                            />
+                    <div className="p-6 space-y-5">
+                        {/* Avatar */}
+                        <div className="flex items-center gap-4 mb-2">
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-900/20 select-none">
+                                {(profileForm.name || user.name || '?').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p className="text-white font-bold">{user.name}</p>
+                                <p className="text-slate-400 text-sm">{user.email}</p>
+                                <p className="text-blue-400/70 text-xs mt-0.5">Member since {new Date((user as any).createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-2">
-                                <Mail className="w-4 h-4 inline mr-2" />
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                value={profileData.email}
-                                onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                                disabled={!isEditing}
-                                aria-label="Email Address"
-                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white disabled:opacity-50"
-                            />
-                        </div>
+                        {profileMsg && (
+                            <div className={`flex items-center gap-2 p-3 rounded-xl text-sm ${profileMsg.type === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                {profileMsg.type === 'ok' ? <Check className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+                                {profileMsg.text}
+                            </div>
+                        )}
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-2">
-                                <Phone className="w-4 h-4 inline mr-2" />
-                                Phone Number
-                            </label>
-                            <input
-                                type="tel"
-                                value={profileData.phone}
-                                onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                                disabled={!isEditing}
-                                aria-label="Phone Number"
-                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white disabled:opacity-50"
-                            />
-                        </div>
+                        {[
+                            { id: 'name', label: 'Full Name', icon: <User className="w-4 h-4" />, type: 'text', key: 'name' as const, placeholder: 'John Doe' },
+                            { id: 'email', label: 'Email Address', icon: <Mail className="w-4 h-4" />, type: 'email', key: 'email' as const, placeholder: 'john@example.com' },
+                            { id: 'phone', label: 'Phone Number', icon: <Phone className="w-4 h-4" />, type: 'tel', key: 'phone' as const, placeholder: '+1 234 567 890' },
+                        ].map(f => (
+                            <div key={f.id}>
+                                <label htmlFor={`profile-${f.id}`} className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
+                                    <span className="text-slate-500">{f.icon}</span> {f.label}
+                                </label>
+                                <input
+                                    id={`profile-${f.id}`}
+                                    type={f.type}
+                                    value={profileForm[f.key]}
+                                    onChange={e => setProfileForm(p => ({ ...p, [f.key]: e.target.value }))}
+                                    disabled={!profileEditing}
+                                    placeholder={f.placeholder}
+                                    className={`w-full px-4 py-3 rounded-xl text-white text-sm outline-none transition-all ${profileEditing
+                                        ? 'bg-slate-800 border border-slate-600 focus:border-blue-500 cursor-text'
+                                        : 'bg-slate-800/40 border border-slate-800 cursor-default text-slate-300'}`}
+                                />
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
 
-            {/* Security Section */}
-            {activeSection === 'security' && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-                    <h3 className="text-xl font-bold text-white mb-6">Security Settings</h3>
+            {/* ──────────── SECURITY ──────────── */}
+            {tab === 'security' && (
+                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+                    <div className="p-6 border-b border-slate-800/60">
+                        <h3 className="text-lg font-bold text-white">Change Password</h3>
+                        <p className="text-slate-400 text-sm mt-0.5">Use a strong, unique password for your account</p>
+                    </div>
+                    <form onSubmit={savePassword} className="p-6 space-y-5">
+                        {pwMsg && (
+                            <div className={`flex items-center gap-2 p-3 rounded-xl text-sm ${pwMsg.type === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                {pwMsg.type === 'ok' ? <Check className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+                                {pwMsg.text}
+                            </div>
+                        )}
 
-                    <div className="space-y-4">
+                        {/* Current password */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-2">
-                                Current Password
+                            <label htmlFor="pw-current" className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
+                                <Lock className="w-4 h-4 text-slate-500" /> Current Password
                             </label>
                             <div className="relative">
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    aria-label="Current Password"
-                                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white pr-12"
-                                />
-                                <button
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                                >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                <input id="pw-current" type={showPw.current ? 'text' : 'password'} required value={pwForm.current}
+                                    onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))}
+                                    placeholder="••••••••"
+                                    className="w-full px-4 py-3 pr-12 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-blue-500 transition-colors" />
+                                <button type="button" onClick={() => setShowPw(p => ({ ...p, current: !p.current }))}
+                                    aria-label="Toggle current password visibility"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors">
+                                    {showPw.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
                         </div>
 
+                        {/* New password */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-2">
-                                New Password
+                            <label htmlFor="pw-new" className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
+                                <Lock className="w-4 h-4 text-slate-500" /> New Password
                             </label>
-                            <input
-                                type="password"
-                                aria-label="New Password"
-                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
-                            />
+                            <div className="relative">
+                                <input id="pw-new" type={showPw.new ? 'text' : 'password'} required value={pwForm.newPw}
+                                    onChange={e => setPwForm(p => ({ ...p, newPw: e.target.value }))}
+                                    placeholder="Min. 8 characters"
+                                    className="w-full px-4 py-3 pr-12 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-blue-500 transition-colors" />
+                                <button type="button" onClick={() => setShowPw(p => ({ ...p, new: !p.new }))}
+                                    aria-label="Toggle new password visibility"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors">
+                                    {showPw.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                            <PasswordStrength password={pwForm.newPw} />
                         </div>
 
+                        {/* Confirm password */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-2">
-                                Confirm New Password
+                            <label htmlFor="pw-confirm" className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
+                                <Lock className="w-4 h-4 text-slate-500" /> Confirm New Password
                             </label>
-                            <input
-                                type="password"
-                                aria-label="Confirm New Password"
-                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white"
-                            />
+                            <div className="relative">
+                                <input id="pw-confirm" type={showPw.confirm ? 'text' : 'password'} required value={pwForm.confirm}
+                                    onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
+                                    placeholder="••••••••"
+                                    className={`w-full px-4 py-3 pr-12 bg-slate-800 border rounded-xl text-white text-sm outline-none transition-colors ${pwForm.confirm && pwForm.newPw !== pwForm.confirm ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`} />
+                                <button type="button" onClick={() => setShowPw(p => ({ ...p, confirm: !p.confirm }))}
+                                    aria-label="Toggle confirm password visibility"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors">
+                                    {showPw.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                            {pwForm.confirm && pwForm.newPw !== pwForm.confirm && (
+                                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><X className="w-3 h-3" /> Passwords do not match</p>
+                            )}
+                            {pwForm.confirm && pwForm.newPw === pwForm.confirm && pwForm.confirm.length > 0 && (
+                                <p className="text-emerald-400 text-xs mt-1 flex items-center gap-1"><Check className="w-3 h-3" /> Passwords match</p>
+                            )}
                         </div>
 
-                        <button className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition-colors mt-6">
+                        <button type="submit" disabled={pwSaving || !pwForm.current || !pwForm.newPw || !pwForm.confirm}
+                            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-900/20">
+                            {pwSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
                             Update Password
                         </button>
-                    </div>
+                    </form>
                 </div>
             )}
 
-            {/* Notifications Section */}
-            {activeSection === 'notifications' && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-                    <h3 className="text-xl font-bold text-white mb-6">Notification Preferences</h3>
+            {tab === 'notifications' && (
+                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+                    <div className="p-6 border-b border-slate-800/60 flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Notification Preferences</h3>
+                            <p className="text-slate-400 text-sm mt-0.5">Choose what you want to be notified about</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {notifSaving && (
+                                <span className="flex items-center gap-1 text-slate-400 text-xs">
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
+                                </span>
+                            )}
+                            {notifSaved && !notifSaving && (
+                                <span className="flex items-center gap-1 text-emerald-400 text-xs font-medium">
+                                    <Check className="w-3.5 h-3.5" /> Saved to account
+                                </span>
+                            )}
+                        </div>
+                    </div>
 
-                    <div className="space-y-4">
-                        {[
-                            { label: 'Order Updates', description: 'Get notified about your order status' },
-                            { label: 'Repair Status', description: 'Updates on your repair tickets' },
-                            { label: 'Promotions', description: 'Receive special offers and deals' },
-                            { label: 'Newsletter', description: 'Weekly newsletter and product updates' },
-                        ].map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl">
-                                <div>
-                                    <p className="text-white font-medium">{item.label}</p>
-                                    <p className="text-sm text-slate-400">{item.description}</p>
+                    {notifError && (
+                        <div className="mx-4 mt-4 flex items-center gap-2 p-3 rounded-xl text-sm bg-red-500/10 text-red-400 border border-red-500/20">
+                            <AlertCircle className="w-4 h-4 flex-shrink-0" /> {notifError}
+                        </div>
+                    )}
+
+                    <div className="divide-y divide-slate-800/60">
+                        {notifLoading ? (
+                            // Skeleton loader
+                            [1, 2, 3, 4].map(i => (
+                                <div key={i} className="flex items-center justify-between p-5">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-800 animate-pulse" />
+                                        <div className="space-y-2">
+                                            <div className="w-28 h-3 bg-slate-800 rounded animate-pulse" />
+                                            <div className="w-44 h-2.5 bg-slate-800/60 rounded animate-pulse" />
+                                        </div>
+                                    </div>
+                                    <div className="w-11 h-6 bg-slate-800 rounded-full animate-pulse" />
                                 </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" aria-label={item.label} className="sr-only peer" defaultChecked={idx < 2} />
-                                    <div className="w-11 h-6 bg-slate-700 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            NOTIF_ITEMS.map(item => (
+                                <div key={item.key} className="flex items-center justify-between p-5 hover:bg-slate-800/20 transition-colors">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${notifs[item.key] ? 'bg-blue-600/20 text-blue-400' : 'bg-slate-800 text-slate-500'}`}>
+                                            {item.icon}
+                                        </div>
+                                        <div>
+                                            <p className="text-white font-semibold text-sm">{item.label}</p>
+                                            <p className="text-slate-400 text-xs mt-0.5">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                    <ToggleSwitch
+                                        checked={notifs[item.key]}
+                                        onChange={v => toggleNotif(item.key, v)}
+                                        label={item.label}
+                                    />
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    <div className="p-4 border-t border-slate-800/60 bg-slate-950/30">
+                        <p className="text-slate-500 text-xs text-center">Changes are saved automatically to your account across all devices.</p>
                     </div>
                 </div>
             )}
 
-            {/* Addresses Section */}
-            {activeSection === 'addresses' && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-bold text-white">Saved Addresses</h3>
-                        <button
-                            onClick={() => setShowAddressModal(true)}
-                            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-                        >
-                            + Add New
+            {/* ──────────── ADDRESSES ──────────── */}
+            {tab === 'addresses' && (
+                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+                    <div className="p-6 border-b border-slate-800/60 flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Saved Addresses</h3>
+                            <p className="text-slate-400 text-sm mt-0.5">{addresses.length} address{addresses.length !== 1 ? 'es' : ''} saved</p>
+                        </div>
+                        <button onClick={openAddAddr}
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors shadow-md shadow-blue-900/20">
+                            <Plus className="w-4 h-4" /> Add Address
                         </button>
                     </div>
 
-                    <div className="space-y-3">
-                        {addresses.map((address, idx) => (
-                            <div key={idx} className="p-4 bg-slate-800/30 rounded-xl">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                        <p className="text-white font-medium">{address.name}</p>
-                                        <p className="text-sm text-slate-400 mt-1">
-                                            {address.street}, {address.city}, {address.postalCode}
-                                        </p>
-                                        <p className="text-sm text-slate-400">{address.phone}</p>
+                    <div className="p-4 space-y-3">
+                        {addresses.length === 0 ? (
+                            <div className="flex flex-col items-center py-12 text-slate-500 gap-3">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-800/60 flex items-center justify-center">
+                                    <MapPin className="w-7 h-7 opacity-40" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="font-medium text-slate-400">No saved addresses yet</p>
+                                    <p className="text-sm text-slate-500 mt-1">Add a shipping address for faster checkout</p>
+                                </div>
+                                <button onClick={openAddAddr}
+                                    className="mt-2 flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 border border-blue-500/30 hover:border-blue-400/50 px-4 py-2 rounded-xl transition-colors">
+                                    <Plus className="w-4 h-4" /> Add your first address
+                                </button>
+                            </div>
+                        ) : (
+                            addresses.map(addr => (
+                                <div key={addr._id} className={`relative p-4 rounded-xl border transition-all ${addr.isDefault ? 'border-blue-600/50 bg-blue-900/10' : 'border-slate-800 bg-slate-800/30 hover:border-slate-700'}`}>
+                                    {addr.isDefault && (
+                                        <span className="absolute top-3 right-3 flex items-center gap-1 text-[10px] bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20 font-bold">
+                                            <Star className="w-2.5 h-2.5" /> Default
+                                        </span>
+                                    )}
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <MapPin className="w-4 h-4 text-slate-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0 pr-16">
+                                            <p className="text-white font-bold text-sm">{addr.name}</p>
+                                            <p className="text-slate-400 text-sm mt-0.5">
+                                                {addr.street}, {addr.city}
+                                                {(addr as any).postalCode || addr.zipCode ? `, ${(addr as any).postalCode || addr.zipCode}` : ''}
+                                                {addr.country ? `, ${addr.country}` : ''}
+                                            </p>
+                                            {(addr as any).phone && <p className="text-slate-500 text-xs mt-1">{(addr as any).phone}</p>}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        {address.isDefault && (
-                                            <span className="text-xs bg-blue-600/20 text-blue-400 px-2 py-1 rounded">
-                                                Default
-                                            </span>
-                                        )}
-                                        <button
-                                            onClick={() => handleEditAddress(address)}
-                                            className="px-3 py-1.5 text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-lg transition-colors"
-                                        >
-                                            Edit
+                                    <div className="flex gap-2 mt-3 ml-12">
+                                        <button onClick={() => openEditAddr(addr)}
+                                            className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 bg-blue-400/5 hover:bg-blue-400/10 px-3 py-1.5 rounded-lg transition-colors border border-blue-400/15">
+                                            <Pencil className="w-3 h-3" /> Edit
                                         </button>
-                                        <button
-                                            onClick={() => address._id && handleDeleteAddress(address._id)}
-                                            className="px-3 py-1.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors"
-                                        >
-                                            Delete
+                                        <button onClick={() => addr._id && deleteAddr(addr._id)}
+                                            className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 bg-red-400/5 hover:bg-red-400/10 px-3 py-1.5 rounded-lg transition-colors border border-red-400/15">
+                                            <Trash2 className="w-3 h-3" /> Delete
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                        {addresses.length === 0 && (
-                            <div className="text-center py-8 text-slate-500">
-                                <MapPin className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                <p>No saved addresses</p>
-                            </div>
+                            ))
                         )}
                     </div>
-
-                    {/* Address Modal */}
-                    {showAddressModal && (
-                        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                            <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full">
-                                <h4 className="text-xl font-bold text-white mb-4">
-                                    {editingAddress ? 'Edit Address' : 'Add New Address'}
-                                </h4>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-400 mb-2">Recipient Name</label>
-                                        <input
-                                            type="text"
-                                            value={newAddress.name}
-                                            onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                                            aria-label="Recipient Name"
-                                            className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
-                                            placeholder="John Doe"
-                                            title="Recipient Name"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-400 mb-2">Street Address</label>
-                                        <input
-                                            type="text"
-                                            value={newAddress.street}
-                                            onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
-                                            aria-label="Street Address"
-                                            className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
-                                            placeholder="123 Main St"
-                                            title="Street Address"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-slate-400 mb-2">City</label>
-                                            <input
-                                                type="text"
-                                                value={newAddress.city}
-                                                onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                                                aria-label="City"
-                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
-                                                placeholder="Berlin"
-                                                title="City"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-slate-400 mb-2">State</label>
-                                            <input
-                                                type="text"
-                                                value={newAddress.state}
-                                                onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
-                                                aria-label="State"
-                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
-                                                placeholder="BE"
-                                                title="State"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-slate-400 mb-2">Zip Code</label>
-                                            <input
-                                                type="text"
-                                                value={newAddress.zipCode}
-                                                onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
-                                                aria-label="Zip Code"
-                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
-                                                placeholder="10115"
-                                                title="Zip Code"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-slate-400 mb-2">Country</label>
-                                            <input
-                                                type="text"
-                                                value={newAddress.country}
-                                                onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
-                                                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500"
-                                                placeholder="Germany"
-                                                title="Country"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={newAddress.isDefault}
-                                            onChange={(e) => setNewAddress({ ...newAddress, isDefault: e.target.checked })}
-                                            aria-label="Set as default address"
-                                            className="w-4 h-4 text-blue-600 rounded"
-                                        />
-                                        <span className="text-sm text-slate-300">Set as default address</span>
-                                    </label>
-                                </div>
-
-                                <div className="flex gap-3 mt-6">
-                                    <button
-                                        onClick={handleCloseModal}
-                                        className="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl font-medium hover:bg-slate-700 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={editingAddress ? handleUpdateAddress : handleSaveAddress}
-                                        className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors"
-                                    >
-                                        {editingAddress ? 'Update Address' : 'Save Address'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div >
-                    )}
-                </div >
+                </div>
             )}
-        </div >
+
+            {/* ──────────── ADDRESS MODAL ──────────── */}
+            {showAddrModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                    <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[90vh]">
+                        <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+                            <h4 className="text-white font-bold">{editingAddr ? 'Edit Address' : 'Add New Address'}</h4>
+                            <button onClick={closeAddrModal} aria-label="Close modal" className="text-slate-400 hover:text-white hover:bg-slate-800 p-2 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="overflow-y-auto p-6 space-y-4 flex-1">
+                            {[
+                                { id: 'addr-name', label: 'Recipient Name', field: 'name' as const, placeholder: 'John Doe' },
+                                { id: 'addr-street', label: 'Street Address', field: 'street' as const, placeholder: '123 Main St' },
+                            ].map(f => (
+                                <div key={f.id}>
+                                    <label htmlFor={f.id} className="block text-sm font-medium text-slate-400 mb-1.5">{f.label}</label>
+                                    <input id={f.id} type="text" placeholder={f.placeholder} value={(addrForm as any)[f.field]}
+                                        onChange={e => setAddrForm(p => ({ ...p, [f.field]: e.target.value }))}
+                                        className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-blue-500 placeholder:text-slate-600 transition-colors" />
+                                </div>
+                            ))}
+                            <div className="grid grid-cols-2 gap-3">
+                                {[
+                                    { id: 'addr-city', label: 'City', field: 'city' as const, placeholder: 'Berlin' },
+                                    { id: 'addr-state', label: 'State / Region', field: 'state' as const, placeholder: 'BE' },
+                                ].map(f => (
+                                    <div key={f.id}>
+                                        <label htmlFor={f.id} className="block text-sm font-medium text-slate-400 mb-1.5">{f.label}</label>
+                                        <input id={f.id} type="text" placeholder={f.placeholder} value={(addrForm as any)[f.field]}
+                                            onChange={e => setAddrForm(p => ({ ...p, [f.field]: e.target.value }))}
+                                            className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-blue-500 placeholder:text-slate-600 transition-colors" />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                {[
+                                    { id: 'addr-zip', label: 'ZIP / Postal Code', field: 'zipCode' as const, placeholder: '10115' },
+                                    { id: 'addr-country', label: 'Country', field: 'country' as const, placeholder: 'Germany' },
+                                ].map(f => (
+                                    <div key={f.id}>
+                                        <label htmlFor={f.id} className="block text-sm font-medium text-slate-400 mb-1.5">{f.label}</label>
+                                        <input id={f.id} type="text" placeholder={f.placeholder} value={(addrForm as any)[f.field]}
+                                            onChange={e => setAddrForm(p => ({ ...p, [f.field]: e.target.value }))}
+                                            className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-blue-500 placeholder:text-slate-600 transition-colors" />
+                                    </div>
+                                ))}
+                            </div>
+                            <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-700 hover:border-blue-500/40 cursor-pointer transition-colors">
+                                <div onClick={() => setAddrForm(p => ({ ...p, isDefault: !p.isDefault }))}
+                                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${addrForm.isDefault ? 'bg-blue-600 border-blue-600' : 'border-slate-600'}`}>
+                                    {addrForm.isDefault && <Check className="w-3 h-3 text-white" />}
+                                </div>
+                                <div>
+                                    <p className="text-sm text-white font-medium">Set as default address</p>
+                                    <p className="text-xs text-slate-400">Used automatically at checkout</p>
+                                </div>
+                            </label>
+                        </div>
+                        <div className="px-6 py-4 border-t border-slate-800 flex gap-3">
+                            <button onClick={closeAddrModal} className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 text-sm font-medium transition-colors">
+                                Cancel
+                            </button>
+                            <button onClick={submitAddr} disabled={addrSaving || !addrForm.name || !addrForm.street || !addrForm.city}
+                                className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-md shadow-blue-900/20">
+                                {addrSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : editingAddr ? <><Save className="w-4 h-4" /> Update</> : <><Plus className="w-4 h-4" /> Save Address</>}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };

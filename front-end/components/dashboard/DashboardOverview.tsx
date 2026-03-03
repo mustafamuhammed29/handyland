@@ -46,7 +46,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             value: totalOrders.toString(),
             change: `${pendingOrders} pending`,
             icon: <Package className="w-6 h-6" />,
-            color: 'from-blue-600 to-blue-500',
+            color: 'from-blue-600 to-brand-secondary',
         },
         {
             label: 'Active Repairs',
@@ -67,7 +67,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             value: completedOrders.toString(),
             change: `${((completedOrders / Math.max(totalOrders, 1)) * 100).toFixed(0)}% rate`,
             icon: <Activity className="w-6 h-6" />,
-            color: 'from-cyan-600 to-cyan-500',
+            color: 'from-brand-primary to-cyan-500',
         },
     ];
 
@@ -128,7 +128,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* Quick Actions */}
             <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
                 <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-cyan-400" />
+                    <Activity className="w-5 h-5 text-brand-primary" />
                     Quick Actions
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -151,7 +151,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* Recent Activity — combined orders + repairs + valuations */}
             <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
                 <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-cyan-400" />
+                    <Activity className="w-5 h-5 text-brand-primary" />
                     Letzte Aktivitäten
                 </h3>
                 <div className="space-y-3">
@@ -171,8 +171,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             })),
                             ...repairs.slice(0, 2).map((r: any) => ({
                                 key: `repair-${r.id}`,
-                                icon: <Wrench className="w-5 h-5 text-cyan-400" />,
-                                iconBg: 'bg-cyan-600/20',
+                                icon: <Wrench className="w-5 h-5 text-brand-primary" />,
+                                iconBg: 'bg-brand-primary/20',
                                 title: `Reparatur: ${r.device}`,
                                 sub: r.issue || 'Reparaturticket',
                                 badge: r.status,
