@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { LanguageCode } from '../types';
-import { Upload, Camera, Tag, Smartphone, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { Upload, Camera, Tag, Smartphone, CheckCircle2, AlertCircle, ArrowRight, Loader2, TrendingUp, DollarSign, Package } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import { RevenueChart } from './dashboard/RevenueChart';
 
 interface SellerStudioProps {
     lang: LanguageCode;
@@ -31,6 +32,17 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
         }, 2000);
     };
 
+    // Mock Analytics Data
+    const revenueData = [
+        { date: '1 Mar', earnings: 120 },
+        { date: '5 Mar', earnings: 450 },
+        { date: '10 Mar', earnings: 300 },
+        { date: '15 Mar', earnings: 850 },
+        { date: '20 Mar', earnings: 600 },
+        { date: '25 Mar', earnings: 1100 },
+        { date: '30 Mar', earnings: 950 },
+    ];
+
     return (
         <div className="min-h-screen pt-28 pb-12 px-4 max-w-4xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
@@ -42,6 +54,41 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
                     <p className="text-slate-400">Turn your tech into cash.</p>
                 </div>
             </div>
+
+            {/* Analytics Overview Section */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+                <div className="md:col-span-2 bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                            <TrendingUp className="w-5 h-5 text-brand-primary" /> Revenue (Last 30 Days)
+                        </h2>
+                        <span className="text-emerald-400 text-sm font-bold bg-emerald-500/10 px-3 py-1 rounded-full">+24%</span>
+                    </div>
+                    <RevenueChart data={revenueData} height={250} />
+                </div>
+
+                <div className="space-y-6">
+                    <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 border border-brand-primary/20 rounded-3xl p-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-brand-primary/10 blur-2xl rounded-full"></div>
+                        <div className="w-10 h-10 bg-brand-primary/20 rounded-xl flex items-center justify-center mb-4 text-brand-primary">
+                            <DollarSign className="w-5 h-5" />
+                        </div>
+                        <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Total Earned</p>
+                        <p className="text-3xl font-black text-white mt-1">€4,370<span className="text-lg text-slate-500">.00</span></p>
+                    </div>
+
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+                        <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center mb-4 text-slate-400">
+                            <Package className="w-5 h-5" />
+                        </div>
+                        <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Active Listings</p>
+                        <p className="text-3xl font-black text-white mt-1">12</p>
+                        <p className="text-xs text-slate-500 mt-2">3 pending valuations</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 className="text-2xl font-bold text-white mb-6">Create New Listing</h2>
 
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden relative">
                 {/* Progress Bar */}

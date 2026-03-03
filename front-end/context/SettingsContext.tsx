@@ -131,7 +131,26 @@ interface Settings {
         google?: boolean;
         facebook?: boolean;
     };
+    theme?: {
+        primaryColor?: string;
+        secondaryColor?: string;
+    };
     freeShippingThreshold?: number;
+    payment?: {
+        stripe?: {
+            enabled: boolean;
+            publishableKey: string;
+        };
+        paypal?: {
+            enabled: boolean;
+            clientId: string;
+            mode: 'sandbox' | 'live';
+        };
+        bankTransfer?: {
+            enabled: boolean;
+            instructions: string;
+        };
+    };
 }
 
 interface SettingsContextType {
@@ -240,6 +259,10 @@ const defaultSettings: Settings = {
     socialAuth: {
         google: false,
         facebook: false
+    },
+    theme: {
+        primaryColor: '#06b6d4', // cyan-500
+        secondaryColor: '#3b82f6' // blue-500
     }
 };
 
@@ -270,6 +293,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     footerSection: { ...defaultSettings.footerSection, ...(parsed.footerSection || {}) },
                     navbar: { ...defaultSettings.navbar, ...(parsed.navbar || {}) },
                     socialAuth: { ...defaultSettings.socialAuth, ...(parsed.socialAuth || {}) },
+                    theme: { ...defaultSettings.theme, ...(parsed.theme || {}) },
                     announcementBanner: { ...defaultSettings.announcementBanner, ...(parsed.announcementBanner || {}) },
                     promoPopup: { ...defaultSettings.promoPopup, ...(parsed.promoPopup || {}) },
                 };
@@ -293,6 +317,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [error, setError] = useState(false);
     const { addToast } = useToast();
 
+    // Inject dynamic CSS variables into document root whenever theme settings change
+    useEffect(() => {
+        if (settings.theme) {
+            const root = document.documentElement;
+            if (settings.theme.primaryColor) {
+                root.style.setProperty('--color-primary', settings.theme.primaryColor);
+            }
+            if (settings.theme.secondaryColor) {
+                root.style.setProperty('--color-secondary', settings.theme.secondaryColor);
+            }
+        }
+    }, [settings.theme]);
+
     useEffect(() => {
         const fetchSettings = async (isBackgroundPolling = false) => {
             try {
@@ -313,6 +350,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     footerSection: { ...defaultSettings.footerSection, ...(safeData.footerSection || {}) },
                     navbar: { ...defaultSettings.navbar, ...(safeData.navbar || {}) },
                     socialAuth: { ...defaultSettings.socialAuth, ...(safeData.socialAuth || {}) },
+                    theme: { ...defaultSettings.theme, ...(safeData.theme || {}) },
                     announcementBanner: { ...defaultSettings.announcementBanner, ...(safeData.announcementBanner || {}) },
                     promoPopup: { ...defaultSettings.promoPopup, ...(safeData.promoPopup || {}) },
                 };
@@ -373,6 +411,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 footerSection: { ...prev.footerSection, ...(freshData.footerSection || {}) },
                 navbar: { ...prev.navbar, ...(freshData.navbar || {}) },
                 socialAuth: { ...prev.socialAuth, ...(freshData.socialAuth || {}) },
+                theme: { ...prev.theme, ...(freshData.theme || {}) },
             }));
 
             addToast('Settings updated', 'success');

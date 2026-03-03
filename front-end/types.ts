@@ -133,7 +133,9 @@ export interface Order {
   amount?: number; // Legacy or alternative
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'return_requested' | 'returned';
   createdAt: string;
+  updatedAt?: string;
   date?: string; // Legacy or alternative
+  history?: { status: string; date: string }[];
 }
 
 export interface WalletTransaction {

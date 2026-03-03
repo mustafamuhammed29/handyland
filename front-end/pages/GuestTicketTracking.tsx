@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../utils/api';
 import { Search, Loader2, Wrench, CheckCircle, Clock } from 'lucide-react';
 import { SEO } from '../components/SEO';
+import { VisualOrderTimeline } from '../components/VisualOrderTimeline';
 
 export const GuestTicketTracking: React.FC = () => {
     const [ticketId, setTicketId] = useState('');
@@ -48,7 +49,7 @@ export const GuestTicketTracking: React.FC = () => {
             />
 
             <div className="max-w-md w-full text-center mb-8">
-                <Wrench className="w-12 h-12 text-cyan-500 mx-auto mb-4" />
+                <Wrench className="w-12 h-12 text-brand-primary mx-auto mb-4" />
                 <h1 className="text-3xl font-black text-white mb-2 tracking-tight">Track Your Repair</h1>
                 <p className="text-slate-400">Enter your ticket ID and email to check the status of your device repair.</p>
             </div>
@@ -64,7 +65,7 @@ export const GuestTicketTracking: React.FC = () => {
                                 value={ticketId}
                                 onChange={e => setTicketId(e.target.value)}
                                 placeholder="e.g. 5f8d04f2b5..."
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-brand-primary outline-none transition-colors"
                             />
                         </div>
                         <div>
@@ -75,7 +76,7 @@ export const GuestTicketTracking: React.FC = () => {
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 placeholder="Email used for the repair"
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-cyan-500 outline-none transition-colors"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-brand-primary outline-none transition-colors"
                             />
                         </div>
 
@@ -88,7 +89,7 @@ export const GuestTicketTracking: React.FC = () => {
                         <button
                             type="submit"
                             disabled={loading || !ticketId || !email}
-                            className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-brand-primary hover:bg-brand-primary text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Search className="w-5 h-5" /> Track Ticket</>}
                         </button>
@@ -96,18 +97,29 @@ export const GuestTicketTracking: React.FC = () => {
                 </div>
 
                 {ticket && (
-                    <div className="bg-slate-900 border border-cyan-500/30 rounded-3xl p-8 shadow-[0_0_30px_rgba(6,182,212,0.1)] relative overflow-hidden animate-in fade-in slide-in-from-bottom-4">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full"></div>
+                    <div className="bg-slate-900 border border-brand-primary/30 rounded-3xl p-8 shadow-[0_0_30px_rgba(6,182,212,0.1)] relative overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-3xl rounded-full"></div>
 
                         <div className="flex justify-between items-start mb-6 border-b border-slate-800 pb-6">
                             <div>
-                                <h3 className="text-xl font-bold text-white">{ticket.device}</h3>
+                                <h3 className="text-xl font-bold text-white mb-2">{ticket.device}</h3>
+                                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${getStatusConfig(ticket.status).bg}`}>
+                                    {getStatusConfig(ticket.status).icon}
+                                    <span className="font-bold text-sm text-white capitalize">{getStatusConfig(ticket.status).text}</span>
+                                </div>
+                            </div>
+                            <div className="text-right">
                                 <p className="text-slate-400 text-sm font-mono mt-1">Ticket #{ticket._id.substring(0, 8)}</p>
                             </div>
-                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${getStatusConfig(ticket.status).bg}`}>
-                                {getStatusConfig(ticket.status).icon}
-                                <span className="font-bold text-sm text-white capitalize">{getStatusConfig(ticket.status).text}</span>
-                            </div>
+                        </div>
+
+                        {/* Integration of Visual Timeline for Guests */}
+                        <div className="mb-8">
+                            <VisualOrderTimeline
+                                currentStatus={ticket.status}
+                                type="repair"
+                                history={ticket.history || [{ status: ticket.status, date: ticket.updatedAt || new Date().toISOString() }]}
+                            />
                         </div>
 
                         <div className="space-y-6 relative z-10">
@@ -124,7 +136,7 @@ export const GuestTicketTracking: React.FC = () => {
                                 {ticket.estimatedCost && (
                                     <div>
                                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Est. Cost</label>
-                                        <p className="text-cyan-400 font-bold mt-1 text-lg">€{ticket.estimatedCost}</p>
+                                        <p className="text-brand-primary font-bold mt-1 text-lg">€{ticket.estimatedCost}</p>
                                     </div>
                                 )}
                             </div>

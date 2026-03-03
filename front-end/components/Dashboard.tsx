@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     User, Package, Wrench, Settings, LogOut, Activity,
-    Wallet, Bell, Shield, BarChart3, Heart, ExternalLink, Mail
+    Wallet, Shield, BarChart3, Heart, ExternalLink, Mail
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserType } from '../types';
@@ -16,6 +16,7 @@ import {
     DashboardWishlist,
     DashboardSettings,
 } from './dashboard/index';
+import { NotificationBell } from './dashboard/NotificationBell';
 import { api } from '../utils/api';
 import { authService } from '../services/authService';
 import { orderService } from '../services/orderService';
@@ -28,7 +29,6 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout }) => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
-    const [showNotifications, setShowNotifications] = useState(false);
 
     // Use the new data fetching hook
     const dashboardData = useDashboardData();
@@ -85,6 +85,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
             navigate(`/sell/${val.quoteReference}`);
         } else {
             navigate('/valuation');
+        }
+    };
+
+    const handleDeleteValuation = async (valId: string) => {
+        try {
+            await api.delete(`/api/valuation/saved/${valId}`);
+            await valuations.refetch();
+        } catch (error) {
+            console.error('Error deleting valuation:', error);
         }
     };
 
@@ -181,7 +190,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                             </div>
                             <div className="overflow-hidden">
                                 <h3 className="text-white font-bold truncate">{currentUser.name}</h3>
-                                <div className="flex items-center gap-1 text-xs text-cyan-400">
+                                <div className="flex items-center gap-1 text-xs text-brand-primary">
                                     <Shield className="w-3 h-3" /> {isAdmin ? 'Administrator' : (
                                         currentUser.createdAt
                                             ? `Mitglied seit ${new Date(currentUser.createdAt).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}`
@@ -233,43 +242,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                             <div className="h-px bg-slate-800 my-4"></div>
 
                             <div className="flex items-center gap-4">
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setShowNotifications(!showNotifications)}
-                                        aria-label="Toggle notifications"
-                                        className="p-2 text-slate-400 hover:text-white transition-colors relative"
-                                    >
-                                        <Bell className="w-6 h-6" />
-                                        {unreadCount > 0 && (
-                                            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-950"></span>
-                                        )}
-                                    </button>
-
-                                    {/* Notifications Dropdown */}
-                                    {showNotifications && (
-                                        <div className="absolute right-0 top-12 w-80 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                                            <div className="p-4 border-b border-slate-800">
-                                                <h3 className="font-bold text-white">Notifications</h3>
-                                                <p className="text-xs text-slate-400">{unreadCount} unread</p>
-                                            </div>
-                                            <div className="max-h-96 overflow-y-auto">
-                                                {notifications.data && notifications.data.length > 0 ? (
-                                                    notifications.data.slice(0, 5).map((notif: any, idx: number) => (
-                                                        <div key={idx} className="p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors">
-                                                            <p className="text-white text-sm font-medium">{notif.title}</p>
-                                                            <p className="text-slate-400 text-xs mt-1">{notif.message}</p>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <div className="p-8 text-center text-slate-500">
-                                                        <Bell className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                                                        <p className="text-sm">No notifications</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                <NotificationBell userId={currentUser?._id} />
                                 <button
                                     onClick={() => { logout(); navigate('/'); }}
                                     aria-label="Logout"
@@ -316,6 +289,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                             valuations={valuations.data || []}
                             isLoading={valuations.isLoading}
                             onSell={handleSell}
+                            onDelete={handleDeleteValuation}
                         />
                     )}
 

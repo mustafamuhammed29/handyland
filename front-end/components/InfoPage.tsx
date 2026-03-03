@@ -39,7 +39,8 @@ export const InfoPage: React.FC<InfoPageProps> = ({ lang }) => {
         setLoading(true);
         setError(false);
         try {
-            const data = await api.get<any>(`/api/pages/${slug}`);
+            const res = await api.get<any>(`/api/pages/${slug}`);
+            const data = res as any;
             setTitle(data.title);
             setContent(data.content);
         } catch (err) {

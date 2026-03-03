@@ -8,6 +8,7 @@ import { useCart } from '../context/CartContext';
 import { Order } from '../types';
 import { ENV } from '../src/config/env';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { VisualOrderTimeline } from '../components/VisualOrderTimeline';
 
 export const OrderDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -151,8 +152,6 @@ export const OrderDetails = () => {
         );
     }
 
-    const steps = ['pending', 'processing', 'shipped', 'delivered'];
-    const currentStep = steps.indexOf(order.status) === -1 ? (order.status === 'cancelled' ? -1 : 0) : steps.indexOf(order.status);
     const isCancelled = order.status === 'cancelled';
 
     return (
@@ -268,58 +267,18 @@ export const OrderDetails = () => {
                             ))}
                         </div>
                         <div className="pt-4 mt-4 border-t border-slate-800 flex justify-end">
-                            <button onClick={handleBuyAgain} className="text-sm font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-2 transition-colors">
+                            <button onClick={handleBuyAgain} className="text-sm font-bold text-brand-primary hover:text-brand-primary flex items-center gap-2 transition-colors">
                                 <Repeat className="w-4 h-4" /> Buy Again
                             </button>
                         </div>
                     </div>
 
                     {/* Timeline */}
-                    {!isCancelled && (
-                        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
-                            <h2 className="font-bold text-white mb-6 flex items-center gap-2">
-                                <Truck className="w-5 h-5 text-purple-400" /> Tracking
-                            </h2>
-                            <div className="relative px-2">
-                                {/* Connector Line */}
-                                <div className="absolute top-4 left-4 right-4 h-0.5 bg-slate-800 -z-10"></div>
-                                <div
-                                    className="absolute top-4 left-4 h-0.5 bg-green-500 transition-all duration-1000 -z-10"
-                                    style={{
-                                        width: `${(currentStep / (steps.length - 1)) * 100}%`,
-                                        right: `${100 - ((currentStep / (steps.length - 1)) * 100)}%`
-                                    }}
-                                ></div>
-                                {/* Better Connector implementation */}
-                                <div className="absolute top-4 left-6 right-6 h-0.5 bg-slate-800 -z-10"></div>
-                                <div
-                                    className="absolute top-4 left-6 h-0.5 bg-blue-500 -z-10 transition-all duration-500"
-                                    style={{ width: `${(currentStep / (steps.length - 1)) * 95}%` }}
-                                ></div>
-
-
-                                <div className="flex justify-between">
-                                    {steps.map((step, idx) => {
-                                        const isCompleted = idx <= currentStep;
-                                        const isCurrent = idx === currentStep;
-
-                                        return (
-                                            <div key={step} className="flex flex-col items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${isCompleted ? 'bg-blue-500 border-blue-500 text-white' : 'bg-slate-900 border-slate-700 text-slate-600'
-                                                    } ${isCurrent ? 'ring-4 ring-blue-500/20' : ''}`}>
-                                                    {isCompleted ? <CheckCircle className="w-4 h-4" /> : <div className="w-2 h-2 bg-current rounded-full" />}
-                                                </div>
-                                                <div className="text-center">
-                                                    <div className={`text-xs font-bold uppercase tracking-wider ${isCompleted ? 'text-blue-400' : 'text-slate-600'}`}>{step}</div>
-                                                    {isCurrent && <div className="text-[10px] text-slate-400 mt-1 animate-pulse">In Progress</div>}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    <VisualOrderTimeline
+                        currentStatus={order.status}
+                        type="order"
+                        history={order.history || [{ status: order.status, date: order.updatedAt || new Date().toISOString() }]}
+                    />
                 </div>
 
                 {/* Sidebar Info */}

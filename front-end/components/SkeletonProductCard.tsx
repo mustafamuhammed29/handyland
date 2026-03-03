@@ -2,7 +2,7 @@ import React from 'react';
 
 export const SkeletonProductCard = () => {
     return (
-        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-4 flex flex-col h-full animate-pulse">
+        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-4 flex flex-col h-full animate-pulse transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-brand-primary/ hover:border-slate-700">
             <div className="w-full h-64 bg-slate-800 rounded-2xl mb-4"></div>
             <div className="space-y-3 flex-1">
                 <div className="flex justify-between items-start">

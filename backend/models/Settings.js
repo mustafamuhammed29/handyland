@@ -87,6 +87,15 @@ const settingsSchema = new mongoose.Schema({
             google: false,
             facebook: false
         }
+    },
+    quickReplies: {
+        type: [String],
+        default: [
+            "We have received your message and are looking into it.",
+            "Please provide us with your order number so we can investigate further.",
+            "Your repair is currently in progress. We will update you soon.",
+            "Thank you for reaching out. Your issue has been resolved."
+        ]
     }
 }, { timestamps: true });
 

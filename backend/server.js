@@ -278,9 +278,11 @@ app.get('/api/status', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
+// Initialize Socket.io
 const http = require('http');
-
 const server = http.createServer(app);
+const { initSocket } = require('./utils/socket');
+initSocket(server);
 
 server.listen(PORT, () => {
     logger.info(`🚀 Server running on http://localhost:${PORT}`);

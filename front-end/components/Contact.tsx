@@ -71,7 +71,7 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
         return (
             <section className="relative py-24 bg-black">
                 <div className="flex items-center justify-center h-96">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
                 </div>
             </section>
         );
@@ -80,14 +80,14 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
     return (
         <section className="relative py-24 bg-black overflow-hidden border-t border-slate-900">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_var(--tw-gradient-stops))] from-blue-900/10 via-slate-950 to-black pointer-events-none"></div>
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
                 <div className="text-center mb-16">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/30 border border-cyan-500/30 text-cyan-400 text-xs font-mono mb-4 animate-pulse">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/30 border border-brand-primary/30 text-brand-primary text-xs font-mono mb-4 animate-pulse">
                         <Radio className="w-3 h-3" />
                         <span>SIGNAL_STRENGTH: 100%</span>
                     </div>
@@ -125,7 +125,7 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
                             )}
 
                             <div className="absolute bottom-6 left-6 flex items-center gap-3 z-10">
-                                <div className="w-12 h-12 bg-black/60 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                                <div className="w-12 h-12 bg-black/60 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10 text-brand-primary shadow-[0_0_20px_rgba(6,182,212,0.4)]">
                                     <MapPin className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -137,7 +137,7 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
 
                         {/* Info Grid */}
                         <div className="grid sm:grid-cols-2 gap-4">
-                            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-cyan-500/50 transition-colors group">
+                            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-primary/50 transition-colors group">
                                 <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center mb-4 text-purple-400 group-hover:scale-110 transition-transform">
                                     <Phone className="w-5 h-5" />
                                 </div>
@@ -145,7 +145,7 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
                                 <div className="text-white font-mono text-lg">{settings.phone}</div>
                             </div>
 
-                            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-cyan-500/50 transition-colors group">
+                            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-primary/50 transition-colors group">
                                 <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center mb-4 text-emerald-400 group-hover:scale-110 transition-transform">
                                     <Mail className="w-5 h-5" />
                                 </div>
@@ -181,11 +181,11 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
 
                     {/* RIGHT: Contact Form */}
                     <div className="relative">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-[2rem] opacity-20 blur-xl"></div>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-[2rem] opacity-20 blur-xl"></div>
                         <div className="relative glass-modern p-8 rounded-[2rem] border border-slate-700/50">
 
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <MessageSquare className="w-5 h-5 text-cyan-400" />
+                                <MessageSquare className="w-5 h-5 text-brand-primary" />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">{settings.title}</span>
                             </h3>
 
@@ -193,12 +193,12 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
                                 <div className="space-y-2">
                                     <label className="text-xs text-slate-400 font-bold ml-1 uppercase">{t.fullName}</label>
                                     <div className="relative group">
-                                        <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
+                                        <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                                         <input
                                             type="text"
                                             name="name"
                                             required
-                                            className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all placeholder:text-slate-600"
+                                            className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-600"
                                             placeholder={settings.labels.name}
                                         />
                                     </div>
@@ -207,12 +207,12 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
                                 <div className="space-y-2">
                                     <label className="text-xs text-slate-400 font-bold ml-1 uppercase">{t.email}</label>
                                     <div className="relative group">
-                                        <AtSign className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
+                                        <AtSign className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                                         <input
                                             type="email"
                                             name="email"
                                             required
-                                            className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all placeholder:text-slate-600"
+                                            className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-600"
                                             placeholder={settings.labels.email}
                                         />
                                     </div>
@@ -224,7 +224,7 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
                                         name="message"
                                         required
                                         rows={4}
-                                        className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 px-4 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all placeholder:text-slate-600 resize-none"
+                                        className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 px-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-600 resize-none"
                                         placeholder={settings.labels.message}
                                     ></textarea>
                                 </div>
@@ -234,7 +234,7 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
                                     disabled={formState !== 'idle'}
                                     className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-300 ${formState === 'success'
                                         ? 'bg-emerald-500 text-white'
-                                        : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-900/20'
+                                        : 'bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white shadow-lg shadow-cyan-900/20'
                                         }`}
                                 >
                                     {formState === 'idle' && (

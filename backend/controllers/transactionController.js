@@ -140,3 +140,238 @@ exports.confirmTopUp = async (req, res) => {
         res.status(500).json({ success: false, message: error.message || 'Fehler beim Bestätigen der Zahlung' });
     }
 };
+
+// ==========================================
+// PayPal Wallet Top-Up
+// ==========================================
+const paypal = require('@paypal/checkout-server-sdk');
+
+const getPayPalClient = async () => {
+    const settings = await Settings.findOne();
+    const clientId = settings?.payment?.paypal?.clientId || process.env.PAYPAL_CLIENT_ID;
+    const clientSecret = settings?.payment?.paypal?.clientSecret || process.env.PAYPAL_CLIENT_SECRET;
+    const environment = settings?.payment?.paypal?.mode === 'live'
+        ? new paypal.core.LiveEnvironment(clientId, clientSecret)
+        : new paypal.core.SandboxEnvironment(clientId, clientSecret);
+
+    return new paypal.core.PayPalHttpClient(environment);
+};
+
+// @desc    Create PayPal Top-up Order
+// @route   POST /api/transactions/paypal/create-topup
+// @access  Private
+exports.createPayPalTopUp = async (req, res) => {
+    try {
+        const { amount } = req.body;
+        const parsedAmount = parseFloat(amount);
+
+        if (isNaN(parsedAmount) || parsedAmount < 5) {
+            return res.status(400).json({ success: false, message: 'Mindestbetrag ist 5 €' });
+        }
+        if (parsedAmount > 5000) {
+            return res.status(400).json({ success: false, message: 'Maximalbetrag ist 5.000 €' });
+        }
+
+        const request = new paypal.orders.OrdersCreateRequest();
+        request.prefer("return=representation");
+        request.requestBody({
+            intent: "CAPTURE",
+            purchase_units: [{
+                amount: {
+                    currency_code: "EUR",
+                    value: parsedAmount.toFixed(2)
+                },
+                description: `Handyland Wallet Aufladung: €${parsedAmount.toFixed(2)}`
+            }]
+        });
+
+        const client = await getPayPalClient();
+        const order = await client.execute(request);
+
+        res.status(200).json({
+            success: true,
+            id: order.result.id
+        });
+    } catch (error) {
+        console.error('PayPal create top-up order error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Fehler beim Erstellen der PayPal-Bestellung',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Capture PayPal Top-up Order
+// @route   POST /api/transactions/paypal/capture-topup
+// @access  Private
+exports.capturePayPalTopUp = async (req, res) => {
+    try {
+        const { orderID } = req.body;
+
+        const request = new paypal.orders.OrdersCaptureRequest(orderID);
+        request.requestBody({});
+
+        const client = await getPayPalClient();
+        const capture = await client.execute(request);
+
+        if (capture.result.status === 'COMPLETED') {
+            const amount = parseFloat(capture.result.purchase_units[0].payments.captures[0].amount.value);
+            const captureId = capture.result.purchase_units[0].payments.captures[0].id;
+
+            // Check if already processed
+            const existing = await Transaction.findOne({ stripePaymentId: captureId });
+            if (existing) {
+                return res.status(200).json({ success: true, message: 'Bereits verarbeitet', alreadyProcessed: true });
+            }
+
+            // Create transaction record
+            await Transaction.create({
+                user: req.user.id,
+                amount,
+                type: 'deposit',
+                paymentMethod: 'paypal',
+                status: 'completed',
+                stripePaymentId: captureId, // Using this field for PayPal Capture ID as well
+                description: `Wallet-Aufladung via PayPal (€${amount.toFixed(2)})`,
+            });
+
+            // Credit user balance
+            const user = await User.findById(req.user.id);
+            user.balance = (user.balance || 0) + amount;
+            await user.save();
+
+            res.status(200).json({
+                success: true,
+                message: `€${amount.toFixed(2)} erfolgreich per PayPal gutgeschrieben`,
+                newBalance: user.balance,
+            });
+        } else {
+            res.status(400).json({ success: false, message: 'PayPal-Zahlung nicht abgeschlossen' });
+        }
+    } catch (error) {
+        console.error('PayPal capture error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Fehler beim Erfassen der PayPal-Zahlung',
+            error: error.message
+        });
+    }
+};
+
+// ==========================================
+// Bank Transfer Wallet Top-Up
+// ==========================================
+
+// @desc    Create pending Bank Transfer Top-up
+// @route   POST /api/transactions/bank-transfer
+// @access  Private
+exports.createBankTransferTopUp = async (req, res) => {
+    try {
+        const { amount } = req.body;
+        const parsedAmount = parseFloat(amount);
+
+        if (isNaN(parsedAmount) || parsedAmount < 5) {
+            return res.status(400).json({ success: false, message: 'Mindestbetrag ist 5 €' });
+        }
+        if (parsedAmount > 5000) {
+            return res.status(400).json({ success: false, message: 'Maximalbetrag ist 5.000 €' });
+        }
+
+        // Create a *pending* transaction record
+        const transaction = await Transaction.create({
+            user: req.user.id,
+            amount: parsedAmount,
+            type: 'deposit',
+            paymentMethod: 'bank_transfer',
+            status: 'pending',
+            description: `Ausstehende Wallet-Aufladung via Banküberweisung (€${parsedAmount.toFixed(2)})`,
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Antrag auf Banküberweisung erstellt. Bitte überweisen Sie den Betrag auf unser Konto.',
+            transaction
+        });
+
+    } catch (error) {
+        console.error('Bank Transfer top-up error:', error);
+        res.status(500).json({ success: false, message: 'Fehler beim Erstellen des Antrags', error: error.message });
+    }
+};
+
+// ==========================================
+// Admin Transaction Management
+// ==========================================
+
+// @desc    Get all transactions (Admin)
+// @route   GET /api/transactions/admin
+// @access  Private/Admin
+exports.getAllTransactions = async (req, res) => {
+    try {
+        const { status, type } = req.query;
+        let query = {};
+        if (status) query.status = status;
+        if (type) query.type = type;
+
+        const transactions = await Transaction.find(query)
+            .populate('user', 'name email balance')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: transactions.length,
+            transactions
+        });
+    } catch (error) {
+        console.error('Admin Fetch Transactions Error:', error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+// @desc    Update transaction status (e.g. approve bank transfer)
+// @route   PUT /api/transactions/admin/:id/status
+// @access  Private/Admin
+exports.updateTransactionStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const transaction = await Transaction.findById(req.params.id);
+
+        if (!transaction) {
+            return res.status(404).json({ success: false, message: 'Transaktion nicht gefunden' });
+        }
+
+        // Optional logic: if approving a pending deposit, credit the user's wallet
+        if (transaction.status === 'pending' && status === 'completed' && transaction.type === 'deposit') {
+            const user = await User.findById(transaction.user);
+            if (user) {
+                user.balance = (user.balance || 0) + transaction.amount;
+                await user.save();
+                transaction.description = transaction.description.replace('Ausstehende ', '');
+            }
+        }
+
+        // Optional logic: if declining a completed deposit, deduct from the user's wallet
+        // This is complex because they might have spent the money. We will just allow status update.
+        if (transaction.status === 'completed' && status === 'failed' && transaction.type === 'deposit') {
+            const user = await User.findById(transaction.user);
+            if (user) {
+                user.balance = Math.max(0, (user.balance || 0) - transaction.amount);
+                await user.save();
+            }
+        }
+
+        transaction.status = status;
+        await transaction.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Transaktionsstatus aktualisiert auf ${status}`,
+            transaction
+        });
+
+    } catch (error) {
+        console.error('Admin Update Transaction Status Error:', error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};

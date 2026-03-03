@@ -90,7 +90,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                 >
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            <ShoppingCart className="w-5 h-5 text-cyan-400" /> {t.cart || 'Your Cart'}
+                            <ShoppingCart className="w-5 h-5 text-brand-primary" /> {t.cart || 'Your Cart'}
                             <span className="bg-slate-800 text-slate-300 text-xs px-2 py-0.5 rounded-full">{cart.length}</span>
                         </h3>
                         <button onClick={() => setIsCartOpen(false)} aria-label="Close cart" className="text-slate-400 hover:text-white transition-colors">
@@ -185,7 +185,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                                         </div>
 
                                         <div className="text-right">
-                                            <div className="text-cyan-400 font-bold">{item.price}{t.currency}</div>
+                                            <div className="text-brand-primary font-bold">{item.price}{t.currency}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -219,7 +219,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                                             placeholder="Promo Code"
                                             value={couponCodeIn}
                                             onChange={(e) => setCouponCodeIn(e.target.value)}
-                                            className="w-full bg-black/40 border border-slate-700 rounded-xl py-2 pl-10 pr-4 text-white text-sm focus:border-cyan-500 outline-none transition-all placeholder:text-slate-600"
+                                            className="w-full bg-black/40 border border-slate-700 rounded-xl py-2 pl-10 pr-4 text-white text-sm focus:border-brand-primary outline-none transition-all placeholder:text-slate-600"
                                         />
                                     </div>
                                     <button
@@ -249,14 +249,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                         )}
                         <div className="flex justify-between items-center pt-2 border-t border-slate-800">
                             <span className="text-lg font-bold text-white">Total</span>
-                            <span className="text-2xl font-bold text-cyan-400">{finalTotal.toFixed(2)}{t.currency}</span>
+                            <span className="text-2xl font-bold text-brand-primary">{finalTotal.toFixed(2)}{t.currency}</span>
                         </div>
                     </div>
 
                     <button
                         onClick={handleCheckout}
                         disabled={cart.length === 0}
-                        className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
+                        className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
                         Checkout Securely <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>

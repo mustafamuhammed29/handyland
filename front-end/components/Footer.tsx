@@ -51,7 +51,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
           <div className={settings.columns.length <= 1 ? 'col-span-1' : 'col-span-1 md:col-span-2'}>
             <Link to="/" className="text-3xl font-black text-white tracking-tighter uppercase cursor-pointer inline-block">
               {settings.companyInfo.name.split('LAND')[0]}
-              <span className="text-cyan-400">LAND</span>
+              <span className="text-brand-primary">LAND</span>
             </Link>
             <p className="text-slate-500 mt-4 max-w-sm leading-relaxed">
               {settings.companyInfo.tagline}
@@ -69,7 +69,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
                   <li key={linkIndex}>
                     <Link
                       to={link.url}
-                      className="hover:text-cyan-400 transition-colors uppercase font-medium"
+                      className="hover:text-brand-primary transition-colors uppercase font-medium"
                     >
                       {link.label}
                     </Link>
@@ -86,7 +86,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
 
           {/* Legal Links (Dynamic) */}
           <div className="flex flex-wrap justify-center gap-6">
-            <Link to="/track-repair" className="hover:text-cyan-400 uppercase transition-colors text-cyan-500 font-bold">Track Repair</Link>
+            <Link to="/track-repair" className="hover:text-brand-primary uppercase transition-colors text-brand-primary font-bold">Track Repair</Link>
             <Link to="/agb" className="hover:text-white uppercase transition-colors">AGB</Link>
             <Link to="/datenschutz" className="hover:text-white uppercase transition-colors">Datenschutz</Link>
             <Link to="/impressum" className="hover:text-white uppercase transition-colors">Impressum</Link>

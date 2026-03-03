@@ -64,9 +64,9 @@ export const Stats: React.FC = () => {
       value: settings.stats.devicesRepaired,
       suffix: '+',
       label: 'Devices Repaired',
-      color: 'text-cyan-400',
-      border: 'group-hover:border-cyan-500/50',
-      bg: 'group-hover:bg-cyan-500/10'
+      color: 'text-brand-primary',
+      border: 'group-hover:border-brand-primary/50',
+      bg: 'group-hover:bg-brand-primary/10'
     },
     {
       icon: <Users className="w-6 h-6" />,

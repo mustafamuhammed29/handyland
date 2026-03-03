@@ -83,6 +83,14 @@ const UserSchema = new mongoose.Schema({
     refreshToken: {
         type: String,
         select: false
+    },
+
+    // Notification Preferences
+    notificationPrefs: {
+        orderUpdates: { type: Boolean, default: true },
+        repairStatus: { type: Boolean, default: true },
+        promotions: { type: Boolean, default: false },
+        newsletter: { type: Boolean, default: false }
     }
 }, {
     timestamps: true

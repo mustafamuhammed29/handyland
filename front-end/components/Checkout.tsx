@@ -122,7 +122,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                     </div>
                     <h2 className="text-4xl font-black text-white">Order Placed! 🎉</h2>
                     <p className="text-slate-400">You'll receive a confirmation email shortly.</p>
-                    <p className="text-sm text-cyan-400 font-mono animate-pulse">Redirecting to Dashboard...</p>
+                    <p className="text-sm text-brand-primary font-mono animate-pulse">Redirecting to Dashboard...</p>
                 </div>
             </div>
         );
@@ -132,7 +132,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         return (
             <div className="min-h-screen pt-32 text-center">
                 <h2 className="text-2xl text-slate-500">Your cart is empty.</h2>
-                <button onClick={() => navigate('/marketplace')} className="mt-4 text-cyan-400 hover:underline">Return to Market</button>
+                <button onClick={() => navigate('/marketplace')} className="mt-4 text-brand-primary hover:underline">Return to Market</button>
             </div>
         );
     }
@@ -140,7 +140,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
     return (
         <div className="min-h-screen pt-28 pb-12 px-4 max-w-7xl mx-auto">
             <h1 className="text-4xl font-black text-white mb-8 flex items-center gap-3">
-                <Lock className="w-8 h-8 text-cyan-400" />
+                <Lock className="w-8 h-8 text-brand-primary" />
                 SECURE CHECKOUT
             </h1>
 
@@ -153,10 +153,10 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                             <Truck className="w-5 h-5 text-blue-400" /> Shipping Details
                         </h3>
                         <div className="grid md:grid-cols-2 gap-4">
-                            <input name="fullName" value={shippingInfo.fullName} onChange={handleInputChange} type="text" placeholder="Full Name" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <input name="email" value={shippingInfo.email} onChange={handleInputChange} type="email" placeholder="Email Address" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <input name="phone" value={shippingInfo.phone} onChange={handleInputChange} type="tel" placeholder="Phone (+49... or 017...)" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <select name="country" title="Shipping country" value={shippingInfo.country} onChange={handleInputChange} className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500">
+                            <input name="fullName" value={shippingInfo.fullName} onChange={handleInputChange} type="text" placeholder="Full Name" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
+                            <input name="email" value={shippingInfo.email} onChange={handleInputChange} type="email" placeholder="Email Address" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
+                            <input name="phone" value={shippingInfo.phone} onChange={handleInputChange} type="tel" placeholder="Phone (+49... or 017...)" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
+                            <select name="country" title="Shipping country" value={shippingInfo.country} onChange={handleInputChange} className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary">
                                 <option value="DE">🇩🇪 Germany</option>
                                 <option value="AT">🇦🇹 Austria</option>
                                 <option value="CH">🇨🇭 Switzerland</option>
@@ -173,9 +173,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                 <option value="US">🇺🇸 United States</option>
                                 <option value="TR">🇹🇷 Turkey</option>
                             </select>
-                            <input name="street" value={shippingInfo.street} onChange={handleInputChange} type="text" placeholder="Address (Street, House No.)" className="md:col-span-2 bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <input name="city" value={shippingInfo.city} onChange={handleInputChange} type="text" placeholder="City" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
-                            <input name="zipCode" value={shippingInfo.zipCode} onChange={handleInputChange} type="text" placeholder="Postal Code" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-cyan-500" />
+                            <input name="street" value={shippingInfo.street} onChange={handleInputChange} type="text" placeholder="Address (Street, House No.)" className="md:col-span-2 bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
+                            <input name="city" value={shippingInfo.city} onChange={handleInputChange} type="text" placeholder="City" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
+                            <input name="zipCode" value={shippingInfo.zipCode} onChange={handleInputChange} type="text" placeholder="Postal Code" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
                         </div>
                     </div>
 
@@ -227,12 +227,12 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                                     onChange={(e) => setTermsAccepted(e.target.checked)}
                                     className="sr-only"
                                 />
-                                <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${termsAccepted ? 'bg-cyan-500 border-cyan-500' : 'bg-black/40 border-slate-600 group-hover:border-slate-500'}`}>
+                                <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${termsAccepted ? 'bg-brand-primary border-brand-primary' : 'bg-black/40 border-slate-600 group-hover:border-slate-500'}`}>
                                     {termsAccepted && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                                 </div>
                             </div>
                             <span className="text-xs text-slate-400 leading-relaxed">
-                                I agree to the <span className="text-cyan-400 hover:underline">Terms of Service</span> and <span className="text-cyan-400 hover:underline">Privacy Policy</span>. I confirm that all provided shipping information is correct.
+                                I agree to the <span className="text-brand-primary hover:underline">Terms of Service</span> and <span className="text-brand-primary hover:underline">Privacy Policy</span>. I confirm that all provided shipping information is correct.
                             </span>
                         </label>
                     </div>
@@ -248,14 +248,14 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                         </div>
                         <div className="flex justify-between text-white font-bold text-lg pt-2">
                             <span>Total</span>
-                            <span className="text-cyan-400">{cartTotal}€</span>
+                            <span className="text-brand-primary">{cartTotal}€</span>
                         </div>
                     </div>
 
                     <button
                         onClick={handlePayment}
                         disabled={isProcessing}
-                        className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                         {isProcessing ? (
                             <span className="animate-pulse">Processing...</span>

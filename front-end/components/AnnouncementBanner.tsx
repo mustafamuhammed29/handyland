@@ -20,7 +20,7 @@ export const AnnouncementBanner: React.FC = () => {
         yellow: 'bg-amber-500 text-black',
         red: 'bg-red-600 text-white',
         purple: 'bg-purple-600 text-white',
-        cyan: 'bg-cyan-600 text-white',
+        cyan: 'bg-brand-primary text-white',
     };
 
     const colorClass = colorMap[banner.color] || colorMap.blue;

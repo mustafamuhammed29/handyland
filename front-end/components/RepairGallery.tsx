@@ -124,8 +124,8 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            <Wand2 className="w-8 h-8 text-cyan-400" />
-                            <span className="text-cyan-500 font-mono tracking-widest text-sm uppercase">{settings.subtitle}</span>
+                            <Wand2 className="w-8 h-8 text-brand-primary" />
+                            <span className="text-brand-primary font-mono tracking-widest text-sm uppercase">{settings.subtitle}</span>
                         </div>
                         <h2 className="text-4xl lg:text-5xl font-black text-white">
                             {settings.title}
@@ -139,7 +139,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                                 key={cat.id}
                                 onClick={() => setFilter(cat.id)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-bold transition-all ${filter === cat.id
-                                    ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                                    ? 'bg-brand-primary/20 border-brand-primary text-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]'
                                     : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-600'
                                     }`}
                             >
@@ -206,7 +206,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                                 {/* Scan Animation Overlay */}
                                 {isScanning && (
                                     <div className="absolute inset-0 pointer-events-none z-30">
-                                        <div className="absolute inset-0 bg-cyan-500/20 animate-pulse"></div>
+                                        <div className="absolute inset-0 bg-brand-primary/20 animate-pulse"></div>
                                         <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)] animate-scan"></div>
                                     </div>
                                 )}
@@ -241,7 +241,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                         {/* Scan Button */}
                         <button
                             onClick={handleScan}
-                            className="mt-4 w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 group"
+                            className="mt-4 w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 group"
                         >
                             <ScanLine className="w-5 h-5 group-hover:animate-pulse" />
                             <span>INITIATE DIAGNOSTIC SCAN</span>
@@ -253,7 +253,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                         <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex-1 flex flex-col">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-2">
-                                    <Activity className="w-5 h-5 text-cyan-400" />
+                                    <Activity className="w-5 h-5 text-brand-primary" />
                                     <h3 className="text-white font-bold uppercase tracking-wider text-sm">Case Files ({filteredProjects.length})</h3>
                                 </div>
                             </div>
@@ -267,7 +267,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                                         className="w-full text-left group"
                                     >
                                         <div className={`relative rounded-xl overflow-hidden border-2 transition-all ${selectedId === project._id
-                                            ? 'border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                                            ? 'border-brand-primary shadow-[0_0_20px_rgba(6,182,212,0.4)]'
                                             : 'border-slate-800 hover:border-slate-600'
                                             }`}>
                                             {/* Thumbnail */}
@@ -292,7 +292,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
 
                                                 {/* Active Indicator */}
                                                 {selectedId === project._id && (
-                                                    <div className="absolute inset-0 border-2 border-cyan-500 rounded-xl animate-pulse"></div>
+                                                    <div className="absolute inset-0 border-2 border-brand-primary rounded-xl animate-pulse"></div>
                                                 )}
                                             </div>
                                         </div>
@@ -304,7 +304,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                             <div className="mt-4 pt-4 border-t border-slate-800">
                                 <button
                                     onClick={() => setShowAllModal(true)}
-                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border border-cyan-500/30 text-cyan-300 text-sm font-bold hover:bg-cyan-900/70 transition-all flex items-center justify-center gap-2 group"
+                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border border-brand-primary/30 text-brand-primary text-sm font-bold hover:bg-cyan-900/70 transition-all flex items-center justify-center gap-2 group"
                                 >
                                     <Smartphone className="w-4 h-4 group-hover:animate-bounce" />
                                     {settings.buttonText} {settings.totalRepairs ? settings.totalRepairs.toLocaleString() : ''}
@@ -339,7 +339,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                         <div className="p-6 overflow-y-auto">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {comparisons.map((item) => (
-                                    <div key={item._id} className="bg-slate-950 border border-slate-800 rounded-xl p-4 hover:border-cyan-500 transition-colors">
+                                    <div key={item._id} className="bg-slate-950 border border-slate-800 rounded-xl p-4 hover:border-brand-primary transition-colors">
                                         <h4 className="text-white font-bold mb-2">{item.title}</h4>
                                         <div className="flex gap-2 mb-3">
                                             <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">{item.category}</span>

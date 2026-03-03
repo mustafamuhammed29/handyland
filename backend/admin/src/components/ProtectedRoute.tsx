@@ -28,7 +28,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             try {
                 // Verify with backend
                 // This ensures the token is valid and not expired
-                await api.get('/auth/me'); // Assuming /auth/me exists and checks token
+                await api.get('/api/auth/me'); // Ensure we use /api to hit the proxy
                 setIsVerified(true);
             } catch (error) {
                 console.error('Session verification failed:', error);
