@@ -65,6 +65,16 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    // Login attempts and lockout
+    loginAttempts: {
+        type: Number,
+        default: 0,
+        select: false
+    },
+    lockUntil: {
+        type: Date,
+        select: false
+    },
     // Wallet & Loyalty
     balance: {
         type: Number,

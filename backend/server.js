@@ -59,6 +59,8 @@ app.use(helmet({
             frameSrc: ["'self'", "js.stripe.com", "hooks.stripe.com"],
         },
     },
+    frameguard: { action: 'deny' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     crossOriginEmbedderPolicy: false,
 })); // Secure HTTP headers with CSP
 app.use(compression()); // Compress responses
