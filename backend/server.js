@@ -112,7 +112,7 @@ const limiter = rateLimit({
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => req.method === 'OPTIONS' || process.env.NODE_ENV === 'development',
+    skip: (req) => req.method === 'OPTIONS', // FIXED: [Rate limiting is always active. Use NODE_ENV=test to skip in automated tests if needed.]
 });
 app.use('/api/', limiter);
 
@@ -122,7 +122,22 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 // Data Sanitization
 app.use(mongoSanitize); // Prevent NoSQL injection
-// app.use(xss()); // Removed causing issues with Express 5
+const xss = require('xss');
+const xssSanitize = (req, res, next) => {
+  const sanitizeHelper = (obj) => {
+    if (typeof obj === 'string') return xss(obj);
+    if (Array.isArray(obj)) return obj.map(sanitizeHelper);
+    if (typeof obj === 'object' && obj !== null) {
+      Object.keys(obj).forEach(key => { obj[key] = sanitizeHelper(obj[key]); });
+    }
+    return obj;
+  };
+  if (req.body) req.body = sanitizeHelper(req.body);
+  if (req.query) req.query = sanitizeHelper(req.query);
+  if (req.params) req.params = sanitizeHelper(req.params);
+  next();
+};
+app.use(xssSanitize); // FIXED: [Custom XSS middleware]
 app.use(cookieParser());
 app.use(passport.initialize()); // Social OAuth init
 

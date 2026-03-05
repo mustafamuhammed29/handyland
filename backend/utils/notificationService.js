@@ -23,54 +23,54 @@ const sendEmail = require('./emailService');
  * @param {object}  [opts.prefs]     - User's notificationPrefs from DB (optional, skip email if not provided)
  */
 const notify = async ({
-    userId,
-    userEmail,
-    userName,
-    message,
-    type = 'info',
-    link = null,
-    category = 'orderUpdates',
-    subject = null,
-    emailHtml = null,
-    prefs = null
+  userId,
+  userEmail,
+  userName,
+  message,
+  type = 'info',
+  link = null,
+  category = 'orderUpdates',
+  subject = null,
+  emailHtml = null,
+  prefs = null
 }) => {
-    try {
-        // ── 1. Save to DB ──────────────────────────────────────────
-        const notif = await Notification.create({ user: userId, message, type, link });
+  try {
+    // ── 1. Save to DB ──────────────────────────────────────────
+    const notif = await Notification.create({ user: userId, message, type, link });
 
-        // ── 2. Real-time push via Socket.io ────────────────────────
-        emitNotification(userId, {
-            _id: notif._id,
-            message: notif.message,
-            type: notif.type,
-            link: notif.link,
-            read: false,
-            createdAt: notif.createdAt
-        });
+    // ── 2. Real-time push via Socket.io ────────────────────────
+    emitNotification(userId, {
+      _id: notif._id,
+      message: notif.message,
+      type: notif.type,
+      link: notif.link,
+      read: false,
+      createdAt: notif.createdAt
+    });
 
-        // ── 3. Email – only if user has prefs set AND that category is ON ──
-        const shouldEmail = prefs ? prefs[category] : false;
-        if (shouldEmail && userEmail) {
-            const emailSubject = subject || `HandyLand: ${message.substring(0, 60)}`;
-            const html = emailHtml || buildDefaultEmailHtml(userName, message, link, type);
-            try {
-                await sendEmail({ email: userEmail, subject: emailSubject, html });
-            } catch (emailErr) {
-                console.error('📧 Notification email failed (non-fatal):', emailErr.message);
-            }
-        }
-    } catch (err) {
-        // Never let notification failure crash the main request
-        console.error('❌ notificationService error (non-fatal):', err.message);
+    // ── 3. Email – only if user has prefs set AND that category is ON ──
+    const shouldEmail = prefs ? prefs[category] : false;
+    if (shouldEmail && userEmail) {
+      const emailSubject = subject || `HandyLand: ${message.substring(0, 60)}`;
+      const html = emailHtml || buildDefaultEmailHtml(userName, message, link, type);
+      try {
+        await sendEmail({ email: userEmail, subject: emailSubject, html });
+      } catch (emailErr) {
+        console.error('📧 Notification email failed (non-fatal):', emailErr.message);
+      }
     }
+  } catch (err) {
+    // Never let notification failure crash the main request
+    console.error('❌ notificationService error (non-fatal):', err.message);
+  }
 };
 
 /** Build a clean, minimal HTML email */
 const buildDefaultEmailHtml = (name, message, link, type) => {
-    const colors = { success: '#22c55e', info: '#3b82f6', warning: '#f59e0b', error: '#ef4444' };
-    const color = colors[type] || colors.info;
+  const colors = { success: '#22c55e', info: '#3b82f6', warning: '#f59e0b', error: '#ef4444' };
+  const color = colors[type] || colors.info;
 
-    return `
+  return `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;background:#0f172a;font-family:Inter,Arial,sans-serif;">
@@ -89,8 +89,9 @@ const buildDefaultEmailHtml = (name, message, link, type) => {
         </td></tr>
         <!-- Footer -->
         <tr><td style="padding:16px 32px;border-top:1px solid #334155;">
-          <p style="color:#475569;font-size:12px;margin:0;">You received this because you have notifications enabled for this category. <br>Manage your preferences in your <a href="/dashboard" style="color:#3b82f6;">account settings</a>.</p>
+          <p style="color:#475569;font-size:12px;margin:0;">You received this because you have notifications enabled for this category. <br>Manage your preferences in your <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard" style="color:#3b82f6;">account settings</a>.</p>
         </td></tr>
+        <!-- FIXED: [Dynamic frontend URL for dashboard link] -->
       </table>
     </td></tr>
   </table>

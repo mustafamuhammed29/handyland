@@ -86,8 +86,8 @@ exports.register = async (req, res) => {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
         const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
-        console.log('📧 Attempting to send verification email to:', user.email);
-        console.log('🔗 Verification URL:', verificationUrl);
+        if (process.env.NODE_ENV !== 'production') { console.log('📧 Attempting to send verification email to:', user.email); } // FIXED: [Removed debug console.log in production]
+        if (process.env.NODE_ENV !== 'production') { console.log('🔗 Verification URL:', verificationUrl); } // FIXED: [Removed debug console.log in production]
 
         try {
             const sent = await sendTemplateEmail(user.email, 'verify_email', {
@@ -95,7 +95,7 @@ exports.register = async (req, res) => {
                 verificationUrl
             });
             if (!sent) {
-                console.log('⚠️  No verify_email template in DB, sending fallback HTML email...');
+                if (process.env.NODE_ENV !== 'production') { console.log('⚠️  No verify_email template in DB, sending fallback HTML email...'); } // FIXED: [Removed debug console.log in production]
                 // Fallback: send a basic HTML email
                 await sendEmail({
                     email: user.email,
@@ -106,7 +106,7 @@ exports.register = async (req, res) => {
                            <p>This link expires in 24 hours.</p>`
                 });
             } else {
-                console.log('✅ Verification email sent successfully (via template).');
+                if (process.env.NODE_ENV !== 'production') { console.log('✅ Verification email sent successfully (via template).'); } // FIXED: [Removed debug console.log in production]
             }
         } catch (emailError) {
             console.error('❌ Error sending verification email:', emailError.message);
@@ -176,10 +176,10 @@ exports.login = async (req, res) => {
         // Send access token in HTTP-only cookie
         // Force secure: false for localhost/http development
         // Add detailed logging
-        console.log('🍪 Setting cookies for user:', user.email);
+        if (process.env.NODE_ENV !== 'production') { console.log('🍪 Setting cookies for user:', user.email); } // FIXED: [Removed debug console.log in production]
 
         const isProduction = process.env.NODE_ENV === 'production';
-        console.log('🌍 Environment isProduction:', isProduction);
+        if (process.env.NODE_ENV !== 'production') { console.log('🌍 Environment isProduction:', isProduction); } // FIXED: [Removed debug console.log in production]
 
         res.cookie('accessToken', token, {
             httpOnly: true,
@@ -207,8 +207,8 @@ exports.login = async (req, res) => {
             path: '/'
         });
 
-        console.log('✅ AuthController: Sending login response. Token exists:', !!token);
-        if (token) console.log('✅ Token preview:', token.substring(0, 10) + '...');
+        if (process.env.NODE_ENV !== 'production') { console.log('✅ AuthController: Sending login response. Token exists:', !!token); } // FIXED: [Removed debug console.log in production]
+        if (token) if (process.env.NODE_ENV !== 'production') { console.log('✅ Token preview:', token.substring(0, 10) + '...'); } // FIXED: [Removed debug console.log in production]
 
         // Fetch addresses
         const addresses = await require('../models/Address').find({ user: user._id });
@@ -343,11 +343,11 @@ exports.adminLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        console.log('🔐 Admin login attempt for:', email);
+        if (process.env.NODE_ENV !== 'production') { console.log('🔐 Admin login attempt for:', email); } // FIXED: [Removed debug console.log in production]
 
         // Validation
         if (!email || !password) {
-            console.log('❌ Missing credentials');
+            if (process.env.NODE_ENV !== 'production') { console.log('❌ Missing credentials'); } // FIXED: [Removed debug console.log in production]
             return res.status(400).json({
                 success: false,
                 message: 'Please provide email and password'
@@ -358,7 +358,7 @@ exports.adminLogin = async (req, res) => {
         const user = await User.findOne({ email }).select('+password');
 
         if (!user) {
-            console.log('❌ User not found:', email);
+            if (process.env.NODE_ENV !== 'production') { console.log('❌ User not found:', email); } // FIXED: [Removed debug console.log in production]
             return res.status(400).json({ // Changed to 400 as requested or kept 401? User asked for 400 in "Invalid credentials" block below, keeping consistent
                 success: false,
                 message: 'Invalid credentials'
@@ -367,7 +367,7 @@ exports.adminLogin = async (req, res) => {
 
         // Check if user is admin
         if (user.role !== 'admin') {
-            console.log('❌ Access denied - User is not admin. Role:', user.role);
+            if (process.env.NODE_ENV !== 'production') { console.log('❌ Access denied - User is not admin. Role:', user.role); } // FIXED: [Removed debug console.log in production]
             return res.status(403).json({
                 success: false,
                 message: 'Access denied. Admin privileges required.',
@@ -377,7 +377,7 @@ exports.adminLogin = async (req, res) => {
 
         // Check if account is active
         if (user.isActive === false) {
-            console.log('❌ Account deactivated');
+            if (process.env.NODE_ENV !== 'production') { console.log('❌ Account deactivated'); } // FIXED: [Removed debug console.log in production]
             return res.status(403).json({
                 success: false,
                 message: 'Your account has been deactivated. Please contact support.'
@@ -388,7 +388,7 @@ exports.adminLogin = async (req, res) => {
         const isMatch = await user.matchPassword(password);
 
         if (!isMatch) {
-            console.log('❌ Invalid password');
+            if (process.env.NODE_ENV !== 'production') { console.log('❌ Invalid password'); } // FIXED: [Removed debug console.log in production]
             return res.status(400).json({
                 success: false,
                 message: 'Invalid credentials'
@@ -436,7 +436,7 @@ exports.adminLogin = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
     try {
         const { token } = req.params;
-        console.log("Verifying email with token:", token);
+        if (process.env.NODE_ENV !== 'production') { console.log("Verifying email with token:", token); } // FIXED: [Removed debug console.log in production]
 
         const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -447,13 +447,13 @@ exports.verifyEmail = async (req, res) => {
         });
 
         if (!user) {
-            console.log("Verify failed: Invalid or expired token");
+            if (process.env.NODE_ENV !== 'production') { console.log("Verify failed: Invalid or expired token"); } // FIXED: [Removed debug console.log in production]
             // Check if token exists but expired
             const expiredUser = await User.findOne({ verificationToken: hashedToken });
             if (expiredUser) {
-                console.log("Token found but expired. Expiry:", expiredUser.verificationTokenExpire, "Now:", Date.now());
+                if (process.env.NODE_ENV !== 'production') { console.log("Token found but expired. Expiry:", expiredUser.verificationTokenExpire, "Now:", Date.now()); } // FIXED: [Removed debug console.log in production]
             } else {
-                console.log("Token not found at all.");
+                if (process.env.NODE_ENV !== 'production') { console.log("Token not found at all."); } // FIXED: [Removed debug console.log in production]
             }
 
             return res.status(400).json({
@@ -462,14 +462,14 @@ exports.verifyEmail = async (req, res) => {
             });
         }
 
-        console.log("User found for verification:", user.email);
+        if (process.env.NODE_ENV !== 'production') { console.log("User found for verification:", user.email); } // FIXED: [Removed debug console.log in production]
 
         user.isVerified = true;
         user.verificationToken = undefined;
         user.verificationTokenExpire = undefined;
         await user.save();
 
-        console.log("User verified successfully:", user.email);
+        if (process.env.NODE_ENV !== 'production') { console.log("User verified successfully:", user.email); } // FIXED: [Removed debug console.log in production]
 
         res.status(200).json({
             success: true,
@@ -672,7 +672,7 @@ exports.refreshToken = async (req, res) => {
 
         // Verify expiration
         if (RefreshToken.verifyExpiration(refreshTokenDoc)) {
-            await RefreshToken.findByIdAndRemove(refreshTokenDoc._id, { useFindAndModify: false });
+            await RefreshToken.findByIdAndDelete(refreshTokenDoc._id); // FIXED: [Deprecated findByIdAndRemove replaced with findByIdAndDelete]
             return res.status(403).json({
                 message: 'Refresh token was expired. Please make a new signin request'
             });
@@ -686,7 +686,7 @@ exports.refreshToken = async (req, res) => {
         // Send access token in HTTP-only cookie
         res.cookie('accessToken', newAccessToken, {
             httpOnly: true,
-            secure: false, // process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'production', // FIXED: [Do not hardcode secure: false in production]
             sameSite: 'lax',
             maxAge: 15 * 60 * 1000, // 15 minutes
             path: '/'
@@ -741,3 +741,6 @@ exports.logout = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// FIXED: [Moved module.exports to the end]
+module.exports = exports;

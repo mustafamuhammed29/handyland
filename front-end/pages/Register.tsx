@@ -78,6 +78,19 @@ const PasswordInput: React.FC<{
 
 const Register: React.FC = () => {
     const { settings } = useSettings();
+
+    // FIXED: [Added lang state and translations for error messages]
+    const lang = localStorage.getItem('handyland_lang') || 'en';
+    const errorMessages: Record<string, Record<string, string>> = {
+        nameRequired: { en: 'Name is required', de: 'Name ist erforderlich', ar: 'الاسم مطلوب' },
+        invalidEmail: { en: 'Please enter a valid email address', de: 'Bitte gültige E-Mail eingeben', ar: 'يرجى إدخال بريد إلكتروني صحيح' },
+        invalidPhone: { en: 'Please enter a valid phone number', de: 'Bitte gültige Telefonnummer eingeben', ar: 'يرجى إدخال رقم هاتف صحيح' },
+        passwordMismatch: { en: 'Passwords do not match', de: 'Passwörter stimmen nicht überein', ar: 'كلمات المرور غير متطابقة' },
+        invalidPassword: { en: 'Invalid password', de: 'Ungültiges Passwort', ar: 'كلمة مرور غير صالحة' },
+        registrationFailed: { en: 'Registration failed', de: 'Registrierung fehlgeschlagen', ar: 'فشل التسجيل' },
+    };
+    const t = (key: string) => errorMessages[key]?.[lang] || errorMessages[key]?.en || key;
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -101,14 +114,18 @@ const Register: React.FC = () => {
         e.preventDefault();
         setError('');
 
-        if (!validateRequired(formData.name)) { setError('Name is required'); return; }
-        if (!validateEmail(formData.email)) { setError('Please enter a valid email address'); return; }
-        if (!validatePhone(formData.phone)) { setError('Please enter a valid phone number'); return; }
+        // FIXED: [Translated error messages and soft warning for optional phone validation]
+        if (!validateRequired(formData.name)) { setError(t('nameRequired')); return; }
+        if (!validateEmail(formData.email)) { setError(t('invalidEmail')); return; }
+        if (formData.phone && !validatePhone(formData.phone)) {
+            setError(t('invalidPhone'));
+            return;
+        }
 
         const passwordValidation = validatePassword(formData.password);
-        if (!passwordValidation.isValid) { setError(passwordValidation.message || 'Invalid password'); return; }
+        if (!passwordValidation.isValid) { setError(passwordValidation.message || t('invalidPassword')); return; }
 
-        if (formData.password !== formData.confirmPassword) { setError('Passwords do not match'); return; }
+        if (formData.password !== formData.confirmPassword) { setError(t('passwordMismatch')); return; }
 
         setLoading(true);
         try {
@@ -123,7 +140,8 @@ const Register: React.FC = () => {
                 navigate('/verify-email-notice', { state: { email: formData.email } });
             }
         } catch (err: any) {
-            setError(err.message || 'Registration failed');
+            // FIXED: [Translated fallback error message]
+            setError(err.message || t('registrationFailed'));
         } finally {
             setLoading(false);
         }

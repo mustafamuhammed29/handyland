@@ -3,6 +3,13 @@ import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, 
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
 
+// Extracted Tab Components
+import { HeroSettingsTab } from './settings/HeroSettingsTab';
+import { SocialAuthTab } from './settings/SocialAuthTab';
+import { SectionsTab } from './settings/SectionsTab';
+import { ContactSettingsTab } from './settings/ContactSettingsTab';
+import { AppearanceTab } from './settings/AppearanceTab';
+
 interface HeroSettings {
     headline: string;
     subheadline: string;
@@ -376,104 +383,10 @@ export default function SettingsManager() {
 
                 {/* Content */}
                 <div className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-8">
-                    {activeTab === 'general' && (
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-white mb-4">General Information</h3>
-                            <Input label="Site Name" value={settings.siteName} onChange={(v) => handleChange(null, 'siteName', v)} />
-
-                            <div className="p-4 border border-slate-700 rounded-xl bg-slate-900/50">
-                                <h4 className="text-blue-400 font-bold mb-4">Navbar Configuration</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Input label="Logo Text (Main)" value={settings.navbar?.logoText} onChange={(v) => handleChange('navbar', 'logoText', v)} placeholder="HANDY" />
-                                    <Input label="Logo Accent (Color)" value={settings.navbar?.logoAccentText} onChange={(v) => handleChange('navbar', 'logoAccentText', v)} placeholder="LAND" />
-                                </div>
-                                <div className="mt-4">
-                                    <Toggle label="Show Language Switcher" value={settings.navbar?.showLanguageSwitcher || false} onChange={(v) => handleChange('navbar', 'showLanguageSwitcher', v)} />
-                                </div>
-                            </div>
-
-                            <Input label="Contact Email" value={settings.contactEmail} onChange={(v) => handleChange(null, 'contactEmail', v)} />
-                            <Input label="Free Shipping Threshold (€)" value={settings.freeShippingThreshold.toString()} onChange={(v) => handleChange(null, 'freeShippingThreshold', Number(v))} type="number" />
-                            <Input label="Footer Text" value={settings.footerText} onChange={(v) => handleChange(null, 'footerText', v)} />
-                        </div>
-                    )}
-
-                    {activeTab === 'auth' && (
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-white mb-4">Social Login & Authentication</h3>
-                            <p className="text-slate-400 text-sm">Control which login methods are available to your users.</p>
-
-                            <div className="p-4 border border-slate-700 rounded-xl space-y-4 bg-slate-900/50">
-                                <h4 className="text-blue-400 font-bold mb-4">Social Auth Providers</h4>
-                                <Toggle
-                                    label="Enable Google Login"
-                                    value={settings.socialAuth?.google || false}
-                                    onChange={(v) => handleChange('socialAuth', 'google', v)}
-                                />
-                                <Toggle
-                                    label="Enable Facebook Login"
-                                    value={settings.socialAuth?.facebook || false}
-                                    onChange={(v) => handleChange('socialAuth', 'facebook', v)}
-                                />
-                                <div className="mt-4 p-3 bg-blue-900/20 border border-blue-800 rounded-lg text-sm text-blue-300 flex gap-2">
-                                    <AlertCircle className="w-5 h-5 shrink-0" />
-                                    <p>Note: To use social login, ensure you have configured your Client IDs and Secrets in the backend <code>.env</code> file.</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-
-
-                    {activeTab === 'hero' && (
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-white mb-4">Hero Section Configuration</h3>
-                            <Input label="Headline" value={settings.hero.headline} onChange={(v) => handleChange('hero', 'headline', v)} textarea />
-                            <Input label="Subheadline" value={settings.hero.subheadline} onChange={(v) => handleChange('hero', 'subheadline', v)} />
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input label="Button 1 (Market)" value={settings.hero.buttonMarket} onChange={(v) => handleChange('hero', 'buttonMarket', v)} />
-                                <Input label="Button 2 (Valuation)" value={settings.hero.buttonValuation} onChange={(v) => handleChange('hero', 'buttonValuation', v)} />
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-4">
-                                <Input label="Trust Badge 1" value={settings.hero.trustBadge1} onChange={(v) => handleChange('hero', 'trustBadge1', v)} placeholder="VERIFIED SELLERS" />
-                                <Input label="Trust Badge 2" value={settings.hero.trustBadge2} onChange={(v) => handleChange('hero', 'trustBadge2', v)} placeholder="24/7 SUPPORT" />
-                                <Input label="Trust Badge 3" value={settings.hero.trustBadge3} onChange={(v) => handleChange('hero', 'trustBadge3', v)} placeholder="4.9 RATED" />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input label="Background Start Color" value={settings.hero.bgStart} onChange={(v) => handleChange('hero', 'bgStart', v)} type="color" />
-                                <Input label="Background End Color" value={settings.hero.bgEnd} onChange={(v) => handleChange('hero', 'bgEnd', v)} type="color" />
-                            </div>
-
-                            <Input label="Accent Color" value={settings.hero.accentColor} onChange={(v) => handleChange('hero', 'accentColor', v)} type="color" />
-
-                            <div className="p-4 border border-slate-700 rounded-xl mt-6">
-                                <h4 className="text-blue-400 font-bold mb-4">Visuals & Product</h4>
-                                <Input label="Phone Screen Image URL" value={settings.hero.heroImage} onChange={(v) => handleChange('hero', 'heroImage', v)} placeholder="https://..." />
-                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                    <Input label="Product Name" value={settings.hero.productName} onChange={(v) => handleChange('hero', 'productName', v)} placeholder="iPhone 15 Pro" />
-                                    <Input label="Product Price" value={settings.hero.productPrice} onChange={(v) => handleChange('hero', 'productPrice', v)} placeholder="€950" />
-                                    <Input label="Label (e.g. Current Offer)" value={settings.hero.productLabel} onChange={(v) => handleChange('hero', 'productLabel', v)} placeholder="CURRENT OFFER" />
-                                </div>
-                            </div>
-
-                            <div className="p-4 border border-slate-700 rounded-xl mt-6">
-                                <h4 className="text-blue-400 font-bold mb-4">Floating Stats Cards</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Input label="Stat 1 Title" value={settings.hero.stat1Title} onChange={(v) => handleChange('hero', 'stat1Title', v)} placeholder="Device Sold" />
-                                        <Input label="Stat 1 Value" value={settings.hero.stat1Value} onChange={(v) => handleChange('hero', 'stat1Value', v)} placeholder="+24% this week" />
-                                    </div>
-                                    <div>
-                                        <Input label="Stat 2 Title" value={settings.hero.stat2Title} onChange={(v) => handleChange('hero', 'stat2Title', v)} placeholder="Customer Rating" />
-                                        <Input label="Stat 2 Value" value={settings.hero.stat2Value} onChange={(v) => handleChange('hero', 'stat2Value', v)} placeholder="4.9/5.0 Excellent" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {activeTab === 'general' && <AppearanceTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'auth' && <SocialAuthTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'hero' && <HeroSettingsTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'layout' && <SectionsTab settings={settings} handleChange={handleChange} />}
 
                     {activeTab === 'stats' && (
                         <div className="space-y-6">
@@ -680,48 +593,7 @@ export default function SettingsManager() {
                         </div>
                     )}
 
-                    {activeTab === 'contact' && (
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-white mb-4">Contact & Footer Configuration</h3>
-
-                            <div className="p-4 border border-slate-700 rounded-xl mb-6">
-                                <h4 className="text-blue-400 font-bold mb-4">Contact Details</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Input label="Address / HQ" value={settings.contactSection?.address} onChange={(v) => handleChange('contactSection', 'address', v)} />
-                                    <Input label="Phone Number" value={settings.contactSection?.phone} onChange={(v) => handleChange('contactSection', 'phone', v)} />
-                                    <Input label="Email Address" value={settings.contactSection?.email} onChange={(v) => handleChange('contactSection', 'email', v)} />
-                                    <Input label="Map URL (Embed)" value={settings.contactSection?.mapUrl} onChange={(v) => handleChange('contactSection', 'mapUrl', v)} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                    <Input label="Form Title" value={settings.contactSection?.formTitle} onChange={(v) => handleChange('contactSection', 'formTitle', v)} />
-                                    <Input label="Form Button Text" value={settings.contactSection?.formButton} onChange={(v) => handleChange('contactSection', 'formButton', v)} />
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-slate-700">
-                                    <h4 className="text-green-500 font-bold mb-4 flex items-center gap-2"><MessageSquare size={18} /> WhatsApp Widget Settings</h4>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <Input label="WhatsApp Number (e.g. 4915123456789)" value={settings.contactSection?.whatsappPhone} onChange={(v) => handleChange('contactSection', 'whatsappPhone', v)} placeholder="4915123456789" />
-                                        <Input label="Default Welcome Message" value={settings.contactSection?.whatsappMessage} onChange={(v) => handleChange('contactSection', 'whatsappMessage', v)} placeholder="Hello, I need help" />
-                                    </div>
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-slate-700">
-                                    <h4 className="text-blue-400 font-bold mb-4 text-sm uppercase">Social Media Links</h4>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <Input label="Facebook URL" value={settings.contactSection?.socialLinks?.facebook} onChange={(v) => handleChange('contactSection', 'socialLinks', { ...settings.contactSection.socialLinks, facebook: v })} />
-                                        <Input label="Instagram URL" value={settings.contactSection?.socialLinks?.instagram} onChange={(v) => handleChange('contactSection', 'socialLinks', { ...settings.contactSection.socialLinks, instagram: v })} />
-                                        <Input label="Twitter (X) URL" value={settings.contactSection?.socialLinks?.twitter} onChange={(v) => handleChange('contactSection', 'socialLinks', { ...settings.contactSection.socialLinks, twitter: v })} />
-                                        <Input label="LinkedIn URL" value={settings.contactSection?.socialLinks?.linkedin} onChange={(v) => handleChange('contactSection', 'socialLinks', { ...settings.contactSection.socialLinks, linkedin: v })} />
-                                        <Input label="YouTube URL" value={settings.contactSection?.socialLinks?.youtube} onChange={(v) => handleChange('contactSection', 'socialLinks', { ...settings.contactSection.socialLinks, youtube: v })} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="p-4 border border-slate-700 rounded-xl">
-                                <h4 className="text-blue-400 font-bold mb-4">Footer Settings</h4>
-                                <Input label="Footer Tagline" value={settings.footerSection?.tagline} onChange={(v) => handleChange('footerSection', 'tagline', v)} />
-                                <Input label="Copyright Text" value={settings.footerSection?.copyright} onChange={(v) => handleChange('footerSection', 'copyright', v)} />
-                            </div>
-                        </div>
-                    )}
+                    {activeTab === 'contact' && <ContactSettingsTab settings={settings} handleChange={handleChange} />}
 
                     {activeTab === 'scripts' && (
                         <div className="space-y-6">
@@ -1218,7 +1090,7 @@ interface InputProps {
     placeholder?: string;
 }
 
-const Input = ({ label, value, onChange, type = "text", textarea = false, placeholder }: InputProps) => (
+export const Input = ({ label, value, onChange, type = "text", textarea = false, placeholder }: InputProps) => (
     <div>
         <label className="block text-slate-400 text-sm font-bold mb-2">{label}</label>
         {textarea ? (
@@ -1240,7 +1112,7 @@ const Input = ({ label, value, onChange, type = "text", textarea = false, placeh
     </div>
 );
 
-const Toggle = ({ label, value, onChange }: { label: string, value: boolean | undefined, onChange: (val: boolean) => void }) => (
+export const Toggle = ({ label, value, onChange }: { label: string, value: boolean | undefined, onChange: (val: boolean) => void }) => (
     <div className="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800">
         <span className="text-white font-bold">{label}</span>
         <button
