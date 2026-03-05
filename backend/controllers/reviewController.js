@@ -79,13 +79,13 @@ exports.getProductReviews = async (req, res) => {
 exports.getAllReviews = async (req, res) => {
     try {
         const reviews = await Review.find({})
-            .populate('user', 'name')
-            .populate('product', 'model')
+            .populate('user', 'name email')
+            .populate('product', 'name model image images')
             .sort({ createdAt: -1 });
 
-        res.json(reviews);
+        res.json({ success: true, count: reviews.length, reviews });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -95,11 +95,24 @@ exports.getAllReviews = async (req, res) => {
 exports.deleteReview = async (req, res) => {
     try {
         const review = await Review.findById(req.params.id);
-        if (!review) return res.status(404).json({ message: 'Review not found' });
+        if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
 
+        const productId = review.product;
         await review.deleteOne();
-        res.json({ message: 'Review deleted' });
+
+        // Recalculate product rating after deletion
+        const remaining = await Review.find({ product: productId });
+        const product = await Product.findById(productId);
+        if (product) {
+            product.numReviews = remaining.length;
+            product.rating = remaining.length > 0
+                ? remaining.reduce((acc, r) => acc + r.rating, 0) / remaining.length
+                : 0;
+            await product.save();
+        }
+
+        res.json({ success: true, message: 'Review deleted' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };

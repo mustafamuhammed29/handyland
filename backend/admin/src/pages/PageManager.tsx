@@ -39,7 +39,7 @@ export default function PageManager() {
         setSaving(true);
         setMessage(null);
         try {
-            const strippedContent = content.replace(/<[^>]*>/g, '');
+            const strippedContent = content;
             await api.put(`/api/pages/${selectedPage}`, { content: strippedContent });
             setMessage({ type: 'success', text: 'Page updated successfully!' });
         } catch (error) {
@@ -108,8 +108,14 @@ export default function PageManager() {
                             />
                         )}
                     </div>
-                    <div className="mt-4 text-xs text-slate-500">
-                        Supports plain text formatting. Use standard paragraphs.
+                    <div className="mt-4 text-xs text-slate-500 flex items-center gap-1">
+                        <span>💡 HTML is supported.</span>
+                        <span className="text-slate-600">Use tags like</span>
+                        <code className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">&lt;h2&gt;</code>
+                        <code className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">&lt;p&gt;</code>
+                        <code className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">&lt;ul&gt;</code>
+                        <code className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">&lt;strong&gt;</code>
+                        <span className="text-slate-600">for rich formatting.</span>
                     </div>
                 </div>
             </div>

@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-const API_URL = 'http://localhost:5000/api';
+import { api } from '../utils/api';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -19,29 +18,17 @@ const Login: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/auth/admin/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data = await response.json();
+            const response = await api.post('/api/auth/admin/login', { email, password });
+            const data = (response as any)?.data || response;
 
             if (data.success) {
-                // Use AuthContext login method
                 login(data.token, data.user);
-
-                // Small delay to ensure state updates
-                setTimeout(() => {
-                    navigate('/', { replace: true });
-                }, 100);
+                setTimeout(() => navigate('/', { replace: true }), 100);
             } else {
                 setError(data.message || 'Invalid credentials');
             }
-        } catch (err) {
-            setError('Error connecting to server. Please try again.');
+        } catch (err: any) {
+            setError(err?.response?.data?.message || 'Error connecting to server. Please try again.');
             console.error('Login error:', err);
         } finally {
             setLoading(false);

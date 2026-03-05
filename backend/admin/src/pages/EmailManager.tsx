@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Edit3, Save, X, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
-
-const API_URL = 'http://localhost:5000/api';
+import { api } from '../utils/api';
 
 interface EmailTemplate {
     _id: string;
@@ -35,14 +34,11 @@ const EmailManager: React.FC = () => {
     const fetchTemplates = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${API_URL}/email-templates`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
+            const response = await api.get('/api/email-templates');
+            const data = (response as any)?.data || response;
             if (data.success) setTemplates(data.data);
         } catch (err) {
-            showNotification('error', 'Failed to load email templates');
+            console.error('Failed to load email templates', err);
         } finally {
             setLoading(false);
         }
@@ -70,22 +66,17 @@ const EmailManager: React.FC = () => {
         if (!selectedTemplate) return;
         setSaving(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            const res = await fetch(`${API_URL}/email-templates/${selectedTemplate._id}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ subject: editSubject, html: editHtml })
+            const response = await api.put(`/api/email-templates/${selectedTemplate._id}`, {
+                subject: editSubject,
+                html: editHtml
             });
-            const data = await res.json();
+            const data = (response as any)?.data || response;
             if (data.success) {
-                showNotification('success', '✅ تم حفظ القالب بنجاح!');
+                showNotification('success', '✅ Template saved successfully!');
                 setTemplates(prev => prev.map(t => t._id === selectedTemplate._id ? data.data : t));
                 setEditMode(false);
             } else {
-                showNotification('error', data.message || 'Failed to save template');
+                showNotification('error', data.message || 'Failed to save');
             }
         } catch (err) {
             showNotification('error', 'Error saving template');

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, CheckCircle, XCircle, Wallet, Edit, Loader2 } from 'lucide-react';
-
-const API_URL = 'http://localhost:5000/api';
+import { Search, CheckCircle, XCircle, Wallet, Edit, Loader2, AlertCircle } from 'lucide-react';
+import { api } from '../utils/api';
 
 interface Transaction {
     _id: string;
@@ -33,7 +32,7 @@ const WalletManager: React.FC = () => {
     // Transactions State
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loadingTx, setLoadingTx] = useState(true);
-    const [txFilter, setTxFilter] = useState('pending'); // default to pending
+    const [txFilter, setTxFilter] = useState('pending');
 
     // Users State
     const [users, setUsers] = useState<User[]>([]);
@@ -45,6 +44,13 @@ const WalletManager: React.FC = () => {
     const [adjustAmount, setAdjustAmount] = useState('');
     const [adjustNote, setAdjustNote] = useState('');
     const [adjusting, setAdjusting] = useState(false);
+
+    // Toast
+    const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const showToast = (type: 'success' | 'error', text: string) => {
+        setToast({ type, text });
+        setTimeout(() => setToast(null), 3500);
+    };
 
     useEffect(() => {
         if (activeTab === 'approvals') {
@@ -60,19 +66,11 @@ const WalletManager: React.FC = () => {
     const fetchTransactions = async () => {
         setLoadingTx(true);
         try {
-            const token = localStorage.getItem('adminToken');
             let query = '?type=deposit';
-            if (txFilter !== 'all') {
-                query += `&status=${txFilter}`;
-            }
-
-            const response = await fetch(`${API_URL}/transactions/admin${query}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (data.success) {
-                setTransactions(data.transactions);
-            }
+            if (txFilter !== 'all') query += `&status=${txFilter}`;
+            const response = await api.get(`/api/transactions/admin${query}`);
+            const data = (response as any)?.data || response;
+            if (data.success) setTransactions(data.transactions);
         } catch (error) {
             console.error('Error fetching transactions:', error);
         } finally {
@@ -81,28 +79,18 @@ const WalletManager: React.FC = () => {
     };
 
     const updateTxStatus = async (id: string, newStatus: string) => {
-        if (!confirm(`Are you sure you want to mark this transaction as ${newStatus}?`)) return;
-
+        if (!window.confirm(`Mark this transaction as ${newStatus}?`)) return;
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`${API_URL}/transactions/admin/${id}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ status: newStatus })
-            });
-
-            const data = await response.json();
+            const response = await api.put(`/api/transactions/admin/${id}/status`, { status: newStatus });
+            const data = (response as any)?.data || response;
             if (data.success) {
-                fetchTransactions(); // Refresh list
+                fetchTransactions();
+                showToast('success', `Transaction marked as ${newStatus}`);
             } else {
-                alert(`Error: ${data.message}`);
+                showToast('error', data.message || 'Update failed');
             }
         } catch (error) {
-            console.error('Error updating status:', error);
-            alert('Failed to update transaction status.');
+            showToast('error', 'Failed to update transaction status.');
         }
     };
 
@@ -112,14 +100,9 @@ const WalletManager: React.FC = () => {
     const fetchUsers = async () => {
         setLoadingUsers(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`${API_URL}/users/admin/all?limit=50&search=${searchQuery}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (data.success) {
-                setUsers(data.users);
-            }
+            const response = await api.get(`/api/users/admin/all?limit=50&search=${searchQuery}`);
+            const data = (response as any)?.data || response;
+            if (data.success) setUsers(data.users);
         } catch (error) {
             console.error('Error fetching users:', error);
         } finally {
@@ -136,38 +119,27 @@ const WalletManager: React.FC = () => {
 
     const handleAdjustBalance = async () => {
         if (!selectedUser || !adjustAmount || isNaN(parseFloat(adjustAmount))) {
-            alert("Please enter a valid amount.");
+            showToast('error', 'Please enter a valid amount.');
             return;
         }
-
         setAdjusting(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`${API_URL}/users/admin/${selectedUser._id}/wallet`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    amount: parseFloat(adjustAmount),
-                    note: adjustNote
-                })
+            const response = await api.post(`/api/users/admin/${selectedUser._id}/wallet`, {
+                amount: parseFloat(adjustAmount),
+                note: adjustNote
             });
-
-            const data = await response.json();
+            const data = (response as any)?.data || response;
             if (data.success) {
-                alert(`Balance updated! New balance: ${data.newBalance}€`);
+                showToast('success', `Balance updated! New balance: €${data.newBalance}`);
                 setSelectedUser(null);
                 setAdjustAmount('');
                 setAdjustNote('');
-                fetchUsers(); // Refresh list to reflect new balance
+                fetchUsers();
             } else {
-                alert(`Error: ${data.message}`);
+                showToast('error', data.message || 'Update failed');
             }
         } catch (error) {
-            console.error("Adjustment error", error);
-            alert("Failed to adjust balance.");
+            showToast('error', 'Failed to adjust balance.');
         } finally {
             setAdjusting(false);
         }
@@ -176,6 +148,16 @@ const WalletManager: React.FC = () => {
 
     return (
         <div className="p-6">
+            {/* Toast */}
+            {toast && (
+                <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium animate-in slide-in-from-right-4 ${toast.type === 'success'
+                        ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
+                        : 'bg-red-900/90 border-red-500/50 text-red-300'
+                    }`}>
+                    {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                    {toast.text}
+                </div>
+            )}
             <div className="mb-6 flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-black text-white mb-2 flex items-center gap-2">

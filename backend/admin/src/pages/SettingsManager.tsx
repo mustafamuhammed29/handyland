@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, CheckCircle, AlertCircle, Shield } from 'lucide-react';
+import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, CheckCircle, AlertCircle, Shield, Bell, Gift } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
 
@@ -203,6 +203,13 @@ export default function SettingsManager() {
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
 
+    // Toast state for settings save feedback
+    const [saveToast, setSaveToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const showSaveToast = (type: 'success' | 'error', text: string) => {
+        setSaveToast({ type, text });
+        setTimeout(() => setSaveToast(null), 3500);
+    };
+
     // Email Templates State
     const [emailTemplates, setEmailTemplates] = useState<EmailTemplateData[]>([]);
     const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<EmailTemplateData | null>(null);
@@ -252,21 +259,18 @@ export default function SettingsManager() {
     const handleSave = async () => {
         try {
             await api.put('/api/settings', settings);
-            alert('Settings saved successfully!');
+            showSaveToast('success', 'Settings saved successfully!');
         } catch (error) {
-            console.error("Failed to save settings:", error);
-            alert('Failed to save settings. Please check console for details.');
+            console.error('Failed to save settings:', error);
+            showSaveToast('error', 'Failed to save settings.');
         }
     };
 
     const fetchEmailTemplates = async () => {
         setEmailLoading(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            const res = await fetch('http://localhost:5000/api/email-templates', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
+            const response = await api.get('/api/email-templates');
+            const data = (response as any)?.data || response;
             if (data.success) setEmailTemplates(data.data);
         } catch (err) {
             console.error('Failed to load email templates', err);
@@ -292,15 +296,13 @@ export default function SettingsManager() {
         if (!selectedEmailTemplate) return;
         setEmailSaving(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            const res = await fetch(`http://localhost:5000/api/email-templates/${selectedEmailTemplate._id}`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject: editSubject, html: editHtml })
+            const response = await api.put(`/api/email-templates/${selectedEmailTemplate._id}`, {
+                subject: editSubject,
+                html: editHtml
             });
-            const data = await res.json();
+            const data = (response as any)?.data || response;
             if (data.success) {
-                showEmailNotification('success', '✅ تم حفظ القالب بنجاح!');
+                showEmailNotification('success', '✅ Template saved successfully!');
                 setEmailTemplates(prev => prev.map(t => t._id === selectedEmailTemplate._id ? data.data : t));
                 setEmailEditMode(false);
             } else {
@@ -331,6 +333,16 @@ export default function SettingsManager() {
 
     return (
         <div>
+            {/* Global Save Toast */}
+            {saveToast && (
+                <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium animate-in slide-in-from-right-4 ${saveToast.type === 'success'
+                    ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
+                    : 'bg-red-900/90 border-red-500/50 text-red-300'
+                    }`}>
+                    {saveToast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                    {saveToast.text}
+                </div>
+            )}
             <div className="flex justify-between items-center mb-8">
                 <div>
                     <h2 className="text-3xl font-black text-white">Global Settings</h2>
@@ -760,6 +772,235 @@ export default function SettingsManager() {
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'banner' && (
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-amber-500/10 rounded-xl">
+                                    <Bell className="text-amber-400" size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">Announcement Banner</h3>
+                                    <p className="text-slate-400 text-sm">Shows a dismissible banner at the top of every page for all visitors.</p>
+                                </div>
+                            </div>
+
+                            <div className="p-5 border border-slate-700 rounded-xl space-y-5">
+                                {/* Enable Toggle */}
+                                <div className="flex items-center justify-between py-3 border border-slate-700 rounded-xl px-4">
+                                    <span className="text-white font-bold">Enable Banner</span>
+                                    <button
+                                        type="button"
+                                        aria-label={settings.announcementBanner?.enabled ? 'Disable Banner' : 'Enable Banner'}
+                                        onClick={() => handleChange('announcementBanner', 'enabled', !settings.announcementBanner?.enabled)}
+                                        className={`relative w-12 h-6 rounded-full transition-all ${settings.announcementBanner?.enabled ? 'bg-blue-500' : 'bg-slate-700'
+                                            }`}
+                                    >
+                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${settings.announcementBanner?.enabled ? 'translate-x-6' : 'translate-x-0'
+                                            }`} />
+                                    </button>
+                                </div>
+
+                                {/* Banner Text */}
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Banner Text</label>
+                                    <input
+                                        type="text"
+                                        value={settings.announcementBanner?.text || ''}
+                                        onChange={e => handleChange('announcementBanner', 'text', e.target.value)}
+                                        placeholder="🎉 Free shipping on orders over €100!"
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                    />
+                                </div>
+
+                                {/* Banner Color */}
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-3">Banner Color</label>
+                                    <div className="flex gap-3">
+                                        {['blue', 'green', 'orange', 'red', 'purple', 'teal'].map(color => {
+                                            const colorMap: Record<string, string> = {
+                                                blue: 'bg-blue-600', green: 'bg-green-600',
+                                                orange: 'bg-orange-500', red: 'bg-red-600',
+                                                purple: 'bg-purple-600', teal: 'bg-teal-500'
+                                            };
+                                            return (
+                                                <button
+                                                    key={color}
+                                                    type="button"
+                                                    aria-label={`Select ${color} color`}
+                                                    onClick={() => handleChange('announcementBanner', 'color', color)}
+                                                    className={`w-9 h-9 rounded-full ${colorMap[color]} transition-all ${settings.announcementBanner?.color === color
+                                                        ? 'ring-4 ring-offset-2 ring-offset-slate-900 ring-white scale-110'
+                                                        : 'opacity-70 hover:opacity-100'
+                                                        }`}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Link */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-slate-400 text-sm font-bold mb-2">Link URL (optional)</label>
+                                        <input
+                                            type="url"
+                                            value={settings.announcementBanner?.link || ''}
+                                            onChange={e => handleChange('announcementBanner', 'link', e.target.value)}
+                                            placeholder="https://..."
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-slate-400 text-sm font-bold mb-2">Link Text</label>
+                                        <input
+                                            type="text"
+                                            value={settings.announcementBanner?.linkText || ''}
+                                            onChange={e => handleChange('announcementBanner', 'linkText', e.target.value)}
+                                            placeholder="Shop Now →"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Dismissible */}
+                                <div className="flex items-center justify-between py-3 border border-slate-700 rounded-xl px-4">
+                                    <span className="text-white font-bold">Allow users to dismiss banner</span>
+                                    <button
+                                        type="button"
+                                        aria-label={settings.announcementBanner?.dismissible ? 'Disable dismiss' : 'Enable dismiss'}
+                                        onClick={() => handleChange('announcementBanner', 'dismissible', !settings.announcementBanner?.dismissible)}
+                                        className={`relative w-12 h-6 rounded-full transition-all ${settings.announcementBanner?.dismissible ? 'bg-blue-500' : 'bg-slate-700'
+                                            }`}
+                                    >
+                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${settings.announcementBanner?.dismissible ? 'translate-x-6' : 'translate-x-0'
+                                            }`} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Live Preview */}
+                            {settings.announcementBanner?.text && (
+                                <div className="mt-4">
+                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Live Preview</p>
+                                    <div className={`flex items-center justify-between px-4 py-3 rounded-xl text-white text-sm font-medium ${settings.announcementBanner.color === 'green' ? 'bg-green-600' :
+                                        settings.announcementBanner.color === 'orange' ? 'bg-orange-500' :
+                                            settings.announcementBanner.color === 'red' ? 'bg-red-600' :
+                                                settings.announcementBanner.color === 'purple' ? 'bg-purple-600' :
+                                                    settings.announcementBanner.color === 'teal' ? 'bg-teal-500' : 'bg-blue-600'
+                                        }`}>
+                                        <span>{settings.announcementBanner.text}</span>
+                                        {settings.announcementBanner.link && (
+                                            <span className="underline opacity-80">{settings.announcementBanner.linkText || 'Learn More'}</span>
+                                        )}
+                                        {settings.announcementBanner.dismissible && (
+                                            <span className="opacity-60 text-xs ml-2">[×]</span>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'promo' && (
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-pink-500/10 rounded-xl">
+                                    <Gift className="text-pink-400" size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">Promo Popup</h3>
+                                    <p className="text-slate-400 text-sm">A timed popup shown to new visitors with a special offer or coupon code.</p>
+                                </div>
+                            </div>
+
+                            <div className="p-5 border border-slate-700 rounded-xl space-y-5">
+                                {/* Enable Toggle */}
+                                <div className="flex items-center justify-between py-3 border border-slate-700 rounded-xl px-4">
+                                    <span className="text-white font-bold">Enable Promo Popup</span>
+                                    <button
+                                        type="button"
+                                        aria-label={settings.promoPopup?.enabled ? 'Disable Popup' : 'Enable Popup'}
+                                        onClick={() => handleChange('promoPopup', 'enabled', !settings.promoPopup?.enabled)}
+                                        className={`relative w-12 h-6 rounded-full transition-all ${settings.promoPopup?.enabled ? 'bg-pink-500' : 'bg-slate-700'
+                                            }`}
+                                    >
+                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${settings.promoPopup?.enabled ? 'translate-x-6' : 'translate-x-0'
+                                            }`} />
+                                    </button>
+                                </div>
+
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Popup Title</label>
+                                    <input
+                                        type="text"
+                                        value={settings.promoPopup?.title || ''}
+                                        onChange={e => handleChange('promoPopup', 'title', e.target.value)}
+                                        placeholder="🎁 Special Offer!"
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Popup Message</label>
+                                    <textarea
+                                        value={settings.promoPopup?.message || ''}
+                                        onChange={e => handleChange('promoPopup', 'message', e.target.value)}
+                                        placeholder="Get 10% off your first order! Use the code below at checkout."
+                                        rows={3}
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 outline-none resize-none"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-slate-400 text-sm font-bold mb-2">Coupon Code</label>
+                                        <input
+                                            type="text"
+                                            value={settings.promoPopup?.couponCode || ''}
+                                            onChange={e => handleChange('promoPopup', 'couponCode', e.target.value.toUpperCase())}
+                                            placeholder="WELCOME10"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white font-mono tracking-wider focus:border-pink-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-slate-400 text-sm font-bold mb-2">Delay (seconds)</label>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            max={120}
+                                            value={settings.promoPopup?.delay ?? 5}
+                                            onChange={e => handleChange('promoPopup', 'delay', Number(e.target.value))}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="p-3 bg-blue-900/20 border border-blue-800 rounded-lg text-sm text-blue-300 flex gap-2">
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
+                                    <p>Make sure the coupon code you enter matches an active coupon in <strong>Coupon Manager</strong>. The popup will show after the delay only to new visitors (tracked via localStorage).</p>
+                                </div>
+                            </div>
+
+                            {/* Live Preview */}
+                            {settings.promoPopup?.title && (
+                                <div className="mt-4">
+                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Live Preview</p>
+                                    <div className="max-w-sm mx-auto bg-slate-900 border border-pink-500/30 rounded-2xl p-6 shadow-2xl text-center">
+                                        <div className="text-3xl mb-2">🎁</div>
+                                        <h4 className="text-white font-black text-lg mb-2">{settings.promoPopup.title}</h4>
+                                        <p className="text-slate-400 text-sm mb-4">{settings.promoPopup.message || 'Your message here...'}</p>
+                                        {settings.promoPopup.couponCode && (
+                                            <div className="px-4 py-2 bg-pink-500/10 border border-pink-500/40 rounded-xl font-mono text-pink-400 font-bold text-lg mb-4 tracking-widest">
+                                                {settings.promoPopup.couponCode}
+                                            </div>
+                                        )}
+                                        <button className="w-full py-2 bg-pink-500 text-white font-bold rounded-xl text-sm">Copy Code</button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
