@@ -124,18 +124,18 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(mongoSanitize); // Prevent NoSQL injection
 const xss = require('xss');
 const xssSanitize = (req, res, next) => {
-  const sanitizeHelper = (obj) => {
-    if (typeof obj === 'string') return xss(obj);
-    if (Array.isArray(obj)) return obj.map(sanitizeHelper);
-    if (typeof obj === 'object' && obj !== null) {
-      Object.keys(obj).forEach(key => { obj[key] = sanitizeHelper(obj[key]); });
-    }
-    return obj;
-  };
-  if (req.body) req.body = sanitizeHelper(req.body);
-  if (req.query) req.query = sanitizeHelper(req.query);
-  if (req.params) req.params = sanitizeHelper(req.params);
-  next();
+    const sanitizeHelper = (obj) => {
+        if (typeof obj === 'string') return xss(obj);
+        if (Array.isArray(obj)) return obj.map(sanitizeHelper);
+        if (typeof obj === 'object' && obj !== null) {
+            Object.keys(obj).forEach(key => { obj[key] = sanitizeHelper(obj[key]); });
+        }
+        return obj;
+    };
+    if (req.body) req.body = sanitizeHelper(req.body);
+    if (req.query) req.query = sanitizeHelper(req.query);
+    if (req.params) req.params = sanitizeHelper(req.params);
+    next();
 };
 app.use(xssSanitize); // FIXED: [Custom XSS middleware]
 app.use(cookieParser());
@@ -165,7 +165,15 @@ app.post('/api/upload', uploadLimiter, protect, upload.single('image'), (req, re
         return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
     // Use relative path instead of hardcoded localhost
-    const imageUrl = `/uploads/${req.file.filename}`;
+    let imageUrl = `/uploads/${req.file.filename}`;
+
+    // TODO: If using cloud storage, modify to return the cloud URL instead
+    if (process.env.CLOUDINARY_URL) {
+        // imageUrl = req.file.path; // (if using multer-storage-cloudinary)
+    } else if (process.env.S3_BUCKET) {
+        // imageUrl = req.file.location; // (if using multer-s3)
+    }
+
     res.json({ success: true, imageUrl });
 });
 
