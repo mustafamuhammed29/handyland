@@ -107,11 +107,19 @@ function AppContent() {
   const location = useLocation();
   const [lang, setLang] = useState<LanguageCode>('de');
   const { user, setUser, logout } = useAuth(); // Use AuthContext
-  const { cart } = useCart();
+  const { cart, setIsCartOpen } = useCart(); // FIXED: [Added setIsCartOpen for /cart redirect]
 
   // Use settings context to check for global load errors
   // This is now safe because AppContent is wrapped by SettingsProvider in App
   const { settings, loading: settingsLoading, error: settingsError } = useSettings();
+
+  // FIXED: [Open cart drawer if navigated from /cart]
+  useEffect(() => {
+    if (location.state?.message === 'cart_open') {
+      setIsCartOpen(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, setIsCartOpen]);
 
   // Load language preference
   useEffect(() => {
@@ -188,7 +196,7 @@ function AppContent() {
 
               {/* UX Report Redirects */}
               <Route path="/products" element={<Navigate to="/marketplace" replace />} />
-              <Route path="/cart" element={<Navigate to="/" replace />} />
+              <Route path="/cart" element={<Navigate to="/" replace state={{ message: 'cart_open' }} />} /> {/* FIXED: [Route /cart gives feedback by opening cart drawer] */}
               <Route path="/about" element={<Navigate to="/uber-uns" replace />} />
               <Route path="/admin" element={<AdminRedirect />} />
 

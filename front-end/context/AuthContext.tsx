@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const data = await authService.refreshToken();
             if (data?.token) {
-                localStorage.setItem('accessToken', data.token);
+                // FIXED: [Security root - removed localStorage.setItem('accessToken', ...)]
                 return true;
             }
             return false;
@@ -41,9 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const initAuth = async () => {
             const storedUser = localStorage.getItem('user');
-            const storedToken = localStorage.getItem('accessToken');
 
-            if (!storedUser && !storedToken) {
+            if (!storedUser) {
+                // FIXED: [Only rely on localStorage.getItem('user') to determine if a session might exist]
                 if (!ignore) setLoading(false);
                 return;
             }
@@ -73,14 +73,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 } catch {
                                     setUser(null);
                                     localStorage.removeItem('user');
-                                    localStorage.removeItem('accessToken');
-                                    localStorage.removeItem('refreshToken');
+                                    // FIXED: [Removed localStorage.removeItem for tokens]
                                 }
                             } else {
                                 setUser(null);
                                 localStorage.removeItem('user');
-                                localStorage.removeItem('accessToken');
-                                localStorage.removeItem('refreshToken');
+                                // FIXED: [Removed localStorage.removeItem for tokens]
                             }
                         }
                     }
@@ -101,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
     const loginWithToken = async (token: string) => {
-        localStorage.setItem('accessToken', token);
+        // FIXED: [Removed localStorage.setItem for accessToken]
         const { user: userData } = await authService.getMe();
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
@@ -114,9 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (data.success && data.user) {
 
-                // Hybrid Auth: Store tokens in localStorage as fallback
-                if (data.token) localStorage.setItem('accessToken', data.token);
-                if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+                // FIXED: [Removed localStorage.setItem for accessToken and refreshToken to prevent XSS vulnerability]
 
                 localStorage.setItem('user', JSON.stringify(data.user));
                 setUser(data.user);
@@ -147,8 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const logout = () => {
         setUser(null);
         localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        // FIXED: [Removed localStorage.removeItem for tokens as they are cleared server-side via cookies]
 
         authService.logout().catch(err => {
         });
