@@ -47,7 +47,7 @@ const registerRules = [
         .matches(/[A-Za-z]/).withMessage('Password must contain at least one letter')
         .matches(/\d/).withMessage('Password must contain at least one number')
         .matches(/[@$!%*#?&]/).withMessage('Password must contain at least one special character'),
-    body('phone').optional().isMobilePhone('any').withMessage('Invalid phone number'),
+    body('phone').optional({ checkFalsy: true }).matches(/^\+?[0-9\s\-()]{7,20}$/).withMessage('Invalid phone number'),
 ];
 
 const loginRules = [

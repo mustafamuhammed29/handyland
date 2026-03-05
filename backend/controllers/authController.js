@@ -142,12 +142,22 @@ exports.login = async (req, res) => {
         const { email, password } = req.body;
 
         // Check for user email
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
 
         if (!user) {
+            // Prevent user enumeration by just delaying slightly if we want, or straight return
             return res.status(400).json({
                 success: false,
                 message: 'Invalid credentials'
+            });
+        }
+
+        // Check if account is locked
+        if (user.lockUntil && user.lockUntil > Date.now()) {
+            const timeRemaining = Math.ceil((user.lockUntil - Date.now()) / 1000 / 60);
+            return res.status(423).json({
+                success: false,
+                message: `Account locked due to too many failed attempts. Please try again in ${timeRemaining} minutes.`
             });
         }
 
@@ -155,10 +165,28 @@ exports.login = async (req, res) => {
         const isMatch = await user.matchPassword(password);
 
         if (!isMatch) {
+            user.loginAttempts = (user.loginAttempts || 0) + 1;
+            if (user.loginAttempts >= 5) {
+                user.lockUntil = Date.now() + 15 * 60 * 1000; // 15 mins lock
+            }
+            // Use updateOne to avoid full validation lifecycle for simple counter logic
+            await User.updateOne(
+                { _id: user._id },
+                { $set: { loginAttempts: user.loginAttempts, lockUntil: user.lockUntil } }
+            );
+
             return res.status(400).json({
                 success: false,
                 message: 'Invalid credentials'
             });
+        }
+
+        // Reset login attempts on successful login
+        if (user.loginAttempts > 0 || user.lockUntil) {
+            await User.updateOne(
+                { _id: user._id },
+                { $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } }
+            );
         }
 
         // Require email verification by default; set REQUIRE_EMAIL_VERIFICATION=false to skip
@@ -495,9 +523,11 @@ exports.forgotPassword = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'No user found with this email'
+            // Prevent user enumeration by returning a generic success message
+            // Optionally wait to mimic bcrypt timing if this was login, but here it's fine
+            return res.status(200).json({
+                success: true,
+                message: 'Password reset email sent! Please check your email.'
             });
         }
 
