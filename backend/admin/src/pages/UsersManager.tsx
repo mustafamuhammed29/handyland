@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Trash2, CheckSquare, Square } from 'lucide-react';
-
-const API_URL = 'http://localhost:5000/api';
+import { Search, Trash2, CheckSquare, Square, CheckCircle, AlertCircle } from 'lucide-react';
+import { api } from '../utils/api';
 
 interface User {
     _id: string;
@@ -18,6 +17,12 @@ const UsersManager: React.FC = () => {
     const [search, setSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+    const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    const showToast = (type: 'success' | 'error', text: string) => {
+        setToast({ type, text });
+        setTimeout(() => setToast(null), 3500);
+    };
 
     useEffect(() => {
         fetchUsers();
@@ -25,19 +30,10 @@ const UsersManager: React.FC = () => {
 
     const fetchUsers = async () => {
         try {
-            const token = localStorage.getItem('adminToken');
-            const url = `${API_URL}/users/admin/all${roleFilter ? `?role=${roleFilter}` : ''}`;
-
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                setUsers(data.users);
-            }
+            const url = `/api/users/admin/all${roleFilter ? `?role=${roleFilter}` : ''}`;
+            const response = await api.get(url);
+            const data = (response as any)?.data || response;
+            if (data.success) setUsers(data.users);
         } catch (error) {
             console.error('Error fetching users:', error);
         } finally {
@@ -47,111 +43,58 @@ const UsersManager: React.FC = () => {
 
     const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`${API_URL}/users/admin/${userId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ isActive: !currentStatus })
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                fetchUsers();
-            }
+            const response = await api.put(`/api/users/admin/${userId}/status`, { isActive: !currentStatus });
+            const data = (response as any)?.data || response;
+            if (data.success) { fetchUsers(); showToast('success', `User ${!currentStatus ? 'activated' : 'deactivated'}`); }
         } catch (error) {
-            console.error('Error updating user status:', error);
+            showToast('error', 'Failed to update user status');
         }
     };
 
     const changeUserRole = async (userId: string, newRole: string) => {
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`${API_URL}/users/admin/${userId}/role`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ role: newRole })
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                fetchUsers();
-            }
+            const response = await api.put(`/api/users/admin/${userId}/role`, { role: newRole });
+            const data = (response as any)?.data || response;
+            if (data.success) { fetchUsers(); showToast('success', `Role changed to ${newRole}`); }
         } catch (error) {
-            console.error('Error updating user role:', error);
+            showToast('error', 'Failed to update role');
         }
     };
 
     const deleteUser = async (userId: string) => {
-        if (!confirm('Are you sure you want to delete this user?')) return;
-
+        if (!window.confirm('Are you sure you want to delete this user?')) return;
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`${API_URL}/users/admin/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                fetchUsers();
-                setSelectedUsers(selectedUsers.filter(id => id !== userId));
-            }
+            await api.delete(`/api/users/admin/${userId}`);
+            fetchUsers();
+            setSelectedUsers(selectedUsers.filter(id => id !== userId));
+            showToast('success', 'User deleted');
         } catch (error) {
-            console.error('Error deleting user:', error);
+            showToast('error', 'Failed to delete user');
         }
     };
 
     const handleBulkDelete = async () => {
-        if (!confirm(`Are you sure you want to delete ${selectedUsers.length} selected users?`)) return;
-
+        if (!window.confirm(`Delete ${selectedUsers.length} selected users?`)) return;
         try {
-            const token = localStorage.getItem('adminToken');
-            // Execute deletions concurrently
-            await Promise.all(selectedUsers.map(userId =>
-                fetch(`${API_URL}/users/admin/${userId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                })
-            ));
-
+            await Promise.all(selectedUsers.map(userId => api.delete(`/api/users/admin/${userId}`)));
             fetchUsers();
             setSelectedUsers([]);
+            showToast('success', `${selectedUsers.length} users deleted`);
         } catch (error) {
-            console.error('Error performing bulk delete:', error);
+            showToast('error', 'Bulk delete failed');
         }
     };
 
     const handleBulkRoleChange = async (newRole: string) => {
         if (!newRole) return;
-        if (!confirm(`Are you sure you want to change the role of ${selectedUsers.length} users to ${newRole}?`)) return;
-
+        if (!window.confirm(`Change role of ${selectedUsers.length} users to ${newRole}?`)) return;
         try {
-            const token = localStorage.getItem('adminToken');
-            await Promise.all(selectedUsers.map(userId =>
-                fetch(`${API_URL}/users/admin/${userId}/role`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ role: newRole })
-                })
-            ));
-
+            await Promise.all(selectedUsers.map(userId => api.put(`/api/users/admin/${userId}/role`, { role: newRole })));
             fetchUsers();
             setSelectedUsers([]);
+            showToast('success', `Role changed to ${newRole} for ${selectedUsers.length} users`);
         } catch (error) {
-            console.error('Error performing bulk role change:', error);
+            showToast('error', 'Bulk role change failed');
         }
     };
 
@@ -180,6 +123,16 @@ const UsersManager: React.FC = () => {
 
     return (
         <div className="p-6">
+            {/* Toast */}
+            {toast && (
+                <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium animate-in slide-in-from-right-4 ${toast.type === 'success'
+                        ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
+                        : 'bg-red-900/90 border-red-500/50 text-red-300'
+                    }`}>
+                    {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                    {toast.text}
+                </div>
+            )}
             {/* Header */}
             <div className="mb-6">
                 <h1 className="text-3xl font-black text-white mb-2">User Management</h1>

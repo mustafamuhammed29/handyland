@@ -49,6 +49,7 @@ exports.createTicket = async (req, res) => {
 };
 
 const { sendEmail, emailTemplates } = require('../utils/emailService');
+const { notify } = require('../utils/notificationService');
 
 // @desc    Update repair ticket status (Admin)
 // @route   PUT /api/repairs/tickets/:id/status
@@ -69,7 +70,7 @@ exports.updateTicketStatus = async (req, res) => {
         await ticket.save();
 
         // Send Email Notification
-        if (status) {
+        if (status && ticket.user) {
             try {
                 await sendEmail({
                     email: ticket.user.email,
@@ -79,6 +80,25 @@ exports.updateTicketStatus = async (req, res) => {
             } catch (emailError) {
                 console.error('Email sending failed:', emailError);
             }
+
+            // Real-time DB notification + Socket.io push
+            const repairLabels = {
+                received: 'تم استلام جهازك 📦',
+                diagnosing: 'جاري تشخيص الجهاز 🔍',
+                repairing: 'جاري إصلاح جهازك 🔧',
+                waiting_parts: 'في انتظار قطع الغيار ⏳',
+                completed: 'تم إصلاح جهازك بنجاح ✅',
+                cancelled: 'تم إلغاء طلب الإصلاح ❌'
+            };
+            const label = repairLabels[status] || status;
+
+            notify({
+                userId: ticket.user._id.toString(),
+                message: `إصلاح ${ticket.device}: ${label}${estimatedCost ? ` — التكلفة المتوقعة: €${estimatedCost}` : ''
+                    }`,
+                type: status === 'completed' ? 'success' : status === 'cancelled' ? 'warning' : 'info',
+                link: `/dashboard?tab=repairs`
+            }).catch(console.error);
         }
 
         res.status(200).json({

@@ -5,6 +5,7 @@ const RefundRequest = require('../models/RefundRequest'); // Added
 const Coupon = require('../models/Coupon');
 const Accessory = require('../models/Accessory');
 const { createNotification } = require('../controllers/notificationController');
+const { notify } = require('../utils/notificationService');
 let stripe;
 if (process.env.STRIPE_SECRET_KEY) {
     stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -420,9 +421,28 @@ exports.updateOrderStatus = async (req, res) => {
             }
         }
 
-        // Real-time notification via Socket.IO
+        // Real-time notification via Socket.IO + persistent DB notification
         if (status && status !== oldStatus) {
             emitOrderUpdate(order.user?._id?.toString(), order);
+
+            const statusLabels = {
+                processing: 'قيد المعالجة',
+                shipped: 'تم الشحن',
+                delivered: 'تم التسليم ✅',
+                cancelled: 'تم الإلغاء ❌',
+                return_requested: 'طلب إرجاع',
+                refunded: 'تم الاسترداد'
+            };
+            const label = statusLabels[status] || status;
+
+            // Fire-and-forget — don't await so it never blocks the response
+            notify({
+                userId: order.user._id.toString(),
+                message: `طلبك #${order.orderNumber} — ${label}${trackingNumber ? ` · رقم التتبع: ${trackingNumber}` : ''
+                    }`,
+                type: status === 'cancelled' ? 'warning' : status === 'delivered' ? 'success' : 'info',
+                link: `/dashboard?tab=orders`
+            }).catch(console.error);
         }
 
         res.status(200).json({
