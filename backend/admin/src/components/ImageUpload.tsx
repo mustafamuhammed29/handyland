@@ -25,7 +25,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Pro
         formData.append('image', file);
 
         try {
-            const res = await fetch('http://localhost:5000/api/upload', {
+            const res = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square, Star } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
 import { api } from '../utils/api';
 
@@ -57,6 +57,27 @@ export default function ProductsManager() {
             fetchProducts();
         } catch (error) {
             console.error("Failed to delete", error);
+        }
+    };
+
+    const handleSetHero = async (product: any) => {
+        if (!confirm(`Set ${product.model || product.name} as the featured device on the homepage?`)) return;
+        try {
+            const res = await api.get('/api/settings');
+            const data = res.data;
+            const updatedHero = {
+                ...data.hero,
+                productName: product.name || product.model,
+                productPrice: `€${product.price}`,
+                heroImage: product.image || product.imageUrl || '',
+                productLabel: 'FEATURED DEVICE'
+            };
+            const updatedSettings = { ...data, hero: updatedHero };
+            await api.put('/api/settings', updatedSettings);
+            alert('Successfully updated homepage featured device!');
+        } catch (error) {
+            console.error("Failed to set hero", error);
+            alert('Failed to update homepage featured device.');
         }
     };
 
@@ -264,6 +285,13 @@ export default function ProductsManager() {
                                         </td>
                                         <td className="p-6 text-right">
                                             <div className="flex justify-end gap-2">
+                                                <button
+                                                    onClick={() => handleSetHero(p)}
+                                                    className="p-2 hover:bg-yellow-500/10 text-yellow-400 rounded-lg transition-colors"
+                                                    title="Set as Featured on Homepage"
+                                                >
+                                                    <Star size={18} />
+                                                </button>
                                                 <button
                                                     onClick={() => handleEdit(p)}
                                                     className="p-2 hover:bg-blue-500/10 text-blue-400 rounded-lg transition-colors"

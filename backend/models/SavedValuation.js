@@ -39,7 +39,7 @@ const SavedValuationSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['active', 'expired', 'sold', 'pending_shipment'],
+        enum: ['active', 'expired', 'sold', 'pending_shipment', 'received', 'paid'],
         default: 'active'
     },
     isQuote: {

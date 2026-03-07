@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Loader } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api';
 import { getImageUrl } from '../utils/imageUrl';
 
-export const GlobalSearchBar: React.FC = () => {
+interface GlobalSearchBarProps {
+    className?: string;
+}
+
+export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ className = "hidden lg:block" }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedTerm, setDebouncedTerm] = useState('');
     const [results, setResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
+    const { t } = useTranslation();
 
     const wrapperRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
@@ -73,7 +79,7 @@ export const GlobalSearchBar: React.FC = () => {
     };
 
     return (
-        <div ref={wrapperRef} className="relative w-full max-w-sm hidden lg:block">
+        <div ref={wrapperRef} className={`relative w-full max-w-sm ${className}`}>
             <form onSubmit={handleSubmit} className="relative group">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-brand-primary transition-colors z-10" />
                 <input
@@ -81,7 +87,7 @@ export const GlobalSearchBar: React.FC = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onFocus={() => { if (searchTerm) setShowDropdown(true); }}
-                    placeholder="Search devices..."
+                    placeholder={t('navbar.searchPlaceholder', 'Search devices...')}
                     className="w-full bg-slate-900/50 border border-slate-700/50 text-white text-sm rounded-full pl-10 pr-10 py-2 focus:outline-none focus:border-brand-primary/50 focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-slate-500"
                 />
 
@@ -130,12 +136,12 @@ export const GlobalSearchBar: React.FC = () => {
                                 onClick={() => setShowDropdown(false)}
                                 className="block text-center text-xs text-brand-primary hover:text-brand-primary hover:bg-slate-800/50 py-3 font-bold uppercase tracking-wider transition-colors"
                             >
-                                View all results →
+                                {t('search.viewAll', 'View all results →')}
                             </Link>
                         </div>
                     ) : (
                         <div className="p-6 text-center text-sm text-slate-500">
-                            {isSearching ? 'Searching...' : `No devices found for "${searchTerm}"`}
+                            {isSearching ? t('search.searching', 'Searching...') : t('search.noResultsFor', `No devices found for "{{searchTerm}}"`, { searchTerm })}
                         </div>
                     )}
                 </div>

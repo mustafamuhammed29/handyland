@@ -223,22 +223,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 </button>
                             ))}
 
-                            {isAdmin && (
-                                <>
-                                    <div className="h-px bg-slate-800 my-4 mx-2"></div>
-                                    <a
-                                        href={ADMIN_PANEL_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-purple-600/10 border border-purple-600/30 hover:bg-purple-600/20 hover:border-purple-500/50 text-purple-400 font-bold transition-all duration-300 group"
-                                    >
-                                        <Shield className="w-4 h-4" />
-                                        <span>Admin-Konsole</span>
-                                        <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-60 group-hover:opacity-100" />
-                                    </a>
-                                </>
-                            )}
-
                             <div className="h-px bg-slate-800 my-4"></div>
 
                             <div className="flex items-center gap-4">

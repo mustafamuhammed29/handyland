@@ -325,11 +325,18 @@ exports.saveValuation = async (req, res) => {
 // @access  Private
 exports.deleteValuation = async (req, res) => {
     try {
-        const result = await SavedValuation.findOneAndDelete({
+        const quote = await SavedValuation.findOne({
             _id: req.params.id,
             user: req.user._id
         });
-        if (!result) return res.status(404).json({ success: false, message: 'Valuation not found' });
+
+        if (!quote) return res.status(404).json({ success: false, message: 'Valuation not found' });
+
+        if (!['active', 'pending_shipment'].includes(quote.status)) {
+            return res.status(400).json({ success: false, message: 'Anfrage kann nicht mehr gelöscht werden, da sie bereits in Bearbeitung ist.' });
+        }
+
+        await SavedValuation.deleteOne({ _id: quote._id });
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -341,10 +348,13 @@ exports.deleteValuation = async (req, res) => {
 // @access  Public
 exports.getQuoteByReference = async (req, res) => {
     try {
+        console.log(`[getQuoteByReference] Looking for: "${req.params.reference}"`);
         const quote = await SavedValuation.findOne({
             quoteReference: req.params.reference,
             isQuote: true
         });
+
+        console.log(`[getQuoteByReference] Found:`, quote ? quote.quoteReference : 'NULL');
 
         if (!quote) {
             return res.status(404).json({ success: false, message: 'Quote not found' });
@@ -439,7 +449,7 @@ exports.getAdminQuotes = async (req, res) => {
     try {
         const quotes = await SavedValuation.find({ isQuote: true })
             .sort({ createdAt: -1 })
-            .populate('user', 'firstName lastName email')
+            .populate('user', 'name email phone')
             .lean();
 
         // Stats
@@ -471,20 +481,25 @@ exports.getAdminQuotes = async (req, res) => {
 // @access  Private/Admin
 exports.updateQuoteStatus = async (req, res) => {
     try {
+        console.log(`[Admin Quote Status] Attempting to update quote ${req.params.id} to status: ${req.body.status}`);
+
         const { status } = req.body;
-        const validStatuses = ['pending_shipment', 'received', 'paid'];
+        const validStatuses = ['active', 'pending_shipment', 'received', 'paid'];
         if (!validStatuses.includes(status)) {
+            console.log(`[Admin Quote Status] Invalid status: ${status}`);
             return res.status(400).json({ success: false, message: 'Invalid status' });
         }
 
         const quote = await SavedValuation.findById(req.params.id);
         if (!quote) {
+            console.log(`[Admin Quote Status] Quote not found: ${req.params.id}`);
             return res.status(404).json({ success: false, message: 'Quote not found' });
         }
 
         const oldStatus = quote.status;
         quote.status = status;
         await quote.save();
+        console.log(`[Admin Quote Status] Saved quote ${quote._id} to ${status}`);
 
         // Send email notification on status change
         const emailTo = quote.contact?.email || null;
@@ -514,7 +529,47 @@ exports.updateQuoteStatus = async (req, res) => {
             }
         };
 
-        if (emailTo && statusMessages[status]) {
+        const { adminMessage } = req.body;
+
+        const statusLabels = {
+            pending_shipment: 'Versand ausstehend',
+            received: 'Gerät erhalten',
+            paid: 'Bezahlt',
+            active: 'Aktiv'
+        };
+
+        if (emailTo && adminMessage && adminMessage.trim()) {
+            // Admin provided a custom message - send it as a nicely formatted email
+            try {
+                const htmlContent = `
+                    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+                        <div style="background:#1e293b;padding:20px;border-radius:12px 12px 0 0;border-bottom:3px solid #06b6d4;">
+                            <h2 style="color:#fff;margin:0;">Statusaktualisierung: ${statusLabels[status] || status}</h2>
+                            <p style="color:#94a3b8;margin:5px 0 0;font-size:13px;">Angebot: ${quote.quoteReference}</p>
+                        </div>
+                        <div style="background:#0f172a;padding:24px;border-radius:0 0 12px 12px;">
+                            <pre style="color:#e2e8f0;font-family:Arial,sans-serif;white-space:pre-wrap;line-height:1.7;font-size:14px;margin:0;">${adminMessage.trim()}</pre>
+                            <hr style="border-color:#1e293b;margin:20px 0;" />
+                            <p style="color:#475569;font-size:12px;margin:0;">HandyLand GmbH · Gerätebewertungs-Service</p>
+                        </div>
+                    </div>
+                `;
+                const statusSubjects = {
+                    pending_shipment: `Dein Angebot: Bitte Gerät einsenden – ${quote.quoteReference}`,
+                    received: `Dein Gerät ist angekommen – ${quote.quoteReference}`,
+                    paid: `Zahlung erfolgt – ${quote.quoteReference}`,
+                    active: `Statusaktualisierung – ${quote.quoteReference}`
+                };
+                await sendEmail({
+                    email: emailTo,
+                    subject: statusSubjects[status] || `Statusaktualisierung – ${quote.quoteReference}`,
+                    html: htmlContent
+                });
+            } catch (emailErr) {
+                console.error('Failed to send admin message email:', emailErr);
+            }
+        } else if (emailTo && statusMessages[status]) {
+            // No custom message – use default template
             try {
                 await sendEmail({
                     email: emailTo,

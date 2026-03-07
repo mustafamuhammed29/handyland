@@ -13,7 +13,11 @@ const getSocket = (): Socket => {
     if (!socket) {
         socket = io(SOCKET_URL, {
             autoConnect: false,
-            transports: ['websocket', 'polling'],
+            transports: ['polling', 'websocket'], // polling first for reliability
+            upgrade: true,                        // then upgrade to websocket
+            reconnection: true,
+            reconnectionDelay: 2000,
+            reconnectionAttempts: 3,
         });
     }
     return socket;

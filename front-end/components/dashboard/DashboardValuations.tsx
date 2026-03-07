@@ -156,7 +156,7 @@ export const DashboardValuations: React.FC<DashboardValuationsProps> = ({
                             </div>
 
                             {/* Countdown */}
-                            {!isPaid && (
+                            {statusKey === 'active' && (
                                 <div className="mb-3">
                                     <CountdownBadge expiresAt={val.expiresAt} />
                                 </div>
@@ -175,7 +175,7 @@ export const DashboardValuations: React.FC<DashboardValuationsProps> = ({
                                     >
                                         <Shield className="w-5 h-5" />
                                     </button>
-                                    {onDelete && (
+                                    {onDelete && ['active', 'pending_shipment'].includes(statusKey) && (
                                         <button
                                             onClick={() => onDelete(val.id!)}
                                             className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
@@ -255,17 +255,19 @@ export const DashboardValuations: React.FC<DashboardValuationsProps> = ({
                             <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700">
                                 <div className="text-xs text-slate-500 font-bold uppercase mb-1">Gerät</div>
                                 <div className="text-lg font-bold text-white mb-1">{selectedDetails.device}</div>
-                                <div className="text-sm text-slate-400">{selectedDetails.specs} • {selectedDetails.condition}</div>
+                                <div className="text-sm text-slate-400">{selectedDetails.specs}</div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-slate-800/30 rounded-2xl p-4 border border-slate-800">
                                     <div className="text-xs text-slate-500 font-bold uppercase mb-1">Displayzustand</div>
-                                    <div className="text-sm font-medium text-slate-300">{selectedDetails.screenCondition || '-'}</div>
+                                    <div className="text-sm font-medium text-slate-300">
+                                        {selectedDetails.condition === 'hervorragend' ? 'Wie Neu' : selectedDetails.condition === 'sehr_gut' ? 'Sehr Gut' : selectedDetails.condition === 'gut' ? 'Gut' : selectedDetails.condition === 'beschadigt' ? 'Beschädigt' : 'Siehe Variante'}
+                                    </div>
                                 </div>
                                 <div className="bg-slate-800/30 rounded-2xl p-4 border border-slate-800">
                                     <div className="text-xs text-slate-500 font-bold uppercase mb-1">Gehäusezustand</div>
-                                    <div className="text-sm font-medium text-slate-300">{selectedDetails.bodyCondition || '-'}</div>
+                                    <div className="text-sm font-medium text-slate-300">Siehe Variante</div>
                                 </div>
                             </div>
 
@@ -273,10 +275,10 @@ export const DashboardValuations: React.FC<DashboardValuationsProps> = ({
                                 <div>
                                     <div className="text-xs text-slate-500 font-bold uppercase mb-1">Funktionalität</div>
                                     <div className="text-sm font-medium text-slate-300">
-                                        {selectedDetails.isFunctional !== false ? 'Voll funktionsfähig' : 'Defekt'}
+                                        Basierend auf Angebotspreis
                                     </div>
                                 </div>
-                                <div className={`w-3 h-3 rounded-full ${selectedDetails.isFunctional !== false ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+                                <div className={`w-3 h-3 rounded-full bg-emerald-500`}></div>
                             </div>
                         </div>
 

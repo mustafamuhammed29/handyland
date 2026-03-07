@@ -154,11 +154,11 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
 
                     {/* LEFT: THE DIAGNOSTIC VIEWER (Interactive Slider) */}
                     <div className="w-full lg:w-2/3 flex flex-col">
-                        <div className="relative flex-1 rounded-3xl overflow-hidden border-2 border-slate-800 bg-slate-950 shadow-2xl group">
+                        <div className="relative flex-1 rounded-3xl overflow-hidden border-2 border-slate-800 bg-slate-950 shadow-2xl group min-h-[400px] lg:min-h-[500px]">
                             {/* Before/After Container */}
                             <div
                                 ref={containerRef}
-                                className="relative w-full h-full cursor-ew-resize select-none min-h-[500px]"
+                                className="absolute inset-0 w-full h-full cursor-ew-resize select-none overflow-hidden"
                                 onMouseDown={handleMouseDown}
                                 onMouseUp={handleMouseUp}
                                 onMouseMove={handleMouseMove}
@@ -172,7 +172,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                                         alt="After"
                                         className="w-full h-full object-cover"
                                     />
-                                    <div className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm flex items-center gap-2 shadow-lg">
+                                    <div className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm flex items-center gap-2 shadow-lg z-40">
                                         <CheckCircle className="w-4 h-4" />
                                         {activeProject.labelAfter}
                                     </div>
@@ -180,7 +180,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
 
                                 {/* BEFORE Image (Left) - Clipped */}
                                 <div
-                                    className="absolute inset-0 overflow-hidden"
+                                    className="absolute inset-0 overflow-hidden z-20"
                                     style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
                                 >
                                     <img
@@ -188,14 +188,14 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                                         alt="Before"
                                         className="w-full h-full object-cover"
                                     />
-                                    <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg">
+                                    <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg z-40">
                                         {activeProject.labelBefore}
                                     </div>
                                 </div>
 
                                 {/* Slider Line */}
                                 <div
-                                    className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_20px_rgba(255,255,255,0.8)] z-20 pointer-events-none"
+                                    className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_20px_rgba(255,255,255,0.8)] z-30 pointer-events-none"
                                     style={{ left: `${sliderPosition}%` }}
                                 >
                                     <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center">
@@ -205,15 +205,15 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
 
                                 {/* Scan Animation Overlay */}
                                 {isScanning && (
-                                    <div className="absolute inset-0 pointer-events-none z-30">
+                                    <div className="absolute inset-0 pointer-events-none z-50">
                                         <div className="absolute inset-0 bg-brand-primary/20 animate-pulse"></div>
                                         <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)] animate-scan"></div>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Bottom Info Bar */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent p-6 space-y-3">
+                            {/* Bottom Info Bar - ensure it stays above the absolute container */}
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent p-6 space-y-3 z-40 pointer-events-none">
                                 <h3 className="text-2xl font-bold text-white flex items-center gap-3">
                                     {activeProject.title}
                                     <span className={`text-xs px-3 py-1 rounded-full font-bold ${activeProject.difficulty === 'Expert' ? 'bg-red-500/20 text-red-400 border border-red-500/50' :
@@ -307,7 +307,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                                     className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border border-brand-primary/30 text-brand-primary text-sm font-bold hover:bg-cyan-900/70 transition-all flex items-center justify-center gap-2 group"
                                 >
                                     <Smartphone className="w-4 h-4 group-hover:animate-bounce" />
-                                    {settings.buttonText} {settings.totalRepairs ? settings.totalRepairs.toLocaleString() : ''}
+                                    {settings.buttonText} {comparisons.length}
                                 </button>
                             </div>
                         </div>
@@ -329,6 +329,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                             </div>
                             <button
                                 onClick={() => setShowAllModal(false)}
+                                aria-label="Close modal"
                                 className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
                             >
                                 <X className="w-6 h-6" />
@@ -336,28 +337,37 @@ export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-6 overflow-y-auto">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="p-4 md:p-6 overflow-y-auto custom-scrollbar">
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
                                 {comparisons.map((item) => (
-                                    <div key={item._id} className="bg-slate-950 border border-slate-800 rounded-xl p-4 hover:border-brand-primary transition-colors">
-                                        <h4 className="text-white font-bold mb-2">{item.title}</h4>
-                                        <div className="flex gap-2 mb-3">
-                                            <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">{item.category}</span>
-                                            <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">{item.difficulty}</span>
-                                            <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">{item.time}</span>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <p className="text-xs text-slate-600 mb-1">{item.labelBefore}</p>
-                                                <img src={getImageUrl(item.imgBefore)} alt="Before" className="w-full h-32 object-cover rounded" />
+                                    <button
+                                        key={item._id}
+                                        onClick={() => {
+                                            setSelectedId(item._id);
+                                            setShowAllModal(false);
+                                            // Optional: scroll into view
+                                            document.getElementById('repair-gallery')?.scrollIntoView({ behavior: 'smooth' });
+                                        }}
+                                        className="w-full text-left group flex flex-col"
+                                    >
+                                        <div className={`relative w-full aspect-[4/5] rounded-xl overflow-hidden border-2 mb-2 transition-all ${selectedId === item._id ? 'border-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'border-slate-800 group-hover:border-slate-600'}`}>
+                                            <img src={getImageUrl(item.imgAfter)} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                            <div className="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm p-1 rounded-md">
+                                                {item.category === 'water' && <Droplets className="w-3 h-3 text-blue-400" />}
+                                                {item.category === 'screen' && <Monitor className="w-3 h-3 text-purple-400" />}
+                                                {item.category === 'glass' && <Hammer className="w-3 h-3 text-red-400" />}
                                             </div>
-                                            <div>
-                                                <p className="text-xs text-slate-600 mb-1">{item.labelAfter}</p>
-                                                <img src={getImageUrl(item.imgAfter)} alt="After" className="w-full h-32 object-cover rounded" />
-                                            </div>
+                                            {selectedId === item._id && (
+                                                <div className="absolute inset-0 bg-brand-primary/20 flex items-center justify-center pointer-events-none">
+                                                    <div className="bg-brand-primary text-slate-900 rounded-full p-1 shadow-lg">
+                                                        <CheckCircle className="w-4 h-4" />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                        <p className="text-slate-500 text-sm mt-3">{item.description}</p>
-                                    </div>
+                                        <div className="text-[10px] sm:text-xs font-bold text-white line-clamp-2 leading-tight">{item.title}</div>
+                                        <div className="text-[9px] sm:text-[10px] text-slate-500 mt-1 uppercase tracking-wider">{item.difficulty}</div>
+                                    </button>
                                 ))}
                             </div>
                         </div>

@@ -15,6 +15,9 @@ jest.mock('../utils/emailService', () => ({
         orderStatusUpdate: jest.fn().mockReturnValue('<html>Status Update</html>')
     }
 }));
+jest.mock('../models/Address', () => ({
+    find: jest.fn().mockResolvedValue([])
+}));
 
 describe('Auth Controller', () => {
     let req, res, next;
@@ -85,8 +88,9 @@ describe('Auth Controller', () => {
                 email: 'test@example.com',
                 password: 'hashedPassword',
                 matchPassword: jest.fn().mockResolvedValue(true),
-                getSignedJwtToken: jest.fn().mockReturnValue('token'),
-                isVerified: true
+                isVerified: true,
+                name: 'Test',
+                role: 'user'
             };
 
             User.findOne.mockReturnValue({

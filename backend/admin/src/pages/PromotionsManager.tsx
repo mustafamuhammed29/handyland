@@ -126,8 +126,8 @@ export default function PromotionsManager() {
             {/* Toast */}
             {toast && (
                 <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium animate-in slide-in-from-right-4 ${toast.type === 'success'
-                        ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
-                        : 'bg-red-900/90 border-red-500/50 text-red-300'
+                    ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
+                    : 'bg-red-900/90 border-red-500/50 text-red-300'
                     }`}>
                     {toast.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
                     {toast.text}
@@ -189,8 +189,8 @@ export default function PromotionsManager() {
                         const daysLeft = Math.ceil((new Date(p.endDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
                         return (
                             <div key={p._id} className={`border rounded-2xl p-5 transition-all ${p.isActive && !isExpired
-                                    ? 'bg-slate-900/60 border-blue-500/30'
-                                    : 'bg-slate-900/30 border-slate-800 opacity-60'
+                                ? 'bg-slate-900/60 border-blue-500/30'
+                                : 'bg-slate-900/30 border-slate-800 opacity-60'
                                 }`}>
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex-1">
@@ -247,49 +247,50 @@ export default function PromotionsManager() {
                         </div>
                         <form onSubmit={handleSave} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 mb-1">Title *</label>
-                                <input required value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                                <label htmlFor="promo-title" className="block text-xs font-bold text-slate-400 mb-1">Title *</label>
+                                <input id="promo-title" required value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
                                     placeholder="Summer Sale 2025" />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 mb-1">Description</label>
-                                <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                                <label htmlFor="promo-description" className="block text-xs font-bold text-slate-400 mb-1">Description</label>
+                                <input id="promo-description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
                                     placeholder="Description for this promotion" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 mb-1">Discount Type</label>
-                                    <select value={form.discountType} onChange={e => setForm(f => ({ ...f, discountType: e.target.value as 'percentage' | 'fixed' }))}
-                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
-                                        title="Discount type">
+                                    <label htmlFor="promo-discount-type" className="block text-xs font-bold text-slate-400 mb-1">Discount Type</label>
+                                    <select id="promo-discount-type" value={form.discountType} onChange={e => setForm(f => ({ ...f, discountType: e.target.value as 'percentage' | 'fixed' }))}
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm">
                                         <option value="percentage">Percentage (%)</option>
                                         <option value="fixed">Fixed Amount (€)</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 mb-1">Value *</label>
-                                    <input required type="number" min={0} value={form.discountValue} onChange={e => setForm(f => ({ ...f, discountValue: Number(e.target.value) }))}
+                                    <label htmlFor="promo-discount-value" className="block text-xs font-bold text-slate-400 mb-1">Value *</label>
+                                    <input id="promo-discount-value" required type="number" min={0} value={form.discountValue} onChange={e => setForm(f => ({ ...f, discountValue: Number(e.target.value) }))}
                                         className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
                                         placeholder={form.discountType === 'percentage' ? '10' : '5.00'} />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 mb-1">Start Date *</label>
-                                    <input required type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
-                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm" />
+                                    <label htmlFor="promo-start-date" className="block text-xs font-bold text-slate-400 mb-1">Start Date *</label>
+                                    <input id="promo-start-date" required type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
+                                        title="Start Date" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 mb-1">End Date *</label>
-                                    <input required type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
-                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm" />
+                                    <label htmlFor="promo-end-date" className="block text-xs font-bold text-slate-400 mb-1">End Date *</label>
+                                    <input id="promo-end-date" required type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
+                                        title="End Date" />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 mb-1">Min Order Amount (€)</label>
-                                <input type="number" min={0} value={form.minOrderAmount} onChange={e => setForm(f => ({ ...f, minOrderAmount: Number(e.target.value) }))}
+                                <label htmlFor="promo-min-order" className="block text-xs font-bold text-slate-400 mb-1">Min Order Amount (€)</label>
+                                <input id="promo-min-order" type="number" min={0} value={form.minOrderAmount} onChange={e => setForm(f => ({ ...f, minOrderAmount: Number(e.target.value) }))}
                                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm"
                                     placeholder="0 = no minimum" />
                             </div>

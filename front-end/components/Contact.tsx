@@ -136,21 +136,21 @@ export const Contact: React.FC<ContactProps> = ({ lang }) => {
                         </div>
 
                         {/* Info Grid */}
-                        <div className="grid sm:grid-cols-2 gap-4">
-                            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-primary/50 transition-colors group">
-                                <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center mb-4 text-purple-400 group-hover:scale-110 transition-transform">
-                                    <Phone className="w-5 h-5" />
+                        <div className="grid grid-cols-2 gap-3 md:gap-4">
+                            <div className="p-4 md:p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-primary/50 transition-colors group flex flex-col items-center text-center">
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-800 rounded-lg flex items-center justify-center mb-2 md:mb-4 text-purple-400 group-hover:scale-110 transition-transform">
+                                    <Phone className="w-4 h-4 md:w-5 md:h-5" />
                                 </div>
-                                <div className="text-xs text-slate-500 uppercase font-bold mb-1">{t.callUs}</div>
-                                <div className="text-white font-mono text-lg">{settings.phone}</div>
+                                <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t.callUs}</div>
+                                <div className="text-white font-mono text-xs md:text-lg break-all">{settings.phone}</div>
                             </div>
 
-                            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-primary/50 transition-colors group">
-                                <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center mb-4 text-emerald-400 group-hover:scale-110 transition-transform">
-                                    <Mail className="w-5 h-5" />
+                            <div className="p-4 md:p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-primary/50 transition-colors group flex flex-col items-center text-center">
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-800 rounded-lg flex items-center justify-center mb-2 md:mb-4 text-emerald-400 group-hover:scale-110 transition-transform">
+                                    <Mail className="w-4 h-4 md:w-5 md:h-5" />
                                 </div>
-                                <div className="text-xs text-slate-500 uppercase font-bold mb-1">{t.emailUs}</div>
-                                <div className="text-white font-mono text-sm">{settings.email}</div>
+                                <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t.emailUs}</div>
+                                <div className="text-white font-mono text-xs md:text-sm break-all">{settings.email}</div>
                             </div>
                         </div>
 
