@@ -360,7 +360,7 @@ exports.getAllOrders = async (req, res) => {
 // @access  Private/Admin
 exports.updateOrderStatus = async (req, res) => {
     try {
-        const { status, trackingNumber, note } = req.body;
+        const { status, trackingNumber, note, adminNote } = req.body;
 
         const order = await Order.findById(req.params.id).populate('user', 'name email');
 
@@ -414,7 +414,7 @@ exports.updateOrderStatus = async (req, res) => {
                 await sendEmail({
                     email: order.user.email,
                     subject: `Order Update: ${order.orderNumber}`,
-                    html: emailTemplates.orderStatusUpdate(order.user.name, order, status)
+                    html: emailTemplates.orderStatusUpdate(order.user.name, order, status, adminNote)
                 });
             } catch (emailError) {
                 console.error('Email sending failed:', emailError);
@@ -781,7 +781,7 @@ exports.generateInvoice = async (req, res) => {
                 <div class="header">
                     <h1>INVOICE</h1>
                     <div>
-                        <p><strong>Order ID:</strong> ${order._id}</p>
+                        <p><strong>Order ID:</strong> ${order.orderNumber || order._id}</p>
                         <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
                 </div>

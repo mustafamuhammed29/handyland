@@ -81,8 +81,16 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
         const fetchDevices = async () => {
             try {
                 const data = await api.get('/api/valuation/devices');
-                if (Array.isArray(data)) setApiDevices(data);
-                else if (data.data && Array.isArray(data.data)) setApiDevices(data.data);
+                let devices: DeviceBlueprint[] = [];
+                if (Array.isArray(data)) devices = data;
+                else if (data.data && Array.isArray(data.data)) devices = data.data;
+
+                // Clean out broken image URLs (Samsung CDN links return 404)
+                const cleaned = devices.map(d => ({
+                    ...d,
+                    imageUrl: d.imageUrl && !d.imageUrl.includes('images.samsung.com') ? d.imageUrl : undefined
+                }));
+                setApiDevices(cleaned);
             } catch (error) {
                 console.error("Failed to fetch devices", error);
                 addToast("Failed to load devices", "error");
@@ -224,18 +232,12 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
     };
 
     const handleSubmitQuote = async () => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            sessionStorage.setItem('pendingValuationQuote', JSON.stringify({
-                quoteData,
-                formData
-            }));
-            addToast("Bitte melde dich an, um das Angebot zu bestätigen", "info");
-            navigate('/login');
-            return;
-        }
+        // Save to sessionStorage FIRST as a safety net (for post-login redirect)
+        sessionStorage.setItem('pendingValuationQuote', JSON.stringify({ quoteData, formData }));
+
         setLoading(true);
         try {
+            // Try to save to DB (relies on HTTP-Only cookies for auth)
             const payload = {
                 model: quoteData?.model || formData.model,
                 storage: quoteData?.storage || formData.storage,
@@ -245,13 +247,16 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
             };
             const data: any = await api.post('/api/valuation/saved', payload);
             if (data.success || data.quoteReference) {
+                // DB save succeeded → clean up sessionStorage, use real reference
                 sessionStorage.removeItem('pendingValuationQuote');
                 addToast("Angebot erfolgreich gespeichert!", "success");
                 navigate(`/sell/${data.quoteReference}`);
-            } else {
-                addToast(data.message || "Fehler beim Speichern", "error");
+                return;
             }
+            addToast(data.message || "Fehler beim Speichern", "error");
         } catch (error: any) {
+            // If 401 → api interceptor will redirect to /login automatically
+            // sessionStorage is already set, so after login the user can resume
             const msg = error?.response?.data?.message || error?.message || "Netzwerkfehler";
             addToast(msg, "error");
         } finally {
@@ -374,10 +379,14 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
 
                                         <div className="relative w-28 h-28 rounded-2xl flex items-center justify-center bg-slate-50 dark:bg-slate-800 p-3 shadow-inner group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                                             {device.imageUrl ? (
-                                                <img src={device.imageUrl} alt={device.modelName} className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-500" />
-                                            ) : (
-                                                <Smartphone className="w-12 h-12 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                            )}
+                                                <img
+                                                    src={device.imageUrl}
+                                                    alt={device.modelName}
+                                                    className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-500"
+                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
+                                                />
+                                            ) : null}
+                                            <Smartphone className={`w-12 h-12 text-slate-400 group-hover:text-blue-500 transition-colors ${device.imageUrl ? 'hidden' : ''}`} />
                                         </div>
                                         <div className="text-center w-full z-10 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                             <div className="font-extrabold text-lg text-slate-900 dark:text-white truncate" title={device.modelName}>{device.modelName}</div>
@@ -571,10 +580,14 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                                     <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-sm">
                                         <div className="w-28 h-28 bg-slate-50 dark:bg-slate-950 rounded-2xl flex items-center justify-center shrink-0 p-3 shadow-inner border border-slate-100 dark:border-slate-800/50">
                                             {selectedDevice?.imageUrl ? (
-                                                <img src={selectedDevice.imageUrl} alt={selectedDevice.modelName} className="object-contain w-full h-full drop-shadow-sm" />
-                                            ) : (
-                                                <Smartphone className="w-12 h-12 text-slate-400" />
-                                            )}
+                                                <img
+                                                    src={selectedDevice.imageUrl}
+                                                    alt={selectedDevice.modelName}
+                                                    className="object-contain w-full h-full drop-shadow-sm"
+                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
+                                                />
+                                            ) : null}
+                                            <Smartphone className={`w-12 h-12 text-slate-400 ${selectedDevice?.imageUrl ? 'hidden' : ''}`} />
                                         </div>
                                         <div className="text-center sm:text-left pt-2">
                                             <h3 className="font-black text-2xl text-slate-900 dark:text-white leading-tight">{formData.model}</h3>

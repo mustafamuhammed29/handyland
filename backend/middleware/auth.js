@@ -8,15 +8,15 @@ exports.protect = async (req, res, next) => {
     // DEBUG LOGGING
     console.log('🔐 Auth Middleware Started');
 
-    // Check for token in cookies (PRIORITY)
-    if (req.cookies && req.cookies.accessToken) {
-        token = req.cookies.accessToken;
-        console.log('✓ Token found in cookies');
-    }
-    // Fallback to Authorization header
-    else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    // Check for Authorization header first (Admin Panel prioritizes this)
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
         console.log('✓ Token found in Authorization header');
+    }
+    // Fallback to cookie (Customer Frontend utilizes this)
+    else if (req.cookies && req.cookies.accessToken) {
+        token = req.cookies.accessToken;
+        console.log('✓ Token found in cookies');
     }
 
     // Make sure token exists

@@ -224,20 +224,20 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     {filteredItems.slice(0, visibleCount).map((item) => (
                         <div
                             key={item.id}
                             onMouseEnter={() => setHoveredId(item.id)}
                             onMouseLeave={() => setHoveredId(null)}
-                            className="group relative bg-slate-900/30 rounded-2xl p-4 border border-slate-800 hover:border-purple-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] flex flex-col"
+                            className="group relative bg-slate-900/30 rounded-2xl p-2 md:p-4 border border-slate-800 hover:border-purple-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] flex flex-col"
                         >
                             {/* Hover Border Glow */}
                             <div className={`absolute inset-0 rounded-2xl border-2 border-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}></div>
 
                             {/* Image Container with Float Effect */}
                             <div
-                                className="relative h-48 rounded-xl overflow-hidden bg-gradient-to-b from-slate-800 to-slate-900 mb-4 cursor-pointer"
+                                className="relative h-32 md:h-48 rounded-xl overflow-hidden bg-gradient-to-b from-slate-800 to-slate-900 mb-2 md:mb-4 cursor-pointer"
                                 onClick={() => setSelectedItem(item)}
                             >
                                 <img
@@ -249,32 +249,32 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                 />
 
                                 {/* Tag */}
-                                <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded text-[10px] font-bold text-white uppercase tracking-widest">
+                                <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md border border-white/10 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[8px] md:text-[10px] font-bold text-white uppercase tracking-widest">
                                     {item.tag}
                                 </div>
 
                                 {/* Quick Inspect Overlay */}
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
-                                    <span className="bg-purple-500/80 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                    <span className="bg-purple-500/80 text-white px-2 py-1 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-bold flex items-center gap-1">
                                         <Layers className="w-3 h-3" /> Inspect
                                     </span>
                                 </div>
                             </div>
 
                             {/* Info */}
-                            <div className="space-y-1 flex-1">
-                                <h3 className="text-white font-bold truncate hover:text-purple-400 cursor-pointer" onClick={() => setSelectedItem(item)}>{item.name}</h3>
-                                <div className="flex justify-between items-center mt-2">
-                                    <span className="text-purple-400 font-mono font-bold text-lg">{item.price}{t.currency}</span>
+                            <div className="space-y-1 flex-1 flex flex-col justify-between">
+                                <h3 className="text-white font-bold text-sm md:text-base line-clamp-2 hover:text-purple-400 cursor-pointer" onClick={() => setSelectedItem(item)}>{item.name}</h3>
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
+                                    <span className="text-purple-400 font-mono font-bold text-base md:text-lg">{item.price}{t.currency}</span>
 
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 w-full sm:w-auto">
                                         <button
                                             onClick={() => handleAddToCart(item)}
                                             disabled={item.stock === 0}
-                                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-all text-xs font-bold uppercase disabled:opacity-50 disabled:cursor-not-allowed ${item.stock > 0 ? 'bg-slate-800 hover:bg-purple-600 text-slate-300 hover:text-white' : 'bg-slate-900 border border-slate-800 text-slate-600'}`}
+                                            className={`flex-1 sm:flex-none flex items-center justify-center gap-1 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg transition-all text-[10px] md:text-xs font-bold uppercase disabled:opacity-50 disabled:cursor-not-allowed ${item.stock > 0 ? 'bg-slate-800 hover:bg-purple-600 text-slate-300 hover:text-white' : 'bg-slate-900 border border-slate-800 text-slate-600'}`}
                                         >
                                             <ShoppingCart className="w-3 h-3" />
-                                            {item.stock > 0 ? t.equip : 'Out of Stock'}
+                                            <span className="hidden min-[380px]:inline">{item.stock > 0 ? t.equip : 'Out'}</span>
                                         </button>
                                     </div>
                                 </div>

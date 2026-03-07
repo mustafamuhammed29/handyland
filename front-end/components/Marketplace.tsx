@@ -299,6 +299,14 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
 
                             <div className="space-y-3 mb-8">
                                 <div className="flex justify-between py-2 border-b border-slate-800/50">
+                                    <span className="text-slate-500 text-sm">Status</span>
+                                    {selectedProduct.stock > 0 ? (
+                                        <span className="text-emerald-400 font-bold">{selectedProduct.stock} In Stock</span>
+                                    ) : (
+                                        <span className="text-red-500 font-bold">Out of Stock</span>
+                                    )}
+                                </div>
+                                <div className="flex justify-between py-2 border-b border-slate-800/50">
                                     <span className="text-slate-500 text-sm">Color</span>
                                     <span className="text-white font-medium">{selectedProduct.color}</span>
                                 </div>
@@ -318,9 +326,10 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                         handleAddToCart(selectedProduct);
                                         setSelectedProduct(null);
                                     }}
-                                    className="flex-1 bg-white hover:bg-slate-200 text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all"
+                                    disabled={selectedProduct.stock === 0}
+                                    className={`flex-1 font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all ${selectedProduct.stock > 0 ? 'bg-white hover:bg-slate-200 text-black' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}`}
                                 >
-                                    <Plus className="w-5 h-5" /> Add to Cart
+                                    <Plus className="w-5 h-5" /> {selectedProduct.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -329,7 +338,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                         // Slight delay to allow toast to show and state to update
                                         setTimeout(() => window.location.href = '/checkout', 100);
                                     }}
-                                    className="flex-1 border border-slate-700 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-all"
+                                    disabled={selectedProduct.stock === 0}
+                                    className={`flex-1 border font-bold py-4 rounded-xl transition-all ${selectedProduct.stock > 0 ? 'border-slate-700 hover:bg-slate-800 text-white' : 'border-slate-800 bg-slate-900 text-slate-600 cursor-not-allowed'}`}
                                 >
                                     Buy Now
                                 </button>
@@ -342,17 +352,17 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* Header & Controls */}
-                <div className="flex flex-col gap-8 mb-8">
-                    <div className="flex flex-col md:flex-row justify-between items-end gap-4">
+                <div className="flex flex-col gap-6 md:gap-8 mb-6 md:mb-8">
+                    <div className="flex justify-between items-end gap-4">
                         <div>
-                            <h2 className="text-5xl font-black text-white mb-2 tracking-tight">MARKET<span className="text-brand-primary">PLACE</span></h2>
-                            <div className="h-1 w-24 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full"></div>
+                            <h2 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">MARKET<span className="text-brand-primary">PLACE</span></h2>
+                            <div className="h-1 w-16 md:w-24 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full"></div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => setViewMode('grid')} aria-label="Grid view" className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-slate-800 text-brand-primary' : 'text-slate-500 hover:text-white'}`}><Grid className="w-5 h-5" /></button>
-                            <button onClick={() => setViewMode('list')} aria-label="List view" className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-slate-800 text-brand-primary' : 'text-slate-500 hover:text-white'}`}><List className="w-5 h-5" /></button>
-                            <button onClick={() => setShowFilters(!showFilters)} aria-label="Toggle filters" className={`p-2 rounded-lg ${showFilters ? 'bg-slate-800 text-brand-primary' : 'text-slate-500 hover:text-white'} md:hidden`}><Filter className="w-5 h-5" /></button>
+                        <div className="flex items-center gap-1 md:gap-2">
+                            <button onClick={() => setViewMode('grid')} aria-label="Grid view" className={`p-2 w-10 h-10 flex items-center justify-center rounded-xl transition-all ${viewMode === 'grid' ? 'bg-slate-800 text-brand-primary border border-slate-700' : 'text-slate-500 hover:text-white glass-modern'}`}><Grid className="w-5 h-5" /></button>
+                            <button onClick={() => setViewMode('list')} aria-label="List view" className={`p-2 w-10 h-10 flex items-center justify-center rounded-xl transition-all ${viewMode === 'list' ? 'bg-slate-800 text-brand-primary border border-slate-700' : 'text-slate-500 hover:text-white glass-modern'}`}><List className="w-5 h-5" /></button>
+                            <button onClick={() => setShowFilters(!showFilters)} aria-label="Toggle filters" className={`p-2 w-10 h-10 flex items-center justify-center rounded-xl transition-all ${showFilters ? 'bg-slate-800 text-brand-primary border border-slate-700' : 'text-slate-500 hover:text-white glass-modern'} md:hidden`}><Filter className="w-5 h-5" /></button>
                         </div>
                     </div>
 
@@ -440,22 +450,22 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
 
                 {/* Product Grid / List */}
                 {loading ? (
-                    <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                    <div className={`grid gap-3 md:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
                         {[...Array(itemsPerPage)].map((_, i) => (
-                            <div key={i} className={viewMode === 'list' ? 'h-48' : 'h-96'}>
+                            <div key={i} className={viewMode === 'list' ? 'h-48' : 'h-72 md:h-96'}>
                                 <SkeletonProductCard />
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                    <div className={`grid gap-3 md:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
                         {products.map((phone) => (
                             viewMode === 'grid' ? (
                                 // GRID CARD
-                                <div key={phone.id} className="spotlight-card rounded-3xl h-full flex flex-col border border-slate-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] bg-slate-900/40 backdrop-blur-sm group">
+                                <div key={phone.id} className="spotlight-card rounded-2xl md:rounded-3xl h-full flex flex-col border border-slate-800/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] bg-slate-900/60 backdrop-blur-md group">
                                     <div className="spotlight-border"></div>
                                     <div className="relative p-1">
-                                        <div className="relative h-72 overflow-hidden rounded-2xl bg-gradient-to-b from-slate-800 to-slate-950 cursor-pointer" onClick={() => setSelectedProduct(phone)}>
+                                        <div className="relative h-40 md:h-60 overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-b from-slate-800 to-slate-950 cursor-pointer border border-slate-800/50" onClick={() => setSelectedProduct(phone)}>
                                             <img
                                                 src={getProductImage(phone)}
                                                 alt={phone.model}
@@ -463,52 +473,52 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                 loading="lazy"
                                                 className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
                                             />
-                                            <div className="absolute top-3 left-3 flex gap-2">
-                                                <span className={`text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border ${phone.condition === 'new' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'}`}>
+                                            <div className="absolute top-2 left-2 flex gap-1">
+                                                <span className={`text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur-md border ${phone.condition === 'new' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'}`}>
                                                     {(phone.condition || 'Used').toUpperCase()}
                                                 </span>
                                             </div>
 
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
-                                                <span className="bg-white/10 border border-white/20 text-white px-4 py-2 rounded-full font-bold text-sm backdrop-blur-md flex items-center gap-2">
-                                                    <Layers className="w-4 h-4" /> Inspect
+                                                <span className="bg-white/10 border border-white/20 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full font-bold text-xs md:text-sm backdrop-blur-md flex items-center gap-1.5 md:gap-2">
+                                                    <Layers className="w-3 h-3 md:w-4 md:h-4" /> Inspect
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="p-5 flex-1 flex flex-col">
-                                        <div className="mb-3">
-                                            <div className="text-[10px] text-brand-primary font-mono uppercase mb-1 tracking-wider">{phone.brand}</div>
-                                            <h3 className="text-xl font-bold text-white hover:text-brand-primary transition-colors cursor-pointer" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
+                                    <div className="p-3 md:p-5 flex-1 flex flex-col">
+                                        <div className="mb-2 md:mb-4">
+                                            <div className="text-[9px] md:text-[10px] text-brand-primary font-mono uppercase mb-0.5 md:mb-1 tracking-wider truncate">{phone.brand}</div>
+                                            <h3 className="text-sm md:text-xl font-bold text-white hover:text-brand-primary transition-colors cursor-pointer line-clamp-2" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-2 mb-6">
-                                            <div className="bg-slate-900/50 rounded-lg p-2 border border-slate-800 flex items-center gap-2">
-                                                <Cpu className="w-3 h-3 text-slate-400" />
-                                                <span className="text-xs text-slate-300 truncate">{phone.specs?.cpu}</span>
+                                        <div className="grid grid-cols-2 gap-1 md:gap-2 mb-3 md:mb-6">
+                                            <div className="bg-slate-900/50 rounded-md md:rounded-lg p-1.5 md:p-2 border border-slate-800 flex items-center gap-1 md:gap-2">
+                                                <Cpu className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-400" />
+                                                <span className="text-[9px] md:text-xs text-slate-300 truncate">{phone.specs?.cpu}</span>
                                             </div>
-                                            <div className="bg-slate-900/50 rounded-lg p-2 border border-slate-800 flex items-center gap-2">
-                                                <Signal className="w-3 h-3 text-slate-400" />
-                                                <span className="text-xs text-slate-300">5G Ready</span>
+                                            <div className="bg-slate-900/50 rounded-md md:rounded-lg p-1.5 md:p-2 border border-slate-800 flex items-center gap-1 md:gap-2">
+                                                <Signal className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-400" />
+                                                <span className="text-[9px] md:text-xs text-slate-300">5G</span>
                                             </div>
                                         </div>
-                                        <div className="mt-auto flex items-center justify-between gap-3">
-                                            <div className="text-xl font-bold text-white">{phone.price}{t.currency}</div>
-                                            <div className="flex items-center gap-2">
+                                        <div className="mt-auto flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-3">
+                                            <div className="text-base md:text-xl font-bold text-white mb-2 md:mb-0">{phone.price}{t.currency}</div>
+                                            <div className="flex items-center gap-1.5 md:gap-2 w-full md:w-auto">
                                                 <button
                                                     onClick={(e) => toggleWishlist(e, phone.id)}
                                                     disabled={loadingWishlistId === phone.id}
                                                     aria-label="Wishlist"
-                                                    className={`p-3 rounded-xl transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-wait ${wishlist.includes(phone.id) ? 'bg-red-500/20 text-red-500 border-red-500/30 hover:bg-red-500/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:bg-slate-700'}`}
+                                                    className={`p-2 flex-1 md:flex-none flex justify-center items-center md:p-3 rounded-lg md:rounded-xl transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-wait ${wishlist.includes(phone.id) ? 'bg-red-500/20 text-red-500 border-red-500/30 hover:bg-red-500/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:bg-slate-700'}`}
                                                 >
-                                                    <Heart className={`w-5 h-5 group-hover/btn:scale-110 transition-transform ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
+                                                    <Heart className={`w-4 h-4 md:w-5 md:h-5 group-hover/btn:scale-110 transition-transform ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleAddToCart(phone)}
                                                     disabled={phone.stock === 0}
                                                     aria-label="Add to cart"
-                                                    className={`p-3 rounded-xl font-bold transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-not-allowed ${phone.stock > 0 ? 'bg-slate-800 border-slate-700 hover:bg-brand-primary hover:text-black hover:border-brand-primary text-white' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
+                                                    className={`p-2 flex-1 md:flex-none flex justify-center items-center md:p-3 rounded-lg md:rounded-xl font-bold transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-not-allowed ${phone.stock > 0 ? 'bg-slate-800 border-slate-700 hover:bg-brand-primary hover:text-black hover:border-brand-primary text-white' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
                                                 >
-                                                    <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
+                                                    <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 group-hover/btn:scale-110 transition-transform" />
                                                 </button>
                                             </div>
                                         </div>

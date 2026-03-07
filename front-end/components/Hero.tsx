@@ -42,7 +42,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] animate-pulse delay-1000"></div>
             </div>
 
-            <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-28 md:pt-16 lg:pt-0">
 
                 {/* Text Content */}
                 <div
@@ -54,11 +54,11 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                         <span className="text-xs font-bold tracking-widest uppercase" style={{ color: settings.hero.accentColor }}>Germany's #1 Tech Hub</span>
                     </div>
 
-                    <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight tracking-tight whitespace-pre-line">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-tight tracking-tight whitespace-pre-line">
                         {settings.hero.headline}
                     </h1>
 
-                    <p className="text-lg text-slate-400 max-w-lg leading-relaxed border-l-2 border-slate-800 pl-6">
+                    <p className="text-base md:text-lg text-slate-400 max-w-lg leading-relaxed border-l-2 border-slate-800 pl-4 md:pl-6">
                         {lang === 'ar'
                             ? 'اكتشف مستقبل تجارة الهواتف. منصة تفاعلية للبيع، الشراء، والصيانة بدقة ألمانية.'
                             : settings.hero.subheadline}
@@ -84,28 +84,35 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     </div>
 
                     {/* Trust Indicators */}
-                    <div className="flex flex-wrap items-center gap-6 pt-8">
-                        <div className="group flex items-center gap-2 px-4 py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-emerald-500/30 transition-all">
-                            <ShieldCheck className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
-                            <span className="text-xs font-mono text-slate-300 group-hover:text-emerald-300 transition-colors">{settings.hero.trustBadge1 || 'VERIFIED SELLERS'}</span>
+                    <div className="flex flex-wrap items-center gap-3 md:gap-6 pt-6 md:pt-8">
+                        <div className="group flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-emerald-500/30 transition-all">
+                            <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-emerald-300 transition-colors">{settings.hero.trustBadge1 || 'VERIFIED SELLERS'}</span>
                         </div>
-                        <div className="group flex items-center gap-2 px-4 py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-blue-500/30 transition-all">
-                            <Hexagon className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
-                            <span className="text-xs font-mono text-slate-300 group-hover:text-blue-300 transition-colors">{settings.hero.trustBadge2 || '24/7 SUPPORT'}</span>
+                        <div className="group flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-blue-500/30 transition-all">
+                            <Hexagon className="w-4 h-4 md:w-5 md:h-5 text-blue-400 group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-blue-300 transition-colors">{settings.hero.trustBadge2 || '24/7 SUPPORT'}</span>
                         </div>
-                        <div className="group flex items-center gap-2 px-4 py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-purple-500/30 transition-all">
-                            <Star className="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform fill-purple-400" />
-                            <span className="text-xs font-mono text-slate-300 group-hover:text-purple-300 transition-colors">{settings.hero.trustBadge3 || '4.9★ RATED'}</span>
+                        <div className="group flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-purple-500/30 transition-all">
+                            <Star className="w-4 h-4 md:w-5 md:h-5 text-purple-400 group-hover:scale-110 transition-transform fill-purple-400" />
+                            <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-purple-300 transition-colors">{settings.hero.trustBadge3 || '4.9★ RATED'}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* 3D Visual */}
-                <div className="order-1 lg:order-2 relative h-[500px] lg:h-[700px] flex items-center justify-center preserve-3d">
+                <div className="order-1 lg:order-2 relative h-[400px] md:h-[500px] lg:h-[700px] flex items-center justify-center preserve-3d">
 
                     {/* Main Phone Card - Rotates opposite to mouse */}
                     <div
-                        className="relative w-72 md:w-80 h-[500px] rounded-[3rem] bg-slate-900 border-[8px] border-slate-800 shadow-2xl flex flex-col overflow-hidden transform transition-transform duration-100 ease-out"
+                        className="relative w-64 md:w-80 h-[400px] md:h-[500px] rounded-[2.5rem] md:rounded-[3rem] bg-slate-900 border-[6px] md:border-[8px] border-slate-800 shadow-2xl flex flex-col overflow-hidden transform transition-all duration-100 ease-out cursor-pointer hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:border-cyan-800/50"
+                        onClick={() => {
+                            if (settings.hero.productName) {
+                                navigate(`/marketplace?search=${encodeURIComponent(settings.hero.productName)}`);
+                            } else {
+                                navigate('/marketplace');
+                            }
+                        }}
                         style={{
                             transform: `rotateY(${offset.x}deg) rotateX(${-offset.y}deg) translateZ(50px)`,
                             boxShadow: `${-offset.x * 2}px ${-offset.y * 2}px 50px rgba(0,0,0,0.5)`
@@ -121,13 +128,13 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
 
                             {/* UI Elements on Phone */}
-                            <div className="absolute bottom-8 left-6 right-6">
-                                <div className="flex justify-between items-end mb-4">
-                                    <div>
-                                        <div className="text-brand-primary text-xs font-bold mb-1">{settings.hero.productLabel || 'CURRENT OFFER'}</div>
-                                        <div className="text-white text-2xl font-black">{settings.hero.productName || 'iPhone 15 Pro'}</div>
+                            <div className="absolute bottom-6 md:bottom-8 left-5 md:left-6 right-5 md:right-6">
+                                <div className="flex justify-between items-end mb-4 gap-3">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-brand-primary text-[10px] md:text-xs font-bold mb-1 truncate">{settings.hero.productLabel || 'CURRENT OFFER'}</div>
+                                        <div className="text-white text-lg md:text-xl font-black leading-tight break-words line-clamp-2 md:line-clamp-3">{settings.hero.productName || 'iPhone 15 Pro'}</div>
                                     </div>
-                                    <div className="text-white text-xl font-bold">{settings.hero.productPrice || '€950'}</div>
+                                    <div className="text-white text-lg md:text-xl font-bold whitespace-nowrap shrink-0">{settings.hero.productPrice || '€950'}</div>
                                 </div>
                                 <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
                                     <div className="h-full bg-cyan-400 w-2/3 animate-pulse"></div>
@@ -141,31 +148,31 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
                     {/* Floating Elements (Parallax Layers) */}
                     <div
-                        className="absolute top-1/4 right-10 lg:-right-10 glass-modern p-4 rounded-2xl animate-bounce duration-[3000ms]"
+                        className="absolute top-[15%] md:top-1/4 right-[2%] sm:right-4 md:-right-4 lg:-right-20 xl:-right-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
                         style={{ transform: `translateZ(80px) translateX(${offset.x * 1.5}px)` }}
                     >
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400">
-                                <Smartphone className="w-5 h-5" />
+                        <div className="flex items-center gap-2 md:gap-3">
+                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 shrink-0">
+                                <Smartphone className="w-4 h-4 md:w-5 md:h-5" />
                             </div>
-                            <div>
-                                <div className="text-xs text-slate-400">{settings.hero.stat1Title || 'Device Sold'}</div>
-                                <div className="text-white font-bold">{settings.hero.stat1Value || '+24% this week'}</div>
+                            <div className="min-w-0">
+                                <div className="text-[9px] md:text-xs text-slate-400 whitespace-nowrap">{settings.hero.stat1Title || 'Device Sold'}</div>
+                                <div className="text-[11px] md:text-base text-white font-bold whitespace-nowrap">{settings.hero.stat1Value || '+24% this week'}</div>
                             </div>
                         </div>
                     </div>
 
                     <div
-                        className="absolute bottom-1/4 left-0 lg:-left-12 glass-modern p-4 rounded-2xl animate-bounce duration-[4000ms]"
+                        className="absolute bottom-[40%] md:bottom-[35%] lg:bottom-[45%] left-[2%] sm:left-0 md:-left-4 lg:-left-20 xl:-left-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
                         style={{ transform: `translateZ(100px) translateX(${offset.x * 2}px)` }}
                     >
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
-                                <Star className="w-5 h-5 fill-purple-400" />
+                        <div className="flex items-center gap-2 md:gap-3">
+                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
+                                <Star className="w-4 h-4 md:w-5 md:h-5 fill-purple-400" />
                             </div>
-                            <div>
-                                <div className="text-xs text-slate-400">{settings.hero.stat2Title || 'Customer Rating'}</div>
-                                <div className="text-white font-bold">{settings.hero.stat2Value || '4.9/5.0 Excellent'}</div>
+                            <div className="min-w-0">
+                                <div className="text-[9px] md:text-xs text-slate-400 whitespace-nowrap">{settings.hero.stat2Title || 'Customer Rating'}</div>
+                                <div className="text-[11px] md:text-base text-white font-bold whitespace-nowrap">{settings.hero.stat2Value || '4.9/5.0 Excellent'}</div>
                             </div>
                         </div>
                     </div>

@@ -149,10 +149,11 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 
-// Image Upload Utility
-const upload = require('./utils/imageUpload');
+const upload = process.env.CLOUDINARY_URL
+    ? require('./utils/cloudinaryUpload')
+    : require('./utils/imageUpload');
 
-// Serve Static Files
+// Serve Static Files (still need this for dev uploads)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Upload Endpoint (rate limited + auth protected)
@@ -166,16 +167,7 @@ app.post('/api/upload', uploadLimiter, protect, upload.single('image'), (req, re
     if (!req.file) {
         return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
-    // Use relative path instead of hardcoded localhost
-    let imageUrl = `/uploads/${req.file.filename}`;
-
-    // TODO: If using cloud storage, modify to return the cloud URL instead
-    if (process.env.CLOUDINARY_URL) {
-        // imageUrl = req.file.path; // (if using multer-storage-cloudinary)
-    } else if (process.env.S3_BUCKET) {
-        // imageUrl = req.file.location; // (if using multer-s3)
-    }
-
+    const imageUrl = req.file.path || `/uploads/${req.file.filename}`;
     res.json({ success: true, imageUrl });
 });
 

@@ -69,40 +69,57 @@ export const SellDevice = () => {
         const fetchAll = async () => {
             if (!quoteRef) return;
 
-            // 1. Restore pending quote from sessionStorage (post-login redirect)
+            let resolvedQuote: any = null;
+
+            // 1. Restore pending quote from sessionStorage (post-login or after valuation)
             const pendingRaw = sessionStorage.getItem('pendingValuationQuote');
             if (pendingRaw) {
                 try {
                     const { quoteData } = JSON.parse(pendingRaw);
                     if (quoteData?.quoteReference === quoteRef) {
-                        setQuote({
+                        resolvedQuote = {
                             reference: quoteData.quoteReference,
                             model: quoteData.model,
                             price: quoteData.estimatedValue,
                             specs: quoteData.storage,
                             condition: quoteData.screenCondition,
                             status: 'active'
-                        });
-                        sessionStorage.removeItem('pendingValuationQuote');
+                        };
+                        setQuote(resolvedQuote);
+                        // Don't remove sessionStorage yet - keep it for page refreshes
                     }
                 } catch {
                     sessionStorage.removeItem('pendingValuationQuote');
                 }
             }
 
-            // 2. Fetch quote from API if not from session
-            try {
-                const data: any = await api.get(`/api/valuation/quote/${quoteRef}`);
-                if (data.success) {
-                    setQuote(data.quote);
-                } else {
-                    addToast('Ungültiges oder abgelaufenes Angebot', 'error');
-                    setTimeout(() => navigate('/valuation'), 3000);
-                }
-            } catch {
-                // If we already set quote from session, skip error
-                if (!quote) {
-                    addToast('Fehler beim Laden des Angebots', 'error');
+            // 2. Handle quote loading based on reference type
+            const isTemp = quoteRef?.startsWith('HV-TEMP-');
+
+            if (isTemp && !resolvedQuote) {
+                // Temp quote with no session data = expired/unusable, restart
+                addToast('Dein Angebot ist abgelaufen. Bitte starte eine neue Bewertung.', 'error');
+                setTimeout(() => navigate('/valuation'), 2500);
+                setLoading(false);
+                return;
+            }
+
+            if (!isTemp) {
+                // Real DB quote: fetch from API
+                try {
+                    const data: any = await api.get(`/api/valuation/quote/${quoteRef}`);
+                    if (data.success) {
+                        resolvedQuote = data.quote;
+                        setQuote(data.quote);
+                    } else if (!resolvedQuote) {
+                        addToast('Ungültiges oder abgelaufenes Angebot', 'error');
+                        setTimeout(() => navigate('/valuation'), 3000);
+                    }
+                } catch {
+                    if (!resolvedQuote) {
+                        addToast('Angebot nicht gefunden. Bitte erstelle ein neues Angebot.', 'error');
+                        setTimeout(() => navigate('/valuation'), 3000);
+                    }
                 }
             }
 
@@ -198,13 +215,6 @@ export const SellDevice = () => {
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            addToast('Bitte melde dich an, um den Verkauf abzuschließen', 'error');
-            navigate('/login');
-            setIsSubmitting(false);
-            return;
-        }
         try {
             const data: any = await api.put(`/api/valuation/quote/${quoteRef}/confirm`, {
                 ...formData,
@@ -212,6 +222,7 @@ export const SellDevice = () => {
             });
             if (data.success) {
                 setShowConfirm(false);
+                sessionStorage.removeItem('pendingValuationQuote');
                 addToast('Verkauf bestätigt! Du erhältst eine E-Mail mit dem Versandlabel.', 'success');
                 setTimeout(() => navigate('/dashboard'), 3000);
             } else {

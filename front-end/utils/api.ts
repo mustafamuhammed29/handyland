@@ -16,10 +16,8 @@ export const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
+        // Frontend relies entirely on HTTP-Only cookies (withCredentials: true)
+        // We do not send Authorization headers here to prevent mixing with Admin panel tokens.
         return config;
     },
     (error) => {
@@ -65,9 +63,8 @@ api.interceptors.response.use(
                 }
 
                 if (newToken) {
-                    localStorage.setItem('accessToken', newToken);
-                    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-                    originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                    // Backend already set the new HttpOnly cookie!
+                    // No need to manually set headers or localStorage here.
                 }
 
                 // Retry the original request

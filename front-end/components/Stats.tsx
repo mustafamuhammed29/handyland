@@ -116,23 +116,23 @@ export const Stats: React.FC = () => {
           <div className="h-px bg-gradient-to-r from-blue-500/50 to-transparent w-32"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           {stats.map((stat, index) => (
             <div
               key={index}
-              className={`group relative p-6 rounded-2xl bg-slate-900/40 border border-slate-800 backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 ${stat.border}`}
+              className={`group relative p-4 md:p-6 rounded-2xl bg-slate-900/40 border border-slate-800 backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 flex flex-col items-center text-center ${stat.border}`}
             >
               {/* Hover Glow Effect */}
               <div className={`absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ${stat.bg}`}></div>
 
-              <div className="relative z-10 flex flex-col items-center md:items-start">
+              <div className="relative z-10 flex flex-col items-center w-full">
                 {/* Icon Container */}
-                <div className={`w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center mb-4 shadow-lg ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center mb-3 md:mb-4 shadow-lg ${stat.color} group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
                   {stat.icon}
                 </div>
 
                 {/* Value */}
-                <div className="text-4xl lg:text-5xl font-black text-white mb-2 tracking-tight">
+                <div className="text-2xl md:text-4xl lg:text-5xl font-black text-white mb-1 md:mb-2 tracking-tight">
                   {stat.isDecimal ? (
                     <span>{stat.value}{stat.suffix}</span>
                   ) : (
@@ -141,7 +141,7 @@ export const Stats: React.FC = () => {
                 </div>
 
                 {/* Label */}
-                <div className="text-sm font-medium text-slate-400 uppercase tracking-wide group-hover:text-slate-300 transition-colors">
+                <div className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-wide group-hover:text-slate-300 transition-colors leading-tight">
                   {stat.label}
                 </div>
               </div>

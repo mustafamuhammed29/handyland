@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Trash2, Edit, Save, X, Calculator, ClipboardList, Package, Banknote, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Search, Trash2, Edit, Save, X, Calculator, ClipboardList, Package, Banknote, TrendingUp, ChevronDown, ChevronUp, MessageSquare, Send, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
 
@@ -38,8 +38,8 @@ interface Quote {
     estimatedValue: number;
     status: string;
     createdAt: string;
-    contact?: { name?: string; email?: string };
-    user?: { firstName?: string; lastName?: string; email?: string };
+    contact?: { name?: string; email?: string; phone?: string };
+    user?: { name?: string; email?: string; phone?: string };
 }
 
 const BRANDS = ['Apple', 'Samsung', 'Google', 'Xiaomi', 'Huawei', 'Other'];
@@ -86,6 +86,11 @@ const ValuationManager = () => {
     const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
     const [expandedQuoteId, setExpandedQuoteId] = useState<string | null>(null);
 
+    // Status Change Dialog State
+    const [statusDialog, setStatusDialog] = useState<{ open: boolean; quoteId: string; newStatus: string; customerEmail: string; customerName: string; message: string } | null>(null);
+    const [sendingMessage, setSendingMessage] = useState(false);
+    const [statusSuccess, setStatusSuccess] = useState<string | null>(null);
+
     // Sorting State
     const [sortConfig, setSortConfig] = useState<{ key: keyof DeviceBlueprint, direction: 'asc' | 'desc' } | null>(null);
     const [quoteSortConfig, setQuoteSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
@@ -116,10 +121,10 @@ const ValuationManager = () => {
     const fetchQuotes = async () => {
         setQuotesLoading(true);
         try {
-            const res: any = await api.get('/api/valuation/admin/quotes');
-            if (res.success) {
-                setQuotes(res.quotes);
-                setQuoteStats(res.stats);
+            const { data }: any = await api.get('/api/valuation/admin/quotes');
+            if (data.success) {
+                setQuotes(data.quotes);
+                setQuoteStats(data.stats);
             }
         } catch (error) {
             console.error('Error fetching quotes:', error);
@@ -128,16 +133,44 @@ const ValuationManager = () => {
         }
     };
 
-    const handleStatusChange = async (quoteId: string, newStatus: string) => {
+    const STATUS_MESSAGES: Record<string, string> = {
+        pending_shipment: 'Hallo {name},\n\nDein Angebot (Ref: {ref}) wurde erfolgreich geprüft. Bitte sende dein Gerät an die angegebene Adresse. Wir warten auf deinen Versand.\n\nMit freundlichen Grüßen,\nDas HandyLand Team',
+        received: 'Hallo {name},\n\nWir haben dein Gerät ({device}) erfolgreich erhalten und prüfen es aktuell. Du wirst in Kürze eine Bestätigung und deinen Auszahlungsbetrag von €{value} erhalten.\n\nMit freundlichen Grüßen,\nDas HandyLand Team',
+        paid: 'Hallo {name},\n\nWir freuen uns, dir mitteilen zu können, dass die Zahlung von €{value} für dein Gerät ({device}) erfolgreich auf dein Konto überwiesen wurde!\n\nVielen Dank für dein Vertrauen.\nDas HandyLand Team',
+        active: 'Hallo {name},\n\nDein Angebot für {device} wurde aktualisiert. Bitte überprüfe deinen Status in deinem Kundenkonto.\n\nMit freundlichen Grüßen,\nDas HandyLand Team',
+    };
+
+    const openStatusDialog = (quote: Quote, newStatus: string) => {
+        const email = quote.contact?.email || quote.user?.email || '';
+        const name = quote.contact?.name || quote.user?.name || 'Kunde';
+        const templateMsg = (STATUS_MESSAGES[newStatus] || '')
+            .replace('{name}', name)
+            .replace(/{ref}/g, quote.quoteReference)
+            .replace(/{device}/g, quote.device)
+            .replace(/{value}/g, String(quote.estimatedValue));
+        setStatusDialog({ open: true, quoteId: quote._id, newStatus, customerEmail: email, customerName: name, message: templateMsg });
+    };
+
+    const handleStatusChange = async (skipMessage = false) => {
+        if (!statusDialog) return;
+        const { quoteId, newStatus, message } = statusDialog;
         setUpdatingStatus(quoteId);
+        setSendingMessage(true);
         try {
-            await api.put(`/api/valuation/admin/quotes/${quoteId}/status`, { status: newStatus });
+            await api.put(`/api/valuation/admin/quotes/${quoteId}/status`, {
+                status: newStatus,
+                adminMessage: skipMessage ? '' : message
+            });
             setQuotes(prev => prev.map(q => q._id === quoteId ? { ...q, status: newStatus } : q));
-            fetchQuotes(); // Update stats locally
+            fetchQuotes();
+            setStatusSuccess(`Status erfolgreich auf "${newStatus}" geändert!`);
+            setTimeout(() => setStatusSuccess(null), 3000);
         } catch (error) {
             console.error('Error updating status:', error);
         } finally {
             setUpdatingStatus(null);
+            setSendingMessage(false);
+            setStatusDialog(null);
         }
     };
 
@@ -147,7 +180,7 @@ const ValuationManager = () => {
         const uploadFormData = new FormData();
         uploadFormData.append('image', file);
         try {
-            const res = await fetch('http://localhost:5000/api/upload', { method: 'POST', body: uploadFormData });
+            const res = await fetch('/api/upload', { method: 'POST', body: uploadFormData });
             const data = await res.json();
             if (data.imageUrl) setFormData(prev => ({ ...prev, imageUrl: data.imageUrl }));
         } catch (error) { console.error('Error uploading image:', error); }
@@ -287,8 +320,8 @@ const ValuationManager = () => {
 
         // Handle nested or derived sort values
         if (quoteSortConfig.key === 'customer') {
-            aVal = a.user ? `${a.user.firstName || ''} ${a.user.lastName || ''}` : a.contact?.name || '';
-            bVal = b.user ? `${b.user.firstName || ''} ${b.user.lastName || ''}` : b.contact?.name || '';
+            aVal = a.user ? (a.user.name || '') : a.contact?.name || '';
+            bVal = b.user ? (b.user.name || '') : b.contact?.name || '';
         } else if (quoteSortConfig.key === 'estimatedValue') {
             aVal = Number(aVal) || 0;
             bVal = Number(bVal) || 0;
@@ -481,17 +514,9 @@ const ValuationManager = () => {
                                         <tr><td colSpan={7} className="p-8 text-center text-slate-500">Keine Angebote vorhanden.</td></tr>
                                     ) : (
                                         sortedQuotes.map((quote: any) => {
-                                            const customerName = quote.user
-                                                ? `${quote.user.firstName || ''} ${quote.user.lastName || ''}`.trim()
-                                                : quote.contact?.name || '—';
+                                            const customerName = quote.user?.name || quote.contact?.name || '—';
                                             const customerEmail = quote.user?.email || quote.contact?.email || '—';
 
-                                            const STATUS_COLORS: Record<string, string> = {
-                                                pending_shipment: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-                                                received: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-                                                paid: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                                                active: 'text-slate-400 bg-slate-500/10 border-slate-500/20'
-                                            };
 
                                             const isExpanded = expandedQuoteId === quote._id;
 
@@ -517,20 +542,32 @@ const ValuationManager = () => {
                                                         <td className="p-4 font-mono font-black text-emerald-400 text-lg">€{quote.estimatedValue}</td>
                                                         <td className="p-4" onClick={(e) => e.stopPropagation()}>
                                                             <div className="relative">
-                                                                <select
-                                                                    aria-label={`Status für ${quote.quoteReference}`}
-                                                                    title={`Status: ${quote.status}`}
-                                                                    value={quote.status}
-                                                                    disabled={updatingStatus === quote._id}
-                                                                    onChange={(e) => handleStatusChange(quote._id, e.target.value)}
-                                                                    className={`text-xs font-bold px-3 py-2 rounded-lg border cursor-pointer appearance-none pr-8 ${STATUS_COLORS[quote.status] || STATUS_COLORS.active} outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 w-full`}
-                                                                >
-                                                                    <option value="pending_shipment">📦 Versand ausstehend</option>
-                                                                    <option value="received">✅ Erhalten</option>
-                                                                    <option value="paid">💶 Bezahlt</option>
-                                                                    <option value="active">⏳ Aktiv</option>
-                                                                </select>
-                                                                <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" />
+                                                                {updatingStatus === quote._id ? (
+                                                                    <div className="flex items-center gap-2 text-xs text-cyan-400">
+                                                                        <div className="w-3 h-3 border border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                                                                        Wird aktualisiert...
+                                                                    </div>
+                                                                ) : (
+                                                                    <select
+                                                                        aria-label={`Status für ${quote.quoteReference}`}
+                                                                        title={`Status: ${quote.status}`}
+                                                                        value={quote.status}
+                                                                        disabled={updatingStatus === quote._id}
+                                                                        onChange={(e) => openStatusDialog(quote, e.target.value)}
+                                                                        className={`text-xs font-bold px-3 py-2 rounded-lg border cursor-pointer appearance-none pr-8 outline-none focus:ring-2 focus:ring-cyan-500 w-full transition-all ${quote.status === 'active' ? 'text-slate-300 bg-slate-700/50 border-slate-600' :
+                                                                            quote.status === 'pending_shipment' ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
+                                                                                quote.status === 'received' ? 'text-blue-400 bg-blue-500/10 border-blue-500/30' :
+                                                                                    quote.status === 'paid' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' :
+                                                                                        'text-slate-400 bg-slate-500/10 border-slate-500/20'
+                                                                            }`}
+                                                                    >
+                                                                        <option value="active">⏳ Aktiv (Angebot läuft)</option>
+                                                                        <option value="pending_shipment">📦 Versand ausstehend</option>
+                                                                        <option value="received">✅ Gerät erhalten</option>
+                                                                        <option value="paid">💶 Bezahlt</option>
+                                                                    </select>
+                                                                )}
+                                                                {updatingStatus !== quote._id && <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-40" />}
                                                             </div>
                                                         </td>
                                                         <td className="p-4 text-xs font-medium text-slate-400">
@@ -550,88 +587,106 @@ const ValuationManager = () => {
                                                                         transition={{ duration: 0.2, ease: 'easeOut' }}
                                                                         className="overflow-hidden bg-slate-800/30"
                                                                     >
-                                                                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                                                            {/* Configuration */}
-                                                                            <div className="space-y-3">
-                                                                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 pb-2">Konfiguration</h4>
-                                                                                <div className="space-y-2 text-sm">
-                                                                                    <div className="flex justify-between">
-                                                                                        <span className="text-slate-400">Speicher:</span>
-                                                                                        <span className="font-medium text-white">{quote.selections?.storage || 'N/A'}</span>
+                                                                        <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                                                                            {/* ── Konfiguration ── */}
+                                                                            <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 space-y-3">
+                                                                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                                    <span className="text-purple-400">⚙️</span> Konfiguration
+                                                                                </h4>
+                                                                                <div className="space-y-2.5 text-sm">
+                                                                                    <div>
+                                                                                        <span className="text-slate-500 text-xs block mb-0.5">Variante</span>
+                                                                                        <span className="font-semibold text-white break-words">{quote.specs || 'N/A'}</span>
                                                                                     </div>
-                                                                                    <div className="flex justify-between">
-                                                                                        <span className="text-slate-400">Display:</span>
-                                                                                        <span className="font-medium text-white">{quote.selections?.screenCondition === 'hervorragend' ? 'Wie Neu' : quote.selections?.screenCondition === 'sehr_gut' ? 'Sehr Gut' : quote.selections?.screenCondition === 'gut' ? 'Gut' : quote.selections?.screenCondition === 'beschadigt' ? 'Beschädigt' : 'N/A'}</span>
+                                                                                    <div>
+                                                                                        <span className="text-slate-500 text-xs block mb-0.5">Display / Gehäuse</span>
+                                                                                        <span className="font-semibold text-white">
+                                                                                            {quote.condition === 'hervorragend' ? '⭐ Wie Neu' :
+                                                                                                quote.condition === 'sehr_gut' ? '✅ Sehr Gut' :
+                                                                                                    quote.condition === 'gut' ? '👍 Gut' :
+                                                                                                        quote.condition === 'beschadigt' ? '⚠️ Beschädigt' :
+                                                                                                            quote.condition || 'N/A'}
+                                                                                        </span>
                                                                                     </div>
-                                                                                    <div className="flex justify-between">
-                                                                                        <span className="text-slate-400">Gehäuse:</span>
-                                                                                        <span className="font-medium text-white">{quote.selections?.bodyCondition === 'hervorragend' ? 'Wie Neu' : quote.selections?.bodyCondition === 'sehr_gut' ? 'Sehr Gut' : quote.selections?.bodyCondition === 'gut' ? 'Gut' : quote.selections?.bodyCondition === 'beschadigt' ? 'Beschädigt' : 'N/A'}</span>
-                                                                                    </div>
-                                                                                    <div className="flex justify-between">
-                                                                                        <span className="text-slate-400">Funktionalität:</span>
-                                                                                        <span className="font-medium text-emerald-400">{quote.selections?.isFunctional ? '✅ Voll funktionsfähig' : '❌ Defekt'}</span>
+                                                                                    <div>
+                                                                                        <span className="text-slate-500 text-xs block mb-0.5">Angebotspreis</span>
+                                                                                        <span className="font-black text-emerald-400 text-base">€{quote.estimatedValue}</span>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
 
-                                                                            {/* Contact Info */}
-                                                                            <div className="space-y-3">
-                                                                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 pb-2">Kontaktdaten</h4>
-                                                                                <div className="space-y-2 text-sm">
-                                                                                    <div className="flex flex-col">
-                                                                                        <span className="text-slate-400 text-xs">Name</span>
-                                                                                        <span className="font-medium text-white">{customerName}</span>
+                                                                            {/* ── Kontaktdaten ── */}
+                                                                            <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 space-y-3">
+                                                                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                                    <span>👤</span> Kontaktdaten
+                                                                                </h4>
+                                                                                <div className="space-y-2.5 text-sm">
+                                                                                    <div>
+                                                                                        <span className="text-slate-500 text-xs block mb-0.5">Name</span>
+                                                                                        <span className="font-semibold text-white">{customerName}</span>
                                                                                     </div>
-                                                                                    <div className="flex flex-col mt-2">
-                                                                                        <span className="text-slate-400 text-xs">Email</span>
-                                                                                        <span className="font-medium text-blue-400">{customerEmail}</span>
+                                                                                    <div>
+                                                                                        <span className="text-slate-500 text-xs block mb-0.5">E-Mail</span>
+                                                                                        <span className="font-medium text-blue-400 break-all">{customerEmail}</span>
                                                                                     </div>
-                                                                                    {quote.contact?.phone && (
-                                                                                        <div className="flex flex-col mt-2">
-                                                                                            <span className="text-slate-400 text-xs">Telefon</span>
-                                                                                            <span className="font-medium text-slate-300">{quote.contact.phone}</span>
+                                                                                    {(quote.contact?.phone || quote.user?.phone) && (
+                                                                                        <div>
+                                                                                            <span className="text-slate-500 text-xs block mb-0.5">Telefon</span>
+                                                                                            <span className="font-medium text-slate-300">{quote.contact?.phone || quote.user?.phone}</span>
                                                                                         </div>
                                                                                     )}
                                                                                 </div>
                                                                             </div>
 
-                                                                            {/* Address Info */}
-                                                                            <div className="space-y-3">
-                                                                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 pb-2">Versandadresse</h4>
-                                                                                {quote.shippingAddress ? (
-                                                                                    <div className="text-sm text-slate-300 leading-relaxed">
-                                                                                        {quote.shippingAddress.address}<br />
-                                                                                        {quote.shippingAddress.postalCode} {quote.shippingAddress.city}
+                                                                            {/* ── Versandadresse ── */}
+                                                                            <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 space-y-3">
+                                                                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                                    <span>📦</span> Versandadresse
+                                                                                </h4>
+                                                                                {quote.shippingAddress?.address || quote.shippingAddress?.city ? (
+                                                                                    <div className="text-sm text-slate-200 space-y-1 leading-relaxed">
+                                                                                        {quote.shippingAddress.address && <div className="font-medium">{quote.shippingAddress.address}</div>}
+                                                                                        {(quote.shippingAddress.postalCode || quote.shippingAddress.city) && (
+                                                                                            <div className="text-slate-400">{[quote.shippingAddress.postalCode, quote.shippingAddress.city].filter(Boolean).join(' ')}</div>
+                                                                                        )}
                                                                                     </div>
                                                                                 ) : (
-                                                                                    <span className="text-sm text-slate-500 italic">Keine Adresse hinterlegt</span>
+                                                                                    <div className="flex items-center gap-2 text-slate-500 text-sm italic">
+                                                                                        <span>—</span> Keine Adresse hinterlegt
+                                                                                    </div>
                                                                                 )}
                                                                             </div>
 
-                                                                            {/* Payment Info */}
-                                                                            <div className="space-y-3">
-                                                                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 pb-2">Auszahlung</h4>
-                                                                                {quote.paymentDetails ? (
-                                                                                    <div className="space-y-2 text-sm">
-                                                                                        <div className="flex flex-col">
-                                                                                            <span className="text-slate-400 text-xs">IBAN</span>
-                                                                                            <span className="font-mono bg-slate-900/50 px-2 py-1 rounded inline-block mt-1 text-slate-300">
-                                                                                                {quote.paymentDetails.iban?.replace(/(.{4})/g, '$1 ').trim()}
+                                                                            {/* ── Auszahlung ── */}
+                                                                            <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 space-y-3">
+                                                                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                                    <span className="text-emerald-400">💶</span> Auszahlung
+                                                                                </h4>
+                                                                                {quote.paymentDetails?.iban ? (
+                                                                                    <div className="space-y-2.5 text-sm">
+                                                                                        <div>
+                                                                                            <span className="text-slate-500 text-xs block mb-1">IBAN</span>
+                                                                                            <span className="font-mono text-xs bg-slate-800 px-2 py-1.5 rounded-lg block text-slate-200 tracking-wider break-all">
+                                                                                                {quote.paymentDetails.iban.replace(/(.{4})/g, '$1 ').trim()}
                                                                                             </span>
                                                                                         </div>
-                                                                                        <div className="flex justify-between items-center mt-2">
-                                                                                            <span className="text-slate-400">Bank:</span>
-                                                                                            <span className="font-medium text-white">{quote.paymentDetails.bankName || '—'}</span>
+                                                                                        <div>
+                                                                                            <span className="text-slate-500 text-xs block mb-0.5">Bank</span>
+                                                                                            <span className="font-semibold text-white">{quote.paymentDetails.bankName || <span className="text-slate-500 italic font-normal">Nicht angegeben</span>}</span>
                                                                                         </div>
-                                                                                        <div className="flex justify-between items-center">
-                                                                                            <span className="text-slate-400">Kontoinhaber:</span>
-                                                                                            <span className="font-medium text-slate-300">{quote.paymentDetails.accountHolderName || customerName}</span>
+                                                                                        <div>
+                                                                                            <span className="text-slate-500 text-xs block mb-0.5">Kontoinhaber</span>
+                                                                                            <span className="font-semibold text-slate-200">{customerName}</span>
                                                                                         </div>
                                                                                     </div>
                                                                                 ) : (
-                                                                                    <span className="text-sm text-slate-500 italic">Keine Bankdaten hinterlegt</span>
+                                                                                    <div className="flex items-center gap-2 text-slate-500 text-sm italic">
+                                                                                        <span>—</span> Keine Bankdaten hinterlegt
+                                                                                    </div>
                                                                                 )}
                                                                             </div>
+
                                                                         </div>
                                                                     </motion.div>
                                                                 </td>
@@ -648,6 +703,118 @@ const ValuationManager = () => {
                     </div>
                 </div>
             )}
+
+            {/* Status Success Toast */}
+            <AnimatePresence>
+                {statusSuccess && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed top-6 right-6 z-[100] bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl flex items-center gap-2 shadow-xl"
+                    >
+                        ✅ {statusSuccess}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Status Change Dialog */}
+            <AnimatePresence>
+                {statusDialog?.open && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+                        onClick={() => setStatusDialog(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            transition={{ type: 'spring', duration: 0.35 }}
+                            className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Dialog Header */}
+                            <div className={`p-5 border-b border-slate-700/50 flex items-center justify-between ${statusDialog.newStatus === 'received' ? 'bg-blue-500/10' :
+                                statusDialog.newStatus === 'paid' ? 'bg-emerald-500/10' :
+                                    statusDialog.newStatus === 'pending_shipment' ? 'bg-amber-500/10' :
+                                        'bg-slate-800/50'
+                                }`}>
+                                <div>
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                        <MessageSquare size={18} className="text-cyan-400" />
+                                        Status ändern + Nachricht
+                                    </h3>
+                                    <p className="text-xs text-slate-400 mt-1">
+                                        An: <span className="text-cyan-400 font-medium">{statusDialog.customerEmail || 'Keine E-Mail'}</span>
+                                        {' · '}Neuer Status:{' '}
+                                        <span className={`font-bold ${statusDialog.newStatus === 'paid' ? 'text-emerald-400' :
+                                            statusDialog.newStatus === 'received' ? 'text-blue-400' :
+                                                statusDialog.newStatus === 'pending_shipment' ? 'text-amber-400' :
+                                                    'text-slate-300'
+                                            }`}>
+                                            {statusDialog.newStatus === 'paid' ? '💶 Bezahlt' :
+                                                statusDialog.newStatus === 'received' ? '✅ Gerät erhalten' :
+                                                    statusDialog.newStatus === 'pending_shipment' ? '📦 Versand ausstehend' :
+                                                        '⏳ Aktiv'}
+                                        </span>
+                                    </p>
+                                </div>
+                                <button onClick={() => setStatusDialog(null)} title="Dialog schließen" className="text-slate-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-700/50">
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            {/* Message Editor */}
+                            <div className="p-5 space-y-4">
+                                {!statusDialog.customerEmail && (
+                                    <div className="flex items-start gap-2 text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 text-xs">
+                                        <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                                        <span>Dieser Kunde hat keine E-Mail-Adresse. Die Nachricht kann nicht gesendet werden.</span>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                        Nachricht an Kunden (optional bearbeiten):
+                                    </label>
+                                    <textarea
+                                        value={statusDialog.message}
+                                        onChange={(e) => setStatusDialog(prev => prev ? { ...prev, message: e.target.value } : null)}
+                                        rows={7}
+                                        className="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-600 font-mono leading-relaxed"
+                                        placeholder="Nachricht an den Kunden..."
+                                    />
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => handleStatusChange(false)}
+                                        disabled={sendingMessage || !statusDialog.customerEmail}
+                                        className="flex-1 flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2.5 px-4 rounded-xl transition-colors text-sm"
+                                    >
+                                        {sendingMessage ? (
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <Send size={15} />
+                                        )}
+                                        Status ändern & E-Mail senden
+                                    </button>
+                                    <button
+                                        onClick={() => handleStatusChange(true)}
+                                        disabled={sendingMessage}
+                                        className="flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-slate-300 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm whitespace-nowrap"
+                                    >
+                                        Nur Status ändern
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Modal */}
             <AnimatePresence>

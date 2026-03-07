@@ -28,7 +28,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             try {
                 // Verify with backend
                 // This ensures the token is valid and not expired
-                await api.get('/api/auth/me'); // Ensure we use /api to hit the proxy
+                const response = await api.get('/api/auth/me'); // Ensure we use /api to hit the proxy
+                const userRole = response.data?.user?.role;
+
+                // If this is an admin route, enforce admin role strictly from the server response
+                if (requireAdmin && userRole !== 'admin') {
+                    console.error('Session verification failed: User is not an admin', userRole);
+                    logout();
+                    setIsVerified(false);
+                    return;
+                }
+
+                // Also update local context user if needed, but for now just verify
                 setIsVerified(true);
             } catch (error) {
                 console.error('Session verification failed:', error);
@@ -38,7 +49,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         };
 
         verifySession();
-    }, [isAuthenticated, logout]);
+    }, [isAuthenticated, logout, requireAdmin]);
 
     // Show loading while verifying (prevent flash of content or login)
     if (isVerified === null) {

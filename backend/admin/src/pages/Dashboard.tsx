@@ -156,7 +156,7 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-xl p-6">
                     <h2 className="text-xl font-bold text-white mb-6">Sales Overview (Last 30 Days)</h2>
-                    <div className="h-72">
+                    <div className="h-72 w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={timelineData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
@@ -175,7 +175,7 @@ const Dashboard: React.FC = () => {
 
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-xl p-6">
                     <h2 className="text-xl font-bold text-white mb-6">Repair Tickets by Status</h2>
-                    <div className="h-72">
+                    <div className="h-72 w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie

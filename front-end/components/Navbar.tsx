@@ -122,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
           </div>
 
           <div className="hidden lg:block ml-4 flex-1">
-            <GlobalSearchBar />
+            <GlobalSearchBar className="w-full" />
           </div>
 
           {/* Actions */}
@@ -213,7 +213,11 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
 
         {/* Mobile Nav Menu */}
         {isOpen && (
-          <div id="mobile-menu" className="md:hidden mt-4 pt-4 border-t border-slate-800/50 flex flex-col gap-2 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div id="mobile-menu" className="md:hidden absolute top-[calc(100%+0.5rem)] left-0 right-0 w-full h-[80vh] bg-black/95 backdrop-blur-3xl border border-slate-800/50 rounded-b-3xl flex flex-col px-6 py-6 gap-3 animate-in fade-in slide-in-from-top-4 duration-300 z-50 overflow-y-auto custom-scrollbar shadow-2xl">
+            <div className="w-full mb-2">
+              <GlobalSearchBar className="w-full" />
+            </div>
+
             {navItems.map((item) => {
               const isMobileActive = item.path === '/'
                 ? location.pathname === '/'
@@ -223,27 +227,30 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 ${isMobileActive
-                    ? 'bg-gradient-to-r from-brand-primary to-brand-secondary text-white shadow-lg'
-                    : 'bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white'
+                  className={`flex items-center px-5 py-4 rounded-2xl text-base font-bold uppercase tracking-widest transition-all duration-300 ${isMobileActive
+                    ? 'bg-gradient-to-r from-brand-primary/20 to-brand-secondary/10 border border-brand-primary/30 text-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                    : 'bg-slate-900/40 text-slate-300 border border-transparent hover:bg-slate-800 hover:border-slate-700/50 hover:text-white'
                     }`}
                 >
-                  <span className="me-3">{item.icon}</span>
+                  <span className="me-4 scale-125 opacity-80">{item.icon}</span>
                   {item.label}
                 </Link>
               );
             })}
-            <Link
-              to={user ? '/dashboard' : '/login'}
-              onClick={() => setIsOpen(false)}
-              className={`flex mt-2 items-center px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 ${user
-                ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-600/30'
-                : 'bg-brand-primary/20 text-brand-primary border border-brand-primary/30'
-                }`}
-            >
-              <UserIcon className="w-4 h-4 me-3" />
-              {user ? 'Dashboard' : 'Login'}
-            </Link>
+
+            <div className="mt-auto pt-4 border-t border-slate-800/50">
+              <Link
+                to={user ? '/dashboard' : '/login'}
+                onClick={() => setIsOpen(false)}
+                className={`flex w-full justify-center items-center px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-wider transition-all duration-300 ${user
+                  ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-600/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                  : 'bg-brand-primary/20 text-brand-primary border border-brand-primary/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                  }`}
+              >
+                <UserIcon className="w-5 h-5 me-3" />
+                {user ? t('admin.dashboard', 'Go to Dashboard') : t('common.signInRegister', 'Sign In / Register')}
+              </Link>
+            </div>
           </div>
         )}
       </div>

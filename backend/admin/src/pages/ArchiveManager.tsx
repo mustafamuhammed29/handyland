@@ -29,7 +29,7 @@ const ArchiveManager = () => {
 
     const fetchCases = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/repair-archive');
+            const res = await fetch('/api/repair-archive');
             const data = await res.json();
             setCases(data);
             setLoading(false);
@@ -42,7 +42,7 @@ const ArchiveManager = () => {
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this case?')) return;
         try {
-            await fetch(`http://localhost:5000/api/repair-archive/${id}`, { method: 'DELETE' });
+            await fetch(`/api/repair-archive/${id}`, { method: 'DELETE' });
             setCases(cases.filter(c => c._id !== id));
             setSelectedCases(selectedCases.filter(cId => cId !== id));
         } catch (error) {
@@ -69,7 +69,7 @@ const ArchiveManager = () => {
     const handleBulkDelete = async () => {
         if (!confirm(`Are you sure you want to delete ${selectedCases.length} selected cases?`)) return;
         try {
-            await Promise.all(selectedCases.map(id => fetch(`http://localhost:5000/api/repair-archive/${id}`, { method: 'DELETE' })));
+            await Promise.all(selectedCases.map(id => fetch(`/api/repair-archive/${id}`, { method: 'DELETE' })));
             setCases(cases.filter(c => !selectedCases.includes(c._id)));
             setSelectedCases([]);
         } catch (error) {
@@ -82,8 +82,8 @@ const ArchiveManager = () => {
         try {
             const method = currentCase._id ? 'PUT' : 'POST';
             const url = currentCase._id
-                ? `http://localhost:5000/api/repair-archive/${currentCase._id}`
-                : 'http://localhost:5000/api/repair-archive';
+                ? `/api/repair-archive/${currentCase._id}`
+                : '/api/repair-archive';
 
             const res = await fetch(url, {
                 method,

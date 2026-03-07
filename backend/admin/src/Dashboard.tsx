@@ -57,8 +57,8 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 const [statsRes, revenueRes] = await Promise.all([
-                    fetch('http://localhost:5000/api/stats'),
-                    fetch('http://localhost:5000/api/stats/user')
+                    fetch('/api/stats'),
+                    fetch('/api/stats/user')
                 ]);
                 const statsData = await statsRes.json();
                 const revenueData = await revenueRes.json();

@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square } from 'lucide-react';
+import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertTriangle, Send } from 'lucide-react';
 import { api } from '../utils/api';
+
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: React.ReactNode; description: string }> = {
+    pending: { label: 'Pending', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', icon: <Clock className="w-4 h-4" />, description: 'Order received, awaiting processing.' },
+    processing: { label: 'Processing', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', icon: <Package className="w-4 h-4" />, description: 'Order is being prepared.' },
+    shipped: { label: 'Shipped', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/30', icon: <Truck className="w-4 h-4" />, description: 'Order has been shipped.' },
+    delivered: { label: 'Delivered', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/30', icon: <CheckCircle className="w-4 h-4" />, description: 'Order delivered successfully.' },
+    cancelled: { label: 'Cancelled', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: <XCircle className="w-4 h-4" />, description: 'Order has been cancelled.' },
+};
 
 
 
@@ -60,6 +68,16 @@ const OrdersManager: React.FC = () => {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+    const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    // Status update modal state
+    const [showStatusModal, setShowStatusModal] = useState(false);
+    const [statusForm, setStatusForm] = useState({ status: '', trackingNumber: '', adminNote: '' });
+    const [updatingStatus, setUpdatingStatus] = useState(false);
+
+    const showToast = (type: 'success' | 'error', text: string) => {
+        setToast({ type, text });
+        setTimeout(() => setToast(null), 3500);
+    };
 
     // Fetch orders
     const fetchOrders = async () => {
@@ -95,23 +113,34 @@ const OrdersManager: React.FC = () => {
         fetchStats();
     }, [selectedStatus]);
 
-    // Update order status
-    const updateStatus = async (orderId: string, newStatus: string, trackingNumber?: string) => {
-        try {
-            const response = await api.put(`/api/orders/admin/${orderId}/status`, {
-                status: newStatus,
-                trackingNumber
-            });
+    // Open status update modal
+    const openStatusModal = (order: Order) => {
+        setStatusForm({ status: order.status, trackingNumber: order.trackingNumber || '', adminNote: '' });
+        setShowStatusModal(true);
+    };
 
+    // Submit status update
+    const handleStatusUpdate = async () => {
+        if (!selectedOrder || !statusForm.status) return;
+        setUpdatingStatus(true);
+        try {
+            const response = await api.put(`/api/orders/admin/${selectedOrder._id}/status`, {
+                status: statusForm.status,
+                trackingNumber: statusForm.trackingNumber || undefined,
+                adminNote: statusForm.adminNote || undefined,
+            });
             if (response.data.success) {
-                alert('Order status updated successfully!');
+                showToast('success', `Order ${selectedOrder.orderNumber} updated to "${STATUS_CONFIG[statusForm.status]?.label || statusForm.status}"`);
+                setShowStatusModal(false);
+                setSelectedOrder(null);
                 fetchOrders();
                 fetchStats();
-                setSelectedOrder(null);
             }
         } catch (error) {
             console.error('❌ Error updating order:', error);
-            alert('Error updating order status');
+            showToast('error', 'Failed to update order status. Please try again.');
+        } finally {
+            setUpdatingStatus(false);
         }
     };
 
@@ -122,14 +151,14 @@ const OrdersManager: React.FC = () => {
         try {
             const response = await api.put(`/api/orders/admin/${orderId}/approve-bank-transfer`);
             if (response.data.success) {
-                alert('Payment approved successfully! Order is now processing.');
+                showToast('success', 'Payment approved! Order is now processing.');
                 fetchOrders();
                 fetchStats();
                 setSelectedOrder(null);
             }
         } catch (error) {
             console.error('❌ Error approving payment:', error);
-            alert('Failed to approve payment.');
+            showToast('error', 'Failed to approve payment.');
         }
     };
 
@@ -157,13 +186,13 @@ const OrdersManager: React.FC = () => {
             await Promise.all(selectedOrders.map(id =>
                 api.put(`/api/orders/admin/${id}/status`, { status: newStatus })
             ));
-            alert('Orders updated successfully!');
+            showToast('success', `${selectedOrders.length} orders updated to "${STATUS_CONFIG[newStatus]?.label || newStatus}"`);
             fetchOrders();
             fetchStats();
             setSelectedOrders([]);
         } catch (error) {
             console.error('❌ Error in bulk status update:', error);
-            alert('Error updating orders');
+            showToast('error', 'Error updating orders. Some may have failed.');
         }
     };
 
@@ -220,6 +249,17 @@ const OrdersManager: React.FC = () => {
 
     return (
         <div className="p-6">
+            {/* Toast */}
+            {toast && (
+                <div className={`fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium animate-in slide-in-from-right-4 ${toast.type === 'success'
+                    ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
+                    : 'bg-red-900/90 border-red-500/50 text-red-300'
+                    }`}>
+                    {toast.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                    {toast.text}
+                </div>
+            )}
+
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold flex items-center gap-2">
                     <Package className="w-8 h-8" />
@@ -512,24 +552,143 @@ const OrdersManager: React.FC = () => {
                                 </div>
                             )}
 
-                            <div>
-                                <h3 className="font-bold text-white mb-2">Update Status</h3>
-                                <div className="flex gap-2">
-                                    {['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
-                                        <button
-                                            key={status}
-                                            onClick={() => updateStatus(selectedOrder._id, status)}
-                                            className={`px-4 py-2 rounded-lg font-bold transition-all ${selectedOrder.status === status ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'}`}
-                                        >
-                                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                            {/* Update Status Button */}
+                            <button
+                                onClick={() => openStatusModal(selectedOrder)}
+                                className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all"
+                            >
+                                <Send className="w-4 h-4" />
+                                Update Order Status
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
+            {/* ── Smart Status Update Modal ── */}
+            {showStatusModal && selectedOrder && (() => {
+                const cfg = STATUS_CONFIG[statusForm.status];
+                const isShipped = statusForm.status === 'shipped';
+                const isCancelled = statusForm.status === 'cancelled';
+                return (
+                    <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+                        <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl">
+                            {/* Header */}
+                            <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+                                <div>
+                                    <h3 className="font-bold text-lg text-white">Update Order Status</h3>
+                                    <p className="text-xs text-slate-500 mt-0.5">#{selectedOrder.orderNumber} · {selectedOrder.user?.name}</p>
+                                </div>
+                                <button onClick={() => setShowStatusModal(false)} aria-label="Close" className="text-slate-500 hover:text-white transition-colors">✕</button>
+                            </div>
+
+                            <div className="p-5 space-y-4">
+                                {/* Status Selector */}
+                                <div>
+                                    <label htmlFor="status-select" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">New Status</label>
+                                    <div className="grid grid-cols-5 gap-2">
+                                        {Object.entries(STATUS_CONFIG).map(([key, s]) => (
+                                            <button
+                                                key={key}
+                                                onClick={() => setStatusForm(f => ({ ...f, status: key }))}
+                                                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-bold transition-all ${statusForm.status === key
+                                                    ? `${s.bg} ${s.border} ${s.color} ring-2 ring-offset-1 ring-offset-slate-900 ring-current`
+                                                    : 'bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-600 hover:text-slate-300'
+                                                    }`}
+                                            >
+                                                <span className={statusForm.status === key ? s.color : 'text-slate-500'}>{s.icon}</span>
+                                                {s.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {cfg && (
+                                        <p className={`text-xs mt-2 ${cfg.color}`}>→ {cfg.description}</p>
+                                    )}
+                                </div>
+
+                                {/* Tracking Number (Shipped only) */}
+                                {isShipped && (
+                                    <div>
+                                        <label htmlFor="tracking-input" className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                                            Tracking Number <span className="text-slate-600 font-normal">(optional)</span>
+                                        </label>
+                                        <input
+                                            id="tracking-input"
+                                            type="text"
+                                            value={statusForm.trackingNumber}
+                                            onChange={e => setStatusForm(f => ({ ...f, trackingNumber: e.target.value.toUpperCase() }))}
+                                            placeholder="e.g. 1Z999AA1012345678"
+                                            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-600 focus:outline-none focus:border-purple-500 text-sm font-mono"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Admin Note to Customer */}
+                                <div>
+                                    <label htmlFor="admin-note" className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
+                                        <Send className="w-3 h-3" /> Message to Customer <span className="text-slate-600 font-normal">(optional)</span>
+                                    </label>
+                                    <textarea
+                                        id="admin-note"
+                                        value={statusForm.adminNote}
+                                        onChange={e => setStatusForm(f => ({ ...f, adminNote: e.target.value }))}
+                                        placeholder={
+                                            isShipped ? "e.g. Your package is on its way via DHL Express!" :
+                                                isCancelled ? "e.g. We're sorry, your order was cancelled due to stock issues." :
+                                                    "Add a personal message for the customer..."
+                                        }
+                                        rows={3}
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 text-sm resize-none"
+                                    />
+                                    {/* Live Preview */}
+                                    {statusForm.adminNote && (
+                                        <div className="mt-2 bg-slate-800/60 border border-slate-700/50 rounded-xl p-3">
+                                            <p className="text-xs text-indigo-400 font-bold mb-1.5 uppercase tracking-wider">Email Preview</p>
+                                            <div className="bg-blue-950/40 border border-blue-500/20 rounded-lg p-2.5">
+                                                <p className="text-xs text-blue-300 font-bold mb-0.5">Message from our team</p>
+                                                <p className="text-xs text-slate-300 italic">"{statusForm.adminNote}"</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Cancellation Warning */}
+                                {isCancelled && (
+                                    <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/30 rounded-xl p-3">
+                                        <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                                        <p className="text-xs text-red-300">
+                                            <strong>Warning:</strong> Cancelling this order will restore stock and notify the customer via email.
+                                            This action cannot be undone.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Footer */}
+                            <div className="p-5 border-t border-slate-800 flex gap-3">
+                                <button
+                                    onClick={() => setShowStatusModal(false)}
+                                    className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-colors text-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleStatusUpdate}
+                                    disabled={updatingStatus || statusForm.status === selectedOrder.status}
+                                    className={`flex-1 py-2.5 font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-40 ${isCancelled
+                                        ? 'bg-red-600 hover:bg-red-500 text-white'
+                                        : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                                        }`}
+                                >
+                                    {updatingStatus
+                                        ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Updating...</>
+                                        : <><Send className="w-4 h-4" /> Confirm Update</>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 };

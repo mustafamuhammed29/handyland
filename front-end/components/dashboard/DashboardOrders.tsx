@@ -23,7 +23,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
     const filteredOrders = orders.filter(order => {
         const matchesFilter = orderFilter === 'all' || order.status === orderFilter;
         const matchesSearch = orderSearch === '' ||
-            order._id?.toLowerCase().includes(orderSearch.toLowerCase()) ||
+            order.orderNumber?.toLowerCase().includes(orderSearch.toLowerCase()) ||
             order.items?.some(item => item.name?.toLowerCase().includes(orderSearch.toLowerCase()));
         return matchesFilter && matchesSearch;
     });
@@ -98,7 +98,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                         <Package className="w-6 h-6 text-blue-400" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-white">Order #{order._id?.slice(-8)}</h3>
+                                        <h3 className="font-bold text-white">Order {order.orderNumber || `#${order._id?.slice(-8)}`}</h3>
                                         <p className="text-sm text-slate-400">
                                             {new Date(order.createdAt).toLocaleDateString()} • {order.items?.length || 0} items
                                         </p>
