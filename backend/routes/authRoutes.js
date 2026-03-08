@@ -10,16 +10,15 @@ const rateLimit = require('express-rate-limit');
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-const emailLimiter = isDevelopment
-    ? (req, res, next) => next()
-    : rateLimit({
-        windowMs: 15 * 60 * 1000,
-        max: 3,
-        message: {
-            success: false,
-            message: 'Too many requests from this IP, please try again after 15 minutes'
-        }
-    });
+// FIXED: Rate limiting active in all environments (FIX 6)
+const emailLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDevelopment ? 10 : 3, // Relaxed in dev, strict in production
+    message: {
+        success: false,
+        message: 'Too many requests. Please try again in 15 minutes.'
+    }
+});
 
 
 

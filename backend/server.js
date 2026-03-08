@@ -301,6 +301,21 @@ const server = http.createServer(app);
 const { initSocket } = require('./utils/socket');
 initSocket(server);
 
+// FIXED: Periodic cleanup of expired refresh tokens (IMP 3)
+const RefreshToken = require('./models/RefreshToken');
+const cleanupExpiredTokens = async () => {
+    try {
+        const result = await RefreshToken.deleteMany({ expiryDate: { $lt: new Date() } });
+        if (process.env.NODE_ENV !== 'production' && result.deletedCount > 0) {
+            console.log(`🧹 Cleaned up ${result.deletedCount} expired refresh tokens`);
+        }
+    } catch (error) {
+        console.error('Token cleanup error:', error.message);
+    }
+};
+setInterval(cleanupExpiredTokens, 6 * 60 * 60 * 1000); // Every 6 hours
+cleanupExpiredTokens(); // Run on startup
+
 server.listen(PORT, () => {
     logger.info(`🚀 Server running on http://localhost:${PORT}`);
     logger.info(`📊 Admin Panel: http://localhost:3001`);
