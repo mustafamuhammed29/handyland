@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from './components/PageTransition';
@@ -34,6 +34,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import SocialAuthCallback from './pages/SocialAuthCallback';
 import { LanguageCode, User } from './types';
 import { translations } from './i18n';
+import { LanguageProvider, useLang } from './context/LanguageContext';
 import { CartProvider, useCart } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
@@ -46,6 +47,7 @@ import { SEO } from './components/SEO';
 import { WhatsAppWidget } from './components/WhatsAppWidget';
 import { AnnouncementBanner } from './components/AnnouncementBanner';
 import { OfflineBanner } from './components/OfflineBanner';
+import ErrorBoundary from './components/ErrorBoundary';
 import { PromoModal } from './components/PromoModal';
 
 // Lazy Load Components
@@ -105,7 +107,8 @@ const Home = ({ lang }: { lang: LanguageCode }) => {
 // AppContent uses the hooks that require the contexts provided in App
 function AppContent() {
   const location = useLocation();
-  const [lang, setLang] = useState<LanguageCode>('de');
+  // FIXED: Use LanguageContext instead of local state (FIX 9)
+  const { lang } = useLang();
   const { user, setUser, logout } = useAuth(); // Use AuthContext
   const { cart, setIsCartOpen } = useCart(); // FIXED: [Added setIsCartOpen for /cart redirect]
 
@@ -120,18 +123,6 @@ function AppContent() {
       window.history.replaceState({}, document.title);
     }
   }, [location.state, setIsCartOpen]);
-
-  // Load language preference
-  useEffect(() => {
-    const savedLang = localStorage.getItem('handyland_lang') as LanguageCode;
-    if (savedLang) setLang(savedLang);
-  }, []);
-
-  // Sync Document properties with current language
-  useEffect(() => {
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = lang;
-  }, [lang]);
 
   // Dynamically update browser tab title from admin settings
   useEffect(() => {
@@ -183,7 +174,8 @@ function AppContent() {
               <Route path="/sell/:quoteRef" element={<PageTransition><SellDevice /></PageTransition>} />
               <Route path="/products/:id" element={<PageTransition><ProductDetails lang={lang} /></PageTransition>} />
               <Route path="contact" element={<PageTransition><Contact lang={lang} /></PageTransition>} />
-              <Route path="checkout" element={<ProtectedRoute><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout lang={lang} /></Suspense></PageTransition></ProtectedRoute>} />
+              {/* FIXED: Wrapped with ErrorBoundary (FIX 10) */}
+              <Route path="checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout lang={lang} /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
               <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
               <Route path="login" element={<PageTransition><Login /></PageTransition>} />
               <Route path="verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
@@ -245,7 +237,7 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 60 * 1000, // 1 minute default
+      staleTime: 5 * 60 * 1000, // FIXED: 5 minutes to reduce unnecessary refetches (FIX 12)
     },
   },
 });
@@ -254,16 +246,19 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      {/* @ts-ignore */}
-      <HelmetProvider context={{}}>
+      {/* FIXED: Removed deprecated context={{}} prop (FIX 7) */}
+      <HelmetProvider>
         <ToastProvider>
-          <SettingsProvider>
-            <AuthProvider>
-              <CartProvider>
-                <AppContent />
-              </CartProvider>
-            </AuthProvider>
-          </SettingsProvider>
+          {/* FIXED: Added LanguageProvider (FIX 9) */}
+          <LanguageProvider>
+            <SettingsProvider>
+              <AuthProvider>
+                <CartProvider>
+                  <AppContent />
+                </CartProvider>
+              </AuthProvider>
+            </SettingsProvider>
+          </LanguageProvider>
         </ToastProvider>
       </HelmetProvider>
     </QueryClientProvider>

@@ -100,11 +100,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
 
+    // FIXED: Added error handling to loginWithToken (FIX 11)
     const loginWithToken = async (token: string) => {
-        // FIXED: [Removed localStorage.setItem for accessToken]
-        const { user: userData } = await authService.getMe();
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
+        try {
+            const { user: userData } = await authService.getMe();
+            localStorage.setItem('user', JSON.stringify(userData));
+            setUser(userData);
+        } catch (error) {
+            setUser(null);
+            localStorage.removeItem('user');
+            throw new Error('Social login failed. Please try again.');
+        }
     };
 
     const login = async (email: string, password: string) => {

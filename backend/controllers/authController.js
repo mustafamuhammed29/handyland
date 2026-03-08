@@ -299,6 +299,14 @@ exports.updateProfile = async (req, res) => {
             address: req.body.address
         };
 
+        // FIXED: Check phone uniqueness before updating (FIX 4)
+        if (req.body.phone) {
+            const phoneExists = await User.findOne({ phone: req.body.phone, _id: { $ne: req.user.id } });
+            if (phoneExists) {
+                return res.status(400).json({ success: false, message: 'This phone number is already in use by another account.' });
+            }
+        }
+
         const user = await User.findByIdAndUpdate(
             req.user.id,
             fieldsToUpdate,
@@ -344,6 +352,17 @@ exports.changePassword = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid current password'
+            });
+        }
+
+        // FIXED: Validate password strength before saving (FIX 2)
+        const hasLetter = /[A-Za-z]/.test(newPassword);
+        const hasNumber = /\d/.test(newPassword);
+        const hasSpecial = /[@$!%*#?&]/.test(newPassword);
+        if (newPassword.length < 8 || newPassword.length > 20 || !hasLetter || !hasNumber || !hasSpecial) {
+            return res.status(400).json({
+                success: false,
+                message: 'New password must be 8-20 characters with at least one letter, number, and special character.'
             });
         }
 
@@ -599,6 +618,17 @@ exports.resetPassword = async (req, res) => {
             });
         }
 
+        // FIXED: Validate password strength before saving (FIX 3)
+        const hasLetter = /[A-Za-z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasSpecial = /[@$!%*#?&]/.test(password);
+        if (password.length < 8 || password.length > 20 || !hasLetter || !hasNumber || !hasSpecial) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be 8-20 characters with at least one letter, number, and special character.'
+            });
+        }
+
         // Set new password
         user.password = password;
         user.resetPasswordToken = undefined;
@@ -679,7 +709,7 @@ exports.resendVerification = async (req, res) => {
     }
 };
 
-module.exports = exports;
+// FIXED: Removed duplicate module.exports here (FIX 1) — kept only the final one at end of file
 
 // @desc    Refresh Access Token
 // @route   GET /api/auth/refresh
@@ -733,8 +763,13 @@ exports.refreshToken = async (req, res) => {
 // @access  Private/Admin
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find();
-        res.status(200).json(users);
+        // FIXED: Add pagination to prevent loading all users at once (FIX 5)
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+        const total = await User.countDocuments();
+        const users = await User.find().skip(skip).limit(limit).sort({ createdAt: -1 });
+        res.status(200).json({ success: true, users, total, page, pages: Math.ceil(total / limit) });
     } catch (error) {
         res.status(500).json({
             success: false,

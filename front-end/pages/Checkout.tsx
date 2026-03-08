@@ -326,7 +326,8 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                 ...shippingDetails,
                 street: shippingDetails.address // Fix 400 Bad Request error
             },
-            shippingFee: shippingCost.toString(),
+            // FIXED: Send shippingFee as a number, not a string
+            shippingFee: shippingCost,
             shippingMethod: selectedMethod?.name || 'Standard',
             couponCode: coupon?.code,
             discountAmount: coupon?.discount,

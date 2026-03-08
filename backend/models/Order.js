@@ -151,9 +151,9 @@ OrderSchema.pre('validate', async function (next) {
     // 2. Integrity Check: Verify Total Amount
     if (this.items && this.items.length > 0) {
         const itemsTotal = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        // Assumes tax is included in price (Gross pricing)
-        // So Total = Items + Shipping - Discount
-        const calculatedTotal = itemsTotal + (this.shippingFee || 0) - (this.discountAmount || 0);
+        // FIXED: Include tax in validation to match controller calculation
+        // Total = Items + Shipping + Tax - Discount
+        const calculatedTotal = itemsTotal + (this.shippingFee || 0) + (this.tax || 0) - (this.discountAmount || 0);
 
         // Allow for small floating point differences (e.g. 0.01)
         if (Math.abs(this.totalAmount - calculatedTotal) > 0.01) {
