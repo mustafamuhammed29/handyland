@@ -7,8 +7,10 @@ const User = require('../models/User');
 // Helper: Calculate Price (BackMarket Style)
 // Price = (basePrice + storageAddon) * screenMult * bodyMult * functionalityMult
 const calculatePriceInternal = async (details) => {
+    // FIXED: Escape regex input to prevent ReDoS (FIX 4)
+    const escapedModel = details.model.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const device = await DeviceBlueprint.findOne({
-        model: { $regex: new RegExp(`^${details.model}$`, 'i') }
+        model: { $regex: new RegExp(`^${escapedModel}$`, 'i') }
     });
 
     if (!device) {
@@ -348,13 +350,13 @@ exports.deleteValuation = async (req, res) => {
 // @access  Public
 exports.getQuoteByReference = async (req, res) => {
     try {
-        console.log(`[getQuoteByReference] Looking for: "${req.params.reference}"`);
+        if (process.env.NODE_ENV !== 'production') console.log(`[getQuoteByReference] Looking for: "${req.params.reference}"`);
         const quote = await SavedValuation.findOne({
             quoteReference: req.params.reference,
             isQuote: true
         });
 
-        console.log(`[getQuoteByReference] Found:`, quote ? quote.quoteReference : 'NULL');
+        if (process.env.NODE_ENV !== 'production') console.log(`[getQuoteByReference] Found:`, quote ? quote.quoteReference : 'NULL');
 
         if (!quote) {
             return res.status(404).json({ success: false, message: 'Quote not found' });
@@ -442,34 +444,48 @@ exports.confirmQuote = async (req, res) => {
     }
 };
 
-// @desc    Get all quotes (Admin)
-// @route   GET /api/valuation/admin/quotes
-// @access  Private/Admin
+// FIXED: Added pagination + aggregation (FIX 6)
 exports.getAdminQuotes = async (req, res) => {
     try {
-        const quotes = await SavedValuation.find({ isQuote: true })
-            .sort({ createdAt: -1 })
-            .populate('user', 'name email phone')
-            .lean();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+        const query = { isQuote: true };
+        if (req.query.status) query.status = req.query.status;
 
-        // Stats
+        const [quotes, total] = await Promise.all([
+            SavedValuation.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate('user', 'name email phone')
+                .lean(),
+            SavedValuation.countDocuments(query)
+        ]);
+
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const todayCount = quotes.filter(q => new Date(q.createdAt) >= startOfDay).length;
-        const totalPaidValue = quotes
-            .filter(q => q.status === 'paid')
-            .reduce((sum, q) => sum + (q.estimatedValue || 0), 0);
-        const pendingCount = quotes.filter(q => q.status === 'pending_shipment').length;
+        const [todayCount, paidAgg, pendingCount] = await Promise.all([
+            SavedValuation.countDocuments({ isQuote: true, createdAt: { $gte: startOfDay } }),
+            SavedValuation.aggregate([
+                { $match: { isQuote: true, status: 'paid' } },
+                { $group: { _id: null, total: { $sum: '$estimatedValue' } } }
+            ]),
+            SavedValuation.countDocuments({ isQuote: true, status: 'pending_shipment' })
+        ]);
 
         res.json({
             success: true,
             stats: {
                 todayCount,
-                totalPaidValue,
+                totalPaidValue: paidAgg[0]?.total || 0,
                 pendingCount,
-                totalCount: quotes.length
+                totalCount: total
             },
-            quotes
+            quotes,
+            page,
+            pages: Math.ceil(total / limit),
+            total
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -481,25 +497,25 @@ exports.getAdminQuotes = async (req, res) => {
 // @access  Private/Admin
 exports.updateQuoteStatus = async (req, res) => {
     try {
-        console.log(`[Admin Quote Status] Attempting to update quote ${req.params.id} to status: ${req.body.status}`);
+        if (process.env.NODE_ENV !== 'production') console.log(`[Admin Quote Status] Attempting to update quote ${req.params.id} to status: ${req.body.status}`);
 
         const { status } = req.body;
         const validStatuses = ['active', 'pending_shipment', 'received', 'paid'];
         if (!validStatuses.includes(status)) {
-            console.log(`[Admin Quote Status] Invalid status: ${status}`);
+            if (process.env.NODE_ENV !== 'production') console.log(`[Admin Quote Status] Invalid status: ${status}`);
             return res.status(400).json({ success: false, message: 'Invalid status' });
         }
 
         const quote = await SavedValuation.findById(req.params.id);
         if (!quote) {
-            console.log(`[Admin Quote Status] Quote not found: ${req.params.id}`);
+            if (process.env.NODE_ENV !== 'production') console.log(`[Admin Quote Status] Quote not found: ${req.params.id}`);
             return res.status(404).json({ success: false, message: 'Quote not found' });
         }
 
         const oldStatus = quote.status;
         quote.status = status;
         await quote.save();
-        console.log(`[Admin Quote Status] Saved quote ${quote._id} to ${status}`);
+        if (process.env.NODE_ENV !== 'production') console.log(`[Admin Quote Status] Saved quote ${quote._id} to ${status}`);
 
         // Send email notification on status change
         const emailTo = quote.contact?.email || null;

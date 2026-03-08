@@ -107,36 +107,35 @@ exports.syncCart = async (req, res) => {
             }
         }
 
-        // Re-fetch the fully updated cart
+        // FIXED: Batch populate instead of N+1 queries (FIX 8)
         cart = await Cart.findOne({ user: req.user.id });
+        if (!cart || cart.items.length === 0) return res.json([]);
+
+        const productIds = cart.items.filter(i => i.productType === 'Product').map(i => i.product);
+        const accessoryIds = cart.items.filter(i => i.productType === 'Accessory').map(i => i.product);
+
+        const [products, accessories] = await Promise.all([
+            productIds.length ? Product.find({ _id: { $in: productIds } }).select('name price images category') : [],
+            accessoryIds.length ? Accessory.find({ _id: { $in: accessoryIds } }).select('name price images category') : []
+        ]);
+
+        const productMap = new Map(products.map(p => [p._id.toString(), p]));
+        const accessoryMap = new Map(accessories.map(a => [a._id.toString(), a]));
 
         const populatedItems = [];
         for (const item of cart.items) {
-            let details;
-            // Additional check if product exists (it might be deleted but still in cart)
-            if (!item.product) continue;
-
-            try {
-                if (item.productType === 'Product') {
-                    details = await Product.findById(item.product).select('name price images category');
-                } else {
-                    details = await Accessory.findById(item.product).select('name price images category');
-                }
-
-                if (details) {
-                    populatedItems.push({
-                        id: details._id,
-                        title: details.name,
-                        price: details.price,
-                        image: details.images && details.images.length > 0 ? details.images[0] : '',
-                        category: item.productType === 'Product' ? 'device' : 'accessory',
-                        quantity: item.quantity,
-                        productType: item.productType
-                    });
-                }
-            } catch (innerErr) {
-                console.error(`Error populating item ${item.product}:`, innerErr);
-                // Continue to next item instead of failing whole request
+            const idStr = item.product?.toString();
+            const details = item.productType === 'Product' ? productMap.get(idStr) : accessoryMap.get(idStr);
+            if (details) {
+                populatedItems.push({
+                    id: details._id,
+                    title: details.name,
+                    price: details.price,
+                    image: details.images && details.images.length > 0 ? details.images[0] : '',
+                    category: item.productType === 'Product' ? 'device' : 'accessory',
+                    quantity: item.quantity,
+                    productType: item.productType
+                });
             }
         }
 
@@ -176,6 +175,20 @@ exports.updateCart = async (req, res) => {
                 const catLower = productType ? productType.toLowerCase() : '';
                 const typeToSave = (catLower === 'device' || catLower === 'phone') ? 'Product' : (catLower === 'accessory' ? 'Accessory' : 'Product');
 
+                // FIXED: Validate stock before adding new item (FIX 9)
+                let stockDoc;
+                if (typeToSave === 'Product') {
+                    stockDoc = await Product.findById(id).select('stock name');
+                } else {
+                    stockDoc = await Accessory.findById(id).select('stock name');
+                }
+                if (!stockDoc) {
+                    return res.status(404).json({ success: false, message: 'Product not found' });
+                }
+                if (stockDoc.stock < quantity) {
+                    return res.status(400).json({ success: false, message: `Only ${stockDoc.stock} units available for ${stockDoc.name}` });
+                }
+
                 // Add new item atomically
                 await Cart.findOneAndUpdate(
                     { user: req.user.id },
@@ -214,62 +227,37 @@ exports.getAllCarts = async (req, res) => {
     try {
         const carts = await Cart.find({ "items.0": { $exists: true } }).populate('user', 'name email').sort({ updatedAt: -1 });
 
-        // Manually populate items to handle dynamic refs (Product vs Accessory) matching getCart logic
+        // FIXED: Batch queries per cart instead of N+1 (FIX 10)
         const populatedCarts = await Promise.all(carts.map(async (cart) => {
-            const populatedItems = [];
-            for (const item of cart.items) {
-                // Skip if no product ID
-                if (!item.product) continue;
-
-                let details;
-                try {
-                    if (item.productType === 'Product') {
-                        details = await Product.findById(item.product).select('name price images category');
-                    } else if (item.productType === 'Accessory') {
-                        details = await Accessory.findById(item.product).select('name price images category');
-                    }
-
-                    if (details) {
-                        populatedItems.push({
-                            _id: item._id, // Keep item ID
-                            product: { // Nest details to match common structure or flatten? 
-                                // Admin likely expects "product" object. 
-                                // Let's look at how getCart returns it: it returns a flat list of items.
-                                // But getAllCarts returns a list of Carts.
-                                // So cart.items should be replaced or mapped.
-                                _id: details._id,
-                                name: details.name,
-                                price: details.price,
-                                image: details.images && details.images.length > 0 ? details.images[0] : '',
-                                category: item.productType === 'Product' ? 'device' : 'accessory'
-                            },
-                            quantity: item.quantity,
-                            productType: item.productType
-                        });
-                    } else {
-                        // Product might be deleted. Keep item info or mark as unavailable?
-                        // For Admin, it's useful to see "Unknown Item" or just skip.
-                        // Let's keep ID for reference.
-                        populatedItems.push({
-                            _id: item._id,
-                            product: { name: 'Unknown/Deleted Product', _id: item.product },
-                            quantity: item.quantity,
-                            productType: item.productType
-                        });
-                    }
-                } catch (err) {
-                    console.error(`Error populating cart item ${item.product}:`, err);
-                }
+            if (!cart.items || cart.items.length === 0) {
+                return { _id: cart._id, user: cart.user, items: [], updatedAt: cart.updatedAt, createdAt: cart.createdAt };
             }
 
-            // Return cart object with populated items
-            return {
-                _id: cart._id,
-                user: cart.user,
-                items: populatedItems,
-                updatedAt: cart.updatedAt,
-                createdAt: cart.createdAt
-            };
+            const pIds = cart.items.filter(i => i.productType === 'Product' && i.product).map(i => i.product);
+            const aIds = cart.items.filter(i => i.productType === 'Accessory' && i.product).map(i => i.product);
+
+            const [prods, accs] = await Promise.all([
+                pIds.length ? Product.find({ _id: { $in: pIds } }).select('name price images') : [],
+                aIds.length ? Accessory.find({ _id: { $in: aIds } }).select('name price images') : []
+            ]);
+
+            const pMap = new Map(prods.map(p => [p._id.toString(), p]));
+            const aMap = new Map(accs.map(a => [a._id.toString(), a]));
+
+            const populatedItems = cart.items.map(item => {
+                const idStr = item.product?.toString();
+                const details = item.productType === 'Product' ? pMap.get(idStr) : aMap.get(idStr);
+                return {
+                    _id: item._id,
+                    product: details
+                        ? { _id: details._id, name: details.name, price: details.price, image: details.images && details.images.length > 0 ? details.images[0] : '' }
+                        : { name: 'Unknown/Deleted Product', _id: item.product },
+                    quantity: item.quantity,
+                    productType: item.productType
+                };
+            });
+
+            return { _id: cart._id, user: cart.user, items: populatedItems, updatedAt: cart.updatedAt, createdAt: cart.createdAt };
         }));
 
         res.json(populatedCarts);

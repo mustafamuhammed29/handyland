@@ -31,8 +31,16 @@ exports.updateDeviceServices = async (req, res) => {
 };
 
 // ... existing methods
+// FIXED: Added input validation (FIX 1)
 exports.estimateRepairCost = (req, res) => {
     const { device, issue } = req.body;
+
+    if (!device || !issue || typeof device !== 'string' || typeof issue !== 'string') {
+        return res.status(400).json({ success: false, message: 'Device and issue are required and must be strings.' });
+    }
+    if (device.length > 100 || issue.length > 200) {
+        return res.status(400).json({ success: false, message: 'Input too long.' });
+    }
 
     // Mock logic for estimation
     let baseCost = 50;
@@ -46,7 +54,7 @@ exports.estimateRepairCost = (req, res) => {
         device,
         issue,
         estimatedCost: baseCost,
-        currency: 'USD',
+        currency: 'EUR',
         note: 'This is a preliminary estimate. Final cost may vary after diagnostic.'
     });
 };
@@ -67,13 +75,20 @@ exports.createDevice = async (req, res) => {
     }
 };
 
+// FIXED: Whitelist allowed fields (FIX 2)
 exports.updateDevice = async (req, res) => {
     try {
         const { id } = req.params;
+        const allowedFields = ['model', 'brand', 'image', 'services', 'isVisible', 'description'];
+        const updateData = {};
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) updateData[field] = req.body[field];
+        });
+
         const device = await RepairDevice.findOneAndUpdate(
             { id: id },
-            req.body,
-            { new: true }
+            updateData,
+            { new: true, runValidators: true }
         );
         if (device) res.json(device);
         else res.status(404).json({ message: "Device not found" });
@@ -82,11 +97,15 @@ exports.updateDevice = async (req, res) => {
     }
 };
 
+// FIXED: Return 404 when device not found (FIX 3)
 exports.deleteDevice = async (req, res) => {
     try {
         const { id } = req.params;
-        await RepairDevice.findOneAndDelete({ id: id });
-        res.json({ message: "Device deleted" });
+        const result = await RepairDevice.findOneAndDelete({ id: id });
+        if (!result) {
+            return res.status(404).json({ success: false, message: 'Device not found' });
+        }
+        res.json({ success: true, message: 'Device deleted' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
