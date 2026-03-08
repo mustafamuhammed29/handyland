@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Transaction = require('../models/Transaction');
@@ -75,10 +76,15 @@ exports.applyCoupon = async (req, res) => {
 // @route   POST /api/orders
 // @access  Private
 exports.createOrder = async (req, res) => {
+    // FIXED: Use MongoDB session for atomicity (FIX 2)
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
         const { items, shippingAddress, paymentMethod, notes, couponCode, discountAmount } = req.body;
 
         if (!items || items.length === 0) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({
                 success: false,
                 message: 'No items in order'
@@ -92,12 +98,14 @@ exports.createOrder = async (req, res) => {
         for (const item of items) {
             let product;
             if (item.productType === 'Product') {
-                product = await Product.findById(item.product);
+                product = await Product.findById(item.product).session(session);
             } else if (item.productType === 'Accessory') {
-                product = await Accessory.findById(item.product);
+                product = await Accessory.findById(item.product).session(session);
             }
 
             if (!product) {
+                await session.abortTransaction();
+                session.endSession();
                 return res.status(404).json({
                     success: false,
                     message: `Product not found: ${item.product}`
@@ -106,6 +114,8 @@ exports.createOrder = async (req, res) => {
 
             // Check Stock
             if (product.stock < item.quantity) {
+                await session.abortTransaction();
+                session.endSession();
                 return res.status(400).json({
                     success: false,
                     message: `Insufficient stock for ${product.name}. Available: ${product.stock}`
@@ -133,8 +143,8 @@ exports.createOrder = async (req, res) => {
 
         const finalAmount = Math.max(0, totalAmount + shippingFee + taxAmount - appliedDiscount);
 
-        // Create order
-        const order = await Order.create({
+        // Create order within session
+        const [order] = await Order.create([{
             user: req.user.id,
             items: orderItems,
             totalAmount: finalAmount,
@@ -145,14 +155,14 @@ exports.createOrder = async (req, res) => {
             notes,
             couponCode: couponCode || undefined,
             discountAmount: appliedDiscount
-        });
+        }], { session });
 
-        // Update Stock and Sold
+        // Update Stock and Sold within session
         for (const item of orderItems) {
             if (item.productType === 'Product') {
-                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
+                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } }, { session });
             } else if (item.productType === 'Accessory') {
-                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
+                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } }, { session });
             }
         }
 
@@ -162,7 +172,10 @@ exports.createOrder = async (req, res) => {
             await recordCouponUsage(couponCode, req.user.id, req.user.email);
         }
 
-        // Send order confirmation email
+        await session.commitTransaction();
+        session.endSession();
+
+        // Send order confirmation email (outside transaction — non-critical)
         try {
             await sendEmail({
                 email: req.user.email,
@@ -171,7 +184,6 @@ exports.createOrder = async (req, res) => {
             });
         } catch (emailError) {
             console.error('Email sending failed:', emailError);
-            // Don't fail the order if email fails
         }
 
         res.status(201).json({
@@ -180,6 +192,8 @@ exports.createOrder = async (req, res) => {
             order
         });
     } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
         console.error('Create order error:', error);
         res.status(500).json({
             success: false,
@@ -301,6 +315,15 @@ exports.cancelOrder = async (req, res) => {
             } else if (item.productType === 'Accessory') {
                 await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
             }
+        }
+
+        // FIXED: Rollback coupon usage on cancellation (FIX 3)
+        if (order.couponCode) {
+            const Coupon = require('../models/Coupon');
+            await Coupon.findOneAndUpdate(
+                { code: order.couponCode.toUpperCase() },
+                { $inc: { usedCount: -1 } }
+            );
         }
 
         res.status(200).json({
@@ -609,30 +632,33 @@ exports.getInvoice = async (req, res) => {
 // @desc    Get order statistics (Admin)
 // @route   GET /api/orders/admin/stats
 // @access  Private/Admin
+// FIXED: Replaced 6 separate countDocuments with single aggregation (FIX 4)
 exports.getOrderStats = async (req, res) => {
     try {
-        const totalOrders = await Order.countDocuments();
-        const pendingOrders = await Order.countDocuments({ status: 'pending' });
-        const processingOrders = await Order.countDocuments({ status: 'processing' });
-        const shippedOrders = await Order.countDocuments({ status: 'shipped' });
-        const deliveredOrders = await Order.countDocuments({ status: 'delivered' });
-        const cancelledOrders = await Order.countDocuments({ status: 'cancelled' });
-
-        const totalRevenue = await Order.aggregate([
-            { $match: { status: { $ne: 'cancelled' } } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+        const [statusCounts, revenueData] = await Promise.all([
+            Order.aggregate([
+                { $group: { _id: '$status', count: { $sum: 1 } } }
+            ]),
+            Order.aggregate([
+                { $match: { status: { $ne: 'cancelled' } } },
+                { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            ])
         ]);
+
+        const counts = {};
+        statusCounts.forEach(s => { counts[s._id] = s.count; });
+        const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
         res.status(200).json({
             success: true,
             stats: {
-                totalOrders,
-                pendingOrders,
-                processingOrders,
-                shippedOrders,
-                deliveredOrders,
-                cancelledOrders,
-                totalRevenue: totalRevenue[0]?.total || 0
+                totalOrders: total,
+                pendingOrders: counts['pending'] || 0,
+                processingOrders: counts['processing'] || 0,
+                shippedOrders: counts['shipped'] || 0,
+                deliveredOrders: counts['delivered'] || 0,
+                cancelledOrders: counts['cancelled'] || 0,
+                totalRevenue: revenueData[0]?.total || 0
             }
         });
     } catch (error) {
@@ -748,82 +774,8 @@ exports.requestRefund = async (req, res) => {
     }
 };
 
-// @desc    Generate Invoice
-// @route   GET /api/orders/:id/invoice
-// @access  Private
-exports.generateInvoice = async (req, res) => {
-    try {
-        const order = await Order.findById(req.params.id).populate('user', 'name email');
-        if (!order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
-        }
-
-        if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-            return res.status(403).json({ success: false, message: 'Not authorized' });
-        }
-
-        // Generate HTML Invoice
-        const html = `
-            <html>
-            <head>
-                <style>
-                    body { font-family: Arial, sans-serif; padding: 20px; }
-                    .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-                    .header h1 { color: #333; }
-                    .details { margin-bottom: 20px; }
-                    table { width: 100%; border-collapse: collapse; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f2f2f2; }
-                    .total { font-weight: bold; text-align: right; margin-top: 20px; }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>INVOICE</h1>
-                    <div>
-                        <p><strong>Order ID:</strong> ${order.orderNumber || order._id}</p>
-                        <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
-                    </div>
-                </div>
-                <div class="details">
-                    <p><strong>Billed To:</strong> ${order.user.name} (${order.user.email})</p>
-                    <p><strong>Status:</strong> ${order.status.toUpperCase()}</p>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${order.items.map(item => `
-                            <tr>
-                                <td>${item.name}</td>
-                                <td>${item.quantity}</td>
-                                <td>€${item.price.toFixed(2)}</td>
-                                <td>€${(item.quantity * item.price).toFixed(2)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                <div class="total">
-                    <p>Total Amount: €${order.totalAmount.toFixed(2)}</p>
-                </div>
-            </body>
-            </html>
-        `;
-
-        res.set('Content-Type', 'text/html');
-        res.send(html);
-
-    } catch (error) {
-        console.error("Generate Invoice Error:", error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
+// FIXED: Removed duplicate generateInvoice — use getInvoice instead (FIX 7)
+exports.generateInvoice = exports.getInvoice; // alias for backward compatibility
 
 // @desc    Process refund (Admin)
 // @route   PUT /api/orders/refund/:id
@@ -849,6 +801,28 @@ exports.processRefund = async (req, res) => {
         }
 
         await refundRequest.save();
+
+        // FIXED: Send email notification to user about refund status (FIX 6)
+        try {
+            const User = require('../models/User');
+            const refundUser = await User.findById(refundRequest.user);
+            if (refundUser) {
+                await sendEmail({
+                    email: refundUser.email,
+                    subject: status === 'approved' ? 'Refund Approved - HandyLand' : 'Refund Request Update - HandyLand',
+                    html: `
+                        <h2>Hello ${refundUser.name},</h2>
+                        <p>Your refund request for Order <strong>#${refundRequest.order.orderNumber || refundRequest.order._id}</strong> has been <strong>${status.toUpperCase()}</strong>.</p>
+                        ${adminComments ? `<p><strong>Note from our team:</strong> ${adminComments}</p>` : ''}
+                        <p>If you have questions, please contact our support team.</p>
+                        <p>HandyLand Team</p>
+                    `
+                });
+            }
+        } catch (emailError) {
+            console.error('Refund email failed:', emailError);
+        }
+
         res.json(refundRequest);
 
     } catch (error) {
@@ -863,17 +837,22 @@ exports.updateOrderToPaid = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id);
 
-        if (order) {
-            order.isPaid = true;
-            order.paidAt = Date.now();
-            order.status = 'processing';
-            const updatedOrder = await order.save();
-            res.json(updatedOrder);
-        } else {
-            res.status(404).json({ message: 'Order not found' });
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
         }
+
+        // FIXED: Authorization check — only order owner or admin (FIX 1)
+        if (order.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized to update this order' });
+        }
+
+        order.isPaid = true;
+        order.paidAt = Date.now();
+        order.status = 'processing';
+        const updatedOrder = await order.save();
+        res.json({ success: true, order: updatedOrder });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -882,19 +861,24 @@ exports.updateOrderToPaid = async (req, res) => {
 // @access  Private/Admin
 exports.updateOrderToDelivered = async (req, res) => {
     try {
+        // FIXED: Admin-only authorization check (FIX 1)
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
         const order = await Order.findById(req.params.id);
 
-        if (order) {
-            order.isDelivered = true;
-            order.deliveredAt = Date.now();
-            order.status = 'delivered';
-            const updatedOrder = await order.save();
-            res.json(updatedOrder);
-        } else {
-            res.status(404).json({ message: 'Order not found' });
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
         }
+
+        order.isDelivered = true;
+        order.deliveredAt = Date.now();
+        order.status = 'delivered';
+        const updatedOrder = await order.save();
+        res.json({ success: true, order: updatedOrder });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -920,9 +904,9 @@ exports.uploadPaymentReceipt = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please upload an image file' });
         }
 
-        // Construct URL for the uploaded file
-        // Ensure your server handles serving standard static files from /uploads
-        const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        // FIXED: Proxy-safe URL construction (FIX 5)
+        const protocol = req.get('x-forwarded-proto') || req.protocol;
+        const fileUrl = `${protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
         order.paymentReceipt = fileUrl;
         order.statusHistory.push({
