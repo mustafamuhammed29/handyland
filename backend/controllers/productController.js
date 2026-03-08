@@ -18,25 +18,28 @@ exports.getAllProducts = async (req, res) => {
             query.stock = { $gt: 0 };
         }
 
-        // Search
+        // Search — FIXED: Escape regex input to prevent ReDoS (FIX 7)
         if (req.query.search) {
+            const escapedSearch = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             query.$or = [
-                { name: { $regex: req.query.search, $options: 'i' } },
-                { model: { $regex: req.query.search, $options: 'i' } },
-                { brand: { $regex: req.query.search, $options: 'i' } }
+                { name: { $regex: escapedSearch, $options: 'i' } },
+                { model: { $regex: escapedSearch, $options: 'i' } },
+                { brand: { $regex: escapedSearch, $options: 'i' } }
             ];
         }
 
-        // Filters
+        // Filters — FIXED: Escape regex inputs (FIX 7)
         if (req.query.brand && req.query.brand !== 'All') {
-            query.brand = { $regex: new RegExp(`^${req.query.brand}$`, 'i') };
+            const escapedBrand = req.query.brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            query.brand = { $regex: new RegExp(`^${escapedBrand}$`, 'i') };
         }
-        // Condition filter - case-insensitive match
         if (req.query.condition) {
-            query.condition = { $regex: new RegExp(`^${req.query.condition}$`, 'i') };
+            const escapedCondition = req.query.condition.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            query.condition = { $regex: new RegExp(`^${escapedCondition}$`, 'i') };
         }
         if (req.query.storage) {
-            query.storage = { $regex: new RegExp(req.query.storage, 'i') };
+            const escapedStorage = req.query.storage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            query.storage = { $regex: new RegExp(escapedStorage, 'i') };
         }
         if (req.query.ram) {
             query['specs.ram'] = req.query.ram;
@@ -105,12 +108,19 @@ exports.createProduct = async (req, res) => {
     }
 };
 
+// FIXED: Whitelist allowed fields to prevent injection (FIX 6)
 exports.updateProduct = async (req, res) => {
     try {
+        const allowedFields = ['name', 'price', 'description', 'stock', 'images', 'image', 'brand', 'model', 'category', 'condition', 'storage', 'color', 'specs', 'isActive', 'isFeatured', 'tags'];
+        const updateData = {};
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) updateData[field] = req.body[field];
+        });
+
         const product = await Product.findOneAndUpdate(
             { id: req.params.id },
-            req.body,
-            { new: true }
+            updateData,
+            { new: true, runValidators: true }
         );
         if (product) {
             res.json(product);
@@ -255,29 +265,29 @@ exports.answerQuestion = async (req, res) => {
     }
 };
 
-// @desc Validate stock for checkout
-// @route POST /api/products/validate-stock
-// @access Public
+// FIXED: Batch queries with $in to fix N+1 problem (FIX 8)
 exports.validateStock = async (req, res) => {
     try {
         const { items } = req.body;
-        const errors = [];
         const Accessory = require('../models/Accessory');
 
-        for (const item of items) {
-            let productDoc;
-            if (item.category === 'accessory') {
-                productDoc = await Accessory.findOne({ id: item.id });
-                if (!productDoc && mongoose.Types.ObjectId.isValid(item.id)) {
-                    productDoc = await Accessory.findById(item.id);
-                }
-            } else {
-                productDoc = await Product.findOne({ id: item.id });
-                if (!productDoc && mongoose.Types.ObjectId.isValid(item.id)) {
-                    productDoc = await Product.findById(item.id);
-                }
-            }
+        // Separate items by category
+        const productIds = items.filter(i => i.category !== 'accessory').map(i => i.id);
+        const accessoryIds = items.filter(i => i.category === 'accessory').map(i => i.id);
 
+        // Batch fetch all items in 2 queries instead of N
+        const [products, accessories] = await Promise.all([
+            productIds.length > 0 ? Product.find({ id: { $in: productIds } }) : Promise.resolve([]),
+            accessoryIds.length > 0 ? Accessory.find({ id: { $in: accessoryIds } }) : Promise.resolve([])
+        ]);
+
+        // Build lookup map
+        const productMap = {};
+        [...products, ...accessories].forEach(p => { productMap[p.id] = p; });
+
+        const errors = [];
+        for (const item of items) {
+            const productDoc = productMap[item.id];
             if (!productDoc) {
                 errors.push({ id: item.id, message: `Item not found: ${item.name || item.id}` });
             } else if (productDoc.stock < item.quantity) {
@@ -286,10 +296,8 @@ exports.validateStock = async (req, res) => {
         }
 
         if (errors.length > 0) {
-            const errorMsg = errors.map(e => e.message).join(', ');
-            return res.status(400).json({ success: false, errors, message: errorMsg });
+            return res.status(400).json({ success: false, errors, message: errors.map(e => e.message).join(', ') });
         }
-
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server Error', error: error.message });

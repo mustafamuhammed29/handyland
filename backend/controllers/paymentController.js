@@ -6,23 +6,35 @@ const Settings = require('../models/Settings');
 const mongoose = require('mongoose');
 const Coupon = require('../models/Coupon');
 
-// Helper to get Stripe instance
+// FIXED: Cache Stripe instance to avoid DB query on every payment request (FIX 5)
+let _stripeInstance = null;
+let _stripeCacheTime = 0;
+const STRIPE_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Helper to get Stripe instance (with cache)
 const getStripe = async () => {
     try {
+        // FIXED: Return cached instance if still fresh (FIX 5)
+        const now = Date.now();
+        if (_stripeInstance && (now - _stripeCacheTime) < STRIPE_CACHE_TTL) {
+            return _stripeInstance;
+        }
+
         const settings = await Settings.findOne();
         const secretKey = settings?.payment?.stripe?.secretKey || process.env.STRIPE_SECRET_KEY;
 
+        let stripeResult;
         if (secretKey && !secretKey.includes('your_stripe_secret_key')) {
-            return require('stripe')(secretKey);
+            stripeResult = require('stripe')(secretKey);
         } else {
             // Fallback Mock
-            console.warn('Stripe key missing or invalid. Using Mock.');
-            return {
+            if (process.env.NODE_ENV !== 'production') console.warn('Stripe key missing or invalid. Using Mock.');
+            stripeResult = {
                 checkout: {
                     sessions: {
                         create: async (params) => ({
                             id: 'mock_session_' + Date.now(),
-                            url: 'http://localhost:3000/payment-success?session_id=mock_session_' + Date.now(), // Direct to success for mock
+                            url: 'http://localhost:3000/payment-success?session_id=mock_session_' + Date.now(),
                             metadata: params.metadata,
                             amount_total: params.line_items.reduce((acc, item) => acc + item.price_data.unit_amount * item.quantity, 0),
                             currency: 'eur',
@@ -44,9 +56,13 @@ const getStripe = async () => {
                         return body;
                     }
                 },
-                refunds: { create: async () => ({ id: 'mock_refund_id_' + Date.now() }) }
+                refunds: { create: async () => ({ id: 'mock_refund_id_' + Date.now(), amount: 0, status: 'succeeded' }) }
             };
         }
+
+        _stripeInstance = stripeResult;
+        _stripeCacheTime = now;
+        return _stripeInstance;
     } catch (err) {
         console.error("Error getting Stripe instance:", err);
         throw err;
@@ -133,13 +149,13 @@ exports.createCheckoutSession = async (req, res) => {
         if (req.body.shippingFee) {
             shippingFee = parseFloat(req.body.shippingFee);
         } else {
-            shippingFee = subtotal >= 100 ? 0 : 5.99; // Using >= to match frontend logic
+            shippingFee = subtotal >= 100 ? 0 : 5.99;
         }
 
         const finalDiscount = discountAmount ? parseFloat(discountAmount) : 0;
-        const tax = subtotal * 0.19; // Approximation
+        const tax = subtotal * 0.19;
 
-        // Create Pending Order
+        // Prepare order data (but don't create yet)
         const orderData = {
             user: req.user ? req.user.id : undefined,
             items: orderItems,
@@ -161,8 +177,6 @@ exports.createCheckoutSession = async (req, res) => {
                 country: shippingAddress.country
             }
         };
-
-        const order = await Order.create(orderData);
 
         // Create line items for Stripe
         const lineItems = items.map(item => ({
@@ -190,10 +204,8 @@ exports.createCheckoutSession = async (req, res) => {
             });
         }
 
-        // Create checkout session
+        // FIXED: Create Stripe session FIRST, then order (FIX 2)
         const stripe = await getStripe();
-
-        // Ensure Stripe accepts the provided method type
         const methodType = paymentProvider === 'stripe' ? 'card' : (paymentProvider || 'card');
 
         const session = await stripe.checkout.sessions.create({
@@ -204,14 +216,15 @@ exports.createCheckoutSession = async (req, res) => {
             cancel_url: `${process.env.FRONTEND_URL}/checkout`,
             customer_email: req.user ? req.user.email : shippingAddress.email,
             metadata: {
-                orderId: order._id.toString(),
                 userId: req.user ? req.user.id : 'guest'
             },
         });
 
-        // Update Order with Session ID
-        order.paymentId = session.id;
-        await order.save();
+        // Only create order AFTER Stripe session succeeds (prevents ghost orders)
+        const order = await Order.create({ ...orderData, paymentId: session.id });
+
+        // Update session metadata with orderId (for webhook)
+        // Note: Stripe metadata is immutable after creation, so we store orderId in the order's paymentId field instead
 
         res.status(200).json({
             success: true,
@@ -315,52 +328,59 @@ exports.handleWebhook = async (req, res) => {
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    console.log(`[Webhook] Received event: ${event.type} (${event.id})`);
+    if (process.env.NODE_ENV !== 'production') console.log(`[Webhook] Received event: ${event.type} (${event.id})`);
 
     // Handle the event
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
-        console.log('Payment successful (Webhook):', session.id);
+        if (process.env.NODE_ENV !== 'production') console.log('Payment successful (Webhook):', session.id);
 
         try {
-            const orderId = session.metadata.orderId;
-            if (!orderId) {
-                console.error("No orderId in metadata");
-                return res.status(400).send("No orderId in metadata");
-            }
-
-            const order = await Order.findById(orderId);
+            // FIXED: Since order is now created after Stripe session, find by paymentId
+            const order = await Order.findOne({ paymentId: session.id });
             if (!order) {
-                console.error("Order not found:", orderId);
-                return res.status(404).send("Order not found");
+                // Try metadata orderId for backward compatibility
+                const orderId = session.metadata?.orderId;
+                if (orderId) {
+                    const orderById = await Order.findById(orderId);
+                    if (!orderById) {
+                        console.error("Order not found for session:", session.id);
+                        return res.status(404).send("Order not found");
+                    }
+                } else {
+                    console.error("Order not found for session:", session.id);
+                    return res.status(404).send("Order not found");
+                }
             }
 
-            if (order.status !== 'pending' && order.status !== 'pending_payment') {
-                console.log('Order already processed or not pending:', orderId);
+            const foundOrder = order || await Order.findById(session.metadata?.orderId);
+
+            if (foundOrder.status !== 'pending' && foundOrder.status !== 'pending_payment') {
+                if (process.env.NODE_ENV !== 'production') console.log('Order already processed:', foundOrder._id);
                 return res.json({ received: true });
             }
 
             // Update Order
-            order.status = 'processing';
-            order.paymentStatus = 'paid';
-            order.paymentId = session.payment_intent; // Update with actual payment intent
-            await order.save();
+            foundOrder.status = 'processing';
+            foundOrder.paymentStatus = 'paid';
+            foundOrder.paymentId = session.payment_intent;
+            await foundOrder.save();
 
             // Create Transaction Record (only for registered users)
-            if (order.user) {
+            if (foundOrder.user) {
                 await Transaction.create({
-                    user: order.user,
-                    order: order._id,
-                    amount: order.totalAmount,
+                    user: foundOrder.user,
+                    order: foundOrder._id,
+                    amount: foundOrder.totalAmount,
                     status: 'completed',
                     paymentMethod: 'card',
                     stripePaymentId: session.payment_intent,
-                    description: `Payment for Order #${order.orderNumber}`
+                    description: `Payment for Order #${foundOrder.orderNumber}`
                 });
             }
 
             // Deduct Stock
-            for (const item of order.items) {
+            for (const item of foundOrder.items) {
                 if (item.productType === 'Product') {
                     await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
                 } else if (item.productType === 'Accessory') {
@@ -369,13 +389,13 @@ exports.handleWebhook = async (req, res) => {
             }
 
             // Update Coupon Usage
-            if (order.couponCode) {
-                await Coupon.updateOne({ code: order.couponCode }, { $inc: { usedCount: 1 } });
+            if (foundOrder.couponCode) {
+                await Coupon.updateOne({ code: foundOrder.couponCode }, { $inc: { usedCount: 1 } });
             }
 
             // Send Confirmation Email
             const emailService = require('../utils/emailService');
-            await emailService.sendOrderConfirmation(order);
+            await emailService.sendOrderConfirmation(foundOrder);
 
         } catch (err) {
             console.error('Error processing webhook order update:', err);
@@ -383,23 +403,22 @@ exports.handleWebhook = async (req, res) => {
         }
     } else if (event.type === 'payment_intent.payment_failed') {
         const paymentIntent = event.data.object;
-        console.log('[Webhook] Payment failed:', paymentIntent.id);
+        if (process.env.NODE_ENV !== 'production') console.log('[Webhook] Payment failed:', paymentIntent.id);
 
         try {
-            // Find order by payment intent or session metadata
             const order = await Order.findOne({ paymentId: paymentIntent.id });
             if (order && (order.status === 'pending' || order.status === 'pending_payment')) {
                 order.status = 'cancelled';
                 order.paymentStatus = 'failed';
                 await order.save();
-                console.log(`[Webhook] Order ${order.orderNumber} marked as failed`);
+                if (process.env.NODE_ENV !== 'production') console.log(`[Webhook] Order ${order.orderNumber} marked as failed`);
             }
         } catch (err) {
             console.error('[Webhook] Error handling payment failure:', err);
         }
     } else if (event.type === 'charge.refunded') {
         const charge = event.data.object;
-        console.log('[Webhook] Charge refunded:', charge.id);
+        if (process.env.NODE_ENV !== 'production') console.log('[Webhook] Charge refunded:', charge.id);
 
         try {
             const order = await Order.findOne({ paymentId: charge.payment_intent });
@@ -408,7 +427,6 @@ exports.handleWebhook = async (req, res) => {
                 order.status = 'refunded';
                 await order.save();
 
-                // Record refund transaction
                 if (order.user) {
                     await Transaction.create({
                         user: order.user,
@@ -420,13 +438,13 @@ exports.handleWebhook = async (req, res) => {
                         description: `Refund for Order #${order.orderNumber}`
                     });
                 }
-                console.log(`[Webhook] Order ${order.orderNumber} marked as refunded`);
+                if (process.env.NODE_ENV !== 'production') console.log(`[Webhook] Order ${order.orderNumber} marked as refunded`);
             }
         } catch (err) {
             console.error('[Webhook] Error handling refund:', err);
         }
     } else {
-        console.log(`[Webhook] Unhandled event type: ${event.type}`);
+        if (process.env.NODE_ENV !== 'production') console.log(`[Webhook] Unhandled event type: ${event.type}`);
     }
 
     res.json({ received: true });
@@ -469,7 +487,14 @@ exports.createRefund = async (req, res) => {
         const stripe = await getStripe();
         const refund = await stripe.refunds.create({
             payment_intent: paymentIntentId,
-            amount: amount ? Math.round(amount * 100) : undefined, // Partial or full refund
+            amount: amount ? Math.round(amount * 100) : undefined,
+        });
+
+        // FIXED: Added missing response (FIX 1)
+        res.status(200).json({
+            success: true,
+            message: 'Refund created successfully',
+            refund: { id: refund.id, amount: refund.amount / 100, status: refund.status }
         });
 
     } catch (error) {
@@ -556,57 +581,70 @@ exports.capturePayPalOrder = async (req, res) => {
 
         if (capture.result.status === 'COMPLETED') {
 
-            // Re-validate and create the local Order in DB now that payment is confirmed
-            const orderItems = orderData.items.map(item => ({
-                product: item.product || item.id, // Support different object formats
-                productType: item.category === 'device' ? 'Product' : (item.productType || 'Accessory'),
-                name: item.title || item.name,
-                quantity: item.quantity,
-                price: item.price,
-                image: item.image
-            }));
+            // FIXED: Wrap DB operations in MongoDB transaction (FIX 3)
+            const dbSession = await mongoose.startSession();
+            dbSession.startTransaction();
 
-            const finalOrder = await Order.create({
-                user: req.user ? req.user.id : undefined,
-                items: orderItems,
-                totalAmount: parseFloat(capture.result.purchase_units[0].payments.captures[0].amount.value),
-                tax: 0, // Simplify for now or calculate properly
-                shippingFee: orderData.shippingFee || 0,
-                discountAmount: orderData.discountAmount || 0,
-                couponCode: orderData.couponCode,
-                status: 'processing',
-                paymentStatus: 'paid',
-                paymentMethod: 'paypal',
-                paymentId: capture.result.id, // Store PayPal Capture ID
-                shippingAddress: orderData.shippingAddress
-            });
-
-            // Update Stock and Sold
-            for (const item of orderItems) {
-                if (item.productType === 'Product') {
-                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
-                } else if (item.productType === 'Accessory') {
-                    await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
-                }
-            }
-
-            // Record coupon usage
-            if (orderData.couponCode && req.user) {
-                const { recordCouponUsage } = require('./couponController');
-                await recordCouponUsage(orderData.couponCode, req.user.id, req.user.email);
-            }
-
-            // Send Email
             try {
-                const emailService = require('../utils/emailService');
-                await emailService.sendOrderConfirmation(finalOrder);
-            } catch (e) { console.error('Email sending failed', e); }
+                const orderItems = orderData.items.map(item => ({
+                    product: item.product || item.id,
+                    productType: item.category === 'device' ? 'Product' : (item.productType || 'Accessory'),
+                    name: item.title || item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    image: item.image
+                }));
 
-            res.status(200).json({
-                success: true,
-                message: 'Payment successful',
-                order: finalOrder
-            });
+                const [finalOrder] = await Order.create([{
+                    user: req.user ? req.user.id : undefined,
+                    items: orderItems,
+                    totalAmount: parseFloat(capture.result.purchase_units[0].payments.captures[0].amount.value),
+                    tax: 0,
+                    shippingFee: orderData.shippingFee || 0,
+                    discountAmount: orderData.discountAmount || 0,
+                    couponCode: orderData.couponCode,
+                    status: 'processing',
+                    paymentStatus: 'paid',
+                    paymentMethod: 'paypal',
+                    paymentId: capture.result.id,
+                    shippingAddress: orderData.shippingAddress
+                }], { session: dbSession });
+
+                // Update Stock and Sold within session
+                for (const item of orderItems) {
+                    if (item.productType === 'Product') {
+                        await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } }, { session: dbSession });
+                    } else if (item.productType === 'Accessory') {
+                        await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } }, { session: dbSession });
+                    }
+                }
+
+                // Record coupon usage
+                if (orderData.couponCode && req.user) {
+                    const { recordCouponUsage } = require('./couponController');
+                    await recordCouponUsage(orderData.couponCode, req.user.id, req.user.email);
+                }
+
+                await dbSession.commitTransaction();
+                dbSession.endSession();
+
+                // Send Email (outside transaction)
+                try {
+                    const emailService = require('../utils/emailService');
+                    await emailService.sendOrderConfirmation(finalOrder);
+                } catch (e) { console.error('Email sending failed', e); }
+
+                res.status(200).json({
+                    success: true,
+                    message: 'Payment successful',
+                    order: finalOrder
+                });
+
+            } catch (err) {
+                await dbSession.abortTransaction();
+                dbSession.endSession();
+                throw err;
+            }
         } else {
             res.status(400).json({ success: false, message: 'Payment capture not completed' });
         }

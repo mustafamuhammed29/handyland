@@ -34,10 +34,12 @@ const productSchema = new mongoose.Schema({
     numReviews: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Performance indexes
+// Performance indexes (FIX 9)
 productSchema.index({ category: 1, isActive: 1 });
-productSchema.index({ name: 'text', description: 'text' });
+productSchema.index({ stock: 1 });
+productSchema.index({ brand: 1, condition: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ createdAt: -1 });
+productSchema.index({ name: 'text', model: 'text', brand: 'text' });
 
 module.exports = mongoose.model('Product', productSchema);
