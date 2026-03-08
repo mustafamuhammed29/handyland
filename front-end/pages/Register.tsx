@@ -311,7 +311,8 @@ const Register: React.FC = () => {
                     </div>
                 </div>
 
-                <p className="text-center text-slate-500 text-sm mt-6">Protected User Area • HandyLand © 2025</p>
+                {/* FIXED: Dynamic year so it never goes stale */}
+                <p className="text-center text-slate-500 text-sm mt-6">Protected User Area • HandyLand © {new Date().getFullYear()}</p>
             </div>
         </div>
     );

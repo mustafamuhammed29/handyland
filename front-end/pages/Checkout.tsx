@@ -10,8 +10,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, Truck, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Loader2, Tag, X, Lock, User, UserPlus, Phone } from 'lucide-react';
 import { LanguageCode } from '../types';
 import { translations } from '../i18n';
+import { formatPrice } from '../utils/formatPrice';
 import { z } from 'zod';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+// FIXED: Import extracted sub-components (FIX 5)
+import { CheckoutShippingForm } from './checkout/CheckoutShippingForm';
+import { CheckoutPaymentSection } from './checkout/CheckoutPaymentSection';
+import { CheckoutOrderSummary } from './checkout/CheckoutOrderSummary';
 
 // Initialize Stripe (Move to env var in production)
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
@@ -273,7 +278,8 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
         if (cartTotal >= freeShippingThreshold && !method.isExpress) {
             return 'FREE';
         }
-        return `${method.price.toFixed(2)}€`;
+        // FIXED: Use formatPrice for consistent currency display
+        return `${formatPrice(method.price)}`;
     };
 
     const handlePaymentSuccess = async () => {
@@ -428,544 +434,64 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
                         )}
 
                         {step === 2 && (
-                            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 animate-in fade-in slide-in-from-left-4">
-                                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                                    <Truck className="w-6 h-6 text-blue-500" /> Shipping Details
-                                </h2>
-
-                                {/* Saved Addresses Selection */}
-                                {user && user.addresses && user.addresses.length > 0 && (
-                                    <div className="mb-8 p-4 bg-slate-950/50 rounded-xl border border-dashed border-slate-700">
-                                        <h3 className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider flex items-center gap-2">
-                                            <Tag className="w-3 h-3" /> Select Saved Address
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {user.addresses.map((addr: any, idx: number) => (
-                                                <div
-                                                    key={idx}
-                                                    onClick={() => {
-                                                        setShippingDetails(prev => ({
-                                                            ...prev,
-                                                            fullName: addr.name || prev.fullName,
-                                                            street: addr.street || '', // Using 'street' in DB vs 'address' in form
-                                                            address: addr.street || '', // Fix mapping: form uses 'address'
-                                                            city: addr.city || '',
-                                                            zipCode: addr.zipCode || addr.postalCode || '',
-                                                            country: addr.country || 'Germany',
-                                                            phone: addr.phone || prev.phone
-                                                        }));
-                                                        // Clear errors
-                                                        setFormErrors({});
-                                                    }}
-                                                    className={`relative p-4 rounded-xl border cursor-pointer transition-all group ${shippingDetails.address === addr.street && shippingDetails.fullName === addr.name
-                                                        ? 'bg-blue-600/10 border-blue-500 ring-1 ring-blue-500'
-                                                        : 'bg-black/20 border-slate-700 hover:border-slate-500 hover:bg-slate-800/50'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-start justify-between">
-                                                        <div>
-                                                            <div className="font-bold text-white text-sm">{addr.name}</div>
-                                                            <div className="text-xs text-slate-400 mt-1 leading-relaxed">
-                                                                {addr.street}<br />
-                                                                {addr.zipCode || addr.postalCode} {addr.city}<br />
-                                                                {addr.country}
-                                                            </div>
-                                                            {addr.phone && (
-                                                                <div className="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
-                                                                    <Phone className="w-3 h-3" /> {addr.phone}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        {addr.isDefault && (
-                                                            <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full absolute top-3 right-3 shadow-lg shadow-blue-900/50">
-                                                                Default
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <form onSubmit={handleShippingSubmit} className="space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-400">Full Name</label>
-                                            <input
-                                                type="text"
-                                                name="fullName"
-                                                value={shippingDetails.fullName}
-                                                onChange={handleInputChange}
-                                                className={`w-full bg-black/40 border ${formErrors.fullName ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
-                                                placeholder="John Doe"
-                                            />
-                                            {formErrors.fullName && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.fullName}</p>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-400">Email (for order updates)</label>
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                value={shippingDetails.email}
-                                                onChange={handleInputChange}
-                                                className={`w-full bg-black/40 border ${formErrors.email ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
-                                                placeholder="john@example.com"
-                                            />
-                                            {formErrors.email && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.email}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-slate-400">Phone</label>
-                                        <input
-                                            type="tel"
-                                            name="phone"
-                                            value={shippingDetails.phone}
-                                            onChange={handleInputChange}
-                                            className={`w-full bg-black/40 border ${formErrors.phone ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
-                                            placeholder="+49 123 456789"
-                                        />
-                                        {formErrors.phone && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.phone}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-slate-400">Address</label>
-                                        <input
-                                            type="text"
-                                            name="address"
-                                            value={shippingDetails.address}
-                                            onChange={handleInputChange}
-                                            className={`w-full bg-black/40 border ${formErrors.address ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
-                                            placeholder="123 Tech Street"
-                                        />
-                                        {formErrors.address && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.address}</p>}
-                                    </div>
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-400">City</label>
-                                            <input
-                                                type="text"
-                                                name="city"
-                                                value={shippingDetails.city}
-                                                onChange={handleInputChange}
-                                                className={`w-full bg-black/40 border ${formErrors.city ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
-                                                placeholder="Berlin"
-                                            />
-                                            {formErrors.city && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.city}</p>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-400">Zip Code</label>
-                                            <input
-                                                type="text"
-                                                name="zipCode"
-                                                value={shippingDetails.zipCode}
-                                                onChange={handleInputChange}
-                                                className={`w-full bg-black/40 border ${formErrors.zipCode ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none rtl:text-right transition-colors`}
-                                                placeholder="10115"
-                                            />
-                                            {formErrors.zipCode && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.zipCode}</p>}
-                                        </div>
-                                        <div className="space-y-2 col-span-2 md:col-span-1">
-                                            <label className="text-sm font-bold text-slate-400">Country</label>
-                                            <select
-                                                name="country"
-                                                value={shippingDetails.country}
-                                                onChange={handleInputChange}
-                                                aria-label="Country"
-                                                className={`w-full bg-black/40 border ${formErrors.country ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
-                                            >
-                                                <option value="Germany">Germany</option>
-                                                <option value="Austria">Austria</option>
-                                                <option value="Switzerland">Switzerland</option>
-                                            </select>
-                                            {formErrors.country && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.country}</p>}
-                                        </div>
-                                    </div>
-
-                                    {/* Shipping Method Selection */}
-                                    <div className="pt-6 border-t border-slate-800">
-                                        <h3 className="font-bold text-white mb-4">Shipping Method</h3>
-                                        <div className="space-y-3">
-                                            {shippingMethods.map((method) => (
-                                                <label key={method._id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${selectedMethodId === method._id ? 'bg-blue-600/10 border-blue-500' : 'bg-black/20 border-slate-700 hover:border-slate-500'}`}>
-                                                    <div className="flex items-center gap-3">
-                                                        <input
-                                                            type="radio"
-                                                            name="shippingMethod"
-                                                            value={method._id}
-                                                            checked={selectedMethodId === method._id}
-                                                            onChange={() => setSelectedMethodId(method._id)}
-                                                            className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
-                                                        />
-                                                        <div>
-                                                            <div className="font-bold text-white">{method.name}</div>
-                                                            <div className="text-xs text-slate-400">{method.duration}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className={`font-bold ${method.isExpress ? 'text-emerald-400' : 'text-white'}`}>
-                                                        {getShippingCostDisplay(method)}
-                                                    </div>
-                                                </label>
-                                            ))}
-                                            {shippingMethods.length === 0 && !isLoadingMethods && (
-                                                <div className="text-slate-400 text-sm">No shipping methods available.</div>
-                                            )}
-                                            {isLoadingMethods && (
-                                                <div className="text-slate-400 text-sm flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading shipping methods...</div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <style>{`
-                                        @keyframes shake {
-                                            0%, 100% { transform: translateX(0); }
-                                            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-                                            20%, 40%, 60%, 80% { transform: translateX(4px); }
-                                        }
-                                        .animate-shake {
-                                            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
-                                        }
-                                    `}</style>
-
-                                    {/* Terms & Conditions */}
-                                    <div className={`pt-4 pb-2 transition-colors duration-300 rounded-lg p-2 ${error && !termsAccepted ? 'bg-red-500/10 border border-red-500/30 animate-shake' : ''}`}>
-                                        <label className="flex items-center gap-3 cursor-pointer group">
-                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${termsAccepted ? 'bg-blue-500 border-blue-500' : (error && !termsAccepted ? 'border-red-500' : 'border-slate-600 group-hover:border-blue-400')}`}>
-                                                {termsAccepted && <CheckCircle className="w-3.5 h-3.5 text-white" />}
-                                            </div>
-                                            <input
-                                                type="checkbox"
-                                                checked={termsAccepted}
-                                                onChange={e => {
-                                                    setTermsAccepted(e.target.checked);
-                                                    if (e.target.checked) setError(null);
-                                                }}
-                                                className="hidden"
-                                            />
-                                            <span className={`text-sm ${error && !termsAccepted ? 'text-red-400 font-bold' : 'text-slate-400'} group-hover:text-slate-300`}>
-                                                I agree to the <Link to="/agb" target="_blank" className="text-blue-400 hover:underline">Terms & Conditions</Link> and <Link to="/privacy" target="_blank" className="text-blue-400 hover:underline">Privacy Policy</Link>.
-                                            </span>
-                                        </label>
-                                    </div>
-
-                                    <div className="pt-4 flex justify-end">
-                                        <button
-                                            type="submit"
-                                            className="w-full md:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
-                                        >
-                                            Proceed to Payment <ArrowRight className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
+                            <CheckoutShippingForm
+                                formData={shippingDetails}
+                                onChange={handleInputChange}
+                                shippingMethods={shippingMethods}
+                                selectedMethodId={selectedMethodId}
+                                onMethodChange={setSelectedMethodId}
+                                isLoadingMethods={isLoadingMethods}
+                                getShippingCostDisplay={getShippingCostDisplay}
+                                onSubmit={handleShippingSubmit}
+                                formErrors={formErrors}
+                                termsAccepted={termsAccepted}
+                                onTermsChange={setTermsAccepted}
+                                error={error}
+                                onClearError={() => setError(null)}
+                                user={user}
+                                setShippingDetails={setShippingDetails}
+                                setFormErrors={setFormErrors}
+                            />
                         )}
 
                         {step === 3 && (
-                            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 animate-in fade-in slide-in-from-right-4">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <button onClick={() => setStep(2)} aria-label="Back to shipping" className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
-                                        <ArrowLeft className="w-5 h-5" />
-                                    </button>
-                                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                                        <CreditCard className="w-6 h-6 text-emerald-500" /> Payment
-                                    </h2>
-                                </div>
-                                <h3 className="font-bold text-white mb-4">Payment Method</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-
-                                    <button
-                                        onClick={() => setSelectedPaymentMethod('bank_transfer')}
-                                        className={`p-6 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${selectedPaymentMethod === 'bank_transfer'
-                                            ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500 shadow-lg shadow-blue-900/20'
-                                            : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
-                                            }`}
-                                    >
-                                        <div className={`w-12 h-12 flex items-center justify-center rounded-full ${selectedPaymentMethod === 'bank_transfer' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-400'}`}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                                            </svg>
-                                        </div>
-                                        <div className="text-center">
-                                            <span className="font-bold text-white block">Bank Transfer</span>
-                                            <span className="text-xs text-slate-400">Vorkasse / Überweisung</span>
-                                        </div>
-                                    </button>
-
-                                    {/* PayPal */}
-                                    {paymentConfig?.paypal?.enabled && paymentConfig?.paypal?.clientId && (
-                                        <button
-                                            onClick={() => setSelectedPaymentMethod('paypal')}
-                                            className={`p-6 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${selectedPaymentMethod === 'paypal'
-                                                ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500 shadow-lg shadow-blue-900/20'
-                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
-                                                }`}
-                                        >
-                                            <div className={`w-12 h-12 flex items-center justify-center rounded-full ${selectedPaymentMethod === 'paypal' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-400'}`}>
-                                                <svg className="w-6 h-6" viewBox="0 0 256 256" fill="currentColor">
-                                                    <path d="M208.2,74.7c-4.4-17.7-18.7-27.1-41-28.7c-3.1-0.2-6.5-0.3-10-0.3H82.4c-6.8,0-12.7,5-13.8,11.8L40,245.8c-0.2,1.3,0.8,2.4,2,2.4 h41.8c6.1,0,11.3-4.5,12.3-10.5l8.5-59.3h27.4c29.1,0,52.3-11.8,59-42.3C195.9,114.3,197,93.6,193.3,77.5L208.2,74.7z M144.2,143.7 c-4.6,23.3-25.7,23.3-43,23.3H87.1l14.9-103.7h27.6c11.6,0,22,0.6,28.3,7C163.6,76.1,161.4,103.1,144.2,143.7z" />
-                                                </svg>
-                                            </div>
-                                            <div className="text-center">
-                                                <span className="font-bold text-white block">PayPal</span>
-                                                <span className="text-xs text-slate-400">Fast & Secure</span>
-                                            </div>
-                                        </button>
-                                    )}
-
-                                    {/* Cash on Delivery (Nachnahme) */}
-                                    {paymentConfig?.cashOnDelivery?.enabled !== false && (
-                                        <button
-                                            onClick={() => setSelectedPaymentMethod('cod')}
-                                            className={`p-6 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${selectedPaymentMethod === 'cod'
-                                                ? 'bg-emerald-600/20 border-emerald-500 ring-1 ring-emerald-500 shadow-lg shadow-emerald-900/20'
-                                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
-                                                }`}
-                                        >
-                                            <div className={`w-12 h-12 flex items-center justify-center rounded-full ${selectedPaymentMethod === 'cod' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
-                                                <Truck className="w-6 h-6" />
-                                            </div>
-                                            <div className="text-center">
-                                                <span className="font-bold text-white block">Cash on Delivery</span>
-                                                <span className="text-xs text-slate-400">Nachnahme / Barzahlung</span>
-                                            </div>
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 mb-8 text-center">
-                                    <p className="text-slate-400 mb-6 text-sm">
-                                        {selectedPaymentMethod === 'bank_transfer' && (paymentConfig?.bankTransfer?.instructions || "You will receive our bank details (IBAN/BIC) via email after placing the order. Your order will be shipped once the payment is received.")}
-                                        {selectedPaymentMethod === 'cod' && "You will pay for your order directly to the courier upon delivery. Please have the exact amount ready."}
-                                        {selectedPaymentMethod === 'paypal' && "You will be securely redirected to PayPal to complete your purchase."}
-                                        {!selectedPaymentMethod && "Please select a payment method to continue."}
-                                    </p>
-
-                                    {selectedPaymentMethod === 'paypal' && paymentConfig?.paypal?.clientId ? (
-                                        <PayPalScriptProvider options={{ clientId: paymentConfig.paypal.clientId, currency: "EUR", intent: "capture" }}>
-                                            <PayPalButtons
-                                                style={{ layout: "vertical", shape: "rect", color: "blue" }}
-                                                createOrder={async () => {
-                                                    const selectedMethod = shippingMethods.find(m => m._id === selectedMethodId);
-                                                    let shippingCost = selectedMethod ? selectedMethod.price : 5.99;
-                                                    if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) {
-                                                        shippingCost = 0;
-                                                    }
-
-                                                    const commonOrderData = {
-                                                        items: cart.map(item => ({
-                                                            product: item.id,
-                                                            productType: item.category === 'device' ? 'Product' : 'Accessory',
-                                                            name: item.title,
-                                                            price: item.price,
-                                                            image: item.image,
-                                                            quantity: item.quantity || 1
-                                                        })),
-                                                        shippingAddress: {
-                                                            ...shippingDetails,
-                                                            street: shippingDetails.address
-                                                        },
-                                                        shippingFee: shippingCost,
-                                                        couponCode: coupon?.code,
-                                                        discountAmount: coupon?.discount
-                                                    };
-
-                                                    try {
-                                                        const res = await api.post('/api/payment/paypal/create-order', commonOrderData);
-                                                        if (res.data.success) {
-                                                            return res.data.id;
-                                                        } else {
-                                                            setError("Error initiating PayPal checkout");
-                                                            return "";
-                                                        }
-                                                    } catch (error: any) {
-                                                        setError(error.response?.data?.message || "Failed to initiate PayPal");
-                                                        return "";
-                                                    }
-                                                }}
-                                                onApprove={async (data, actions) => {
-                                                    try {
-                                                        setLoading(true);
-                                                        const selectedMethod = shippingMethods.find(m => m._id === selectedMethodId);
-                                                        let shippingCost = selectedMethod ? selectedMethod.price : 5.99;
-                                                        if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) {
-                                                            shippingCost = 0;
-                                                        }
-
-                                                        const commonOrderData = {
-                                                            items: cart.map(item => ({
-                                                                product: item.id,
-                                                                productType: item.category === 'device' ? 'Product' : 'Accessory',
-                                                                name: item.title,
-                                                                price: item.price,
-                                                                image: item.image,
-                                                                quantity: item.quantity || 1
-                                                            })),
-                                                            shippingAddress: {
-                                                                ...shippingDetails,
-                                                                street: shippingDetails.address
-                                                            },
-                                                            shippingFee: shippingCost,
-                                                            couponCode: coupon?.code,
-                                                            discountAmount: coupon?.discount
-                                                        };
-
-                                                        const captureRes = await api.post('/api/payment/paypal/capture-order', {
-                                                            orderID: data.orderID,
-                                                            orderData: commonOrderData
-                                                        });
-
-                                                        if (captureRes.data.success) {
-                                                            navigate(`/payment-success?order_id=${captureRes.data.order._id}&method=paypal`);
-                                                        } else {
-                                                            setError("Failed to capture PayPal payment.");
-                                                            setLoading(false);
-                                                        }
-                                                    } catch (error: any) {
-                                                        setError(error.response?.data?.message || "Error finalizing PayPal transaction.");
-                                                        setLoading(false);
-                                                    }
-                                                }}
-                                                onError={(err) => {
-                                                    console.error("PayPal Checkout Error:", err);
-                                                    setError("An error occurred during PayPal checkout.");
-                                                }}
-                                            />
-                                        </PayPalScriptProvider>
-                                    ) : (
-                                        <button
-                                            onClick={handlePaymentSuccess}
-                                            disabled={loading || !selectedPaymentMethod}
-                                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20"
-                                        >
-                                            {loading ? (
-                                                <>
-                                                    <Loader2 className="animate-spin w-5 h-5" /> Processing...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    Place Order Securely <span className="ml-1">{getFinalTotal().toFixed(2)}{t.currency}</span> <ArrowRight className="w-5 h-5" />
-                                                </>
-                                            )}
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className="flex justify-center items-center gap-6 text-slate-500 text-xs md:text-sm">
-                                    <div className="flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-500" /> 256-bit SSL Encrypted</div>
-                                    <div className="w-px h-3 bg-slate-700"></div>
-                                    <div className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Payment</div>
-                                </div>
-                            </div>
+                            <CheckoutPaymentSection
+                                selectedPaymentMethod={selectedPaymentMethod}
+                                setSelectedPaymentMethod={setSelectedPaymentMethod}
+                                paymentConfig={paymentConfig}
+                                loading={loading}
+                                setLoading={setLoading}
+                                handlePaymentSuccess={handlePaymentSuccess}
+                                getFinalTotal={getFinalTotal}
+                                onBack={() => setStep(2)}
+                                setError={setError}
+                                navigate={navigate}
+                                shippingMethods={shippingMethods}
+                                selectedMethodId={selectedMethodId}
+                                cart={cart}
+                                cartTotal={cartTotal}
+                                freeShippingThreshold={freeShippingThreshold}
+                                shippingDetails={shippingDetails}
+                                coupon={coupon}
+                            />
                         )}
                     </div>
 
-                    {/* Right Column: Order Summary (Sticky) */}
+                    {/* FIXED: Extracted to CheckoutOrderSummary sub-component (FIX 5) */}
                     <div className="lg:col-span-1">
-                        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 sticky top-28 shadow-2xl">
-                            <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between">
-                                <span>Order Summary</span> //
-                                <span className="text-xs font-normal text-slate-500">{cart.length} Items</span>
-                            </h3>
-
-                            <div className="space-y-4 max-h-80 overflow-y-auto pr-2 custom-scrollbar mb-6">
-                                {/* Free Shipping Progress */}
-                                {cartTotal < freeShippingThreshold && (
-                                    <div className="bg-slate-950/50 rounded-xl p-4 border border-blue-500/30 mb-4">
-                                        <div className="flex justify-between text-xs font-bold mb-2">
-                                            <span className="text-blue-400">Add {(freeShippingThreshold - cartTotal).toFixed(2)}€ for Free Shipping</span>
-                                            <span className="text-slate-500">{Math.round((cartTotal / freeShippingThreshold) * 100)}%</span>
-                                        </div>
-                                        <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                                            <div
-                                                className="bg-blue-500 h-full rounded-full transition-all duration-500"
-                                                style={{ width: `${Math.min(100, (cartTotal / freeShippingThreshold) * 100)}%` }}
-                                            ></div>
-                                        </div>
-                                    </div>
-                                )}
-                                {cartTotal >= freeShippingThreshold && (
-                                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 mb-4 flex items-center gap-2 text-emerald-400 text-sm font-bold animate-in fade-in">
-                                        <CheckCircle className="w-4 h-4" /> You've qualified for Free Standard Shipping!
-                                    </div>
-                                )}
-
-                                {cart.map((item, idx) => (
-                                    <div key={idx} className="flex gap-3 items-start group">
-                                        <div className="w-16 h-16 bg-slate-950 rounded-lg overflow-hidden flex-shrink-0 border border-slate-800 relative">
-                                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                                            {item.quantity && item.quantity > 1 && (
-                                                <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg">
-                                                    x{item.quantity}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="text-sm font-bold text-white line-clamp-1 group-hover:text-blue-400 transition-colors">{item.title}</div>
-                                            <div className="text-xs text-slate-500 line-clamp-1">{item.category}</div>
-                                            <div className="text-sm text-blue-400 font-bold mt-1">{(item.price * (item.quantity || 1)).toFixed(2)}{t.currency}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Coupon Input */}
-                            <div className="pt-6 border-t border-slate-800">
-                                {coupon ? (
-                                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-center justify-between animate-in fade-in">
-                                        <div className="flex items-center gap-2 text-emerald-400">
-                                            <Tag className="w-4 h-4" />
-                                            <span className="font-bold text-sm">{coupon.code}</span>
-                                        </div>
-                                        <button onClick={handleRemoveCoupon} aria-label="Remove coupon" className="text-slate-400 hover:text-white p-1 transition-colors">
-                                            <X className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="relative flex gap-2">
-                                        <div className="relative flex-1">
-                                            <Tag className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
-                                            <input
-                                                type="text"
-                                                placeholder="Promo Code"
-                                                value={couponCode}
-                                                onChange={(e) => setCouponCode(e.target.value)}
-                                                className="w-full bg-black/40 border border-slate-700 rounded-xl py-2 pl-10 pr-4 text-white text-sm focus:border-blue-500 outline-none transition-all"
-                                            />
-                                        </div>
-                                        <button
-                                            onClick={handleApplyCoupon}
-                                            disabled={!couponCode || couponLoading}
-                                            className="bg-slate-800 hover:bg-slate-700 text-white px-4 rounded-xl text-sm font-bold disabled:opacity-50 transition-colors"
-                                        >
-                                            {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
-                                        </button>
-                                    </div>
-                                )}
-                                {couponError && <p className="text-red-400 text-xs mt-2 animate-in slide-in-from-top-1">{couponError}</p>}
-                            </div>
-
-                            <div className="mt-6 pt-6 border-t border-slate-800 space-y-3">
-                                <div className="flex justify-between text-slate-400">
-                                    <span>Subtotal</span>
-                                    <span>{cartTotal.toFixed(2)}{t.currency}</span>
-                                </div>
-                                <div className="flex justify-between text-emerald-400 text-sm">
-                                    <span>Shipping</span>
-                                    <span>{(getFinalTotal() - (cartTotal - (coupon ? coupon.discount : 0))) === 0 ? 'FREE' : `${(getFinalTotal() - (cartTotal - (coupon ? coupon.discount : 0))).toFixed(2)}${t.currency}`}</span>
-                                </div>
-                                {coupon && (
-                                    <div className="flex justify-between text-emerald-400 text-sm">
-                                        <span>Discount</span>
-                                        <span>- {coupon.discount.toFixed(2)}{t.currency}</span>
-                                    </div>
-                                )}
-                                <div className="flex justify-between text-white font-bold text-xl pt-4 border-t border-slate-800 mt-2">
-                                    <span>Total</span>
-                                    <span>{getFinalTotal().toFixed(2)}{t.currency}</span>
-                                </div>
-                            </div>
-                        </div>
+                        <CheckoutOrderSummary
+                            cart={cart}
+                            cartTotal={cartTotal}
+                            coupon={coupon}
+                            couponCode={couponCode}
+                            setCouponCode={setCouponCode}
+                            couponLoading={couponLoading}
+                            couponError={couponError}
+                            handleApplyCoupon={handleApplyCoupon}
+                            handleRemoveCoupon={handleRemoveCoupon}
+                            getFinalTotal={getFinalTotal}
+                            freeShippingThreshold={freeShippingThreshold}
+                        />
                     </div>
                 </div>
             </div>

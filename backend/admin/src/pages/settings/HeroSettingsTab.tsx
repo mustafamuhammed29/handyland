@@ -6,6 +6,8 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
             <h3 className="text-xl font-bold text-white mb-4">Hero Section Configuration</h3>
             <Input label="Headline" value={settings.hero?.headline} onChange={(v: string) => handleChange('hero', 'headline', v)} textarea />
             <Input label="Subheadline" value={settings.hero?.subheadline} onChange={(v: string) => handleChange('hero', 'subheadline', v)} />
+            {/* FIXED: Added Arabic subheadline field for admin control */}
+            <Input label="Subheadline (Arabic)" value={settings.hero?.subheadlineAr} onChange={(v: string) => handleChange('hero', 'subheadlineAr', v)} />
 
             <div className="grid grid-cols-2 gap-4">
                 <Input label="Button 1 (Market)" value={settings.hero?.buttonMarket} onChange={(v: string) => handleChange('hero', 'buttonMarket', v)} />

@@ -1,5 +1,5 @@
 import React, { useState, MouseEvent, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { PhoneListing, LanguageCode } from '../types';
 import { productService } from '../services/productService';
 import { api } from '../utils/api';
@@ -10,12 +10,14 @@ import { useToast } from '../context/ToastContext';
 import { SkeletonProductCard } from './SkeletonProductCard';
 import { SEO } from './SEO';
 import { getImageUrl } from '../utils/imageUrl';
+import { formatPrice } from '../utils/formatPrice';
 
 interface MarketplaceProps {
     lang: LanguageCode;
 }
 
 export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
+    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const initialSearch = searchParams.get('search') || '';
     const initialBrand = searchParams.get('brand') || 'All';
@@ -31,6 +33,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const [filterBrand, setFilterBrand] = useState(initialBrand);
     const [selectedProduct, setSelectedProduct] = useState<PhoneListing | null>(null);
     const [products, setProducts] = useState<PhoneListing[]>([]);
+    // FIXED: Dynamically build brand list from fetched products instead of hardcoding
+    const [brands, setBrands] = useState<string[]>(['All']);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -174,6 +178,9 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     }));
                     setProducts(formatted);
                     setTotalPages(data.totalPages);
+                    // FIXED: Dynamically build brand list from fetched products
+                    const uniqueBrands = ['All', ...new Set(data.products.map((p: any) => p.brand).filter(Boolean))];
+                    setBrands(uniqueBrands);
                 } else {
                     // Fallback mechanism (keeping existing logic just in case, though service should handle it)
                     const formatted = (Array.isArray(data) ? data : []).map((p: any) => ({
@@ -281,16 +288,17 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
 
                         {/* Right: Data & Actions */}
                         <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto bg-slate-950">
+                            {/* FIXED: Removed raw product ID display */}
                             <div className="flex items-center gap-2 mb-2">
                                 <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full ${selectedProduct.condition === 'new' ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/30' : 'bg-purple-500/10 text-purple-400 border border-purple-500/30'}`}>
                                     {selectedProduct.condition}
                                 </span>
-                                <span className="text-xs text-slate-500 font-mono">ID: {selectedProduct.id.substring(0, 8)}</span>
                             </div>
 
                             <h2 className="text-4xl font-black text-white mb-2 leading-tight">{selectedProduct.model}</h2>
                             <div className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-brand-secondary font-bold mb-6">
-                                {selectedProduct.price}{t.currency}
+                                {/* FIXED: Use formatPrice for consistent currency display */}
+                                {formatPrice(selectedProduct.price)}
                             </div>
 
                             <p className="text-slate-400 leading-relaxed mb-8 border-l-2 border-slate-800 pl-4">
@@ -335,8 +343,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                     onClick={() => {
                                         handleAddToCart(selectedProduct);
                                         setSelectedProduct(null);
-                                        // Slight delay to allow toast to show and state to update
-                                        setTimeout(() => window.location.href = '/checkout', 100);
+                                        // FIXED: Use React Router navigate instead of hard reload
+                                        navigate('/checkout');
                                     }}
                                     disabled={selectedProduct.stock === 0}
                                     className={`flex-1 border font-bold py-4 rounded-xl transition-all ${selectedProduct.stock > 0 ? 'border-slate-700 hover:bg-slate-800 text-white' : 'border-slate-800 bg-slate-900 text-slate-600 cursor-not-allowed'}`}
@@ -407,7 +415,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 />
                             </div>
 
-                            {['All', 'Apple', 'Samsung', 'Google', 'Xiaomi'].map(brand => (
+                            {/* FIXED: Dynamically loaded brands from API */}
+                            {brands.map(brand => (
                                 <button
                                     key={brand}
                                     onClick={() => setFilterBrand(brand)}
@@ -434,7 +443,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                     </div>
 
                     {/* Expanded Filters */}
-                    <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-300 ${showFilters || window.innerWidth >= 768 ? 'block' : 'hidden md:grid'}`}>
+                    {/* FIXED: Use CSS classes only — no window.innerWidth in JSX */}
+                    <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-300 ${showFilters ? 'grid' : 'hidden md:grid'}`}>
                         <input type="number" placeholder="Min Price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-brand-primary outline-none" />
                         <input type="number" placeholder="Max Price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-brand-primary outline-none" />
                         <select value={selectedRam} onChange={(e) => setSelectedRam(e.target.value)} aria-label="Filter by RAM" className="bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2 text-white text-sm focus:border-brand-primary outline-none">
@@ -502,7 +512,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                             </div>
                                         </div>
                                         <div className="mt-auto flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-3">
-                                            <div className="text-base md:text-xl font-bold text-white mb-2 md:mb-0">{phone.price}{t.currency}</div>
+                                            {/* FIXED: Use formatPrice for consistent currency display */}
+                                            <div className="text-base md:text-xl font-bold text-white mb-2 md:mb-0">{formatPrice(phone.price)}</div>
                                             <div className="flex items-center gap-1.5 md:gap-2 w-full md:w-auto">
                                                 <button
                                                     onClick={(e) => toggleWishlist(e, phone.id)}
@@ -543,7 +554,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                 <h3 className="text-xl font-bold text-white hover:text-brand-primary cursor-pointer" onClick={() => setSelectedProduct(phone)}>{phone.model}</h3>
                                             </div>
                                             <div className="text-right pr-12">
-                                                <div className="text-2xl font-bold text-white">{phone.price}{t.currency}</div>
+                                                {/* FIXED: Use formatPrice for consistent currency display */}
+                                                <div className="text-2xl font-bold text-white">{formatPrice(phone.price)}</div>
                                                 <div className={`text-xs font-bold uppercase ${phone.condition === 'new' ? 'text-emerald-400' : 'text-purple-400'}`}>{(phone.condition || 'Used').toUpperCase()}</div>
                                             </div>
                                         </div>

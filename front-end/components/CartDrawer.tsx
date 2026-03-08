@@ -5,6 +5,7 @@ import { ShoppingCart, X, Trash2, ArrowRight, Zap, Heart, Tag, Truck, Check, Loa
 import { LanguageCode } from '../types';
 import { translations } from '../i18n';
 import { api } from '../utils/api';
+import { formatPrice } from '../utils/formatPrice';
 
 interface CartDrawerProps {
     lang: LanguageCode;
@@ -103,7 +104,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                         <div className="flex items-center gap-2 text-sm font-bold text-slate-300 mb-2">
                             <Truck className="w-4 h-4 text-emerald-400" />
                             {remainingForFreeShipping > 0
-                                ? <span>Add <span className="text-emerald-400">{remainingForFreeShipping.toFixed(2)}{t.currency}</span> for Free Shipping</span>
+                                ? <span>Add <span className="text-emerald-400">{/* FIXED: Use formatPrice for consistent currency display */}{formatPrice(remainingForFreeShipping)}</span> for Free Shipping</span>
                                 : <span className="text-emerald-400">You've unlocked Free Shipping!</span>
                             }
                         </div>
@@ -185,7 +186,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                                         </div>
 
                                         <div className="text-right">
-                                            <div className="text-brand-primary font-bold">{item.price}{t.currency}</div>
+                                            {/* FIXED: Use formatPrice for consistent currency display */}
+                                            <div className="text-brand-primary font-bold">{formatPrice(item.price)}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -239,17 +241,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                     <div className="space-y-2 pt-2">
                         <div className="flex justify-between text-slate-400">
                             <span>Subtotal</span>
-                            <span>{cartTotal.toFixed(2)}{t.currency}</span>
+                            <span>{/* FIXED: Use formatPrice for consistent currency display */}{formatPrice(cartTotal)}</span>
                         </div>
                         {coupon && (
                             <div className="flex justify-between text-emerald-400 text-sm">
                                 <span>Discount</span>
-                                <span>-{coupon.discount.toFixed(2)}{t.currency}</span>
+                                <span>-{/* FIXED: Use formatPrice */}{formatPrice(coupon.discount)}</span>
                             </div>
                         )}
                         <div className="flex justify-between items-center pt-2 border-t border-slate-800">
                             <span className="text-lg font-bold text-white">Total</span>
-                            <span className="text-2xl font-bold text-brand-primary">{finalTotal.toFixed(2)}{t.currency}</span>
+                            <span className="text-2xl font-bold text-brand-primary">{/* FIXED: Use formatPrice */}{formatPrice(finalTotal)}</span>
                         </div>
                     </div>
 
