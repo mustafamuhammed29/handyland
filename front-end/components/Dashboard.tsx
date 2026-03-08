@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     User, Package, Wrench, Settings, LogOut, Activity,
     Wallet, Shield, BarChart3, Heart, ExternalLink, Mail
@@ -52,8 +52,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const currentUser = user.data || initialUser;
     const isAdmin = currentUser?.role === 'admin';
 
-    // Handler functions
-    const handleDownloadInvoice = async (orderId: string) => {
+    // FIXED: Wrapped all handlers with useCallback (FIX 8)
+    const handleDownloadInvoice = useCallback(async (orderId: string) => {
         try {
             const response = await api.get(`/api/orders/${orderId}/invoice`, {
                 responseType: 'blob'
@@ -68,93 +68,82 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         } catch (error) {
             console.error('Error downloading invoice:', error);
         }
-    };
-    // Use orderService.downloadInvoice if it supports blob response handling as expected here.
-    // orderService.downloadInvoice implementation in step 469 opens window.
-    // implementation in Dashboard.tsx creates a blob link.
-    // I should check orderService.downloadInvoice implementation again.
-    // It does window.open(url, '_blank').
-    // The Dashboard implementation downloads it as file.
-    // I will stick to existing implementation for now or update orderService to support this.
-    // For now I'll leave handleDownloadInvoice as is or update it to use orderService if I update orderService.
-    // I'll leave it for now.
+    }, []);
 
-    const handleSell = (valId: string) => {
+    const handleSell = useCallback((valId: string) => {
         const val = valuations.data?.find((v: any) => v.id === valId || v._id === valId);
         if (val?.quoteReference) {
             navigate(`/sell/${val.quoteReference}`);
         } else {
             navigate('/valuation');
         }
-    };
+    }, [valuations.data, navigate]);
 
-    const handleDeleteValuation = async (valId: string) => {
+    const handleDeleteValuation = useCallback(async (valId: string) => {
         try {
             await api.delete(`/api/valuation/saved/${valId}`);
             await valuations.refetch();
         } catch (error) {
             console.error('Error deleting valuation:', error);
         }
-    };
+    }, [valuations]);
 
-    const handleUpdateProfile = async (data: Partial<UserType>) => {
+    const handleUpdateProfile = useCallback(async (data: Partial<UserType>) => {
         try {
             await authService.updateProfile(data);
             user.refetch();
         } catch (error) {
             console.error('Error updating profile:', error);
         }
-    };
+    }, [user]);
 
-    const handleUpdatePassword = async (oldPass: string, newPass: string) => {
+    const handleUpdatePassword = useCallback(async (oldPass: string, newPass: string) => {
         try {
             await authService.updatePassword({ oldPassword: oldPass, newPassword: newPass });
         } catch (error) {
             console.error('Error updating password:', error);
         }
-    };
+    }, []);
 
-    const handleAddAddress = async (address: any) => {
+    const handleAddAddress = useCallback(async (address: any) => {
         try {
             await authService.addAddress(address);
             await addresses.refetch();
         } catch (error) {
             console.error('Error adding address:', error);
         }
-    };
+    }, [addresses]);
 
-    const handleUpdateAddress = async (id: string, address: any) => {
+    const handleUpdateAddress = useCallback(async (id: string, address: any) => {
         try {
             await authService.updateAddress(id, address);
             await addresses.refetch();
         } catch (error) {
             console.error('Error updating address:', error);
         }
-    };
+    }, [addresses]);
 
-    const handleDeleteAddress = async (id: string) => {
+    const handleDeleteAddress = useCallback(async (id: string) => {
         try {
             await authService.deleteAddress(id);
             await addresses.refetch();
         } catch (error) {
             console.error('Error deleting address:', error);
         }
-    };
+    }, [addresses]);
 
-    const handleAddFunds = () => {
-        // Wallet top-up can be done via the admin or a future payment flow.
-        // For now, redirect customer to contact us.
+    const handleAddFunds = useCallback(() => {
         navigate('/contact');
-    };
+    }, [navigate]);
 
-    const handleRemoveWishlistItem = async (itemId: string) => {
+    const handleRemoveWishlistItem = useCallback(async (itemId: string) => {
         try {
             await api.delete(`/api/wishlist/${itemId}`);
-            await wishlist.refetch(); // Instantly update UI after removal
+            await wishlist.refetch();
         } catch (error) {
             console.error('Error removing from wishlist:', error);
         }
-    };
+    }, [wishlist]);
 
     if (!currentUser) {
         return null;
