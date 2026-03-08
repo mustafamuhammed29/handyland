@@ -7,6 +7,8 @@ interface HeroSettings {
     bgEnd: string;
     headline: string;
     subheadline: string;
+    // FIXED: Added Arabic subheadline field for admin control
+    subheadlineAr?: string;
     accentColor: string;
     buttonMarket?: string;
     buttonValuation?: string;

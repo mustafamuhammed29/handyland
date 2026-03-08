@@ -59,8 +59,9 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     </h1>
 
                     <p className="text-base md:text-lg text-slate-400 max-w-lg leading-relaxed border-l-2 border-slate-800 pl-4 md:pl-6">
+                        {/* FIXED: Use admin-controlled Arabic subheadline if available, fallback to hardcoded */}
                         {lang === 'ar'
-                            ? 'اكتشف مستقبل تجارة الهواتف. منصة تفاعلية للبيع، الشراء، والصيانة بدقة ألمانية.'
+                            ? (settings.hero.subheadlineAr || 'اكتشف مستقبل تجارة الهواتف. منصة تفاعلية للبيع، الشراء، والصيانة بدقة ألمانية.')
                             : settings.hero.subheadline}
                     </p>
 
