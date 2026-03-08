@@ -10,30 +10,51 @@ exports.updateUserProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
 
-        if (user) {
-            user.name = req.body.name || user.name;
-            user.email = req.body.email || user.email;
-            user.phone = req.body.phone || user.phone;
-            user.address = req.body.address || user.address;
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
 
-            if (req.body.password) {
-                user.password = req.body.password;
+        user.name = req.body.name || user.name;
+        user.phone = req.body.phone || user.phone;
+        user.address = req.body.address || user.address;
+
+        // Only allow email update if not taken by another user
+        if (req.body.email && req.body.email !== user.email) {
+            const existing = await User.findOne({ email: req.body.email });
+            if (existing) {
+                return res.status(400).json({ success: false, message: 'Email already in use' });
             }
+            user.email = req.body.email;
+        }
 
-            const updatedUser = await user.save();
+        // Validate and update password if provided
+        if (req.body.password) {
+            const pw = req.body.password;
+            const hasLetter = /[A-Za-z]/.test(pw);
+            const hasNumber = /\d/.test(pw);
+            const hasSpecial = /[@$!%*#?&]/.test(pw);
+            if (pw.length < 8 || pw.length > 20 || !hasLetter || !hasNumber || !hasSpecial) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Password must be 8-20 characters with at least one letter, number, and special character.'
+                });
+            }
+            user.password = pw;
+        }
 
-            res.json({
+        const updatedUser = await user.save();
+
+        res.json({
+            success: true,
+            user: {
                 _id: updatedUser._id,
                 name: updatedUser.name,
                 email: updatedUser.email,
                 phone: updatedUser.phone,
                 address: updatedUser.address,
-                role: updatedUser.role,
-                token: req.token // Keep existing token
-            });
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
+                role: updatedUser.role
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error updating user profile', error: error.message });
     }
@@ -45,17 +66,30 @@ exports.updateUserProfile = async (req, res) => {
 exports.changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.id).select('+password');
 
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
-        if (!isMatch) return res.status(400).json({ message: 'Invalid current password' });
+        // Use account model's matchPassword method for consistency
+        const isMatch = await user.matchPassword(currentPassword);
+        if (!isMatch) return res.status(400).json({ success: false, message: 'Invalid current password' });
+
+        // Validate new password
+        const pw = newPassword;
+        const hasLetter = /[A-Za-z]/.test(pw);
+        const hasNumber = /\d/.test(pw);
+        const hasSpecial = /[@$!%*#?&]/.test(pw);
+        if (!pw || pw.length < 8 || pw.length > 20 || !hasLetter || !hasNumber || !hasSpecial) {
+            return res.status(400).json({
+                success: false,
+                message: 'New password must be 8-20 characters with at least one letter, number, and special character.'
+            });
+        }
 
         user.password = newPassword; // Will be hashed by pre-save hook
         await user.save();
 
-        res.json({ message: 'Password updated successfully' });
+        res.json({ success: true, message: 'Password updated successfully' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error changing password', error: error.message });
     }
@@ -185,7 +219,7 @@ exports.getAllUsers = async (req, res) => {
         }
 
         const users = await User.find(query)
-            .select('-password')
+            .select('-password +loginAttempts +lockUntil')
             .sort({ createdAt: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit);
@@ -463,6 +497,39 @@ exports.adjustWalletBalance = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error adjusting wallet balance',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Unlock user account (Admin) - clears loginAttempts and lockUntil
+// @route   PUT /api/users/admin/:id/unlock
+// @access  Private/Admin
+exports.unlockUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('+loginAttempts +lockUntil');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        await User.updateOne(
+            { _id: user._id },
+            { $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: `Account for ${user.email} has been unlocked successfully`
+        });
+    } catch (error) {
+        console.error('Unlock user error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error unlocking user account',
             error: error.message
         });
     }

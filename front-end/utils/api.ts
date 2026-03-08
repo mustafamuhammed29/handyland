@@ -31,11 +31,8 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // ✅ CRITICAL: If refresh endpoint itself fails, don't retry
-        if (error.config.url?.includes('/auth/refresh')) {
+        if (error.config?.url?.includes('/auth/refresh')) {
             localStorage.removeItem('user');
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
 
             // Only redirect if NOT already on login/public pages
             const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
@@ -58,22 +55,13 @@ api.interceptors.response.use(
                 const refreshResponse = await api.get('/api/auth/refresh');
                 const newToken = (refreshResponse as any)?.token; // Access token from response
 
-                if (!newToken) {
-                    throw new Error('No refresh token returned');
-                }
-
-                if (newToken) {
-                    // Backend already set the new HttpOnly cookie!
-                    // No need to manually set headers or localStorage here.
-                }
+                // Backend already set the new HttpOnly cookie — no manual token handling needed.
 
                 // Retry the original request
                 return api.request(originalRequest);
             } catch (refreshError) {
                 // Clear authentication state
                 localStorage.removeItem('user');
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
 
                 // Only redirect if NOT on public pages
                 const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];

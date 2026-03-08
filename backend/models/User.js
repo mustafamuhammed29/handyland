@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: function () { return !this.googleId && !this.facebookId; },
-        minlength: [12, 'Password must be at least 12 characters'],
+        minlength: [8, 'Password must be at least 8 characters'],
         select: false // Don't return password by default
     },
     role: {
@@ -108,22 +108,18 @@ const UserSchema = new mongoose.Schema({
 
 // Pre-save hook for hashing password and encrypting refresh token
 UserSchema.pre('save', async function () {
-    console.log('User pre-save hook triggered for:', this.email);
     try {
         // 1. Encrypt Refresh Token
         if (this.isModified('refreshToken') && this.refreshToken) {
-            console.log('Encrypting refresh token...');
             const crypto = require('crypto');
             this.refreshToken = crypto.createHash('sha256').update(this.refreshToken).digest('hex');
         }
 
         // 2. Hash Password
         if (this.isModified('password')) {
-            console.log('Hashing password...');
             const salt = await bcrypt.genSalt(10);
             this.password = await bcrypt.hash(this.password, salt);
         }
-        console.log('User pre-save hook completed successfully.');
     } catch (error) {
         console.error('Error in User pre-save hook:', error);
         throw error;

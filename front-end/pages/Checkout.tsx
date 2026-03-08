@@ -284,15 +284,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
             return;
         }
 
-        // Token Validation for Logged In Users
-        if (user) {
-            const token = localStorage.getItem('accessToken'); // AuthContext stores token as 'accessToken'
-            if (!token) {
-                setError("Session expired. Please log in again.");
-                navigate('/login?redirect=/checkout');
-                return;
-            }
-        }
+        // Token Validation for Logged In Users handled securely via HttpOnly cookies by the API endpoints.
 
         setLoading(true);
         setError(null);

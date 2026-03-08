@@ -143,7 +143,7 @@ exports.createCheckoutSession = async (req, res) => {
         const orderData = {
             user: req.user ? req.user.id : undefined,
             items: orderItems,
-            totalAmount: (subtotal + shippingFee - finalDiscount),
+            totalAmount: (subtotal + shippingFee + tax - finalDiscount),
             tax,
             shippingFee,
             discountAmount: finalDiscount,

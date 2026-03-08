@@ -7,44 +7,29 @@ const Accessory = require('../models/Accessory');
 // @access  Private
 exports.getCart = async (req, res) => {
     try {
-        let cart = await Cart.findOne({ user: req.user.id });
+        const cart = await Cart.findOne({ user: req.user.id });
 
-        if (!cart) {
+        if (!cart || cart.items.length === 0) {
             return res.json([]);
         }
 
-        // Populate items
-        // Since we have dynamic refs (Product vs Accessory), standard populate is tricky if we store them in one array with mixed types.
-        // Mongoose refPath handles this if setup correctly.
-        // Let's try to populate based on refPath.
+        // Batch fetch: Separate product/accessory IDs to avoid N+1 queries
+        const productIds = cart.items.filter(i => i.productType === 'Product').map(i => i.product);
+        const accessoryIds = cart.items.filter(i => i.productType === 'Accessory').map(i => i.product);
 
-        // However, refPath in array subdocument might be tricky.
-        // Alternative: Fetch items manually or use a library.
-        // Or simpler: Just return the IDs and let frontend fetch details? No, backend should populate.
+        const [products, accessories] = await Promise.all([
+            productIds.length ? Product.find({ _id: { $in: productIds } }).select('name price images category') : [],
+            accessoryIds.length ? Accessory.find({ _id: { $in: accessoryIds } }).select('name price images category') : []
+        ]);
 
-        // Mongoose 'populate' with 'refPath' works fine usually.
-        // But let's be explicit and robust.
+        // Build lookup maps for O(1) access
+        const productMap = new Map(products.map(p => [p._id.toString(), p]));
+        const accessoryMap = new Map(accessories.map(a => [a._id.toString(), a]));
 
-        // Actually, to make it easier for frontend which expects { id, title, price, image, category ... }
-        // We might want to format the response.
-
-        // Let's try standard population first.
-        // Note: The schema defines `product` with `refPath: 'items.productType'`. 
-        // Need to make sure `items` matches the schema structure.
-
-        // Wait, 'refPath' looks at the document property. Inside an array, strict relative paths can be complex.
-        // Let's assume standard populate works for now, or we do manual fetch.
-
-        // Manual fetch is safer for mixed types if standard populate fails.
         const populatedItems = [];
-
         for (const item of cart.items) {
-            let details;
-            if (item.productType === 'Product') {
-                details = await Product.findById(item.product).select('name price images category');
-            } else {
-                details = await Accessory.findById(item.product).select('name price images category');
-            }
+            const idStr = item.product?.toString();
+            const details = item.productType === 'Product' ? productMap.get(idStr) : accessoryMap.get(idStr);
 
             if (details) {
                 populatedItems.push({
@@ -54,7 +39,7 @@ exports.getCart = async (req, res) => {
                     image: details.images && details.images.length > 0 ? details.images[0] : '',
                     category: item.productType === 'Product' ? 'device' : 'accessory',
                     quantity: item.quantity,
-                    productType: item.productType // For frontend context
+                    productType: item.productType
                 });
             }
         }
@@ -71,7 +56,6 @@ exports.getCart = async (req, res) => {
 // @access  Private
 exports.syncCart = async (req, res) => {
     try {
-        console.log("SYNC CART CALLED WITH BODY:", JSON.stringify(req.body));
         const { localItems } = req.body;
         const mongoose = require('mongoose');
 

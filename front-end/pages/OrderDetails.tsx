@@ -105,15 +105,11 @@ export const OrderDetails = () => {
         formData.append('receipt', file);
         try {
             setUploading(true);
-            const token = localStorage.getItem('accessToken');
             const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
-
-            const headers: any = {};
-            if (token) headers['Authorization'] = `Bearer ${token}`;
 
             const res = await fetch(`${baseUrl}/api/orders/${order._id || id}/receipt`, {
                 method: 'POST',
-                headers,
+                credentials: 'include',
                 body: formData
             });
             const data = await res.json();
