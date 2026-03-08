@@ -53,15 +53,15 @@ exports.register = async (req, res) => {
         }
 
         // Check password strength - match frontend and route validation
-        // (At least 12 chars, one letter, one number, one special character)
+        // (8 to 20 chars, one letter, one number, one special character)
         const hasLetter = /[A-Za-z]/.test(password);
         const hasNumber = /\d/.test(password);
         const hasSpecial = /[@$!%*#?&]/.test(password);
 
-        if (password.length < 12 || !hasLetter || !hasNumber || !hasSpecial) {
+        if (password.length < 8 || password.length > 20 || !hasLetter || !hasNumber || !hasSpecial) {
             return res.status(400).json({
                 success: false,
-                message: 'Password must be at least 12 characters long and include at least one letter, one number, and one special character.'
+                message: 'Password must be between 8 and 20 characters long and include at least one letter, one number, and one special character.'
             });
         }
 
@@ -145,7 +145,6 @@ exports.login = async (req, res) => {
         const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
 
         if (!user) {
-            // Prevent user enumeration by just delaying slightly if we want, or straight return
             return res.status(400).json({
                 success: false,
                 message: 'Invalid credentials'

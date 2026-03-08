@@ -131,7 +131,7 @@ exports.createOrder = async (req, res) => {
         const taxAmount = totalAmount * taxRate;
         const appliedDiscount = discountAmount ? parseFloat(discountAmount) : 0;
 
-        const finalAmount = Math.max(0, totalAmount + shippingFee - appliedDiscount);
+        const finalAmount = Math.max(0, totalAmount + shippingFee + taxAmount - appliedDiscount);
 
         // Create order
         const order = await Order.create({

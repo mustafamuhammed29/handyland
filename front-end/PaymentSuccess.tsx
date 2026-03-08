@@ -39,10 +39,7 @@ const PaymentSuccess: React.FC = () => {
 
         const verifyOrder = async () => {
             try {
-                // FIX: Use correct token key 'accessToken' (not 'token')
-                const token = localStorage.getItem('accessToken');
                 const headers: any = { 'Content-Type': 'application/json' };
-                if (token) headers['Authorization'] = `Bearer ${token}`;
 
                 const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
 
@@ -53,6 +50,7 @@ const PaymentSuccess: React.FC = () => {
                     const response = await fetch(`${baseUrl}/api/payment/success`, {
                         method: 'POST',
                         headers,
+                        credentials: 'include',
                         body: JSON.stringify({ sessionId })
                     });
                     data = await response.json();
@@ -61,10 +59,13 @@ const PaymentSuccess: React.FC = () => {
                     // We assume if they have the ID and are redirected here, it's valid for now.
                     // For guests, we can't easily fetch details without a public token.
                     // If logged in, we fetch the order.
-                    if (token) {
+                    // We can check if `user` context exists, but inside useEffect we might not have it.
+                    // The backend API will return 401 if not authorized anyway.
+                    try {
                         const response = await fetch(`${baseUrl}/api/orders/${orderId}`, {
                             method: 'GET',
-                            headers
+                            headers,
+                            credentials: 'include'
                         });
                         const resData = await response.json();
                         if (resData.success) {
@@ -72,7 +73,7 @@ const PaymentSuccess: React.FC = () => {
                         } else {
                             data = { success: false, message: "Order not found" };
                         }
-                    } else {
+                    } catch (e) {
                         // Guest COD Success - Mock the order summary or just show success
                         // We can't fetch details securely.
                         data = {
@@ -135,15 +136,11 @@ const PaymentSuccess: React.FC = () => {
         formData.append('receipt', file);
         try {
             setUploading(true);
-            const token = localStorage.getItem('accessToken');
             const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
-
-            const headers: any = {};
-            if (token) headers['Authorization'] = `Bearer ${token}`;
 
             const res = await fetch(`${baseUrl}/api/orders/${orderId}/receipt`, {
                 method: 'POST',
-                headers,
+                credentials: 'include',
                 body: formData
             });
             const data = await res.json();
@@ -165,10 +162,9 @@ const PaymentSuccess: React.FC = () => {
         const id = order._id || order.id;
         if (!id) return alert('Bestellungs-ID nicht gefunden');
         try {
-            const token = localStorage.getItem('accessToken');
             const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
             const response = await fetch(`${baseUrl}/api/orders/${id}/invoice`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
             const html = await response.text();
             const blob = new Blob([html], { type: 'text/html' });

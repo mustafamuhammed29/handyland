@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Trash2, CheckSquare, Square, CheckCircle, AlertCircle } from 'lucide-react';
+import { Search, Trash2, CheckSquare, Square, CheckCircle, AlertCircle, Lock, Unlock } from 'lucide-react';
 import { api } from '../utils/api';
 
 interface User {
@@ -9,6 +9,8 @@ interface User {
     role: string;
     isActive: boolean;
     createdAt: string;
+    loginAttempts?: number;
+    lockUntil?: string | null;
 }
 
 const UsersManager: React.FC = () => {
@@ -73,6 +75,16 @@ const UsersManager: React.FC = () => {
         }
     };
 
+    const unlockUser = async (userId: string) => {
+        try {
+            const response = await api.put(`/api/users/admin/${userId}/unlock`, {});
+            const data = (response as any)?.data || response;
+            if (data.success) { fetchUsers(); showToast('success', 'Account unlocked successfully'); }
+        } catch (error) {
+            showToast('error', 'Failed to unlock account');
+        }
+    };
+
     const handleBulkDelete = async () => {
         if (!window.confirm(`Delete ${selectedUsers.length} selected users?`)) return;
         try {
@@ -126,8 +138,8 @@ const UsersManager: React.FC = () => {
             {/* Toast */}
             {toast && (
                 <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium animate-in slide-in-from-right-4 ${toast.type === 'success'
-                        ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
-                        : 'bg-red-900/90 border-red-500/50 text-red-300'
+                    ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
+                    : 'bg-red-900/90 border-red-500/50 text-red-300'
                     }`}>
                     {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                     {toast.text}
@@ -221,6 +233,7 @@ const UsersManager: React.FC = () => {
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">User</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Role</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Status</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Account</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Joined</th>
                                 <th className="px-6 py-4 text-right text-sm font-semibold text-slate-300">Actions</th>
                             </tr>
@@ -286,11 +299,29 @@ const UsersManager: React.FC = () => {
                                                 {user.isActive ? 'Active' : 'Inactive'}
                                             </button>
                                         </td>
+                                        <td className="px-6 py-4">
+                                            {user.lockUntil && new Date(user.lockUntil) > new Date() ? (
+                                                <span className="flex items-center gap-1 text-amber-400 text-xs font-bold">
+                                                    <Lock className="w-3 h-3" /> Locked
+                                                </span>
+                                            ) : (
+                                                <span className="text-slate-500 text-xs">—</span>
+                                            )}
+                                        </td>
                                         <td className="px-6 py-4 text-slate-400 text-sm">
                                             {new Date(user.createdAt).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-2">
+                                                {user.lockUntil && new Date(user.lockUntil) > new Date() && (
+                                                    <button
+                                                        onClick={() => unlockUser(user._id)}
+                                                        className="p-2 text-amber-400 hover:bg-amber-600/10 rounded-lg transition-colors"
+                                                        title="Unlock account"
+                                                    >
+                                                        <Unlock className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={() => deleteUser(user._id)}
                                                     className="p-2 text-red-400 hover:bg-red-600/10 rounded-lg transition-colors"

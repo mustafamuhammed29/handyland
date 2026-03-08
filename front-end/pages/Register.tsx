@@ -49,7 +49,8 @@ const PasswordInput: React.FC<{
     placeholder?: string;
     required?: boolean;
     minLength?: number;
-}> = ({ name, value, onChange, placeholder = '••••••••', required, minLength }) => {
+    maxLength?: number;
+}> = ({ name, value, onChange, placeholder = '••••••••', required, minLength, maxLength }) => {
     const [show, setShow] = useState(false);
     return (
         <div className="relative">
@@ -62,6 +63,7 @@ const PasswordInput: React.FC<{
                 placeholder={placeholder}
                 required={required}
                 minLength={minLength}
+                maxLength={maxLength}
                 className="w-full pl-11 pr-11 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
             />
             <button
@@ -148,7 +150,7 @@ const Register: React.FC = () => {
     };
 
     const checks = {
-        length: formData.password.length >= 12,
+        length: formData.password.length >= 8 && formData.password.length <= 20,
         upper: /[A-Z]/.test(formData.password),
         number: /[0-9]/.test(formData.password),
         special: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
@@ -229,7 +231,7 @@ const Register: React.FC = () => {
                                 <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
                                 <PasswordInput
                                     name="password" value={formData.password} onChange={handleChange}
-                                    required minLength={12}
+                                    required minLength={8} maxLength={20}
                                 />
                                 {/* Strength Indicator */}
                                 {formData.password.length > 0 && (
@@ -244,7 +246,7 @@ const Register: React.FC = () => {
                                         </div>
                                         <div className="grid grid-cols-2 gap-1">
                                             {[
-                                                { ok: checks.length, label: '12+ characters' },
+                                                { ok: checks.length, label: '8-20 characters' },
                                                 { ok: checks.upper, label: 'Uppercase' },
                                                 { ok: checks.number, label: 'Number' },
                                                 { ok: checks.special, label: 'Special char' },
@@ -263,7 +265,7 @@ const Register: React.FC = () => {
                                 <label className="block text-sm font-medium text-slate-300 mb-2">Confirm Password</label>
                                 <PasswordInput
                                     name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
-                                    required
+                                    required minLength={8} maxLength={20}
                                 />
                                 {formData.confirmPassword.length > 0 && (
                                     <div className={`flex items-center gap-1.5 mt-2 text-[10px] ${formData.password === formData.confirmPassword ? 'text-emerald-400' : 'text-red-400'}`}>

@@ -100,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-2 bg-black/30 rounded-full p-1 border border-slate-800/50">
+          <div className="hidden md:flex items-center gap-2 bg-slate-900/60 backdrop-blur-md rounded-full p-1.5 border border-slate-800/50 shadow-inner">
             {navItems.map((item) => {
               const isActive = item.path === '/'
                 ? location.pathname === '/'
@@ -110,8 +110,8 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
                   key={item.path}
                   to={item.path}
                   className={`flex items-center px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 ${isActive
-                    ? 'bg-white text-black shadow-lg scale-105'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-brand-primary/20 to-brand-secondary/10 border border-brand-primary/30 text-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.15)] scale-105'
+                    : 'text-slate-400 border border-transparent hover:bg-slate-800/60 hover:border-slate-700/50 hover:text-white'
                     }`}
                 >
                   <span className="me-2">{item.icon}</span>
@@ -136,9 +136,12 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-brand-primary transition-colors group"
+                  className={`relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 group ${unreadCount > 0
+                      ? 'bg-red-500/10 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.15)] hover:bg-red-500/20'
+                      : 'bg-slate-900/60 border border-slate-800 hover:border-brand-primary/50 hover:bg-brand-primary/10 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                    }`}
                 >
-                  <Bell className="w-5 h-5 text-slate-400 group-hover:text-brand-primary" />
+                  <Bell className={`w-5 h-5 transition-colors ${unreadCount > 0 ? 'text-red-400 group-hover:text-red-300' : 'text-slate-400 group-hover:text-brand-primary'}`} />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 rtl:right-auto rtl:-left-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border border-black">
                       {unreadCount}
@@ -181,18 +184,20 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
               </div>
             )}
 
-            <button onClick={() => setIsCartOpen(true)} className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 hover:border-brand-primary transition-colors group">
-              <ShoppingCart className="w-5 h-5 text-slate-400 group-hover:text-brand-primary" />
+            <button onClick={() => setIsCartOpen(true)} className={`relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 group ${cart.length > 0 ? 'bg-brand-primary/10 border border-brand-primary/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:bg-brand-primary/20' : 'bg-slate-900/60 border border-slate-800 hover:border-brand-primary/50 hover:bg-brand-primary/10 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'}`}>
+              <ShoppingCart className={`w-5 h-5 transition-colors ${cart.length > 0 ? 'text-brand-primary group-hover:text-brand-secondary' : 'text-slate-400 group-hover:text-brand-primary'}`} />
               {cart.length > 0 && <span className="absolute -top-1 -right-1 rtl:right-auto rtl:-left-1 w-4 h-4 bg-brand-primary text-black text-[10px] font-black rounded-full flex items-center justify-center border border-black">{cart.length}</span>}
             </button>
 
             <Link
               to={user ? '/dashboard' : '/login'}
               aria-label={user ? 'Go to dashboard' : 'Log in'}
-              className={`w-10 h-10 flex items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 hidden md:flex ${user ? 'bg-emerald-600 shadow-emerald-900/20' : 'bg-brand-primary shadow-brand-primary/20'
+              className={`w-10 h-10 items-center justify-center rounded-xl transition-all duration-300 active:scale-90 hidden md:flex group ${user
+                  ? 'bg-emerald-600/10 border border-emerald-600/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-600/20'
+                  : 'bg-slate-900/60 border border-slate-800 hover:border-brand-primary/50 hover:bg-brand-primary/10 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'
                 }`}
             >
-              <UserIcon className="w-5 h-5" />
+              <UserIcon className={`w-5 h-5 transition-colors ${user ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-slate-400 group-hover:text-brand-primary'}`} />
             </Link>
 
             <button

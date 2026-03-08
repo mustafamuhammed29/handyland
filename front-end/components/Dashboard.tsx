@@ -179,7 +179,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
                 {/* --- SIDEBAR --- */}
                 <div className="w-full lg:w-72 shrink-0">
-                    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-6 sticky top-28">
+                    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-6 sticky top-28 z-40">
                         {/* Profile Summary */}
                         <div className="flex items-center gap-4 mb-8">
                             <div className="relative">

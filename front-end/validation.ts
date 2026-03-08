@@ -8,8 +8,8 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const validatePassword = (password: string): { isValid: boolean; message?: string } => {
-    if (password.length < 12) {
-        return { isValid: false, message: 'Password must be at least 12 characters long.' };
+    if (password.length < 8 || password.length > 20) {
+        return { isValid: false, message: 'Password must be between 8 and 20 characters long.' };
     }
     if (!/[A-Za-z]/.test(password)) {
         return { isValid: false, message: 'Password must contain at least one letter.' };

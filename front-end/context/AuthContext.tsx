@@ -16,7 +16,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User | null>(() => {
+        try {
+            const storedUser = localStorage.getItem('user');
+            return storedUser ? JSON.parse(storedUser) : null;
+        } catch {
+            return null;
+        }
+    });
     const [loading, setLoading] = useState<boolean>(true);
     const navigate = useNavigate();
 
@@ -43,50 +50,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const storedUser = localStorage.getItem('user');
 
             if (!storedUser) {
-                // FIXED: [Only rely on localStorage.getItem('user') to determine if a session might exist]
                 if (!ignore) setLoading(false);
                 return;
             }
 
-            if (storedUser) {
-                try {
-                    const parsedUser = JSON.parse(storedUser);
-                    // ✅ Optimistically set user so ProtectedRoute doesn't flash to login
-                    if (!ignore) setUser(parsedUser);
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                // Optimistically set user so ProtectedRoute doesn't flash to login
+                if (!ignore) setUser(parsedUser);
 
-                    // Verify session with backend
-                    try {
-                        const { user } = await authService.getMe();
-                        if (!ignore) {
-                            setUser(user);
-                            localStorage.setItem('user', JSON.stringify(user));
-                        }
-                    } catch {
-                        // Try refresh before giving up
-                        const refreshed = await refreshAccessToken();
-                        if (!ignore) {
-                            if (refreshed) {
-                                try {
-                                    const { user } = await authService.getMe();
-                                    setUser(user);
-                                    localStorage.setItem('user', JSON.stringify(user));
-                                } catch {
-                                    setUser(null);
-                                    localStorage.removeItem('user');
-                                    // FIXED: [Removed localStorage.removeItem for tokens]
-                                }
-                            } else {
+                // Verify session with backend
+                try {
+                    const { user } = await authService.getMe();
+                    if (!ignore) {
+                        setUser(user);
+                        localStorage.setItem('user', JSON.stringify(user));
+                    }
+                } catch {
+                    // Try refresh before giving up
+                    const refreshed = await refreshAccessToken();
+                    if (!ignore) {
+                        if (refreshed) {
+                            try {
+                                const { user } = await authService.getMe();
+                                setUser(user);
+                                localStorage.setItem('user', JSON.stringify(user));
+                            } catch {
                                 setUser(null);
                                 localStorage.removeItem('user');
-                                // FIXED: [Removed localStorage.removeItem for tokens]
                             }
+                        } else {
+                            setUser(null);
+                            localStorage.removeItem('user');
                         }
                     }
-                } catch (parseError) {
-                    if (!ignore) {
-                        setUser(null);
-                        localStorage.removeItem('user');
-                    }
+                }
+            } catch (parseError) {
+                if (!ignore) {
+                    setUser(null);
+                    localStorage.removeItem('user');
                 }
             }
 
