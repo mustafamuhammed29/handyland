@@ -186,6 +186,19 @@ exports.createOrder = async (req, res) => {
             console.error('Email sending failed:', emailError);
         }
 
+        // Send in-app notification
+        try {
+            await notify({
+                userId: req.user.id,
+                userEmail: req.user.email,
+                userName: req.user.name,
+                message: `Your order #${order.orderNumber} has been placed successfully! Total: €${order.totalAmount.toFixed(2)}`,
+                type: 'success',
+                link: `/dashboard`,
+                category: 'orderUpdates'
+            });
+        } catch (notifError) { /* non-fatal */ }
+
         res.status(201).json({
             success: true,
             message: 'Order created successfully',
@@ -850,6 +863,18 @@ exports.updateOrderToPaid = async (req, res) => {
         order.paidAt = Date.now();
         order.status = 'processing';
         const updatedOrder = await order.save();
+
+        // Send in-app notification
+        try {
+            await notify({
+                userId: order.user.toString(),
+                message: `Payment confirmed for order #${order.orderNumber}. Your order is now being processed!`,
+                type: 'success',
+                link: `/dashboard`,
+                category: 'orderUpdates'
+            });
+        } catch (notifError) { /* non-fatal */ }
+
         res.json({ success: true, order: updatedOrder });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -876,6 +901,18 @@ exports.updateOrderToDelivered = async (req, res) => {
         order.deliveredAt = Date.now();
         order.status = 'delivered';
         const updatedOrder = await order.save();
+
+        // Send in-app notification
+        try {
+            await notify({
+                userId: order.user.toString(),
+                message: `Your order #${order.orderNumber} has been delivered! Enjoy your purchase 🎉`,
+                type: 'success',
+                link: `/dashboard`,
+                category: 'orderUpdates'
+            });
+        } catch (notifError) { /* non-fatal */ }
+
         res.json({ success: true, order: updatedOrder });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

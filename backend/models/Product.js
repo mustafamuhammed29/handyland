@@ -15,12 +15,15 @@ const productSchema = new mongoose.Schema({
         }
     },
     stock: { type: Number, required: true, default: 0, min: 0 },
+    minStock: { type: Number, default: 2, min: 0 },
     sold: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
+    barcode: { type: String, unique: true, sparse: true },
     description: String,
     image: String,
     images: [String],
     category: String,
+    subCategory: String,
     brand: String,
     condition: String,
     seller: String,
@@ -38,7 +41,6 @@ const productSchema = new mongoose.Schema({
 productSchema.index({ category: 1, isActive: 1 });
 productSchema.index({ stock: 1 });
 productSchema.index({ brand: 1, condition: 1 });
-productSchema.index({ price: 1 });
 productSchema.index({ createdAt: -1 });
 productSchema.index({ name: 'text', model: 'text', brand: 'text' });
 

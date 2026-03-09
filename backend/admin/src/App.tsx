@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star, Box } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
+import InventoryManager from './pages/InventoryManager';
 import { ActiveCarts } from './components/ActiveCarts';
 import ProductsManager from './pages/ProductsManager';
 import RepairManager from './pages/RepairManager';
@@ -19,6 +20,7 @@ import CouponManager from './pages/CouponManager';
 import ReviewsManager from './pages/ReviewsManager';
 import Login from './pages/Login';
 import WalletManager from './pages/WalletManager';
+import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const SidebarLink = ({ to, icon: Icon, label }: { to: string, icon: React.ElementType, label: string }) => {
@@ -78,6 +80,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarLink to="/carts" icon={ShoppingCart} label="Active Carts" />
           <SidebarLink to="/users" icon={Users} label="Users" />
           <SidebarLink to="/wallet" icon={CreditCard} label="Wallet Manager" />
+          <SidebarLink to="/inventory" icon={Box} label="Inventory & Sales" />
           <SidebarLink to="/orders" icon={Package} label="Orders" />
           <SidebarLink to="/products" icon={Smartphone} label="Products" />
           <SidebarLink to="/accessories" icon={Headphones} label="Accessories" />
@@ -114,7 +117,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-import ProtectedRoute from './components/ProtectedRoute';
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
@@ -141,6 +143,7 @@ function AppContent() {
                   <Route path="/carts" element={<ActiveCarts />} />
                   <Route path="/users" element={<UsersManager />} />
                   <Route path="/wallet" element={<WalletManager />} />
+                  <Route path="/inventory" element={<InventoryManager />} />
                   <Route path="/orders" element={<OrdersManager />} />
                   <Route path="/products" element={<ProductsManager />} />
                   <Route path="/accessories" element={<AccessoriesManager />} />
