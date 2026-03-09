@@ -321,12 +321,14 @@ exports.cancelOrder = async (req, res) => {
         order.status = 'cancelled';
         await order.save();
 
-        // Rollback Stock and Sold
-        for (const item of order.items) {
-            if (item.productType === 'Product') {
-                await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
-            } else if (item.productType === 'Accessory') {
-                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
+        // Rollback Stock and Sold only if it wasn't pending (pending orders haven't deducted stock yet)
+        if (order.status !== 'pending' && order.status !== 'pending_payment') {
+            for (const item of order.items) {
+                if (item.productType === 'Product') {
+                    await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
+                } else if (item.productType === 'Accessory') {
+                    await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
+                }
             }
         }
 
@@ -413,7 +415,7 @@ exports.updateOrderStatus = async (req, res) => {
             order.status = status;
 
             // Rollback stock and sold count if order is cancelled by admin
-            if (status === 'cancelled' && oldStatus !== 'cancelled') {
+            if (status === 'cancelled' && oldStatus !== 'cancelled' && oldStatus !== 'pending' && oldStatus !== 'pending_payment') {
                 for (const item of order.items) {
                     if (item.productType === 'Product') {
                         const Product = require('../models/Product');

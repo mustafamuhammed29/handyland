@@ -6,14 +6,16 @@ const repairPartSchema = new mongoose.Schema({
     category: { type: String, required: true }, // screens, batteries, charging_ports, logic_boards, other
     subCategory: String, // e.g. iPhone 15 Pro Max
     brand: String, // Original OEM, Copy, High Quality, etc.
+    model: String,
     price: { type: Number, required: true }, // Selling/Repair Price
-    cost: { type: Number, default: 0 }, // Cost from supplier
+    costPrice: { type: Number, default: 0 }, // Cost from supplier
     stock: { type: Number, required: true, default: 0, min: 0 },
     minStock: { type: Number, default: 5, min: 0 },
     sold: { type: Number, default: 0 }, // Used in repairs
     isActive: { type: Boolean, default: true },
     barcode: { type: String, unique: true, sparse: true },
-    supplier: String, // Supplier info for re-ordering
+    supplierName: String, // Supplier info for re-ordering
+    supplierContact: String,
     image: String,
     description: String,
     specs: { type: Map, of: String }
