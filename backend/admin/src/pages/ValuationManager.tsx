@@ -91,6 +91,10 @@ const ValuationManager = () => {
     const [sendingMessage, setSendingMessage] = useState(false);
     const [statusSuccess, setStatusSuccess] = useState<string | null>(null);
 
+    // Purchase Dialog State
+    const [purchaseDialog, setPurchaseDialog] = useState<{ open: boolean; quote: any; deviceImei: string; digitalSignature: string } | null>(null);
+    const [completingPurchase, setCompletingPurchase] = useState(false);
+
     // Sorting State
     const [sortConfig, setSortConfig] = useState<{ key: keyof DeviceBlueprint, direction: 'asc' | 'desc' } | null>(null);
     const [quoteSortConfig, setQuoteSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
@@ -171,6 +175,27 @@ const ValuationManager = () => {
             setUpdatingStatus(null);
             setSendingMessage(false);
             setStatusDialog(null);
+        }
+    };
+
+    const handleCompletePurchase = async () => {
+        if (!purchaseDialog) return;
+        setCompletingPurchase(true);
+        try {
+            await api.post(`/api/valuation/admin/quotes/${purchaseDialog.quote._id}/complete-purchase`, {
+                deviceImei: purchaseDialog.deviceImei,
+                digitalSignature: purchaseDialog.digitalSignature
+            });
+            setStatusSuccess('Ankauf erfolgreich! Gerät wurde als "Gebraucht" zum Inventar hinzugefügt.');
+            setTimeout(() => setStatusSuccess(null), 4000);
+            setQuotes(prev => prev.map(q => q._id === purchaseDialog.quote._id ? { ...q, status: 'paid' } : q));
+            fetchQuotes();
+            setPurchaseDialog(null);
+        } catch (error) {
+            console.error('Error completing purchase:', error);
+            alert('Fehler beim Kaufabschluss.');
+        } finally {
+            setCompletingPurchase(false);
         }
     };
 
@@ -658,32 +683,44 @@ const ValuationManager = () => {
                                                                                 )}
                                                                             </div>
 
-                                                                            {/* ── Auszahlung ── */}
-                                                                            <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 space-y-3">
-                                                                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                                                                    <span className="text-emerald-400">💶</span> Auszahlung
-                                                                                </h4>
-                                                                                {quote.paymentDetails?.iban ? (
-                                                                                    <div className="space-y-2.5 text-sm">
-                                                                                        <div>
-                                                                                            <span className="text-slate-500 text-xs block mb-1">IBAN</span>
-                                                                                            <span className="font-mono text-xs bg-slate-800 px-2 py-1.5 rounded-lg block text-slate-200 tracking-wider break-all">
-                                                                                                {quote.paymentDetails.iban.replace(/(.{4})/g, '$1 ').trim()}
-                                                                                            </span>
+                                                                            {/* ── Auszahlung & Ankauf ── */}
+                                                                            <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 space-y-3 flex flex-col justify-between">
+                                                                                <div>
+                                                                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+                                                                                        <span className="text-emerald-400">💶</span> Auszahlung
+                                                                                    </h4>
+                                                                                    {quote.paymentDetails?.iban ? (
+                                                                                        <div className="space-y-2.5 text-sm">
+                                                                                            <div>
+                                                                                                <span className="text-slate-500 text-xs block mb-1">IBAN</span>
+                                                                                                <span className="font-mono text-xs bg-slate-800 px-2 py-1.5 rounded-lg block text-slate-200 tracking-wider break-all">
+                                                                                                    {quote.paymentDetails.iban.replace(/(.{4})/g, '$1 ').trim()}
+                                                                                                </span>
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <span className="text-slate-500 text-xs block mb-0.5">Bank</span>
+                                                                                                <span className="font-semibold text-white">{quote.paymentDetails.bankName || <span className="text-slate-500 italic font-normal">Nicht angegeben</span>}</span>
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <span className="text-slate-500 text-xs block mb-0.5">Kontoinhaber</span>
+                                                                                                <span className="font-semibold text-slate-200">{customerName}</span>
+                                                                                            </div>
                                                                                         </div>
-                                                                                        <div>
-                                                                                            <span className="text-slate-500 text-xs block mb-0.5">Bank</span>
-                                                                                            <span className="font-semibold text-white">{quote.paymentDetails.bankName || <span className="text-slate-500 italic font-normal">Nicht angegeben</span>}</span>
+                                                                                    ) : (
+                                                                                        <div className="flex items-center gap-2 text-slate-500 text-sm italic">
+                                                                                            <span>—</span> Keine Bankdaten hinterlegt
                                                                                         </div>
-                                                                                        <div>
-                                                                                            <span className="text-slate-500 text-xs block mb-0.5">Kontoinhaber</span>
-                                                                                            <span className="font-semibold text-slate-200">{customerName}</span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <div className="flex items-center gap-2 text-slate-500 text-sm italic">
-                                                                                        <span>—</span> Keine Bankdaten hinterlegt
-                                                                                    </div>
+                                                                                    )}
+                                                                                </div>
+
+                                                                                {/* Action Button for Purchase */}
+                                                                                {quote.status !== 'paid' && (
+                                                                                    <button
+                                                                                        onClick={(e) => { e.stopPropagation(); setPurchaseDialog({ open: true, quote, deviceImei: '', digitalSignature: '' }); }}
+                                                                                        className="mt-4 w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/50 py-2 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                                                                                    >
+                                                                                        <Banknote size={16} /> Ankauf & Inventarisierung
+                                                                                    </button>
                                                                                 )}
                                                                             </div>
 
@@ -810,6 +847,82 @@ const ValuationManager = () => {
                                         Nur Status ändern
                                     </button>
                                 </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Complete Purchase Dialog */}
+            <AnimatePresence>
+                {purchaseDialog?.open && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[70] p-4"
+                        onClick={() => setPurchaseDialog(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="p-5 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/50">
+                                <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
+                                    <Banknote size={20} />
+                                    Ankauf abschließen
+                                </h3>
+                                <button aria-label="Close dialog" title="Close" onClick={() => setPurchaseDialog(null)} className="text-slate-500 hover:text-white"><X size={18} /></button>
+                            </div>
+
+                            <div className="p-5 space-y-4">
+                                <div className="bg-slate-800 rounded-xl p-4 text-sm text-slate-300">
+                                    Du bist dabei, den Ankauf für das <strong>{purchaseDialog.quote.device}</strong> zu bestätigen (Auszahlung: <strong>€{purchaseDialog.quote.estimatedValue}</strong>).
+                                    Das Gerät wird danach automatisch als Gebrauchtware in den Produkten gelistet.
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                        Geräte-IMEI / Seriennummer <span className="text-red-400">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={purchaseDialog.deviceImei}
+                                        onChange={e => setPurchaseDialog(prev => prev ? { ...prev, deviceImei: e.target.value } : null)}
+                                        placeholder="IMEI eingeben..."
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                        Digitale Signatur / Bestätigung <span className="text-red-400">*</span>
+                                    </label>
+                                    <p className="text-xs text-slate-500 mb-2">Bitte gib deinen vollständigen Namen als elektronische Unterschrift des Kaufvertrags ein.</p>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={purchaseDialog.digitalSignature}
+                                        onChange={e => setPurchaseDialog(prev => prev ? { ...prev, digitalSignature: e.target.value } : null)}
+                                        placeholder="Vor- und Nachname..."
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={handleCompletePurchase}
+                                    disabled={completingPurchase || !purchaseDialog.deviceImei || !purchaseDialog.digitalSignature}
+                                    className="w-full mt-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-colors flex justify-center items-center gap-2"
+                                >
+                                    {completingPurchase ? (
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : <Banknote size={18} />}
+                                    Kaufvertrag bestätigen & Schließen
+                                </button>
                             </div>
                         </motion.div>
                     </motion.div>

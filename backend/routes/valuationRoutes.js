@@ -35,5 +35,6 @@ router.put('/quote/:reference/confirm', valuationController.confirmQuote);
 // ==========================================
 router.get('/admin/quotes', protect, authorize('admin'), valuationController.getAdminQuotes);
 router.put('/admin/quotes/:id/status', protect, authorize('admin'), valuationController.updateQuoteStatus);
+router.post('/admin/quotes/:id/complete-purchase', protect, authorize('admin'), valuationController.completePurchase);
 
 module.exports = router;

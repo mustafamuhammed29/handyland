@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home, Bell } from 'lucide-react';
+import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home, Bell, ClipboardList } from 'lucide-react';
 import { LanguageCode, User } from '../types';
 import { translations } from '../i18n';
 import { useCart } from '../context/CartContext';
@@ -77,6 +77,22 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
                 </Link>
               );
             })}
+            {/* Track Repair - inside pill */}
+            {(() => {
+              const isTrackActive = location.pathname === '/track-repair';
+              return (
+                <Link
+                  to="/track-repair"
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 border ${isTrackActive
+                      ? 'bg-amber-500/20 border-amber-500/40 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                      : 'border-amber-500/20 text-amber-400/70 hover:bg-amber-500/10 hover:border-amber-500/30 hover:text-amber-400'
+                    }`}
+                >
+                  <ClipboardList className="w-3.5 h-3.5" />
+                  Track Repair
+                </Link>
+              );
+            })()}
           </div>
 
           <div className="hidden lg:block ml-4 flex-1">
@@ -152,6 +168,19 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
                 </Link>
               );
             })}
+
+            {/* Track Repair - Mobile */}
+            <Link
+              to="/track-repair"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center px-5 py-4 rounded-2xl text-base font-bold uppercase tracking-widest transition-all duration-300 border ${location.pathname === '/track-repair'
+                ? 'bg-amber-500/20 border-amber-500/40 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
+                : 'bg-slate-900/40 text-amber-400/70 border-amber-500/20 hover:bg-amber-500/10 hover:border-amber-500/40 hover:text-amber-400'
+                }`}
+            >
+              <span className="me-4 scale-125 opacity-80"><ClipboardList className="w-5 h-5" /></span>
+              Track Repair
+            </Link>
 
             <div className="mt-auto pt-4 border-t border-slate-800/50">
               <Link

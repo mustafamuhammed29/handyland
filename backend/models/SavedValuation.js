@@ -54,7 +54,11 @@ const SavedValuationSchema = new mongoose.Schema({
         address: String,
         city: String,
         postalCode: String
-    }
+    },
+    deviceImei: String,
+    deviceSerial: String,
+    digitalSignature: String, // Base64 or URL
+    purchaseAgreementUrl: String
 }, {
     timestamps: true
 });

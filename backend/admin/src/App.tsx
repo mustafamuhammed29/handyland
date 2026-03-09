@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star, Box } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star, Box, PhoneForwarded, ShieldCheck } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import InventoryManager from './pages/InventoryManager';
 import { ActiveCarts } from './components/ActiveCarts';
@@ -8,6 +8,7 @@ import RepairManager from './pages/RepairManager';
 import SettingsManager from './pages/SettingsManager';
 import AccessoriesManager from './pages/AccessoriesManager';
 import ArchiveManager from './pages/ArchiveManager';
+import RepairTicketManager from './pages/RepairTicketManager';
 import PageManager from './pages/PageManager';
 import ValuationManager from './pages/ValuationManager';
 import OrdersManager from './pages/OrdersManager';
@@ -22,6 +23,8 @@ import Login from './pages/Login';
 import WalletManager from './pages/WalletManager';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import LoanerManager from './pages/LoanerManager';
+import WarrantyManager from './pages/WarrantyManager';
 
 const SidebarLink = ({ to, icon: Icon, label }: { to: string, icon: React.ElementType, label: string }) => {
   const location = useLocation();
@@ -85,8 +88,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarLink to="/products" icon={Smartphone} label="Products" />
           <SidebarLink to="/accessories" icon={Headphones} label="Accessories" />
           <SidebarLink to="/coupons" icon={ScanLine} label="Coupons" />
-          <SidebarLink to="/repairs" icon={Wrench} label="Repairs" />
+          <SidebarLink to="/repairs" icon={Wrench} label="Repairs Catalog" />
+          <SidebarLink to="/repair-tickets" icon={FileText} label="Repair Tickets" />
           <SidebarLink to="/archive" icon={ScanLine} label="Repair Archive" />
+          <SidebarLink to="/loaners" icon={PhoneForwarded} label="Loaner Phones" />
+          <SidebarLink to="/warranties" icon={ShieldCheck} label="Smart Warranty" />
           <SidebarLink to="/valuation" icon={FileText} label="Valuation" />
           <SidebarLink to="/messages" icon={MessageSquare} label="Inbox" />
           <SidebarLink to="/reviews" icon={Star} label="Reviews" />
@@ -149,7 +155,10 @@ function AppContent() {
                   <Route path="/accessories" element={<AccessoriesManager />} />
                   <Route path="/coupons" element={<CouponManager />} />
                   <Route path="/repairs" element={<RepairManager />} />
+                  <Route path="/repair-tickets" element={<RepairTicketManager />} />
                   <Route path="/archive" element={<ArchiveManager />} />
+                  <Route path="/loaners" element={<LoanerManager />} />
+                  <Route path="/warranties" element={<WarrantyManager />} />
                   <Route path="/valuation" element={<ValuationManager />} />
                   <Route path="/messages" element={<MessagesManager />} />
                   <Route path="/pages" element={<PageManager />} />

@@ -236,6 +236,8 @@ app.use('/api/messages', require('./routes/messageRoutes')); // Registered Messa
 app.use('/api/shipping-methods', require('./routes/shippingRoutes')); // Added
 app.use('/api/pages', require('./routes/pageRoutes')); // Added
 app.use('/api/coupons', require('./routes/couponRoutes')); // Added Coupon Routes
+app.use('/api/loaners', require('./routes/loanerRoutes')); // Phase 6 Loaner Phones
+app.use('/api/warranties', require('./routes/warrantyRoutes')); // Phase 7 Warranties
 
 // Basic Routes
 app.get('/', (req, res) => {

@@ -3,16 +3,19 @@ import { api } from '../utils/api';
 import { Search, Loader2, Wrench, CheckCircle, Clock } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { VisualOrderTimeline } from '../components/VisualOrderTimeline';
+import { useLocation } from 'react-router-dom';
 
 export const GuestTicketTracking: React.FC = () => {
-    const [ticketId, setTicketId] = useState('');
-    const [email, setEmail] = useState('');
+    const location = useLocation();
+    const [ticketId, setTicketId] = useState(location.state?.ticketId || '');
+    const [email, setEmail] = useState(location.state?.email || '');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [ticket, setTicket] = useState<any | null>(null);
+    const [initialLoadDone, setInitialLoadDone] = useState(false);
 
-    const handleTrack = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleTrack = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         setLoading(true);
         setError(null);
         setTicket(null);
@@ -30,6 +33,13 @@ export const GuestTicketTracking: React.FC = () => {
             setLoading(false);
         }
     };
+
+    React.useEffect(() => {
+        if (location.state?.ticketId && location.state?.email && !initialLoadDone) {
+            handleTrack();
+            setInitialLoadDone(true);
+        }
+    }, [location.state, initialLoadDone]);
 
     const getStatusConfig = (status: string) => {
         switch (status) {
