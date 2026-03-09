@@ -4,10 +4,13 @@ const accessorySchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     category: { type: String, required: true }, // audio, power, protection, wearables
+    subCategory: String,
     price: { type: Number, required: true },
     stock: { type: Number, required: true, default: 0 },
+    minStock: { type: Number, default: 5, min: 0 },
     sold: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
+    barcode: { type: String, unique: true, sparse: true },
     image: String,
     description: String,
     tag: String,
@@ -16,7 +19,6 @@ const accessorySchema = new mongoose.Schema({
     color: String,
     display: String,
     storage: String,
-    specs: { type: Map, of: String } // Flexible key-value pairs
 }, { timestamps: true });
 
 module.exports = mongoose.model('Accessory', accessorySchema);

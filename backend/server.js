@@ -174,10 +174,16 @@ app.post('/api/upload', uploadLimiter, protect, upload.single('image'), (req, re
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
-const repairRoutes = require('./routes/repairRoutes');
+const cartRoutes = require('./routes/cartRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
+const accessoryRoutes = require('./routes/accessoriesRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
+const repairPartRoutes = require('./routes/repairPartRoutes');
+const repairRoutes = require('./routes/repairRoutes'); // Existing route, not in snippet, keep
+const orderRoutes = require('./routes/orderRoutes'); // Existing route, not in snippet, keep
+const paymentRoutes = require('./routes/paymentRoutes'); // Existing route, not in snippet, keep
+const reviewRoutes = require('./routes/reviewRoutes'); // Existing route, not in snippet, keep
 
 // Stricter rate limit for auth endpoints (relaxed for development)
 // Stricter rate limit for auth endpoints (relaxed for development)
@@ -195,11 +201,17 @@ const authLimiter = rateLimit({
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/auth', require('./routes/socialAuthRoutes')); // Social OAuth routes
-app.use('/api/products', productRoutes);
-app.use('/api/repairs', repairRoutes);
-app.use('/api/settings', settingsRoutes); // Registered Settings Route
-app.use('/api/orders', orderRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/accessories', accessoryRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/inventory', inventoryRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/products', productRoutes); // Existing route, not in snippet, keep
+app.use('/api/repair-parts', repairPartRoutes);
+app.use('/api/repairs', repairRoutes); // Existing route, not in snippet, keep
+app.use('/api/orders', orderRoutes); // Existing route, not in snippet, keep
 
 // Swagger Documentation
 const swaggerUi = require('swagger-ui-express');

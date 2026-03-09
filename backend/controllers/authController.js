@@ -443,16 +443,10 @@ exports.adminLogin = async (req, res) => {
 
         const token = generateToken(user._id);
 
-        // Set cookie
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            path: '/'
-        };
-
-        res.cookie('accessToken', token, cookieOptions);
+        // FIXED: Admin panel uses localStorage (adminToken), NOT cookies.
+        // Previously this set the same 'accessToken' cookie as customer login,
+        // which caused customer frontend to pick up the admin session.
+        // Token is returned in JSON body — admin panel stores it in localStorage.
 
         res.status(200).json({
             success: true,
