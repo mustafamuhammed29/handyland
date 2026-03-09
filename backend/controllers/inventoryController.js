@@ -18,6 +18,8 @@ exports.getInventoryStats = async (req, res) => {
         let totalStock = 0;
         let totalValue = 0;
         let lowStockCount = 0;
+        let criticalStockCount = 0;
+        let outOfStockCount = 0;
         let totalItemsSold = 0;
 
         allItems.forEach(item => {
@@ -25,9 +27,11 @@ exports.getInventoryStats = async (req, res) => {
             totalValue += (item.stock * item.price);
             totalItemsSold += item.sold;
 
-            // Check against item's specific minStock, or default to 5
-            const threshold = item.minStock !== undefined ? item.minStock : 5;
-            if (item.stock <= threshold) {
+            if (item.stock === 0) {
+                outOfStockCount++;
+            } else if (item.stock < 2) {
+                criticalStockCount++;
+            } else if (item.stock < 5) {
                 lowStockCount++;
             }
         });
@@ -45,6 +49,8 @@ exports.getInventoryStats = async (req, res) => {
                 totalStock,
                 totalValue,
                 lowStockCount,
+                criticalStockCount,
+                outOfStockCount,
                 totalItemsSold,
                 totalRevenue
             }
@@ -60,7 +66,7 @@ exports.getInventoryStats = async (req, res) => {
 // @access  Private/Admin
 exports.getInventoryItems = async (req, res) => {
     try {
-        const selectFields = 'name category subCategory brand barcode stock minStock sold price image isActive';
+        const selectFields = 'name category subCategory brand model barcode stock minStock sold price costPrice supplierName supplierContact image isActive';
 
         const products = await Product.find({}, selectFields).lean();
         const accessories = await Accessory.find({}, selectFields).lean();
@@ -140,7 +146,7 @@ const StockHistory = require('../models/StockHistory');
 exports.updateStock = async (req, res) => {
     try {
         const { type, id } = req.params;
-        const { stock, price, reason, notes } = req.body;
+        const { stock, price, costPrice, reason, notes } = req.body;
 
         let Model;
         let itemModelName;
@@ -174,6 +180,10 @@ exports.updateStock = async (req, res) => {
 
         if (price !== undefined) {
             item.price = Number(price);
+        }
+
+        if (costPrice !== undefined) {
+            item.costPrice = Number(costPrice);
         }
 
         await item.save();

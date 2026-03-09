@@ -1,4 +1,5 @@
 const RepairPart = require('../models/RepairPart');
+const { v4: uuidv4 } = require('uuid');
 
 // @desc    Update a repair part
 // @route   PUT /api/repair-parts/:id
@@ -68,7 +69,11 @@ exports.getRepairPartById = async (req, res) => {
 // @access  Private/Admin
 exports.createRepairPart = async (req, res) => {
     try {
-        const part = await RepairPart.create(req.body);
+        const itemData = { ...req.body, id: req.body.id || uuidv4() };
+        if (!itemData.category) {
+            itemData.category = 'Repair Part';
+        }
+        const part = await RepairPart.create(itemData);
         res.status(201).json({ success: true, data: part });
     } catch (error) {
         console.error('Error creating repair part:', error);
