@@ -52,20 +52,15 @@ const RepairTicketSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Generate Ticket ID - FIX
-RepairTicketSchema.pre('validate', async function (next) {
-    // Ensure either user or guestContact is present
-    if (!this.user && (!this.guestContact || !this.guestContact.email)) {
-        this.invalidate('user', 'Either a registered user or guest contact details (email) are required.');
-    }
+const crypto = require('crypto');
 
+// Generate Ticket ID
+RepairTicketSchema.pre('save', function () {
     if (this.isNew && !this.ticketId) {
         const year = new Date().getFullYear().toString().slice(-2);
-        // Random unique ID: REP-26-XXXXXX
-        const randomSuffix = require('crypto').randomBytes(3).toString('hex').toUpperCase();
+        const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
         this.ticketId = `REP-${year}-${randomSuffix}`;
 
-        // Add initial timeline entry
         if (this.timeline.length === 0) {
             this.timeline.push({
                 status: this.status,
@@ -73,7 +68,6 @@ RepairTicketSchema.pre('validate', async function (next) {
             });
         }
     }
-    next();
 });
 
 module.exports = mongoose.model('RepairTicket', RepairTicketSchema);

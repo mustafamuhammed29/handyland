@@ -15,10 +15,18 @@ exports.createTicket = async (req, res) => {
             serviceType
         };
 
-        if (req.user) {
+        if (req.user && req.user.role !== 'admin' && !guestContact) {
+            // Regular logged-in user creating a ticket for themselves
             ticketData.user = req.user.id;
-        } else if (guestContact) {
+        } else if (guestContact && guestContact.email) {
+            // Guest ticket (either created by guest or by admin on behalf of a guest)
             ticketData.guestContact = guestContact;
+        } else if (req.user && req.user.role === 'admin' && req.body.userId) {
+            // Admin creating ticket for a specific registered user
+            ticketData.user = req.body.userId;
+        } else if (req.user) {
+            // Fallback: logged in user, maybe didn't strictly provide guestContact
+            ticketData.user = req.user.id;
         } else {
             return res.status(400).json({
                 success: false,
@@ -203,11 +211,12 @@ exports.trackGuestTicket = async (req, res) => {
         }
 
         let ticket;
-        // Check if ticketId is valid MongoDB ObjectID
+        // Support both MongoDB ObjectID and custom REP-XX-XXXXXX format
         if (ticketId.match(/^[0-9a-fA-F]{24}$/)) {
             ticket = await RepairTicket.findById(ticketId).populate('user', 'email');
+        } else if (ticketId.match(/^REP-\d{2}-[A-F0-9]{6}$/i)) {
+            ticket = await RepairTicket.findOne({ ticketId: ticketId.toUpperCase() }).populate('user', 'email');
         } else {
-            // Or if it's some custom ID if implemented
             return res.status(400).json({ success: false, message: 'Invalid ticket ID format' });
         }
 
@@ -236,5 +245,17 @@ exports.trackGuestTicket = async (req, res) => {
             message: 'Error tracking ticket',
             error: error.message
         });
+    }
+};
+
+exports.deleteTicket = async (req, res) => {
+    try {
+        const ticket = await RepairTicket.findByIdAndDelete(req.params.id);
+        if (!ticket) {
+            return res.status(404).json({ success: false, message: 'Ticket not found' });
+        }
+        res.status(200).json({ success: true, message: 'Ticket deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error deleting ticket', error: error.message });
     }
 };

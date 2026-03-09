@@ -126,8 +126,31 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
         };
 
+        const syncWishlist = async () => {
+            if (user && user._id) {
+                try {
+                    const response: any = await api.get('/api/wishlist');
+                    const data = response.data || response;
+                    if (data && data.success && data.products) {
+                        const mappedWishlist = data.products.map((p: any) => ({
+                            id: p.customId || p.product,
+                            title: p.name,
+                            price: p.price,
+                            image: p.image,
+                            category: p.productType || 'Product',
+                            quantity: 1
+                        }));
+                        setWishlist(mappedWishlist);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch wishlist:", error);
+                }
+            }
+        };
+
         if (user && user._id) {
             syncCart();
+            syncWishlist();
         }
     }, [user?._id]); // Run when user ID is established
 
@@ -272,15 +295,33 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     // Wishlist Actions
-    const addToWishlist = (item: CartItem) => {
+    const addToWishlist = async (item: CartItem) => {
         setWishlist(prev => {
             if (prev.find(i => i.id === item.id)) return prev;
             return [...prev, item];
         });
+
+        if (user) {
+            try {
+                await api.post('/api/wishlist', {
+                    productId: item.id,
+                    productType: item.category
+                });
+            } catch (error) {
+                console.error("Failed to add to wishlist backend", error);
+            }
+        }
     };
 
-    const removeFromWishlist = (id: string | number) => {
+    const removeFromWishlist = async (id: string | number) => {
         setWishlist(prev => prev.filter(item => item.id !== id));
+        if (user) {
+            try {
+                await api.delete(`/api/wishlist/${id}`);
+            } catch (error) {
+                console.error("Failed to remove from wishlist backend", error);
+            }
+        }
     };
 
     const isInWishlist = (id: string | number) => {

@@ -17,7 +17,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
         cart, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen,
         cartTotal, finalTotal,
         coupon, applyCoupon, removeCoupon,
-        addToWishlist, isInWishlist,
+        addToWishlist, removeFromWishlist, isInWishlist,
         freeShippingThreshold
     } = useCart();
 
@@ -65,9 +65,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
         }
     };
 
-    const handleMoveToWishlist = (item: any) => {
-        addToWishlist(item);
-        removeFromCart(item.id);
+    const handleToggleWishlist = (item: any) => {
+        if (isInWishlist(item.id)) {
+            removeFromWishlist(item.id);
+        } else {
+            addToWishlist(item);
+        }
     };
 
     return (
@@ -146,12 +149,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                                             <h4 className="font-bold text-white text-sm truncate pr-2">{item.title}</h4>
                                             <div className="flex gap-2">
                                                 <button
-                                                    onClick={() => handleMoveToWishlist(item)}
-                                                    className="text-slate-500 hover:text-pink-400 transition-colors"
-                                                    title="Move to Wishlist"
-                                                    aria-label={`Move ${item.title} to wishlist`}
+                                                    onClick={() => handleToggleWishlist(item)}
+                                                    className={`${isInWishlist(item.id) ? 'text-pink-500' : 'text-slate-500 hover:text-pink-400'} transition-colors`}
+                                                    title={isInWishlist(item.id) ? "Remove from Favorites" : "Add to Favorites"}
+                                                    aria-label={`Toggle favorite for ${item.title}`}
                                                 >
-                                                    <Heart className="w-4 h-4" />
+                                                    <Heart className={`w-4 h-4 ${isInWishlist(item.id) ? 'fill-current' : ''}`} />
                                                 </button>
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}

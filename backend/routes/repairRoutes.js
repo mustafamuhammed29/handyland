@@ -24,6 +24,7 @@ router.put('/devices/:id/services', protect, authorize('admin'), repairControlle
 
 // Admin Ticket Management
 router.put('/tickets/:id/status', protect, authorize('admin'), repairTicketController.updateTicketStatus);
+router.delete('/tickets/:id', protect, authorize('admin'), repairTicketController.deleteTicket);
 router.get('/admin/all', protect, authorize('admin'), repairTicketController.getAllTickets);
 
 module.exports = router;

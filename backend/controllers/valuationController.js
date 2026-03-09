@@ -601,3 +601,45 @@ exports.updateQuoteStatus = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// @desc    Complete Purchase & Add to Inventory
+// @route   POST /api/valuation/admin/quotes/:id/complete-purchase
+// @access  Private/Admin
+exports.completePurchase = async (req, res) => {
+    try {
+        const { deviceImei, deviceSerial, digitalSignature } = req.body;
+        const quote = await SavedValuation.findById(req.params.id);
+
+        if (!quote) return res.status(404).json({ success: false, message: 'Quote not found' });
+        if (quote.status === 'paid') return res.status(400).json({ success: false, message: 'Quote already paid' });
+
+        quote.deviceImei = deviceImei;
+        quote.deviceSerial = deviceSerial;
+        quote.digitalSignature = digitalSignature;
+        quote.status = 'paid';
+        await quote.save();
+
+        // Add to Products inventory
+        const Product = require('../models/Product');
+        const { v4: uuidv4 } = require('uuid');
+
+        const newProduct = await Product.create({
+            id: uuidv4(),
+            name: `${quote.device} (Used)`,
+            price: Math.ceil((quote.estimatedValue * 1.5) / 5) * 5, // Example markup, rounded to nearest 5
+            costPrice: quote.estimatedValue,
+            stock: 1,
+            category: 'Devices',
+            subCategory: 'Mobile Phones', // Default
+            brand: quote.device.split(' ')[0], // Best guess for brand
+            model: quote.device,
+            supplierName: quote.contact?.name || 'Customer Trade-In',
+            description: `Trade-In Device. Condition: ${quote.condition}. Specs: ${quote.specs}. IMEI/Serial: ${deviceImei || deviceSerial}`,
+            isActive: false // Keep it hidden until admin reviews it
+        });
+
+        res.json({ success: true, quote, newProduct });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

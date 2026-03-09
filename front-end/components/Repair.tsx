@@ -61,6 +61,17 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     const [repairCatalog, setRepairCatalog] = useState<RepairDevice[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Ticket Modal State
+    const [showTicketModal, setShowTicketModal] = useState(false);
+    const [selectedServiceForTicket, setSelectedServiceForTicket] = useState<{ device: string, service: string } | null>(null);
+    const [ticketForm, setTicketForm] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        notes: ''
+    });
+    const [submitting, setSubmitting] = useState(false);
+
     useEffect(() => {
         const loadRepairs = async () => {
             try {
@@ -95,6 +106,50 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
 
     const handleContactSupport = () => {
         navigate('/contact');
+    };
+
+    const handleOpenTicketModal = (deviceModel: string, serviceLabel?: string) => {
+        setSelectedServiceForTicket({ device: deviceModel, service: serviceLabel || 'General Diagnostic' });
+        setShowTicketModal(true);
+    };
+
+    const handleSubmitTicket = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedServiceForTicket) return;
+        setSubmitting(true);
+        try {
+            const payload: any = {
+                device: selectedServiceForTicket.device,
+                issue: selectedServiceForTicket.service,
+                notes: ticketForm.notes,
+                serviceType: 'In-Store'
+            };
+
+            if (!isAuthenticated) {
+                payload.guestContact = {
+                    name: ticketForm.name,
+                    email: ticketForm.email,
+                    phone: ticketForm.phone
+                };
+            }
+
+            const response = await api.post('/api/repairs/tickets', payload);
+            if (response.data?.success) {
+                addToast('Repair Ticket Created Successfully!', 'success');
+                setShowTicketModal(false);
+                setSelectedDevice(null);
+                setTicketForm({ name: '', email: '', phone: '', notes: '' });
+                // Redirect user to track repair with their new ticket ID
+                setTimeout(() => {
+                    navigate('/track-repair', { state: { ticketId: response.data.ticket.ticketId, email: ticketForm.email } });
+                }, 1500);
+            }
+        } catch (error) {
+            console.error('Ticket creation error', error);
+            addToast('Failed to create repair ticket. Please try again.', 'error');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -170,11 +225,14 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
+                                            <div className="text-right flex flex-col items-end gap-2">
                                                 <div className="text-xl font-bold text-blue-400">{service.price}{t.currency}</div>
-                                                <div className="mt-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-900/50 px-3 py-1.5 rounded border border-slate-800">
-                                                    In-Store Only
-                                                </div>
+                                                <button
+                                                    onClick={() => handleOpenTicketModal(selectedDevice.model, service.label)}
+                                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-blue-900/20 transition-all flex items-center gap-2"
+                                                >
+                                                    <Wrench className="w-3 h-3" /> Book Repair
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -206,16 +264,16 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                         </p>
                     </div>
 
-                    {/* Contact Support CTA (replaces AI diagnostic) */}
+                    {/* Contact Support / Create Custom Ticket */}
                     {searchTerm && (
                         <button
-                            onClick={handleGetAdvice}
+                            onClick={() => handleOpenTicketModal(searchTerm, 'Custom Diagnostics requested from Search')}
                             className="group relative px-6 py-3 bg-blue-900/20 border border-blue-500/30 rounded-xl overflow-hidden hover:bg-blue-900/40 transition-all"
                         >
                             <div className="absolute inset-0 bg-blue-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                             <div className="relative flex items-center gap-2 text-blue-400 font-bold text-sm">
-                                <MessageSquare className="w-4 h-4" />
-                                Contact an Expert
+                                <Activity className="w-4 h-4" />
+                                Request Custom Diagnostics
                             </div>
                         </button>
                     )}
@@ -305,6 +363,83 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 </div>
 
             </div>
+
+            {/* --- REPAIR TICKET MODAL --- */}
+            {showTicketModal && selectedServiceForTicket && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-cyan-400"></div>
+                        <button
+                            onClick={() => setShowTicketModal(false)}
+                            aria-label="Close form"
+                            className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
+
+                        <div className="p-6 md:p-8">
+                            <h3 className="text-2xl font-black text-white mb-2">Request Repair Ticket</h3>
+                            <p className="text-slate-400 text-sm mb-6">You are booking a repair for <strong className="text-blue-400">{selectedServiceForTicket.device}</strong> ({selectedServiceForTicket.service}). Our team will review this request and contact you.</p>
+
+                            <form onSubmit={handleSubmitTicket} className="space-y-4">
+                                {!isAuthenticated && (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Full Name *</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                value={ticketForm.name}
+                                                onChange={e => setTicketForm({ ...ticketForm, name: e.target.value })}
+                                                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-blue-500 outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Email Address *</label>
+                                            <input
+                                                type="email"
+                                                required
+                                                value={ticketForm.email}
+                                                onChange={e => setTicketForm({ ...ticketForm, email: e.target.value })}
+                                                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-blue-500 outline-none"
+                                            />
+                                            <p className="text-[10px] text-slate-500 mt-1">We need your email so you can track your repair progress later online.</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Phone Number</label>
+                                            <input
+                                                type="text"
+                                                value={ticketForm.phone}
+                                                onChange={e => setTicketForm({ ...ticketForm, phone: e.target.value })}
+                                                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-blue-500 outline-none"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Additional Notes <span className="font-normal normal-case opacity-50">(Optional)</span></label>
+                                    <textarea
+                                        rows={3}
+                                        value={ticketForm.notes}
+                                        onChange={e => setTicketForm({ ...ticketForm, notes: e.target.value })}
+                                        placeholder="Describe the issue in more detail if needed..."
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-blue-500 outline-none resize-none"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="w-full py-4 mt-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all flex justify-center items-center"
+                                >
+                                    {submitting ? 'Creating Ticket...' : 'Confirm Request'}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
