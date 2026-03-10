@@ -99,6 +99,10 @@ const ValuationManager = () => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof DeviceBlueprint, direction: 'asc' | 'desc' } | null>(null);
     const [quoteSortConfig, setQuoteSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
 
+    // Selection & Bulk ops
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [reseeding, setReseeding] = useState(false);
+
     // Simulator
     const [simState, setSimState] = useState({
         storage: '128GB',
@@ -230,9 +234,39 @@ const ValuationManager = () => {
         if (!window.confirm('Are you sure you want to delete this blueprint?')) return;
         try {
             await api.delete(`/api/valuation/devices/${id}`);
+            setSelectedIds(prev => prev.filter(i => i !== id));
             fetchDevices();
         } catch (error) {
             console.error('Error deleting device:', error);
+        }
+    };
+
+    const handleBulkDelete = async (deleteAll = false) => {
+        const count = deleteAll ? devices.length : selectedIds.length;
+        if (!window.confirm(`Wirklich ${deleteAll ? 'ALLE' : count} Gerät(e) löschen? Dies kann nicht rückgängig gemacht werden!`)) return;
+        try {
+            await api.delete('/api/valuation/devices', {
+                data: deleteAll ? { deleteAll: true } : { ids: selectedIds }
+            });
+            setSelectedIds([]);
+            fetchDevices();
+        } catch (error) {
+            console.error('Error bulk deleting:', error);
+        }
+    };
+
+    const handleReseed = async () => {
+        if (!window.confirm('Alle Geräte mit aktuellen Marktpreisen aktualisieren? (seedDevices.js wird ausgeführt)')) return;
+        setReseeding(true);
+        try {
+            await api.post('/api/valuation/devices/reseed', {});
+            fetchDevices();
+            alert('✅ Geräte erfolgreich aktualisiert!');
+        } catch (error) {
+            console.error('Reseed failed:', error);
+            alert('❌ Reseed fehlgeschlagen.');
+        } finally {
+            setReseeding(false);
         }
     };
 
@@ -372,7 +406,7 @@ const ValuationManager = () => {
     return (
         <div className="p-6 max-w-7xl mx-auto text-slate-100">
             {/* Header */}
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex justify-between items-start mb-8 gap-4 flex-wrap">
                 <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                         Valuation Manager
@@ -380,12 +414,32 @@ const ValuationManager = () => {
                     <p className="text-slate-400 mt-2">Gerätepreise und Kundenangebote verwalten</p>
                 </div>
                 {activeSection === 'blueprints' && (
-                    <button
-                        onClick={openNew}
-                        className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-cyan-900/20 transition-all"
-                    >
-                        <Plus size={20} /> Neues Blueprint
-                    </button>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {/* Reseed Button */}
+                        <button
+                            onClick={handleReseed}
+                            disabled={reseeding}
+                            title="Alle Geräte mit aktuellen Marktpreisen neu laden"
+                            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 px-4 py-2.5 rounded-xl font-bold text-sm transition-all"
+                        >
+                            {reseeding ? '⏳' : '🔄'} {reseeding ? 'Updating...' : 'Update Preise'}
+                        </button>
+                        {/* Delete All */}
+                        <button
+                            onClick={() => handleBulkDelete(true)}
+                            title="Alle Blueprints löschen"
+                            className="flex items-center gap-2 bg-red-700 hover:bg-red-600 px-4 py-2.5 rounded-xl font-bold text-sm transition-all"
+                        >
+                            <Trash2 size={16} /> Alle löschen
+                        </button>
+                        {/* Add New */}
+                        <button
+                            onClick={openNew}
+                            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-cyan-900/20 transition-all"
+                        >
+                            <Plus size={20} /> Neues Blueprint
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -439,12 +493,33 @@ const ValuationManager = () => {
                         </select>
                     </div>
 
+                    {/* Bulk Actions Bar */}
+                    {selectedIds.length > 0 && (
+                        <div className="flex items-center justify-between gap-4 mb-4 px-4 py-3 bg-blue-900/30 border border-blue-700 rounded-xl">
+                            <span className="text-blue-300 font-bold text-sm">{selectedIds.length} Gerät(e) ausgewählt</span>
+                            <div className="flex gap-2">
+                                <button onClick={() => setSelectedIds([])} className="text-xs px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold transition-all">Abwählen</button>
+                                <button onClick={() => handleBulkDelete(false)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-700 hover:bg-red-600 rounded-lg font-bold transition-all"><Trash2 size={13} /> Auswahl löschen</button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Table */}
                     <div className="bg-slate-900/50 border border-slate-700 rounded-xl overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead className="bg-slate-800 text-slate-400">
                                     <tr>
+                                        <th className="p-4 w-10">
+                                            <input
+                                                type="checkbox"
+                                                aria-label="Alle auswählen"
+                                                title="Alle auswählen"
+                                                checked={selectedIds.length === filteredDevices.length && filteredDevices.length > 0}
+                                                onChange={(e) => setSelectedIds(e.target.checked ? filteredDevices.map(d => d._id) : [])}
+                                                className="w-4 h-4 accent-cyan-500 cursor-pointer"
+                                            />
+                                        </th>
                                         <th className="p-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('brand')}>
                                             <div className="flex items-center gap-2">Brand {sortConfig?.key === 'brand' && (sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</div>
                                         </th>
@@ -460,12 +535,24 @@ const ValuationManager = () => {
                                 </thead>
                                 <tbody className="divide-y divide-slate-700">
                                     {loading ? (
-                                        <tr><td colSpan={5} className="p-8 text-center text-slate-500">Loading...</td></tr>
+                                        <tr><td colSpan={6} className="p-8 text-center text-slate-500">Loading...</td></tr>
                                     ) : filteredDevices.length === 0 ? (
-                                        <tr><td colSpan={5} className="p-8 text-center text-slate-500">No devices found.</td></tr>
+                                        <tr><td colSpan={6} className="p-8 text-center text-slate-500">No devices found.</td></tr>
                                     ) : (
                                         filteredDevices.map(device => (
-                                            <tr key={device._id} className="hover:bg-slate-800/50 transition-colors">
+                                            <tr key={device._id} className={`hover:bg-slate-800/50 transition-colors ${selectedIds.includes(device._id) ? 'bg-blue-900/20' : ''}`}>
+                                                <td className="p-4">
+                                                    <input
+                                                        type="checkbox"
+                                                        aria-label={`Select ${device.modelName}`}
+                                                        title={`Select ${device.modelName}`}
+                                                        checked={selectedIds.includes(device._id)}
+                                                        onChange={(e) => setSelectedIds(prev =>
+                                                            e.target.checked ? [...prev, device._id] : prev.filter(i => i !== device._id)
+                                                        )}
+                                                        className="w-4 h-4 accent-cyan-500 cursor-pointer"
+                                                    />
+                                                </td>
                                                 <td className="p-4"><span className="px-2 py-1 bg-slate-800 rounded text-sm text-slate-300 font-medium">{device.brand}</span></td>
                                                 <td className="p-4 font-bold text-white">{device.modelName}</td>
                                                 <td className="p-4 text-emerald-400 font-mono font-bold">€{device.basePrice}</td>

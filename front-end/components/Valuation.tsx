@@ -59,6 +59,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
     const [apiDevices, setApiDevices] = useState<DeviceBlueprint[]>([]);
     const [selectedDevice, setSelectedDevice] = useState<DeviceBlueprint | null>(null);
     const [loading, setLoading] = useState(false);
+    const [brandFilter, setBrandFilter] = useState<string>('all');
 
     // Smooth interpolated price display
     const [previewPrice, setPreviewPrice] = useState<number>(0);
@@ -99,10 +100,16 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
         fetchDevices();
     }, []);
 
-    const filteredDevices = apiDevices.filter(device =>
-        (device.modelName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (device.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-    );
+    const brands = ['all', ...Array.from(new Set(apiDevices.map(d => d.brand).filter(Boolean)))];
+
+    const filteredDevices = apiDevices.filter(device => {
+        const matchSearch = (device.modelName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (device.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+        const matchBrand = brandFilter === 'all' || device.brand === brandFilter;
+        return matchSearch && matchBrand;
+    });
+
+    const popularModels = apiDevices.slice(0, 6).map(d => d.modelName);
 
     useEffect(() => {
         if (!quoteData) {
@@ -336,7 +343,8 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
             {/* ========================================== */}
             {mode === 'landing' && (
                 <div className="w-full relative z-10 duration-700">
-                    <div className="max-w-5xl mx-auto mb-12 text-center space-y-5">
+                    {/* HERO */}
+                    <div className="max-w-5xl mx-auto mb-8 text-center space-y-5">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-full text-sm mb-2 shadow-sm">
                             <Sparkles size={16} /> Maximiere deinen Gerätewert
                         </div>
@@ -344,19 +352,26 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                             Verkaufe dein Gerät an <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">HandyLand</span>
                         </h1>
                         <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-medium">
-                            Ermittle den Wert in wenigen Sekunden. Garantiert faire Preise, schnelle Auszahlung und kostenloser Versand inklusive.
+                            Ermittle den Wert in wenigen Sekunden. Faire Preise, schnelle Auszahlung, kostenloser Versand.
                         </p>
+                    </div>
+
+                    {/* TRUST BAR */}
+                    <div className="max-w-3xl mx-auto mb-10 flex flex-wrap items-center justify-center gap-6">
+                        {[{ icon: '⭐', label: '4.8/5 von 2.000+ Bewertungen' }, { icon: '📦', label: 'Kostenloser Versand' }, { icon: '⚡', label: 'Auszahlung in 24h' }, { icon: '🔒', label: '100% Sicher & Seriös' }].map(item => (
+                            <div key={item.label} className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
+                                <span className="text-base">{item.icon}</span>{item.label}
+                            </div>
+                        ))}
                     </div>
 
                     <div>
                         <AppFrame title="Gerät finden" subtitle="Wähle dein Modell aus, um sofort zu starten" icon={<ScanLine className="w-7 h-7" />}>
                             {/* Search Bar */}
-                            <div className="relative mb-12 max-w-3xl mx-auto group">
+                            <div className="relative mb-6 max-w-3xl mx-auto group">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-500"></div>
                                 <div className="relative flex items-center bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-3xl p-2 shadow-sm transition-all focus-within:border-blue-500 dark:focus-within:border-blue-500">
-                                    <div className="pl-4 pr-2">
-                                        <Search className="text-blue-500" size={24} />
-                                    </div>
+                                    <div className="pl-4 pr-2"><Search className="text-blue-500" size={24} /></div>
                                     <input
                                         type="text"
                                         placeholder="Z.B. iPhone 15 Pro, Samsung Galaxy S24..."
@@ -367,36 +382,65 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                                 </div>
                             </div>
 
+                            {/* Popular Searches */}
+                            {!searchTerm && popularModels.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-6 max-w-3xl mx-auto">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider self-center">Beliebt:</span>
+                                    {popularModels.map(m => (
+                                        <button key={m} onClick={() => setSearchTerm(m)}
+                                            className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold transition-all border border-slate-200 dark:border-slate-700">
+                                            {m}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Brand Filter */}
+                            {brands.length > 2 && (
+                                <div className="flex flex-wrap gap-2 mb-8">
+                                    {brands.map(b => (
+                                        <button key={b} onClick={() => setBrandFilter(b)}
+                                            className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all border ${brandFilter === b
+                                                ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20'
+                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-400 hover:text-blue-600'
+                                                }`}>
+                                            {b === 'all' ? 'Alle' : b}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
                             {/* Device Grid */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                                 {filteredDevices.map(device => (
                                     <button
                                         key={device._id}
                                         onClick={() => startWizard(device)}
-                                        className="group relative bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800/80 rounded-3xl p-6 transition-all shadow-sm hover:shadow-xl text-left flex flex-col items-center justify-center gap-5 overflow-hidden hover:scale-[1.02] hover:-translate-y-1"
+                                        className="group relative bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800/80 rounded-3xl p-5 transition-all shadow-sm hover:shadow-xl text-left flex flex-col items-center justify-center gap-4 overflow-hidden hover:scale-[1.02] hover:-translate-y-1 hover:border-blue-400 dark:hover:border-blue-600"
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50/50 dark:to-slate-800/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                                        <div className="relative w-28 h-28 rounded-2xl flex items-center justify-center bg-slate-50 dark:bg-slate-800 p-3 shadow-inner group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
+                                        {/* Price Badge */}
+                                        <div className="absolute top-3 right-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                            bis {device.basePrice}€
+                                        </div>
+                                        <div className="relative w-24 h-24 rounded-2xl flex items-center justify-center bg-slate-50 dark:bg-slate-800 p-3 shadow-inner group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                                             {device.imageUrl ? (
-                                                <img
-                                                    src={device.imageUrl}
-                                                    alt={device.modelName}
+                                                <img src={device.imageUrl} alt={device.modelName}
                                                     className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-500"
                                                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
                                                 />
                                             ) : null}
                                             <Smartphone className={`w-12 h-12 text-slate-400 group-hover:text-blue-500 transition-colors ${device.imageUrl ? 'hidden' : ''}`} />
                                         </div>
-                                        <div className="text-center w-full z-10 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                            <div className="font-extrabold text-lg text-slate-900 dark:text-white truncate" title={device.modelName}>{device.modelName}</div>
-                                            <div className="text-sm font-medium text-slate-500 mt-1">{device.brand}</div>
+                                        <div className="text-center w-full z-10">
+                                            <div className="font-extrabold text-base text-slate-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title={device.modelName}>{device.modelName}</div>
+                                            <div className="text-xs font-medium text-slate-400 mt-0.5">{device.brand}</div>
                                         </div>
                                     </button>
                                 ))}
                                 {filteredDevices.length === 0 && (
                                     <div className="col-span-full py-16 text-center text-slate-500 font-medium text-lg">
-                                        Keine Geräte gefunden für "{searchTerm}"
+                                        Keine Geräte gefunden für &quot;{searchTerm}&quot;
                                     </div>
                                 )}
                             </div>
@@ -449,34 +493,35 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                             {/* STEP 2: SCREEN CONDITION */}
                             {step === 2 && (
                                 <div className="py-4">
-                                    <h2 className="text-3xl md:text-4xl font-black mb-10 text-slate-900 dark:text-white text-center tracking-tight">
+                                    <h2 className="text-3xl md:text-4xl font-black mb-3 text-slate-900 dark:text-white text-center tracking-tight">
                                         Wie ist der Zustand deines Bildschirms?
                                     </h2>
+                                    <p className="text-center text-slate-400 text-sm mb-8">Halte das Gerät bei guter Beleuchtung und prüfe den Bildschirm sorgfältig.</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        {screenConditions.map((c: any) => (
-                                            <button
-                                                key={c.id}
-                                                onClick={() => { setFormData({ ...formData, screenCondition: c.id }); handleNextStep(); }}
-                                                className={`p-6 rounded-[2rem] border-2 text-left bg-white dark:bg-slate-900 transition-all hover:scale-[1.01] shadow-sm flex flex-col items-start gap-3 relative overflow-hidden ${formData.screenCondition === c.id ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'}`}
-                                            >
-                                                <div className="flex items-center justify-between w-full">
-                                                    <h3 className={`font-black text-xl ${formData.screenCondition === c.id ? 'text-blue-700 dark:text-blue-400' : 'text-slate-900 dark:text-white'}`}>
-                                                        {c.title}
-                                                    </h3>
-                                                    {formData.screenCondition === c.id ? (
-                                                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm animate-pulse-once">
-                                                            <CheckCircle2 size={20} />
+                                        {screenConditions.map((c: any) => {
+                                            const icons: Record<string, string> = { hervorragend: '✨', sehr_gut: '🟢', gut: '🟡', beschadigt: '🔴' };
+                                            return (
+                                                <button
+                                                    key={c.id}
+                                                    onClick={() => { setFormData({ ...formData, screenCondition: c.id }); handleNextStep(); }}
+                                                    className={`p-6 rounded-[2rem] border-2 text-left bg-white dark:bg-slate-900 transition-all hover:scale-[1.01] shadow-sm flex flex-col items-start gap-3 relative overflow-hidden ${formData.screenCondition === c.id ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'}`}
+                                                >
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-2xl">{icons[c.id] || '📱'}</span>
+                                                            <h3 className={`font-black text-xl ${formData.screenCondition === c.id ? 'text-blue-700 dark:text-blue-400' : 'text-slate-900 dark:text-white'}`}>{c.title}</h3>
                                                         </div>
-                                                    ) : (
-                                                        <div className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-700 shrink-0" />
-                                                    )}
-                                                </div>
-                                                <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{c.desc}</p>
-                                                {formData.screenCondition === c.id && (
-                                                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600" />
-                                                )}
-                                            </button>
-                                        ))}
+                                                        {formData.screenCondition === c.id ? (
+                                                            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm"><CheckCircle2 size={20} /></div>
+                                                        ) : (
+                                                            <div className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-700 shrink-0" />
+                                                        )}
+                                                    </div>
+                                                    <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{c.desc}</p>
+                                                    {formData.screenCondition === c.id && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600" />}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -484,32 +529,35 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                             {/* STEP 3: BODY CONDITION */}
                             {step === 3 && (
                                 <div className="py-4">
-                                    <h2 className="text-3xl md:text-4xl font-black mb-10 text-slate-900 dark:text-white text-center tracking-tight">
+                                    <h2 className="text-3xl md:text-4xl font-black mb-3 text-slate-900 dark:text-white text-center tracking-tight">
                                         Wie ist der Zustand des Gehäuses?
                                     </h2>
+                                    <p className="text-center text-slate-400 text-sm mb-8">Rahmen, Rückseite und Kanten — prüfe auf Kratzer, Dellen und Risse.</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        {bodyConditions.map((c: any) => (
-                                            <button
-                                                key={c.id}
-                                                onClick={() => { setFormData({ ...formData, bodyCondition: c.id }); handleNextStep(); }}
-                                                className={`p-6 rounded-[2rem] border-2 text-left bg-white dark:bg-slate-900 transition-all hover:scale-[1.01] shadow-sm flex items-start gap-4 justify-between relative overflow-hidden ${formData.bodyCondition === c.id ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'}`}
-                                            >
-                                                {formData.bodyCondition === c.id && (
-                                                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600" />
-                                                )}
-                                                <div>
-                                                    <h3 className={`font-black text-xl mb-2 ${formData.bodyCondition === c.id ? 'text-blue-700 dark:text-blue-400' : 'text-slate-900 dark:text-white'}`}>{c.title}</h3>
-                                                    <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{c.desc}</p>
-                                                </div>
-                                                {formData.bodyCondition === c.id ? (
-                                                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-1 animate-pulse-once">
-                                                        <CheckCircle2 size={20} />
+                                        {bodyConditions.map((c: any) => {
+                                            const icons: Record<string, string> = { hervorragend: '💎', sehr_gut: '🟢', gut: '🟡', beschadigt: '🔴' };
+                                            return (
+                                                <button
+                                                    key={c.id}
+                                                    onClick={() => { setFormData({ ...formData, bodyCondition: c.id }); handleNextStep(); }}
+                                                    className={`p-6 rounded-[2rem] border-2 text-left bg-white dark:bg-slate-900 transition-all hover:scale-[1.01] shadow-sm flex items-start gap-4 justify-between relative overflow-hidden ${formData.bodyCondition === c.id ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'}`}
+                                                >
+                                                    {formData.bodyCondition === c.id && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600" />}
+                                                    <div className="flex items-start gap-3">
+                                                        <span className="text-2xl mt-0.5">{icons[c.id] || '📱'}</span>
+                                                        <div>
+                                                            <h3 className={`font-black text-xl mb-2 ${formData.bodyCondition === c.id ? 'text-blue-700 dark:text-blue-400' : 'text-slate-900 dark:text-white'}`}>{c.title}</h3>
+                                                            <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{c.desc}</p>
+                                                        </div>
                                                     </div>
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-700 shrink-0 mt-1" />
-                                                )}
-                                            </button>
-                                        ))}
+                                                    {formData.bodyCondition === c.id ? (
+                                                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-1"><CheckCircle2 size={20} /></div>
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-700 shrink-0 mt-1" />
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -674,6 +722,26 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                                             <span className="text-lg">{loading ? 'Wird gespeichert...' : 'Angebot annehmen'}</span>
                                             {!loading && <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />}
                                         </button>
+                                    </div>
+
+                                    {/* HOW IT WORKS */}
+                                    <div className="mt-6 p-5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl">
+                                        <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 text-center">Wie geht es weiter?</p>
+                                        <div className="flex items-center justify-between gap-2">
+                                            {[
+                                                { icon: '✅', label: 'Angebot annehmen' },
+                                                { icon: '📦', label: 'Gerät einsenden' },
+                                                { icon: '💰', label: 'Geld erhalten' }
+                                            ].map((s, i) => (
+                                                <React.Fragment key={s.label}>
+                                                    <div className="flex flex-col items-center gap-1.5 text-center flex-1">
+                                                        <span className="text-2xl">{s.icon}</span>
+                                                        <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{s.label}</span>
+                                                    </div>
+                                                    {i < 2 && <div className="w-6 h-px bg-slate-300 dark:bg-slate-700 flex-shrink-0" />}
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
 

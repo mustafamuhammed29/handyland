@@ -6,11 +6,13 @@ const { protect, authorize } = require('../middleware/auth');
 // ==========================================
 // BLUEPRINT MANAGEMENT (ADMIN)
 // ==========================================
-// Changed to /devices to match Admin Panel frontend
 router.get('/devices', valuationController.getBlueprints);
 router.post('/devices', protect, valuationController.createBlueprint);
 router.put('/devices/:id', protect, valuationController.updateBlueprint);
 router.delete('/devices/:id', protect, valuationController.deleteBlueprint);
+// Bulk operations
+router.delete('/devices', protect, authorize('admin'), valuationController.bulkDeleteBlueprints);
+router.post('/devices/reseed', protect, authorize('admin'), valuationController.reseedBlueprints);
 
 // ==========================================
 // VALUATION & QUOTES (PUBLIC/USER)

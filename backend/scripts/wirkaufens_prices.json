@@ -1,0 +1,2201 @@
+{
+  "scrapedAt": "2026-03-10T00:21:17.868Z",
+  "source": "wirkaufens.de",
+  "totalScraped": 313,
+  "successCount": 0,
+  "failCount": 313,
+  "devices": [],
+  "noPrice": [
+    {
+      "slug": "apple iphone se 32GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-32-gb",
+      "name": "Apple iPhone SE 32 GB",
+      "price": null,
+      "storageGB": 32
+    },
+    {
+      "slug": "apple iphone 11 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-11-128-gb",
+      "name": "Apple iPhone 11 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 11 pro 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-11-pro-64-gb",
+      "name": "Apple iPhone 11 Pro 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone 11 pro max 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-11-pro-max-256-gb",
+      "name": "Apple iPhone 11 Pro Max 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone se 2020 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-2020-128-gb",
+      "name": "Apple iPhone SE (2020) 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s20 fe g780f ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20-fe-g780f-ds-128-gb",
+      "name": "Samsung Galaxy S20 FE G780F/DS 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 12 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-pro-256-gb",
+      "name": "Apple iPhone 12 Pro 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 12 pro max 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-pro-max-256-gb",
+      "name": "Apple iPhone 12 Pro Max 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s21 5g g991b ds 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21-5g-g991b-ds-256-gb",
+      "name": "Samsung Galaxy S21 5G G991B/DS 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s21 ultra 5g 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21-ultra-5g-128-gb",
+      "name": "Samsung Galaxy S21 Ultra 5G 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s21 ultra 5g 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21-ultra-5g-256-gb",
+      "name": "Samsung Galaxy S21 Ultra 5G 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s21 ultra 5g 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21-ultra-5g-512-gb",
+      "name": "Samsung Galaxy S21 Ultra 5G 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "google pixel 6 pro 5g 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-6-pro-5g-256-gb",
+      "name": "Google Pixel 6 Pro 5G 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s21 fe 5g g990b ds 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21-fe-5g-g990b-ds-256-gb",
+      "name": "Samsung Galaxy S21 FE 5G G990B/DS 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s22 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s22-256-gb",
+      "name": "Samsung Galaxy S22 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z flip4 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip4-128-gb",
+      "name": "Samsung Galaxy Z Flip4 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 14 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-256-gb",
+      "name": "Apple iPhone 14 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 14 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-512-gb",
+      "name": "Apple iPhone 14 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 14 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-pro-512-gb",
+      "name": "Apple iPhone 14 Pro 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 14 pro max 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-pro-max-512-gb",
+      "name": "Apple iPhone 14 Pro Max 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "google pixel 7 pro 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-7-pro-128-gb",
+      "name": "Google Pixel 7 Pro 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s23 ultra 1TB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s23-ultra-1-tb",
+      "name": "Samsung Galaxy S23 Ultra 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy z flip5 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip5-512-gb",
+      "name": "Samsung Galaxy Z Flip5 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 15 plus 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-plus-256-gb",
+      "name": "Apple iPhone 15 Plus 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 15 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-pro-512-gb",
+      "name": "Apple iPhone 15 Pro 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 15 pro 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-pro-1-tb",
+      "name": "Apple iPhone 15 Pro 1 TB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 15 pro max 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-pro-max-1-tb",
+      "name": "Apple iPhone 15 Pro Max 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy a35 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-a35-128-gb",
+      "name": "Samsung Galaxy A35 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s24plus 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s24plus-512-gb",
+      "name": "Samsung Galaxy S24+ 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s24 ultra 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s24-ultra-256-gb",
+      "name": "Samsung Galaxy S24 Ultra 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s24 ultra 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s24-ultra-512-gb",
+      "name": "Samsung Galaxy S24 Ultra 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s24 ultra 1TB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s24-ultra-1-tb",
+      "name": "Samsung Galaxy S24 Ultra 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy z fold6 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold6-256-gb",
+      "name": "Samsung Galaxy Z Fold6 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 9 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-pro-512-gb",
+      "name": "Google Pixel 9 Pro 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 16 pro 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-pro-128-gb",
+      "name": "Apple iPhone 16 Pro 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s25 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-256-gb",
+      "name": "Samsung Galaxy S25 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s25 ultra 1TB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-ultra-1-tb",
+      "name": "Samsung Galaxy S25 Ultra 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s25 ultra 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-ultra-256-gb",
+      "name": "Samsung Galaxy S25 Ultra 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 16e 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16e-512-gb",
+      "name": "Apple iPhone 16e 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s25 edge 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-edge-256-gb",
+      "name": "Samsung Galaxy S25 Edge 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s25 ultra enterprise edition 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-ultra-enterprise-edition-256-gb",
+      "name": "Samsung Galaxy S25 Ultra Enterprise Edition 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z fold7 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold7-512-gb",
+      "name": "Samsung Galaxy Z Fold7 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy z fold7 1TB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold7-1-tb",
+      "name": "Samsung Galaxy Z Fold7 1 TB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 17 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17-512-gb",
+      "name": "Apple iPhone 17 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone air 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-air-256-gb",
+      "name": "Apple iPhone Air 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 10 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10-128-gb",
+      "name": "Google Pixel 10 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 10 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10-pro-512-gb",
+      "name": "Google Pixel 10 Pro 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s25 fe 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-fe-256-gb",
+      "name": "Samsung Galaxy S25 FE 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s25 fe 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-fe-512-gb",
+      "name": "Samsung Galaxy S25 FE 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s26 ultra 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s26-ultra-256-gb",
+      "name": "Samsung Galaxy S26 Ultra 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 8 plus 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-8-plus-256-gb",
+      "name": "Apple iPhone 8 Plus 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone xs 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-xs-256-gb",
+      "name": "Apple iPhone XS 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone xs 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-xs-512-gb",
+      "name": "Apple iPhone XS 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone xs max 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-xs-max-256-gb",
+      "name": "Apple iPhone XS Max 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone xr 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-xr-64-gb",
+      "name": "Apple iPhone XR 64 GB",
+      "price": null,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone 11 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-11-pro-256-gb",
+      "name": "Apple iPhone 11 Pro 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 8 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-8-128-gb",
+      "name": "Apple iPhone 8 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s20 ultra 5g g988b ds 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20-ultra-5g-g988b-ds-512-gb",
+      "name": "Samsung Galaxy S20 Ultra 5G G988B/DS 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "google pixel 5 5g 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-5-5g-128-gb",
+      "name": "Google Pixel 5 5G 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 12 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-128-gb",
+      "name": "Apple iPhone 12 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 12 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-256-gb",
+      "name": "Apple iPhone 12 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s21 5g g991b ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21-5g-g991b-ds-128-gb",
+      "name": "Samsung Galaxy S21 5G G991B/DS 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s20 fe 4g g780g ds snapdragon 865 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20-fe-4g-g780g-ds-snapdragon-865-128-gb",
+      "name": "Samsung Galaxy S20 FE 4G G780G/DS (Snapdragon 865) 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 13 mini 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-mini-512-gb",
+      "name": "Apple iPhone 13 mini 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 13 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-pro-256-gb",
+      "name": "Apple iPhone 13 Pro 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 13 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-pro-512-gb",
+      "name": "Apple iPhone 13 Pro 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 13 pro max 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-pro-max-256-gb",
+      "name": "Apple iPhone 13 Pro Max 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 13 pro max 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-pro-max-512-gb",
+      "name": "Apple iPhone 13 Pro Max 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s22 ultra 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s22-ultra-128-gb",
+      "name": "Samsung Galaxy S22 Ultra 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s22 ultra 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s22-ultra-512-gb",
+      "name": "Samsung Galaxy S22 Ultra 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy z flip4 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip4-512-gb",
+      "name": "Samsung Galaxy Z Flip4 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy z fold4 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold4-256-gb",
+      "name": "Samsung Galaxy Z Fold4 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z fold4 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold4-512-gb",
+      "name": "Samsung Galaxy Z Fold4 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 14 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-pro-256-gb",
+      "name": "Apple iPhone 14 Pro 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 14 pro 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-pro-1-tb",
+      "name": "Apple iPhone 14 Pro 1 TB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 7 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-7-pro-256-gb",
+      "name": "Google Pixel 7 Pro 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s23 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s23-128-gb",
+      "name": "Samsung Galaxy S23 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s23plus 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s23plus-512-gb",
+      "name": "Samsung Galaxy S23+ 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy a54 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-a54-128-gb",
+      "name": "Samsung Galaxy A54 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy a54 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-a54-256-gb",
+      "name": "Samsung Galaxy A54 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z fold5 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold5-512-gb",
+      "name": "Samsung Galaxy Z Fold5 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy z fold5 1TB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold5-1-tb",
+      "name": "Samsung Galaxy Z Fold5 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 15 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-256-gb",
+      "name": "Apple iPhone 15 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 15 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-512-gb",
+      "name": "Apple iPhone 15 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 15 plus 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-plus-128-gb",
+      "name": "Apple iPhone 15 Plus 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s24 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s24-256-gb",
+      "name": "Samsung Galaxy S24 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s24plus 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s24plus-256-gb",
+      "name": "Samsung Galaxy S24+ 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z flip6 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip6-512-gb",
+      "name": "Samsung Galaxy Z Flip6 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "google pixel 9 pro xl 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-pro-xl-128-gb",
+      "name": "Google Pixel 9 Pro XL 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 9 pro fold 512GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-pro-fold-512-gb",
+      "name": "Google Pixel 9 Pro Fold 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 16 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-256-gb",
+      "name": "Apple iPhone 16 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 16 plus 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-plus-128-gb",
+      "name": "Apple iPhone 16 Plus 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 16 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-pro-512-gb",
+      "name": "Apple iPhone 16 Pro 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s24 fe 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s24-fe-128-gb",
+      "name": "Samsung Galaxy S24 FE 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s25 plus 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-plus-512-gb",
+      "name": "Samsung Galaxy S25 Plus 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s25 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-128-gb",
+      "name": "Samsung Galaxy S25 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 16e 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16e-256-gb",
+      "name": "Apple iPhone 16e 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 9a 256GB 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9a-256gb-256-gb",
+      "name": "Google Pixel 9a - 256GB 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z flip7 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip7-256-gb",
+      "name": "Samsung Galaxy Z Flip7 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z flip7 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip7-512-gb",
+      "name": "Samsung Galaxy Z Flip7 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 17 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17-pro-256-gb",
+      "name": "Apple iPhone 17 Pro 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 17 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17-pro-512-gb",
+      "name": "Apple iPhone 17 Pro 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 17 pro max 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17-pro-max-256-gb",
+      "name": "Apple iPhone 17 Pro Max 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 10 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10-256-gb",
+      "name": "Google Pixel 10 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google google pixel 10 pro fold 512GB",
+      "url": "https://wirkaufens.de/produkte/google-google-pixel-10-pro-fold-512-gb",
+      "name": "Google Google Pixel 10 Pro Fold 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s25 fe 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-fe-128-gb",
+      "name": "Samsung Galaxy S25 FE 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy a56 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-a56-256-gb",
+      "name": "Samsung Galaxy A56 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s26plus 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s26plus-256-gb",
+      "name": "Samsung Galaxy S26+ 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s26 ultra 1TB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s26-ultra-1-tb",
+      "name": "Samsung Galaxy S26 Ultra 1 TB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 17e 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17e-512-gb",
+      "name": "Apple iPhone 17e 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone se 16GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-16-gb",
+      "name": "Apple iPhone SE 16 GB",
+      "price": 0,
+      "storageGB": 16
+    },
+    {
+      "slug": "apple iphone x 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-x-64-gb",
+      "name": "Apple iPhone X 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone x 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-x-256-gb",
+      "name": "Apple iPhone X 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 11 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-11-256-gb",
+      "name": "Apple iPhone 11 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s20plus 5g g986b ds 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20plus-5g-g986b-ds-512-gb",
+      "name": "Samsung Galaxy S20+ 5G G986B/DS 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s20 ultra 5g g988b ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20-ultra-5g-g988b-ds-128-gb",
+      "name": "Samsung Galaxy S20 Ultra 5G G988B/DS 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone se 2020 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-2020-64-gb",
+      "name": "Apple iPhone SE (2020) 64 GB",
+      "price": null,
+      "storageGB": 64
+    },
+    {
+      "slug": "samsung galaxy s20 fe 5g g781b ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20-fe-5g-g781b-ds-128-gb",
+      "name": "Samsung Galaxy S20 FE 5G G781B/DS 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s20 fe 5g g781b ds 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20-fe-5g-g781b-ds-256-gb",
+      "name": "Samsung Galaxy S20 FE 5G G781B/DS 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 12 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-64-gb",
+      "name": "Apple iPhone 12 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone 12 pro 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-pro-128-gb",
+      "name": "Apple iPhone 12 Pro 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel fold 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-fold-256-gb",
+      "name": "Google Pixel Fold 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel fold 512GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-fold-512-gb",
+      "name": "Google Pixel Fold 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 13 mini 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-mini-128-gb",
+      "name": "Apple iPhone 13 mini 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 13 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-512-gb",
+      "name": "Apple iPhone 13 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "google pixel 6 pro 5g 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-6-pro-5g-128-gb",
+      "name": "Google Pixel 6 Pro 5G 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s22plus 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s22plus-128-gb",
+      "name": "Samsung Galaxy S22+ 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s22 ultra 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s22-ultra-256-gb",
+      "name": "Samsung Galaxy S22 Ultra 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s21 fe 5g g990b2 ds neue edition 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21-fe-5g-g990b2-ds-neue-edition-256-gb",
+      "name": "Samsung Galaxy S21 FE 5G G990B2/DS (Neue Edition) 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 14 plus 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-plus-128-gb",
+      "name": "Apple iPhone 14 Plus 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 14 pro 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-pro-128-gb",
+      "name": "Apple iPhone 14 Pro 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 14 pro max 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-pro-max-1-tb",
+      "name": "Apple iPhone 14 Pro Max 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 7 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-7-128-gb",
+      "name": "Google Pixel 7 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s23plus 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s23plus-256-gb",
+      "name": "Samsung Galaxy S23+ 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s23 ultra 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s23-ultra-256-gb",
+      "name": "Samsung Galaxy S23 Ultra 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s23 ultra 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s23-ultra-512-gb",
+      "name": "Samsung Galaxy S23 Ultra 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "google pixel 8 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-8-128-gb",
+      "name": "Google Pixel 8 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s23 fe 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s23-fe-128-gb",
+      "name": "Samsung Galaxy S23 FE 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s23 fe 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s23-fe-256-gb",
+      "name": "Samsung Galaxy S23 FE 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 8a 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-8a-128-gb",
+      "name": "Google Pixel 8a 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 9 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-256-gb",
+      "name": "Google Pixel 9 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 9 pro 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-pro-128-gb",
+      "name": "Google Pixel 9 Pro 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 9 pro xl 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-pro-xl-256-gb",
+      "name": "Google Pixel 9 Pro XL 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 9 pro xl 1TB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-pro-xl-1-tb",
+      "name": "Google Pixel 9 Pro XL 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 9 pro fold 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-pro-fold-256-gb",
+      "name": "Google Pixel 9 Pro Fold 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 16 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-512-gb",
+      "name": "Apple iPhone 16 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 16 plus 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-plus-512-gb",
+      "name": "Apple iPhone 16 Plus 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 16 pro max 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-pro-max-256-gb",
+      "name": "Apple iPhone 16 Pro Max 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 16 pro max 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-pro-max-512-gb",
+      "name": "Apple iPhone 16 Pro Max 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 16 pro max 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-pro-max-1-tb",
+      "name": "Apple iPhone 16 Pro Max 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s25 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-512-gb",
+      "name": "Samsung Galaxy S25 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s25 plus 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-plus-256-gb",
+      "name": "Samsung Galaxy S25 Plus 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s25 enterprise edition 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-enterprise-edition-128-gb",
+      "name": "Samsung Galaxy S25 Enterprise Edition 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy z fold7 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold7-256-gb",
+      "name": "Samsung Galaxy Z Fold7 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z flip7 fe 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip7-fe-256-gb",
+      "name": "Samsung Galaxy Z Flip7 FE 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 17 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17-256-gb",
+      "name": "Apple iPhone 17 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone air 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-air-512-gb",
+      "name": "Apple iPhone Air 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone air 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-air-1-tb",
+      "name": "Apple iPhone Air 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 10 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10-pro-256-gb",
+      "name": "Google Pixel 10 Pro 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 10 pro xl 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10-pro-xl-256-gb",
+      "name": "Google Pixel 10 Pro XL 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google google pixel 10 pro xl 1TB",
+      "url": "https://wirkaufens.de/produkte/google-google-pixel-10-pro-xl-1-tb",
+      "name": "Google Google Pixel 10 Pro XL 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 17 pro max 2TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17-pro-max-2-tb",
+      "name": "Apple iPhone 17 Pro Max 2 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s26 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s26-512-gb",
+      "name": "Samsung Galaxy S26 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s26plus 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s26plus-512-gb",
+      "name": "Samsung Galaxy S26+ 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s26 ultra 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s26-ultra-512-gb",
+      "name": "Samsung Galaxy S26 Ultra 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 17e 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17e-256-gb",
+      "name": "Apple iPhone 17e 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone se 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-64-gb",
+      "name": "Apple iPhone SE 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone se 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-128-gb",
+      "name": "Apple iPhone SE 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 8 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-8-64-gb",
+      "name": "Apple iPhone 8 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone 8 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-8-256-gb",
+      "name": "Apple iPhone 8 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 8 plus 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-8-plus-64-gb",
+      "name": "Apple iPhone 8 Plus 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone xr 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-xr-128-gb",
+      "name": "Apple iPhone XR 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone xr 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-xr-256-gb",
+      "name": "Apple iPhone XR 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 8 plus 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-8-plus-128-gb",
+      "name": "Apple iPhone 8 Plus 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s20 4g g980f ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20-4g-g980f-ds-128-gb",
+      "name": "Samsung Galaxy S20 4G G980F/DS 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s20 5g g981b ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20-5g-g981b-ds-128-gb",
+      "name": "Samsung Galaxy S20 5G G981B/DS 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s20plus 4g g985f ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20plus-4g-g985f-ds-128-gb",
+      "name": "Samsung Galaxy S20+ 4G G985F/DS 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s21plus 5g g996b ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21plus-5g-g996b-ds-128-gb",
+      "name": "Samsung Galaxy S21+ 5G G996B/DS 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 13 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-256-gb",
+      "name": "Apple iPhone 13 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 13 pro 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-pro-128-gb",
+      "name": "Apple iPhone 13 Pro 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 13 pro max 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-pro-max-1-tb",
+      "name": "Apple iPhone 13 Pro Max 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s22plus 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s22plus-256-gb",
+      "name": "Samsung Galaxy S22+ 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s22 ultra 1TB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s22-ultra-1-tb",
+      "name": "Samsung Galaxy S22 Ultra 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy z fold4 1TB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold4-1-tb",
+      "name": "Samsung Galaxy Z Fold4 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 14 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-128-gb",
+      "name": "Apple iPhone 14 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 14 pro max 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-pro-max-128-gb",
+      "name": "Apple iPhone 14 Pro Max 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 14 pro max 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-pro-max-256-gb",
+      "name": "Apple iPhone 14 Pro Max 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel buds pro",
+      "url": "https://wirkaufens.de/produkte/google-pixel-buds-pro",
+      "name": "Google Pixel Buds Pro",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 7 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-7-256-gb",
+      "name": "Google Pixel 7 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s23 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s23-256-gb",
+      "name": "Samsung Galaxy S23 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 7a 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-7a-128-gb",
+      "name": "Google Pixel 7a 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy z fold5 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold5-256-gb",
+      "name": "Samsung Galaxy Z Fold5 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z flip5 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip5-256-gb",
+      "name": "Samsung Galaxy Z Flip5 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 15 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-128-gb",
+      "name": "Apple iPhone 15 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 15 plus 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-plus-512-gb",
+      "name": "Apple iPhone 15 Plus 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 15 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-pro-256-gb",
+      "name": "Apple iPhone 15 Pro 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 15 pro max 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-pro-max-512-gb",
+      "name": "Apple iPhone 15 Pro Max 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "google pixel 8 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-8-256-gb",
+      "name": "Google Pixel 8 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 8 pro 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-8-pro-128-gb",
+      "name": "Google Pixel 8 Pro 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 8 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-8-pro-256-gb",
+      "name": "Google Pixel 8 Pro 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 8 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-8-pro-512-gb",
+      "name": "Google Pixel 8 Pro 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy z flip6 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip6-256-gb",
+      "name": "Samsung Galaxy Z Flip6 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z fold6 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold6-512-gb",
+      "name": "Samsung Galaxy Z Fold6 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "google pixel 9 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-128-gb",
+      "name": "Google Pixel 9 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 9 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-pro-256-gb",
+      "name": "Google Pixel 9 Pro 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 16 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-128-gb",
+      "name": "Apple iPhone 16 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 16 pro 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-pro-256-gb",
+      "name": "Apple iPhone 16 Pro 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 16 pro 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-pro-1-tb",
+      "name": "Apple iPhone 16 Pro 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s24 fe 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s24-fe-256-gb",
+      "name": "Samsung Galaxy S24 FE 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s25 edge 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-edge-512-gb",
+      "name": "Samsung Galaxy S25 Edge 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s25 enterprise edition 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-enterprise-edition-256-gb",
+      "name": "Samsung Galaxy S25 Enterprise Edition 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s25 ultra enterprise edition 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-ultra-enterprise-edition-512-gb",
+      "name": "Samsung Galaxy S25 Ultra Enterprise Edition 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy z flip7 fe 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip7-fe-128-gb",
+      "name": "Samsung Galaxy Z Flip7 FE 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 17 pro 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17-pro-1-tb",
+      "name": "Apple iPhone 17 Pro 1 TB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 17 pro max 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17-pro-max-512-gb",
+      "name": "Apple iPhone 17 Pro Max 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 17 pro max 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-17-pro-max-1-tb",
+      "name": "Apple iPhone 17 Pro Max 1 TB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 10 pro 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10-pro-128-gb",
+      "name": "Google Pixel 10 Pro 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "google google pixel 10 pro fold 1TB",
+      "url": "https://wirkaufens.de/produkte/google-google-pixel-10-pro-fold-1-tb",
+      "name": "Google Google Pixel 10 Pro Fold 1 TB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s26 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s26-256-gb",
+      "name": "Samsung Galaxy S26 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone xs 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-xs-64-gb",
+      "name": "Apple iPhone XS 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone xs max 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-xs-max-64-gb",
+      "name": "Apple iPhone XS Max 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone xs max 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-xs-max-512-gb",
+      "name": "Apple iPhone XS Max 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 11 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-11-64-gb",
+      "name": "Apple iPhone 11 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone 11 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-11-pro-512-gb",
+      "name": "Apple iPhone 11 Pro 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 11 pro max 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-11-pro-max-64-gb",
+      "name": "Apple iPhone 11 Pro Max 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone 11 pro max 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-11-pro-max-512-gb",
+      "name": "Apple iPhone 11 Pro Max 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s20plus 5g g986b ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20plus-5g-g986b-ds-128-gb",
+      "name": "Samsung Galaxy S20+ 5G G986B/DS 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone se 2020 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-2020-256-gb",
+      "name": "Apple iPhone SE (2020) 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s20 fe 4g g780f ds 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s20-fe-4g-g780f-ds-256-gb",
+      "name": "Samsung Galaxy S20 FE 4G G780F/DS 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 12 mini 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-mini-64-gb",
+      "name": "Apple iPhone 12 mini 64 GB",
+      "price": 0,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone 12 mini 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-mini-128-gb",
+      "name": "Apple iPhone 12 mini 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 12 mini 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-mini-256-gb",
+      "name": "Apple iPhone 12 mini 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 12 pro 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-pro-512-gb",
+      "name": "Apple iPhone 12 Pro 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 12 pro max 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-pro-max-128-gb",
+      "name": "Apple iPhone 12 Pro Max 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 12 pro max 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-12-pro-max-512-gb",
+      "name": "Apple iPhone 12 Pro Max 512 GB",
+      "price": 0,
+      "storageGB": 512
+    },
+    {
+      "slug": "samsung galaxy s21plus 5g g996b ds 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21plus-5g-g996b-ds-256-gb",
+      "name": "Samsung Galaxy S21+ 5G G996B/DS 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 13 mini 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-mini-256-gb",
+      "name": "Apple iPhone 13 mini 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 13 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-128-gb",
+      "name": "Apple iPhone 13 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 13 pro 1TB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-pro-1-tb",
+      "name": "Apple iPhone 13 Pro 1 TB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 13 pro max 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-13-pro-max-128-gb",
+      "name": "Apple iPhone 13 Pro Max 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 6 5g 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-6-5g-128-gb",
+      "name": "Google Pixel 6 5G 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s21 fe 5g g990b ds 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21-fe-5g-g990b-ds-128-gb",
+      "name": "Samsung Galaxy S21 FE 5G G990B/DS 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy s22 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s22-128-gb",
+      "name": "Samsung Galaxy S22 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone se 2022 64GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-2022-64-gb",
+      "name": "Apple iPhone SE (2022) 64 GB",
+      "price": null,
+      "storageGB": 64
+    },
+    {
+      "slug": "apple iphone se 2022 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-2022-128-gb",
+      "name": "Apple iPhone SE (2022) 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone se 2022 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-se-2022-256-gb",
+      "name": "Apple iPhone SE (2022) 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 6a 5g 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-6a-5g-128-gb",
+      "name": "Google Pixel 6a 5G 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy z flip4 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-flip4-256-gb",
+      "name": "Samsung Galaxy Z Flip4 256 GB",
+      "price": 0,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s21 fe 5g g990b2 ds neue edition 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s21-fe-5g-g990b2-ds-neue-edition-128-gb",
+      "name": "Samsung Galaxy S21 FE 5G G990B2/DS (Neue Edition) 128 GB",
+      "price": 0,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 14 plus 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-plus-256-gb",
+      "name": "Apple iPhone 14 Plus 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "apple iphone 14 plus 512GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-14-plus-512-gb",
+      "name": "Apple iPhone 14 Plus 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 15 pro 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-pro-128-gb",
+      "name": "Apple iPhone 15 Pro 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "apple iphone 15 pro max 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-15-pro-max-256-gb",
+      "name": "Apple iPhone 15 Pro Max 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s24 128GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s24-128-gb",
+      "name": "Samsung Galaxy S24 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "samsung galaxy a55 5g 256GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-a55-5g-256-gb",
+      "name": "Samsung Galaxy A55 5G 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 8a 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-8a-256-gb",
+      "name": "Google Pixel 8a 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy z fold6 1TB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-z-fold6-1-tb",
+      "name": "Samsung Galaxy Z Fold6 1 TB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 9 pro xl 512GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9-pro-xl-512-gb",
+      "name": "Google Pixel 9 Pro XL 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 16 plus 256GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16-plus-256-gb",
+      "name": "Apple iPhone 16 Plus 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "samsung galaxy s25 ultra 512GB",
+      "url": "https://wirkaufens.de/produkte/samsung-galaxy-s25-ultra-512-gb",
+      "name": "Samsung Galaxy S25 Ultra 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "apple iphone 16e 128GB",
+      "url": "https://wirkaufens.de/produkte/apple-iphone-16e-128-gb",
+      "name": "Apple iPhone 16e 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 9a 128GB 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-9a-128gb-128-gb",
+      "name": "Google Pixel 9a - 128GB 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 10 pro 1TB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10-pro-1-tb",
+      "name": "Google Pixel 10 Pro 1 TB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 10 pro xl 512GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10-pro-xl-512-gb",
+      "name": "Google Pixel 10 Pro XL 512 GB",
+      "price": null,
+      "storageGB": 512
+    },
+    {
+      "slug": "google google pixel 10 pro fold 256GB",
+      "url": "https://wirkaufens.de/produkte/google-google-pixel-10-pro-fold-256-gb",
+      "name": "Google Google Pixel 10 Pro Fold 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "google pixel 10a 128GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10a-128-gb",
+      "name": "Google Pixel 10a 128 GB",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "google pixel 10a 256GB",
+      "url": "https://wirkaufens.de/produkte/google-pixel-10a-256-gb",
+      "name": "Google Pixel 10a 256 GB",
+      "price": null,
+      "storageGB": 256
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-17e",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-17-pro-max",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-17-pro",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-air",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-17",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-16e",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-16-pro-max",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-16-pro",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-16-plus",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-16",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-15-pro-max",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-15-pro",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-15-plus",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-15",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-14-pro-max",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-14-pro",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-14-plus",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-14",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-13-pro-max",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-13-pro",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-13",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-13-mini",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-12-pro-max",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-12-pro",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-12-mini",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-12",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-11",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-xr",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-xs",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-x",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-8",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-apple-iphone-se",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-google-pixel-10",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-google-pixel-9",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-google-pixel-8",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-google-pixel-7",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-google-pixel-6",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-google-pixel-5",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-google-pixel-fold",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-samsung-galaxy-s26",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-samsung-galaxy-s25",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-samsung-galaxy-s24",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-samsung-galaxy-s23",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-samsung-galaxy-s22",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-samsung-galaxy-s21",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    },
+    {
+      "slug": "",
+      "url": "https://wirkaufens.de/verkaufen/handys-samsung-galaxy-s20",
+      "name": "SEO_SELL_POPTITLE",
+      "price": null,
+      "storageGB": 128
+    }
+  ]
+}

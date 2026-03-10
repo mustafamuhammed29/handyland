@@ -49,8 +49,10 @@
         "xss-clean": "^0.1.4"
     },
     "devDependencies": {
+        "cheerio": "^1.2.0",
         "jest": "^30.2.0",
         "node-mocks-http": "^1.17.2",
+        "puppeteer": "^24.38.0",
         "supertest": "^7.2.2"
     }
 }
