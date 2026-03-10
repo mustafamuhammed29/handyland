@@ -16,7 +16,7 @@ const productSchema = new mongoose.Schema({
     },
     stock: { type: Number, required: true, default: 0, min: 0 },
     minStock: { type: Number, default: 2, min: 0 },
-    sold: { type: Number, default: 0 },
+    sold: { type: Number, default: 0, min: 0 },
     isActive: { type: Boolean, default: true },
     barcode: { type: String, unique: true, sparse: true },
     description: String,
@@ -47,5 +47,14 @@ productSchema.index({ stock: 1 });
 productSchema.index({ brand: 1, condition: 1 });
 productSchema.index({ createdAt: -1 });
 productSchema.index({ name: 'text', model: 'text', brand: 'text' });
+
+const transformSold = {
+    transform: (doc, ret) => {
+        ret.sold = Math.max(0, ret.sold || 0);
+        return ret;
+    }
+};
+productSchema.set('toJSON', transformSold);
+productSchema.set('toObject', transformSold);
 
 module.exports = mongoose.model('Product', productSchema);

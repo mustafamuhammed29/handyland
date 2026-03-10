@@ -10,3 +10,5 @@ export { DashboardPages } from './DashboardPages';
 export { DashboardAccessories } from './DashboardAccessories';
 export { DashboardGlobalSettings } from './DashboardGlobalSettings';
 export { RepairArchiveManager } from './RepairArchiveManager';
+export { NotificationBell } from './NotificationBell';
+export { RevenueChart } from './RevenueChart';

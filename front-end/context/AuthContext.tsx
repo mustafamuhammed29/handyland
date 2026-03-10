@@ -6,7 +6,7 @@ import { User } from '../types';
 interface AuthContextType {
     user: User | null;
     setUser: (user: User | null) => void;
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string, redirectTo?: string) => Promise<void>;
     loginWithToken: (token: string) => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const login = async (email: string, password: string) => {
+    const login = async (email: string, password: string, redirectTo?: string) => {
 
         try {
             const data = await authService.login(email, password);
@@ -139,7 +139,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         sessionStorage.removeItem('pendingValuationQuote');
                     }
                 }
-                navigate('/dashboard', { replace: true });
+                if (redirectTo) {
+                    navigate(redirectTo, { replace: true });
+                } else {
+                    navigate('/dashboard', { replace: true });
+                }
             } else {
                 throw new Error('Login failed');
             }

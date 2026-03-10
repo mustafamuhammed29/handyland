@@ -32,9 +32,10 @@ export function useUserData() {
     });
 }
 
-export function useOrders() {
+export function useOrders(options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: dashboardKeys.orders(),
+        enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await orderService.getMyOrders();
             return res.orders || [];
@@ -45,9 +46,10 @@ export function useOrders() {
     });
 }
 
-export function useRepairs() {
+export function useRepairs(options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: dashboardKeys.repairs(),
+        enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/repairs/my-repairs') as any;
             return res.data?.repairs || res.repairs || [];
@@ -57,9 +59,10 @@ export function useRepairs() {
     });
 }
 
-export function useValuations() {
+export function useValuations(options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: dashboardKeys.valuations(),
+        enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/valuation/my-valuations') as any;
             // api interceptor returns response.data directly, so res may be the array itself
@@ -82,9 +85,10 @@ export function useValuations() {
 }
 
 
-export function usePromotions() {
+export function usePromotions(options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: dashboardKeys.promotions(),
+        enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/promotions/active');
             return res.data?.promotions || [];
@@ -94,9 +98,10 @@ export function usePromotions() {
     });
 }
 
-export function useUserStats() {
+export function useUserStats(options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: dashboardKeys.stats(),
+        enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/stats/user');
             return res.data || null;
@@ -106,9 +111,10 @@ export function useUserStats() {
     });
 }
 
-export function useWalletTransactions() {
+export function useWalletTransactions(options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: dashboardKeys.wallet(),
+        enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/transactions') as any;
             const transactions = res.data?.transactions || res.transactions || [];
@@ -126,9 +132,10 @@ export function useWalletTransactions() {
     });
 }
 
-export function useAddresses() {
+export function useAddresses(options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: dashboardKeys.addresses(),
+        enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await authService.getAddresses();
             return res.addresses || [];
@@ -138,9 +145,10 @@ export function useAddresses() {
     });
 }
 
-export function useWishlist() {
+export function useWishlist(options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: dashboardKeys.wishlist(),
+        enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/wishlist') as any;
             // Interceptor may strip the .data wrapper, so check both res and res.data
@@ -175,16 +183,17 @@ export function useNotifications() {
 }
 
 // Main hook that combines all queries
-export function useDashboardData() {
+export function useDashboardData(activeTab: string = 'overview') {
+    const isOverview = activeTab === 'overview';
     const userQuery = useUserData();
-    const ordersQuery = useOrders();
-    const repairsQuery = useRepairs();
-    const valuationsQuery = useValuations();
-    const promotionsQuery = usePromotions();
-    const statsQuery = useUserStats();
-    const walletQuery = useWalletTransactions();
-    const addressesQuery = useAddresses();
-    const wishlistQuery = useWishlist();
+    const ordersQuery = useOrders({ enabled: isOverview || activeTab === 'orders' });
+    const repairsQuery = useRepairs({ enabled: isOverview || activeTab === 'repairs' });
+    const valuationsQuery = useValuations({ enabled: isOverview || activeTab === 'valuations' });
+    const promotionsQuery = usePromotions({ enabled: isOverview });
+    const statsQuery = useUserStats({ enabled: isOverview });
+    const walletQuery = useWalletTransactions({ enabled: isOverview || activeTab === 'wallet' });
+    const addressesQuery = useAddresses({ enabled: activeTab === 'settings' });
+    const wishlistQuery = useWishlist({ enabled: isOverview || activeTab === 'wishlist' });
     const notificationsQuery = useNotifications();
 
     return {

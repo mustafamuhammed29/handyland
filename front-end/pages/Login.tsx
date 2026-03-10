@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader, Eye, EyeOff } from 'lucide-react';
 import { validateEmail, validateRequired } from '../validation';
 import { useAuth } from '../context/AuthContext';
@@ -49,6 +49,7 @@ const Login: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [showResend, setShowResend] = useState(false);
     const [resendSuccess, setResendSuccess] = useState(false);
+    const location = useLocation();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,7 +63,8 @@ const Login: React.FC = () => {
 
         setLoading(true);
         try {
-            await login(email, password);
+            const redirectPath = location.state?.from?.pathname;
+            await login(email, password, redirectPath);
         } catch (err: any) {
             const errorMessage = err.message || 'Invalid email or password';
             setError(errorMessage);

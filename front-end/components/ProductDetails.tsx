@@ -246,14 +246,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
             )}
 
             <div className="max-w-7xl mx-auto">
-                {/* Breadcrumbs */}
-                <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8">
-                    <button onClick={() => navigate('/marketplace')} className="hover:text-brand-primary transition-colors">Marketplace</button>
-                    <ChevronRight className="w-4 h-4" />
-                    <span className="text-slate-300">{product.brand || 'Brand'}</span>
-                    <ChevronRight className="w-4 h-4" />
-                    <span className="text-white font-medium">{product.model}</span>
-                </nav>
+
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
                     {/* Image Gallery */}
@@ -431,7 +424,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                             <button
                                 key={tab}
                                 role="tab"
-                                aria-selected={activeTab === tab}
+                                aria-selected={activeTab === tab ? "true" : "false"}
                                 aria-controls={`tabpanel-${tab}`}
                                 id={`tab-${tab}`}
                                 onClick={() => setActiveTab(tab as any)}
@@ -443,7 +436,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         ))}
                         <button
                             role="tab"
-                            aria-selected={activeTab === 'questions'}
+                            aria-selected={activeTab === 'questions' ? "true" : "false"}
                             aria-controls="tabpanel-questions"
                             id="tab-questions"
                             onClick={() => setActiveTab('questions')}
