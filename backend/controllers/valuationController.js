@@ -643,3 +643,43 @@ exports.completePurchase = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// @desc    Bulk delete device blueprints (by IDs array, or all if ids=[] and deleteAll=true)
+// @route   DELETE /api/valuation/devices
+// @access  Admin
+exports.bulkDeleteBlueprints = async (req, res) => {
+    try {
+        const { ids, deleteAll } = req.body;
+        let result;
+        if (deleteAll) {
+            result = await DeviceBlueprint.deleteMany({});
+        } else if (Array.isArray(ids) && ids.length > 0) {
+            result = await DeviceBlueprint.deleteMany({ _id: { $in: ids } });
+        } else {
+            return res.status(400).json({ success: false, message: 'Provide ids[] or deleteAll=true' });
+        }
+        res.json({ success: true, deleted: result.deletedCount });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Re-run seed script to update all device prices/images
+// @route   POST /api/valuation/devices/reseed
+// @access  Admin
+exports.reseedBlueprints = async (req, res) => {
+    try {
+        const { execFile } = require('child_process');
+        const path = require('path');
+        const scriptPath = path.join(__dirname, '../scripts/seedDevices.js');
+        execFile('node', [scriptPath], { timeout: 60000 }, (error, stdout, stderr) => {
+            if (error) {
+                console.error('Reseed error:', error);
+                return res.status(500).json({ success: false, message: 'Reseed failed', error: error.message });
+            }
+            res.json({ success: true, message: 'Devices reseeded successfully', output: stdout });
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
