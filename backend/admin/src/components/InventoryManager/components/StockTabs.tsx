@@ -8,7 +8,7 @@ interface StockTabsProps {
 
 export function StockTabs({ activeTab, setActiveTab }: StockTabsProps) {
     return (
-        <div className="flex gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:pb-0">
+        <div className="flex gap-2 flex-wrap pb-2 md:pb-0">
             <button
                 onClick={() => setActiveTab('items')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'items'

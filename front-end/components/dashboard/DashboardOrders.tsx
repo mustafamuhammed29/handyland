@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Package, Download, ChevronRight, Search, Filter, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Order } from '../../types';
+import { VisualOrderTimeline } from '../VisualOrderTimeline';
 
 interface DashboardOrdersProps {
     orders: Order[];
@@ -126,6 +127,10 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         {expandedOrderId === order._id && (
                             <div className="px-6 pb-6 animate-in slide-in-from-top-2">
                                 <div className="h-px bg-slate-800 mb-4"></div>
+
+                                <div className="mb-6">
+                                    <VisualOrderTimeline currentStatus={order.status || 'pending'} type="order" />
+                                </div>
 
                                 {/* Order Items */}
                                 <div className="space-y-3 mb-4">

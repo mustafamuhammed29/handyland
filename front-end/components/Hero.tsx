@@ -82,6 +82,13 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                         >
                             <Zap className="w-5 h-5 text-yellow-400" /> {settings.hero.buttonValuation || t.ctaValue}
                         </button>
+                        
+                        <button
+                            onClick={() => navigate('/track-repair')}
+                            className="px-8 py-4 rounded-full border border-slate-700/50 bg-slate-900/40 text-amber-400 font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 backdrop-blur-md"
+                        >
+                            <Search className="w-5 h-5" /> Track Repair
+                        </button>
                     </div>
 
                     {/* Trust Indicators */}

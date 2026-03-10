@@ -239,6 +239,12 @@ app.use('/api/coupons', require('./routes/couponRoutes')); // Added Coupon Route
 app.use('/api/loaners', require('./routes/loanerRoutes')); // Phase 6 Loaner Phones
 app.use('/api/warranties', require('./routes/warrantyRoutes')); // Phase 7 Warranties
 
+// User requested additional routes:
+app.use('/api/inventory', require('./routes/inventoryRoutes'));
+app.use('/api/warranty', require('./routes/warrantyRoutes'));
+app.use('/api/loaner', require('./routes/loanerRoutes'));
+app.use('/api/repair-parts', require('./routes/repairPartRoutes'));
+
 // Basic Routes
 app.get('/', (req, res) => {
     res.json({

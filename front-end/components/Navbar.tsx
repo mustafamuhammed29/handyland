@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home, Bell, ClipboardList } from 'lucide-react';
+import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home, Bell, ClipboardList, Heart } from 'lucide-react';
 import { LanguageCode, User } from '../types';
 import { translations } from '../i18n';
 import { useCart } from '../context/CartContext';
@@ -114,6 +114,13 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
               <ShoppingCart className={`w-5 h-5 transition-colors ${cart.length > 0 ? 'text-brand-primary group-hover:text-brand-secondary' : 'text-slate-400 group-hover:text-brand-primary'}`} />
               {cart.length > 0 && <span className="absolute -top-1 -right-1 rtl:right-auto rtl:-left-1 w-4 h-4 bg-brand-primary text-black text-[10px] font-black rounded-full flex items-center justify-center border border-black">{cart.length}</span>}
             </button>
+
+            {user && (
+              <Link to="/dashboard?tab=wishlist"
+                className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900/60 border border-slate-800 hover:border-pink-500/50 transition-all group shadow-[0_0_15px_rgba(236,72,153,0)] hover:shadow-[0_0_15px_rgba(236,72,153,0.15)] hidden md:flex">
+                <Heart className="w-5 h-5 text-slate-400 transition-colors group-hover:text-pink-400" />
+              </Link>
+            )}
 
             <Link
               to={user ? '/dashboard' : '/login'}

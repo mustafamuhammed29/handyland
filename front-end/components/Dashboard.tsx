@@ -15,8 +15,8 @@ import {
     DashboardValuations,
     DashboardWishlist,
     DashboardSettings,
+    NotificationBell
 } from './dashboard/index';
-import { NotificationBell } from './dashboard/NotificationBell';
 import { api } from '../utils/api';
 import { authService } from '../services/authService';
 import { orderService } from '../services/orderService';
@@ -31,7 +31,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const [activeTab, setActiveTab] = useState('overview');
 
     // Use the new data fetching hook
-    const dashboardData = useDashboardData();
+    const dashboardData = useDashboardData(activeTab);
 
     const {
         user,
@@ -160,7 +160,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
     ];
 
-    const ADMIN_PANEL_URL = 'http://localhost:3001';
+    const ADMIN_PANEL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3001';
 
     return (
         <div className="min-h-screen pt-28 pb-12 px-4 max-w-7xl mx-auto">

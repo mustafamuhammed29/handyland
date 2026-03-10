@@ -8,7 +8,7 @@ const accessorySchema = new mongoose.Schema({
     price: { type: Number, required: true },
     stock: { type: Number, required: true, default: 0 },
     minStock: { type: Number, default: 5, min: 0 },
-    sold: { type: Number, default: 0 },
+    sold: { type: Number, default: 0, min: 0 },
     isActive: { type: Boolean, default: true },
     barcode: { type: String, unique: true, sparse: true },
     brand: String,
@@ -25,5 +25,14 @@ const accessorySchema = new mongoose.Schema({
     display: String,
     storage: String,
 }, { timestamps: true });
+
+const transformSold = {
+    transform: (doc, ret) => {
+        ret.sold = Math.max(0, ret.sold || 0);
+        return ret;
+    }
+};
+accessorySchema.set('toJSON', transformSold);
+accessorySchema.set('toObject', transformSold);
 
 module.exports = mongoose.model('Accessory', accessorySchema);

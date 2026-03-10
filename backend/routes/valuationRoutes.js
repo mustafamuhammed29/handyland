@@ -6,6 +6,8 @@ const { protect, authorize } = require('../middleware/auth');
 // ==========================================
 // BLUEPRINT MANAGEMENT (ADMIN)
 // ==========================================
+router.get('/', (req, res) => res.status(200).json({ success: true, message: 'Valuation API is healthy' }));
+
 router.get('/devices', valuationController.getBlueprints);
 router.post('/devices', protect, valuationController.createBlueprint);
 router.put('/devices/:id', protect, valuationController.updateBlueprint);
