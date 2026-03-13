@@ -8,7 +8,13 @@ const pageSchema = new mongoose.Schema({
     },
     title: { type: String, required: true },
     content: { type: String, default: '' },
-    lastUpdated: { type: Date, default: Date.now }
+    lastUpdated: { type: Date, default: Date.now },
+    seo: {
+        metaTitle: String,
+        metaDescription: String,
+        keywords: String,
+        canonicalUrl: String
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Page', pageSchema);

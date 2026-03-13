@@ -38,7 +38,13 @@ const productSchema = new mongoose.Schema({
     storage: String,
     specs: Object, // Flexible specs object
     rating: { type: Number, default: 0 },
-    numReviews: { type: Number, default: 0 }
+    numReviews: { type: Number, default: 0 },
+    seo: {
+        metaTitle: String,
+        metaDescription: String,
+        keywords: String,
+        canonicalUrl: String
+    }
 }, { timestamps: true });
 
 // Performance indexes (FIX 9)

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, CheckCircle, AlertCircle, Shield, Bell, Gift } from 'lucide-react';
+import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, CheckCircle, AlertCircle, Shield, Bell, Gift, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
+import ImageUpload from '../components/ImageUpload';
 
 // Extracted Tab Components
 import { HeroSettingsTab } from './settings/HeroSettingsTab';
@@ -143,6 +144,15 @@ interface Settings {
     };
     socialAuth: SocialAuthSettings;
     quickReplies?: string[];
+    seo?: {
+        defaultMetaTitle: string;
+        defaultMetaDescription: string;
+        defaultKeywords: string;
+        defaultOgImage: string;
+        faviconUrl: string;
+        googleAnalyticsId: string;
+        facebookPixelId: string;
+    };
 }
 
 interface EmailTemplateData {
@@ -205,7 +215,15 @@ export default function SettingsManager() {
             "Please provide us with your order number so we can investigate further.",
             "Your repair is currently in progress. We will update you soon.",
             "Thank you for reaching out. Your issue has been resolved."
-        ]
+        ],
+        seo: {
+            defaultMetaTitle: 'HandyLand - E-Commerce & Repair Services',
+            defaultMetaDescription: 'Your one-stop shop for electronics, mobile phones, and reliable repair services.',
+            defaultKeywords: 'handyland, electronics, mobile repair, buy phones, sell phones',
+            defaultOgImage: '',
+            googleAnalyticsId: '',
+            facebookPixelId: ''
+        }
     });
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
@@ -239,6 +257,7 @@ export default function SettingsManager() {
                     ...data,
                     promoPopup: { ...prev.promoPopup, ...(data.promoPopup || {}) },
                     announcementBanner: { ...prev.announcementBanner, ...(data.announcementBanner || {}) },
+                    seo: { ...prev.seo, ...(data.seo || {}) },
                 }));
             } catch (err) {
                 console.error('Failed to fetch settings:', err);
@@ -333,6 +352,7 @@ export default function SettingsManager() {
         { id: 'layout', label: 'Layout Control', icon: LayoutTemplate },
         { id: 'banner', label: '📢 Announcement', icon: Layers },
         { id: 'promo', label: '🎁 Promo Popup', icon: Layers },
+        { id: 'seo', label: 'SEO & Meta', icon: Globe },
         { id: 'scripts', label: '💬 Support Scripts', icon: MessageSquare },
     ];
 
@@ -594,6 +614,97 @@ export default function SettingsManager() {
                     )}
 
                     {activeTab === 'contact' && <ContactSettingsTab settings={settings} handleChange={handleChange} />}
+
+                    {activeTab === 'seo' && (
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-purple-500/10 rounded-xl">
+                                    <Globe className="text-purple-400" size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">SEO & Meta Tags</h3>
+                                    <p className="text-slate-400 text-sm">Configure default search engine optimization tags and analytics tracking.</p>
+                                </div>
+                            </div>
+
+                            <div className="p-5 border border-slate-700 rounded-xl space-y-5">
+                                <h4 className="text-blue-400 font-bold mb-2">Global Meta Details</h4>
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Default Meta Title</label>
+                                    <input
+                                        type="text"
+                                        value={settings.seo?.defaultMetaTitle || ''}
+                                        onChange={e => handleChange('seo', 'defaultMetaTitle', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Default Meta Description</label>
+                                    <textarea
+                                        value={settings.seo?.defaultMetaDescription || ''}
+                                        onChange={e => handleChange('seo', 'defaultMetaDescription', e.target.value)}
+                                        rows={3}
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none resize-none"
+                                    />
+                                    <p className="text-xs text-slate-500 mt-1">Recommended 150-160 characters.</p>
+                                </div>
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Default Keywords</label>
+                                    <input
+                                        type="text"
+                                        value={settings.seo?.defaultKeywords || ''}
+                                        onChange={e => handleChange('seo', 'defaultKeywords', e.target.value)}
+                                        placeholder="Comma-separated keywords"
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Default OpenGraph Image URL</label>
+                                    <input
+                                        type="text"
+                                        value={settings.seo?.defaultOgImage || ''}
+                                        onChange={e => handleChange('seo', 'defaultOgImage', e.target.value)}
+                                        placeholder="https://..."
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                    />
+                                </div>
+                                <div className="mt-4">
+                                    <ImageUpload
+                                        label="Global Site Favicon (Browser Tab Icon)"
+                                        value={settings.seo?.faviconUrl || ''}
+                                        onChange={url => handleChange('seo', 'faviconUrl', url)}
+                                    />
+                                    <p className="text-xs text-slate-500 mt-1">Recommended size: 32x32px or 64x64px (PNG or ICO).</p>
+                                </div>
+                            </div>
+
+                            <div className="p-5 border border-slate-700 rounded-xl space-y-5">
+                                <h4 className="text-blue-400 font-bold mb-2">Analytics & Tracking</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-slate-400 text-sm font-bold mb-2">Google Analytics ID (G-XXXX)</label>
+                                        <input
+                                            type="text"
+                                            value={settings.seo?.googleAnalyticsId || ''}
+                                            onChange={e => handleChange('seo', 'googleAnalyticsId', e.target.value)}
+                                            placeholder="G-..."
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-slate-400 text-sm font-bold mb-2">Facebook Pixel ID</label>
+                                        <input
+                                            type="text"
+                                            value={settings.seo?.facebookPixelId || ''}
+                                            onChange={e => handleChange('seo', 'facebookPixelId', e.target.value)}
+                                            placeholder="1234567890..."
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {activeTab === 'scripts' && (
                         <div className="space-y-6">

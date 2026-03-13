@@ -22,7 +22,13 @@ export default function ProductsManager() {
         display: '',
         description: '',
         category: 'Smartphones',
-        stock: 0
+        stock: 0,
+        seo: {
+            metaTitle: '',
+            metaDescription: '',
+            keywords: '',
+            canonicalUrl: ''
+        }
     });
 
     const fetchProducts = async () => {
@@ -123,7 +129,13 @@ export default function ProductsManager() {
             display: product.display || '',
             description: product.description || '',
             category: product.category || 'Smartphones',
-            stock: product.stock ?? 0
+            stock: product.stock ?? 0,
+            seo: {
+                metaTitle: product.seo?.metaTitle || '',
+                metaDescription: product.seo?.metaDescription || '',
+                keywords: product.seo?.keywords || '',
+                canonicalUrl: product.seo?.canonicalUrl || ''
+            }
         });
         setIsModalOpen(true);
     };
@@ -173,7 +185,13 @@ export default function ProductsManager() {
             display: '',
             description: '',
             category: 'Smartphones',
-            stock: 0
+            stock: 0,
+            seo: {
+                metaTitle: '',
+                metaDescription: '',
+                keywords: '',
+                canonicalUrl: ''
+            }
         });
     };
 
@@ -484,6 +502,49 @@ export default function ProductsManager() {
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 />
+                            </div>
+
+                            {/* SEO settings section */}
+                            <div className="p-4 border border-slate-700/50 rounded-xl bg-slate-900/30 space-y-4">
+                                <h4 className="text-blue-400 font-bold text-sm">SEO Overrides (Optional)</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-slate-400">Meta Title</label>
+                                        <input
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-white focus:border-blue-500 outline-none"
+                                            placeholder="Custom page title"
+                                            value={formData.seo.metaTitle}
+                                            onChange={e => setFormData({ ...formData, seo: { ...formData.seo, metaTitle: e.target.value } })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-slate-400">Canonical URL</label>
+                                        <input
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-white focus:border-blue-500 outline-none"
+                                            placeholder="https://..."
+                                            value={formData.seo.canonicalUrl}
+                                            onChange={e => setFormData({ ...formData, seo: { ...formData.seo, canonicalUrl: e.target.value } })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1 md:col-span-2">
+                                        <label className="text-xs font-medium text-slate-400">Keywords</label>
+                                        <input
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-white focus:border-blue-500 outline-none"
+                                            placeholder="iphone, apple, smartphone"
+                                            value={formData.seo.keywords}
+                                            onChange={e => setFormData({ ...formData, seo: { ...formData.seo, keywords: e.target.value } })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1 md:col-span-2">
+                                        <label className="text-xs font-medium text-slate-400">Meta Description</label>
+                                        <textarea
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-white focus:border-blue-500 outline-none h-16 resize-none"
+                                            placeholder="Custom meta description for search results..."
+                                            value={formData.seo.metaDescription}
+                                            onChange={e => setFormData({ ...formData, seo: { ...formData.seo, metaDescription: e.target.value } })}
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             <button

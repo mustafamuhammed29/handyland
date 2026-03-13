@@ -222,28 +222,20 @@ app.use('/api/emails', require('./routes/emailRoutes'));
 app.use('/api/email-templates', require('./routes/emailTemplateRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
 
-app.use('/api/accessories', require('./routes/accessoriesRoutes'));
 app.use('/api/repair-archive', require('./routes/repairArchiveRoutes'));
 app.use('/api/valuation', require('./routes/valuationRoutes'));
 app.use('/api/promotions', require('./routes/promotionsRoutes'));
-app.use('/api/reviews', require('./routes/reviewRoutes')); // Added
 app.use('/api/addresses', require('./routes/addressRoutes')); // Added
 app.use('/api/transactions', require('./routes/transactionRoutes')); // Added
-app.use('/api/notifications', require('./routes/notificationRoutes')); // Added
-app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes')); // Registered Message Routes
 app.use('/api/shipping-methods', require('./routes/shippingRoutes')); // Added
 app.use('/api/pages', require('./routes/pageRoutes')); // Added
 app.use('/api/coupons', require('./routes/couponRoutes')); // Added Coupon Routes
 app.use('/api/loaners', require('./routes/loanerRoutes')); // Phase 6 Loaner Phones
+app.use('/api/loaner', require('./routes/loanerRoutes')); // Added alias
 app.use('/api/warranties', require('./routes/warrantyRoutes')); // Phase 7 Warranties
-
-// User requested additional routes:
-app.use('/api/inventory', require('./routes/inventoryRoutes'));
-app.use('/api/warranty', require('./routes/warrantyRoutes'));
-app.use('/api/loaner', require('./routes/loanerRoutes'));
-app.use('/api/repair-parts', require('./routes/repairPartRoutes'));
+app.use('/api/warranty', require('./routes/warrantyRoutes')); // Added alias
 
 // Basic Routes
 app.get('/', (req, res) => {

@@ -133,6 +133,15 @@ interface Settings {
         google?: boolean;
         facebook?: boolean;
     };
+    seo?: {
+        defaultMetaTitle?: string;
+        defaultMetaDescription?: string;
+        defaultKeywords?: string;
+        defaultOgImage?: string;
+        faviconUrl?: string;
+        googleAnalyticsId?: string;
+        facebookPixelId?: string;
+    };
     theme?: {
         primaryColor?: string;
         secondaryColor?: string;
@@ -298,6 +307,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     theme: { ...defaultSettings.theme, ...(parsed.theme || {}) },
                     announcementBanner: { ...defaultSettings.announcementBanner, ...(parsed.announcementBanner || {}) },
                     promoPopup: { ...defaultSettings.promoPopup, ...(parsed.promoPopup || {}) },
+                    seo: { ...(parsed.seo || {}) },
                 };
             }
         } catch { }
@@ -355,6 +365,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     theme: { ...defaultSettings.theme, ...(safeData.theme || {}) },
                     announcementBanner: { ...defaultSettings.announcementBanner, ...(safeData.announcementBanner || {}) },
                     promoPopup: { ...defaultSettings.promoPopup, ...(safeData.promoPopup || {}) },
+                    seo: { ...(safeData.seo || {}) },
                 };
 
                 setSettings(merged);
@@ -414,6 +425,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 navbar: { ...prev.navbar, ...(freshData.navbar || {}) },
                 socialAuth: { ...prev.socialAuth, ...(freshData.socialAuth || {}) },
                 theme: { ...prev.theme, ...(freshData.theme || {}) },
+                seo: { ...(freshData.seo || {}) },
             }));
 
             addToast('Settings updated', 'success');

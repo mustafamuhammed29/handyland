@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { LanguageCode } from '../types';
 import { translations } from '../i18n';
 import { api } from '../utils/api';
+import { SEO } from './SEO';
 
 interface InfoPageProps {
     lang: LanguageCode;
@@ -23,6 +24,7 @@ export const InfoPage: React.FC<InfoPageProps> = ({ lang }) => {
     const location = useLocation();
     const [content, setContent] = useState('');
     const [title, setTitle] = useState('');
+    const [seo, setSeo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
@@ -43,6 +45,7 @@ export const InfoPage: React.FC<InfoPageProps> = ({ lang }) => {
             const data = res as any;
             setTitle(data.title);
             setContent(data.content);
+            setSeo(data.seo);
         } catch (err) {
             console.error(err);
             setError(true);
@@ -70,6 +73,12 @@ export const InfoPage: React.FC<InfoPageProps> = ({ lang }) => {
 
     return (
         <div className="min-h-screen pt-32 pb-20 bg-slate-950">
+            <SEO
+                title={seo?.metaTitle || title}
+                description={seo?.metaDescription}
+                keywords={seo?.keywords}
+                canonical={seo?.canonicalUrl || window.location.href}
+            />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h1 className="text-4xl md:text-5xl font-black text-white mb-12 border-b border-slate-800 pb-8">
                     {title}
