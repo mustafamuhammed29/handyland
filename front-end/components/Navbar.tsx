@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home, Bell, ClipboardList, Heart } from 'lucide-react';
-import { LanguageCode, User } from '../types';
-import { translations } from '../i18n';
+import { User } from '../types';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -13,13 +12,11 @@ import { GlobalSearchBar } from './GlobalSearchBar';
 import { NotificationBell } from './dashboard/NotificationBell';
 
 interface NavbarProps {
-  lang: LanguageCode;
-  setLang?: (lang: LanguageCode) => void; // Made optional as it might not be passed always or handled by context
   user: User | null;
   cartCount: number; // Add cartCount as it was passed in PublicLayout
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
+export const Navbar: React.FC<NavbarProps> = ({ user, cartCount }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { cart, setIsCartOpen } = useCart();
   const { settings } = useSettings(); // Use Global Settings
@@ -34,11 +31,27 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
     BarChart3: <BarChart3 className="w-4 h-4" />
   };
 
-  const navItems = (settings.navbar?.links || []).map(link => ({
-    label: link.labelKey ? t(link.labelKey, link.defaultLabel) : link.defaultLabel,
-    path: link.path,
-    icon: link.iconName && iconMap[link.iconName] ? iconMap[link.iconName] : <Home className="w-4 h-4" />
-  }));
+  const navItems = (settings.navbar?.links || []).map(link => {
+    // Migration mapping for legacy database keys
+    let key = link.labelKey;
+    if (key === 'home') key = 'nav.home';
+    if (key === 'market') key = 'nav.marketplace';
+    if (key === 'repair') key = 'nav.repair';
+    if (key === 'valuation') key = 'nav.valuation';
+
+    let translatedLabel = key ? t(key, link.defaultLabel) : link.defaultLabel;
+    
+    // Failsafe: if translation returns an object (e.g. key doesn't resolve to a string), use default
+    if (typeof translatedLabel === 'object') {
+      translatedLabel = (link.defaultLabel || '') as any;
+    }
+
+    return {
+      label: translatedLabel as React.ReactNode,
+      path: link.path,
+      icon: link.iconName && iconMap[link.iconName] ? iconMap[link.iconName] : <Home className="w-4 h-4" />
+    };
+  });
 
   const hasBanner = settings.announcementBanner?.enabled && settings.announcementBanner?.text;
 

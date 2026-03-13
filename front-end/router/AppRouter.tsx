@@ -25,8 +25,9 @@ import VerifyEmailNotice from '../pages/VerifyEmailNotice';
 import ForgotPassword from '../pages/ForgotPassword';
 import SocialAuthCallback from '../pages/SocialAuthCallback';
 import { LanguageCode } from '../types';
-import { translations } from '../i18n';
+
 import { useLang } from '../context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
@@ -61,6 +62,7 @@ const AdminRedirect = () => {
 // Home Component to group Home-related sections
 const Home = ({ lang }: { lang: LanguageCode }) => {
     const { settings } = useSettings();
+    const { t } = useTranslation();
     const sections = settings?.sections || { hero: true, stats: true, repairGallery: true, marketplace: true, accessories: true, contact: true };
 
     return (
@@ -74,14 +76,14 @@ const Home = ({ lang }: { lang: LanguageCode }) => {
             {sections.stats && <Stats />}
             {sections.repairGallery && (
                 <div className="bg-slate-950">
-                    <RepairGallery lang={lang} />
+                    <RepairGallery />
                 </div>
             )}
             {sections.marketplace && (
                 <div className="bg-slate-950 py-12 border-t border-slate-900">
                     <div className="max-w-7xl mx-auto px-4">
                         <h3 className="text-2xl font-bold text-white mb-8 pl-4 border-l-4 border-blue-600 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">
-                            {translations[lang].market} Highlights
+                            {t('market', 'Market')} Highlights
                         </h3>
                         <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="w-8 h-8 border-2 border-blue-500 rounded-full animate-spin border-t-transparent"></div></div>}>
                             <Marketplace lang={lang} />
@@ -90,7 +92,7 @@ const Home = ({ lang }: { lang: LanguageCode }) => {
                 </div>
             )}
             {sections.accessories && <Accessories lang={lang} />}
-            {sections.contact && <Contact lang={lang} />}
+            {sections.contact && <Contact />}
         </>
     );
 };
@@ -144,15 +146,15 @@ export const AppRouter = () => {
                         <Route path="/" element={<PublicLayout lang={lang} user={user} cartCount={cart.length} />}>
                             <Route path="/" element={<PageTransition><Home lang={lang} /></PageTransition>} />
                             <Route path="/marketplace" element={<Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense>} />
-                            <Route path="/marketplace/:id" element={<Suspense fallback={<GlobalLoader />}><ProductDetails lang={lang} /></Suspense>} />
+                            <Route path="/marketplace/:id" element={<Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense>} />
                             <Route path="/orders/:id" element={<ProtectedRoute><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
                             <Route path="/accessories" element={<PageTransition><Accessories lang={lang} /></PageTransition>} />
                             <Route path="/repair" element={<PageTransition><Repair lang={lang} /></PageTransition>} />
                             <Route path="/valuation" element={<PageTransition><Valuation lang={lang} /></PageTransition>} />
                             <Route path="/sell/:quoteRef" element={<PageTransition><SellDevice /></PageTransition>} />
-                            <Route path="/products/:id" element={<PageTransition><ProductDetails lang={lang} /></PageTransition>} />
-                            <Route path="contact" element={<PageTransition><Contact lang={lang} /></PageTransition>} />
-                            <Route path="checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout lang={lang} /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
+                            <Route path="/products/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
+                            <Route path="contact" element={<PageTransition><Contact /></PageTransition>} />
+                            <Route path="checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
                             <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
                             <Route path="login" element={<PageTransition><Login /></PageTransition>} />
                             <Route path="verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
@@ -168,15 +170,15 @@ export const AppRouter = () => {
                             <Route path="/about" element={<Navigate to="/uber-uns" replace />} />
                             <Route path="/admin" element={<AdminRedirect />} />
 
-                            <Route path="/info" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+                            <Route path="/info" element={<PageTransition><InfoPage /></PageTransition>} />
                             <Route path="/agb" element={<PageTransition><TermsAndConditions /></PageTransition>} />
                             <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
-                            <Route path="/datenschutz" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
-                            <Route path="/service" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
-                            <Route path="/kundenservice" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
-                            <Route path="/impressum" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
-                            <Route path="/uber-uns" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
-                            <Route path="/page/:slug" element={<PageTransition><InfoPage lang={lang} /></PageTransition>} />
+                            <Route path="/datenschutz" element={<PageTransition><InfoPage /></PageTransition>} />
+                            <Route path="/service" element={<PageTransition><InfoPage /></PageTransition>} />
+                            <Route path="/kundenservice" element={<PageTransition><InfoPage /></PageTransition>} />
+                            <Route path="/impressum" element={<PageTransition><InfoPage /></PageTransition>} />
+                            <Route path="/uber-uns" element={<PageTransition><InfoPage /></PageTransition>} />
+                            <Route path="/page/:slug" element={<PageTransition><InfoPage /></PageTransition>} />
                         </Route>
 
                         <Route element={<ProtectedRoute />}>
@@ -189,7 +191,7 @@ export const AppRouter = () => {
                     </Routes>
                 </AnimatePresence>
 
-                <CartDrawer lang={lang} />
+                <CartDrawer />
                 <WhatsAppWidget />
             </Suspense>
         </div>

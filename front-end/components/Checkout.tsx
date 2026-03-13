@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
-import { LanguageCode } from '../types';
+
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Truck, ShieldCheck, Lock, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { api } from '../utils/api';
 import { getSecureItem, setSecureItem } from '../utils/storage';
 
-interface CheckoutProps {
-    lang: LanguageCode;
-}
-
-export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
+export const Checkout: React.FC = () => {
     const { cart, cartTotal, clearCart } = useCart();
     const { addToast } = useToast();
     const navigate = useNavigate();

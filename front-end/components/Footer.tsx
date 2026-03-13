@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageCode } from '../types';
-import { translations } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube, Send } from 'lucide-react';
 
@@ -11,7 +11,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ lang }) => {
-  const t = translations[lang];
+  const { t } = useTranslation();
   const { settings: globalSettings } = useSettings();
 
   const settings = {
@@ -86,7 +86,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
 
           {/* Legal Links (Dynamic) */}
           <div className="flex flex-wrap justify-center gap-6">
-            <Link to="/track-repair" className="hover:text-brand-primary uppercase transition-colors text-brand-primary font-bold">Track Repair</Link>
+            <Link to="/track-repair" className="hover:text-brand-primary uppercase transition-colors text-brand-primary font-bold">{t('hero.trackRepair')}</Link>
             <Link to="/agb" className="hover:text-white uppercase transition-colors">AGB</Link>
             <Link to="/datenschutz" className="hover:text-white uppercase transition-colors">Datenschutz</Link>
             <Link to="/impressum" className="hover:text-white uppercase transition-colors">Impressum</Link>

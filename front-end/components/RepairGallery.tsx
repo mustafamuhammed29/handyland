@@ -1,11 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LanguageCode } from '../types';
-import { translations } from '../i18n';
 import { CheckCircle, MoveHorizontal, ScanLine, Smartphone, Hammer, Wand2, Droplets, Monitor, Cpu, Filter, Clock, Activity, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-interface RepairGalleryProps {
-    lang: LanguageCode;
-}
+interface RepairGalleryProps {}
 
 const CATEGORIES = [
     { id: 'all', label: 'All Cases', icon: <Filter className="w-4 h-4" /> },
@@ -19,8 +16,9 @@ import { useSettings } from '../context/SettingsContext';
 
 // ... (keep props interface)
 
-export const RepairGallery: React.FC<RepairGalleryProps> = ({ lang }) => {
+export const RepairGallery: React.FC<RepairGalleryProps> = () => {
     const { settings: globalSettings } = useSettings();
+    const { t } = useTranslation();
     const [sliderPosition, setSliderPosition] = useState(50);
     const [selectedId, setSelectedId] = useState<any>(null);
     const [filter, setFilter] = useState('all');

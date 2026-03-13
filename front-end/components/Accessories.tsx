@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageCode } from '../types';
-import { translations } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { Headphones, Zap, Shield, Watch, Plus, Sparkles, X, Layers, ShoppingCart, Search } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
@@ -13,7 +13,7 @@ interface AccessoriesProps {
 }
 
 export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
-    const t = translations[lang];
+    const { t } = useTranslation();
     const { settings } = useSettings();
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -55,10 +55,10 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
     const categories = [
         { id: 'all', label: 'ALL GEAR', icon: <Sparkles className="w-4 h-4" /> },
-        { id: 'audio', label: t.catAudio, icon: <Headphones className="w-4 h-4" /> },
-        { id: 'power', label: t.catPower, icon: <Zap className="w-4 h-4" /> },
-        { id: 'protection', label: t.catProtection, icon: <Shield className="w-4 h-4" /> },
-        { id: 'wearables', label: t.catWearables, icon: <Watch className="w-4 h-4" /> },
+        { id: 'audio', label: t('accessories.catAudio'), icon: <Headphones className="w-4 h-4" /> },
+        { id: 'power', label: t('accessories.catPower'), icon: <Zap className="w-4 h-4" /> },
+        { id: 'protection', label: t('accessories.catProtection'), icon: <Shield className="w-4 h-4" /> },
+        { id: 'wearables', label: t('accessories.catWearables'), icon: <Watch className="w-4 h-4" /> },
     ];
 
     const filteredItems = accessories.filter(item => {
@@ -108,7 +108,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
                             <h2 className="text-3xl font-black text-white mb-2 leading-tight">{selectedItem.name}</h2>
                             <div className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 font-bold mb-6">
-                                {selectedItem.price}{t.currency}
+                                {selectedItem.price}{t('common.currency')}
                             </div>
 
                             <p className="text-slate-400 leading-relaxed mb-8 border-l-2 border-purple-800 pl-4 text-sm">
@@ -167,7 +167,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                     disabled={selectedItem.stock === 0}
                                     className={`flex-1 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${selectedItem.stock > 0 ? 'bg-white hover:bg-slate-200 text-black' : 'bg-slate-800 text-slate-500'}`}
                                 >
-                                    <Plus className="w-5 h-5" /> {selectedItem.stock > 0 ? t.equip : 'Out of Stock'}
+                                    <Plus className="w-5 h-5" /> {selectedItem.stock > 0 ? t('accessories.equip') : 'Out of Stock'}
                                 </button>
                             </div>
                         </div>
@@ -182,11 +182,11 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                     <div>
                         <h2 className="text-4xl md:text-5xl font-black text-white flex items-center gap-3">
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                                {settings?.content?.accessoriesTitle || t.accTitle}
+                                {settings?.content?.accessoriesTitle || t('accessories.accTitle')}
                             </span>
                         </h2>
                         <p className="text-slate-400 mt-2 font-mono text-sm tracking-wider">
-                            {settings?.content?.accessoriesSubtitle || t.accSubtitle} // SYSTEM_READY
+                            {settings?.content?.accessoriesSubtitle || t('accessories.accSubtitle')} // SYSTEM_READY
                         </p>
                     </div>
 
@@ -265,7 +265,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                             <div className="space-y-1 flex-1 flex flex-col justify-between">
                                 <h3 className="text-white font-bold text-sm md:text-base line-clamp-2 hover:text-purple-400 cursor-pointer" onClick={() => setSelectedItem(item)}>{item.name}</h3>
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
-                                    <span className="text-purple-400 font-mono font-bold text-base md:text-lg">{item.price}{t.currency}</span>
+                                    <span className="text-purple-400 font-mono font-bold text-base md:text-lg">{item.price}{t('common.currency')}</span>
 
                                     <div className="flex gap-2 w-full sm:w-auto">
                                         <button
@@ -274,7 +274,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                             className={`flex-1 sm:flex-none flex items-center justify-center gap-1 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg transition-all text-[10px] md:text-xs font-bold uppercase disabled:opacity-50 disabled:cursor-not-allowed ${item.stock > 0 ? 'bg-slate-800 hover:bg-purple-600 text-slate-300 hover:text-white' : 'bg-slate-900 border border-slate-800 text-slate-600'}`}
                                         >
                                             <ShoppingCart className="w-3 h-3" />
-                                            <span className="hidden min-[380px]:inline">{item.stock > 0 ? t.equip : 'Out'}</span>
+                                            <span className="hidden min-[380px]:inline">{item.stock > 0 ? t('accessories.equip') : 'Out'}</span>
                                         </button>
                                     </div>
                                 </div>

@@ -20,7 +20,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     useEffect(() => {
-        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.dir = (lang === 'ar' || lang === 'fa') ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
     }, [lang]);
 

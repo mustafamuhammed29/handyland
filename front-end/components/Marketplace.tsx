@@ -4,7 +4,7 @@ import { PhoneListing, LanguageCode } from '../types';
 import { productService } from '../services/productService';
 import { api } from '../utils/api';
 import { Search, ShoppingCart, Cpu, Signal, X, Layers, ChevronRight, Plus, Grid, List, Filter, Heart } from 'lucide-react';
-import { translations } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { SkeletonProductCard } from './SkeletonProductCard';
@@ -17,6 +17,7 @@ interface MarketplaceProps {
 }
 
 export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const initialSearch = searchParams.get('search') || '';
@@ -75,7 +76,6 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
 
     const { addToCart } = useCart();
     const { addToast } = useToast();
-    const t = translations[lang];
 
     // Debounce search term and map ALL FILTERS to URL param
     useEffect(() => {
@@ -337,7 +337,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                     disabled={selectedProduct.stock === 0}
                                     className={`flex-1 font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all ${selectedProduct.stock > 0 ? 'bg-white hover:bg-slate-200 text-black' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}`}
                                 >
-                                    <Plus className="w-5 h-5" /> {selectedProduct.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                                    <Plus className="w-5 h-5" /> {selectedProduct.stock > 0 ? t('marketplace.addToCart') : t('marketplace.outOfStock')}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -349,7 +349,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                     disabled={selectedProduct.stock === 0}
                                     className={`flex-1 border font-bold py-4 rounded-xl transition-all ${selectedProduct.stock > 0 ? 'border-slate-700 hover:bg-slate-800 text-white' : 'border-slate-800 bg-slate-900 text-slate-600 cursor-not-allowed'}`}
                                 >
-                                    Buy Now
+                                    {t('marketplace.buyNow')}
                                 </button>
                             </div>
                         </div>
@@ -380,7 +380,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                             <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-brand-primary transition-colors" />
                             <input
                                 type="text"
-                                placeholder="Search Devices (e.g. iPhone 13 Pro)..."
+                                placeholder={t('marketplace.search')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full bg-slate-900/50 text-white rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-brand-primary outline-none border border-transparent placeholder-slate-600"
@@ -436,7 +436,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                             aria-label="Sort products"
                             className="bg-slate-900/50 text-white rounded-xl px-4 py-2.5 text-sm border-none focus:ring-1 focus:ring-brand-primary outline-none min-w-[150px]"
                         >
-                            <option value="newest">Newest Arrivals</option>
+                            <option value="newest">{t('marketplace.sort')} - Newest</option>
                             <option value="price_asc">Price: Low to High</option>
                             <option value="price_desc">Price: High to Low</option>
                         </select>
@@ -485,13 +485,13 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                             />
                                             <div className="absolute top-2 left-2 flex gap-1">
                                                 <span className={`text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur-md border ${phone.condition === 'new' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'}`}>
-                                                    {(phone.condition || 'Used').toUpperCase()}
+                                                    {(phone.condition || t('marketplace.condition.used')).toUpperCase()}
                                                 </span>
                                             </div>
 
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
                                                 <span className="bg-white/10 border border-white/20 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full font-bold text-xs md:text-sm backdrop-blur-md flex items-center gap-1.5 md:gap-2">
-                                                    <Layers className="w-3 h-3 md:w-4 md:h-4" /> Inspect
+                                                    <Layers className="w-3 h-3 md:w-4 md:h-4" /> {t('common.viewAll')}
                                                 </span>
                                             </div>
                                         </div>
@@ -568,7 +568,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                 onClick={() => handleAddToCart(phone)}
                                                 className={`px-6 py-2 font-bold rounded-lg transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${phone.stock > 0 ? 'bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white' : 'bg-slate-800 text-slate-500'}`}
                                             >
-                                                <ShoppingCart className="w-4 h-4" /> {phone.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                                                {phone.stock > 0 ? t('marketplace.addToCart') : t('marketplace.outOfStock')}
                                             </button>
                                             <button
                                                 onClick={(e) => toggleWishlist(e, phone.id)}
@@ -580,7 +580,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                                 <Heart className={`w-4 h-4 ${wishlist.includes(phone.id) ? 'fill-current' : ''}`} />
                                             </button>
                                             <button onClick={() => setSelectedProduct(phone)} className="px-4 py-2 border border-slate-700 hover:bg-slate-800 text-white font-bold rounded-lg transition-all text-sm">
-                                                Details
+                                                {t('common.learnMore')}
                                             </button>
                                         </div>
                                     </div>
@@ -597,7 +597,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         disabled={currentPage === 1}
                         className="px-6 py-3 bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl transition-all border border-slate-700 hover:bg-slate-700"
                     >
-                        Previous
+                        {t('common.back')}
                     </button>
                     <span className="text-slate-400 font-mono">
                         Page <span className="text-white font-bold">{currentPage}</span> of {totalPages}
@@ -607,7 +607,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         disabled={currentPage === totalPages}
                         className="px-6 py-3 bg-slate-800 disabled:opacity-50 text-white font-bold rounded-xl transition-all border border-slate-700 hover:bg-slate-700"
                     >
-                        Next
+                        {t('common.next')}
                     </button>
                 </div>
 

@@ -261,10 +261,10 @@ const defaultSettings: Settings = {
         logoAccentText: 'LAND',
         showLanguageSwitcher: true,
         links: [
-            { labelKey: 'home', defaultLabel: 'Home', path: '/', iconName: 'Home' },
-            { labelKey: 'market', defaultLabel: 'Marketplace', path: '/marketplace', iconName: 'ShoppingBag' },
-            { labelKey: 'repair', defaultLabel: 'Repair', path: '/repair', iconName: 'Wrench' },
-            { labelKey: 'valuation', defaultLabel: 'Sell', path: '/valuation', iconName: 'BarChart3' }
+            { labelKey: 'nav.home', defaultLabel: 'Home', path: '/', iconName: 'Home' },
+            { labelKey: 'nav.marketplace', defaultLabel: 'Marketplace', path: '/marketplace', iconName: 'ShoppingBag' },
+            { labelKey: 'nav.repair', defaultLabel: 'Repair', path: '/repair', iconName: 'Wrench' },
+            { labelKey: 'nav.valuation', defaultLabel: 'Sell', path: '/valuation', iconName: 'BarChart3' }
         ]
     },
     socialAuth: {

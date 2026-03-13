@@ -6,17 +6,15 @@ import { productService } from '../services/productService';
 import { api } from '../utils/api'; // Added
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
-import { translations } from '../i18n';
-import { PhoneListing, LanguageCode } from '../types';
+import { PhoneListing } from '../types';
 import { SEO } from './SEO';
+import { useTranslation } from 'react-i18next';
 import { getImageUrl } from '../utils/imageUrl';
 import { Breadcrumbs } from './Breadcrumbs';
 
-interface ProductDetailsProps {
-    lang: LanguageCode;
-}
+interface ProductDetailsProps {}
 
-export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
+export const ProductDetails: React.FC<ProductDetailsProps> = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState<PhoneListing | null>(null);
@@ -35,7 +33,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
     // Hooks
     const { addToCart } = useCart();
     const { addToast } = useToast();
-    const t = translations[lang];
+    const { t } = useTranslation();
     const { user } = useAuth(); // Safe to access now if context provides it
 
     const [wishlist, setWishlist] = useState<string[]>([]);
@@ -318,7 +316,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
 
                         <div className="flex items-end gap-3 mb-8">
                             <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-brand-secondary">
-                                {product.price}{t.currency}
+                                {product.price}{t('currency', '€')}
                             </div>
                             {/* Stock Indicator */}
                             <div className={`text-sm mb-2 font-medium ${product.stock > 0 ? (product.stock < 5 ? 'text-orange-400' : 'text-green-400') : 'text-red-500'}`}>
@@ -546,7 +544,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                                         <img src={getImageUrl(related.imageUrl)} alt={related.model} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                                     </div>
                                     <h4 className="font-bold text-white mb-1 truncate">{related.model}</h4>
-                                    <div className="text-brand-primary font-bold">{related.price}{t.currency}</div>
+                                    <div className="text-brand-primary font-bold">{related.price}{t('currency', '€')}</div>
                                 </div>
                             ))}
                         </div>

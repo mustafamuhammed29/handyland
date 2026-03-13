@@ -8,8 +8,7 @@ import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, Truck, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Loader2, Tag, X, Lock, User, UserPlus, Phone } from 'lucide-react';
-import { LanguageCode } from '../types';
-import { translations } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { formatPrice } from '../utils/formatPrice';
 import { z } from 'zod';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
@@ -21,9 +20,7 @@ import { CheckoutOrderSummary } from './checkout/CheckoutOrderSummary';
 // Initialize Stripe (Move to env var in production)
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-interface CheckoutProps {
-    lang: LanguageCode;
-}
+// Removed CheckoutProps
 
 // Zod Schema for Validation
 const shippingSchema = z.object({
@@ -47,11 +44,11 @@ interface ShippingMethod {
     isExpress: boolean;
 }
 
-export const Checkout: React.FC<CheckoutProps> = ({ lang }) => {
+export const Checkout: React.FC = () => {
     const { cart, cartTotal, coupon, applyCoupon, removeCoupon } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
-    const t = translations[lang];
+    const { t } = useTranslation();
 
     // State
     const [step, setStep] = useState(1); // 1: Auth Choice, 2: Shipping, 3: Payment
