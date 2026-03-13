@@ -1,15 +1,194 @@
 {
-    "nav": {
-        "marketplace": "المتجر",
-        "repair": "الصيانة",
-        "sell": "بيع جهازك",
-        "login": "تسجيل الدخول",
-        "register": "إنشاء حساب",
-        "dashboard": "لوحة التحكم"
+  "nav": {
+    "home": "الرئيسية",
+    "marketplace": "السوق",
+    "repair": "إصلاح",
+    "valuation": "تقييم",
+    "accessories": "إكسسوارات",
+    "sell": "بيع جهاز",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "dashboard": "لوحة التحكم",
+    "trackRepair": "تتبع الإصلاح",
+    "signInRegister": "تسجيل الدخول / إنشاء حساب"
+  },
+  "hero": {
+    "title": "HANDYLAND",
+    "subtitle": "المعيار العالمي لتجارة الأجهزة المتميزة وإصلاحها.",
+    "shopNow": "تسوق الآن",
+    "sellDevice": "بيع جهاز",
+    "trackRepair": "تتبع الإصلاح"
+  },
+  "auth": {
+    "loginTitle": "مرحباً بعودتك",
+    "emailLabel": "البريد الإلكتروني",
+    "passwordLabel": "كلمة المرور",
+    "loginButton": "تسجيل الدخول",
+    "noAccount": "ليس لديك حساب؟",
+    "createAccount": "إنشاء حساب",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "verifyEmail": "تأكيد البريد",
+    "registerTitle": "إنشاء حساب",
+    "fullName": "الاسم الكامل",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+    "signIn": "تسجيل الدخول",
+    "continueWithGoogle": "المتابعة باستخدام Google",
+    "continueWithFacebook": "المتابعة باستخدام Facebook"
+  },
+  "cart": {
+    "title": "سلة التسوق",
+    "emptyTitle": "سلة التسوق فارغة",
+    "emptyText": "يبدو أنك لم تضف أي شيء إلى سلة التسوق الخاصة بك بعد.",
+    "continueShopping": "مواصلة التسوق",
+    "checkout": "الذهاب للدفع",
+    "remove": "إزالة",
+    "quantity": "الكمية",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "الشحن",
+    "total": "المجموع",
+    "freeShipping": "شحن مجاني!",
+    "freeShippingProgress": "أضف {{amount}} للحصول على شحن مجاني"
+  },
+  "checkout": {
+    "title": "الدفع",
+    "shippingInfo": "معلومات الشحن",
+    "paymentMethod": "طريقة الدفع",
+    "orderSummary": "ملخص الطلب",
+    "placeOrder": "تأكيد الطلب",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "address": "العنوان",
+    "city": "المدينة",
+    "zipCode": "الرمز البريدي",
+    "country": "البلد",
+    "processing": "جاري المعالجة...",
+    "orderSuccess": "تم الطلب بنجاح!",
+    "couponCode": "كود الخصم",
+    "applyCoupon": "تطبيق",
+    "removeCoupon": "إزالة",
+    "discount": "خصم"
+  },
+  "dashboard": {
+    "overview": "نظرة عامة",
+    "orders": "طلباتي",
+    "repairs": "الإصلاحات النشطة",
+    "valuations": "تقييماتي",
+    "wallet": "المحفظة الرقمية",
+    "wishlist": "قائمة الأمنيات",
+    "messages": "الرسائل",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "totalOrders": "إجمالي الطلبات",
+    "activeRepairs": "الإصلاحات النشطة",
+    "thisMonth": "هذا الشهر",
+    "walletBalance": "رصيد المحفظة",
+    "noOrders": "لا توجد طلبات بعد",
+    "noRepairs": "لا توجد إصلاحات نشطة",
+    "downloadInvoice": "تنزيل الفاتورة",
+    "orderStatus": {
+      "pending": "قيد الانتظار",
+      "processing": "قيد المعالجة",
+      "shipped": "تم الشحن",
+      "delivered": "تم التوصيل",
+      "cancelled": "ملغى"
     },
-    "auth": {
-        "loginTitle": "مرحباً بعودتك",
-        "emailLabel": "البريد الإلكتروني",
-        "passwordLabel": "كلمة المرور"
+    "repairStatus": {
+      "received": "تم الاستلام",
+      "diagnosing": "جاري الفحص",
+      "repairing": "جاري الإصلاح",
+      "testing": "جاري الاختبار",
+      "ready": "جاهز للاستلام",
+      "attention": "يحتاج إلى انتباه"
     }
+  },
+  "marketplace": {
+    "title": "السوق",
+    "search": "ابحث عن الأجهزة...",
+    "filter": "تصفية",
+    "sort": "ترتيب",
+    "noResults": "لم يتم العثور على منتجات",
+    "addToCart": "أضف إلى السلة",
+    "buyNow": "اشتري الآن",
+    "condition": {
+      "new": "جديد",
+      "used": "مستعمل",
+      "refurbished": "مجدد"
+    },
+    "inStock": "في المخزن",
+    "outOfStock": "نفد من المخزن",
+    "freeShipping": "شحن مجاني"
+  },
+  "repair": {
+    "title": "خدمات الإصلاح",
+    "subtitle": "أسعار شفافة لإصلاح الأجهزة المتقدمة",
+    "bookRepair": "احجز إصلاحاً",
+    "trackRepair": "تتبع الإصلاح",
+    "ticketNumber": "رقم التذكرة",
+    "track": "تتبع",
+    "status": "الحالة"
+  },
+  "valuation": {
+    "title": "تقييم الجهاز",
+    "step1": "اختر المواصفات",
+    "step2": "سعة التخزين",
+    "step3": "فحص الحالة",
+    "next": "التالي",
+    "back": "رجوع",
+    "submit": "احصل على التقييم",
+    "result": "القيمة المقدرة",
+    "sellNow": "بع الآن",
+    "saveValuation": "حفظ التقييم"
+  },
+  "accessories": {
+    "title": "الإكسسوارات",
+    "subtitle": "ملحقات متميزة لأجهزتك.",
+    "categories": {
+      "audio": "صوتيات",
+      "power": "طاقة",
+      "protection": "حماية",
+      "wearables": "أجهزة قابلة للارتداء"
+    }
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "retry": "حاول مرة أخرى",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "search": "بحث...",
+    "currency": "€",
+    "viewAll": "عرض الكل",
+    "learnMore": "اعرف المزيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "submit": "إرسال",
+    "success": "نجاح",
+    "required": "مطلوب"
+  },
+  "footer": {
+    "terms": "الشروط والأحكام",
+    "privacy": "سياسة الخصوصية",
+    "service": "خدمة العملاء",
+    "imprint": "بصمة",
+    "about": "معلومات عنا"
+  },
+  "contact": {
+    "title": "اتصل بنا",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "message": "رسالتك",
+    "send": "إرسال الرسالة",
+    "sending": "جاري الإرسال...",
+    "success": "تم استلام الرسالة!",
+    "location": "المقر الرئيسي",
+    "phone": "الخط المباشر",
+    "mail": "بريد آمن"
+  }
 }
