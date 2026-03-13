@@ -161,4 +161,4 @@ export interface Transaction {
 // ViewState enum removed in favor of React Router
 
 
-export type LanguageCode = 'ar' | 'en' | 'de' | 'tr' | 'ru';
+export type LanguageCode = 'ar' | 'en' | 'de' | 'tr' | 'ru' | 'fa';

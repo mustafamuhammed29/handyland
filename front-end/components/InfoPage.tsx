@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LanguageCode } from '../types';
-import { translations } from '../i18n';
 import { api } from '../utils/api';
 import { SEO } from './SEO';
+import { useTranslation } from 'react-i18next';
 
-interface InfoPageProps {
-    lang: LanguageCode;
-}
+interface InfoPageProps {}
 
 const PAGE_TITLES: Record<string, string> = {
     '/agb': 'agb',
@@ -20,8 +17,9 @@ const PAGE_TITLES: Record<string, string> = {
     '/about': 'ueber-uns'
 };
 
-export const InfoPage: React.FC<InfoPageProps> = ({ lang }) => {
+export const InfoPage: React.FC<InfoPageProps> = () => {
     const location = useLocation();
+    const { t } = useTranslation();
     const [content, setContent] = useState('');
     const [title, setTitle] = useState('');
     const [seo, setSeo] = useState<any>(null);

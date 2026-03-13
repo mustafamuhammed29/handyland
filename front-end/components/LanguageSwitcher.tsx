@@ -10,6 +10,7 @@ const LANGUAGES: { code: LanguageCode; label: string; flag: string }[] = [
   { code: 'ar', label: 'العربية', flag: '🇸🇦' },
   { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
   { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'fa', label: 'فارسی', flag: '🇮🇷' }
 ];
 
 export const LanguageSwitcher: React.FC = () => {

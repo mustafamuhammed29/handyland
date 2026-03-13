@@ -3,15 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { ShoppingCart, X, Trash2, ArrowRight, Zap, Heart, Tag, Truck, Check, Loader2 } from 'lucide-react';
 import { LanguageCode } from '../types';
-import { translations } from '../i18n';
+
 import { api } from '../utils/api';
 import { formatPrice } from '../utils/formatPrice';
+import { useTranslation } from 'react-i18next';
 
-interface CartDrawerProps {
-    lang: LanguageCode;
-}
+interface CartDrawerProps {}
 
-export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
+export const CartDrawer: React.FC<CartDrawerProps> = () => {
     const navigate = useNavigate();
     const {
         cart, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen,
@@ -21,7 +20,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
         freeShippingThreshold
     } = useCart();
 
-    const t = translations[lang];
+    const { t } = useTranslation();
     const [couponCodeIn, setCouponCodeIn] = useState('');
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
@@ -94,7 +93,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                 >
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            <ShoppingCart className="w-5 h-5 text-brand-primary" /> {t.cart || 'Your Cart'}
+                            <ShoppingCart className="w-5 h-5 text-brand-primary" /> {t('cart', 'Your Cart')}
                             <span className="bg-slate-800 text-slate-300 text-xs px-2 py-0.5 rounded-full">{cart.length}</span>
                         </h3>
                         <button onClick={() => setIsCartOpen(false)} aria-label="Close cart" className="text-slate-400 hover:text-white transition-colors">
@@ -133,7 +132,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ lang }) => {
                                 onClick={() => { setIsCartOpen(false); navigate('/marketplace'); }}
                                 className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors font-bold text-sm"
                             >
-                                {t.shopNow || 'Start Shopping'}
+                                {t('shopNow', 'Start Shopping')}
                             </button>
                         </div>
                     ) : (

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 // import { getRepairAdvice } from '../services/geminiService'; // Removed
 
 
-import { translations } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -51,7 +51,7 @@ interface RepairProps {
 }
 
 export const Repair: React.FC<RepairProps> = ({ lang }) => {
-    const t = translations[lang];
+    const { t } = useTranslation();
     const { settings } = useSettings();
     const { isAuthenticated } = useAuth();
     const { addToast } = useToast();
@@ -199,7 +199,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                         <div className="w-full md:w-2/3 p-8 overflow-y-auto bg-slate-950/80">
                             <div className="flex items-center gap-2 mb-6">
                                 <Activity className="w-5 h-5 text-blue-400" />
-                                <h4 className="text-lg font-bold text-white uppercase tracking-wider">Available Diagnostics & Repairs</h4>
+                                <h4 className="text-lg font-bold text-white uppercase tracking-wider">{t('repair.title')}</h4>
                             </div>
 
                             <div className="space-y-3">
@@ -226,12 +226,12 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                                 </div>
                                             </div>
                                             <div className="text-right flex flex-col items-end gap-2">
-                                                <div className="text-xl font-bold text-blue-400">{service.price}{t.currency}</div>
+                                                <div className="text-xl font-bold text-blue-400">{service.price}{t('common.currency')}</div>
                                                 <button
                                                     onClick={() => handleOpenTicketModal(selectedDevice.model, service.label)}
                                                     className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-blue-900/20 transition-all flex items-center gap-2"
                                                 >
-                                                    <Wrench className="w-3 h-3" /> Book Repair
+                                                    <Wrench className="w-3 h-3" /> {t('repair.bookRepair')}
                                                 </button>
                                             </div>
                                         </div>
@@ -254,13 +254,13 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <Wrench className="w-6 h-6 text-blue-500" />
-                            <span className="text-blue-500 font-mono text-sm tracking-widest uppercase">Repair Service</span>
+                            <span className="text-blue-500 font-mono text-sm tracking-widest uppercase">{t('repair.title')}</span>
                         </div>
                         <h2 className="text-4xl lg:text-5xl font-black text-white">
-                            {settings?.content?.repairTitle || t.repairTitle}
+                            {settings?.content?.repairTitle || t('repair.title')}
                         </h2>
                         <p className="text-slate-400 mt-2 font-light border-l-2 border-blue-900 pl-4">
-                            {settings?.content?.repairSubtitle || t.repairSubtitle}
+                            {settings?.content?.repairSubtitle || t('repair.subtitle')}
                         </p>
                     </div>
 
@@ -333,13 +333,13 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                         <span className="text-slate-500 text-xs flex items-center gap-2">
                                             <Monitor className="w-3 h-3" /> Screen Repair
                                         </span>
-                                        <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'screen')?.price || 'N/A'}{t.currency}</span>
+                                        <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'screen')?.price || 'N/A'}{t('common.currency')}</span>
                                     </div>
                                     <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-slate-800/50 group-hover:border-blue-500/20 transition-colors">
                                         <span className="text-slate-500 text-xs flex items-center gap-2">
                                             <Battery className="w-3 h-3" /> Battery
                                         </span>
-                                        <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'battery')?.price || 'N/A'}{t.currency}</span>
+                                        <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'battery')?.price || 'N/A'}{t('common.currency')}</span>
                                     </div>
                                 </div>
 

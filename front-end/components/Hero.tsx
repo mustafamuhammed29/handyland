@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LanguageCode } from '../types';
 import { ArrowRight, ArrowLeft, ShieldCheck, Zap, Smartphone, Search, Star, Hexagon } from 'lucide-react';
-import { translations } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
 
 interface HeroProps {
@@ -11,7 +11,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ lang }) => {
     const navigate = useNavigate();
-    const t = translations[lang];
+    const { t } = useTranslation();
     const isRTL = lang === 'ar';
     const { settings } = useSettings();
 
@@ -72,7 +72,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-cyan-300 to-blue-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <span className="relative flex items-center gap-2">
-                                {settings.hero.buttonMarket || t.ctaMarket} {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+                                {settings.hero.buttonMarket || t('hero.shopNow')} {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
                             </span>
                         </button>
 
@@ -80,14 +80,14 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                             onClick={() => navigate('/valuation')}
                             className="px-8 py-4 rounded-full border border-slate-700 text-white font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
                         >
-                            <Zap className="w-5 h-5 text-yellow-400" /> {settings.hero.buttonValuation || t.ctaValue}
+                            <Zap className="w-5 h-5 text-yellow-400" /> {settings.hero.buttonValuation || t('hero.sellDevice')}
                         </button>
                         
                         <button
                             onClick={() => navigate('/track-repair')}
                             className="px-8 py-4 rounded-full border border-slate-700/50 bg-slate-900/40 text-amber-400 font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 backdrop-blur-md"
                         >
-                            <Search className="w-5 h-5" /> Track Repair
+                            <Search className="w-5 h-5" /> {t('hero.trackRepair')}
                         </button>
                     </div>
 

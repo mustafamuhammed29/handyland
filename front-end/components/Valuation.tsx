@@ -16,7 +16,7 @@ import {
     ArrowRight,
     ScanLine
 } from 'lucide-react';
-import { translations } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '../context/ToastContext';
 import { api } from '../utils/api';
 import { useSettings } from '../context/SettingsContext';
@@ -35,7 +35,7 @@ interface DeviceBlueprint {
 }
 
 export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
-    const t = translations[lang];
+    const { t } = useTranslation();
     const { addToast } = useToast();
     const navigate = useNavigate();
     const { settings } = useSettings();
@@ -349,10 +349,10 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                             <Sparkles size={16} /> Maximiere deinen Gerätewert
                         </div>
                         <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight">
-                            Verkaufe dein Gerät an <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">HandyLand</span>
+                            {t('valuation.title')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">HandyLand</span>
                         </h1>
                         <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-medium">
-                            Ermittle den Wert in wenigen Sekunden. Faire Preise, schnelle Auszahlung, kostenloser Versand.
+                            {t('valuation.subtitle') || 'Ermittle den Wert in wenigen Sekunden. Faire Preise, schnelle Auszahlung, kostenloser Versand.'}
                         </p>
                     </div>
 
@@ -466,7 +466,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                             {step === 1 && (
                                 <div className="py-4">
                                     <h2 className="text-3xl md:text-4xl font-black mb-10 text-slate-900 dark:text-white text-center tracking-tight">
-                                        Welche Speicherkapazität hat dein Gerät?
+                                        {t('valuation.step2')}
                                     </h2>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                                         {(selectedDevice?.validStorages || ['128 GB', '256 GB', '512 GB']).map(s => (
@@ -494,7 +494,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                             {step === 2 && (
                                 <div className="py-4">
                                     <h2 className="text-3xl md:text-4xl font-black mb-3 text-slate-900 dark:text-white text-center tracking-tight">
-                                        Wie ist der Zustand deines Bildschirms?
+                                        {t('valuation.step3')}
                                     </h2>
                                     <p className="text-center text-slate-400 text-sm mb-8">Halte das Gerät bei guter Beleuchtung und prüfe den Bildschirm sorgfältig.</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -530,7 +530,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                             {step === 3 && (
                                 <div className="py-4">
                                     <h2 className="text-3xl md:text-4xl font-black mb-3 text-slate-900 dark:text-white text-center tracking-tight">
-                                        Wie ist der Zustand des Gehäuses?
+                                        {t('valuation.step4BodyTitle') || 'Wie ist der Zustand des Gehäuses?'}
                                     </h2>
                                     <p className="text-center text-slate-400 text-sm mb-8">Rahmen, Rückseite und Kanten — prüfe auf Kratzer, Dellen und Risse.</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -566,7 +566,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                             {step === 4 && (
                                 <div className="py-4">
                                     <h2 className="text-3xl md:text-4xl font-black mb-4 text-slate-900 dark:text-white text-center tracking-tight">
-                                        Funktioniert dein Gerät einwandfrei?
+                                        {t('valuation.step5FuncTitle') || 'Funktioniert dein Gerät einwandfrei?'}
                                     </h2>
                                     <p className="text-slate-500 dark:text-slate-400 font-medium mb-12 text-center max-w-2xl mx-auto leading-relaxed">
                                         Kameras, Lautsprecher, Mikrofone und Tasten arbeiten fehlerfrei. Das Gerät ist auf Werkseinstellungen zurückgesetzt und jegliche Kontosperren (z.B. iCloud/Google) sind entfernt.
@@ -617,8 +617,8 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                 <div className="w-full max-w-5xl mx-auto z-10 duration-500">
                     <div>
                         <AppFrame
-                            title="Dein Angebot ist da!"
-                            subtitle={`Exklusives Angebot für dich (Ref: ${quoteData.quoteReference || '…'})`}
+                            title={t('valuation.result') || 'Dein Angebot ist da!'}
+                            subtitle={`${t('valuation.yourOffer') || 'Exklusives Angebot für dich'} (Ref: ${quoteData.quoteReference || '…'})`}
                             icon={<BadgeEuro className="w-7 h-7" />}
                         >
                             <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
@@ -662,7 +662,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                                     </div>
 
                                     <button onClick={() => window.location.reload()} className="w-full py-4 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-2 transition-colors bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-800/80">
-                                        <RotateCcw className="w-4 h-4" /> Neues Gerät bewerten
+                                        <RotateCcw className="w-4 h-4" /> {t('valuation.newValuation') || 'Neues Gerät bewerten'}
                                     </button>
                                 </div>
 
@@ -711,7 +711,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                                             onClick={() => navigate('/')}
                                             className="py-5 rounded-2xl font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-800 transition-all shadow-sm"
                                         >
-                                            Nein, danke
+                                            {t('common.cancel') || 'Nein, danke'}
                                         </button>
                                         <button
                                             onClick={handleSubmitQuote}
@@ -719,7 +719,7 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
                                             className="relative py-5 bg-emerald-500 rounded-2xl font-black text-white hover:bg-emerald-400 shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed group"
                                         >
                                             <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
-                                            <span className="text-lg">{loading ? 'Wird gespeichert...' : 'Angebot annehmen'}</span>
+                                            <span className="text-lg">{loading ? (t('common.loading') || 'Wird gespeichert...') : (t('valuation.saveValuation') || 'Angebot annehmen')}</span>
                                             {!loading && <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />}
                                         </button>
                                     </div>

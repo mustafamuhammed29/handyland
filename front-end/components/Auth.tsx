@@ -1,25 +1,25 @@
 
 import React, { useState } from 'react';
-import { LanguageCode, User } from '../types';
-import { translations } from '../i18n';
+import { User } from '../types';
 import { User as UserIcon, Mail, Lock, ArrowRight, Loader2, Phone, MapPin, KeyRound, ChevronLeft, ShieldCheck, CheckCircle2, RefreshCw } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface AuthProps {
-    lang: LanguageCode;
     setUser: (user: User) => void;
 }
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'verify' | 'reset-verify' | 'reset-password';
 
 // ... inside component ...
-export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
+export const Auth: React.FC<AuthProps> = ({ setUser }) => {
     const navigate = useNavigate();
     const [mode, setMode] = useState<AuthMode>('login');
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const t = translations[lang];
+    const { t, i18n } = useTranslation();
+    const currentLang = i18n.language || 'en';
     const { addToast } = useToast();
 
     const [formData, setFormData] = useState({
@@ -56,7 +56,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
         e.preventDefault();
 
         if (mode === 'register' && formData.password !== formData.confirmPassword) {
-            addToast(lang === 'ar' ? "كلمات المرور غير متطابقة" : "Passwords do not match", 'error');
+            addToast(currentLang === 'ar' || currentLang === 'fa' ? "كلمات المرور غير متطابقة" : "Passwords do not match", 'error');
             return;
         }
 
@@ -103,7 +103,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                 if (mode === 'login') {
                     setUser(data.user);
                     localStorage.setItem('user', JSON.stringify(data.user));
-                    addToast(`${t.welcomeBack}, ${data.user.name.split(' ')[0]}!`, 'success');
+                    addToast(`${t('welcomeBack', 'Welcome back')}, ${data.user.name.split(' ')[0]}!`, 'success');
                     navigate('/dashboard');
                 } else if (mode === 'register') {
                     addToast('Registration successful! Please check your email to verify.', 'success');
@@ -177,12 +177,12 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                             {mode === 'reset-password' && <ShieldCheck className="w-10 h-10 text-emerald-400 group-hover:scale-110 transition-transform" />}
                         </div>
                         <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
-                            {mode === 'login' ? t.login :
-                                mode === 'register' ? t.register :
+                            {mode === 'login' ? t('login', 'Login') :
+                                mode === 'register' ? t('register', 'Register') :
                                     mode === 'verify' ? 'Verification' :
                                         mode === 'reset-verify' ? 'Verification' :
-                                            mode === 'reset-password' ? (lang === 'ar' ? 'كلمة سر جديدة' : 'New Password') :
-                                                (lang === 'ar' ? 'استعادة الرمز' : 'Recovery')}
+                                            mode === 'reset-password' ? (currentLang === 'ar' ? 'كلمة سر جديدة' : 'New Password') :
+                                                (currentLang === 'ar' ? 'استعادة الرمز' : 'Recovery')}
                         </h2>
                         <p className="text-slate-500 text-xs mt-2 font-mono tracking-widest uppercase">
                             {(mode === 'verify' || mode === 'reset-verify') ? 'Enter Security Code' :
@@ -198,21 +198,21 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                             {mode === 'register' && (
                                 <div className="grid md:grid-cols-2 gap-4 animate-in slide-in-from-top-4">
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{t.fullName}</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{t('fullName', 'Full Name')}</label>
                                         <div className="relative group">
                                             <UserIcon className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
                                             <input type="text" name="name" required value={formData.name} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="e.g. Mark Tech" />
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{lang === 'ar' ? 'الهاتف' : 'Phone'}</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{currentLang === 'ar' ? 'الهاتف' : 'Phone'}</label>
                                         <div className="relative group">
                                             <Phone className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
                                             <input type="tel" name="phone" required value={formData.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="+49..." />
                                         </div>
                                     </div>
                                     <div className="md:col-span-2 space-y-1">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{lang === 'ar' ? 'العنوان' : 'Location'}</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{currentLang === 'ar' ? 'العنوان' : 'Location'}</label>
                                         <div className="relative group">
                                             <MapPin className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
                                             <input type="text" name="address" required value={formData.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="Berlin, Germany" />
@@ -225,7 +225,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                             {mode !== 'verify' && (
                                 <>
                                     <div className="space-y-1 animate-in slide-in-from-top-4">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{t.email}</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{t('email', 'Email Address')}</label>
                                         <div className="relative group">
                                             <Mail className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
                                             <input type="email" name="email" required value={formData.email} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="secure@handyland.com" />
@@ -235,7 +235,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                                     {(mode === 'login' || mode === 'register' || mode === 'reset-password') && (
                                         <div className={`grid ${mode === 'register' || mode === 'reset-password' ? 'md:grid-cols-2' : 'grid-cols-1'} gap-4 animate-in slide-in-from-top-4`}>
                                             <div className="space-y-1">
-                                                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{mode === 'reset-password' ? 'New Password' : t.password}</label>
+                                                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{mode === 'reset-password' ? 'New Password' : t('password', 'Password')}</label>
                                                 <div className="relative group">
                                                     <Lock className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
                                                     <input type="password" name="password" required value={formData.password} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="••••••••" />
@@ -243,7 +243,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                                             </div>
                                             {(mode === 'register' || mode === 'reset-password') && (
                                                 <div className="space-y-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{lang === 'ar' ? 'تأكيد الرمز' : 'Confirm'}</label>
+                                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{currentLang === 'ar' || currentLang === 'fa' ? 'تأكيد الرمز' : 'Confirm'}</label>
                                                     <div className="relative group">
                                                         <Lock className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
                                                         <input type="password" name="confirmPassword" required value={formData.confirmPassword} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="••••••••" />
@@ -290,7 +290,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                             {mode === 'login' && (
                                 <div className="flex justify-end">
                                     <button type="button" onClick={() => setMode('forgot')} className="text-[10px] font-black text-slate-500 hover:text-brand-primary uppercase tracking-widest transition-colors">
-                                        {lang === 'ar' ? 'فقدت الرمز؟' : 'Lost Key?'}
+                                        {currentLang === 'ar' ? 'فقدت الرمز؟' : 'Lost Key?'}
                                     </button>
                                 </div>
                             )}
@@ -302,12 +302,12 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                             >
                                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                                     <>
-                                        {mode === 'login' ? t.signIn :
-                                            mode === 'register' ? t.register :
+                                        {mode === 'login' ? t('signIn', 'Sign In') :
+                                            mode === 'register' ? t('register', 'Register') :
                                                 mode === 'verify' ? 'Confirm Identity' :
                                                     mode === 'reset-verify' ? 'Verify Code' :
                                                         mode === 'reset-password' ? 'Reset Password' :
-                                                            (lang === 'ar' ? 'إرسال طلب الاستعادة' : 'Initialize')}
+                                                            (currentLang === 'ar' ? 'إرسال طلب الاستعادة' : 'Initialize')}
                                         <ArrowRight className="w-5 h-5" />
                                     </>
                                 )}
@@ -318,7 +318,7 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                     <div className="mt-8 pt-6 border-t border-slate-800/50 text-center space-y-4">
                         {mode !== 'login' && (
                             <button onClick={() => setMode('login')} className="text-slate-500 hover:text-white text-[10px] font-black flex items-center justify-center gap-2 mx-auto transition-colors uppercase tracking-widest">
-                                <ChevronLeft className="w-4 h-4" /> {lang === 'ar' ? 'العودة' : 'Return to Core'}
+                                <ChevronLeft className="w-4 h-4" /> {currentLang === 'ar' ? 'العودة' : 'Return to Core'}
                             </button>
                         )}
                         {mode === 'login' && (
@@ -332,9 +332,9 @@ export const Auth: React.FC<AuthProps> = ({ lang, setUser }) => {
                                     </button>
                                 )}
                                 <p className="text-slate-500 text-xs font-medium">
-                                    {t.noAccount} {' '}
+                                    {t('noAccount', "Don't have an account?")} {' '}
                                     <button onClick={() => setMode('register')} className="text-brand-primary hover:text-brand-primary font-black ml-1 uppercase">
-                                        {t.register}
+                                        {t('register', 'Register')}
                                     </button>
                                 </p>
                             </div>
