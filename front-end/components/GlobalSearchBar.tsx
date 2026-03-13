@@ -81,14 +81,14 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ className = "h
     return (
         <div ref={wrapperRef} className={`relative w-full max-w-sm ${className}`}>
             <form onSubmit={handleSubmit} className="relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-brand-primary transition-colors z-10" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-brand-primary transition-colors z-10" />
                 <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onFocus={() => { if (searchTerm) setShowDropdown(true); }}
                     placeholder={t('navbar.searchPlaceholder', 'Search devices...')}
-                    className="w-full bg-slate-900/50 border border-slate-700/50 text-white text-sm rounded-full pl-10 pr-10 py-2 focus:outline-none focus:border-brand-primary/50 focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-slate-500"
+                    className="w-full h-10 bg-slate-900/60 border border-slate-800 text-white text-sm rounded-xl pl-10 pr-10 focus:outline-none focus:border-brand-primary/50 focus:bg-slate-900 transition-all placeholder:text-slate-500 hover:border-slate-700/50"
                 />
 
                 {searchTerm && (

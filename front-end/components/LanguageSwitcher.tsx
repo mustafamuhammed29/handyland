@@ -24,14 +24,14 @@ export const LanguageSwitcher: React.FC = () => {
   };
 
   return (
-    <div className="relative group">
-      <button className="flex items-center gap-2 p-2 px-3 text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-800 rounded-full transition-all border border-slate-700/50 outline-none">
-        <Globe className="w-4 h-4" />
-        <span className="text-xs font-bold uppercase">
-          {LANGUAGES.find(l => l.code === lang)?.flag} {lang.toUpperCase()}
+    <div className="relative group h-10">
+      <button className="h-full flex items-center justify-center gap-2 px-3 text-slate-300 hover:text-white bg-slate-900/60 hover:bg-slate-800 rounded-xl transition-all border border-slate-800 hover:border-brand-primary/50 outline-none group-hover:border-slate-700">
+        <Globe className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+        <span className="text-xs font-bold uppercase mt-px tracking-wider">
+          {lang}
         </span>
       </button>
-      <div className="absolute top-10 right-0 w-40 bg-slate-800 rounded-xl shadow-xl shadow-black/50 overflow-hidden border border-slate-700/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+      <div className="absolute top-[calc(100%+0.5rem)] right-0 w-40 bg-slate-800 rounded-xl shadow-xl shadow-black/50 overflow-hidden border border-slate-700/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
         {LANGUAGES.map(({ code, label, flag }) => (
           <button
             key={code}
