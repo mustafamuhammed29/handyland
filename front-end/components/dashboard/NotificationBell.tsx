@@ -110,20 +110,20 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                 title="Notifications"
                 aria-label="Open notifications"
                 className={isNavbar
-                    ? `relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 group ${unread > 0
-                        ? 'bg-red-500/10 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.15)] hover:bg-red-500/20'
-                        : 'bg-slate-900/60 border border-slate-800 hover:border-brand-primary/50 hover:bg-brand-primary/10 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                    ? `relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 group outline-none ${unread > 0
+                        ? 'bg-red-500/10 border border-red-500/30'
+                        : 'bg-slate-900/60 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-800'
                     }`
-                    : "relative p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                    : "relative p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors outline-none"
                 }
             >
                 <Bell className={isNavbar
-                    ? `w-5 h-5 transition-colors ${unread > 0 ? 'text-red-400 group-hover:text-red-300' : 'text-slate-400 group-hover:text-brand-primary'}`
+                    ? `w-5 h-5 transition-colors ${unread > 0 ? 'text-red-400 group-hover:text-red-300' : 'text-slate-400 group-hover:text-blue-400'}`
                     : "w-5 h-5"
                 } />
                 {unread > 0 && (
                     <span className={isNavbar
-                        ? "absolute -top-1 -right-1 rtl:right-auto rtl:-left-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border border-black"
+                        ? "absolute top-0 right-0 transform translate-x-1/3 -translate-y-1/3 min-w-[20px] h-[20px] flex items-center justify-center bg-red-500 text-white text-[11px] font-black rounded-full border-2 border-slate-950 px-1"
                         : "absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-blue-600 text-white text-[10px] font-bold rounded-full px-1 ring-2 ring-slate-950 animate-pulse"
                     }>
                         {isNavbar ? unread : (unread > 9 ? '9+' : unread)}
