@@ -522,6 +522,7 @@ const RepairTicketManager: React.FC = () => {
                                     <div>
                                         <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">New Status</label>
                                         <select
+                                            title="New Status"
                                             value={statusForm.status}
                                             onChange={(e) => setStatusForm({ ...statusForm, status: e.target.value })}
                                             className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500"

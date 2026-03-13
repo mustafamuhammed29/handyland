@@ -389,6 +389,8 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                             <input
                                                 type="text"
                                                 required
+                                                title="Full Name"
+                                                placeholder="Full Name"
                                                 value={ticketForm.name}
                                                 onChange={e => setTicketForm({ ...ticketForm, name: e.target.value })}
                                                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-blue-500 outline-none"
@@ -399,6 +401,8 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                             <input
                                                 type="email"
                                                 required
+                                                title="Email Address"
+                                                placeholder="Email Address"
                                                 value={ticketForm.email}
                                                 onChange={e => setTicketForm({ ...ticketForm, email: e.target.value })}
                                                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-blue-500 outline-none"
@@ -409,6 +413,8 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                             <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Phone Number</label>
                                             <input
                                                 type="text"
+                                                title="Phone Number"
+                                                placeholder="Phone Number"
                                                 value={ticketForm.phone}
                                                 onChange={e => setTicketForm({ ...ticketForm, phone: e.target.value })}
                                                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-blue-500 outline-none"

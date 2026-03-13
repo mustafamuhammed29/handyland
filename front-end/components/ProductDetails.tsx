@@ -213,9 +213,11 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
     return (
         <div className="min-h-screen bg-slate-950 pt-24 pb-12 px-4 relative">
             <SEO
-                title={`${product.model} - ${product.condition} | ${product.storage}`}
-                description={`Buy used, refurbished ${product.brand} ${product.model} - ${product.storage} - ${product.color} in ${product.condition} condition. Certified quality, warranty included.`}
-                ogImage={getImageUrl(activeImage)}
+                title={(product as any).seo?.metaTitle || `${product.model} - ${product.condition} | ${product.storage}`}
+                description={(product as any).seo?.metaDescription || `Buy used, refurbished ${product.brand} ${product.model} - ${product.storage} - ${product.color} in ${product.condition} condition. Certified quality, warranty included.`}
+                keywords={(product as any).seo?.keywords}
+                canonical={(product as any).seo?.canonicalUrl || window.location.href}
+                ogImage={(product as any).seo?.ogImage || getImageUrl(activeImage)}
             />
             {/* Breadcrumbs */}
             <div className="max-w-7xl mx-auto mb-6">
@@ -424,8 +426,6 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                             <button
                                 key={tab}
                                 role="tab"
-                                aria-selected={activeTab === tab ? "true" : "false"}
-                                aria-controls={`tabpanel-${tab}`}
                                 id={`tab-${tab}`}
                                 onClick={() => setActiveTab(tab as any)}
                                 className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === tab ? 'text-brand-primary' : 'text-slate-500 hover:text-slate-300'}`}
@@ -436,8 +436,6 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ lang }) => {
                         ))}
                         <button
                             role="tab"
-                            aria-selected={activeTab === 'questions' ? "true" : "false"}
-                            aria-controls="tabpanel-questions"
                             id="tab-questions"
                             onClick={() => setActiveTab('questions')}
                             className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === 'questions' ? 'text-brand-primary' : 'text-slate-500 hover:text-slate-300'}`}

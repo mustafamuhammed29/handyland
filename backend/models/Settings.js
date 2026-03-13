@@ -96,6 +96,18 @@ const settingsSchema = new mongoose.Schema({
             "Your repair is currently in progress. We will update you soon.",
             "Thank you for reaching out. Your issue has been resolved."
         ]
+    },
+    seo: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            defaultMetaTitle: 'HandyLand - E-Commerce & Repair Services',
+            defaultMetaDescription: 'Your one-stop shop for electronics, mobile phones, and reliable repair services.',
+            defaultKeywords: 'handyland, electronics, mobile repair, buy phones, sell phones',
+            defaultOgImage: '',
+            faviconUrl: '',
+            googleAnalyticsId: '',
+            facebookPixelId: ''
+        }
     }
 }, { timestamps: true });
 

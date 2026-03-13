@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-2 bg-slate-900/60 backdrop-blur-md rounded-full p-1.5 border border-slate-800/50 shadow-inner">
+          <div className="hidden md:flex items-stretch gap-2 bg-slate-900/60 backdrop-blur-md rounded-full p-1.5 border border-slate-800/50 shadow-inner h-[52px]">
             {navItems.map((item) => {
               const isActive = item.path === '/'
                 ? location.pathname === '/'
@@ -67,7 +67,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 ${isActive
+                  className={`flex items-center px-5 py-2 h-full rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 ${isActive
                     ? 'bg-gradient-to-r from-brand-primary/20 to-brand-secondary/10 border border-brand-primary/30 text-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.15)] scale-105'
                     : 'text-slate-400 border border-transparent hover:bg-slate-800/60 hover:border-slate-700/50 hover:text-white'
                     }`}
@@ -83,7 +83,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
               return (
                 <Link
                   to="/track-repair"
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 border ${isTrackActive
+                  className={`flex items-center gap-1.5 px-4 py-2 h-full rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 border ${isTrackActive
                       ? 'bg-amber-500/20 border-amber-500/40 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
                       : 'border-amber-500/20 text-amber-400/70 hover:bg-amber-500/10 hover:border-amber-500/30 hover:text-amber-400'
                     }`}
@@ -95,12 +95,12 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
             })()}
           </div>
 
-          <div className="hidden lg:block ml-4 flex-1">
+          <div className="hidden lg:flex ml-4 flex-1 items-center h-[52px]">
             <GlobalSearchBar className="w-full" />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 h-[52px]">
             {/* Language Switcher */}
             {(settings.navbar?.showLanguageSwitcher !== false) && (
               <LanguageSwitcher />
@@ -125,7 +125,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
             <Link
               to={user ? '/dashboard' : '/login'}
               aria-label={user ? 'Go to dashboard' : 'Log in'}
-              className={`w-10 h-10 items-center justify-center rounded-xl transition-all duration-300 active:scale-90 hidden md:flex group ${user
+              className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 active:scale-90 hidden md:flex group ${user
                 ? 'bg-emerald-600/10 border border-emerald-600/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-600/20'
                 : 'bg-slate-900/60 border border-slate-800 hover:border-brand-primary/50 hover:bg-brand-primary/10 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'
                 }`}
@@ -135,9 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, user, cartCount }) => {
 
             <button
               onClick={() => setIsOpen(!isOpen)}
-              aria-expanded={isOpen}
               aria-label="Toggle navigation menu"
-              aria-controls="mobile-menu"
               className="w-10 h-10 flex md:hidden items-center justify-center text-white rounded-xl shadow-lg transition-all active:scale-90 bg-slate-900 border border-slate-800 hover:border-brand-primary group"
             >
               {isOpen ? (

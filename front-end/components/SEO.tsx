@@ -3,8 +3,9 @@ import { Helmet } from 'react-helmet-async';
 import { useSettings } from '../context/SettingsContext';
 
 interface SEOProps {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
+    keywords?: string;
     canonical?: string;
     ogImage?: string;
     ogType?: string;
@@ -14,37 +15,87 @@ interface SEOProps {
 export const SEO: React.FC<SEOProps> = ({
     title,
     description,
+    keywords,
     canonical,
-    ogImage = '/og-image.jpg',
+    ogImage,
     ogType = 'website',
     twitterHandle = '@handyland'
 }) => {
     const { settings } = useSettings();
-    // Use settings siteName, fallback to cached localStorage value, fallback to 'HandyLand'
+    const seoSettings = settings?.seo || {};
+
+    // Fallback logic
     const siteTitle = settings?.siteName || localStorage.getItem('handyland_sitename') || 'HandyLand';
-    const fullTitle = `${title} | ${siteTitle}`;
+    
+    // If a specific title is given, use it. Otherwise, use global default, otherwise use site name.
+    const finalTitle = title 
+        ? `${title} | ${siteTitle}` 
+        : (seoSettings.defaultMetaTitle || siteTitle);
+        
+    const finalDescription = description || seoSettings.defaultMetaDescription || '';
+    const finalKeywords = keywords || seoSettings.defaultKeywords || '';
+    const finalOgImage = ogImage || seoSettings.defaultOgImage || '/og-image.jpg';
 
     return (
         <Helmet>
             {/* Standard metadata tags */}
-            <title>{fullTitle}</title>
-            <meta name='description' content={description} />
+            <title>{finalTitle}</title>
+            <meta name='description' content={finalDescription} />
+            {finalKeywords && <meta name='keywords' content={finalKeywords} />}
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             {canonical && <link rel="canonical" href={canonical} />}
 
             {/* Open Graph tags */}
-            <meta property="og:title" content={fullTitle} />
-            <meta property="og:description" content={description} />
+            <meta property="og:title" content={finalTitle} />
+            <meta property="og:description" content={finalDescription} />
             <meta property="og:type" content={ogType} />
-            <meta property="og:image" content={ogImage} />
+            <meta property="og:image" content={finalOgImage} />
             <meta property="og:site_name" content={siteTitle} />
 
             {/* Twitter tags */}
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:creator" content={twitterHandle} />
-            <meta name="twitter:title" content={fullTitle} />
-            <meta name="twitter:description" content={description} />
-            <meta name="twitter:image" content={ogImage} />
+            <meta name="twitter:title" content={finalTitle} />
+            <meta name="twitter:description" content={finalDescription} />
+            <meta name="twitter:image" content={finalOgImage} />
+
+            {/* Dynamic Favicon */}
+            {seoSettings.faviconUrl && (
+                <link rel="icon" href={seoSettings.faviconUrl} />
+            )}
+
+            {/* Google Analytics */}
+            {seoSettings.googleAnalyticsId && (
+                <script async src={`https://www.googletagmanager.com/gtag/js?id=${seoSettings.googleAnalyticsId}`}></script>
+            )}
+            {seoSettings.googleAnalyticsId && (
+                <script>
+                    {`
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                        gtag('config', '${seoSettings.googleAnalyticsId}');
+                    `}
+                </script>
+            )}
+
+            {/* Facebook Pixel */}
+            {seoSettings.facebookPixelId && (
+                <script>
+                    {`
+                        !function(f,b,e,v,n,t,s)
+                        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                        n.queue=[];t=b.createElement(e);t.async=!0;
+                        t.src=v;s=b.getElementsByTagName(e)[0];
+                        s.parentNode.insertBefore(t,s)}(window, document,'script',
+                        'https://connect.facebook.net/en_US/fbevents.js');
+                        fbq('init', '${seoSettings.facebookPixelId}');
+                        fbq('track', 'PageView');
+                    `}
+                </script>
+            )}
         </Helmet>
     );
 };
