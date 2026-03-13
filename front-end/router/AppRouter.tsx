@@ -1,5 +1,5 @@
 import React, { useEffect, Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from '../components/PageTransition';
 import { Hero } from '../components/Hero';
@@ -97,11 +97,23 @@ const Home = ({ lang }: { lang: LanguageCode }) => {
 
 export const AppRouter = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const { lang } = useLang();
     const { user, logout } = useAuth();
     const { cart } = useCart();
 
     const { settings, loading: settingsLoading, error: settingsError } = useSettings();
+
+    useEffect(() => {
+        const handleNavigation = (e: Event) => {
+            const customEvent = e as CustomEvent<string>;
+            if (customEvent.detail) {
+                navigate(customEvent.detail, { replace: true });
+            }
+        };
+        window.addEventListener('handyland:navigate', handleNavigation);
+        return () => window.removeEventListener('handyland:navigate', handleNavigation);
+    }, [navigate]);
 
     useEffect(() => {
         if (settings?.siteName) {

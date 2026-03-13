@@ -1,15 +1,194 @@
 {
-    "nav": {
-        "marketplace": "Marktplatz",
-        "repair": "Reparatur",
-        "sell": "Verkaufen",
-        "login": "Einloggen",
-        "register": "Registrieren",
-        "dashboard": "Dashboard"
+  "nav": {
+    "home": "Startseite",
+    "marketplace": "Marktplatz",
+    "repair": "Reparatur",
+    "valuation": "Bewertung",
+    "accessories": "Zubehör",
+    "sell": "Gerät verkaufen",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "dashboard": "Dashboard",
+    "trackRepair": "Reparatur verfolgen",
+    "signInRegister": "Anmelden / Registrieren"
+  },
+  "hero": {
+    "title": "HANDYLAND",
+    "subtitle": "Der globale Standard für Premium-Gerätehandel und Reparatur.",
+    "shopNow": "Jetzt einkaufen",
+    "sellDevice": "Gerät verkaufen",
+    "trackRepair": "Reparatur verfolgen"
+  },
+  "auth": {
+    "loginTitle": "Willkommen zurück",
+    "emailLabel": "E-Mail-Adresse",
+    "passwordLabel": "Passwort",
+    "loginButton": "Bei HandyLand anmelden",
+    "noAccount": "Sie haben noch kein Konto?",
+    "createAccount": "Konto erstellen",
+    "forgotPassword": "Passwort vergessen?",
+    "resetPassword": "Passwort zurücksetzen",
+    "verifyEmail": "E-Mail überprüfen",
+    "registerTitle": "Konto erstellen",
+    "fullName": "Vollständiger Name",
+    "confirmPassword": "Passwort bestätigen",
+    "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+    "signIn": "Anmelden",
+    "continueWithGoogle": "Weiter mit Google",
+    "continueWithFacebook": "Weiter mit Facebook"
+  },
+  "cart": {
+    "title": "Einkaufswagen",
+    "emptyTitle": "Ihr Warenkorb ist leer",
+    "emptyText": "Es sieht so aus, als hätten Sie noch nichts in Ihren Warenkorb gelegt.",
+    "continueShopping": "Weiter einkaufen",
+    "checkout": "Zur Kasse",
+    "remove": "Entfernen",
+    "quantity": "Menge",
+    "subtotal": "Zwischensumme",
+    "shipping": "Versand",
+    "total": "Gesamt",
+    "freeShipping": "Kostenloser Versand!",
+    "freeShippingProgress": "Fügen Sie {{amount}} für kostenlosen Versand hinzu"
+  },
+  "checkout": {
+    "title": "Kasse",
+    "shippingInfo": "Versandinformationen",
+    "paymentMethod": "Zahlungsmethode",
+    "orderSummary": "Bestellübersicht",
+    "placeOrder": "Bestellung aufgeben",
+    "fullName": "Vollständiger Name",
+    "email": "E-Mail",
+    "phone": "Telefonnummer",
+    "address": "Adresse",
+    "city": "Stadt",
+    "zipCode": "PLZ",
+    "country": "Land",
+    "processing": "Verarbeitung...",
+    "orderSuccess": "Bestellung erfolgreich aufgegeben!",
+    "couponCode": "Gutscheincode",
+    "applyCoupon": "Anwenden",
+    "removeCoupon": "Entfernen",
+    "discount": "Rabatt"
+  },
+  "dashboard": {
+    "overview": "Übersicht",
+    "orders": "Meine Bestellungen",
+    "repairs": "Aktive Reparaturen",
+    "valuations": "Meine Bewertungen",
+    "wallet": "Digitale Geldbörse",
+    "wishlist": "Wunschzettel",
+    "messages": "Nachrichten",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "totalOrders": "Gesamtbestellungen",
+    "activeRepairs": "Aktive Reparaturen",
+    "thisMonth": "Dieser Monat",
+    "walletBalance": "Guthaben",
+    "noOrders": "Noch keine Bestellungen",
+    "noRepairs": "Keine aktiven Reparaturen",
+    "downloadInvoice": "Rechnung herunterladen",
+    "orderStatus": {
+      "pending": "Ausstehend",
+      "processing": "Verarbeitung",
+      "shipped": "Versandt",
+      "delivered": "Zugestellt",
+      "cancelled": "Storniert"
     },
-    "auth": {
-        "loginTitle": "Willkommen zurück",
-        "emailLabel": "E-Mail Adresse",
-        "passwordLabel": "Passwort"
+    "repairStatus": {
+      "received": "Erhalten",
+      "diagnosing": "Diagnose",
+      "repairing": "Reparatur",
+      "testing": "Testen",
+      "ready": "Bereit zur Abholung",
+      "attention": "Achtung erforderlich"
     }
+  },
+  "marketplace": {
+    "title": "Marktplatz",
+    "search": "Geräte suchen...",
+    "filter": "Filtern",
+    "sort": "Sortieren",
+    "noResults": "Keine Produkte gefunden",
+    "addToCart": "In den Warenkorb",
+    "buyNow": "Jetzt kaufen",
+    "condition": {
+      "new": "Neu",
+      "used": "Gebraucht",
+      "refurbished": "Überholt"
+    },
+    "inStock": "Auf Lager",
+    "outOfStock": "Nicht auf Lager",
+    "freeShipping": "Kostenloser Versand"
+  },
+  "repair": {
+    "title": "Reparaturdienste",
+    "subtitle": "Transparente Preise für fortschrittliche Hardware-Reparaturen",
+    "bookRepair": "Reparatur buchen",
+    "trackRepair": "Reparatur verfolgen",
+    "ticketNumber": "Ticketnummer",
+    "track": "Verfolgen",
+    "status": "Status"
+  },
+  "valuation": {
+    "title": "Gerätebewertung",
+    "step1": "Konfiguration auswählen",
+    "step2": "Speicherkapazität",
+    "step3": "Zustandsprüfung",
+    "next": "Weiter",
+    "back": "Zurück",
+    "submit": "Wert berechnen",
+    "result": "Geschätzter Wert",
+    "sellNow": "Jetzt verkaufen",
+    "saveValuation": "Bewertung speichern"
+  },
+  "accessories": {
+    "title": "Zubehör",
+    "subtitle": "Premium-Zubehör für Ihre Geräte.",
+    "categories": {
+      "audio": "Audio",
+      "power": "Energie",
+      "protection": "Schutz",
+      "wearables": "Wearables"
+    }
+  },
+  "common": {
+    "loading": "Wird geladen...",
+    "error": "Etwas ist schief gelaufen",
+    "retry": "Erneut versuchen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "search": "Suchen...",
+    "currency": "€",
+    "viewAll": "Alle anzeigen",
+    "learnMore": "Mehr erfahren",
+    "back": "Zurück",
+    "next": "Weiter",
+    "submit": "Einreichen",
+    "success": "Erfolgreich",
+    "required": "Erforderlich"
+  },
+  "footer": {
+    "terms": "AGB",
+    "privacy": "Datenschutzrichtlinie",
+    "service": "Kundenservice",
+    "imprint": "Impressum",
+    "about": "Über uns"
+  },
+  "contact": {
+    "title": "Kontaktiere uns",
+    "fullName": "Vollständiger Name",
+    "email": "E-Mail-Adresse",
+    "message": "Ihre Nachricht",
+    "send": "Nachricht senden",
+    "sending": "Senden...",
+    "success": "Nachricht erhalten!",
+    "location": "Berlin, HQ",
+    "phone": "Direktwahl",
+    "mail": "Sichere E-Mail"
+  }
 }

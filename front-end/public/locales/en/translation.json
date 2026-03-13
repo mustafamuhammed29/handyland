@@ -1,15 +1,194 @@
 {
-    "nav": {
-        "marketplace": "Marketplace",
-        "repair": "Repair",
-        "sell": "Sell",
-        "login": "Login",
-        "register": "Register",
-        "dashboard": "Dashboard"
+  "nav": {
+    "home": "Home",
+    "marketplace": "Marketplace",
+    "repair": "Repair",
+    "valuation": "Valuation",
+    "accessories": "Accessories",
+    "sell": "Sell Device",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "trackRepair": "Track Repair",
+    "signInRegister": "Sign In / Register"
+  },
+  "hero": {
+    "title": "HANDYLAND",
+    "subtitle": "The global standard for premium device trading and repair.",
+    "shopNow": "Shop Now",
+    "sellDevice": "Sell Device",
+    "trackRepair": "Track Repair"
+  },
+  "auth": {
+    "loginTitle": "Welcome Back",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password",
+    "loginButton": "Login to HandyLand",
+    "noAccount": "Don't have an account?",
+    "createAccount": "Create Account",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "verifyEmail": "Verify Email",
+    "registerTitle": "Create Account",
+    "fullName": "Full Name",
+    "confirmPassword": "Confirm Password",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign In",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithFacebook": "Continue with Facebook"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "emptyTitle": "Your Cart is Empty",
+    "emptyText": "Looks like you haven't added anything to your cart yet.",
+    "continueShopping": "Continue Shopping",
+    "checkout": "Proceed to Checkout",
+    "remove": "Remove",
+    "quantity": "Quantity",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "freeShipping": "Free Shipping!",
+    "freeShippingProgress": "Add {{amount}} more for free shipping"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shippingInfo": "Shipping Information",
+    "paymentMethod": "Payment Method",
+    "orderSummary": "Order Summary",
+    "placeOrder": "Place Order",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "address": "Street Address",
+    "city": "City",
+    "zipCode": "ZIP / Postal Code",
+    "country": "Country",
+    "processing": "Processing...",
+    "orderSuccess": "Order Placed Successfully!",
+    "couponCode": "Coupon Code",
+    "applyCoupon": "Apply",
+    "removeCoupon": "Remove",
+    "discount": "Discount"
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "orders": "My Orders",
+    "repairs": "Active Repairs",
+    "valuations": "My Valuations",
+    "wallet": "Digital Wallet",
+    "wishlist": "Wishlist",
+    "messages": "Messages",
+    "settings": "Settings",
+    "logout": "Logout",
+    "totalOrders": "Total Orders",
+    "activeRepairs": "Active Repairs",
+    "thisMonth": "This Month",
+    "walletBalance": "Wallet Balance",
+    "noOrders": "No orders yet",
+    "noRepairs": "No active repairs",
+    "downloadInvoice": "Download Invoice",
+    "orderStatus": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
     },
-    "auth": {
-        "loginTitle": "Welcome back",
-        "emailLabel": "Email Address",
-        "passwordLabel": "Password"
+    "repairStatus": {
+      "received": "Received",
+      "diagnosing": "Diagnosing",
+      "repairing": "Repairing",
+      "testing": "Testing",
+      "ready": "Ready for Pickup",
+      "attention": "Needs Attention"
     }
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "search": "Search devices...",
+    "filter": "Filter",
+    "sort": "Sort",
+    "noResults": "No products found",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now",
+    "condition": {
+      "new": "New",
+      "used": "Used",
+      "refurbished": "Refurbished"
+    },
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "freeShipping": "Free Shipping"
+  },
+  "repair": {
+    "title": "Repair Services",
+    "subtitle": "Transparent pricing for advanced hardware repair",
+    "bookRepair": "Book Repair",
+    "trackRepair": "Track Repair",
+    "ticketNumber": "Ticket Number",
+    "track": "Track",
+    "status": "Status"
+  },
+  "valuation": {
+    "title": "Device Valuation",
+    "step1": "Select Configuration",
+    "step2": "Storage Capacity",
+    "step3": "Condition Check",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Get Value",
+    "result": "Estimated Value",
+    "sellNow": "Sell Now",
+    "saveValuation": "Save Valuation"
+  },
+  "accessories": {
+    "title": "Accessories",
+    "subtitle": "Premium accessories for your devices.",
+    "categories": {
+      "audio": "Audio",
+      "power": "Energy",
+      "protection": "Protection",
+      "wearables": "Wearables"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "search": "Search...",
+    "currency": "€",
+    "viewAll": "View All",
+    "learnMore": "Learn More",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "success": "Success",
+    "required": "Required"
+  },
+  "footer": {
+    "terms": "T&C",
+    "privacy": "Privacy Policy",
+    "service": "Customer Service",
+    "imprint": "Imprint",
+    "about": "About Us"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "message": "Your Message",
+    "send": "Send Message",
+    "sending": "Sending...",
+    "success": "Message Received!",
+    "location": "Berlin, HQ",
+    "phone": "Direct Line",
+    "mail": "Secure Mail"
+  }
 }

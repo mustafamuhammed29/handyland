@@ -10,7 +10,7 @@ export const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 10000,
+    timeout: 30000,
 });
 
 // Request interceptor
@@ -40,7 +40,7 @@ api.interceptors.response.use(
             const isPublicPath = publicPaths.some(path => currentPath.includes(path));
 
             if (!isPublicPath) {
-                window.location.href = '/login';
+                window.dispatchEvent(new CustomEvent('handyland:navigate', { detail: '/login' }));
             }
 
             return Promise.reject(error);
@@ -69,7 +69,7 @@ api.interceptors.response.use(
                 const isPublicPath = publicPaths.some(path => currentPath.includes(path));
 
                 if (!isPublicPath) {
-                    window.location.href = '/login';
+                    window.dispatchEvent(new CustomEvent('handyland:navigate', { detail: '/login' }));
                 }
 
                 return Promise.reject(refreshError);
