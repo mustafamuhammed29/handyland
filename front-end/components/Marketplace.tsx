@@ -636,8 +636,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                 <button
                                     onClick={() => {
                                         setSearchTerm('');
-                                        setFilterCategory('All');
-                                        setFilterBrand('');
+                                        setFilterBrand('All');
                                         setSelectedRam('');
                                         setSelectedStorage('');
                                     }}

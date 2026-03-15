@@ -27,8 +27,11 @@ const getStripe = async () => {
         if (secretKey && !secretKey.includes('your_stripe_secret_key')) {
             stripeResult = require('stripe')(secretKey);
         } else {
-            // Fallback Mock
-            if (process.env.NODE_ENV !== 'production') console.warn('Stripe key missing or invalid. Using Mock.');
+            // FIXED C-5: BLOCK mock in production — fail loudly instead of silently losing payments
+            if (process.env.NODE_ENV === 'production') {
+                throw new Error('CRITICAL: Stripe secret key is not configured in production! Payments cannot be processed.');
+            }
+            console.warn('⚠️ Stripe key missing or invalid. Using Mock (development only).');
             stripeResult = {
                 checkout: {
                     sessions: {
@@ -91,6 +94,16 @@ exports.createCheckoutSession = async (req, res) => {
             });
         }
 
+        // FIXED C-4: Sanitize all user-provided item fields before Stripe/DB
+        const sanitizeString = (str) => String(str || '').replace(/<[^>]*>/g, '').trim().slice(0, 200);
+        const sanitizedItems = items.map(item => ({
+            ...item,
+            name: sanitizeString(item.name),
+            price: Math.max(0, parseFloat(item.price) || 0),
+            quantity: Math.max(1, Math.min(100, parseInt(item.quantity) || 1)),
+            image: item.image ? String(item.image).slice(0, 500) : '',
+        }));
+
         // Validate Coupon if provided
         if (couponCode) {
             const coupon = await Coupon.findOne({ code: couponCode });
@@ -111,7 +124,7 @@ exports.createCheckoutSession = async (req, res) => {
         // Validate Stock & Build Order Items
         const orderItems = [];
 
-        for (const item of items) {
+        for (const item of sanitizedItems) {
             let productDoc;
 
             if (item.productType === 'Product') {
@@ -144,7 +157,7 @@ exports.createCheckoutSession = async (req, res) => {
         }
 
         // Calculate Totals
-        const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        const subtotal = sanitizedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
         let shippingFee = 0;
         if (req.body.shippingFee) {
             shippingFee = parseFloat(req.body.shippingFee);
@@ -179,7 +192,7 @@ exports.createCheckoutSession = async (req, res) => {
         };
 
         // Create line items for Stripe
-        const lineItems = items.map(item => ({
+        const lineItems = sanitizedItems.map(item => ({
             price_data: {
                 currency: 'eur',
                 product_data: {

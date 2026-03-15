@@ -2,18 +2,11 @@ import React, { useEffect, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from '../components/PageTransition';
-import { Hero } from '../components/Hero';
-import { Accessories } from '../components/Accessories';
-import { Valuation } from '../components/Valuation';
-import { Contact } from '../components/Contact';
 import { CartDrawer } from '../components/CartDrawer';
 import PaymentSuccess from '../PaymentSuccess';
-import { SellDevice } from '../pages/SellDevice';
-import { MyValuations } from '../pages/MyValuations';
 import NotFound from '../pages/NotFound';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import TermsAndConditions from '../pages/TermsAndConditions';
-import { SellerStudio } from '../components/SellerStudio';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { PublicLayout } from '../components/layouts/PublicLayout';
 import { InfoPage } from '../components/InfoPage';
@@ -25,7 +18,6 @@ import VerifyEmailNotice from '../pages/VerifyEmailNotice';
 import ForgotPassword from '../pages/ForgotPassword';
 import SocialAuthCallback from '../pages/SocialAuthCallback';
 import { LanguageCode } from '../types';
-
 import { useLang } from '../context/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
@@ -39,8 +31,17 @@ import { AnnouncementBanner } from '../components/AnnouncementBanner';
 import { OfflineBanner } from '../components/OfflineBanner';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { PromoModal } from '../components/PromoModal';
-import { Stats } from '../components/Stats';
-import { RepairGallery } from '../components/RepairGallery';
+
+// FIXED M-1: Lazy-load heavy components to reduce initial bundle size
+const Hero = React.lazy(() => import('../components/Hero').then(m => ({ default: m.Hero })));
+const Accessories = React.lazy(() => import('../components/Accessories').then(m => ({ default: m.Accessories })));
+const Valuation = React.lazy(() => import('../components/Valuation').then(m => ({ default: m.Valuation })));
+const Contact = React.lazy(() => import('../components/Contact').then(m => ({ default: m.Contact })));
+const Stats = React.lazy(() => import('../components/Stats').then(m => ({ default: m.Stats })));
+const RepairGallery = React.lazy(() => import('../components/RepairGallery').then(m => ({ default: m.RepairGallery })));
+const SellDevice = React.lazy(() => import('../pages/SellDevice').then(m => ({ default: m.SellDevice })));
+const MyValuations = React.lazy(() => import('../pages/MyValuations').then(m => ({ default: m.MyValuations })));
+const SellerStudio = React.lazy(() => import('../components/SellerStudio').then(m => ({ default: m.SellerStudio })));
 
 // Lazy Load Components
 const Marketplace = React.lazy(() => import('../components/Marketplace').then(module => ({ default: module.Marketplace })));

@@ -92,6 +92,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ className = "h
             {iconOnly && !isExpanded && (
                 <button
                    type="button"
+                   aria-label="Open search"
                    onClick={() => setIsExpanded(true)}
                    className="w-full h-full flex items-center justify-center text-slate-400 hover:text-white transition-colors"
                 >
@@ -134,6 +135,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ className = "h
                         {searchTerm && !(iconOnly && isExpanded) && (
                             <button
                                 type="button"
+                                aria-label="Clear search"
                                 onClick={handleClear}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors z-10"
                             >
@@ -145,6 +147,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ className = "h
                     {iconOnly && isExpanded && (
                          <button
                          type="button"
+                         aria-label="Close search"
                          onClick={() => {
                              setIsExpanded(false);
                              setShowDropdown(false);

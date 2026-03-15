@@ -99,7 +99,7 @@ export const Stats: React.FC = () => {
   ];
 
   return (
-    <section className="relative py-20 bg-slate-950 border-y border-slate-900 overflow-hidden">
+    <section className="relative py-20 bg-slate-100 dark:bg-slate-950 border-y border-slate-200 dark:border-slate-900 overflow-hidden transition-colors duration-300">
 
       {/* Animated Background Mesh */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -112,7 +112,7 @@ export const Stats: React.FC = () => {
         {/* Section Header */}
         <div className="flex items-center gap-3 mb-10 justify-center md:justify-start opacity-80">
           <Activity className="w-5 h-5 text-blue-500 animate-pulse" />
-          <span className="text-sm font-mono text-blue-400 uppercase tracking-[0.2em]">Live Performance Data</span>
+          <span className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">Live Performance Data</span>
           <div className="h-px bg-gradient-to-r from-blue-500/50 to-transparent w-32"></div>
         </div>
 
@@ -120,19 +120,19 @@ export const Stats: React.FC = () => {
           {stats.map((stat, index) => (
             <div
               key={index}
-              className={`group relative p-4 md:p-6 rounded-2xl bg-slate-900/40 border border-slate-800 backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 flex flex-col items-center text-center ${stat.border}`}
+              className={`group relative p-4 md:p-6 rounded-2xl bg-white/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 flex flex-col items-center text-center ${stat.border}`}
             >
               {/* Hover Glow Effect */}
               <div className={`absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ${stat.bg}`}></div>
 
               <div className="relative z-10 flex flex-col items-center w-full">
                 {/* Icon Container */}
-                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center mb-3 md:mb-4 shadow-lg ${stat.color} group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
+                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center mb-3 md:mb-4 shadow-lg ${stat.color} group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
                   {stat.icon}
                 </div>
 
                 {/* Value */}
-                <div className="text-2xl md:text-4xl lg:text-5xl font-black text-white mb-1 md:mb-2 tracking-tight">
+                <div className="text-2xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-1 md:mb-2 tracking-tight">
                   {stat.isDecimal ? (
                     <span>{stat.value}{stat.suffix}</span>
                   ) : (
@@ -141,7 +141,7 @@ export const Stats: React.FC = () => {
                 </div>
 
                 {/* Label */}
-                <div className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-wide group-hover:text-slate-300 transition-colors leading-tight">
+                <div className="text-[10px] md:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors leading-tight">
                   {stat.label}
                 </div>
               </div>

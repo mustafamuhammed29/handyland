@@ -121,9 +121,14 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     <span>Subtotal</span>
                     <span>{formatPrice(cartTotal)}</span>
                 </div>
+                {/* FIXED M-6: Show tax breakdown so users aren't surprised */}
+                <div className="flex justify-between text-slate-400 text-sm">
+                    <span>Tax (19% VAT)</span>
+                    <span>{formatPrice(cartTotal * 0.19)}</span>
+                </div>
                 <div className="flex justify-between text-emerald-400 text-sm">
                     <span>Shipping</span>
-                    <span>{(getFinalTotal() - (cartTotal - (coupon ? coupon.discount : 0))) === 0 ? 'FREE' : formatPrice(getFinalTotal() - (cartTotal - (coupon ? coupon.discount : 0)))}</span>
+                    <span>{cartTotal >= freeShippingThreshold ? 'FREE' : formatPrice(5.99)}</span>
                 </div>
                 {coupon && (
                     <div className="flex justify-between text-emerald-400 text-sm">
@@ -135,6 +140,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     <span>Total</span>
                     <span>{formatPrice(getFinalTotal())}</span>
                 </div>
+                <p className="text-[10px] text-slate-500 text-right">incl. 19% VAT</p>
             </div>
 
             {/* Trust Badges */}

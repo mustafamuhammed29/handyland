@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LanguageCode } from '../types';
 import { ArrowRight, ArrowLeft, ShieldCheck, Zap, Smartphone, Search, Star, Hexagon } from 'lucide-react';
@@ -17,17 +17,31 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
     const { settings } = useSettings();
     const { theme } = useTheme();
 
-    // Mouse Parallax State
-    const [offset, setOffset] = useState({ x: 0, y: 0 });
+    // FIXED C-3: Use refs + rAF instead of setState to avoid 60 re-renders/sec
+    const textRef = useRef<HTMLDivElement>(null);
+    const visualRef = useRef<HTMLDivElement>(null);
+    const rafId = useRef<number>(0);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
-            const x = (e.clientX - window.innerWidth / 2) / 40;
-            const y = (e.clientY - window.innerHeight / 2) / 40;
-            setOffset({ x, y });
+            // Cancel any pending frame to avoid stacking
+            if (rafId.current) cancelAnimationFrame(rafId.current);
+            rafId.current = requestAnimationFrame(() => {
+                const x = (e.clientX - window.innerWidth / 2) / 40;
+                const y = (e.clientY - window.innerHeight / 2) / 40;
+                if (textRef.current) {
+                    textRef.current.style.transform = `translate(${x * -0.5}px, ${y * -0.5}px)`;
+                }
+                if (visualRef.current) {
+                    visualRef.current.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+                }
+            });
         };
         window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            if (rafId.current) cancelAnimationFrame(rafId.current);
+        };
     }, []);
 
     return (
@@ -48,8 +62,8 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
                 {/* Text Content */}
                 <div
-                    className="space-y-8 order-2 lg:order-1"
-                    style={{ transform: `translate(${offset.x * -0.5}px, ${offset.y * -0.5}px)` }}
+                    ref={textRef}
+                    className="space-y-8 order-2 lg:order-1 transition-transform duration-100 ease-out"
                 >
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-700 backdrop-blur-md animate-in slide-in-from-bottom-4 fade-in duration-700">
                         <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: settings.hero.accentColor }}></span>
@@ -123,9 +137,10 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                                 navigate('/marketplace');
                             }
                         }}
+                        ref={visualRef}
                         style={{
-                            transform: `rotateY(${offset.x}deg) rotateX(${-offset.y}deg) translateZ(50px)`,
-                            boxShadow: `${-offset.x * 2}px ${-offset.y * 2}px 50px rgba(0,0,0,0.5)`
+                            transform: 'translateZ(50px)',
+                            transition: 'transform 0.1s ease-out'
                         }}
                     >
                         {/* Screen Content */}
@@ -159,7 +174,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     {/* Floating Elements (Parallax Layers) */}
                     <div
                         className="absolute top-[15%] md:top-1/4 right-[2%] sm:right-4 md:-right-4 lg:-right-20 xl:-right-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
-                        style={{ transform: `translateZ(80px) translateX(${offset.x * 1.5}px)` }}
+                        style={{ transform: 'translateZ(80px)' }}
                     >
                         <div className="flex items-center gap-2 md:gap-3">
                             <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 shrink-0">
@@ -174,7 +189,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
                     <div
                         className="absolute bottom-[40%] md:bottom-[35%] lg:bottom-[45%] left-[2%] sm:left-0 md:-left-4 lg:-left-20 xl:-left-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
-                        style={{ transform: `translateZ(100px) translateX(${offset.x * 2}px)` }}
+                        style={{ transform: 'translateZ(100px)' }}
                     >
                         <div className="flex items-center gap-2 md:gap-3">
                             <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
@@ -190,11 +205,11 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     {/* Circle Graphic Behind */}
                     <div
                         className="absolute inset-0 border border-slate-800 rounded-full scale-125 opacity-20 -z-10"
-                        style={{ transform: `translateZ(-50px) scale(${1 + (offset.y * 0.005)})` }}
+                        style={{ transform: 'translateZ(-50px) scale(1)' }}
                     ></div>
                     <div
                         className="absolute inset-0 border border-dashed border-slate-700 rounded-full scale-110 opacity-20 -z-10"
-                        style={{ transform: `translateZ(-50px) rotate(${offset.x * 2}deg)` }}
+                        style={{ transform: 'translateZ(-50px) rotate(0deg)' }}
                     ></div>
 
                 </div>
