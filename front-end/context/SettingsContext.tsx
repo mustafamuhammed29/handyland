@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from './ToastContext';
 import { api, clearCache } from '../utils/api';
+import i18n from '../src/i18n';
 
 interface HeroSettings {
     bgStart: string;
@@ -71,6 +72,7 @@ interface Settings {
     siteName?: string;
     contactEmail?: string;
     footerText?: string;
+    language?: string;
     navbar?: {
         logoText?: string;
         logoAccentText?: string;
@@ -341,6 +343,17 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             }
         }
     }, [settings.theme]);
+
+    // Force application language to match global settings retrieved from the backend
+    useEffect(() => {
+        if (settings.language && i18n.language !== settings.language) {
+            i18n.changeLanguage(settings.language).then(() => {
+                localStorage.setItem('handyland_lang', settings.language!);
+                document.documentElement.dir = (settings.language === 'ar' || settings.language === 'fa') ? 'rtl' : 'ltr';
+                document.documentElement.lang = settings.language!;
+            });
+        }
+    }, [settings.language]);
 
     useEffect(() => {
         const fetchSettings = async (isBackgroundPolling = false) => {

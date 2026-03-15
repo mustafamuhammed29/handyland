@@ -75,14 +75,14 @@ const Home = ({ lang }: { lang: LanguageCode }) => {
             {sections.hero && <Hero lang={lang} />}
             {sections.stats && <Stats />}
             {sections.repairGallery && (
-                <div className="bg-slate-950">
+                <div className="bg-slate-50 dark:bg-slate-950">
                     <RepairGallery />
                 </div>
             )}
             {sections.marketplace && (
-                <div className="bg-slate-950 py-12 border-t border-slate-900">
+                <div className="bg-slate-50 dark:bg-slate-950 py-12 border-t border-slate-200 dark:border-slate-900">
                     <div className="max-w-7xl mx-auto px-4">
-                        <h3 className="text-2xl font-bold text-white mb-8 pl-4 border-l-4 border-blue-600 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-8 pl-4 border-l-4 border-blue-600 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">
                             {t('market', 'Market')} Highlights
                         </h3>
                         <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="w-8 h-8 border-2 border-blue-500 rounded-full animate-spin border-t-transparent"></div></div>}>
@@ -129,14 +129,14 @@ export const AppRouter = () => {
 
     if (settingsLoading) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+            <div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center">
                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className={`min-h-screen font-sans bg-slate-950 selection:bg-blue-500/30 selection:text-blue-200 ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div className={`min-h-screen font-sans bg-transparent selection:bg-brand-primary/30 selection:text-brand-primary ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <AnnouncementBanner />
             <OfflineBanner />
             <PromoModal />

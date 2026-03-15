@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star, Box, PhoneForwarded, ShieldCheck } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
+import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star, Box, PhoneForwarded, ShieldCheck, Languages } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import InventoryManager from './pages/InventoryManager';
 import { ActiveCarts } from './components/ActiveCarts';
@@ -25,6 +26,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoanerManager from './pages/LoanerManager';
 import WarrantyManager from './pages/WarrantyManager';
+import TranslationManager from './pages/TranslationManager';
 
 const SidebarLink = ({ to, icon: Icon, label }: { to: string, icon: React.ElementType, label: string }) => {
   const location = useLocation();
@@ -102,6 +104,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarLink to="/shipping" icon={Truck} label="Shipping Methods" />
           <SidebarLink to="/emails" icon={Mail} label="Emails" />
           <SidebarLink to="/settings" icon={Settings} label="Global Settings" />
+          <SidebarLink to="/translations" icon={Languages} label="Translations" />
         </nav>
 
         <button
@@ -168,6 +171,7 @@ function AppContent() {
                   <Route path="/shipping" element={<ShippingManager />} />
                   <Route path="/emails" element={<EmailManager />} />
                   <Route path="/settings" element={<SettingsManager />} />
+                  <Route path="/translations" element={<TranslationManager />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>
@@ -181,6 +185,13 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
+      <Toaster 
+        position="top-right" 
+        toastOptions={{ 
+            style: { background: '#0f172a', color: '#fff', border: '1px solid #1e293b' },
+            success: { iconTheme: { primary: '#10b981', secondary: '#fff' } }
+        }} 
+      />
       <AppContent />
     </AuthProvider>
   );

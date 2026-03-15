@@ -296,7 +296,8 @@ exports.updateProfile = async (req, res) => {
         const fieldsToUpdate = {
             name: req.body.name,
             phone: req.body.phone,
-            address: req.body.address
+            address: req.body.address,
+            preferredLanguage: req.body.preferredLanguage
         };
 
         // FIXED: Check phone uniqueness before updating (FIX 4)

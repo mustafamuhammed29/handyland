@@ -100,14 +100,24 @@ export interface User {
 }
 
 export interface RepairTicket {
-  id: string;
+  id?: string;
+  _id?: string;
+  ticketId?: string;
   device: string;
   issue: string;
   status: 'received' | 'diagnosing' | 'repairing' | 'testing' | 'ready' | 'attention';
   date: string;
   cost?: number;
-  estimatedCompletion?: string;  // ISO date string from backend
-  technicianNotes?: string;      // Real notes from technician
+  estimatedCost?: number;
+  estimatedCompletion?: string;
+  notes?: string;                // User's original notes
+  technicianNotes?: string;      // Notes from technician
+  messages?: {
+    _id?: string;
+    role: 'customer' | 'admin';
+    text: string;
+    timestamp: string;
+  }[];
   updatedAt?: string;            // Last update timestamp
 }
 

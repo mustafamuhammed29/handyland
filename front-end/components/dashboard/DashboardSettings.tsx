@@ -79,13 +79,23 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
     const [tab, setTab] = useState<Tab>('profile');
 
     // ── Profile ──
-    const [profileForm, setProfileForm] = useState({ name: user.name || '', email: user.email || '', phone: (user as any).phone || '' });
+    const [profileForm, setProfileForm] = useState({ 
+        name: user.name || '', 
+        email: user.email || '', 
+        phone: (user as any).phone || '',
+        preferredLanguage: user.preferredLanguage || 'de'
+    });
     const [profileSaving, setProfileSaving] = useState(false);
     const [profileMsg, setProfileMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
     const [profileEditing, setProfileEditing] = useState(false);
 
     useEffect(() => {
-        setProfileForm({ name: user.name || '', email: user.email || '', phone: (user as any).phone || '' });
+        setProfileForm({ 
+            name: user.name || '', 
+            email: user.email || '', 
+            phone: (user as any).phone || '',
+            preferredLanguage: user.preferredLanguage || 'de'
+        });
     }, [user]);
 
     const saveProfile = async () => {
@@ -255,7 +265,16 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                             </button>
                         ) : (
                             <div className="flex gap-2">
-                                <button onClick={() => { setProfileEditing(false); setProfileForm({ name: user.name || '', email: user.email || '', phone: (user as any).phone || '' }); setProfileMsg(null); }}
+                                <button onClick={() => { 
+                                    setProfileEditing(false); 
+                                    setProfileForm({ 
+                                        name: user.name || '', 
+                                        email: user.email || '', 
+                                        phone: (user as any).phone || '',
+                                        preferredLanguage: user.preferredLanguage || 'de'
+                                    }); 
+                                    setProfileMsg(null); 
+                                }}
                                     className="px-3 py-1.5 text-sm rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors">
                                     Cancel
                                 </button>
@@ -289,7 +308,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
 
                         {[
                             { id: 'name', label: 'Full Name', icon: <User className="w-4 h-4" />, type: 'text', key: 'name' as const, placeholder: 'John Doe' },
-                            { id: 'email', label: 'Email Address', icon: <Mail className="w-4 h-4" />, type: 'email', key: 'email' as const, placeholder: 'john@example.com' },
+                            { id: 'email', label: 'Email Address', icon: <Mail className="w-4 h-4" />, type: 'email', key: 'email' as const, placeholder: 'john@example.com', disabled: true },
                             { id: 'phone', label: 'Phone Number', icon: <Phone className="w-4 h-4" />, type: 'tel', key: 'phone' as const, placeholder: '+1 234 567 890' },
                         ].map(f => (
                             <div key={f.id}>
@@ -299,16 +318,39 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                                 <input
                                     id={`profile-${f.id}`}
                                     type={f.type}
-                                    value={profileForm[f.key]}
+                                    value={profileForm[f.key as keyof typeof profileForm]}
                                     onChange={e => setProfileForm(p => ({ ...p, [f.key]: e.target.value }))}
-                                    disabled={!profileEditing}
+                                    disabled={!profileEditing || f.disabled}
                                     placeholder={f.placeholder}
-                                    className={`w-full px-4 py-3 rounded-xl text-white text-sm outline-none transition-all ${profileEditing
+                                    className={`w-full px-4 py-3 rounded-xl text-white text-sm outline-none transition-all ${profileEditing && !f.disabled
                                         ? 'bg-slate-800 border border-slate-600 focus:border-blue-500 cursor-text'
                                         : 'bg-slate-800/40 border border-slate-800 cursor-default text-slate-300'}`}
                                 />
                             </div>
                         ))}
+
+                        <div>
+                            <label htmlFor="profile-language" className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
+                                <span className="text-slate-500">🌍</span> Preferred Language
+                            </label>
+                            <select
+                                id="profile-language"
+                                value={profileForm.preferredLanguage}
+                                onChange={(e) => setProfileForm(p => ({ ...p, preferredLanguage: e.target.value }))}
+                                disabled={!profileEditing}
+                                className={`w-full px-4 py-3 rounded-xl text-white text-sm outline-none transition-all ${profileEditing
+                                    ? 'bg-slate-800 border border-slate-600 focus:border-blue-500 cursor-pointer'
+                                    : 'bg-slate-800/40 border border-slate-800 cursor-default text-slate-300 opacity-80'}`}
+                            >
+                                <option value="de">German (Deutsch)</option>
+                                <option value="en">English</option>
+                                <option value="ar">Arabic (العربية)</option>
+                                <option value="tr">Turkish (Türkçe)</option>
+                                <option value="ru">Russian (Русский)</option>
+                                <option value="fa">Persian (فارسی)</option>
+                            </select>
+                            <p className="text-xs text-slate-500 mt-2">This language will be used across the interface and for your personalized notifications.</p>
+                        </div>
                     </div>
                 </div>
             )}

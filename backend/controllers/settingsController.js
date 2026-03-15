@@ -93,7 +93,7 @@ exports.updateSettings = async (req, res) => {
 
         const updateData = {};
         const allowedFields = [
-            'siteName', 'contactEmail', 'footerText', 'navbar',
+            'siteName', 'contactEmail', 'footerText', 'navbar', 'language',
             'hero', 'stats', 'valuation', 'content',
             'repairArchive', 'sections', 'contactSection', 'footerSection',
             'freeShippingThreshold', 'payment', 'announcementBanner', 'promoPopup', 'socialAuth'

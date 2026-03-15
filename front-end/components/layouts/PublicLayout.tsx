@@ -10,6 +10,8 @@ interface PublicLayoutProps {
     cartCount: number;
 }
 
+import { BottomNav } from '../BottomNav';
+
 export const PublicLayout: React.FC<PublicLayoutProps> = ({
     lang, user, cartCount
 }) => {
@@ -17,7 +19,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
     const hasBanner = settings.announcementBanner?.enabled && settings.announcementBanner?.text;
 
     return (
-        <div className={`min-h-screen bg-transparent text-gray-100 font-sans flex flex-col transition-all duration-300 ${hasBanner ? 'pt-10' : ''}`}>
+        <div className={`min-h-screen bg-transparent text-gray-100 font-sans flex flex-col transition-all duration-300 ${hasBanner ? 'pt-10' : ''} pb-16 md:pb-0`}>
             <Navbar
                 lang={lang}
                 cartCount={cartCount}
@@ -27,6 +29,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                 <Outlet />
             </main>
             <Footer lang={lang} />
+            <BottomNav />
         </div>
     );
 };

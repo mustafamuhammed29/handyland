@@ -1,0 +1,133 @@
+[
+  {
+    "_id": "69b4bbd04aeaf264ea20aaec",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "device": "Samsung S24 Ultra",
+    "issue": "Dynamic AMOLED 2X",
+    "status": "ready",
+    "serviceType": "In-Store",
+    "notes": "",
+    "timeline": [
+      {
+        "status": "pending",
+        "note": "Repair ticket created",
+        "_id": "69b4bbd04aeaf264ea20aaed",
+        "timestamp": "2026-03-14T01:37:20.953Z"
+      },
+      {
+        "status": "received",
+        "timestamp": "2026-03-14T02:00:54.835Z",
+        "note": "Status updated to received",
+        "_id": "69b4c156a584cb5ee530d79b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-03-14T02:01:01.888Z",
+        "note": "ششششششششششششش",
+        "_id": "69b4c15da584cb5ee530d7b9"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-03-14T02:04:40.137Z",
+        "note": "20",
+        "_id": "69b4c238a584cb5ee530da7d"
+      },
+      {
+        "status": "ready",
+        "timestamp": "2026-03-14T02:05:11.936Z",
+        "note": "Status updated to ready",
+        "_id": "69b4c257a584cb5ee530dbe0"
+      }
+    ],
+    "createdAt": "2026-03-14T01:37:20.953Z",
+    "updatedAt": "2026-03-14T02:05:11.937Z",
+    "ticketId": "REP-26-0B9D6D",
+    "__v": 4,
+    "estimatedCost": 100,
+    "technicianNotes": "20"
+  },
+  {
+    "_id": "69b4bbbc4aeaf264ea20aae2",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "device": "Samsung S24 Ultra",
+    "issue": "Dynamic AMOLED 2X",
+    "status": "pending",
+    "serviceType": "In-Store",
+    "notes": "",
+    "timeline": [
+      {
+        "status": "pending",
+        "note": "Repair ticket created",
+        "_id": "69b4bbbc4aeaf264ea20aae3",
+        "timestamp": "2026-03-14T01:37:00.786Z"
+      }
+    ],
+    "createdAt": "2026-03-14T01:37:00.786Z",
+    "updatedAt": "2026-03-14T01:37:00.786Z",
+    "ticketId": "REP-26-6D13F7",
+    "__v": 0
+  },
+  {
+    "_id": "69b4bbb64aeaf264ea20aade",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "device": "Samsung S24 Ultra",
+    "issue": "Dynamic AMOLED 2X",
+    "status": "pending",
+    "serviceType": "In-Store",
+    "notes": "",
+    "timeline": [
+      {
+        "status": "pending",
+        "note": "Repair ticket created",
+        "_id": "69b4bbb64aeaf264ea20aadf",
+        "timestamp": "2026-03-14T01:36:54.470Z"
+      }
+    ],
+    "createdAt": "2026-03-14T01:36:54.470Z",
+    "updatedAt": "2026-03-14T01:36:54.470Z",
+    "ticketId": "REP-26-2BBB09",
+    "__v": 0
+  },
+  {
+    "_id": "69b4bbb64aeaf264ea20aada",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "device": "Samsung S24 Ultra",
+    "issue": "Dynamic AMOLED 2X",
+    "status": "pending",
+    "serviceType": "In-Store",
+    "notes": "",
+    "timeline": [
+      {
+        "status": "pending",
+        "note": "Repair ticket created",
+        "_id": "69b4bbb64aeaf264ea20aadb",
+        "timestamp": "2026-03-14T01:36:54.301Z"
+      }
+    ],
+    "createdAt": "2026-03-14T01:36:54.301Z",
+    "updatedAt": "2026-03-14T01:36:54.301Z",
+    "ticketId": "REP-26-D434F8",
+    "__v": 0
+  },
+  {
+    "_id": "69b4bbb54aeaf264ea20aad6",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "device": "Samsung S24 Ultra",
+    "issue": "Dynamic AMOLED 2X",
+    "status": "pending",
+    "serviceType": "In-Store",
+    "notes": "",
+    "timeline": [
+      {
+        "status": "pending",
+        "note": "Repair ticket created",
+        "_id": "69b4bbb54aeaf264ea20aad7",
+        "timestamp": "2026-03-14T01:36:53.877Z"
+      }
+    ],
+    "createdAt": "2026-03-14T01:36:53.877Z",
+    "updatedAt": "2026-03-14T01:36:53.877Z",
+    "ticketId": "REP-26-067CD9",
+    "__v": 0
+  }
+]

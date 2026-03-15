@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Wrench, MessageSquare, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Wrench, MessageSquare, ChevronRight, Send, Loader2 } from 'lucide-react';
 import { RepairTicket } from '../../types';
+import { api } from '../../utils/api';
 
 interface DashboardRepairsProps {
     repairs: RepairTicket[];
@@ -12,6 +13,36 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
     isLoading
 }) => {
     const [expandedRepairId, setExpandedRepairId] = useState<string | null>(null);
+    const [localRepairs, setLocalRepairs] = useState<RepairTicket[]>([]);
+    const [newNoteText, setNewNoteText] = useState('');
+    const [isSubmittingNote, setIsSubmittingNote] = useState<string | null>(null);
+
+    useEffect(() => {
+        setLocalRepairs(repairs || []);
+    }, [repairs]);
+
+    const handleAddNote = async (ticketId: string) => {
+        if (!newNoteText.trim()) return;
+        setIsSubmittingNote(ticketId);
+        try {
+            const res: any = await api.put(`/api/repairs/tickets/${ticketId}/notes`, { notes: newNoteText });
+            if (res?.success) {
+                setLocalRepairs(prev => prev.map(t => 
+                    t.id === ticketId || t._id === ticketId ? { 
+                        ...t, 
+                        notes: res.ticket.notes,
+                        messages: res.ticket.messages 
+                    } : t
+                ));
+                setNewNoteText('');
+            }
+        } catch (err) {
+            console.error('Failed to add note', err);
+            alert('Failed to add note. Please try again.');
+        } finally {
+            setIsSubmittingNote(null);
+        }
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -52,9 +83,9 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
             <h2 className="text-2xl font-bold text-white">Active Repairs</h2>
 
             <div className="space-y-4">
-                {repairs.map((ticket) => (
+                {localRepairs.map((ticket) => (
                     <div
-                        key={ticket.id}
+                        key={ticket.id || ticket._id}
                         className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden"
                     >
                         <div className="p-6">
@@ -69,7 +100,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                     <div>
                                         <h3 className="font-bold text-white text-lg flex items-center gap-2">
                                             {ticket.device}
-                                            <span className="text-xs font-normal text-slate-500 font-mono">#{ticket.id}</span>
+                                            <span className="text-xs font-normal text-slate-500 font-mono">#{ticket.ticketId || ticket._id}</span>
                                         </h3>
                                         <p className="text-sm text-slate-400">{ticket.issue}</p>
                                     </div>
@@ -120,44 +151,102 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                     ) : (
                                         <div className="text-xs text-slate-600">Fertigstellung: noch kein Datum</div>
                                     )}
-                                    {ticket.cost !== undefined && ticket.cost !== null && (
+                                    {((ticket as any).estimatedCost !== undefined || ticket.cost !== undefined) && (
                                         <div className="text-xs text-slate-500">
-                                            Kosten: <span className="text-brand-primary font-bold">€{ticket.cost}</span>
+                                            Kosten: <span className="text-brand-primary font-bold">€{(ticket as any).estimatedCost || ticket.cost}</span>
                                         </div>
                                     )}
                                 </div>
                                 <button
-                                    onClick={() => setExpandedRepairId(expandedRepairId === ticket.id ? null : ticket.id)}
+                                    onClick={() => {
+                                        setExpandedRepairId(expandedRepairId === (ticket.id || ticket._id) ? null : (ticket.id || (ticket._id as string)));
+                                        setNewNoteText('');
+                                    }}
                                     className="text-sm text-brand-primary font-bold hover:text-brand-primary flex items-center gap-1"
                                 >
-                                    {expandedRepairId === ticket.id ? 'Hide Details' : 'View Details'}
-                                    <ChevronRight className={`w-4 h-4 transition-transform ${expandedRepairId === ticket.id ? 'rotate-90' : ''}`} />
+                                    {expandedRepairId === (ticket.id || ticket._id) ? 'Hide Details' : 'View Details'}
+                                    <ChevronRight className={`w-4 h-4 transition-transform ${expandedRepairId === (ticket.id || ticket._id) ? 'rotate-90' : ''}`} />
                                 </button>
                             </div>
                         </div>
 
                         {/* Expanded Details */}
-                        {expandedRepairId === ticket.id && (
+                        {expandedRepairId === (ticket.id || ticket._id) && (
                             <div className="px-6 pb-6 pt-0 animate-in slide-in-from-top-2">
                                 <div className="h-px bg-slate-800 mb-6"></div>
-                                <div>
+                                <div className="flex flex-col h-[400px]">
+                                    {/* Chat Header */}
                                     <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
-                                        <MessageSquare className="w-4 h-4" /> Techniker-Notizen
+                                        <MessageSquare className="w-4 h-4" /> Ticket Chat
                                     </h4>
-                                    {ticket.technicianNotes ? (
-                                        <div className="bg-black/30 rounded-xl p-4 border border-slate-800/50">
-                                            <p className="text-sm text-slate-400 leading-relaxed">{ticket.technicianNotes}</p>
-                                            {ticket.updatedAt && (
-                                                <div className="mt-2 text-[10px] text-slate-600 font-mono text-right">
-                                                    Zuletzt aktualisiert: {new Date(ticket.updatedAt).toLocaleString('de-DE')}
+                                    
+                                    {/* Chat Window */}
+                                    <div className="flex-1 bg-slate-950/50 rounded-xl p-4 border border-slate-800/50 flex flex-col">
+                                        <div className="flex-1 overflow-y-auto pr-2 space-y-4 mb-4 custom-scrollbar">
+                                            {/* Legacy Notes Handling & Messages Map */}
+                                            {(!ticket.messages || ticket.messages.length === 0) && !ticket.notes && !ticket.technicianNotes ? (
+                                                <div className="flex items-center justify-center h-full text-slate-600 text-sm italic">
+                                                    Keine Nachrichten bisher. Sende die erste Nachricht!
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-4">
+                                                    {/* Legacy string notes if messages array is empty/undefined */}
+                                                    {(!ticket.messages || ticket.messages.length === 0) && ticket.notes && (
+                                                        <div className="flex justify-end">
+                                                            <div className="bg-blue-600 text-white p-3 rounded-2xl rounded-br-sm max-w-[80%]">
+                                                                <p className="text-sm whitespace-pre-wrap">{ticket.notes}</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {(!ticket.messages || ticket.messages.length === 0) && ticket.technicianNotes && (
+                                                        <div className="flex justify-start">
+                                                            <div className="bg-slate-800 text-white p-3 rounded-2xl rounded-bl-sm max-w-[80%]">
+                                                                <p className="text-sm whitespace-pre-wrap">{ticket.technicianNotes}</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Actual messages array rendering */}
+                                                    {ticket.messages && ticket.messages.map((msg, index) => (
+                                                        <div key={msg._id || index} className={`flex ${msg.role === 'customer' ? 'justify-end' : 'justify-start'}`}>
+                                                            <div className="flex flex-col gap-1 max-w-[85%] sm:max-w-[75%]">
+                                                                <div className={`p-4 rounded-2xl shadow-sm ${msg.role === 'customer' ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-800 border border-slate-700 text-slate-200 rounded-bl-sm'}`}>
+                                                                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                                                                </div>
+                                                                <span className={`text-[10px] text-slate-500 font-mono ${msg.role === 'customer' ? 'text-right pr-1' : 'text-left pl-1'} `}>
+                                                                    {new Date(msg.timestamp).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             )}
                                         </div>
-                                    ) : (
-                                        <div className="bg-black/20 rounded-xl p-4 border border-slate-800/30 text-slate-600 text-sm italic">
-                                            Noch keine Notizen vom Techniker.
+                                        
+                                        {/* Chat Input Field */}
+                                        <div className="mt-auto relative">
+                                            <textarea 
+                                                value={newNoteText}
+                                                onChange={(e) => setNewNoteText(e.target.value)}
+                                                placeholder="Schreibe eine Nachricht..."
+                                                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 pr-12 text-sm text-white focus:border-blue-500 outline-none resize-none h-14 min-h-[56px] shadow-inner"
+                                                disabled={isSubmittingNote === (ticket.id || ticket._id)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                        e.preventDefault();
+                                                        handleAddNote(ticket._id || ticket.id || '');
+                                                    }
+                                                }}
+                                            />
+                                            <button 
+                                                onClick={() => handleAddNote(ticket._id || ticket.id || '')}
+                                                disabled={!newNoteText.trim() || isSubmittingNote === (ticket.id || ticket._id)}
+                                                className="absolute right-2 top-2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                                            >
+                                                {isSubmittingNote === (ticket.id || ticket._id) ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" /> }
+                                            </button>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
                         )}

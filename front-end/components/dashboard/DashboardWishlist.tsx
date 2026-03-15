@@ -115,15 +115,29 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                 ))}
 
                 {wishlistItems.length === 0 && (
-                    <div className="col-span-3 text-center py-12 text-slate-500">
-                        <Heart className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                        <p className="text-lg font-medium">Your wishlist is empty</p>
-                        <p className="text-sm mb-4">Browse the marketplace and save your favorite items</p>
+                    <div className="col-span-1 md:col-span-2 xl:col-span-3 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-bottom-4 duration-500 py-16">
+                        <div className="w-32 h-32 mb-6 relative">
+                            <div className="absolute inset-0 bg-pink-500/10 rounded-full blur-2xl"></div>
+                            <div className="relative w-full h-full bg-slate-50 dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-inner">
+                                <Heart className="w-12 h-12 text-slate-300 dark:text-slate-600" />
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 bg-white dark:bg-slate-900 rounded-full p-2 shadow-lg border border-slate-100 dark:border-slate-800">
+                                <span className="flex h-3 w-3">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-3 w-3 bg-pink-500"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <h4 className="text-xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Your wishlist is empty</h4>
+                        <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-[280px] leading-relaxed">
+                            Save items you love and keep track of price drops. Let's find your next favorite device!
+                        </p>
                         <button
                             onClick={() => navigate('/marketplace')}
-                            className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-colors"
+                            className="group relative px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold transition-all hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 overflow-hidden"
                         >
-                            Browse Marketplace
+                            <span className="relative z-10">Browse Marketplace</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-rose-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </button>
                     </div>
                 )}

@@ -7,6 +7,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { AppRouter } from './router/AppRouter';
+import { ThemeProvider } from './context/ThemeContext';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -22,17 +23,19 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <HelmetProvider>
-                <ToastProvider>
-                    <LanguageProvider>
-                        <SettingsProvider>
-                            <AuthProvider>
-                                <CartProvider>
-                                    <AppRouter />
-                                </CartProvider>
-                            </AuthProvider>
-                        </SettingsProvider>
-                    </LanguageProvider>
-                </ToastProvider>
+                <ThemeProvider>
+                    <ToastProvider>
+                        <LanguageProvider>
+                            <SettingsProvider>
+                                <AuthProvider>
+                                    <CartProvider>
+                                        <AppRouter />
+                                    </CartProvider>
+                                </AuthProvider>
+                            </SettingsProvider>
+                        </LanguageProvider>
+                    </ToastProvider>
+                </ThemeProvider>
             </HelmetProvider>
         </QueryClientProvider>
     );

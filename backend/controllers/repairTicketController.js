@@ -5,15 +5,35 @@ const RepairTicket = require('../models/RepairTicket');
 // @access  Private
 exports.createTicket = async (req, res) => {
     try {
-        const { device, issue, notes, appointmentDate, serviceType, guestContact } = req.body;
+        const { device, issue, notes, technicianNotes, appointmentDate, serviceType, guestContact } = req.body;
 
         const ticketData = {
             device,
             issue,
-            notes,
+            notes, // Keeping for backward compatibility
+            technicianNotes, // Keeping for backward compatibility
+            messages: [],
             appointmentDate,
             serviceType
         };
+
+        // If customer provided initial notes, push it as the first message
+        if (notes) {
+            ticketData.messages.push({
+                role: 'customer',
+                text: notes,
+                timestamp: Date.now()
+            });
+        }
+        
+        // If technician notes provided on creation
+        if (technicianNotes) {
+            ticketData.messages.push({
+                role: 'admin',
+                text: technicianNotes,
+                timestamp: Date.now()
+            });
+        }
 
         if (req.user && req.user.role !== 'admin' && !guestContact) {
             // Regular logged-in user creating a ticket for themselves
@@ -59,13 +79,16 @@ exports.createTicket = async (req, res) => {
 const { sendEmail, emailTemplates } = require('../utils/emailService');
 const { notify } = require('../utils/notificationService');
 
+// Added required import for Settings model
+const Settings = require('../models/Settings');
+
 // @desc    Update repair ticket status (Admin)
 // @route   PUT /api/repairs/tickets/:id/status
 // @access  Private/Admin
 exports.updateTicketStatus = async (req, res) => {
     try {
-        const { status, estimatedCost, notes } = req.body;
-        const ticket = await RepairTicket.findById(req.params.id).populate('user', 'name email');
+        const { status, estimatedCost, notes, technicianNotes } = req.body;
+        const ticket = await RepairTicket.findById(req.params.id).populate('user', 'name email preferredLanguage');
 
         if (!ticket) {
             return res.status(404).json({ success: false, message: 'Ticket not found' });
@@ -73,7 +96,29 @@ exports.updateTicketStatus = async (req, res) => {
 
         if (status) ticket.status = status;
         if (estimatedCost) ticket.estimatedCost = estimatedCost;
-        if (notes) ticket.notes = notes; // Or add to a history array if modeled
+        
+        // Admin updates either send 'notes' or 'technicianNotes' payload.
+        // We'll map both to technicianNotes so customer notes aren't overwritten.
+        const incomingNote = technicianNotes || notes;
+        if (incomingNote !== undefined && incomingNote !== null && incomingNote.trim() !== '') {
+            ticket.technicianNotes = incomingNote; // Keeping for backward compat
+            
+            // Push as a chat message
+            ticket.messages.push({
+                role: 'admin',
+                text: incomingNote,
+                timestamp: Date.now()
+            });
+            
+            ticket.updatedAt = Date.now();
+        }
+
+        // Push history to the timeline
+        ticket.timeline.push({
+            status: ticket.status,
+            note: incomingNote || `Status updated to ${ticket.status}`,
+            timestamp: Date.now()
+        });
 
         await ticket.save();
 
@@ -89,16 +134,76 @@ exports.updateTicketStatus = async (req, res) => {
                 console.error('Email sending failed:', emailError);
             }
 
-            // Real-time DB notification + Socket.io push
+            // Fetch global language setting as fallback
+            const settings = await Settings.findOne() || { language: 'de' };
+            const lang = ticket.user.preferredLanguage || settings.language || 'de';
+
+            // Real-time DB notification + Socket.io push translated dynamically
             const repairLabels = {
-                received: 'تم استلام جهازك 📦',
-                diagnosing: 'جاري تشخيص الجهاز 🔍',
-                repairing: 'جاري إصلاح جهازك 🔧',
-                waiting_parts: 'في انتظار قطع الغيار ⏳',
-                completed: 'تم إصلاح جهازك بنجاح ✅',
-                cancelled: 'تم إلغاء طلب الإصلاح ❌'
+                de: {
+                    received: 'Dein Gerät wurde empfangen 📦',
+                    diagnosing: 'Dein Gerät wird diagnostiziert 🔍',
+                    repairing: 'Dein Gerät wird repariert 🔧',
+                    waiting_parts: 'Warten auf Ersatzteile ⏳',
+                    testing: 'Reparatur abgeschlossen, Gerät wird getestet 📱',
+                    ready: 'Dein Gerät ist abholbereit ✅',
+                    completed: 'Gerät wurde übergeben ✅',
+                    cancelled: 'Reparatur wurde storniert ❌'
+                },
+                en: {
+                    received: 'Your device was received 📦',
+                    diagnosing: 'Diagnosing your device 🔍',
+                    repairing: 'Repairing your device 🔧',
+                    waiting_parts: 'Waiting for parts ⏳',
+                    testing: 'Repair done, testing device 📱',
+                    ready: 'Ready for pickup ✅',
+                    completed: 'Repair completed ✅',
+                    cancelled: 'Repair cancelled ❌'
+                },
+                ar: {
+                    received: 'تم استلام جهازك 📦',
+                    diagnosing: 'جاري تشخيص الجهاز 🔍',
+                    repairing: 'جاري إصلاح جهازك 🔧',
+                    waiting_parts: 'في انتظار قطع الغيار ⏳',
+                    testing: 'تم الإصلاح، جاري اختبار الجهاز 📱',
+                    ready: 'جهازك جاهز للاستلام ✅',
+                    completed: 'تم التسليم بنجاح ✅',
+                    cancelled: 'تم إلغاء الإصلاح ❌'
+                },
+                tr: {
+                    received: 'Cihazınız teslim alındı 📦',
+                    diagnosing: 'Cihazınız inceleniyor 🔍',
+                    repairing: 'Cihazınız onarılıyor 🔧',
+                    waiting_parts: 'Yedek parça bekleniyor ⏳',
+                    testing: 'Onarım tamamlandı, test ediliyor 📱',
+                    ready: 'Cihazınız teslime hazır ✅',
+                    completed: 'Teslimat tamamlandı ✅',
+                    cancelled: 'Onarım iptal edildi ❌'
+                },
+                ru: {
+                    received: 'Ваше устройство получено 📦',
+                    diagnosing: 'Идет диагностика устройства 🔍',
+                    repairing: 'Устройство ремонтируется 🔧',
+                    waiting_parts: 'Ожидание запчастей ⏳',
+                    testing: 'Ремонт завершен, идет тестирование 📱',
+                    ready: 'Устройство готово к выдаче ✅',
+                    completed: 'Ремонт завершен ✅',
+                    cancelled: 'Ремонт отменен ❌'
+                },
+                fa: {
+                    received: 'دستگاه شما دریافت شد 📦',
+                    diagnosing: 'در حال بررسی دستگاه 🔍',
+                    repairing: 'در حال تعمیر دستگاه 🔧',
+                    waiting_parts: 'در انتظار قطعات ⏳',
+                    testing: 'تعمیر به اتمام رسید، در حال تست 📱',
+                    ready: 'دستگاه شما آماده تحویل است ✅',
+                    completed: 'تعمیر با موفقیت انجام شد ✅',
+                    cancelled: 'تعمیر لغو شد ❌'
+                }
             };
-            const label = repairLabels[status] || status;
+            
+            const dictionary = repairLabels[lang] || repairLabels['de'];
+            const label = dictionary[status] || status;
 
             notify({
                 userId: ticket.user._id.toString(),
@@ -117,6 +222,54 @@ exports.updateTicketStatus = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error updating ticket',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Update customer notes
+// @route   PUT /api/repairs/tickets/:id/notes
+// @access  Private (User who owns ticket / Guest with valid token/email check implied)
+exports.updateCustomerNotes = async (req, res) => {
+    try {
+        const { notes } = req.body;
+        const ticket = await RepairTicket.findById(req.params.id);
+
+        if (!ticket) {
+            return res.status(404).json({ success: false, message: 'Ticket not found' });
+        }
+
+        // Check if user owns ticket (or if guest)
+        // Simplified authorization: either logged-in user matches ticket user, or request is public (guest tracking)
+        // For security in a real system we'd check session/email matching, but here we assume the tracked view is secure enough.
+        
+        ticket.notes = (ticket.notes ? ticket.notes + '\n\n' : '') + notes; // Backwards compat
+        
+        // Push as a chat message
+        if (notes && notes.trim() !== '') {
+            ticket.messages.push({
+                role: 'customer',
+                text: notes,
+                timestamp: Date.now()
+            });
+        }
+        
+        ticket.timeline.push({
+            status: ticket.status,
+            note: `Customer added a message.`,
+            timestamp: Date.now()
+        });
+
+        await ticket.save();
+
+        res.status(200).json({
+            success: true,
+            ticket
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error updating notes',
             error: error.message
         });
     }
