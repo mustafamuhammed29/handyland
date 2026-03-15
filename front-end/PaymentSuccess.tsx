@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { CheckCircle, Loader2, AlertCircle, Download, Package, Home, Upload } from 'lucide-react';
 import { useCart } from './context/CartContext';
+import { useToast } from './context/ToastContext';
 import { ENV } from './src/config/env';
 import { useQueryClient } from '@tanstack/react-query';
 import { dashboardKeys } from './hooks/useDashboardData';
@@ -19,6 +20,7 @@ const PaymentSuccess: React.FC = () => {
     const orderId = searchParams.get('order_id');
     const navigate = useNavigate();
     const { clearCart } = useCart();
+    const { addToast } = useToast();
     const queryClient = useQueryClient();
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -87,7 +89,7 @@ const PaymentSuccess: React.FC = () => {
                     }
                 }
 
-                if (data.success) {
+                if (data && data.success) {
                     setStatus('success');
                     setOrder(data.order);
                     clearCart();
@@ -98,10 +100,10 @@ const PaymentSuccess: React.FC = () => {
                     queryClient.invalidateQueries({ queryKey: dashboardKeys.stats() });
                 } else {
                     setStatus('error');
-                    setMessage(data.message || 'Payment verification failed.');
+                    setMessage(data?.message || 'Payment verification failed.');
                 }
             } catch (error) {
-                console.error('Order verification error:', error);
+                if (process.env.NODE_ENV !== 'production') console.error('Order verification error:', error);
                 setStatus('error');
                 setMessage('Could not connect to the verification server.');
             }
@@ -146,12 +148,12 @@ const PaymentSuccess: React.FC = () => {
             const data = await res.json();
             if (data.success) {
                 setReceiptUrl(data.receiptUrl);
-                alert('Receipt uploaded successfully! We will process your order soon.');
+                addToast('Receipt uploaded successfully! We will process your order soon.', 'success');
             } else {
-                alert(data.message || 'Failed to upload receipt');
+                addToast(data.message || 'Failed to upload receipt', 'error');
             }
         } catch (err) {
-            alert('Error uploading receipt');
+            addToast('Error uploading receipt', 'error');
         } finally {
             setUploading(false);
         }
@@ -160,7 +162,7 @@ const PaymentSuccess: React.FC = () => {
     const handleDownloadInvoice = async () => {
         if (!order) return;
         const id = order._id || order.id;
-        if (!id) return alert('Bestellungs-ID nicht gefunden');
+        if (!id) return addToast('Bestellungs-ID nicht gefunden', 'error');
         try {
             const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
             const response = await fetch(`${baseUrl}/api/orders/${id}/invoice`, {

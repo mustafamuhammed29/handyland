@@ -22,14 +22,14 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 // Removed CheckoutProps
 
-// Zod Schema for Validation
+// FIXED C-6: Strengthened Zod schema with proper regex validation
 const shippingSchema = z.object({
-    fullName: z.string().min(2, "Full name is required"),
+    fullName: z.string().min(2, "Full name is required").max(100, "Name is too long"),
     email: z.string().email("Invalid email address"),
-    phone: z.string().min(6, "Phone number is required"), // Added phone
-    address: z.string().min(5, "Address is too short"),
-    city: z.string().min(2, "City is required"),
-    zipCode: z.string().min(4, "Invalid Zip/Postal Code"),
+    phone: z.string().regex(/^(\+|00)?[1-9][0-9\s\-().]{6,20}$/, "Invalid phone number format"),
+    address: z.string().min(5, "Address is too short").max(200, "Address is too long"),
+    city: z.string().min(2, "City is required").max(100, "City name too long"),
+    zipCode: z.string().regex(/^[0-9]{4,10}$/, "Invalid Zip/Postal Code (4-10 digits)"),
     country: z.string().min(2, "Country is required"),
 });
 

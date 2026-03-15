@@ -16,6 +16,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// FIXED M-4: Only store minimal, non-sensitive user data in localStorage
+const getSafeUserForStorage = (user: User) => ({
+    id: user.id || (user as any)._id,
+    name: user.name,
+    email: user.email,
+    isLoggedIn: true,
+});
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(() => {
         try {
@@ -76,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     const { user } = await authService.getMe();
                     if (!ignore) {
                         setUser(user);
-                        localStorage.setItem('user', JSON.stringify(user));
+                localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                     }
                 } catch {
                     // Try refresh before giving up
@@ -86,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             try {
                                 const { user } = await authService.getMe();
                                 setUser(user);
-                                localStorage.setItem('user', JSON.stringify(user));
+                        localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                             } catch {
                                 setUser(null);
                                 localStorage.removeItem('user');
@@ -134,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 // FIXED: [Removed localStorage.setItem for accessToken and refreshToken to prevent XSS vulnerability]
 
-                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(data.user)));
                 setUser(data.user);
 
                 // Check if user was redirected from valuation flow

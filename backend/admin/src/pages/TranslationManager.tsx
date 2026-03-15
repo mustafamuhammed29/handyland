@@ -200,7 +200,7 @@ export default function TranslationManager() {
                                 <Languages className="w-5 h-5 text-blue-500" />
                                 {formData._id ? 'Edit Translation' : 'Add New Key'}
                             </h3>
-                            <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-white transition-colors">
+                            <button onClick={() => setShowForm(false)} aria-label="Close dialog" className="text-slate-400 hover:text-white transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>

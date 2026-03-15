@@ -77,11 +77,11 @@ export const Contact: React.FC<ContactProps> = () => {
     }
 
     return (
-        <section className="relative py-24 bg-black overflow-hidden border-t border-slate-900">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_var(--tw-gradient-stops))] from-blue-900/10 via-slate-950 to-black pointer-events-none"></div>
+        <section className="relative py-24 bg-white dark:bg-black overflow-hidden border-t border-slate-200 dark:border-slate-900 transition-colors duration-300">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_var(--tw-gradient-stops))] from-blue-100/30 dark:from-blue-900/10 via-white dark:via-slate-950 to-slate-50 dark:to-black pointer-events-none"></div>
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
@@ -90,10 +90,10 @@ export const Contact: React.FC<ContactProps> = () => {
                         <Radio className="w-3 h-3" />
                         <span>SIGNAL_STRENGTH: 100%</span>
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-2">
+                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
                         {t('contactTitle', 'Contact Us')}
                     </h2>
-                    <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+                    <p className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto">
                         {t('contactSubtitle', "We're here to help")}
                     </p>
                 </div>
@@ -102,7 +102,7 @@ export const Contact: React.FC<ContactProps> = () => {
 
                     <div className="space-y-6">
                         {/* Map Visual - Google Maps or Fallback */}
-                        <div className="relative h-64 rounded-3xl overflow-hidden border border-slate-800 bg-slate-900/50 group">
+                        <div className="relative h-64 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 group">
                             {settings.mapUrl ? (
                                 <iframe
                                     src={settings.mapUrl}
@@ -128,7 +128,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                     <MapPin className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <div className="text-xs text-slate-400 font-mono">HQ COORDINATES</div>
+                                    <div className="text-xs text-slate-300 dark:text-slate-400 font-mono">HQ COORDINATES</div>
                                     <div className="text-white font-bold text-lg">{settings.location.name}</div>
                                 </div>
                             </div>
@@ -136,20 +136,20 @@ export const Contact: React.FC<ContactProps> = () => {
 
                         {/* Info Grid */}
                         <div className="grid grid-cols-2 gap-3 md:gap-4">
-                            <div className="p-4 md:p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-primary/50 transition-colors group flex flex-col items-center text-center">
-                                <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-800 rounded-lg flex items-center justify-center mb-2 md:mb-4 text-purple-400 group-hover:scale-110 transition-transform">
+                            <div className="p-4 md:p-6 rounded-2xl bg-white/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-brand-primary/50 transition-colors group flex flex-col items-center text-center">
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-2 md:mb-4 text-purple-400 group-hover:scale-110 transition-transform">
                                     <Phone className="w-4 h-4 md:w-5 md:h-5" />
                                 </div>
                                 <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t('callUs', 'Call Us')}</div>
-                                <div className="text-white font-mono text-xs md:text-lg break-all">{settings.phone}</div>
+                                <div className="text-slate-800 dark:text-white font-mono text-xs md:text-lg break-all">{settings.phone}</div>
                             </div>
 
-                            <div className="p-4 md:p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-primary/50 transition-colors group flex flex-col items-center text-center">
-                                <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-800 rounded-lg flex items-center justify-center mb-2 md:mb-4 text-emerald-400 group-hover:scale-110 transition-transform">
+                            <div className="p-4 md:p-6 rounded-2xl bg-white/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-brand-primary/50 transition-colors group flex flex-col items-center text-center">
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-2 md:mb-4 text-emerald-400 group-hover:scale-110 transition-transform">
                                     <Mail className="w-4 h-4 md:w-5 md:h-5" />
                                 </div>
                                 <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t('emailUs', 'Email Us')}</div>
-                                <div className="text-white font-mono text-xs md:text-sm break-all">{settings.email}</div>
+                                <div className="text-slate-800 dark:text-white font-mono text-xs md:text-sm break-all">{settings.email}</div>
                             </div>
                         </div>
 
@@ -157,7 +157,7 @@ export const Contact: React.FC<ContactProps> = () => {
 
                         {/* Social Media Icons */}
                         {settings.socialLinks.length > 0 && (
-                            <div className="mt-8 pt-8 border-t border-slate-800">
+                            <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
                                 <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Social Connect</h4>
                                 <div className="flex gap-4">
                                     {settings.socialLinks.map((social: any, index: number) => (
@@ -166,7 +166,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                             href={social.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className={`w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 transition-all hover:scale-110 hover:border-slate-600 ${social.color}`}
+                                            className={`w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-all hover:scale-110 hover:border-slate-400 dark:hover:border-slate-600 ${social.color}`}
                                             title={`Visit our ${social.icon.name || 'social media'} page`}
                                             aria-label={`Visit our ${social.icon.name || 'social media'} page`}
                                         >
@@ -183,7 +183,7 @@ export const Contact: React.FC<ContactProps> = () => {
                         <div className="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-[2rem] opacity-20 blur-xl"></div>
                         <div className="relative glass-modern p-8 rounded-[2rem] border border-slate-700/50">
 
-                            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
                                 <MessageSquare className="w-5 h-5 text-brand-primary" />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">{settings.title}</span>
                             </h3>
@@ -197,7 +197,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                             type="text"
                                             name="name"
                                             required
-                                            className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-600"
+                                            className="w-full bg-slate-100/50 dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                                             placeholder={settings.labels.name}
                                         />
                                     </div>
@@ -211,7 +211,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                             type="email"
                                             name="email"
                                             required
-                                            className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-600"
+                                            className="w-full bg-slate-100/50 dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                                             placeholder={settings.labels.email}
                                         />
                                     </div>
@@ -223,7 +223,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                         name="message"
                                         required
                                         rows={4}
-                                        className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 px-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-600 resize-none"
+                                        className="w-full bg-slate-100/50 dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-xl py-3 px-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none"
                                         placeholder={settings.labels.message}
                                     ></textarea>
                                 </div>

@@ -624,6 +624,7 @@ export default function SettingsManager() {
                                     <label className="block text-slate-400 text-sm font-bold mb-2">Default Meta Title</label>
                                     <input
                                         type="text"
+                                        placeholder="HandyLand — Germany's #1 Phone Marketplace"
                                         value={settings.seo?.defaultMetaTitle || ''}
                                         onChange={e => handleChange('seo', 'defaultMetaTitle', e.target.value)}
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
@@ -632,6 +633,7 @@ export default function SettingsManager() {
                                 <div>
                                     <label className="block text-slate-400 text-sm font-bold mb-2">Default Meta Description</label>
                                     <textarea
+                                        placeholder="Describe your site for search engines..."
                                         value={settings.seo?.defaultMetaDescription || ''}
                                         onChange={e => handleChange('seo', 'defaultMetaDescription', e.target.value)}
                                         rows={3}
@@ -945,6 +947,7 @@ export default function SettingsManager() {
                                             type="number"
                                             min={0}
                                             max={120}
+                                            placeholder="5"
                                             value={settings.promoPopup?.delay ?? 5}
                                             onChange={e => handleChange('promoPopup', 'delay', Number(e.target.value))}
                                             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 outline-none"
