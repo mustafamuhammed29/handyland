@@ -8,6 +8,11 @@ const settingsSchema = new mongoose.Schema({
         default: 100
     },
     footerText: String,
+    language: {
+        type: String,
+        default: 'de',
+        enum: ['de', 'en', 'ar', 'tr', 'ru', 'fa']
+    },
     navbar: {
         type: mongoose.Schema.Types.Mixed,
         default: {}

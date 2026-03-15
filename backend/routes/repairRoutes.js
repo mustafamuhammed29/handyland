@@ -14,7 +14,8 @@ router.post('/track-guest', repairTicketController.trackGuestTicket);
 router.post('/tickets', optionalProtect, repairTicketController.createTicket);
 router.get('/my-repairs', protect, repairTicketController.getMyTickets); // Alias for frontend compatibility
 router.get('/tickets/my-tickets', protect, repairTicketController.getMyTickets);
-router.get('/tickets/:id', protect, repairTicketController.getTicket);
+router.get('/tickets/:id', optionalProtect, repairTicketController.getTicket);
+router.put('/tickets/:id/notes', optionalProtect, repairTicketController.updateCustomerNotes);
 
 // Admin routes (Catalog Management & Ticket Status)
 router.post('/devices', protect, authorize('admin'), repairController.createDevice);

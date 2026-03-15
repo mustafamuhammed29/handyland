@@ -168,7 +168,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
                 {/* --- SIDEBAR --- */}
                 <div className="w-full lg:w-72 shrink-0">
-                    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-6 sticky top-28 z-40">
+                    <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sticky top-28 z-40">
                         {/* Profile Summary */}
                         <div className="flex items-center gap-4 mb-8">
                             <div className="relative">
@@ -178,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
                             </div>
                             <div className="overflow-hidden">
-                                <h3 className="text-white font-bold truncate">{currentUser.name}</h3>
+                                <h3 className="text-slate-900 dark:text-white font-bold truncate">{currentUser.name}</h3>
                                 <div className="flex items-center gap-1 text-xs text-brand-primary">
                                     <Shield className="w-3 h-3" /> {isAdmin ? 'Administrator' : (
                                         currentUser.createdAt
@@ -196,8 +196,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                     key={item.id}
                                     onClick={() => setActiveTab(item.id)}
                                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 font-medium ${activeTab === item.id
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                        ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20'
+                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
@@ -212,14 +212,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 </button>
                             ))}
 
-                            <div className="h-px bg-slate-800 my-4"></div>
+                            <div className="h-px bg-slate-200 dark:bg-slate-800 my-4"></div>
 
                             <div className="flex items-center gap-4">
                                 <NotificationBell userId={currentUser?._id} />
                                 <button
                                     onClick={() => { logout(); navigate('/'); }}
                                     aria-label="Logout"
-                                    className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+                                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                                 >
                                     <LogOut className="w-5 h-5" />
                                 </button>

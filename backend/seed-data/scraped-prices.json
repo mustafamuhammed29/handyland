@@ -1,0 +1,67 @@
+[
+  {
+    "brand": "Apple",
+    "model": "iPhone 13",
+    "repairs": [
+      { "type": "Display (LCD)", "price": 109 },
+      { "type": "Display (OLED)", "price": 129 },
+      { "type": "Backcover", "price": 109 },
+      { "type": "Akku", "price": 79 },
+      { "type": "Switches (Mute/Vol/Power)", "price": 79 }
+    ]
+  },
+  {
+    "brand": "Apple",
+    "model": "iPhone 13 Pro",
+    "repairs": [
+      { "type": "Display (LCD)", "price": 119 },
+      { "type": "Display (OLED)", "price": 139 },
+      { "type": "Backcover", "price": 109 },
+      { "type": "Akku", "price": 79 }
+    ]
+  },
+  {
+    "brand": "Samsung",
+    "model": "Galaxy S24",
+    "repairs": [
+      { "type": "Display (Original)", "price": 239 },
+      { "type": "Akku", "price": 99 },
+      { "type": "Backcover", "price": 89 },
+      { "type": "Wasserschaden", "price": 59 }
+    ]
+  },
+  {
+    "brand": "Samsung",
+    "model": "Galaxy S24 Plus",
+    "repairs": [
+      { "type": "Display (Original)", "price": 239 },
+      { "type": "Akku", "price": 99 },
+      { "type": "Backcover", "price": 89 }
+    ]
+  },
+  {
+    "brand": "Samsung",
+    "model": "Galaxy S24 Ultra",
+    "repairs": [
+      { "type": "Display (Original)", "price": 289 },
+      { "type": "Akku", "price": 99 },
+      { "type": "Backcover", "price": 89 }
+    ]
+  },
+  {
+    "brand": "Huawei",
+    "model": "P30 Pro",
+    "repairs": [
+      { "type": "Display", "price": 159 },
+      { "type": "Akku", "price": 79 }
+    ]
+  },
+  {
+    "brand": "Google",
+    "model": "Pixel 7 Pro",
+    "repairs": [
+      { "type": "Display", "price": 349 },
+      { "type": "Akku", "price": 89 }
+    ]
+  }
+]

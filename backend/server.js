@@ -227,6 +227,7 @@ app.use('/api/valuation', require('./routes/valuationRoutes'));
 app.use('/api/promotions', require('./routes/promotionsRoutes'));
 app.use('/api/addresses', require('./routes/addressRoutes')); // Added
 app.use('/api/transactions', require('./routes/transactionRoutes')); // Added
+app.use('/api/translations', require('./routes/translationRoutes')); // i18next CMS
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes')); // Registered Message Routes
 app.use('/api/shipping-methods', require('./routes/shippingRoutes')); // Added

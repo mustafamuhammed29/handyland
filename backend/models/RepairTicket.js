@@ -35,6 +35,18 @@ const RepairTicketSchema = new mongoose.Schema({
         default: 'In-Store'
     },
     notes: String,
+    technicianNotes: String,
+    messages: [{
+        role: {
+            type: String,
+            enum: ['customer', 'admin']
+        },
+        text: String,
+        timestamp: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     timeline: [{
         status: String,
         timestamp: {

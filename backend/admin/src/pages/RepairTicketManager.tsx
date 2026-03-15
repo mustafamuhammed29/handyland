@@ -36,6 +36,13 @@ interface RepairTicket {
     appointmentDate?: string;
     serviceType: string;
     notes?: string;
+    technicianNotes?: string;
+    messages?: {
+        _id?: string;
+        role: 'customer' | 'admin';
+        text: string;
+        timestamp: string;
+    }[];
     timeline: { status: string; timestamp: string; note: string }[];
     createdAt: string;
     updatedAt: string;
@@ -63,6 +70,10 @@ const RepairTicketManager: React.FC = () => {
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [statusForm, setStatusForm] = useState({ status: '', estimatedCost: '', adminNote: '' });
     const [updatingStatus, setUpdatingStatus] = useState(false);
+
+    // Support sending a single chat message
+    const [newMessage, setNewMessage] = useState('');
+    const [sendingMessage, setSendingMessage] = useState(false);
 
     // Create ticket modal state
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -130,7 +141,7 @@ const RepairTicketManager: React.FC = () => {
             const response = await api.put(`/api/repairs/tickets/${selectedTicket._id}/status`, {
                 status: statusForm.status,
                 estimatedCost: statusForm.estimatedCost ? Number(statusForm.estimatedCost) : undefined,
-                notes: statusForm.adminNote || undefined,
+                technicianNotes: statusForm.adminNote || undefined,
             });
             if (response.data.success) {
                 showToast('success', `Ticket ${selectedTicket.ticketId} status updated!`);
@@ -146,6 +157,30 @@ const RepairTicketManager: React.FC = () => {
         }
     };
 
+    const handleSendMessage = async () => {
+        if (!selectedTicket || !newMessage.trim()) return;
+        setSendingMessage(true);
+        try {
+            const response = await api.put(`/api/repairs/tickets/${selectedTicket._id}/status`, {
+                technicianNotes: newMessage,
+            });
+            if (response.data.success) {
+                // Instantly update local selected ticket
+                setSelectedTicket({
+                    ...selectedTicket,
+                    messages: response.data.ticket.messages
+                });
+                setNewMessage('');
+                fetchTickets();
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+            showToast('error', 'Failed to send message.');
+        } finally {
+            setSendingMessage(false);
+        }
+    };
+
     const handleCreateTicket = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -153,7 +188,7 @@ const RepairTicketManager: React.FC = () => {
                 device: createForm.device,
                 issue: createForm.issue,
                 serviceType: createForm.serviceType,
-                notes: createForm.notes,
+                technicianNotes: createForm.notes,
                 guestContact: {
                     name: createForm.guestName,
                     email: createForm.guestEmail,
@@ -453,50 +488,91 @@ const RepairTicketManager: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Timeline & Actions */}
-                                <div className="space-y-6 flex flex-col h-full">
-                                    <div className="flex-1 min-h-[200px]">
-                                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex justify-between items-center">
-                                            Ticket Timeline
-                                            <span className={`px-2 py-0.5 rounded text-[10px] ${STATUS_CONFIG[selectedTicket.status]?.bg} ${STATUS_CONFIG[selectedTicket.status]?.color}`}>Current: {STATUS_CONFIG[selectedTicket.status]?.label}</span>
-                                        </h3>
-                                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 h-full max-h-64 overflow-y-auto relative">
-                                            <div className="absolute left-6 top-8 bottom-8 w-px bg-slate-700"></div>
-                                            <div className="space-y-4 relative z-10">
-                                                {selectedTicket.timeline?.map((entry, idx) => {
-                                                    const iconCfg = STATUS_CONFIG[entry.status] || STATUS_CONFIG['pending'];
-                                                    return (
-                                                        <div key={idx} className="flex gap-4">
-                                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 mt-0.5 bg-slate-900 ${iconCfg.color} ${iconCfg.border}`}>
-                                                                {React.cloneElement(iconCfg.icon as any, { className: 'w-3 h-3' })}
-                                                            </div>
-                                                            <div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="font-bold text-white text-sm">{iconCfg.label}</span>
-                                                                    <span className="text-xs text-slate-500">{new Date(entry.timestamp).toLocaleString()}</span>
-                                                                </div>
-                                                                {entry.note && <div className="text-sm text-slate-400 mt-1">{entry.note}</div>}
-                                                            </div>
+                                {/* Unified Chat & Timeline */}
+                                <div className="space-y-6 flex flex-col h-[600px] lg:h-full pr-1">
+                                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex justify-between items-center">
+                                        Ticket Chat
+                                        <span className={`px-2 py-0.5 rounded text-[10px] ${STATUS_CONFIG[selectedTicket.status]?.bg} ${STATUS_CONFIG[selectedTicket.status]?.color}`}>Current: {STATUS_CONFIG[selectedTicket.status]?.label}</span>
+                                    </h3>
+                                    
+                                    <div className="flex-1 bg-slate-950/50 rounded-xl p-4 border border-slate-700/50 flex flex-col relative min-h-[400px]">
+                                        <div className="flex-1 overflow-y-auto pr-2 space-y-4 mb-4 custom-scrollbar">
+                                            {/* Legacy Notes Rendering */}
+                                            {(!selectedTicket.messages || selectedTicket.messages.length === 0) && selectedTicket.notes && (
+                                                <div className="flex justify-start">
+                                                    <div className="bg-slate-800 text-white p-3 rounded-2xl rounded-bl-sm max-w-[85%] border border-slate-700">
+                                                        <p className="text-sm whitespace-pre-wrap leading-relaxed">{selectedTicket.notes}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {(!selectedTicket.messages || selectedTicket.messages.length === 0) && selectedTicket.technicianNotes && (
+                                                <div className="flex justify-end">
+                                                    <div className="bg-blue-600 text-white p-3 rounded-2xl rounded-br-sm max-w-[85%]">
+                                                        <p className="text-sm whitespace-pre-wrap leading-relaxed">{selectedTicket.technicianNotes}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Detailed Messages Array */}
+                                            {selectedTicket.messages && selectedTicket.messages.map((msg, index) => (
+                                                <div key={msg._id || index} className={`flex ${msg.role === 'admin' ? 'justify-end' : 'justify-start'}`}>
+                                                    <div className="flex flex-col gap-1 max-w-[85%]">
+                                                        <div className={`p-3 rounded-2xl shadow-sm ${msg.role === 'admin' ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-800 border border-slate-700 text-slate-200 rounded-bl-sm'}`}>
+                                                            <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                                                         </div>
-                                                    )
-                                                })}
-                                            </div>
+                                                        <span className={`text-[10px] text-slate-500 font-mono ${msg.role === 'admin' ? 'text-right pr-1' : 'text-left pl-1'} `}>
+                                                            {new Date(msg.timestamp).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            
+                                            {(!selectedTicket.messages || selectedTicket.messages.length === 0) && !selectedTicket.notes && !selectedTicket.technicianNotes && (
+                                                <div className="flex items-center justify-center h-full text-slate-600 text-sm italic">
+                                                    Start solving the issue by sending a message to the customer.
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        {/* Reply Area inside Modal Content Area */}
+                                        <div className="mt-auto pt-2 border-t border-slate-800/50 relative shrink-0">
+                                            <textarea
+                                                value={newMessage}
+                                                onChange={e => setNewMessage(e.target.value)}
+                                                placeholder="Reply to customer..."
+                                                disabled={sendingMessage}
+                                                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 pr-12 text-sm text-white focus:border-blue-500 outline-none resize-none h-14 min-h-[56px] shadow-inner"
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                        e.preventDefault();
+                                                        handleSendMessage();
+                                                    }
+                                                }}
+                                            />
+                                            <button 
+                                                onClick={handleSendMessage}
+                                                disabled={!newMessage.trim() || sendingMessage}
+                                                className="absolute right-2 top-4 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:opacity-50 transition-colors shadow-sm"
+                                            >
+                                                {sendingMessage ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <Send className="w-4 h-4" /> }
+                                            </button>
                                         </div>
                                     </div>
 
                                     {/* Action Buttons */}
-                                    <div className="pt-4 border-t border-slate-800 flex flex-col gap-3">
+                                    <div className="pt-2 flex gap-3 shrink-0">
                                         <button
                                             onClick={() => openStatusModal(selectedTicket)}
-                                            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all"
+                                            className="flex-1 flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-all text-sm"
                                         >
-                                            <Send className="w-5 h-5" /> Update Status / Contact Customer
+                                            <Wrench className="w-4 h-4" /> Change Status
                                         </button>
                                         <button
                                             onClick={() => handleDeleteTicket(selectedTicket)}
-                                            className="w-full flex items-center justify-center gap-2 bg-red-600/20 hover:bg-red-600/40 border border-red-600/30 text-red-400 font-bold py-2.5 rounded-xl transition-all"
+                                            className="px-4 flex items-center justify-center gap-2 bg-red-600/20 hover:bg-red-600/40 border border-red-600/30 text-red-400 font-bold py-3 rounded-xl transition-all"
+                                            title="Delete Ticket"
                                         >
-                                            <Trash2 className="w-4 h-4" /> Delete This Ticket
+                                            <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </div>

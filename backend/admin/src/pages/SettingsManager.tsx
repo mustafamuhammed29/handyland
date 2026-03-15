@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, CheckCircle, AlertCircle, Shield, Bell, Gift, Globe } from 'lucide-react';
+import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, AlertCircle, Shield, Bell, Gift, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { api } from '../utils/api';
 import ImageUpload from '../components/ImageUpload';
 
@@ -118,6 +119,7 @@ interface Settings {
     contactEmail: string;
     footerText: string;
     freeShippingThreshold: number;
+    language?: string;
     navbar: NavbarSettings;
     hero: HeroSettings;
     valuation: ValuationSettings;
@@ -183,6 +185,7 @@ export default function SettingsManager() {
         contactEmail: '',
         footerText: '',
         freeShippingThreshold: 100,
+        language: 'de',
         navbar: { logoText: 'HANDY', logoAccentText: 'LAND', showLanguageSwitcher: true },
         hero: {
             headline: '', subheadline: '', bgStart: '', bgEnd: '', accentColor: '',
@@ -221,6 +224,7 @@ export default function SettingsManager() {
             defaultMetaDescription: 'Your one-stop shop for electronics, mobile phones, and reliable repair services.',
             defaultKeywords: 'handyland, electronics, mobile repair, buy phones, sell phones',
             defaultOgImage: '',
+            faviconUrl: '',
             googleAnalyticsId: '',
             facebookPixelId: ''
         }
@@ -228,11 +232,9 @@ export default function SettingsManager() {
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
 
-    // Toast state for settings save feedback
-    const [saveToast, setSaveToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const showSaveToast = (type: 'success' | 'error', text: string) => {
-        setSaveToast({ type, text });
-        setTimeout(() => setSaveToast(null), 3500);
+        if (type === 'success') toast.success(text);
+        else toast.error(text);
     };
 
     // Email Templates State
@@ -243,7 +245,6 @@ export default function SettingsManager() {
     const [editHtml, setEditHtml] = useState('');
     const [emailPreview, setEmailPreview] = useState(false);
     const [emailSaving, setEmailSaving] = useState(false);
-    const [emailNotification, setEmailNotification] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [emailLoading, setEmailLoading] = useState(false);
 
     useEffect(() => {
@@ -306,8 +307,8 @@ export default function SettingsManager() {
     };
 
     const showEmailNotification = (type: 'success' | 'error', text: string) => {
-        setEmailNotification({ type, text });
-        setTimeout(() => setEmailNotification(null), 4000);
+        if (type === 'success') toast.success(text);
+        else toast.error(text);
     };
 
     const startEmailEdit = (template: EmailTemplateData) => {
@@ -360,16 +361,6 @@ export default function SettingsManager() {
 
     return (
         <div>
-            {/* Global Save Toast */}
-            {saveToast && (
-                <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium animate-in slide-in-from-right-4 ${saveToast.type === 'success'
-                    ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
-                    : 'bg-red-900/90 border-red-500/50 text-red-300'
-                    }`}>
-                    {saveToast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                    {saveToast.text}
-                </div>
-            )}
             <div className="flex justify-between items-center mb-8">
                 <div>
                     <h2 className="text-3xl font-black text-white">Global Settings</h2>
@@ -989,17 +980,6 @@ export default function SettingsManager() {
 
                     {activeTab === 'email-templates' && (
                         <div className="space-y-6">
-                            {/* Notification */}
-                            {emailNotification && (
-                                <div className={`flex items-center gap-3 px-5 py-3 rounded-xl border text-sm font-semibold ${emailNotification.type === 'success'
-                                    ? 'bg-green-600/20 border-green-500/50 text-green-300'
-                                    : 'bg-red-600/20 border-red-500/50 text-red-300'
-                                    }`}>
-                                    {emailNotification.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                                    {emailNotification.text}
-                                </div>
-                            )}
-
                             {emailEditMode && selectedEmailTemplate ? (
                                 /* ── Edit View ── */
                                 <div className="space-y-5">

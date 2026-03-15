@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square, Star } from 'lucide-react';
+import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
 import { api } from '../utils/api';
 
@@ -60,9 +61,11 @@ export default function ProductsManager() {
         if (!confirm('Are you sure you want to delete this product?')) return;
         try {
             await api.delete(`/api/products/${id}`);
+            toast.success('Product deleted successfully');
             fetchProducts();
         } catch (error) {
             console.error("Failed to delete", error);
+            toast.error('Failed to delete product');
         }
     };
 
@@ -80,10 +83,10 @@ export default function ProductsManager() {
             };
             const updatedSettings = { ...data, hero: updatedHero };
             await api.put('/api/settings', updatedSettings);
-            alert('Successfully updated homepage featured device!');
+            toast.success('Successfully updated homepage featured device!');
         } catch (error) {
             console.error("Failed to set hero", error);
-            alert('Failed to update homepage featured device.');
+            toast.error('Failed to update homepage featured device.');
         }
     };
 
@@ -107,10 +110,12 @@ export default function ProductsManager() {
         if (!confirm(`Are you sure you want to delete ${selectedProducts.length} selected products?`)) return;
         try {
             await Promise.all(selectedProducts.map(id => api.delete(`/api/products/${id}`)));
+            toast.success(`Deleted ${selectedProducts.length} products`);
             fetchProducts();
             setSelectedProducts([]);
         } catch (error) {
             console.error("Failed to perform bulk delete", error);
+            toast.error('Failed to perform bulk delete');
         }
     };
 
@@ -151,14 +156,17 @@ export default function ProductsManager() {
 
             if (formData.id) {
                 await api.put(url, payload);
+                toast.success('Product updated successfully');
             } else {
                 await api.post(url, payload);
+                toast.success('Product created successfully');
             }
             setIsModalOpen(false);
             resetForm();
             fetchProducts();
         } catch (error) {
             console.error("Failed to save", error);
+            toast.error('Failed to save product');
         }
     };
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background-color:#020617">
+<html lang="en" class="dark">
 
 <head>
   <meta charset="UTF-8" />
@@ -33,9 +33,9 @@
   <meta property="twitter:description"
     content="Buy, Sell, and Repair premium tech devices. The best marketplace for smartphones, accessories, and professional repair services.">
   <meta property="twitter:image" content="/og-image.jpg">
-  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -43,11 +43,21 @@
               primary: 'var(--color-primary, #06b6d4)',
               secondary: 'var(--color-secondary, #3b82f6)'
             }
+          },
+          animation: {
+            'shimmer': 'shimmer 2s infinite linear',
+          },
+          keyframes: {
+            shimmer: {
+              '0%': { backgroundPosition: '-1000px 0' },
+              '100%': { backgroundPosition: '1000px 0' },
+            }
           }
         }
       }
     }
   </script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link
     href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Inter:wght@300;400;600;700&display=swap"
     rel="stylesheet">
@@ -64,7 +74,7 @@
 </script>
 </head>
 
-<body class="antialiased selection:bg-cyan-500 selection:text-black">
+<body class="antialiased selection:bg-cyan-500 selection:text-black bg-slate-50 text-slate-900 dark:bg-[#020617] dark:text-white transition-colors duration-300">
   <div class="aurora-bg"></div>
   <div class="fixed inset-0 tech-grid pointer-events-none z-[-1]"></div>
   <div id="root"></div>

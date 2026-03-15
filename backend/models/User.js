@@ -101,6 +101,13 @@ const UserSchema = new mongoose.Schema({
         repairStatus: { type: Boolean, default: true },
         promotions: { type: Boolean, default: false },
         newsletter: { type: Boolean, default: false }
+    },
+
+    // User Interface Preference
+    preferredLanguage: {
+        type: String,
+        enum: ['de', 'en', 'ar', 'tr', 'ru', 'fa'],
+        default: 'de'
     }
 }, {
     timestamps: true

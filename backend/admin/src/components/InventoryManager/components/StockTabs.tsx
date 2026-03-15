@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, ShoppingCart, FileText } from 'lucide-react';
 
 interface StockTabsProps {

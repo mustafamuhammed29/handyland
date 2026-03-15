@@ -1,6 +1,7 @@
 import React from 'react';
-import { CheckCircle, Tag, X, Loader2 } from 'lucide-react';
+import { CheckCircle, Tag, X, Loader2, ShieldCheck, Truck } from 'lucide-react';
 import { formatPrice } from '../../utils/formatPrice';
+import { TrustBadges } from '../../components/products/TrustBadges';
 
 // FIXED: Extracted from Checkout.tsx for better maintainability (FIX 5)
 
@@ -134,6 +135,11 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     <span>Total</span>
                     <span>{formatPrice(getFinalTotal())}</span>
                 </div>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="mt-6 pt-6 border-t border-slate-800">
+                <TrustBadges className="grid-cols-2" />
             </div>
         </div>
     );

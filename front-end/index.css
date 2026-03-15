@@ -5,12 +5,31 @@
 
 :root {
   font-family: 'Inter', 'Tajawal', sans-serif;
-  background-color: #000000;
-  color: #ffffff;
   overflow-x: hidden;
 }
 
-/* Aurora Background Effect */
+/* Base Light and Dark Adjustments */
+html.dark {
+  color-scheme: dark;
+}
+html:not(.dark) {
+  color-scheme: light;
+}
+
+html:not(.dark) .aurora-bg,
+html:not(.dark) .tech-grid {
+  opacity: 0.05; /* Fades the existing dark background effects in light mode */
+}
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  @apply bg-slate-50 text-slate-900 transition-colors duration-300;
+}
+
+.dark body {
+  @apply bg-slate-950 text-slate-50;
+}
 .aurora-bg {
   position: fixed;
   top: -50%;
@@ -41,11 +60,44 @@
 
 /* Modern Glass */
 .glass-modern {
-  background: rgba(20, 20, 25, 0.6);
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.6);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.dark .glass-modern {
+  background: rgba(20, 20, 25, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* Skeleton Loader */
+.skeleton-loader {
+  background: #e2e8f0;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.4) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 1000px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.5rem;
+}
+
+.dark .skeleton-loader {
+  background: #1e293b;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 /* Glowing Text */
@@ -58,6 +110,7 @@
   background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
   linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 50px 50px;
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
   mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
 }
 
@@ -115,6 +168,9 @@
   -webkit-mask: 
      linear-gradient(#fff 0 0) content-box, 
      linear-gradient(#fff 0 0);
+  mask: 
+     linear-gradient(#fff 0 0) content-box, 
+     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
@@ -149,4 +205,10 @@
 /* The divider line */
 .PhoneInputCountrySelectArrow {
   opacity: 0.7;
+}
+
+/* Fix native select options in dark mode */
+.dark select option {
+  background-color: #0f172a; /* Tailwind slate-900 */
+  color: #ffffff;
 }

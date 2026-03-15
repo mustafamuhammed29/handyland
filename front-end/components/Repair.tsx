@@ -53,7 +53,7 @@ interface RepairProps {
 export const Repair: React.FC<RepairProps> = ({ lang }) => {
     const { t } = useTranslation();
     const { settings } = useSettings();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { addToast } = useToast();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
@@ -68,7 +68,8 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
         name: '',
         email: '',
         phone: '',
-        notes: ''
+        notes: '',
+        appointmentDate: ''
     });
     const [submitting, setSubmitting] = useState(false);
 
@@ -122,6 +123,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 device: selectedServiceForTicket.device,
                 issue: selectedServiceForTicket.service,
                 notes: ticketForm.notes,
+                appointmentDate: ticketForm.appointmentDate,
                 serviceType: 'In-Store'
             };
 
@@ -133,16 +135,23 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 };
             }
 
-            const response = await api.post('/api/repairs/tickets', payload);
-            if (response.data?.success) {
+            const response: any = await api.post('/api/repairs/tickets', payload);
+            if (response?.success) {
                 addToast('Repair Ticket Created Successfully!', 'success');
                 setShowTicketModal(false);
                 setSelectedDevice(null);
-                setTicketForm({ name: '', email: '', phone: '', notes: '' });
+                setTicketForm({ name: '', email: '', phone: '', notes: '', appointmentDate: '' });
                 // Redirect user to track repair with their new ticket ID
                 setTimeout(() => {
-                    navigate('/track-repair', { state: { ticketId: response.data.ticket.ticketId, email: ticketForm.email } });
+                    navigate('/track-repair', { 
+                        state: { 
+                            ticketId: response.ticket.ticketId, 
+                            email: isAuthenticated ? user?.email : ticketForm.email 
+                        } 
+                    });
                 }, 1500);
+            } else {
+                addToast(response?.message || 'Failed to create repair ticket. Please try again.', 'error');
             }
         } catch (error) {
             console.error('Ticket creation error', error);
@@ -184,6 +193,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                     src={getImageUrl(selectedDevice.image)}
                                     alt={selectedDevice.model}
                                     className="relative w-full h-full object-contain drop-shadow-2xl z-10"
+                                    onError={(e: any) => e.target.src = '/placeholder.png'}
                                 />
                                 {/* Scan Line */}
                                 <div className="absolute top-0 left-0 w-full h-1 bg-blue-400 shadow-[0_0_15px_#60a5fa] animate-[scan_2s_linear_infinite] opacity-50 z-20"></div>
@@ -319,8 +329,13 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                 </div>
 
                                 <div className="flex items-center gap-6 mb-6">
-                                    <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-slate-800 border border-slate-700 group-hover:border-blue-500/30 transition-colors">
-                                        <img src={getImageUrl(device.image)} alt={device.model} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                    <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-slate-800 border border-slate-700 group-hover:border-blue-500/30 transition-colors flex items-center justify-center">
+                                        <img 
+                                            src={getImageUrl(device.image)} 
+                                            alt={device.model} 
+                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
+                                            onError={(e: any) => e.target.src = '/placeholder.png'}
+                                        />
                                     </div>
                                     <div>
                                         <div className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mb-1">{device.brand}</div>
@@ -422,6 +437,20 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                                         </div>
                                     </>
                                 )}
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Store Visit Date <span className="font-normal normal-case opacity-50">(Optional)</span></label>
+                                    <input
+                                        type="date"
+                                        title="Appointment Date"
+                                        value={ticketForm.appointmentDate}
+                                        onChange={e => setTicketForm({ ...ticketForm, appointmentDate: e.target.value })}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:border-blue-500 outline-none"
+                                        style={{ colorScheme: 'dark' }}
+                                    />
+                                    <p className="text-[10px] text-slate-500 mt-1">When do you plan to bring the device to our store?</p>
+                                </div>
 
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 mb-1 uppercase">Additional Notes <span className="font-normal normal-case opacity-50">(Optional)</span></label>

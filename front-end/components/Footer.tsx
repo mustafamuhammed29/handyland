@@ -33,7 +33,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
 
   if (loading) {
     return (
-      <footer className="bg-slate-950 border-t border-slate-900 mt-auto relative z-10">
+      <footer className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 mt-auto relative z-10">
         <div className="max-w-7xl mx-auto py-16 px-4">
           <div className="flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-slate-800 border-t-cyan-500 rounded-full animate-spin"></div>
@@ -44,12 +44,12 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
   }
 
   return (
-    <footer className="bg-slate-950 border-t border-slate-900 mt-auto relative z-10">
+    <footer className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 mt-auto relative z-10">
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className={`grid gap-12 mb-12 ${settings.columns.length === 0 ? 'md:grid-cols-1' : settings.columns.length === 1 ? 'md:grid-cols-2' : settings.columns.length === 2 ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
           {/* Company Info */}
           <div className={settings.columns.length <= 1 ? 'col-span-1' : 'col-span-1 md:col-span-2'}>
-            <Link to="/" className="text-3xl font-black text-white tracking-tighter uppercase cursor-pointer inline-block">
+            <Link to="/" className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase cursor-pointer inline-block">
               {settings.companyInfo.name.split('LAND')[0]}
               <span className="text-brand-primary">LAND</span>
             </Link>
@@ -61,7 +61,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
           {/* Dynamic Columns */}
           {settings.columns.map((column, index) => (
             <div key={index}>
-              <h4 className="text-white font-bold mb-6 uppercase text-xs tracking-[0.2em]">
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 uppercase text-xs tracking-[0.2em]">
                 {column.title}
               </h4>
               <ul className="space-y-4 text-sm text-slate-500">
@@ -81,17 +81,17 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 font-mono">
+        <div className="pt-8 border-t border-slate-200 dark:border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 font-mono">
           <span>{settings.companyInfo.copyright}</span>
 
           {/* Legal Links (Dynamic) */}
           <div className="flex flex-wrap justify-center gap-6">
             <Link to="/track-repair" className="hover:text-brand-primary uppercase transition-colors text-brand-primary font-bold">{t('hero.trackRepair')}</Link>
-            <Link to="/agb" className="hover:text-white uppercase transition-colors">AGB</Link>
-            <Link to="/datenschutz" className="hover:text-white uppercase transition-colors">Datenschutz</Link>
-            <Link to="/impressum" className="hover:text-white uppercase transition-colors">Impressum</Link>
-            <Link to="/kundenservice" className="hover:text-white uppercase transition-colors">Kundenservice</Link>
-            <Link to="/uber-uns" className="hover:text-white uppercase transition-colors">Über Uns</Link>
+            <Link to="/agb" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">AGB</Link>
+            <Link to="/datenschutz" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Datenschutz</Link>
+            <Link to="/impressum" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Impressum</Link>
+            <Link to="/kundenservice" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Kundenservice</Link>
+            <Link to="/uber-uns" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Über Uns</Link>
           </div>
 
           {/* Bottom Links from Settings (if any) */}
@@ -101,7 +101,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
                 <Link
                   key={index}
                   to={link.url}
-                  className="hover:text-white uppercase"
+                  className="hover:text-slate-900 dark:hover:text-white uppercase"
                 >
                   {link.label}
                 </Link>

@@ -62,9 +62,9 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
     if (loading) {
         return (
-            <section className="py-24 bg-slate-900 border-t border-slate-800">
+            <section className="py-24 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
                 <div className="flex items-center justify-center">
-                    <div className="w-8 h-8 border-2 border-slate-800 border-t-cyan-500 rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-2 border-slate-200 dark:border-slate-800 border-t-brand-primary rounded-full animate-spin"></div>
                 </div>
             </section>
         );
@@ -72,7 +72,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
     if (comparisons.length === 0) {
         return (
-            <section className="py-24 bg-slate-900 border-t border-slate-800">
+            <section className="py-24 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
                 <div className="max-w-7xl mx-auto px-4 text-center">
                     <p className="text-slate-500">No public case studies verified yet.</p>
                 </div>
@@ -112,7 +112,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
     };
 
     return (
-        <section className="py-24 relative bg-slate-900">
+        <section className="py-24 relative bg-slate-50 dark:bg-slate-900">
             {/* Grid Pattern Background */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(13,148,136,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(13,148,136,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
@@ -125,7 +125,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                             <Wand2 className="w-8 h-8 text-brand-primary" />
                             <span className="text-brand-primary font-mono tracking-widest text-sm uppercase">{settings.subtitle}</span>
                         </div>
-                        <h2 className="text-4xl lg:text-5xl font-black text-white">
+                        <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white">
                             {settings.title}
                         </h2>
                     </div>
@@ -138,7 +138,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                 onClick={() => setFilter(cat.id)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-bold transition-all ${filter === cat.id
                                     ? 'bg-brand-primary/20 border-brand-primary text-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]'
-                                    : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-600'
+                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-slate-300 dark:hover:border-slate-600'
                                     }`}
                             >
                                 {cat.icon}
@@ -152,7 +152,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
                     {/* LEFT: THE DIAGNOSTIC VIEWER (Interactive Slider) */}
                     <div className="w-full lg:w-2/3 flex flex-col">
-                        <div className="relative flex-1 rounded-3xl overflow-hidden border-2 border-slate-800 bg-slate-950 shadow-2xl group min-h-[400px] lg:min-h-[500px]">
+                        <div className="relative flex-1 rounded-3xl overflow-hidden border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl group min-h-[400px] lg:min-h-[500px]">
                             {/* Before/After Container */}
                             <div
                                 ref={containerRef}
@@ -248,7 +248,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
                     {/* RIGHT: Case Files Grid */}
                     <div className="w-full lg:w-1/3 flex flex-col">
-                        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex-1 flex flex-col">
+                        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex-1 flex flex-col">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-2">
                                     <Activity className="w-5 h-5 text-brand-primary" />
@@ -266,7 +266,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                     >
                                         <div className={`relative rounded-xl overflow-hidden border-2 transition-all ${selectedId === project._id
                                             ? 'border-brand-primary shadow-[0_0_20px_rgba(6,182,212,0.4)]'
-                                            : 'border-slate-800 hover:border-slate-600'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
                                             }`}>
                                             {/* Thumbnail */}
                                             <div className="relative h-32 bg-slate-900">

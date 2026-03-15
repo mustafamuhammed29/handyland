@@ -19,7 +19,7 @@ i18n
       caches: ['localStorage'],
     },
     backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      loadPath: '/api/translations/locales/{{lng}}',
     },
   });
 

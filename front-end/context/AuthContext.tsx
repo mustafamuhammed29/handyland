@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { User } from '../types';
+import i18n from '../src/i18n';
 
 interface AuthContextType {
     user: User | null;
@@ -26,6 +27,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     const [loading, setLoading] = useState<boolean>(true);
     const navigate = useNavigate();
+
+    // Sync preferred language
+    useEffect(() => {
+        if (user && user.preferredLanguage && i18n.language !== user.preferredLanguage) {
+            i18n.changeLanguage(user.preferredLanguage).then(() => {
+                localStorage.setItem('handyland_lang', user.preferredLanguage!);
+                document.documentElement.dir = (user.preferredLanguage === 'ar' || user.preferredLanguage === 'fa') ? 'rtl' : 'ltr';
+                document.documentElement.lang = user.preferredLanguage!;
+            });
+        }
+    }, [user?.preferredLanguage]);
 
     //  Refresh Token Function
     const refreshAccessToken = async (): Promise<boolean> => {

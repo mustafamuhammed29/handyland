@@ -25,8 +25,8 @@ export const LanguageSwitcher: React.FC = () => {
 
   return (
     <div className="relative group h-10">
-      <button className="h-full flex items-center justify-center gap-2 px-3 text-slate-300 hover:text-white bg-slate-900/60 hover:bg-slate-800 rounded-xl transition-all border border-slate-800 hover:border-brand-primary/50 outline-none group-hover:border-slate-700">
-        <Globe className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+      <button className="h-full flex items-center justify-center gap-2 px-3 text-slate-300 hover:text-white bg-transparent hover:bg-white/5 rounded-full transition-all border border-transparent outline-none">
+        <Globe className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
         <span className="text-xs font-bold uppercase mt-px tracking-wider">
           {lang}
         </span>

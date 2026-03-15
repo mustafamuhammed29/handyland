@@ -4,6 +4,7 @@ import { LanguageCode } from '../types';
 import { ArrowRight, ArrowLeft, ShieldCheck, Zap, Smartphone, Search, Star, Hexagon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface HeroProps {
     lang: LanguageCode;
@@ -14,6 +15,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
     const { t } = useTranslation();
     const isRTL = lang === 'ar';
     const { settings } = useSettings();
+    const { theme } = useTheme();
 
     // Mouse Parallax State
     const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -30,10 +32,10 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
     return (
         <div
-            className="relative min-h-[90vh] flex items-center justify-center overflow-hidden perspective-container transition-colors duration-300"
-            style={{
+            className="relative min-h-[90vh] flex items-center justify-center overflow-hidden perspective-container transition-colors duration-300 bg-slate-50 dark:bg-slate-950"
+            style={theme === 'dark' ? {
                 background: `linear-gradient(to bottom right, ${settings.hero.bgStart || '#0f172a'}, ${settings.hero.bgEnd || '#020617'})`
-            }}
+            } : undefined}
         >
 
             {/* Floating Abstract Shapes */}
@@ -54,7 +56,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                         <span className="text-xs font-bold tracking-widest uppercase" style={{ color: settings.hero.accentColor }}>Germany's #1 Tech Hub</span>
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-tight tracking-tight whitespace-pre-line">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white leading-tight tracking-tight whitespace-pre-line">
                         {settings.hero.headline}
                     </h1>
 
@@ -78,7 +80,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
                         <button
                             onClick={() => navigate('/valuation')}
-                            className="px-8 py-4 rounded-full border border-slate-700 text-white font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+                            className="px-8 py-4 rounded-full border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
                         >
                             <Zap className="w-5 h-5 text-yellow-400" /> {settings.hero.buttonValuation || t('hero.sellDevice')}
                         </button>
@@ -165,7 +167,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                             </div>
                             <div className="min-w-0">
                                 <div className="text-[9px] md:text-xs text-slate-400 whitespace-nowrap">{settings.hero.stat1Title || 'Device Sold'}</div>
-                                <div className="text-[11px] md:text-base text-white font-bold whitespace-nowrap">{settings.hero.stat1Value || '+24% this week'}</div>
+                                <div className="text-[11px] md:text-base text-slate-900 dark:text-white font-bold whitespace-nowrap">{settings.hero.stat1Value || '+24% this week'}</div>
                             </div>
                         </div>
                     </div>
@@ -180,7 +182,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                             </div>
                             <div className="min-w-0">
                                 <div className="text-[9px] md:text-xs text-slate-400 whitespace-nowrap">{settings.hero.stat2Title || 'Customer Rating'}</div>
-                                <div className="text-[11px] md:text-base text-white font-bold whitespace-nowrap">{settings.hero.stat2Value || '4.9/5.0 Excellent'}</div>
+                                <div className="text-[11px] md:text-base text-slate-900 dark:text-white font-bold whitespace-nowrap">{settings.hero.stat2Value || '4.9/5.0 Excellent'}</div>
                             </div>
                         </div>
                     </div>
