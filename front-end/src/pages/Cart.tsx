@@ -29,7 +29,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                 </p>
                 <button
                     onClick={() => navigate('/marketplace')}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-blue-500/25"
+                    className="flex items-center gap-2 bg-brand-primary text-black px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-brand-primary/25 hover:scale-[1.02]"
                 >
                     <ShoppingCart className="w-5 h-5" />
                     {t('cart.continueShopping', 'Continue Shopping')}
@@ -51,7 +51,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                     </h1>
                     <button
                         onClick={() => navigate('/marketplace')}
-                        className="hidden md:flex items-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                        className="hidden md:flex items-center gap-2 text-brand-primary hover:text-brand-primary/80 font-medium transition-colors"
                     >
                         <ArrowLeft className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
                         {t('cart.continueShopping', 'Continue Shopping')}
@@ -176,7 +176,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 onClick={() => {
                                     navigate('/checkout');
                                 }}
-                                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-500 hover:to-cyan-400 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transform hover:-translate-y-0.5"
+                                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white py-4 rounded-xl font-bold text-lg hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/30 transform hover:-translate-y-0.5"
                             >
                                 {t('cart.checkout', 'Proceed to Checkout')}
                                 <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />

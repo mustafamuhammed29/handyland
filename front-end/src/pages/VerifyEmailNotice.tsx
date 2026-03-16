@@ -34,7 +34,7 @@ const VerifyEmailNotice: React.FC = () => {
                 <div className="space-y-4">
                     <Link
                         to="/login"
-                        className="block w-full py-3 bg-gradient-to-r from-green-600 to-cyan-500 text-white font-bold rounded-lg shadow-lg shadow-green-900/30 hover:shadow-green-900/50 hover:from-green-500 hover:to-cyan-400 transition-all flex items-center justify-center gap-2"
+                        className="block w-full py-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-bold rounded-lg shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                     >
                         Proceed to Login <ArrowRight className="w-5 h-5" />
                     </Link>

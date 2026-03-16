@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
 const { sendEmail, sendTemplateEmail } = require('../utils/emailService');
+const authService = require('../services/authService');
 
 // Generate Access Token
 const generateToken = (id) => {
@@ -30,88 +31,7 @@ const generateRefreshToken = (id) => {
 // @access  Public
 exports.register = async (req, res) => {
     try {
-        const { name, email, password, phone, address } = req.body;
-
-        // Check if email already registered
-        const emailExists = await User.findOne({ email });
-        if (emailExists) {
-            return res.status(400).json({
-                success: false,
-                message: 'User already exists with this email'
-            });
-        }
-
-        // Check if phone already registered
-        if (phone) {
-            const phoneExists = await User.findOne({ phone });
-            if (phoneExists) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'This phone number is already registered'
-                });
-            }
-        }
-
-        // Check password strength - match frontend and route validation
-        // (8 to 20 chars, one letter, one number, one special character)
-        const hasLetter = /[A-Za-z]/.test(password);
-        const hasNumber = /\d/.test(password);
-        const hasSpecial = /[@$!%*#?&]/.test(password);
-
-        if (password.length < 8 || password.length > 20 || !hasLetter || !hasNumber || !hasSpecial) {
-            return res.status(400).json({
-                success: false,
-                message: 'Password must be between 8 and 20 characters long and include at least one letter, one number, and one special character.'
-            });
-        }
-
-        // Generate verification token (unhashed version for email)
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-        // Hash it before saving to DB
-        const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
-
-        // Create user
-        const user = await User.create({
-            name,
-            email,
-            password,
-            phone,
-            address,
-            verificationToken: hashedVerificationToken,
-            verificationTokenExpire: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-            isVerified: false
-        });
-
-        // Send verification email
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
-
-        if (process.env.NODE_ENV !== 'production') { console.log('📧 Attempting to send verification email to:', user.email); } // FIXED: [Removed debug console.log in production]
-        if (process.env.NODE_ENV !== 'production') { console.log('🔗 Verification URL:', verificationUrl); } // FIXED: [Removed debug console.log in production]
-
-        try {
-            const sent = await sendTemplateEmail(user.email, 'verify_email', {
-                userName: user.name,
-                verificationUrl
-            });
-            if (!sent) {
-                if (process.env.NODE_ENV !== 'production') { console.log('⚠️  No verify_email template in DB, sending fallback HTML email...'); } // FIXED: [Removed debug console.log in production]
-                // Fallback: send a basic HTML email
-                await sendEmail({
-                    email: user.email,
-                    subject: 'Verify Your Email - HandyLand',
-                    html: `<h2>Welcome to HandyLand, ${user.name}!</h2>
-                           <p>Please verify your email by clicking the link below:</p>
-                           <a href="${verificationUrl}" style="display:inline-block;padding:12px 24px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;">Verify Email</a>
-                           <p>This link expires in 24 hours.</p>`
-                });
-            } else {
-                if (process.env.NODE_ENV !== 'production') { console.log('✅ Verification email sent successfully (via template).'); } // FIXED: [Removed debug console.log in production]
-            }
-        } catch (emailError) {
-            console.error('❌ Error sending verification email:', emailError.message);
-            // Don't fail registration if email fails
-        }
+        const user = await authService.registerUser(req.body);
 
         res.status(201).json({
             success: true,
@@ -125,11 +45,9 @@ exports.register = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: 'Server error',
-            error: error.message
+            message: error.message
         });
     }
 };
@@ -140,109 +58,34 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
+        const user = await authService.loginUser(email, password);
 
-        // Check for user email
-        const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
-
-        if (!user) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid credentials'
-            });
-        }
-
-        // Check if account is locked
-        if (user.lockUntil && user.lockUntil > Date.now()) {
-            const timeRemaining = Math.ceil((user.lockUntil - Date.now()) / 1000 / 60);
-            return res.status(423).json({
-                success: false,
-                message: `Account locked due to too many failed attempts. Please try again in ${timeRemaining} minutes.`
-            });
-        }
-
-        // Check password
-        const isMatch = await user.matchPassword(password);
-
-        if (!isMatch) {
-            user.loginAttempts = (user.loginAttempts || 0) + 1;
-            if (user.loginAttempts >= 5) {
-                user.lockUntil = Date.now() + 15 * 60 * 1000; // 15 mins lock
-            }
-            // Use updateOne to avoid full validation lifecycle for simple counter logic
-            await User.updateOne(
-                { _id: user._id },
-                { $set: { loginAttempts: user.loginAttempts, lockUntil: user.lockUntil } }
-            );
-
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid credentials'
-            });
-        }
-
-        // Reset login attempts on successful login
-        if (user.loginAttempts > 0 || user.lockUntil) {
-            await User.updateOne(
-                { _id: user._id },
-                { $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } }
-            );
-        }
-
-        // Require email verification by default; set REQUIRE_EMAIL_VERIFICATION=false to skip
-        const skipVerification = process.env.REQUIRE_EMAIL_VERIFICATION === 'false';
-        if (!skipVerification && !user.isVerified) {
-            return res.status(401).json({
-                success: false,
-                message: 'Please verify your email first',
-                isVerified: false
-            });
-        }
-
-        const token = generateToken(user._id);
-
-        // Send access token in HTTP-only cookie
-        // Force secure: false for localhost/http development
-        // Add detailed logging
-        if (process.env.NODE_ENV !== 'production') { console.log('🍪 Setting cookies for user:', user.email); } // FIXED: [Removed debug console.log in production]
+        const token = authService.generateAccessToken(user._id);
+        const refreshTokenData = await authService.generateRefreshToken(user._id);
 
         const isProduction = process.env.NODE_ENV === 'production';
-        if (process.env.NODE_ENV !== 'production') { console.log('🌍 Environment isProduction:', isProduction); } // FIXED: [Removed debug console.log in production]
 
         res.cookie('accessToken', token, {
             httpOnly: true,
-            secure: isProduction, // strict check
+            secure: isProduction,
             sameSite: 'lax',
-            maxAge: 15 * 60 * 1000, // 15 minutes
+            maxAge: 15 * 60 * 1000,
             path: '/'
         });
 
-        // Generate Refresh Token (Opaque)
-        const refreshToken = crypto.randomBytes(40).toString('hex');
-        const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-
-        await RefreshToken.create({
-            token: refreshToken,
-            user: user._id,
-            expiryDate: refreshTokenExpiry
-        });
-
-        res.cookie('refreshToken', refreshToken, {
+        res.cookie('refreshToken', refreshTokenData.token, {
             httpOnly: true,
             secure: isProduction,
             sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            maxAge: 7 * 24 * 60 * 60 * 1000,
             path: '/'
         });
 
-        if (process.env.NODE_ENV !== 'production') { console.log('✅ AuthController: Sending login response. Token exists:', !!token); } // FIXED: [Removed debug console.log in production]
-        if (token) if (process.env.NODE_ENV !== 'production') { console.log('✅ Token preview:', token.substring(0, 10) + '...'); } // FIXED: [Removed debug console.log in production]
-
-        // Fetch addresses
         const addresses = await require('../models/Address').find({ user: user._id });
 
         res.status(200).json({
             success: true,
-            token: token, // Explicit key-value
+            token: token,
             user: {
                 id: user._id,
                 name: user.name,
@@ -250,16 +93,16 @@ exports.login = async (req, res) => {
                 role: user.role,
                 isVerified: user.isVerified,
                 phone: user.phone,
-                addresses: addresses, // Include full address list
-                address: user.address // Keep singular for backward compatibility if any
+                addresses: addresses,
+                address: user.address
             }
         });
     } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({
+        const status = error.message.includes('locked') ? 423 : (error.message.includes('verify') ? 401 : 400);
+        res.status(status).json({
             success: false,
-            message: 'Server error',
-            error: error.message
+            message: error.message,
+            isVerified: error.isVerified !== undefined ? error.isVerified : true
         });
     }
 };
@@ -476,52 +319,15 @@ exports.adminLogin = async (req, res) => {
 // @access  Public
 exports.verifyEmail = async (req, res) => {
     try {
-        const { token } = req.params;
-        if (process.env.NODE_ENV !== 'production') { console.log("Verifying email with token:", token); } // FIXED: [Removed debug console.log in production]
-
-        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-
-        // Find user with matching token and valid expiration
-        const user = await User.findOne({
-            verificationToken: hashedToken,
-            verificationTokenExpire: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            if (process.env.NODE_ENV !== 'production') { console.log("Verify failed: Invalid or expired token"); } // FIXED: [Removed debug console.log in production]
-            // Check if token exists but expired
-            const expiredUser = await User.findOne({ verificationToken: hashedToken });
-            if (expiredUser) {
-                if (process.env.NODE_ENV !== 'production') { console.log("Token found but expired. Expiry:", expiredUser.verificationTokenExpire, "Now:", Date.now()); } // FIXED: [Removed debug console.log in production]
-            } else {
-                if (process.env.NODE_ENV !== 'production') { console.log("Token not found at all."); } // FIXED: [Removed debug console.log in production]
-            }
-
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid or expired verification token'
-            });
-        }
-
-        if (process.env.NODE_ENV !== 'production') { console.log("User found for verification:", user.email); } // FIXED: [Removed debug console.log in production]
-
-        user.isVerified = true;
-        user.verificationToken = undefined;
-        user.verificationTokenExpire = undefined;
-        await user.save();
-
-        if (process.env.NODE_ENV !== 'production') { console.log("User verified successfully:", user.email); } // FIXED: [Removed debug console.log in production]
-
+        await authService.verifyEmail(req.params.token);
         res.status(200).json({
             success: true,
             message: 'Email verified successfully! You can now login.'
         });
     } catch (error) {
-        console.error("Verify Email Error:", error);
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: 'Error verifying email',
-            error: error.message
+            message: error.message
         });
     }
 };

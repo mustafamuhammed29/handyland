@@ -84,9 +84,9 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     <div className="flex flex-col sm:flex-row gap-4 pt-4">
                         <button
                             onClick={() => navigate('/marketplace')}
-                            className="group relative px-8 py-4 bg-white text-black font-bold text-lg rounded-full overflow-hidden hover:scale-105 transition-transform duration-300"
+                            className="group relative px-8 py-4 bg-brand-primary text-black font-extrabold text-lg rounded-full overflow-hidden hover:scale-105 transition-all duration-300 shadow-lg shadow-brand-primary/25"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-300 to-blue-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <span className="relative flex items-center gap-2">
                                 {settings.hero.buttonMarket || t('hero.shopNow')} {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
                             </span>
@@ -94,14 +94,14 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
                         <button
                             onClick={() => navigate('/valuation')}
-                            className="px-8 py-4 rounded-full border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+                            className="px-8 py-4 rounded-full border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors flex items-center justify-center gap-2 glass-modern shadow-sm"
                         >
-                            <Zap className="w-5 h-5 text-yellow-400" /> {settings.hero.buttonValuation || t('hero.sellDevice')}
+                            <Zap className="w-5 h-5 text-amber-400 fill-amber-400/20" /> {settings.hero.buttonValuation || t('hero.sellDevice')}
                         </button>
                         
                         <button
                             onClick={() => navigate('/track-repair')}
-                            className="px-8 py-4 rounded-full border border-slate-700/50 bg-slate-900/40 text-amber-400 font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 backdrop-blur-md"
+                            className="px-8 py-4 rounded-full border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 font-bold hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 backdrop-blur-md shadow-sm"
                         >
                             <Search className="w-5 h-5" /> {t('hero.trackRepair')}
                         </button>
@@ -162,7 +162,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                                     <div className="text-white text-lg md:text-xl font-bold whitespace-nowrap shrink-0">{settings.hero.productPrice || '€950'}</div>
                                 </div>
                                 <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
-                                    <div className="h-full bg-cyan-400 w-2/3 animate-pulse"></div>
+                                    <div className="h-full bg-brand-primary w-2/3 animate-pulse"></div>
                                 </div>
                             </div>
                         </div>

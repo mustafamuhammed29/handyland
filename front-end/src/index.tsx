@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
-import './src/i18n'; // Import i18n to initialize it
+import './i18n'; // Import i18n to initialize it
 import ErrorBoundary from './components/ErrorBoundary';
 import { LoadingProvider } from './context/LoadingContext';
 import { GlobalLoader } from './components/GlobalLoader';

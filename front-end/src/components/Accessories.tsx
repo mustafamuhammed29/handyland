@@ -69,7 +69,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
 
     return (
-        <section className="py-24 relative bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-300">
+        <section className="py-24 relative bg-brand-surface-light dark:bg-brand-surface-dark border-t border-slate-200 dark:border-slate-800/50 overflow-hidden transition-colors duration-300">
 
             {/* Background Atmosphere */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-100/30 dark:from-purple-900/20 via-white dark:via-slate-950 to-slate-50 dark:to-black pointer-events-none"></div>
@@ -77,7 +77,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
             {/* --- GEAR INSPECTOR MODAL --- */}
             {selectedItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="relative w-full max-w-7xl max-h-[90vh] bg-slate-900 border-4 border-blue-500/30 rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/50 flex flex-col md:flex-row">
+                    <div className="relative w-full max-w-7xl max-h-[90vh] bg-slate-900 border-4 border-brand-primary/30 rounded-3xl overflow-hidden shadow-2xl shadow-brand-primary/20 flex flex-col md:flex-row">
                         <button
                             onClick={() => setSelectedItem(null)}
                             className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-white/10 rounded-full text-white transition-colors"
@@ -106,8 +106,8 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                 </span>
                             </div>
 
-                            <h2 className="text-3xl font-black text-white mb-2 leading-tight">{selectedItem.name}</h2>
-                            <div className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 font-bold mb-6">
+                             <h2 className="text-3xl font-black text-white mb-2 leading-tight">{selectedItem.name}</h2>
+                            <div className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary font-bold mb-6">
                                 {selectedItem.price}{t('common.currency')}
                             </div>
 
@@ -211,8 +211,8 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                     key={cat.id}
                                     onClick={() => setActiveCat(cat.id)}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold border transition-all uppercase tracking-wider ${activeCat === cat.id
-                                        ? 'bg-purple-500/20 border-purple-500 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
-                                        : 'bg-white dark:bg-slate-900/50 border-slate-300 dark:border-slate-800 text-slate-500 hover:border-purple-300 dark:hover:border-slate-600 hover:text-purple-600 dark:hover:text-white'
+                                        ? 'bg-brand-primary/20 border-brand-primary text-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                                        : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-brand-primary/30 dark:hover:border-slate-700 hover:text-brand-primary dark:hover:text-white'
                                         }`}
                                 >
                                     {cat.icon}
