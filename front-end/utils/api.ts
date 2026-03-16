@@ -18,12 +18,25 @@ api.interceptors.request.use(
     (config) => {
         // Frontend relies entirely on HTTP-Only cookies (withCredentials: true)
         // We do not send Authorization headers here to prevent mixing with Admin panel tokens.
+
+        // CSRF: Read the XSRF-TOKEN cookie (set by server on first GET) and forward it as a header
+        // for all state-changing requests. Safe methods (GET/HEAD/OPTIONS) are excluded by the server.
+        const csrfToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('XSRF-TOKEN='))
+            ?.split('=')?.[1];
+
+        if (csrfToken) {
+            config.headers['X-XSRF-Token'] = csrfToken;
+        }
+
         return config;
     },
     (error) => {
         return Promise.reject(error);
     }
 );
+
 
 // Response interceptor - Handle errors and token refresh
 api.interceptors.response.use(
