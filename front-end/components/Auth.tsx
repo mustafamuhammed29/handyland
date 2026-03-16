@@ -1,10 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { User } from '../types';
 import { User as UserIcon, Mail, Lock, ArrowRight, Loader2, Phone, MapPin, KeyRound, ChevronLeft, ShieldCheck, CheckCircle2, RefreshCw } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { api } from '../utils/api';
 
 interface AuthProps {
     setUser: (user: User) => void;
@@ -34,6 +34,8 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
     const [tempToken, setTempToken] = useState('');
 
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
+    // Refs for OTP inputs — avoids direct DOM access via getElementById
+    const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -45,10 +47,9 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
         newOtp[index] = value;
         setOtp(newOtp);
 
-        // Auto-focus next input
+        // Auto-focus next input using React refs
         if (value && index < 5) {
-            const nextInput = document.getElementById(`otp-${index + 1}`);
-            nextInput?.focus();
+            otpRefs.current[index + 1]?.focus();
         }
     };
 
@@ -56,50 +57,36 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
         e.preventDefault();
 
         if (mode === 'register' && formData.password !== formData.confirmPassword) {
-            addToast(currentLang === 'ar' || currentLang === 'fa' ? "كلمات المرور غير متطابقة" : "Passwords do not match", 'error');
+            addToast(currentLang === 'ar' || currentLang === 'fa' ? 'كلمات المرور غير متطابقة' : 'Passwords do not match', 'error');
             return;
         }
 
         setIsLoading(true);
 
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            let endpoint = '';
-            let body = {};
+            let data: any;
 
             if (mode === 'login') {
-                endpoint = `${API_URL}/api/auth/login`;
-                body = { email: formData.email, password: formData.password };
+                data = await api.post('/api/auth/login', {
+                    email: formData.email,
+                    password: formData.password,
+                });
             } else if (mode === 'register') {
-                endpoint = `${API_URL}/api/auth/register`;
-                body = {
+                data = await api.post('/api/auth/register', {
                     name: formData.name,
                     email: formData.email,
                     password: formData.password,
                     phone: formData.phone,
-                    address: formData.address
-                };
+                    address: formData.address,
+                });
             } else if (mode === 'forgot') {
-                endpoint = `${API_URL}/api/auth/forgot-password`;
-                body = { email: formData.email };
-            }
-
-            if (!endpoint) {
-                // Handle text-only modes or other logic
-                setIsLoading(false);
+                data = await api.post('/api/auth/forgot-password', { email: formData.email });
+            } else {
+                // Other modes (verify, reset-verify, reset-password) handled elsewhere
                 return;
             }
 
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(body)
-            });
-
-            const data = await res.json();
-
-            if (data.success) {
+            if (data?.success) {
                 if (mode === 'login') {
                     setUser(data.user);
                     localStorage.setItem('user', JSON.stringify(data.user));
@@ -107,24 +94,21 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                     navigate('/dashboard');
                 } else if (mode === 'register') {
                     addToast('Registration successful! Please check your email to verify.', 'success');
-                    setMode('login'); // Switch to login view instead of fake verify
+                    setMode('login');
                 } else if (mode === 'forgot') {
                     addToast('Password reset link sent to your email.', 'success');
                     setMode('login');
                 }
             } else {
-                addToast(data.message || 'Action failed', 'error');
-
-                // Specific handling for unverified email
-                if (mode === 'login' && data.message === 'Please verify your email first') {
+                addToast(data?.message || 'Action failed', 'error');
+                if (mode === 'login' && data?.message === 'Please verify your email first') {
                     setShowResend(true);
-                    addToast('Please check your email to verify your account.', 'error');
                 }
             }
-
-        } catch (error) {
-            console.error('Auth Error:', error);
-            addToast('Connection Error. Please ensure backend is running.', 'error');
+        } catch (error: any) {
+            // api interceptor already handles 401, we just show a toast for other errors
+            const message = error?.response?.data?.message || 'Connection Error. Please ensure backend is running.';
+            addToast(message, 'error');
         } finally {
             setIsLoading(false);
         }
@@ -135,21 +119,15 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
     const handleResend = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/resend-verification`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ email: formData.email })
-            });
-            const data = await res.json();
-            if (data.success) {
+            const data: any = await api.post('/api/auth/resend-verification', { email: formData.email });
+            if (data?.success) {
                 addToast('Verification email resent!', 'success');
                 setShowResend(false);
             } else {
-                addToast(data.message, 'error');
+                addToast(data?.message || 'Failed to resend email', 'error');
             }
-        } catch (error) {
-            addToast('Failed to connect to server', 'error');
+        } catch (error: any) {
+            addToast(error?.response?.data?.message || 'Failed to connect to server', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -265,7 +243,7 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                                         {otp.map((digit, i) => (
                                             <input
                                                 key={i}
-                                                id={`otp-${i}`}
+                                                ref={(el) => { otpRefs.current[i] = el; }}
                                                 type="text"
                                                 maxLength={1}
                                                 value={digit}

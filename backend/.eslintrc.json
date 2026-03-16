@@ -1,0 +1,32 @@
+{
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "commonjs"
+  },
+  "rules": {
+    "no-console": "warn",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "eqeqeq": ["error", "always"],
+    "no-var": "error",
+    "prefer-const": "error",
+    "curly": "error",
+    "no-multiple-empty-lines": ["warn", { "max": 2 }],
+    "no-trailing-spaces": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "uploads/",
+    "dist/",
+    "*.test.js",
+    "test_*.js",
+    "seed-*.js",
+    "scripts/"
+  ]
+}
