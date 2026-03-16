@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ENV } from '../src/config/env';
+import { ENV } from '../config/env';
 
 // Force empty baseURL to rely on Vite proxy for all API calls
 const API_BASE_URL = '';

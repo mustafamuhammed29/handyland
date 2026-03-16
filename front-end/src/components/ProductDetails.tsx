@@ -339,7 +339,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                         </div>
 
                         <div className="flex items-end gap-3 mb-8">
-                            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-brand-secondary">
+                            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">
                                 {product.price}{t('currency', '€')}
                             </div>
                             {/* Stock Indicator */}
@@ -458,7 +458,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                 className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === tab ? 'text-brand-primary' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}
                             >
                                 {tab}
-                                {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>}
+                                {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-primary shadow-[0_0_10px_rgba(6,182,212,0.5)]"></div>}
                             </button>
                         ))}
                         <button
@@ -468,7 +468,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                             className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === 'questions' ? 'text-brand-primary' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}
                         >
                             Q&A
-                            {activeTab === 'questions' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>}
+                            {activeTab === 'questions' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-primary shadow-[0_0_10px_rgba(6,182,212,0.5)]"></div>}
                         </button>
                     </div>
 

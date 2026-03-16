@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { ENV } from '../src/config/env';
+import { ENV } from '../config/env';
 
 // Strip /api from ENV.API_URL to get base URL
 const SOCKET_URL = ENV.API_URL.endsWith('/api')

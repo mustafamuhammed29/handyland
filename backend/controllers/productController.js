@@ -1,81 +1,28 @@
-const Product = require('../models/Product');
-const Review = require('../models/Review');
-const Question = require('../models/Question'); // Added
-const { v4: uuidv4 } = require('uuid');
-const mongoose = require('mongoose');
+const productService = require('../services/productService');
+const Question = require('../models/Question'); // Still needed for Question queries in controller for now
+const Review = require('../models/Review'); // Still needed for Review queries in controller for now
+
+/**
+ * Controller for handling product-related API requests.
+ * Delegates business logic to ProductService.
+ */
 
 exports.getAllProducts = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 12;
-        const skip = (page - 1) * limit;
-
-        // Build Filter Query
-        const query = {};
-
-        // Only show in-stock items unless explicitly requested (for admin)
-        if (req.query.includeOutOfStock !== 'true') {
-            query.stock = { $gt: 0 };
-        }
-
-        // Search — FIXED: Escape regex input to prevent ReDoS (FIX 7)
-        if (req.query.search) {
-            const escapedSearch = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            query.$or = [
-                { name: { $regex: escapedSearch, $options: 'i' } },
-                { model: { $regex: escapedSearch, $options: 'i' } },
-                { brand: { $regex: escapedSearch, $options: 'i' } }
-            ];
-        }
-
-        // Filters — FIXED: Escape regex inputs (FIX 7)
-        if (req.query.brand && req.query.brand !== 'All') {
-            const escapedBrand = req.query.brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            query.brand = { $regex: new RegExp(`^${escapedBrand}$`, 'i') };
-        }
-        if (req.query.condition) {
-            const escapedCondition = req.query.condition.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            query.condition = { $regex: new RegExp(`^${escapedCondition}$`, 'i') };
-        }
-        if (req.query.storage) {
-            const escapedStorage = req.query.storage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            query.storage = { $regex: new RegExp(escapedStorage, 'i') };
-        }
-        if (req.query.ram) {
-            query['specs.ram'] = req.query.ram;
-        }
-
-        // Price Range
-        if (req.query.minPrice || req.query.maxPrice) {
-            query.price = {};
-            if (req.query.minPrice) query.price.$gte = Number(req.query.minPrice);
-            if (req.query.maxPrice) query.price.$lte = Number(req.query.maxPrice);
-        }
-
-        // Build Sort Options
-        let sort = {};
-        if (req.query.sort) {
-            switch (req.query.sort) {
-                case 'price_asc': sort = { price: 1 }; break;
-                case 'price_desc': sort = { price: -1 }; break;
-                case 'newest': sort = { createdAt: -1 }; break;
-                case 'oldest': sort = { createdAt: 1 }; break;
-                case 'name_asc': sort = { name: 1 }; break;
-                default: sort = { createdAt: -1 };
-            }
-        } else {
-            sort = { createdAt: -1 };
-        }
-
-        const products = await Product.find(query).sort(sort).skip(skip).limit(limit);
-        const total = await Product.countDocuments(query);
-
-        res.json({
-            products,
-            currentPage: page,
-            totalPages: Math.ceil(total / limit),
-            totalProducts: total
+        const result = await productService.getProducts({
+            page: parseInt(req.query.page),
+            limit: parseInt(req.query.limit),
+            search: req.query.search,
+            brand: req.query.brand,
+            condition: req.query.condition,
+            storage: req.query.storage,
+            ram: req.query.ram,
+            minPrice: req.query.minPrice,
+            maxPrice: req.query.maxPrice,
+            sort: req.query.sort,
+            includeOutOfStock: req.query.includeOutOfStock === 'true'
         });
+        res.json(result);
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error fetching products', error: error.message });
     }
@@ -83,7 +30,7 @@ exports.getAllProducts = async (req, res) => {
 
 exports.getProductById = async (req, res) => {
     try {
-        const product = await Product.findOne({ id: req.params.id });
+        const product = await productService.getProductById(req.params.id);
         if (product) {
             res.json(product);
         } else {
@@ -100,28 +47,16 @@ exports.createProduct = async (req, res) => {
         if (!name || !price || !category) {
             return res.status(400).json({ message: "Name, price, and category are required" });
         }
-        const newProduct = new Product({ ...req.body, id: uuidv4() });
-        await newProduct.save();
+        const newProduct = await productService.createProduct(req.body);
         res.status(201).json(newProduct);
     } catch (error) {
         res.status(400).json({ success: false, message: 'Error creating product', error: error.message });
     }
 };
 
-// FIXED: Whitelist allowed fields to prevent injection (FIX 6)
 exports.updateProduct = async (req, res) => {
     try {
-        const allowedFields = ['name', 'price', 'description', 'stock', 'images', 'image', 'brand', 'model', 'category', 'condition', 'storage', 'color', 'specs', 'isActive', 'isFeatured', 'tags'];
-        const updateData = {};
-        allowedFields.forEach(field => {
-            if (req.body[field] !== undefined) updateData[field] = req.body[field];
-        });
-
-        const product = await Product.findOneAndUpdate(
-            { id: req.params.id },
-            updateData,
-            { new: true, runValidators: true }
-        );
+        const product = await productService.updateProduct(req.params.id, req.body);
         if (product) {
             res.json(product);
         } else {
@@ -134,7 +69,7 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
     try {
-        const result = await Product.findOneAndDelete({ id: req.params.id });
+        const result = await productService.deleteProduct(req.params.id);
         if (result) {
             res.json({ message: "Product deleted" });
         } else {
@@ -145,65 +80,28 @@ exports.deleteProduct = async (req, res) => {
     }
 };
 
-// @desc Get related products
-// @route GET /api/products/:id/related
-// @access Public
 exports.getRelatedProducts = async (req, res) => {
     try {
-        const product = await Product.findOne({ id: req.params.id });
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-        const related = await Product.find({
-            $or: [
-                { category: product.category },
-                { brand: product.brand }
-            ],
-            id: { $ne: product.id }
-        }).limit(4);
+        const related = await productService.getRelatedProducts(req.params.id);
         res.json(related);
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
-// @desc Create new review
-// @route POST /api/products/:id/reviews
-// @access Private
 exports.createProductReview = async (req, res) => {
     try {
-        const { rating, comment } = req.body;
-        const product = await Product.findOne({ id: req.params.id });
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-        const alreadyReviewed = await Review.findOne({ user: req.user.id, product: product._id });
-        if (alreadyReviewed) {
-            return res.status(400).json({ message: 'Product already reviewed' });
-        }
-        const review = await Review.create({
-            user: req.user.id,
-            product: product._id,
-            rating: Number(rating),
-            comment
-        });
-        // Update Product stats
-        const reviews = await Review.find({ product: product._id });
-        product.numReviews = reviews.length;
-        product.rating = reviews.reduce((acc, item) => item.rating + acc, 0) / reviews.length;
-        await product.save();
-        res.status(201).json({ message: 'Review added' });
+        const review = await productService.addReview(req.params.id, req.user.id, req.body);
+        res.status(201).json({ message: 'Review added', review });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+        const status = error.message === 'Product not found' ? 404 : 400;
+        res.status(status).json({ success: false, message: error.message });
     }
 };
 
-// @desc Get product reviews
-// @route GET /api/products/:id/reviews
-// @access Public
 exports.getProductReviews = async (req, res) => {
     try {
-        const product = await Product.findOne({ id: req.params.id });
+        const product = await productService.getProductById(req.params.id);
         if (!product) return res.status(404).json({ message: 'Product not found' });
         const reviews = await Review.find({ product: product._id }).populate('user', 'name');
         res.json(reviews);
@@ -212,12 +110,9 @@ exports.getProductReviews = async (req, res) => {
     }
 };
 
-// @desc Get product questions
-// @route GET /api/products/:id/questions
-// @access Public
 exports.getProductQuestions = async (req, res) => {
     try {
-        const product = await Product.findOne({ id: req.params.id });
+        const product = await productService.getProductById(req.params.id);
         if (!product) return res.status(404).json({ message: 'Product not found' });
         const questions = await Question.find({ product: product._id })
             .populate('user', 'name')
@@ -228,13 +123,10 @@ exports.getProductQuestions = async (req, res) => {
     }
 };
 
-// @desc Ask a question
-// @route POST /api/products/:id/questions
-// @access Private
 exports.askQuestion = async (req, res) => {
     try {
         const { question } = req.body;
-        const product = await Product.findOne({ id: req.params.id });
+        const product = await productService.getProductById(req.params.id);
         if (!product) return res.status(404).json({ message: 'Product not found' });
         const newQuestion = await Question.create({
             user: req.user._id,
@@ -247,9 +139,6 @@ exports.askQuestion = async (req, res) => {
     }
 };
 
-// @desc Answer a question (Admin)
-// @route PUT /api/products/questions/:id/answer
-// @access Private/Admin
 exports.answerQuestion = async (req, res) => {
     try {
         const { answer } = req.body;
@@ -265,38 +154,17 @@ exports.answerQuestion = async (req, res) => {
     }
 };
 
-// FIXED: Batch queries with $in to fix N+1 problem (FIX 8)
 exports.validateStock = async (req, res) => {
     try {
         const { items } = req.body;
-        const Accessory = require('../models/Accessory');
+        const validation = await productService.validateStock(items);
 
-        // Separate items by category
-        const productIds = items.filter(i => i.category !== 'accessory').map(i => i.id);
-        const accessoryIds = items.filter(i => i.category === 'accessory').map(i => i.id);
-
-        // Batch fetch all items in 2 queries instead of N
-        const [products, accessories] = await Promise.all([
-            productIds.length > 0 ? Product.find({ id: { $in: productIds } }) : Promise.resolve([]),
-            accessoryIds.length > 0 ? Accessory.find({ id: { $in: accessoryIds } }) : Promise.resolve([])
-        ]);
-
-        // Build lookup map
-        const productMap = {};
-        [...products, ...accessories].forEach(p => { productMap[p.id] = p; });
-
-        const errors = [];
-        for (const item of items) {
-            const productDoc = productMap[item.id];
-            if (!productDoc) {
-                errors.push({ id: item.id, message: `Item not found: ${item.name || item.id}` });
-            } else if (productDoc.stock < item.quantity) {
-                errors.push({ id: item.id, message: `Insufficient stock for ${productDoc.name || productDoc.title}. Available: ${productDoc.stock}` });
-            }
-        }
-
-        if (errors.length > 0) {
-            return res.status(400).json({ success: false, errors, message: errors.map(e => e.message).join(', ') });
+        if (!validation.isValid) {
+            return res.status(400).json({ 
+                success: false, 
+                errors: validation.errors, 
+                message: validation.errors.map(e => e.message).join(', ') 
+            });
         }
         res.json({ success: true });
     } catch (error) {

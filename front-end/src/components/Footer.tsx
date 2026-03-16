@@ -36,7 +36,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
       <footer className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 mt-auto relative z-10">
         <div className="max-w-7xl mx-auto py-16 px-4">
           <div className="flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-slate-800 border-t-cyan-500 rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-2 border-slate-800 border-t-brand-primary rounded-full animate-spin"></div>
           </div>
         </div>
       </footer>

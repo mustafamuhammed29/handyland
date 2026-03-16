@@ -302,7 +302,7 @@ export const SellDevice = () => {
                             <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
+                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
                             >
                                 {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
                                 {isSubmitting ? 'Wird bearbeitet...' : 'Bestätigen'}
@@ -526,7 +526,7 @@ export const SellDevice = () => {
 
                         <button
                             type="submit"
-                            className="w-full py-4 rounded-xl bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold text-lg shadow-lg shadow-cyan-900/20 transition-all flex items-center justify-center gap-2"
+                            className="w-full py-4 rounded-xl bg-gradient-to-r from-brand-secondary to-brand-primary hover:from-brand-secondary/90 hover:to-brand-primary/90 text-white font-bold text-lg shadow-lg shadow-brand-primary/20 transition-all flex items-center justify-center gap-2"
                         >
                             Prüfen & Verkauf bestätigen <ArrowRight className="w-5 h-5" />
                         </button>

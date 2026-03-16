@@ -6,7 +6,7 @@ import { orderService } from '../services/orderService';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
 import { Order } from '../types';
-import { ENV } from '../src/config/env';
+import { ENV } from '../config/env';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { VisualOrderTimeline } from '../components/VisualOrderTimeline';
 

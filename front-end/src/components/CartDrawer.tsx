@@ -113,7 +113,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                         </div>
                         <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-1000 w-[var(--progress-w)]"
+                                className="h-full bg-gradient-to-r from-brand-secondary to-brand-primary transition-all duration-1000 w-[var(--progress-w)]"
                                 style={{ '--progress-w': `${progress}%` } as React.CSSProperties}
                             ></div>
                         </div>

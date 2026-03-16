@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from './ToastContext';
 import { api, clearCache } from '../utils/api';
-import i18n from '../src/i18n';
+import i18n from '../i18n';
 
 interface HeroSettings {
     bgStart: string;
