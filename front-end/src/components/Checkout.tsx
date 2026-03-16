@@ -6,6 +6,22 @@ import { useNavigate } from 'react-router-dom';
 import { CreditCard, Truck, ShieldCheck, Lock, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { api } from '../utils/api';
 import { getSecureItem, setSecureItem } from '../utils/storage';
+import { z } from 'zod';
+
+const shippingSchema = z.object({
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().regex(
+    /^(\+|00)[1-9][0-9 \-\(\)\.]{7,32}$|^0[1-9][0-9 \-\(\)\.]{6,32}$/,
+    'Invalid phone number'
+  ),
+  street: z.string().min(5, 'Address is too short'),
+  city: z.string().min(2, 'City is required'),
+  zipCode: z.string().regex(/^\d{4,10}$/, 'Invalid postal code'),
+  country: z.string().length(2, 'Select a country'),
+});
+
+type ShippingFormData = z.infer<typeof shippingSchema>;
 
 export const Checkout: React.FC = () => {
     const { cart, cartTotal, clearCart } = useCart();
@@ -58,16 +74,14 @@ export const Checkout: React.FC = () => {
             return;
         }
 
-        const { fullName, email, phone, street, city, zipCode, country } = shippingInfo;
-        if (!fullName || !email || !phone || !street || !city || !zipCode) {
-            addToast("Please fill in all shipping details", "error");
+        const result = shippingSchema.safeParse(shippingInfo);
+        if (!result.success) {
+            const firstError = result.error.issues[0];
+            addToast(firstError.message, "error");
             return;
         }
 
-        if (!validatePhone(phone)) {
-            addToast("Please enter a valid phone number (e.g., +49 123 45678 or 0171 2345678)", "error");
-            return;
-        }
+        const { fullName, email, phone, street, city, zipCode, country } = shippingInfo;
 
         setIsProcessing(true);
 
@@ -199,16 +213,37 @@ export const Checkout: React.FC = () => {
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-2xl p-6 sticky top-28">
                         <h3 className="text-xl font-bold text-white mb-6">Order Summary</h3>
 
-                        <div className="space-y-4 mb-6 max-h-60 overflow-y-auto custom-scrollbar">
-                            {cart.map((item, i) => (
-                                <div key={i} className="flex gap-3">
-                                    <img src={item.image} className="w-12 h-12 rounded bg-slate-800 object-cover" alt="" />
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-bold text-white truncate">{item.title}</div>
-                                        <div className="text-xs text-slate-400">{item.price}€</div>
-                                    </div>
+                        {/* Order Summary */}
+                        <div className="space-y-3 mb-6 max-h-60 overflow-y-auto custom-scrollbar">
+                            {cart.map((item) => (
+                                <div key={item.id} className="flex justify-between text-sm">
+                                    <span className="text-slate-300">{item.title} × {item.quantity || 1}</span>
+                                    <span className="text-white font-medium">{item.price}€</span>
                                 </div>
                             ))}
+                            
+                            <div className="border-t border-slate-700 pt-3 space-y-2 text-sm">
+                                <div className="flex justify-between text-slate-400">
+                                    <span>Subtotal</span>
+                                    <span>{cartTotal.toFixed(2)}€</span>
+                                </div>
+                                <div className="flex justify-between text-slate-400">
+                                    <span>VAT (19%)</span>
+                                    <span>{(cartTotal * 0.19).toFixed(2)}€</span>
+                                </div>
+                                <div className="flex justify-between text-slate-400">
+                                    <span>Shipping</span>
+                                    <span className="text-green-400">
+                                        {cartTotal >= 100 ? 'Free' : '5.99€'}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between text-white font-bold text-base border-t border-slate-700 pt-2">
+                                    <span>Total</span>
+                                    <span>
+                                        {(cartTotal * 1.19 + (cartTotal >= 100 ? 0 : 5.99)).toFixed(2)}€
+                                    </span>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -231,21 +266,6 @@ export const Checkout: React.FC = () => {
                                 I agree to the <span className="text-brand-primary hover:underline">Terms of Service</span> and <span className="text-brand-primary hover:underline">Privacy Policy</span>. I confirm that all provided shipping information is correct.
                             </span>
                         </label>
-                    </div>
-
-                    <div className="border-t border-slate-800 pt-4 space-y-2 mb-6">
-                        <div className="flex justify-between text-slate-400 text-sm">
-                            <span>Subtotal</span>
-                            <span>{cartTotal}€</span>
-                        </div>
-                        <div className="flex justify-between text-slate-400 text-sm">
-                            <span>Shipping</span>
-                            <span className="text-emerald-400">Free</span>
-                        </div>
-                        <div className="flex justify-between text-white font-bold text-lg pt-2">
-                            <span>Total</span>
-                            <span className="text-brand-primary">{cartTotal}€</span>
-                        </div>
                     </div>
 
                     <button

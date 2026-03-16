@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Lock, CheckCircle, AlertCircle, Loader, Eye, EyeOff, XCircle } from 'lucide-react';
 import { authService } from '../services/authService';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { ENV } from '../config/env';
+const API_URL = ENV.API_URL;
 
 
 const ResetPassword: React.FC = () => {
