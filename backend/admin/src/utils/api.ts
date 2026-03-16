@@ -6,21 +6,11 @@ const API_URL = '';
 
 export const api = axios.create({
     baseURL: API_URL,
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json'
     },
     timeout: 10000
-});
-
-// Request Interceptor (Add Token)
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('adminToken') || localStorage.getItem('token') || localStorage.getItem('accessToken');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-}, (error) => {
-    return Promise.reject(error);
 });
 
 // Response Interceptor (Handle 401)
@@ -29,7 +19,7 @@ api.interceptors.response.use(
     (error) => {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
             console.error("Unauthorized! Redirecting to login...");
-            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
             localStorage.removeItem('token');
             localStorage.removeItem('user');
 

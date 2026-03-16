@@ -7,7 +7,8 @@ import { useSettings } from '../context/SettingsContext';
 import { authService } from '../services/authService';
 import { useTranslation } from 'react-i18next';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { ENV } from '../config/env';
+const API_URL = ENV.API_URL;
 
 const SocialButton: React.FC<{ provider: 'google' | 'facebook'; disabled?: boolean }> = ({ provider, disabled }) => {
     const isGoogle = provider === 'google';

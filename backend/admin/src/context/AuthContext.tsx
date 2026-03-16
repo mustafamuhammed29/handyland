@@ -9,8 +9,7 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
-    token: string | null;
-    login: (token: string, user: User) => void;
+    login: (user: User) => void;
     logout: () => void;
     isAuthenticated: boolean;
 }
@@ -19,16 +18,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
     useEffect(() => {
-        // Check for existing session
-        const storedToken = localStorage.getItem('adminToken');
+        // Check for existing session user
         const storedUser = localStorage.getItem('adminUser');
 
-        if (storedToken && storedUser) {
-            setToken(storedToken);
+        if (storedUser) {
             setUser(JSON.parse(storedUser));
+            setIsAuthenticated(true);
         }
 
         // Listen for 401 Unauthorized events from api.ts
@@ -43,17 +41,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, []);
 
-    const login = (newToken: string, newUser: User) => {
-        setToken(newToken);
+    const login = (newUser: User) => {
         setUser(newUser);
-        localStorage.setItem('adminToken', newToken);
+        setIsAuthenticated(true);
         localStorage.setItem('adminUser', JSON.stringify(newUser));
     };
 
     const logout = () => {
-        setToken(null);
         setUser(null);
-        localStorage.removeItem('adminToken');
+        setIsAuthenticated(false);
         localStorage.removeItem('adminUser');
     };
 
@@ -61,10 +57,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <AuthContext.Provider
             value={{
                 user,
-                token,
                 login,
                 logout,
-                isAuthenticated: !!token && !!user,
+                isAuthenticated,
             }}
         >
             {children}

@@ -10,7 +10,8 @@ import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { useSettings } from '../context/SettingsContext';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { ENV } from '../config/env';
+const API_URL = ENV.API_URL;
 
 const SocialButton: React.FC<{ provider: 'google' | 'facebook' }> = ({ provider }) => {
     const isGoogle = provider === 'google';

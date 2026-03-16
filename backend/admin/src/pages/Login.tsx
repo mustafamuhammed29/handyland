@@ -22,7 +22,7 @@ const Login: React.FC = () => {
             const data = (response as any)?.data || response;
 
             if (data.success) {
-                login(data.token, data.user);
+                login(data.admin || data.user);
                 setTimeout(() => navigate('/', { replace: true }), 100);
             } else {
                 setError(data.message || 'Invalid credentials');

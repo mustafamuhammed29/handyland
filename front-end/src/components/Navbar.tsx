@@ -113,6 +113,13 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             );
           })}
           
+          <Link
+            to="/track-repair"
+            className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
+          >
+            <ClipboardList className="w-3.5 h-3.5" />
+            Track Repair
+          </Link>
           </div>
         </div>
 

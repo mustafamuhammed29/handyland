@@ -13,7 +13,7 @@ const CATEGORIES = [
 ];
 
 import { useSettings } from '../context/SettingsContext';
-
+import { getImageUrl } from '../utils/imageUrl';
 // ... (keep props interface)
 
 export const RepairGallery: React.FC<RepairGalleryProps> = () => {
@@ -102,13 +102,6 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
     const handleScan = () => {
         setIsScanning(true);
         setTimeout(() => setIsScanning(false), 1500);
-    };
-
-    // Helper to get image URL
-    const getImageUrl = (url: string) => {
-        if (!url) return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80';
-        if (url.startsWith('http')) return url;
-        return `http://127.0.0.1:5000${url}`;
     };
 
     return (
