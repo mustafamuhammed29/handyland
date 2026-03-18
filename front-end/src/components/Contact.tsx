@@ -77,7 +77,7 @@ export const Contact: React.FC<ContactProps> = () => {
     }
 
     return (
-        <section className="relative py-24 bg-white dark:bg-black overflow-hidden border-t border-slate-200 dark:border-slate-900 transition-colors duration-300">
+        <section className="relative py-24 bg-white dark:bg-black border-t border-slate-200 dark:border-slate-900 transition-colors duration-300">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_var(--tw-gradient-stops))] from-blue-100/30 dark:from-blue-900/10 via-white dark:via-slate-950 to-slate-50 dark:to-black pointer-events-none"></div>
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
@@ -179,8 +179,8 @@ export const Contact: React.FC<ContactProps> = () => {
                     </div>
 
                     {/* RIGHT: Contact Form */}
-                    <div className="relative">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-[2rem] opacity-20 blur-xl"></div>
+                    <div className="relative z-0">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-[2rem] opacity-20 blur-xl pointer-events-none" style={{isolation: 'isolate', zIndex: -1}}></div>
                         <div className="relative glass-modern p-8 rounded-[2rem] border border-slate-700/50">
 
                             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">

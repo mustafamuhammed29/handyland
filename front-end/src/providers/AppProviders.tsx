@@ -6,6 +6,7 @@ import { LanguageProvider } from '../context/LanguageContext';
 import { SettingsProvider } from '../context/SettingsContext';
 import { AuthProvider } from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
+import { WishlistProvider } from '../context/WishlistContext';
 import { ThemeProvider } from '../context/ThemeContext';
 
 const queryClient = new QueryClient({
@@ -37,9 +38,11 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
                         <LanguageProvider>
                             <SettingsProvider>
                                 <AuthProvider>
-                                    <CartProvider>
-                                        {children}
-                                    </CartProvider>
+                                    <WishlistProvider>
+                                        <CartProvider>
+                                            {children}
+                                        </CartProvider>
+                                    </WishlistProvider>
                                 </AuthProvider>
                             </SettingsProvider>
                         </LanguageProvider>

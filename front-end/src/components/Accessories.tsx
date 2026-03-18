@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { LanguageCode } from '../types';
 import { useTranslation } from 'react-i18next';
 import { Headphones, Zap, Shield, Watch, Plus, Sparkles, X, Layers, ShoppingCart, Search } from 'lucide-react';
@@ -39,6 +40,17 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
             .catch(() => setLoading(false));
     }, []);
 
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (selectedItem) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [selectedItem]);
+
+
     const handleAddToCart = (item: any) => {
         const imageUrl = getImageUrl(item.image || item.images?.[0]);
         addToCart({
@@ -69,111 +81,111 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
 
     return (
-        <section className="py-24 relative bg-brand-surface-light dark:bg-brand-surface-dark border-t border-slate-200 dark:border-slate-800/50 overflow-hidden transition-colors duration-300">
+        <>
+        {/* --- GEAR INSPECTOR MODAL — rendered via Portal into document.body --- */}
+        {selectedItem && createPortal((
+            <div className="fixed inset-0 z-[9000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="relative w-full max-w-7xl max-h-[90vh] bg-slate-900 border-4 border-brand-primary/30 rounded-3xl overflow-hidden shadow-2xl shadow-brand-primary/20 flex flex-col md:flex-row">
+                    <button
+                        onClick={() => setSelectedItem(null)}
+                        className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-white/10 rounded-full text-white transition-colors"
+                        aria-label="Close Inspector"
+                        title="Close Inspector"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+
+                    {/* Left: Visual */}
+                    <div className="w-full md:w-1/2 relative bg-gradient-to-br from-purple-900/20 to-black p-8 flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:30px_30px] opacity-50"></div>
+                        <img
+                            src={getImageUrl(selectedItem.image)}
+                            alt={selectedItem.name}
+                            onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
+                            className="relative z-10 w-3/4 max-w-sm drop-shadow-[0_20px_50px_rgba(168,85,247,0.3)] hover:scale-105 transition-transform duration-500"
+                        />
+                    </div>
+
+                    {/* Right: Specs */}
+                    <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto bg-slate-950">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="px-3 py-1 text-xs font-bold uppercase rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30">
+                                {selectedItem.tag}
+                            </span>
+                        </div>
+
+                         <h2 className="text-3xl font-black text-white mb-2 leading-tight">{selectedItem.name}</h2>
+                        <div className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary font-bold mb-6">
+                            {selectedItem.price}{t('common.currency')}
+                        </div>
+
+                        <p className="text-slate-400 leading-relaxed mb-8 border-l-2 border-purple-800 pl-4 text-sm">
+                            {selectedItem.description}
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                            {selectedItem.color && (
+                                <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Color</div>
+                                    <div className="text-white text-sm font-medium truncate">{selectedItem.color}</div>
+                                </div>
+                            )}
+                            {selectedItem.storage && (
+                                <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Storage</div>
+                                    <div className="text-white text-sm font-medium truncate">{selectedItem.storage}</div>
+                                </div>
+                            )}
+                            {selectedItem.battery && (
+                                <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Battery</div>
+                                    <div className="text-white text-sm font-medium truncate">{selectedItem.battery}</div>
+                                </div>
+                            )}
+                            {selectedItem.processor && (
+                                <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Processor</div>
+                                    <div className="text-white text-sm font-medium truncate">{selectedItem.processor}</div>
+                                </div>
+                            )}
+                            {selectedItem.display && (
+                                <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Display</div>
+                                    <div className="text-white text-sm font-medium truncate">{selectedItem.display}</div>
+                                </div>
+                            )}
+                            {selectedItem.specs && Object.entries(selectedItem.specs).map(([key, value]) => (
+                                <div key={key} className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">{key}</div>
+                                    {/* @ts-ignore */}
+                                    <div className="text-white text-sm font-medium truncate">{value}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => {
+                                    handleAddToCart(selectedItem);
+                                    setSelectedItem(null);
+                                }}
+                                disabled={selectedItem.stock === 0}
+                                className={`flex-1 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${selectedItem.stock > 0 ? 'bg-white hover:bg-slate-200 text-black' : 'bg-slate-800 text-slate-500'}`}
+                            >
+                                <Plus className="w-5 h-5" /> {selectedItem.stock > 0 ? t('accessories.equip', 'Add to Cart') : 'Out of Stock'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        ), document.body)}
+
+
+        <section className="py-24 relative bg-brand-surface-light dark:bg-brand-surface-dark border-t border-slate-200 dark:border-slate-800/50 transition-colors duration-300">
 
             {/* Background Atmosphere */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-100/30 dark:from-purple-900/20 via-white dark:via-slate-950 to-slate-50 dark:to-black pointer-events-none"></div>
 
-            {/* --- GEAR INSPECTOR MODAL --- */}
-            {selectedItem && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="relative w-full max-w-7xl max-h-[90vh] bg-slate-900 border-4 border-brand-primary/30 rounded-3xl overflow-hidden shadow-2xl shadow-brand-primary/20 flex flex-col md:flex-row">
-                        <button
-                            onClick={() => setSelectedItem(null)}
-                            className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-white/10 rounded-full text-white transition-colors"
-                            aria-label="Close Inspector"
-                            title="Close Inspector"
-                        >
-                            <X className="w-6 h-6" />
-                        </button>
-
-                        {/* Left: Visual */}
-                        <div className="w-full md:w-1/2 relative bg-gradient-to-br from-purple-900/20 to-black p-8 flex items-center justify-center overflow-hidden">
-                            <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:30px_30px] opacity-50"></div>
-                            <img
-                                src={getImageUrl(selectedItem.image)}
-                                alt={selectedItem.name}
-                                onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
-                                className="relative z-10 w-3/4 max-w-sm drop-shadow-[0_20px_50px_rgba(168,85,247,0.3)] hover:scale-105 transition-transform duration-500"
-                            />
-                        </div>
-
-                        {/* Right: Specs */}
-                        <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto bg-slate-950">
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="px-3 py-1 text-xs font-bold uppercase rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30">
-                                    {selectedItem.tag}
-                                </span>
-                            </div>
-
-                             <h2 className="text-3xl font-black text-white mb-2 leading-tight">{selectedItem.name}</h2>
-                            <div className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary font-bold mb-6">
-                                {selectedItem.price}{t('common.currency')}
-                            </div>
-
-                            <p className="text-slate-400 leading-relaxed mb-8 border-l-2 border-purple-800 pl-4 text-sm">
-                                {selectedItem.description}
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-4 mb-8">
-                                {/* New Top-Level Specs */}
-                                {selectedItem.color && (
-                                    <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Color</div>
-                                        <div className="text-white text-sm font-medium truncate">{selectedItem.color}</div>
-                                    </div>
-                                )}
-                                {selectedItem.storage && (
-                                    <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Storage</div>
-                                        <div className="text-white text-sm font-medium truncate">{selectedItem.storage}</div>
-                                    </div>
-                                )}
-                                {selectedItem.battery && (
-                                    <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Battery</div>
-                                        <div className="text-white text-sm font-medium truncate">{selectedItem.battery}</div>
-                                    </div>
-                                )}
-                                {selectedItem.processor && (
-                                    <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Processor</div>
-                                        <div className="text-white text-sm font-medium truncate">{selectedItem.processor}</div>
-                                    </div>
-                                )}
-                                {selectedItem.display && (
-                                    <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Display</div>
-                                        <div className="text-white text-sm font-medium truncate">{selectedItem.display}</div>
-                                    </div>
-                                )}
-
-                                {/* Legacy Specs */}
-                                {selectedItem.specs && Object.entries(selectedItem.specs).map(([key, value]) => (
-                                    <div key={key} className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">{key}</div>
-                                        {/* @ts-ignore */}
-                                        <div className="text-white text-sm font-medium truncate">{value}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={() => {
-                                        handleAddToCart(selectedItem);
-                                        setSelectedItem(null);
-                                    }}
-                                    disabled={selectedItem.stock === 0}
-                                    className={`flex-1 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${selectedItem.stock > 0 ? 'bg-white hover:bg-slate-200 text-black' : 'bg-slate-800 text-slate-500'}`}
-                                >
-                                    <Plus className="w-5 h-5" /> {selectedItem.stock > 0 ? t('accessories.equip', 'Add to Cart') : 'Out of Stock'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
@@ -303,7 +315,8 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                     <span>SECURE_CONNECTION_V4</span>
                 </div>
 
-            </div >
-        </section >
+            </div>
+        </section>
+        </>
     );
 };

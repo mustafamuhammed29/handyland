@@ -167,15 +167,19 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             <Link
               to={user ? '/dashboard' : '/login'}
               aria-label={user ? 'Go to dashboard' : 'Log in'}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300 active:scale-95 hidden md:flex group outline-none"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300 active:scale-95 group outline-none"
             >
               <UserIcon className={`w-5 h-5 transition-colors ${user ? 'text-emerald-500 dark:text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)] group-hover:text-emerald-600 dark:group-hover:text-emerald-300' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'}`} />
             </Link>
 
+
+            </div>
+
+          <div className="flex lg:hidden items-center border-l border-black/10 dark:border-white/[0.05] pl-2 ml-1">
             <button
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle navigation menu"
-              className="w-10 h-10 flex lg:hidden items-center justify-center rounded-full transition-all active:scale-90 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 group outline-none ms-2"
+              className="w-10 h-10 flex items-center justify-center rounded-full transition-all active:scale-90 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 group outline-none"
             >
               {isOpen ? (
                 <X className="w-4 h-4 text-brand-primary group-hover:text-brand-secondary drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
@@ -185,6 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             </button>
           </div>
         </div>
+
       </div>
 
       {/* Mobile Nav Menu Drawer */}

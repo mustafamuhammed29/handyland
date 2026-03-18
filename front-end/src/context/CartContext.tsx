@@ -22,10 +22,6 @@ interface CartContextType {
     coupon: Coupon | null;
     applyCoupon: (code: string, discount: number) => void;
     removeCoupon: () => void;
-    wishlist: CartItem[];
-    addToWishlist: (item: CartItem) => void;
-    removeFromWishlist: (id: string | number) => void;
-    isInWishlist: (id: string | number) => boolean;
     freeShippingThreshold: number;
 }
 
@@ -42,20 +38,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 return saved ? JSON.parse(saved) : [];
             } catch (error) {
                 console.error("Failed to parse cart from localStorage", error);
-                return [];
-            }
-        }
-        return [];
-    });
-
-    // Wishlist State
-    const [wishlist, setWishlist] = useState<CartItem[]>(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                const saved = localStorage.getItem('handyland_wishlist');
-                return saved ? JSON.parse(saved) : [];
-            } catch (error) {
-                console.error("Failed to parse wishlist from localStorage", error);
                 return [];
             }
         }
@@ -86,10 +68,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         localStorage.setItem('handyland_cart', JSON.stringify(cart));
     }, [cart]);
-
-    useEffect(() => {
-        localStorage.setItem('handyland_wishlist', JSON.stringify(wishlist));
-    }, [wishlist]);
 
     // Backend Sync on Login / Refresh
     useEffect(() => {
@@ -126,31 +104,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
         };
 
-        const syncWishlist = async () => {
-            if (user && user._id) {
-                try {
-                    const response: any = await api.get('/api/wishlist');
-                    const data = response.data || response;
-                    if (data && data.success && data.products) {
-                        const mappedWishlist = data.products.map((p: any) => ({
-                            id: p.customId || p.product,
-                            title: p.name,
-                            price: p.price,
-                            image: p.image,
-                            category: p.productType || 'Product',
-                            quantity: 1
-                        }));
-                        setWishlist(mappedWishlist);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch wishlist:", error);
-                }
-            }
-        };
-
         if (user && user._id) {
             syncCart();
-            syncWishlist();
         }
     }, [user?._id]); // Run when user ID is established
 
@@ -294,40 +249,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setCoupon(null);
     };
 
-    // Wishlist Actions
-    const addToWishlist = async (item: CartItem) => {
-        setWishlist(prev => {
-            if (prev.find(i => i.id === item.id)) return prev;
-            return [...prev, item];
-        });
-
-        if (user) {
-            try {
-                await api.post('/api/wishlist', {
-                    productId: item.id,
-                    productType: item.category
-                });
-            } catch (error) {
-                console.error("Failed to add to wishlist backend", error);
-            }
-        }
-    };
-
-    const removeFromWishlist = async (id: string | number) => {
-        setWishlist(prev => prev.filter(item => item.id !== id));
-        if (user) {
-            try {
-                await api.delete(`/api/wishlist/${id}`);
-            } catch (error) {
-                console.error("Failed to remove from wishlist backend", error);
-            }
-        }
-    };
-
-    const isInWishlist = (id: string | number) => {
-        return wishlist.some(item => item.id === id);
-    };
-
     // Totals
     const cartTotal = cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
     const finalTotal = Math.max(0, cartTotal - (coupon?.discount || 0));
@@ -338,7 +259,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             isCartOpen, setIsCartOpen,
             cartTotal, finalTotal,
             coupon, applyCoupon, removeCoupon,
-            wishlist, addToWishlist, removeFromWishlist, isInWishlist,
             freeShippingThreshold
         }}>
             {children}

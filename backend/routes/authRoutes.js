@@ -55,6 +55,8 @@ const loginRules = [
 ];
 
 // Public routes
+router.get('/csrf', (req, res) => res.status(204).send());
+
 /**
  * @swagger
  * /api/auth/register:

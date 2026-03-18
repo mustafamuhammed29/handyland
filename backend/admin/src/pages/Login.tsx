@@ -2,36 +2,24 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../utils/api';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, loading } = useAuth();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
-
+        
         try {
-            const response = await api.post('/api/auth/admin/login', { email, password });
-            const data = (response as any)?.data || response;
-
-            if (data.success) {
-                login(data.admin || data.user);
-                setTimeout(() => navigate('/', { replace: true }), 100);
-            } else {
-                setError(data.message || 'Invalid credentials');
-            }
+            await login(email, password);
+            navigate('/', { replace: true });
         } catch (err: any) {
-            setError(err?.response?.data?.message || 'Error connecting to server. Please try again.');
+            setError(err.message || 'Login failed');
             console.error('Login error:', err);
-        } finally {
-            setLoading(false);
         }
     };
 

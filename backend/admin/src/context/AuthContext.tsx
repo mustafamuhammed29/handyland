@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../utils/api';
 
 interface User {
     id: string;
@@ -9,9 +10,10 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
-    login: (user: User) => void;
+    login: (email: string, password: string) => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         // Check for existing session user
@@ -41,10 +44,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, []);
 
-    const login = (newUser: User) => {
-        setUser(newUser);
-        setIsAuthenticated(true);
-        localStorage.setItem('adminUser', JSON.stringify(newUser));
+    const login = async (email: string, password: string): Promise<void> => {
+        try {
+            setLoading(true);
+            await api.get('/api/auth/csrf'); // maintain CSRF protection
+            const response = await api.post('/api/auth/admin/login', { 
+                email, 
+                password 
+            });
+            
+            // Read admin directly from response
+            const adminData = response.data?.admin || (response as any).admin;
+            
+            if (!adminData) {
+                throw new Error('Invalid response from server');
+            }
+            
+            setUser(adminData);
+            setIsAuthenticated(true);
+            localStorage.setItem('adminUser', JSON.stringify(adminData));
+            
+        } catch (error: any) {
+            // Ensure error message is shown to user
+            const message = error?.response?.data?.message 
+                || error?.message 
+                || 'Login failed. Please try again.';
+            throw new Error(message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const logout = () => {
@@ -60,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 login,
                 logout,
                 isAuthenticated,
+                loading
             }}
         >
             {children}

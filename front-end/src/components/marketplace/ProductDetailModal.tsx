@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Cpu, Plus, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PhoneListing } from '../../types';
@@ -20,7 +21,14 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 }) => {
     const { t } = useTranslation();
 
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = ''; };
+    }, []);
+
     if (!product) return null;
+
 
     const getProductImage = (p: any) => {
         if (p.images && p.images.length > 0) return getImageUrl(p.images[0]);
@@ -28,10 +36,10 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         return '/images/placeholder.png';
     };
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
+    const modal = (
+        <div className="fixed inset-0 z-[9000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="relative w-full max-w-7xl max-h-[90vh] bg-white dark:bg-slate-900 border-4 border-blue-500/10 dark:border-blue-500/30 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
-                
+
                 <button
                     onClick={onClose}
                     title="Close"
@@ -117,4 +125,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             </div>
         </div>
     );
+
+    return createPortal(modal, document.body);
 };

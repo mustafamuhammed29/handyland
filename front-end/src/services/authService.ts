@@ -18,6 +18,7 @@ interface RegisterResponse {
 export const authService = {
     login: async (email: string, password: string): Promise<LoginResponse> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.post('/api/auth/login', { email, password });
             return response as any;
         } catch (error: any) {
@@ -28,6 +29,7 @@ export const authService = {
 
     register: async (userData: any): Promise<RegisterResponse> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.post('/api/auth/register', userData);
             return response as any;
         } catch (error: any) {
@@ -68,6 +70,7 @@ export const authService = {
 
     forgotPassword: async (email: string): Promise<any> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.post('/api/auth/forgot-password', { email });
             return response as any;
         } catch (error) {
@@ -78,6 +81,7 @@ export const authService = {
 
     resetPassword: async (token: string, password: string): Promise<any> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.post(`/api/auth/reset-password/${token}`, { password });
             return response as any;
         } catch (error) {
