@@ -63,57 +63,7 @@ export const useMarketplace = () => {
         placeholderData: (previousData) => previousData,
     });
 
-    // --- Wishlist Management ---
-    const { data: wishlistData } = useQuery({
-        queryKey: ['wishlist'],
-        queryFn: async () => {
-            const res = await api.get<any>('/api/wishlist') as any;
-            const items = res.data?.items || res.data?.products || res.products || res.items || [];
-            return items.map((p: any) => p.customId || p.product || p.id || p._id) as string[];
-        },
-        retry: 1,
-    });
-
-    const wishlistMutation = useMutation({
-        mutationFn: async ({ id, isWishlisted }: { id: string; isWishlisted: boolean }) => {
-            const method = isWishlisted ? 'delete' : 'post';
-            const endpoint = isWishlisted ? `/api/wishlist/${id}` : '/api/wishlist';
-            return api({
-                method,
-                url: endpoint,
-                data: isWishlisted ? undefined : { productId: id }
-            });
-        },
-        onMutate: async ({ id, isWishlisted }) => {
-            await queryClient.cancelQueries({ queryKey: ['wishlist'] });
-            const previousWishlist = queryClient.getQueryData<string[]>(['wishlist']);
-            
-            queryClient.setQueryData(['wishlist'], (old: string[] | undefined) => {
-                if (!old) return isWishlisted ? [] : [id];
-                return isWishlisted ? old.filter(item => item !== id) : [...old, id];
-            });
-
-            return { previousWishlist };
-        },
-        onError: (err, variables, context) => {
-            if (context?.previousWishlist) {
-                queryClient.setQueryData(['wishlist'], context.previousWishlist);
-            }
-            addToast('Action failed. Please try again.', 'error');
-        },
-        onSuccess: (data, variables) => {
-            addToast(variables.isWishlisted ? 'Removed from wishlist' : 'Added to wishlist', 'success');
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ['wishlist'] });
-        },
-    });
-
-    const toggleWishlist = useCallback((e: React.MouseEvent, id: string) => {
-        e.stopPropagation();
-        const isWishlisted = (wishlistData || []).includes(id);
-        wishlistMutation.mutate({ id, isWishlisted });
-    }, [wishlistData, wishlistMutation]);
+    // --- Wishlist Management Removed to useWishlist ---
 
     return {
         // State
@@ -132,11 +82,6 @@ export const useMarketplace = () => {
         products: data?.products || [],
         totalPages: data?.totalPages || 1,
         isLoading,
-        isError,
-        wishlist: wishlistData || [],
-        
-        // Actions
-        toggleWishlist,
-        loadingWishlistId: wishlistMutation.isPending ? wishlistMutation.variables?.id : null
+        isError
     };
 };

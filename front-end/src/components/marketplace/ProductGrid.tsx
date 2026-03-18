@@ -12,7 +12,7 @@ interface ProductGridProps {
     itemsPerPage: number;
     wishlist: string[];
     loadingWishlistId: string | null;
-    onToggleWishlist: (e: React.MouseEvent, id: string) => void;
+    onToggleWishlist: (e: React.MouseEvent, product: PhoneListing) => void;
     onAddToCart: (product: PhoneListing) => void;
     onSelect: (product: PhoneListing) => void;
     onClearFilters: () => void;
@@ -87,8 +87,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                     key={phone.id}
                     product={phone}
                     viewMode={viewMode}
-                    isWishlisted={wishlist.includes(phone.id)}
-                    loadingWishlist={loadingWishlistId === phone.id}
+                    isWishlisted={wishlist.includes(String(phone.id))}
+                    loadingWishlist={loadingWishlistId === String(phone.id)}
                     onToggleWishlist={onToggleWishlist}
                     onAddToCart={onAddToCart}
                     onSelect={onSelect}
