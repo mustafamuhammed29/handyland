@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { CartItem } from '../types';
 import { useAuth } from './AuthContext';
+import { useSettings } from './SettingsContext';
 import { api } from '../utils/api';
 import { debounce } from '../utils/debounce';
 
@@ -46,23 +47,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [coupon, setCoupon] = useState<Coupon | null>(null);
-    const [freeShippingThreshold, setFreeShippingThreshold] = useState(100); // Default to 100
-
-    // Fetch Global Settings
-    useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const res = await api.get('/api/settings');
-                const data = res.data || res;
-                if (data.freeShippingThreshold !== undefined) {
-                    setFreeShippingThreshold(data.freeShippingThreshold);
-                }
-            } catch (err) {
-                console.error("Failed to load global settings in Cart:", err);
-            }
-        };
-        fetchSettings();
-    }, []);
+    const { settings } = useSettings();
+    const freeShippingThreshold = settings?.freeShippingThreshold ?? 100;
 
     // Persistence (Local)
     useEffect(() => {
@@ -255,8 +241,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     // Totals
-    const cartTotal = cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
-    const finalTotal = Math.max(0, cartTotal - (coupon?.discount || 0));
+    const cartTotal = React.useMemo(() => 
+        cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0),
+    [cart]);
+
+    const finalTotal = React.useMemo(() => 
+        Math.max(0, cartTotal - (coupon?.discount || 0)),
+    [cartTotal, coupon]);
 
     return (
         <CartContext.Provider value={{
