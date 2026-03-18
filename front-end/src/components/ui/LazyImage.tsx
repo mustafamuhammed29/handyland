@@ -1,56 +1,42 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import { getImageUrl } from '../../utils/imageUrl';
 
 interface LazyImageProps {
-    src: string;
-    alt: string;
-    className?: string;
-    fallback?: string;
+  src: string | undefined | null;
+  alt: string;
+  className?: string;
+  fallback?: string;
 }
 
-export const LazyImage: React.FC<LazyImageProps> = ({
-    src,
-    alt,
-    className = '',
-    fallback = '/placeholder.webp',
+export const LazyImage: React.FC<LazyImageProps> = ({ 
+  src, 
+  alt, 
+  className = '',
+  fallback = '/placeholder-device.svg'
 }) => {
-    const [loaded, setLoaded] = useState(false);
-    const [error, setError] = useState(false);
-    const imgRef = useRef<HTMLImageElement>(null);
+  const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting && imgRef.current) {
-                    imgRef.current.src = src;
-                    observer.disconnect();
-                }
-            },
-            { rootMargin: '200px' }
-        );
+  const imageSrc = error ? fallback : getImageUrl(src);
 
-        if (imgRef.current) observer.observe(imgRef.current);
-        return () => observer.disconnect();
-    }, [src]);
-
-    return (
-        <div className={`relative overflow-hidden ${className}`}>
-            {!loaded && !error && (
-                <div
-                    className="absolute inset-0 bg-slate-800 animate-pulse rounded-inherit"
-                    style={{ borderRadius: 'inherit' }}
-                />
-            )}
-            <img
-                ref={imgRef}
-                alt={alt}
-                className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-                onLoad={() => setLoaded(true)}
-                onError={() => {
-                    setError(true);
-                    if (imgRef.current) imgRef.current.src = fallback;
-                    setLoaded(true);
-                }}
-            />
-        </div>
-    );
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      {/* Skeleton while loading */}
+      {!loaded && (
+        <div className="absolute inset-0 bg-slate-700/50 animate-pulse rounded" />
+      )}
+      <img
+        src={imageSrc}
+        alt={alt}
+        loading="lazy"
+        className={`w-full h-full object-cover transition-opacity duration-300 
+                    ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={() => setLoaded(true)}
+        onError={() => {
+          setError(true);
+          setLoaded(true);
+        }}
+      />
+    </div>
+  );
 };

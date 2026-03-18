@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Sparkles, Smartphone, ScanLine } from 'lucide-react';
 import { AppFrame } from './AppFrame';
+import { LazyImage } from '../ui/LazyImage';
 
 export const ValuationLanding = ({
     t,
@@ -108,13 +109,11 @@ export const ValuationLanding = ({
                                     bis {device.basePrice}€
                                 </div>
                                 <div className="relative w-24 h-24 rounded-2xl flex items-center justify-center bg-slate-50 dark:bg-slate-800 p-3 shadow-inner group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
-                                    {device.imageUrl ? (
-                                        <img src={device.imageUrl} alt={device.modelName}
-                                            className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-500"
-                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
-                                        />
-                                    ) : null}
-                                    <Smartphone className={`w-12 h-12 text-slate-400 group-hover:text-blue-500 transition-colors ${device.imageUrl ? 'hidden' : ''}`} />
+                                    <LazyImage
+                                        src={device.imageUrl || device.image || device.images?.[0]}
+                                        alt={device.modelName}
+                                        className="object-contain w-full h-full"
+                                    />
                                 </div>
                                 <div className="text-center w-full z-10">
                                     <div className="font-extrabold text-base text-slate-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title={device.modelName}>{device.modelName}</div>

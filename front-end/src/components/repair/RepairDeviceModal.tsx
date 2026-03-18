@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Cpu, Activity, Clock, ShieldCheck, Wrench } from 'lucide-react';
 import { RepairDevice } from './types';
 import { getServiceIcon } from './utils';
-import { getImageUrl } from '../../utils/imageUrl';
+import { LazyImage } from '../ui/LazyImage';
 
 interface RepairDeviceModalProps {
     selectedDevice: RepairDevice;
@@ -39,11 +39,10 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                     <div className="text-xs font-mono text-blue-500 mb-4 tracking-widest uppercase">Target System</div>
                     <div className="relative w-48 h-64 mb-6 group">
                         <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                        <img
-                            src={getImageUrl(selectedDevice.image)}
+                        <LazyImage
+                            src={selectedDevice.image || (selectedDevice as any).images?.[0]}
                             alt={selectedDevice.model}
                             className="relative w-full h-full object-contain drop-shadow-2xl z-10"
-                            onError={(e: any) => e.target.src = '/placeholder.png'}
                         />
                         {/* Scan Line */}
                         <div className="absolute top-0 left-0 w-full h-1 bg-blue-400 shadow-[0_0_15px_#60a5fa] animate-[scan_2s_linear_infinite] opacity-50 z-20"></div>
