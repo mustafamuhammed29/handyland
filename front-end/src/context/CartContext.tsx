@@ -155,7 +155,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     return i;
                 });
             }
-            return [...prev, { ...item, quantity: 1 }];
+            const newItem: CartItem = {
+                ...item,
+                title: item.title || (item as any).name || 'Unknown Product',
+                quantity: 1
+            };
+            return [...prev, newItem];
         });
         setIsCartOpen(true);
 
