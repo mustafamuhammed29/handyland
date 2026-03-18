@@ -7,6 +7,7 @@ import { productService } from '../services/productService';
 import { api } from '../utils/api';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
+import { useWishlist } from '../hooks/useWishlist';
 import { PhoneListing } from '../types';
 import { SEO } from './SEO';
 import { useTranslation } from 'react-i18next';
@@ -45,56 +46,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
     const { t } = useTranslation();
     const { user } = useAuth(); // Safe to access now if context provides it
 
-    const [wishlist, setWishlist] = useState<string[]>([]);
-    const [loadingWishlistId, setLoadingWishlistId] = useState<string | null>(null);
+    const { isInWishlist, toggleWishlist, loadingId: wishlistLoadingId } = useWishlist();
 
-    useEffect(() => {
-        const fetchWishlist = async () => {
-            try {
-                if (!user) return;
-                const res = await api.get<any>('/api/wishlist') as any;
-                const products = res.data?.items || res.data?.products || res.products || res.items || [];
-                setWishlist(products.map((p: any) => p.customId || p.product || p.id || p._id));
-            } catch (error) {
-                console.error("Failed to load wishlist", error);
-            }
-        };
-        fetchWishlist();
-    }, [user]);
-
-    const toggleWishlist = async (targetId: string | undefined) => {
-        if (!targetId || !user) {
-            addToast("Please login to use wishlist", "error");
-            return;
-        }
-        if (loadingWishlistId === targetId) return;
-        setLoadingWishlistId(targetId);
-
-        const isWishlisted = wishlist.includes(targetId);
-        const method = isWishlisted ? 'delete' : 'post';
-        const endpoint = isWishlisted ? `/api/wishlist/${targetId}` : '/api/wishlist';
-
-        setWishlist(prev =>
-            isWishlisted ? prev.filter(item => item !== targetId) : [...prev, targetId]
-        );
-
-        try {
-            await api({
-                method,
-                url: endpoint,
-                data: isWishlisted ? undefined : { productId: targetId }
-            });
-            addToast(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist', 'success');
-        } catch (error) {
-            console.error('Wishlist toggle failed:', error);
-            setWishlist(prev =>
-                isWishlisted ? [...prev, targetId] : prev.filter(item => item !== targetId)
-            );
-            addToast('Action failed. Please try again.', 'error');
-        } finally {
-            setLoadingWishlistId(null);
-        }
-    };
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -381,16 +334,24 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
 
                             <div className="flex gap-4">
                                 <button
-                                    onClick={() => toggleWishlist(product.id || (product as any)._id)}
-                                    disabled={loadingWishlistId === (product.id || (product as any)._id)}
-                                    title={wishlist.includes(product.id || (product as any)._id) ? "Remove from wishlist" : "Add to wishlist"}
-                                    aria-label={wishlist.includes(product.id || (product as any)._id) ? "Remove from wishlist" : "Add to wishlist"}
-                                    className={`p-4 rounded-xl border transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-wait ${wishlist.includes(product.id || (product as any)._id)
+                                    onClick={() => toggleWishlist({
+                                        id: product.id || (product as any)._id,
+                                        title: product.model || (product as any).title,
+                                        price: product.price,
+                                        image: activeImage,
+                                        category: 'device',
+                                        quantity: 1,
+                                        stock: product.stock
+                                    })}
+                                    disabled={wishlistLoadingId === String(product.id || (product as any)._id)}
+                                    title={isInWishlist(product.id || (product as any)._id) ? "Remove from wishlist" : "Add to wishlist"}
+                                    aria-label={isInWishlist(product.id || (product as any)._id) ? "Remove from wishlist" : "Add to wishlist"}
+                                    className={`p-4 rounded-xl border transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-wait ${isInWishlist(product.id || (product as any)._id)
                                         ? 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-500 border-red-500/30'
                                         : 'bg-slate-100 text-slate-500 border-slate-200 hover:text-slate-900 hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-white dark:hover:bg-slate-800'
                                         }`}
                                 >
-                                    <Heart className={`w-6 h-6 ${wishlist.includes(product.id || (product as any)._id) ? 'fill-current' : ''}`} />
+                                    <Heart className={`w-6 h-6 ${isInWishlist(product.id || (product as any)._id) ? 'fill-current' : ''}`} />
                                 </button>
                                 <button
                                     onClick={handleAddToCart}

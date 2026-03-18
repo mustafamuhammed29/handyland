@@ -6,10 +6,12 @@ import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { SEO } from './SEO';
 import { useMarketplace } from '../hooks/useMarketplace';
+import { useWishlist } from '../hooks/useWishlist';
 import { FilterSidebar } from './marketplace/FilterSidebar';
 import { ProductGrid } from './marketplace/ProductGrid';
 import { ProductDetailModal } from './marketplace/ProductDetailModal';
-import { LanguageCode, PhoneListing } from '../types';
+import { LanguageCode, PhoneListing, CartItem } from '../types';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface MarketplaceProps {
     lang: LanguageCode;
@@ -23,6 +25,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
 
     // Custom Hook handles all logic, URL syncing, and React Query fetching
     const mp = useMarketplace();
+    const { wishlist, isInWishlist, toggleWishlist, loadingId: wishlistLoadingId } = useWishlist();
 
     const [selectedProduct, setSelectedProduct] = useState<PhoneListing | null>(null);
     const [showFilters, setShowFilters] = useState(false);
@@ -50,6 +53,19 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
         handleAddToCart(phone);
         navigate('/checkout');
     };
+
+    const handleToggleWishlist = React.useCallback((e: React.MouseEvent, product: PhoneListing) => {
+        e.stopPropagation();
+        toggleWishlist({
+            id: product.id || String((product as any)._id),
+            title: product.model || (product as any).title,
+            price: product.price,
+            image: product.images?.[0] || product.imageUrl,
+            category: 'device',
+            quantity: 1,
+            stock: product.stock
+        });
+    }, [toggleWishlist]);
 
     // Optimized mouse handler for spotlight effect (CSS variable based)
     const handleMouseMove = (e: React.MouseEvent) => {
@@ -158,9 +174,9 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         loading={mp.isLoading}
                         viewMode={mp.viewMode}
                         itemsPerPage={12}
-                        wishlist={mp.wishlist}
-                        loadingWishlistId={mp.loadingWishlistId}
-                        onToggleWishlist={mp.toggleWishlist}
+                        wishlist={wishlist}
+                        loadingWishlistId={wishlistLoadingId}
+                        onToggleWishlist={handleToggleWishlist}
                         onAddToCart={handleAddToCart}
                         onSelect={setSelectedProduct}
                         onClearFilters={() => {

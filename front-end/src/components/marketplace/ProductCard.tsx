@@ -11,7 +11,7 @@ interface ProductCardProps {
     viewMode: 'grid' | 'list';
     isWishlisted: boolean;
     loadingWishlist: boolean;
-    onToggleWishlist: (e: React.MouseEvent, id: string) => void;
+    onToggleWishlist: (e: React.MouseEvent, product: PhoneListing) => void;
     onAddToCart: (product: PhoneListing) => void;
     onSelect: (product: PhoneListing) => void;
 }
@@ -73,7 +73,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         <button
                             title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                             disabled={loadingWishlist}
-                            onClick={(e) => onToggleWishlist(e, product.id)}
+                            onClick={(e) => onToggleWishlist(e, product)}
                             className={`px-4 py-2 border rounded-lg transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait ${isWishlisted ? 'bg-red-500/10 border-red-500/30 text-red-600 dark:bg-red-500/20 dark:border-red-500/50 dark:text-red-500' : 'border-slate-200 bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700'}`}
                         >
                             <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
@@ -141,7 +141,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     <div className="flex items-center gap-1.5 md:gap-2 w-full md:w-auto">
                         <motion.button
                             whileTap={{ scale: 0.9 }}
-                            onClick={(e) => onToggleWishlist(e, product.id)}
+                            onClick={(e) => onToggleWishlist(e, product)}
                             disabled={loadingWishlist}
                             className={`p-2 flex-1 md:flex-none flex justify-center items-center md:p-3 rounded-lg md:rounded-xl transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-wait ${isWishlisted ? 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-500 border-red-500/30 hover:bg-red-500/20 dark:hover:bg-red-500/30' : 'bg-slate-100 text-slate-500 border-slate-200 hover:text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:text-white dark:hover:bg-slate-700'}`}
                         >
