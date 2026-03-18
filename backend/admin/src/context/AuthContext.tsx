@@ -62,7 +62,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             setUser(adminData);
             setIsAuthenticated(true);
-            localStorage.setItem('adminUser', JSON.stringify(adminData));
             
         } catch (error: any) {
             // Ensure error message is shown to user
@@ -78,7 +77,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const logout = () => {
         setUser(null);
         setIsAuthenticated(false);
-        localStorage.removeItem('adminUser');
     };
 
     return (

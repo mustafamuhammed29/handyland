@@ -1,8 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { api } from '../utils/api';
 import { authService } from '../services/authService';
 import { orderService } from '../services/orderService';
 import { Order, RepairTicket, SavedValuation, Address, WalletTransaction, User as UserType } from '../types';
+import { normalizeResponse } from '../utils/normalizeResponse';
+import { useSocket } from './useSocket';
 
 // Query keys
 export const dashboardKeys = {
@@ -52,7 +55,7 @@ export function useRepairs(options?: { enabled?: boolean }) {
         enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/repairs/my-repairs') as any;
-            return res.data?.repairs || res.repairs || [];
+            return normalizeResponse(res, 'repairs');
         },
         staleTime: 2 * 60 * 1000,
         retry: 2,
@@ -65,8 +68,7 @@ export function useValuations(options?: { enabled?: boolean }) {
         enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/valuation/my-valuations') as any;
-            // api interceptor returns response.data directly, so res may be the array itself
-            const list: any[] = Array.isArray(res) ? res : (res?.data?.valuations || res?.valuations || res?.data || []);
+            const list = normalizeResponse(res, 'valuations');
             return list.map((v: any) => ({
                 id: v._id,
                 device: v.device || v.deviceName || 'Unknown Device',
@@ -91,7 +93,7 @@ export function usePromotions(options?: { enabled?: boolean }) {
         enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/promotions/active');
-            return res.data?.promotions || [];
+            return normalizeResponse(res, 'promotions');
         },
         staleTime: 10 * 60 * 1000, // 10 minutes
         retry: 1,
@@ -117,7 +119,7 @@ export function useWalletTransactions(options?: { enabled?: boolean }) {
         enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/transactions') as any;
-            const transactions = res.data?.transactions || res.transactions || [];
+            const transactions = normalizeResponse(res, 'transactions');
             // Calculate balance from transactions
             const balance = transactions.reduce((sum: number, t: any) => {
                 if (t.type === 'credit' || t.type === 'deposit' || t.type === 'refund') {
@@ -151,8 +153,8 @@ export function useWishlist(options?: { enabled?: boolean }) {
         enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/wishlist') as any;
-            // Interceptor may strip the .data wrapper, so check both res and res.data
-            const items = res.data?.products || res.products || res.data?.items || res.items || [];
+            // The normalizer checks for 'items' inherently, but if it's 'products', we pass 'products'
+            const items = normalizeResponse(res, 'products');
             return items.map((item: any) => ({
                 id: item.customId || item.product || item._id, // The actual product string ID
                 _id: item._id,                      // The wishlist item ID
@@ -170,16 +172,26 @@ export function useWishlist(options?: { enabled?: boolean }) {
 }
 
 export function useNotifications() {
-    return useQuery({
+    const query = useQuery({
         queryKey: dashboardKeys.notifications(),
         queryFn: async () => {
             const res = await api.get<any>('/api/notifications');
-            return res.data?.notifications || [];
+            return normalizeResponse(res, 'notifications');
         },
         staleTime: 30 * 1000, // 30 seconds
         retry: 2,
-        refetchInterval: 30 * 1000, // Poll every 30 seconds (will be replaced with WebSocket later)
     });
+
+    const { onNotification } = useSocket();
+
+    useEffect(() => {
+        const cleanup = onNotification(() => {
+            query.refetch();
+        });
+        return cleanup;
+    }, [onNotification, query.refetch]);
+
+    return query;
 }
 
 // Main hook that combines all queries
