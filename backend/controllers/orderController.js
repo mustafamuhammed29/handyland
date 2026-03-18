@@ -76,15 +76,10 @@ exports.applyCoupon = async (req, res) => {
 // @route   POST /api/orders
 // @access  Private
 exports.createOrder = async (req, res) => {
-    // FIXED: Use MongoDB session for atomicity (FIX 2)
-    const session = await mongoose.startSession();
-    session.startTransaction();
     try {
         const { items, shippingAddress, paymentMethod, notes, couponCode, discountAmount } = req.body;
 
         if (!items || items.length === 0) {
-            await session.abortTransaction();
-            session.endSession();
             return res.status(400).json({
                 success: false,
                 message: 'No items in order'
@@ -98,14 +93,12 @@ exports.createOrder = async (req, res) => {
         for (const item of items) {
             let product;
             if (item.productType === 'Product') {
-                product = await Product.findById(item.product).session(session);
+                product = await Product.findById(item.product);
             } else if (item.productType === 'Accessory') {
-                product = await Accessory.findById(item.product).session(session);
+                product = await Accessory.findById(item.product);
             }
 
             if (!product) {
-                await session.abortTransaction();
-                session.endSession();
                 return res.status(404).json({
                     success: false,
                     message: `Product not found: ${item.product}`
@@ -114,8 +107,6 @@ exports.createOrder = async (req, res) => {
 
             // Check Stock
             if (product.stock < item.quantity) {
-                await session.abortTransaction();
-                session.endSession();
                 return res.status(400).json({
                     success: false,
                     message: `Insufficient stock for ${product.name}. Available: ${product.stock}`
@@ -143,7 +134,7 @@ exports.createOrder = async (req, res) => {
 
         const finalAmount = Math.max(0, totalAmount + shippingFee + taxAmount - appliedDiscount);
 
-        // Create order within session
+        // Create order
         const [order] = await Order.create([{
             user: req.user.id,
             items: orderItems,
@@ -155,14 +146,14 @@ exports.createOrder = async (req, res) => {
             notes,
             couponCode: couponCode || undefined,
             discountAmount: appliedDiscount
-        }], { session });
+        }]);
 
-        // Update Stock and Sold within session
+        // Update Stock and Sold
         for (const item of orderItems) {
             if (item.productType === 'Product') {
-                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } }, { session });
+                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
             } else if (item.productType === 'Accessory') {
-                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } }, { session });
+                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
             }
         }
 
@@ -172,10 +163,7 @@ exports.createOrder = async (req, res) => {
             await recordCouponUsage(couponCode, req.user.id, req.user.email);
         }
 
-        await session.commitTransaction();
-        session.endSession();
-
-        // Send order confirmation email (outside transaction — non-critical)
+        // Send order confirmation email (non-critical)
         try {
             await sendEmail({
                 email: req.user.email,
@@ -205,8 +193,6 @@ exports.createOrder = async (req, res) => {
             order
         });
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
         console.error('Create order error:', error);
         res.status(500).json({
             success: false,

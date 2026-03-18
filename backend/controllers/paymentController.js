@@ -594,10 +594,6 @@ exports.capturePayPalOrder = async (req, res) => {
 
         if (capture.result.status === 'COMPLETED') {
 
-            // FIXED: Wrap DB operations in MongoDB transaction (FIX 3)
-            const dbSession = await mongoose.startSession();
-            dbSession.startTransaction();
-
             try {
                 const orderItems = orderData.items.map(item => ({
                     product: item.product || item.id,
@@ -621,14 +617,14 @@ exports.capturePayPalOrder = async (req, res) => {
                     paymentMethod: 'paypal',
                     paymentId: capture.result.id,
                     shippingAddress: orderData.shippingAddress
-                }], { session: dbSession });
+                }]);
 
-                // Update Stock and Sold within session
+                // Update Stock and Sold
                 for (const item of orderItems) {
                     if (item.productType === 'Product') {
-                        await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } }, { session: dbSession });
+                        await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
                     } else if (item.productType === 'Accessory') {
-                        await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } }, { session: dbSession });
+                        await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
                     }
                 }
 
@@ -638,10 +634,7 @@ exports.capturePayPalOrder = async (req, res) => {
                     await recordCouponUsage(orderData.couponCode, req.user.id, req.user.email);
                 }
 
-                await dbSession.commitTransaction();
-                dbSession.endSession();
-
-                // Send Email (outside transaction)
+                // Send Email
                 try {
                     const emailService = require('../utils/emailService');
                     await emailService.sendOrderConfirmation(finalOrder);
@@ -654,8 +647,6 @@ exports.capturePayPalOrder = async (req, res) => {
                 });
 
             } catch (err) {
-                await dbSession.abortTransaction();
-                dbSession.endSession();
                 throw err;
             }
         } else {
