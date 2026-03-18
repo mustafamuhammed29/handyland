@@ -99,7 +99,7 @@ export const Stats: React.FC = () => {
   ];
 
   return (
-    <section className="relative py-20 bg-slate-100 dark:bg-slate-950 border-y border-slate-200 dark:border-slate-900 overflow-hidden transition-colors duration-300">
+    <section className="relative py-20 bg-slate-100 dark:bg-slate-950 border-y border-slate-200 dark:border-slate-900 transition-colors duration-300">
 
       {/* Animated Background Mesh */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { ShoppingCart, X, Trash2, ArrowRight, Zap, Heart, Tag, Truck, Check, Loader2 } from 'lucide-react';
 import { LanguageCode } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,9 +18,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
         cart, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen,
         cartTotal, finalTotal,
         coupon, applyCoupon, removeCoupon,
-        addToWishlist, removeFromWishlist, isInWishlist,
         freeShippingThreshold
     } = useCart();
+    
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
     const { t } = useTranslation();
     const [couponCodeIn, setCouponCodeIn] = useState('');

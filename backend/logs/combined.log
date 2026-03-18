@@ -4531,3 +4531,45 @@
 {"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-03-16T01:59:00.374Z"}
 {"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-03-16T01:59:00.374Z"}
 {"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-03-16T01:59:00.375Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-03-16T22:39:14.725Z"}
+{"level":"warn","message":"WARNING: Running with missing environment variables in development.","service":"handyland-backend","timestamp":"2026-03-16T22:39:14.726Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-03-16T22:39:15.425Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-03-16T22:39:15.455Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-03-16T22:39:15.456Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-03-16T22:39:15.456Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-03-16T22:39:15.456Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-03-16T23:31:41.625Z"}
+{"level":"warn","message":"WARNING: Running with missing environment variables in development.","service":"handyland-backend","timestamp":"2026-03-16T23:31:41.626Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-03-16T23:31:41.952Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-03-16T23:31:41.979Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-03-16T23:31:41.980Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-03-16T23:31:41.980Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-03-16T23:31:41.980Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-03-18T21:08:22.248Z"}
+{"level":"warn","message":"WARNING: Running with missing environment variables in development.","service":"handyland-backend","timestamp":"2026-03-18T21:08:22.249Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-03-18T21:08:23.009Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-03-18T21:08:23.048Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-03-18T21:08:23.048Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-03-18T21:08:23.049Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-03-18T21:08:23.049Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-03-18T21:21:15.643Z"}
+{"level":"warn","message":"WARNING: Running with missing environment variables in development.","service":"handyland-backend","timestamp":"2026-03-18T21:21:15.645Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-03-18T21:21:16.003Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-03-18T21:21:16.034Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-03-18T21:21:16.034Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-03-18T21:21:16.034Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-03-18T21:21:16.034Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-03-18T21:31:02.923Z"}
+{"level":"warn","message":"WARNING: Running with missing environment variables in development.","service":"handyland-backend","timestamp":"2026-03-18T21:31:02.924Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-03-18T21:31:03.283Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-03-18T21:31:03.314Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-03-18T21:31:03.315Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-03-18T21:31:03.315Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-03-18T21:31:03.315Z"}
+{"level":"error","message":"❌ Missing or placeholder environment variables: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET","service":"handyland-backend","timestamp":"2026-03-18T21:38:07.800Z"}
+{"level":"warn","message":"WARNING: Running with missing environment variables in development.","service":"handyland-backend","timestamp":"2026-03-18T21:38:07.801Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-03-18T21:38:08.160Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-03-18T21:38:08.189Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-03-18T21:38:08.189Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-03-18T21:38:08.189Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-03-18T21:38:08.189Z"}

@@ -15,6 +15,10 @@ import { formatPrice } from '../utils/formatPrice';
 import { Breadcrumbs } from './Breadcrumbs';
 import { ConditionGuide } from './products/ConditionGuide';
 import { TrustBadges } from './products/TrustBadges';
+import { ProductGallery } from './products/ProductGallery';
+import { ProductTabs } from './products/ProductTabs';
+import { ProductStickyBar } from './products/ProductStickyBar';
+import { ReviewModal } from './products/ReviewModal';
 
 interface ProductDetailsProps {}
 
@@ -230,6 +234,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                     { label: `${product.brand} ${product.model}` }
                 ]} />
             </div>
+
             {/* Lightbox Modal */}
             {isLightboxOpen && (
                 <div
@@ -251,53 +256,14 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
             )}
 
             <div className="max-w-7xl mx-auto">
-
-
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-                    {/* Image Gallery */}
-                    <div className="space-y-4">
-                        <div
-                            className="aspect-square bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden relative group cursor-zoom-in w-full text-left focus:outline-none focus:ring-2 focus:ring-brand-primary block shadow-sm"
-                            onClick={() => setIsLightboxOpen(true)}
-                            aria-label={`Enlarge image of ${product.model}`}
-                        >
-                            <img
-                                src={getImageUrl(activeImage)}
-                                alt={product.model}
-                                className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-105"
-                            />
-                            <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4 z-10">
-                                <button 
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsConditionGuideOpen(true);
-                                    }}
-                                    className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md flex items-center gap-1.5 transition-transform hover:scale-105 shadow-sm active:scale-95 ${product.condition === 'new' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30' : (product.condition as string) === 'fair' ? 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30'}`}
-                                >
-                                    <span className={`w-1.5 h-1.5 rounded-full ${product.condition === 'new' ? 'bg-emerald-500' : (product.condition as string) === 'fair' ? 'bg-purple-500' : 'bg-blue-500'}`} />
-                                    {product.condition}
-                                    <HelpCircle className="w-3.5 h-3.5 opacity-70 ml-0.5" />
-                                </button>
-                            </div>
-                            <div className="absolute bottom-4 right-4 bg-black/50 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur z-10">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-5 gap-2">
-                            {product.images?.map((img, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setActiveImage(img)}
-                                    aria-label={`View image ${idx + 1}`}
-                                    className={`aspect-square rounded-xl border-2 overflow-hidden transition-all ${activeImage === img ? 'border-brand-primary opacity-100' : 'border-slate-200 dark:border-slate-800 opacity-60 hover:opacity-100'}`}
-                                >
-                                    <img src={getImageUrl(img)} alt={`View ${idx}`} className="w-full h-full object-cover" />
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                    <ProductGallery 
+                        product={product} 
+                        activeImage={activeImage} 
+                        setActiveImage={setActiveImage} 
+                        setIsLightboxOpen={setIsLightboxOpen} 
+                        setIsConditionGuideOpen={setIsConditionGuideOpen} 
+                    />
 
                     {/* Product Info */}
                     <div className="flex flex-col">
@@ -446,121 +412,13 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                     </div>
                 </div>
 
-                {/* Tabs Section */}
-                <div className="mb-16">
-                    <div className="flex overflow-x-auto gap-8 border-b border-slate-200 dark:border-slate-800 mb-8 pb-px" role="tablist">
-                        {['overview', 'specs', 'reviews'].map((tab) => (
-                            <button
-                                key={tab}
-                                role="tab"
-                                id={`tab-${tab}`}
-                                onClick={() => setActiveTab(tab as any)}
-                                className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === tab ? 'text-brand-primary' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}
-                            >
-                                {tab}
-                                {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-primary shadow-[0_0_10px_rgba(6,182,212,0.5)]"></div>}
-                            </button>
-                        ))}
-                        <button
-                            role="tab"
-                            id="tab-questions"
-                            onClick={() => setActiveTab('questions')}
-                            className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap px-2 ${activeTab === 'questions' ? 'text-brand-primary' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}
-                        >
-                            Q&A
-                            {activeTab === 'questions' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-primary shadow-[0_0_10px_rgba(6,182,212,0.5)]"></div>}
-                        </button>
-                    </div>
-
-                    <div className="bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 min-h-[300px]">
-                        {activeTab === 'overview' && (
-                            <div className="prose prose-invert max-w-none">
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Product Overview</h3>
-                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
-                                    {product.description || "The ultimate device for power users. Featuring a stunning display, all-day battery life, and a pro-grade camera system. Each unit is rigorously tested and certified by our technicians to ensure 100% functionality."}
-                                </p>
-                                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {['Professional Inspection', 'New Battery Installed', 'Original Accessories', 'Sanitized & Cleaned'].map((feat, i) => (
-                                        <li key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                                            <div className="w-6 h-6 rounded-full bg-brand-primary/20 text-brand-primary flex items-center justify-center"><Check className="w-3 h-3" /></div>
-                                            {feat}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        {activeTab === 'specs' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-                                <div className="space-y-4">
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">Performance</h3>
-                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                        <span className="text-slate-500">Processor</span>
-                                        <span className="text-slate-900 dark:text-slate-200">{product.specs?.cpu}</span>
-                                    </div>
-                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                        <span className="text-slate-500">RAM</span>
-                                        <span className="text-slate-900 dark:text-slate-200">{product.specs?.ram}</span>
-                                    </div>
-                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                        <span className="text-slate-500">Storage</span>
-                                        <span className="text-slate-900 dark:text-slate-200">{product.storage}</span>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">Display & Battery</h3>
-                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                        <span className="text-slate-500">Screen Size</span>
-                                        <span className="text-slate-900 dark:text-slate-200">{product.specs?.screen}</span>
-                                    </div>
-                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                        <span className="text-slate-500">Battery Capacity</span>
-                                        <span className="text-slate-900 dark:text-slate-200">{product.specs?.battery}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {activeTab === 'reviews' && (
-                            <div>
-                                {reviews.length > 0 ? (
-                                    <div className="space-y-6">
-                                        {reviews.map((review: any) => (
-                                            <div key={review._id} className="border-b border-slate-200 dark:border-slate-800 pb-6 last:border-0">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="font-bold text-slate-900 dark:text-white">{review.user?.name || 'Anonymous'}</div>
-                                                        <span className="text-xs text-slate-500">• {new Date(review.createdAt).toLocaleDateString()}</span>
-                                                    </div>
-                                                    <div className="flex text-yellow-500">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-slate-300 dark:text-slate-700'}`} />
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <p className="text-slate-700 dark:text-slate-300">{review.comment}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-12">
-                                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-                                            <Star className="w-8 h-8 text-yellow-500" />
-                                        </div>
-                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Reviews Yet</h3>
-                                        <p className="text-slate-600 dark:text-slate-400 mb-6">Be the first to share your experience with this product!</p>
-                                    </div>
-                                )}
-                                <div className="mt-8 text-center">
-                                    <button
-                                        onClick={() => setShowReviewModal(true)}
-                                        className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700 font-bold rounded-lg transition-colors"
-                                    >
-                                        Write a Review
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <ProductTabs
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    product={product}
+                    reviews={reviews}
+                    setShowReviewModal={setShowReviewModal}
+                />
 
                 {/* Related Products */}
                 {relatedProducts.length > 0 && (
@@ -581,102 +439,15 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                 )}
             </div>
 
-            {/* Sticky Add to Cart Bar (Mobile Bottom, Desktop Top) */}
-            <AnimatePresence>
-                {product && (
-                    <motion.div
-                        initial={{ y: 100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 100, opacity: 0 }}
-                        className="fixed bottom-0 md:top-0 md:bottom-auto left-0 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-lg border-t md:border-t-0 md:border-b border-slate-200 dark:border-slate-800 p-4 z-40 transform translate-y-full md:-translate-y-full transition-transform duration-300"
-                        style={{ 
-                            transform: `translateY(${window.scrollY > 600 ? '0' : (window.innerWidth < 768 ? '100%' : '-100%')})`
-                        }}
-                    >
-                        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-4 flex-1">
-                                <img src={getImageUrl(product.imageUrl || product.images?.[0])} alt={product.model} className="w-12 h-12 object-cover rounded-md hidden sm:block bg-slate-100 dark:bg-slate-900" />
-                                <div>
-                                    <div className="text-sm md:text-base font-bold text-slate-900 dark:text-white line-clamp-1">{product.model}</div>
-                                    <div className="text-xs text-brand-primary font-bold">{formatPrice(product.price)}</div>
-                                </div>
-                            </div>
-                            <button
-                                onClick={handleAddToCart}
-                                disabled={product.stock === 0}
-                                className={`px-6 md:px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 whitespace-nowrap
-                                    ${product.stock > 0
-                                        ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]'
-                                        : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
-                            >
-                                <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
-                                <span className="hidden sm:inline">{product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
-                                <span className="sm:hidden">{product.stock > 0 ? 'Add' : 'Out'}</span>
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <ProductStickyBar product={product} handleAddToCart={handleAddToCart} />
 
-            {/* Review Modal */}
-            {showReviewModal && (
-                <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative">
-                        <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Write a Review</h3>
-                            <button onClick={() => setShowReviewModal(false)} aria-label="Close review modal" title="Close review modal" className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
-                                <X className="w-6 h-6" />
-                            </button>
-                        </div>
-                        <form onSubmit={handleSubmitReview} className="p-6 space-y-6">
-                            <div>
-                                <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 mb-3">Your Rating</label>
-                                <div className="flex gap-2">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <button
-                                            key={star}
-                                            type="button"
-                                            onClick={() => setNewReview({ ...newReview, rating: star })}
-                                            aria-label={`Rate ${star} stars`}
-                                            title={`Rate ${star} stars`}
-                                            className="focus:outline-none transition-transform hover:scale-110"
-                                        >
-                                            <Star className={`w-8 h-8 ${star <= newReview.rating ? 'fill-yellow-500 text-yellow-500' : 'text-slate-300 dark:text-slate-700'}`} />
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">Your Review</label>
-                                <textarea
-                                    required
-                                    rows={4}
-                                    value={newReview.comment}
-                                    onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
-                                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-colors"
-                                    placeholder="What do you think about this product?"
-                                />
-                            </div>
-                            <div className="flex gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowReviewModal(false)}
-                                    className="flex-1 py-3 px-4 font-bold rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={!newReview.comment.trim()}
-                                    className="flex-1 py-3 px-4 font-bold rounded-xl bg-brand-primary hover:bg-brand-primary text-white transition-colors disabled:opacity-50"
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <ReviewModal 
+                showReviewModal={showReviewModal}
+                setShowReviewModal={setShowReviewModal}
+                newReview={newReview}
+                setNewReview={setNewReview}
+                handleSubmitReview={handleSubmitReview}
+            />
         </div>
     );
 };
