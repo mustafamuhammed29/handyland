@@ -91,7 +91,7 @@ export const Checkout: React.FC = () => {
                 name: item.title,
                 price: item.price,
                 image: item.image,
-                quantity: 1,
+                quantity: item.quantity || 1,
                 product: item.id,
                 productType: 'Product'
             }));
@@ -213,12 +213,34 @@ export const Checkout: React.FC = () => {
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-2xl p-6 sticky top-28">
                         <h3 className="text-xl font-bold text-white mb-6">Order Summary</h3>
 
-                        {/* Order Summary */}
+                        {/* Order Summary Items */}
                         <div className="space-y-3 mb-6 max-h-60 overflow-y-auto custom-scrollbar">
-                            {cart.map((item) => (
-                                <div key={item.id} className="flex justify-between text-sm">
-                                    <span className="text-slate-300">{item.title} × {item.quantity || 1}</span>
-                                    <span className="text-white font-medium">{item.price}€</span>
+                            {cart.map((item, index) => (
+                                <div key={item.id || index} className="flex items-center gap-3 py-2">
+                                    <div className="relative">
+                                    <img 
+                                        src={item.image} 
+                                        alt={item.title}
+                                        className="w-12 h-12 object-cover rounded-lg"
+                                    />
+                                    {(item.quantity || 1) > 1 && (
+                                        <span className="absolute -top-1 -right-1 bg-brand-primary text-white 
+                                                        text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                        {item.quantity}
+                                        </span>
+                                    )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                    <p className="text-white text-sm font-medium truncate">
+                                        {item.title || (item as any).name || 'Product'}
+                                    </p>
+                                    <p className="text-slate-400 text-xs">
+                                        Qty: {item.quantity || 1}
+                                    </p>
+                                    </div>
+                                    <span className="text-white font-semibold text-sm">
+                                    {((item.price) * (item.quantity || 1)).toFixed(2)} €
+                                    </span>
                                 </div>
                             ))}
                             
