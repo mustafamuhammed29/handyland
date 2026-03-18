@@ -18,8 +18,8 @@ exports.getCart = async (req, res) => {
         const accessoryIds = cart.items.filter(i => i.productType === 'Accessory').map(i => i.product);
 
         const [products, accessories] = await Promise.all([
-            productIds.length ? Product.find({ _id: { $in: productIds } }).select('name price images category') : [],
-            accessoryIds.length ? Accessory.find({ _id: { $in: accessoryIds } }).select('name price images category') : []
+            productIds.length ? Product.find({ _id: { $in: productIds } }).select('name model price images image category storage color') : [],
+            accessoryIds.length ? Accessory.find({ _id: { $in: accessoryIds } }).select('name model price images image category color') : []
         ]);
 
         // Build lookup maps for O(1) access
@@ -32,11 +32,16 @@ exports.getCart = async (req, res) => {
             const details = item.productType === 'Product' ? productMap.get(idStr) : accessoryMap.get(idStr);
 
             if (details) {
+                const subtitle = details.storage && details.color 
+                    ? `${details.storage} • ${details.color}` 
+                    : (details.storage || details.color || '');
+
                 populatedItems.push({
                     id: details._id,
-                    title: details.name,
+                    title: details.name || details.model,
+                    subtitle,
                     price: details.price,
-                    image: details.images && details.images.length > 0 ? details.images[0] : '',
+                    image: details.images && details.images.length > 0 ? details.images[0] : (details.image || ''),
                     category: item.productType === 'Product' ? 'device' : 'accessory',
                     quantity: item.quantity,
                     productType: item.productType
@@ -115,8 +120,8 @@ exports.syncCart = async (req, res) => {
         const accessoryIds = cart.items.filter(i => i.productType === 'Accessory').map(i => i.product);
 
         const [products, accessories] = await Promise.all([
-            productIds.length ? Product.find({ _id: { $in: productIds } }).select('name price images category') : [],
-            accessoryIds.length ? Accessory.find({ _id: { $in: accessoryIds } }).select('name price images category') : []
+            productIds.length ? Product.find({ _id: { $in: productIds } }).select('name model price images image category storage color') : [],
+            accessoryIds.length ? Accessory.find({ _id: { $in: accessoryIds } }).select('name model price images image category color') : []
         ]);
 
         const productMap = new Map(products.map(p => [p._id.toString(), p]));
@@ -127,11 +132,16 @@ exports.syncCart = async (req, res) => {
             const idStr = item.product?.toString();
             const details = item.productType === 'Product' ? productMap.get(idStr) : accessoryMap.get(idStr);
             if (details) {
+                const subtitle = details.storage && details.color 
+                    ? `${details.storage} • ${details.color}` 
+                    : (details.storage || details.color || '');
+
                 populatedItems.push({
                     id: details._id,
-                    title: details.name,
+                    title: details.name || details.model,
+                    subtitle,
                     price: details.price,
-                    image: details.images && details.images.length > 0 ? details.images[0] : '',
+                    image: details.images && details.images.length > 0 ? details.images[0] : (details.image || ''),
                     category: item.productType === 'Product' ? 'device' : 'accessory',
                     quantity: item.quantity,
                     productType: item.productType
@@ -237,8 +247,8 @@ exports.getAllCarts = async (req, res) => {
             const aIds = cart.items.filter(i => i.productType === 'Accessory' && i.product).map(i => i.product);
 
             const [prods, accs] = await Promise.all([
-                pIds.length ? Product.find({ _id: { $in: pIds } }).select('name price images') : [],
-                aIds.length ? Accessory.find({ _id: { $in: aIds } }).select('name price images') : []
+                pIds.length ? Product.find({ _id: { $in: pIds } }).select('name model price images image storage color') : [],
+                aIds.length ? Accessory.find({ _id: { $in: aIds } }).select('name model price images image color') : []
             ]);
 
             const pMap = new Map(prods.map(p => [p._id.toString(), p]));
@@ -250,7 +260,13 @@ exports.getAllCarts = async (req, res) => {
                 return {
                     _id: item._id,
                     product: details
-                        ? { _id: details._id, name: details.name, price: details.price, image: details.images && details.images.length > 0 ? details.images[0] : '' }
+                        ? { 
+                            _id: details._id, 
+                            name: details.name || details.model, 
+                            subtitle: details.storage && details.color ? `${details.storage} • ${details.color}` : (details.storage || details.color || ''),
+                            price: details.price, 
+                            image: details.images && details.images.length > 0 ? details.images[0] : (details.image || '') 
+                          }
                         : { name: 'Unknown/Deleted Product', _id: item.product },
                     quantity: item.quantity,
                     productType: item.productType
