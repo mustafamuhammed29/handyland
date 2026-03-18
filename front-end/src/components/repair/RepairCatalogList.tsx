@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Monitor, Battery, ChevronRight, AlertTriangle } from 'lucide-react';
 import { RepairDevice } from './types';
-import { getImageUrl } from '../../utils/imageUrl';
+import { LazyImage } from '../ui/LazyImage';
 
 interface RepairCatalogListProps {
     filteredDevices: RepairDevice[];
@@ -31,11 +31,10 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
 
                         <div className="flex items-center gap-6 mb-6">
                             <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-slate-800 border border-slate-700 group-hover:border-blue-500/30 transition-colors flex items-center justify-center">
-                                <img
-                                    src={getImageUrl(device.image)}
+                                <LazyImage
+                                    src={device.image || (device as any).images?.[0]}
                                     alt={device.model}
-                                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                                    onError={(e: any) => e.target.src = '/placeholder.png'}
+                                    className="w-full h-full opacity-80 group-hover:opacity-100 transition-opacity"
                                 />
                             </div>
                             <div>
