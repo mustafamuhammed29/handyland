@@ -132,6 +132,15 @@
   },
   "valuation": {
     "title": "Device Valuation",
+    "subtitle": "Get the value in seconds. Fair prices, fast payout, free shipping.",
+    "badge": "Maximize Your Device Value",
+    "search": "E.g. iPhone 15 Pro, Samsung Galaxy S24...",
+    "stats": {
+      "rating": "4.8/5 from 2,000+ Reviews",
+      "shipping": "Free Shipping",
+      "payout": "Payout in 24h",
+      "secure": "100% Secure & Reliable"
+    },
     "step1": "Select Configuration",
     "step2": "Storage Capacity",
     "step3": "Condition Check",

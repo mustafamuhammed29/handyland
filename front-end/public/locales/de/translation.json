@@ -132,6 +132,15 @@
   },
   "valuation": {
     "title": "Gerätebewertung",
+    "subtitle": "Ermittle den Wert in wenigen Sekunden. Faire Preise, schnelle Auszahlung, kostenloser Versand.",
+    "badge": "Maximiere deinen Gerätewert",
+    "search": "Z.B. iPhone 15 Pro, Samsung Galaxy S24...",
+    "stats": {
+      "rating": "4.8/5 von 2.000+ Bewertungen",
+      "shipping": "Kostenloser Versand",
+      "payout": "Auszahlung in 24h",
+      "secure": "100% Sicher & Seriös"
+    },
     "step1": "Konfiguration auswählen",
     "step2": "Speicherkapazität",
     "step3": "Zustandsprüfung",
