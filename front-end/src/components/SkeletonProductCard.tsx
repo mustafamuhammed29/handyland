@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const SkeletonProductCard = () => {
+export const SkeletonProductCard = React.memo(() => {
     return (
         <div className="bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 flex flex-col h-full transition-all duration-300">
             <div className="w-full h-64 skeleton-loader mb-4 border border-slate-200 dark:border-slate-800"></div>
@@ -26,4 +26,4 @@ export const SkeletonProductCard = () => {
             </div>
         </div>
     );
-};
+});
