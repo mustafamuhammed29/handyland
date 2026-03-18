@@ -36,7 +36,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const conditions = ['New', 'Like New', 'Very Good', 'Good', 'Refurbished'];
     const brands = ['All', 'Apple', 'Samsung', 'Google', 'Huawei', 'Xiaomi']; // Simplified for now
 
-    const handleAddToCart = (phone: PhoneListing) => {
+    const handleAddToCart = React.useCallback((phone: PhoneListing) => {
         addToCart({
             id: phone.id,
             title: phone.model,
@@ -47,12 +47,12 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
             stock: phone.stock ?? 0
         });
         addToast(`${phone.model} added to cart`, 'success');
-    };
+    }, [addToCart, addToast]);
 
-    const handleBuyNow = (phone: PhoneListing) => {
+    const handleBuyNow = React.useCallback((phone: PhoneListing) => {
         handleAddToCart(phone);
         navigate('/checkout');
-    };
+    }, [handleAddToCart, navigate]);
 
     const handleToggleWishlist = React.useCallback((e: React.MouseEvent, product: PhoneListing) => {
         e.stopPropagation();

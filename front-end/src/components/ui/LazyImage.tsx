@@ -8,7 +8,7 @@ interface LazyImageProps {
   fallback?: string;
 }
 
-export const LazyImage: React.FC<LazyImageProps> = ({ 
+export const LazyImage = React.memo<LazyImageProps>(({ 
   src, 
   alt, 
   className = '',
@@ -39,4 +39,4 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       />
     </div>
   );
-};
+});
