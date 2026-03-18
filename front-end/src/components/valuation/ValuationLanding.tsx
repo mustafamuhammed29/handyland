@@ -22,18 +22,23 @@ export const ValuationLanding = ({
         <div className="w-full relative z-10 duration-700">
             <div className="max-w-5xl mx-auto mb-8 text-center space-y-5">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-full text-sm mb-2 shadow-sm">
-                    <Sparkles size={16} /> Maximiere deinen Gerätewert
+                    <Sparkles size={16} /> {t('valuation.badge')}
                 </div>
                 <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight">
                     {t('valuation.title')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">HandyLand</span>
                 </h1>
                 <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-medium">
-                    {t('valuation.subtitle') || 'Ermittle den Wert in wenigen Sekunden. Faire Preise, schnelle Auszahlung, kostenloser Versand.'}
+                    {t('valuation.subtitle')}
                 </p>
             </div>
 
             <div className="max-w-3xl mx-auto mb-10 flex flex-wrap items-center justify-center gap-6">
-                {[{ icon: '⭐', label: '4.8/5 von 2.000+ Bewertungen' }, { icon: '📦', label: 'Kostenloser Versand' }, { icon: '⚡', label: 'Auszahlung in 24h' }, { icon: '🔒', label: '100% Sicher & Seriös' }].map(item => (
+                {[
+                    { icon: '⭐', label: t('valuation.stats.rating') }, 
+                    { icon: '📦', label: t('valuation.stats.shipping') }, 
+                    { icon: '⚡', label: t('valuation.stats.payout') }, 
+                    { icon: '🔒', label: t('valuation.stats.secure') }
+                ].map(item => (
                     <div key={item.label} className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
                         <span className="text-base">{item.icon}</span>{item.label}
                     </div>
@@ -57,7 +62,7 @@ export const ValuationLanding = ({
                             <div className="pl-4 pr-2"><Search className="text-blue-500" size={24} /></div>
                             <input
                                 type="text"
-                                placeholder="Z.B. iPhone 15 Pro, Samsung Galaxy S24..."
+                                placeholder={t('valuation.search')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full bg-transparent py-4 text-xl focus:outline-none font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 placeholder:font-normal"
