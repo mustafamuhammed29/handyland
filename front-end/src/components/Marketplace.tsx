@@ -39,8 +39,8 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const handleAddToCart = React.useCallback((phone: PhoneListing) => {
         addToCart({
             id: phone.id,
-            title: phone.model,
-            subtitle: `${phone.storage} • ${phone.color}`,
+            title: phone.model || (phone as any).name || 'Unknown Product',
+            subtitle: `${phone.storage || ''} • ${phone.color || ''}`.replace(/^ • | • $/g, '') || '',
             price: phone.price,
             image: phone.images?.[0] || phone.imageUrl || '',
             category: 'device',

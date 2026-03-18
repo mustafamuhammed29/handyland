@@ -53,8 +53,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                 <div className="flex-1 flex flex-col justify-center">
                     <div className="flex justify-between items-start mb-2">
                         <div>
-                            <div className="text-xs text-brand-primary font-mono uppercase mb-1">{product.brand}</div>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white hover:text-brand-primary cursor-pointer" onClick={() => onSelect(product)}>{product.model}</h3>
+                            <div className="text-xs text-brand-primary font-mono uppercase mb-1">{product.brand || (product as any).category}</div>
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white hover:text-brand-primary cursor-pointer" onClick={() => onSelect(product)}>{product.model || (product as any).name}</h3>
                         </div>
                         <div className="text-right pr-12">
                             <div className="text-2xl font-bold text-slate-900 dark:text-white">{formatPrice(product.price)}</div>
@@ -103,7 +103,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.4 }}
                         src={getProductImage(product)}
-                        alt={product.model}
+                        alt={product.model || (product as any).name || 'Product'}
                         onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
                         loading="lazy"
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100"
@@ -123,8 +123,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
             </div>
             <div className="p-3 md:p-5 flex-1 flex flex-col">
                 <div className="mb-2 md:mb-4">
-                    <div className="text-[9px] md:text-[10px] text-brand-primary font-mono uppercase mb-0.5 md:mb-1 tracking-wider truncate">{product.brand}</div>
-                    <h3 className="text-sm md:text-xl font-bold text-slate-900 dark:text-white hover:text-brand-primary transition-colors cursor-pointer line-clamp-2" onClick={() => onSelect(product)}>{product.model}</h3>
+                    <div className="text-[9px] md:text-[10px] text-brand-primary font-mono uppercase mb-0.5 md:mb-1 tracking-wider truncate">{product.brand || (product as any).category}</div>
+                    <h3 className="text-sm md:text-xl font-bold text-slate-900 dark:text-white hover:text-brand-primary transition-colors cursor-pointer line-clamp-2" onClick={() => onSelect(product)}>{product.model || (product as any).name}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-1 md:gap-2 mb-3 md:mb-6">
                     <div className="bg-slate-100 dark:bg-slate-900/50 rounded-md md:rounded-lg p-1.5 md:p-2 border border-slate-200 dark:border-slate-800 flex items-center gap-1 md:gap-2">
