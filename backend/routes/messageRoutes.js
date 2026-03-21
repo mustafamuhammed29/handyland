@@ -95,7 +95,7 @@ router.post('/admin/send', protect, authorize('admin'), async (req, res) => {
         // Notify customer in background (non-blocking)
         if (userId) {
             User.findById(userId).select('notificationPrefs email name').then(customer => {
-                if (!customer) return;
+                if (!customer) {return;}
                 notify({
                     userId: customer._id,
                     userEmail: customer.email,
@@ -139,9 +139,9 @@ router.post('/admin/bulk', protect, authorize('admin'), async (req, res) => {
 
         // Notify each recipient in background
         recipients.forEach(r => {
-            if (!r.userId) return;
+            if (!r.userId) {return;}
             User.findById(r.userId).select('notificationPrefs email name').then(customer => {
-                if (!customer) return;
+                if (!customer) {return;}
                 notify({
                     userId: customer._id,
                     userEmail: customer.email,
@@ -207,7 +207,7 @@ router.post('/:id/reply', protect, async (req, res) => {
             isAdmin
         };
 
-        if (isAdmin) message.status = 'replied';
+        if (isAdmin) {message.status = 'replied';}
 
         message.replies.push(reply);
         await message.save();
@@ -215,7 +215,7 @@ router.post('/:id/reply', protect, async (req, res) => {
         // Notify the customer when admin replies
         if (isAdmin && message.user) {
             User.findById(message.user).select('notificationPrefs email name').then(customer => {
-                if (!customer) return;
+                if (!customer) {return;}
                 notify({
                     userId: customer._id,
                     userEmail: customer.email,

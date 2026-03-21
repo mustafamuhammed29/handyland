@@ -6,9 +6,14 @@ const Review = require('../models/Review');
 const Question = require('../models/Question');
 
 // Mock models and libs
-jest.mock('../models/Product');
-jest.mock('../models/Review');
-jest.mock('../models/Question');
+jest.mock('../models/Product', () => ({
+    find: jest.fn(),
+    countDocuments: jest.fn(),
+    findById: jest.fn()
+}));
+jest.mock('../models/Review', () => ({}));
+jest.mock('../models/Question', () => ({}));
+jest.mock('../models/Accessory', () => ({}));
 jest.mock('uuid', () => ({ v4: () => 'test-uuid' }));
 
 describe('Product Controller', () => {

@@ -109,7 +109,7 @@ exports.getRecentSales = async (req, res) => {
             .lean();
 
         // Flatten the items array across orders for a simple sales list
-        let salesList = [];
+        const salesList = [];
         orders.forEach(order => {
             const customerName = order.user
                 ? order.user.name

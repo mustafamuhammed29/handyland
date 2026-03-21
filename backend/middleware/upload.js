@@ -6,7 +6,7 @@ const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/
  * Advanced File Upload Validation Middlewares
  */
 const validateUpload = (req, res, next) => {
-    if (!req.file) return next();
+    if (!req.file) {return next();}
 
     // 1. Size check (already handled by multer, but double check here if needed)
     if (req.file.size > 5 * 1024 * 1024) {
@@ -36,13 +36,13 @@ const validateUpload = (req, res, next) => {
         let isValidHeader = false;
 
         // JPEG: ffd8ffe0, ffd8ffe1, ffd8ffe2
-        if (header.startsWith('ffd8ff')) isValidHeader = true;
+        if (header.startsWith('ffd8ff')) {isValidHeader = true;}
         // PNG: 89504e47
-        else if (header === '89504e47') isValidHeader = true;
+        else if (header === '89504e47') {isValidHeader = true;}
         // PDF: 25504446
-        else if (header === '25504446') isValidHeader = true;
+        else if (header === '25504446') {isValidHeader = true;}
         // WEBP: 52494646 (RIFF header)
-        else if (header === '52494646') isValidHeader = true;
+        else if (header === '52494646') {isValidHeader = true;}
 
         if (!isValidHeader) {
             return res.status(400).json({ success: false, message: 'File content does not match extension (Malware protection)' });

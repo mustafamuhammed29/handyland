@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 // @access  Private
 exports.getWishlist = async (req, res) => {
     try {
-        let wishlist = await Wishlist.findOne({ user: req.user.id });
+        const wishlist = await Wishlist.findOne({ user: req.user.id });
         if (!wishlist) {
             return res.status(200).json({ success: true, products: [] });
         }

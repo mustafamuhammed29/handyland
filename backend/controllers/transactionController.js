@@ -44,7 +44,7 @@ exports.createTopUpSession = async (req, res) => {
         }
 
         const user = await User.findById(req.user.id);
-        if (!user) return res.status(404).json({ success: false, message: 'Benutzer nicht gefunden' });
+        if (!user) {return res.status(404).json({ success: false, message: 'Benutzer nicht gefunden' });}
 
         const stripe = await getStripe();
 
@@ -89,7 +89,7 @@ exports.createTopUpSession = async (req, res) => {
 exports.confirmTopUp = async (req, res) => {
     try {
         const { sessionId } = req.body;
-        if (!sessionId) return res.status(400).json({ success: false, message: 'Session-ID fehlt' });
+        if (!sessionId) {return res.status(400).json({ success: false, message: 'Session-ID fehlt' });}
 
         const stripe = await getStripe();
         const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -310,9 +310,9 @@ exports.createBankTransferTopUp = async (req, res) => {
 exports.getAllTransactions = async (req, res) => {
     try {
         const { status, type } = req.query;
-        let query = {};
-        if (status) query.status = status;
-        if (type) query.type = type;
+        const query = {};
+        if (status) {query.status = status;}
+        if (type) {query.type = type;}
 
         const transactions = await Transaction.find(query)
             .populate('user', 'name email balance')

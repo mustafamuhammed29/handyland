@@ -51,7 +51,7 @@ const calculatePriceInternal = async (details) => {
 
     // Floor: minimum 15% of base price
     const floor = device.basePrice * 0.15;
-    if (price < floor) price = floor;
+    if (price < floor) {price = floor;}
 
     // Round to nearest 5
     price = Math.round(price / 5) * 5;
@@ -172,7 +172,7 @@ exports.updateBlueprint = async (req, res) => {
             updateData,
             { new: true }
         );
-        if (!blueprint) return res.status(404).json({ message: 'Blueprint not found' });
+        if (!blueprint) {return res.status(404).json({ message: 'Blueprint not found' });}
         res.json(blueprint);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -185,7 +185,7 @@ exports.updateBlueprint = async (req, res) => {
 exports.deleteBlueprint = async (req, res) => {
     try {
         const result = await DeviceBlueprint.findByIdAndDelete(req.params.id);
-        if (!result) return res.status(404).json({ message: 'Blueprint not found' });
+        if (!result) {return res.status(404).json({ message: 'Blueprint not found' });}
         res.json({ message: 'Blueprint deleted' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -332,7 +332,7 @@ exports.deleteValuation = async (req, res) => {
             user: req.user._id
         });
 
-        if (!quote) return res.status(404).json({ success: false, message: 'Valuation not found' });
+        if (!quote) {return res.status(404).json({ success: false, message: 'Valuation not found' });}
 
         if (!['active', 'pending_shipment'].includes(quote.status)) {
             return res.status(400).json({ success: false, message: 'Anfrage kann nicht mehr gelöscht werden, da sie bereits in Bearbeitung ist.' });
@@ -350,13 +350,13 @@ exports.deleteValuation = async (req, res) => {
 // @access  Public
 exports.getQuoteByReference = async (req, res) => {
     try {
-        if (process.env.NODE_ENV !== 'production') console.log(`[getQuoteByReference] Looking for: "${req.params.reference}"`);
+        if (process.env.NODE_ENV !== 'production') {console.log(`[getQuoteByReference] Looking for: "${req.params.reference}"`);}
         const quote = await SavedValuation.findOne({
             quoteReference: req.params.reference,
             isQuote: true
         });
 
-        if (process.env.NODE_ENV !== 'production') console.log(`[getQuoteByReference] Found:`, quote ? quote.quoteReference : 'NULL');
+        if (process.env.NODE_ENV !== 'production') {console.log(`[getQuoteByReference] Found:`, quote ? quote.quoteReference : 'NULL');}
 
         if (!quote) {
             return res.status(404).json({ success: false, message: 'Quote not found' });
@@ -451,7 +451,7 @@ exports.getAdminQuotes = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
         const query = { isQuote: true };
-        if (req.query.status) query.status = req.query.status;
+        if (req.query.status) {query.status = req.query.status;}
 
         const [quotes, total] = await Promise.all([
             SavedValuation.find(query)
@@ -497,25 +497,25 @@ exports.getAdminQuotes = async (req, res) => {
 // @access  Private/Admin
 exports.updateQuoteStatus = async (req, res) => {
     try {
-        if (process.env.NODE_ENV !== 'production') console.log(`[Admin Quote Status] Attempting to update quote ${req.params.id} to status: ${req.body.status}`);
+        if (process.env.NODE_ENV !== 'production') {console.log(`[Admin Quote Status] Attempting to update quote ${req.params.id} to status: ${req.body.status}`);}
 
         const { status } = req.body;
         const validStatuses = ['active', 'pending_shipment', 'received', 'paid'];
         if (!validStatuses.includes(status)) {
-            if (process.env.NODE_ENV !== 'production') console.log(`[Admin Quote Status] Invalid status: ${status}`);
+            if (process.env.NODE_ENV !== 'production') {console.log(`[Admin Quote Status] Invalid status: ${status}`);}
             return res.status(400).json({ success: false, message: 'Invalid status' });
         }
 
         const quote = await SavedValuation.findById(req.params.id);
         if (!quote) {
-            if (process.env.NODE_ENV !== 'production') console.log(`[Admin Quote Status] Quote not found: ${req.params.id}`);
+            if (process.env.NODE_ENV !== 'production') {console.log(`[Admin Quote Status] Quote not found: ${req.params.id}`);}
             return res.status(404).json({ success: false, message: 'Quote not found' });
         }
 
         const oldStatus = quote.status;
         quote.status = status;
         await quote.save();
-        if (process.env.NODE_ENV !== 'production') console.log(`[Admin Quote Status] Saved quote ${quote._id} to ${status}`);
+        if (process.env.NODE_ENV !== 'production') {console.log(`[Admin Quote Status] Saved quote ${quote._id} to ${status}`);}
 
         // Send email notification on status change
         const emailTo = quote.contact?.email || null;
@@ -610,8 +610,8 @@ exports.completePurchase = async (req, res) => {
         const { deviceImei, deviceSerial, digitalSignature } = req.body;
         const quote = await SavedValuation.findById(req.params.id);
 
-        if (!quote) return res.status(404).json({ success: false, message: 'Quote not found' });
-        if (quote.status === 'paid') return res.status(400).json({ success: false, message: 'Quote already paid' });
+        if (!quote) {return res.status(404).json({ success: false, message: 'Quote not found' });}
+        if (quote.status === 'paid') {return res.status(400).json({ success: false, message: 'Quote already paid' });}
 
         quote.deviceImei = deviceImei;
         quote.deviceSerial = deviceSerial;

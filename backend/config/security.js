@@ -48,8 +48,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 const corsMiddleware = cors({
     origin: (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
+        if (!origin) {return callback(null, true);}
+        if (allowedOrigins.includes(origin)) {return callback(null, true);}
         return callback(new Error('CORS: Origin not allowed'), false);
     },
     credentials: true,
@@ -71,16 +71,16 @@ const generalLimiter = rateLimit({
 // ── XSS sanitization ────────────────────────────────────────────────────────
 const xssSanitize = (req, res, next) => {
     const sanitize = (obj) => {
-        if (typeof obj === 'string') return xss(obj);
-        if (Array.isArray(obj)) return obj.map(sanitize);
+        if (typeof obj === 'string') {return xss(obj);}
+        if (Array.isArray(obj)) {return obj.map(sanitize);}
         if (typeof obj === 'object' && obj !== null) {
             Object.keys(obj).forEach(key => { obj[key] = sanitize(obj[key]); });
         }
         return obj;
     };
-    if (req.body) req.body = sanitize(req.body);
-    if (req.query) req.query = sanitize(req.query);
-    if (req.params) req.params = sanitize(req.params);
+    if (req.body) {req.body = sanitize(req.body);}
+    if (req.query) {req.query = sanitize(req.query);}
+    if (req.params) {req.params = sanitize(req.params);}
     next();
 };
 
@@ -91,7 +91,7 @@ const CSRF_EXCLUDED_PATHS = [
     '/api/auth/facebook/callback',
 ];
 const csrfMiddleware = (req, res, next) => {
-    if (CSRF_EXCLUDED_PATHS.some(p => req.path.startsWith(p))) return next();
+    if (CSRF_EXCLUDED_PATHS.some(p => req.path.startsWith(p))) {return next();}
     return csrfProtection(req, res, next);
 };
 

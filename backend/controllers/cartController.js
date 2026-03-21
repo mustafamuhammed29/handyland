@@ -32,8 +32,8 @@ exports.getCart = async (req, res) => {
             const details = item.productType === 'Product' ? productMap.get(idStr) : accessoryMap.get(idStr);
 
             if (details) {
-                const subtitle = details.storage && details.color 
-                    ? `${details.storage} • ${details.color}` 
+                const subtitle = details.storage && details.color
+                    ? `${details.storage} • ${details.color}`
                     : (details.storage || details.color || '');
 
                 populatedItems.push({
@@ -114,7 +114,7 @@ exports.syncCart = async (req, res) => {
 
         // FIXED: Batch populate instead of N+1 queries (FIX 8)
         cart = await Cart.findOne({ user: req.user.id });
-        if (!cart || cart.items.length === 0) return res.json([]);
+        if (!cart || cart.items.length === 0) {return res.json([]);}
 
         const productIds = cart.items.filter(i => i.productType === 'Product').map(i => i.product);
         const accessoryIds = cart.items.filter(i => i.productType === 'Accessory').map(i => i.product);
@@ -132,8 +132,8 @@ exports.syncCart = async (req, res) => {
             const idStr = item.product?.toString();
             const details = item.productType === 'Product' ? productMap.get(idStr) : accessoryMap.get(idStr);
             if (details) {
-                const subtitle = details.storage && details.color 
-                    ? `${details.storage} • ${details.color}` 
+                const subtitle = details.storage && details.color
+                    ? `${details.storage} • ${details.color}`
                     : (details.storage || details.color || '');
 
                 populatedItems.push({
@@ -260,12 +260,12 @@ exports.getAllCarts = async (req, res) => {
                 return {
                     _id: item._id,
                     product: details
-                        ? { 
-                            _id: details._id, 
-                            name: details.name || details.model, 
+                        ? {
+                            _id: details._id,
+                            name: details.name || details.model,
                             subtitle: details.storage && details.color ? `${details.storage} • ${details.color}` : (details.storage || details.color || ''),
-                            price: details.price, 
-                            image: details.images && details.images.length > 0 ? details.images[0] : (details.image || '') 
+                            price: details.price,
+                            image: details.images && details.images.length > 0 ? details.images[0] : (details.image || '')
                           }
                         : { name: 'Unknown/Deleted Product', _id: item.product },
                     quantity: item.quantity,

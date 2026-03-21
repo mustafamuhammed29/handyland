@@ -2,6 +2,7 @@
 
 const { sendEmail, sendTemplateEmail } = require('../utils/emailService');
 const crypto = require('crypto');
+const User = require('../models/User');
 
 // @desc    Verify Email
 // @route   GET /api/auth/verify-email/:token

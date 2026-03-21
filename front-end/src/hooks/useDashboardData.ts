@@ -194,6 +194,19 @@ export function useNotifications() {
     return query;
 }
 
+export function useSettingsData(options?: { enabled?: boolean }) {
+    return useQuery({
+        queryKey: [...dashboardKeys.all, 'settings'],
+        enabled: options?.enabled ?? true,
+        queryFn: async () => {
+            const res = await api.get<any>('/api/settings') as any;
+            return res?.data || res || {};
+        },
+        staleTime: 5 * 60 * 1000,
+        retry: 2,
+    });
+}
+
 // Main hook that combines all queries
 export function useDashboardData(activeTab: string = 'overview') {
     const isOverview = activeTab === 'overview';
@@ -207,6 +220,7 @@ export function useDashboardData(activeTab: string = 'overview') {
     const addressesQuery = useAddresses({ enabled: activeTab === 'settings' });
     const wishlistQuery = useWishlist({ enabled: isOverview || activeTab === 'wishlist' });
     const notificationsQuery = useNotifications();
+    const settingsQuery = useSettingsData({ enabled: true });
 
     return {
         user: {
@@ -269,8 +283,14 @@ export function useDashboardData(activeTab: string = 'overview') {
             error: notificationsQuery.error,
             refetch: notificationsQuery.refetch,
         },
+        settings: {
+            data: settingsQuery.data || {},
+            isLoading: settingsQuery.isLoading,
+            error: settingsQuery.error,
+            refetch: settingsQuery.refetch,
+        },
         // Overall loading state
-        isLoading: userQuery.isLoading || ordersQuery.isLoading || repairsQuery.isLoading,
+        isLoading: userQuery.isLoading || ordersQuery.isLoading || repairsQuery.isLoading || settingsQuery.isLoading,
         // Check if any critical query has failed
         hasError: userQuery.isError || ordersQuery.isError || repairsQuery.isError,
     };

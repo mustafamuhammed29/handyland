@@ -82,7 +82,7 @@ exports.sendTestEmail = async (req, res) => {
                 html = emailTemplates.passwordReset('Test User', 'test-token-123');
                 subject = 'Reset Your Password (TEST)';
                 break;
-            case 'orderConfirmation':
+            case 'orderConfirmation': {
                 const sampleOrder = {
                     orderNumber: 'HL-20240206-1234',
                     createdAt: new Date(),
@@ -95,7 +95,8 @@ exports.sendTestEmail = async (req, res) => {
                 html = emailTemplates.orderConfirmation('Test User', sampleOrder);
                 subject = 'Order Confirmation - HandyLand (TEST)';
                 break;
-            case 'orderStatusUpdate':
+            }
+            case 'orderStatusUpdate': {
                 const sampleOrder2 = {
                     orderNumber: 'HL-20240206-1234',
                     trackingNumber: 'TRACK123456'
@@ -103,6 +104,7 @@ exports.sendTestEmail = async (req, res) => {
                 html = emailTemplates.orderStatusUpdate('Test User', sampleOrder2, 'shipped');
                 subject = 'Order Update (TEST)';
                 break;
+            }
             default:
                 return res.status(400).json({
                     success: false,

@@ -25,7 +25,7 @@ exports.createTicket = async (req, res) => {
                 timestamp: Date.now()
             });
         }
-        
+
         // If technician notes provided on creation
         if (technicianNotes) {
             ticketData.messages.push({
@@ -94,22 +94,22 @@ exports.updateTicketStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Ticket not found' });
         }
 
-        if (status) ticket.status = status;
-        if (estimatedCost) ticket.estimatedCost = estimatedCost;
-        
+        if (status) {ticket.status = status;}
+        if (estimatedCost) {ticket.estimatedCost = estimatedCost;}
+
         // Admin updates either send 'notes' or 'technicianNotes' payload.
         // We'll map both to technicianNotes so customer notes aren't overwritten.
         const incomingNote = technicianNotes || notes;
         if (incomingNote !== undefined && incomingNote !== null && incomingNote.trim() !== '') {
             ticket.technicianNotes = incomingNote; // Keeping for backward compat
-            
+
             // Push as a chat message
             ticket.messages.push({
                 role: 'admin',
                 text: incomingNote,
                 timestamp: Date.now()
             });
-            
+
             ticket.updatedAt = Date.now();
         }
 
@@ -201,7 +201,7 @@ exports.updateTicketStatus = async (req, res) => {
                     cancelled: 'تعمیر لغو شد ❌'
                 }
             };
-            
+
             const dictionary = repairLabels[lang] || repairLabels['de'];
             const label = dictionary[status] || status;
 
@@ -242,9 +242,9 @@ exports.updateCustomerNotes = async (req, res) => {
         // Check if user owns ticket (or if guest)
         // Simplified authorization: either logged-in user matches ticket user, or request is public (guest tracking)
         // For security in a real system we'd check session/email matching, but here we assume the tracked view is secure enough.
-        
+
         ticket.notes = (ticket.notes ? ticket.notes + '\n\n' : '') + notes; // Backwards compat
-        
+
         // Push as a chat message
         if (notes && notes.trim() !== '') {
             ticket.messages.push({
@@ -253,7 +253,7 @@ exports.updateCustomerNotes = async (req, res) => {
                 timestamp: Date.now()
             });
         }
-        
+
         ticket.timeline.push({
             status: ticket.status,
             note: `Customer added a message.`,

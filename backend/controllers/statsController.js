@@ -121,8 +121,8 @@ exports.getUserStats = async (req, res) => {
         let productSpend = 0;
         let accessorySpend = 0;
 
-        // Note: Order items price is usually unit price. We should ideally multiply by quantity. 
-        // For simplicity reusing this agg. 
+        // Note: Order items price is usually unit price. We should ideally multiply by quantity.
+        // For simplicity reusing this agg.
         // Better Agg:
         const refinedOrderDist = await Order.aggregate([
             { $match: { user: new mongoose.Types.ObjectId(req.user.id) } },
@@ -136,8 +136,8 @@ exports.getUserStats = async (req, res) => {
         ]);
 
         refinedOrderDist.forEach(item => {
-            if (item._id === 'Product') productSpend = item.total;
-            if (item._id === 'Accessory') accessorySpend = item.total;
+            if (item._id === 'Product') {productSpend = item.total;}
+            if (item._id === 'Accessory') {accessorySpend = item.total;}
         });
 
         // Repairs Spend (Estimate from Tickets)

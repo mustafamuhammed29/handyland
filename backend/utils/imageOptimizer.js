@@ -16,17 +16,17 @@ const optimizeAndSaveImage = async (buffer, originalName) => {
     // Remove original extension, append .webp
     const baseName = path.parse(originalName).name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
     const fileName = `${baseName}-${uniqueSuffix}.webp`;
-    
+
     // Path where image will be saved
     const uploadsDir = path.join(__dirname, '..', 'uploads');
-    
+
     // Ensure directory exists
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
-    
+
     const outputPath = path.join(uploadsDir, fileName);
-    
+
     // Process image with Sharp
     await sharp(buffer)
       .resize(1200, 1200, {
@@ -35,7 +35,7 @@ const optimizeAndSaveImage = async (buffer, originalName) => {
       })
       .webp({ quality: 80 }) // 80% quality WebP
       .toFile(outputPath);
-      
+
     // Return the path that the client will use to request the image
     return `/uploads/${fileName}`;
   } catch (error) {

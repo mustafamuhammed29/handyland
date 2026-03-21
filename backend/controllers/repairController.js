@@ -44,11 +44,11 @@ exports.estimateRepairCost = (req, res) => {
 
     // Mock logic for estimation
     let baseCost = 50;
-    if (device.toLowerCase().includes('iphone')) baseCost += 30;
-    if (device.toLowerCase().includes('macbook')) baseCost += 100;
-    if (issue.toLowerCase().includes('screen')) baseCost += 80;
-    if (issue.toLowerCase().includes('battery')) baseCost += 40;
-    if (issue.toLowerCase().includes('water')) baseCost += 100;
+    if (device.toLowerCase().includes('iphone')) {baseCost += 30;}
+    if (device.toLowerCase().includes('macbook')) {baseCost += 100;}
+    if (issue.toLowerCase().includes('screen')) {baseCost += 80;}
+    if (issue.toLowerCase().includes('battery')) {baseCost += 40;}
+    if (issue.toLowerCase().includes('water')) {baseCost += 100;}
 
     res.json({
         device,
@@ -82,7 +82,7 @@ exports.updateDevice = async (req, res) => {
         const allowedFields = ['model', 'brand', 'image', 'services', 'isVisible', 'description'];
         const updateData = {};
         allowedFields.forEach(field => {
-            if (req.body[field] !== undefined) updateData[field] = req.body[field];
+            if (req.body[field] !== undefined) {updateData[field] = req.body[field];}
         });
 
         const device = await RepairDevice.findOneAndUpdate(
@@ -90,8 +90,8 @@ exports.updateDevice = async (req, res) => {
             updateData,
             { new: true, runValidators: true }
         );
-        if (device) res.json(device);
-        else res.status(404).json({ message: "Device not found" });
+        if (device) {res.json(device);}
+        else {res.status(404).json({ message: "Device not found" });}
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

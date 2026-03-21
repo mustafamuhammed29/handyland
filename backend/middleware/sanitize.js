@@ -29,9 +29,9 @@ const sanitizeValue = (value) => {
 };
 
 const sanitize = (req, res, next) => {
-    if (req.body) req.body = sanitizeValue(req.body);
-    if (req.query) req.query = sanitizeValue(req.query);
-    if (req.params) req.params = sanitizeValue(req.params);
+    if (req.body) {req.body = sanitizeValue(req.body);}
+    if (req.query) {req.query = sanitizeValue(req.query);}
+    if (req.params) {req.params = sanitizeValue(req.params);}
     next();
 };
 

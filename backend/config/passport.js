@@ -25,7 +25,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     }, async (accessToken, refreshToken, profile, done) => {
         try {
             const email = profile.emails?.[0]?.value;
-            if (!email) return done(new Error('No email from Google account'), null);
+            if (!email) {return done(new Error('No email from Google account'), null);}
 
             // Find existing user by googleId or email
             let user = await User.findOne({ googleId: profile.id });

@@ -64,8 +64,8 @@ class ProductService {
 
         if (minPrice || maxPrice) {
             query.price = {};
-            if (minPrice) query.price.$gte = Number(minPrice);
-            if (maxPrice) query.price.$lte = Number(maxPrice);
+            if (minPrice) {query.price.$gte = Number(minPrice);}
+            if (maxPrice) {query.price.$lte = Number(maxPrice);}
         }
 
         // Sort Options
@@ -107,7 +107,7 @@ class ProductService {
         const allowedFields = ['name', 'price', 'description', 'stock', 'images', 'image', 'brand', 'model', 'category', 'condition', 'storage', 'color', 'specs', 'isActive', 'isFeatured', 'tags'];
         const cleanData = {};
         allowedFields.forEach(field => {
-            if (updateData[field] !== undefined) cleanData[field] = updateData[field];
+            if (updateData[field] !== undefined) {cleanData[field] = updateData[field];}
         });
 
         return await Product.findOneAndUpdate(
@@ -123,7 +123,7 @@ class ProductService {
 
     async getRelatedProducts(productId) {
         const product = await Product.findOne({ id: productId });
-        if (!product) return [];
+        if (!product) {return [];}
 
         return await Product.find({
             $or: [
@@ -138,20 +138,30 @@ class ProductService {
         const productIds = items.filter(i => i.category !== 'accessory').map(i => i.id);
         const accessoryIds = items.filter(i => i.category === 'accessory').map(i => i.id);
 
-        const [products, accessories] = await Promise.all([
-            productIds.length > 0 ? Product.find({ id: { $in: productIds } }) : Promise.resolve([]),
-            accessoryIds.length > 0 ? Accessory.find({ id: { $in: accessoryIds } }) : Promise.resolve([])
-        ]);
+        const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(id);
+
+        const productQuery = productIds.length > 0 
+            ? Product.find({ $or: [{ id: { $in: productIds } }, { _id: { $in: productIds.filter(isValidObjectId) } }] }) 
+            : Promise.resolve([]);
+            
+        const accessoryQuery = accessoryIds.length > 0 
+            ? Accessory.find({ $or: [{ id: { $in: accessoryIds } }, { _id: { $in: accessoryIds.filter(isValidObjectId) } }] }) 
+            : Promise.resolve([]);
+
+        const [products, accessories] = await Promise.all([productQuery, accessoryQuery]);
 
         const productMap = {};
-        [...products, ...accessories].forEach(p => { productMap[p.id] = p; });
+        [...products, ...accessories].forEach(p => { 
+            if (p.id) productMap[p.id] = p; 
+            if (p._id) productMap[p._id.toString()] = p; 
+        });
 
         const errors = [];
         for (const item of items) {
-            const productDoc = productMap[item.id];
+            const productDoc = productMap[item.id] || productMap[item.id?.toString()];
             if (!productDoc) {
-                errors.push({ id: item.id, message: `Item not found: ${item.name || item.id}` });
-            } else if (productDoc.stock < item.quantity) {
+                errors.push({ id: item.id, message: `Item not found: ${item.name || item.title || item.id}` });
+            } else if (productDoc.stock < (item.quantity || 1)) {
                 errors.push({ id: item.id, message: `Insufficient stock for ${productDoc.name || productDoc.title}. Available: ${productDoc.stock}` });
             }
         }
@@ -164,10 +174,10 @@ class ProductService {
 
     async addReview(productId, userId, reviewData) {
         const product = await Product.findOne({ id: productId });
-        if (!product) throw new Error('Product not found');
+        if (!product) {throw new Error('Product not found');}
 
         const alreadyReviewed = await Review.findOne({ user: userId, product: product._id });
-        if (alreadyReviewed) throw new Error('Product already reviewed');
+        if (alreadyReviewed) {throw new Error('Product already reviewed');}
 
         const review = await Review.create({
             user: userId,

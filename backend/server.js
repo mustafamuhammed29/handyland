@@ -28,7 +28,7 @@ const PORT = process.env.PORT || 5000;
 
 // ── Environment ────────────────────────────────────────────────────────────────
 console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
-if (!process.env.NODE_ENV) process.env.NODE_ENV = 'development';
+if (!process.env.NODE_ENV) {process.env.NODE_ENV = 'development';}
 
 // ── Security middleware (helmet, cors, rate limit, xss, csrf) ──────────────────
 const { applySecurityMiddleware } = require('./config/security');
@@ -42,7 +42,7 @@ app.use(passport.initialize());
 
 // ── Static uploads (dev only) ──────────────────────────────────────────────────
 const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+if (!fs.existsSync(uploadDir)) {fs.mkdirSync(uploadDir, { recursive: true });}
 app.use('/uploads', express.static(uploadDir));
 
 // ── Swagger docs ───────────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ app.get('/', (req, res) => {
 
 app.get('/health', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) throw new Error('Database not connected');
+        if (mongoose.connection.readyState !== 1) {throw new Error('Database not connected');}
         await mongoose.connection.db.admin().ping();
         res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
     } catch (error) {
@@ -99,7 +99,7 @@ const RefreshToken = require('./models/RefreshToken');
 const cleanupExpiredTokens = async () => {
     try {
         const result = await RefreshToken.deleteMany({ expiryDate: { $lt: new Date() } });
-        if (result.deletedCount > 0) logger.info(`🧹 Cleaned up ${result.deletedCount} expired refresh tokens`);
+        if (result.deletedCount > 0) {logger.info(`🧹 Cleaned up ${result.deletedCount} expired refresh tokens`);}
     } catch (error) {
         logger.error(`Token cleanup error: ${error.message}`);
     }

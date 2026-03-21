@@ -9,6 +9,7 @@ jest.mock('../models/User');
 jest.mock('../models/RefreshToken');
 jest.mock('../utils/emailService', () => ({
     sendEmail: jest.fn().mockResolvedValue(true),
+    sendTemplateEmail: jest.fn().mockResolvedValue(true),
     emailTemplates: {
         verification: jest.fn().mockReturnValue('<html>Verification</html>'),
         passwordReset: jest.fn().mockReturnValue('<html>Reset</html>'),

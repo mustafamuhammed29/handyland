@@ -37,7 +37,7 @@ const upload = multer({
 
 // Middleware to resize image after upload
 const resizeImage = async (req, res, next) => {
-    if (!req.file) return next();
+    if (!req.file) {return next();}
 
     // Generate unique filename
     const filename = `compressed-${Date.now()}-${Math.round(Math.random() * 1E9)}.webp`;
@@ -70,7 +70,7 @@ const resizeImage = async (req, res, next) => {
 module.exports = {
     single: (fieldName) => [upload.single(fieldName), resizeImage],
     array: (fieldName, maxCount) => [upload.array(fieldName, maxCount), async (req, res, next) => {
-        if (!req.files || req.files.length === 0) return next();
+        if (!req.files || req.files.length === 0) {return next();}
 
         try {
             await Promise.all(req.files.map(async (file) => {

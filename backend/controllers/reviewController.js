@@ -95,7 +95,7 @@ exports.getAllReviews = async (req, res) => {
 exports.deleteReview = async (req, res) => {
     try {
         const review = await Review.findById(req.params.id);
-        if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+        if (!review) {return res.status(404).json({ success: false, message: 'Review not found' });}
 
         const productId = review.product;
         await review.deleteOne();
