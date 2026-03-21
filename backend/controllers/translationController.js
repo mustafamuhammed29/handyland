@@ -22,17 +22,17 @@ exports.getAllTranslations = async (req, res) => {
 exports.getTranslationsByLocale = async (req, res) => {
     try {
         const { lang } = req.params;
-        
+
         // Find all translation rows that have a value for the requested language
         const translations = await Translation.find();
-        
+
         // Compact into the { "key.nested": "value" } structure i18next expects
         const result = {};
-        
+
         translations.forEach(doc => {
             // We use the 'en' translation as fallback if the target string is empty
             const value = doc.values[lang] || doc.values['en'] || doc.key;
-            
+
             // i18next handles dot notation ('nav.home') natively, meaning we can just return a flat key map
             result[doc.key] = value;
         });
@@ -49,7 +49,7 @@ exports.getTranslationsByLocale = async (req, res) => {
 // @access  Private/Admin
 exports.updateTranslation = async (req, res) => {
     try {
-        let translation = await Translation.findById(req.params.id);
+        const translation = await Translation.findById(req.params.id);
         if (!translation) {
             return res.status(404).json({ success: false, error: 'Translation not found' });
         }

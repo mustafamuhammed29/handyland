@@ -113,6 +113,20 @@ const settingsSchema = new mongoose.Schema({
             googleAnalyticsId: '',
             facebookPixelId: ''
         }
+    },
+    taxRate: {
+        type: Number,
+        default: 19
+    },
+    vipTiers: {
+        type: mongoose.Schema.Types.Mixed,
+        default: [
+            { id: 'bronze', name: 'Bronze', color: 'from-[#cd7f32] to-[#8b5a2b]', minSpent: 0, maxSpent: 500 },
+            { id: 'silver', name: 'Silver', color: 'from-slate-300 to-slate-500', minSpent: 500, maxSpent: 2000 },
+            { id: 'gold', name: 'Gold', color: 'from-amber-400 to-yellow-600', minSpent: 2000, maxSpent: 5000 },
+            { id: 'platinum', name: 'Platinum', color: 'from-slate-200 to-slate-400', minSpent: 5000, maxSpent: 10000 },
+            { id: 'diamond', name: 'Diamond', color: 'from-cyan-300 to-blue-500', minSpent: 10000, maxSpent: 50000 }
+        ]
     }
 }, { timestamps: true });
 

@@ -11,6 +11,7 @@ import { SocialAuthTab } from './settings/SocialAuthTab';
 import { SectionsTab } from './settings/SectionsTab';
 import { ContactSettingsTab } from './settings/ContactSettingsTab';
 import { AppearanceTab } from './settings/AppearanceTab';
+import { FinancialSettingsTab } from './settings/FinancialSettingsTab';
 
 interface HeroSettings {
     headline: string;
@@ -155,6 +156,14 @@ interface Settings {
         googleAnalyticsId: string;
         facebookPixelId: string;
     };
+    taxRate: number;
+    vipTiers: {
+        id: string;
+        name: string;
+        color: string;
+        minSpent: number;
+        maxSpent: number;
+    }[];
 }
 
 interface EmailTemplateData {
@@ -227,7 +236,15 @@ export default function SettingsManager() {
             faviconUrl: '',
             googleAnalyticsId: '',
             facebookPixelId: ''
-        }
+        },
+        taxRate: 19,
+        vipTiers: [
+            { id: 'bronze', name: 'Bronze', color: 'from-[#cd7f32] to-[#8b5a2b]', minSpent: 0, maxSpent: 500 },
+            { id: 'silver', name: 'Silver', color: 'from-slate-300 to-slate-500', minSpent: 500, maxSpent: 2000 },
+            { id: 'gold', name: 'Gold', color: 'from-amber-400 to-yellow-600', minSpent: 2000, maxSpent: 5000 },
+            { id: 'platinum', name: 'Platinum', color: 'from-slate-200 to-slate-400', minSpent: 5000, maxSpent: 10000 },
+            { id: 'diamond', name: 'Diamond', color: 'from-cyan-300 to-blue-500', minSpent: 10000, maxSpent: 50000 }
+        ]
     });
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
@@ -344,6 +361,7 @@ export default function SettingsManager() {
 
     const tabs = [
         { id: 'general', label: 'General', icon: Layers },
+        { id: 'financials', label: 'Financials & Loyalty', icon: Gift },
         { id: 'auth', label: 'Authentication', icon: Shield },
         { id: 'hero', label: 'Hero Section', icon: MonitorPlay },
         { id: 'stats', label: 'Live Stats', icon: BarChart },
@@ -395,6 +413,7 @@ export default function SettingsManager() {
                 {/* Content */}
                 <div className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-8">
                     {activeTab === 'general' && <AppearanceTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'financials' && <FinancialSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'auth' && <SocialAuthTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'hero' && <HeroSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'layout' && <SectionsTab settings={settings} handleChange={handleChange} />}

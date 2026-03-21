@@ -17,9 +17,9 @@ const sanitize = (obj) => {
 
 module.exports = (req, res, next) => {
     try {
-        if (req.body) sanitize(req.body);
-        if (req.query) sanitize(req.query);
-        if (req.params) sanitize(req.params);
+        if (req.body) {sanitize(req.body);}
+        if (req.query) {sanitize(req.query);}
+        if (req.params) {sanitize(req.params);}
     } catch (err) {
         console.error('Sanitization Error:', err);
     }

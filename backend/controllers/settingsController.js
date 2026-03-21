@@ -38,7 +38,7 @@ exports.getSettings = async (req, res) => {
             const startYear = oldestOrder.createdAt.getFullYear();
             const currentYear = new Date().getFullYear();
             marketExperience = currentYear - startYear;
-            if (marketExperience < 1) marketExperience = 1; // Minimum 1 year if active
+            if (marketExperience < 1) {marketExperience = 1;} // Minimum 1 year if active
         }
 
         // Overlay dynamic stats

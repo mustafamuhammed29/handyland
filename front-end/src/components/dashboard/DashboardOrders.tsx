@@ -41,9 +41,11 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
 
     if (isLoading) {
         return (
-            <div className="space-y-4 animate-pulse">
+            <div className="space-y-4">
                 {[1, 2, 3].map(i => (
-                    <div key={i} className="h-24 bg-slate-800/50 rounded-2xl"></div>
+                    <div key={i} className="h-24 bg-slate-900/50 border border-slate-800 rounded-2xl relative overflow-hidden">
+                        <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+                    </div>
                 ))}
             </div>
         );

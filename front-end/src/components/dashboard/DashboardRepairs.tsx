@@ -70,9 +70,11 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
 
     if (isLoading) {
         return (
-            <div className="space-y-4 animate-pulse">
+            <div className="space-y-4">
                 {[1, 2].map(i => (
-                    <div key={i} className="h-32 bg-slate-800/50 rounded-2xl"></div>
+                    <div key={i} className="h-32 bg-slate-900/50 border border-slate-800 rounded-2xl relative overflow-hidden">
+                        <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+                    </div>
                 ))}
             </div>
         );
@@ -114,7 +116,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                             <div className="relative px-2 mb-8">
                                 <div className="h-1 bg-slate-800 w-full absolute top-1/2 -translate-y-1/2 left-0 right-0 z-0 rounded-full"></div>
                                 <div
-                                    className="h-1 bg-brand-primary absolute top-1/2 -translate-y-1/2 left-0 z-0 transition-all duration-1000 rounded-full"
+                                    className="h-1 bg-brand-primary shadow-[0_0_10px_#06b6d4] absolute top-1/2 -translate-y-1/2 left-0 z-0 transition-all duration-1000 rounded-full"
                                     style={{ width: `${(getStatusStep(ticket.status) / 5) * 100}%` }}
                                 ></div>
 

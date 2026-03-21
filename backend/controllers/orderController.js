@@ -51,7 +51,7 @@ exports.applyCoupon = async (req, res) => {
         let discount = 0;
         if (coupon.discountType === 'percentage') {
             discount = ((cartTotal || 0) * coupon.discountValue) / 100;
-            if (coupon.maxDiscount) discount = Math.min(discount, coupon.maxDiscount);
+            if (coupon.maxDiscount) {discount = Math.min(discount, coupon.maxDiscount);}
         } else {
             discount = coupon.discountValue;
         }
@@ -210,7 +210,7 @@ exports.getMyOrders = async (req, res) => {
     try {
         const { page = 1, limit = 10, status } = req.query;
         const query = { user: req.user.id };
-        if (status) query.status = status;
+        if (status) {query.status = status;}
 
         const orders = await Order.find(query)
             .sort({ createdAt: -1 })
@@ -768,7 +768,6 @@ exports.requestRefund = async (req, res) => {
         });
 
 
-
     } catch (error) {
         console.error("Refund Request Error:", error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -786,7 +785,7 @@ exports.processRefund = async (req, res) => {
         const { status, adminComments } = req.body; // status: 'approved', 'rejected'
         const refundRequest = await RefundRequest.findById(req.params.id).populate('order');
 
-        if (!refundRequest) return res.status(404).json({ message: 'Refund request not found' });
+        if (!refundRequest) {return res.status(404).json({ message: 'Refund request not found' });}
 
         refundRequest.status = status;
         refundRequest.adminComments = adminComments;

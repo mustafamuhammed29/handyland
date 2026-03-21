@@ -27,6 +27,8 @@
     "*.test.js",
     "test_*.js",
     "seed-*.js",
-    "scripts/"
+    "scripts/",
+    "admin/",
+    "tests/"
   ]
 }

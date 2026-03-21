@@ -5,7 +5,7 @@ async function fix() {
   try {
     const client = await MongoClient.connect(process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/handyland');
     const db = client.db();
-    
+
     await db.collection('products').updateMany(
       { image: { $regex: '^http://' } },
       [{
@@ -20,7 +20,7 @@ async function fix() {
         }
       }]
     );
-    
+
     await db.collection('repairdevices').updateMany(
       { image: { $regex: '^http://' } },
       [{

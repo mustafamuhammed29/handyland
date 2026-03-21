@@ -54,8 +54,8 @@ const getStripe = async () => {
                 },
                 webhooks: {
                     constructEvent: (body, sig, secret) => {
-                        if (Buffer.isBuffer(body)) return JSON.parse(body.toString());
-                        if (typeof body === 'string') return JSON.parse(body);
+                        if (Buffer.isBuffer(body)) {return JSON.parse(body.toString());}
+                        if (typeof body === 'string') {return JSON.parse(body);}
                         return body;
                     }
                 },
@@ -341,12 +341,12 @@ exports.handleWebhook = async (req, res) => {
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    if (process.env.NODE_ENV !== 'production') console.log(`[Webhook] Received event: ${event.type} (${event.id})`);
+    if (process.env.NODE_ENV !== 'production') {console.log(`[Webhook] Received event: ${event.type} (${event.id})`);}
 
     // Handle the event
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
-        if (process.env.NODE_ENV !== 'production') console.log('Payment successful (Webhook):', session.id);
+        if (process.env.NODE_ENV !== 'production') {console.log('Payment successful (Webhook):', session.id);}
 
         try {
             // FIXED: Since order is now created after Stripe session, find by paymentId
@@ -369,7 +369,7 @@ exports.handleWebhook = async (req, res) => {
             const foundOrder = order || await Order.findById(session.metadata?.orderId);
 
             if (foundOrder.status !== 'pending' && foundOrder.status !== 'pending_payment') {
-                if (process.env.NODE_ENV !== 'production') console.log('Order already processed:', foundOrder._id);
+                if (process.env.NODE_ENV !== 'production') {console.log('Order already processed:', foundOrder._id);}
                 return res.json({ received: true });
             }
 
@@ -416,7 +416,7 @@ exports.handleWebhook = async (req, res) => {
         }
     } else if (event.type === 'payment_intent.payment_failed') {
         const paymentIntent = event.data.object;
-        if (process.env.NODE_ENV !== 'production') console.log('[Webhook] Payment failed:', paymentIntent.id);
+        if (process.env.NODE_ENV !== 'production') {console.log('[Webhook] Payment failed:', paymentIntent.id);}
 
         try {
             const order = await Order.findOne({ paymentId: paymentIntent.id });
@@ -424,14 +424,14 @@ exports.handleWebhook = async (req, res) => {
                 order.status = 'cancelled';
                 order.paymentStatus = 'failed';
                 await order.save();
-                if (process.env.NODE_ENV !== 'production') console.log(`[Webhook] Order ${order.orderNumber} marked as failed`);
+                if (process.env.NODE_ENV !== 'production') {console.log(`[Webhook] Order ${order.orderNumber} marked as failed`);}
             }
         } catch (err) {
             console.error('[Webhook] Error handling payment failure:', err);
         }
     } else if (event.type === 'charge.refunded') {
         const charge = event.data.object;
-        if (process.env.NODE_ENV !== 'production') console.log('[Webhook] Charge refunded:', charge.id);
+        if (process.env.NODE_ENV !== 'production') {console.log('[Webhook] Charge refunded:', charge.id);}
 
         try {
             const order = await Order.findOne({ paymentId: charge.payment_intent });
@@ -451,13 +451,13 @@ exports.handleWebhook = async (req, res) => {
                         description: `Refund for Order #${order.orderNumber}`
                     });
                 }
-                if (process.env.NODE_ENV !== 'production') console.log(`[Webhook] Order ${order.orderNumber} marked as refunded`);
+                if (process.env.NODE_ENV !== 'production') {console.log(`[Webhook] Order ${order.orderNumber} marked as refunded`);}
             }
         } catch (err) {
             console.error('[Webhook] Error handling refund:', err);
         }
     } else {
-        if (process.env.NODE_ENV !== 'production') console.log(`[Webhook] Unhandled event type: ${event.type}`);
+        if (process.env.NODE_ENV !== 'production') {console.log(`[Webhook] Unhandled event type: ${event.type}`);}
     }
 
     res.json({ received: true });
@@ -545,7 +545,7 @@ exports.createPayPalOrder = async (req, res) => {
         // Simplified totals calculation for PayPal creation
         const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
         let shippingFee = subtotal >= 100 ? 0 : 5.99;
-        if (req.body.shippingFee) shippingFee = parseFloat(req.body.shippingFee);
+        if (req.body.shippingFee) {shippingFee = parseFloat(req.body.shippingFee);}
         const finalDiscount = discountAmount ? parseFloat(discountAmount) : 0;
 
         const total = (subtotal + shippingFee - finalDiscount).toFixed(2);
@@ -594,7 +594,6 @@ exports.capturePayPalOrder = async (req, res) => {
 
         if (capture.result.status === 'COMPLETED') {
 
-            try {
                 const orderItems = orderData.items.map(item => ({
                     product: item.product || item.id,
                     productType: item.category === 'device' ? 'Product' : (item.productType || 'Accessory'),
@@ -645,10 +644,6 @@ exports.capturePayPalOrder = async (req, res) => {
                     message: 'Payment successful',
                     order: finalOrder
                 });
-
-            } catch (err) {
-                throw err;
-            }
         } else {
             res.status(400).json({ success: false, message: 'Payment capture not completed' });
         }

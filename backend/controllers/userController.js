@@ -68,11 +68,11 @@ exports.changePassword = async (req, res) => {
         const { currentPassword, newPassword } = req.body;
         const user = await User.findById(req.user.id).select('+password');
 
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        if (!user) {return res.status(404).json({ success: false, message: 'User not found' });}
 
         // Use account model's matchPassword method for consistency
         const isMatch = await user.matchPassword(currentPassword);
-        if (!isMatch) return res.status(400).json({ success: false, message: 'Invalid current password' });
+        if (!isMatch) {return res.status(400).json({ success: false, message: 'Invalid current password' });}
 
         // Validate new password
         const pw = newPassword;
@@ -101,7 +101,7 @@ exports.changePassword = async (req, res) => {
 exports.getNotificationPrefs = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('notificationPrefs');
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) {return res.status(404).json({ message: 'User not found' });}
         // Fallback defaults if the field doesn't exist yet (old accounts)
         res.json({
             success: true,
@@ -124,7 +124,7 @@ exports.updateNotificationPrefs = async (req, res) => {
     try {
         const { orderUpdates, repairStatus, promotions, newsletter } = req.body;
         const user = await User.findById(req.user.id);
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) {return res.status(404).json({ message: 'User not found' });}
 
         // Only update provided keys
         user.notificationPrefs = {
@@ -181,7 +181,7 @@ exports.addAddress = async (req, res) => {
 exports.deleteAddress = async (req, res) => {
     try {
         const address = await Address.findById(req.params.id);
-        if (!address) return res.status(404).json({ message: 'Address not found' });
+        if (!address) {return res.status(404).json({ message: 'Address not found' });}
 
         if (address.user.toString() !== req.user.id.toString()) {
             return res.status(401).json({ message: 'Not authorized' });
@@ -467,7 +467,7 @@ exports.adjustWalletBalance = async (req, res) => {
         // Apply adjustment
         user.balance = (user.balance || 0) + adjustmentAmount;
 
-        // Ensure balance does not go negative if you don't allow it. 
+        // Ensure balance does not go negative if you don't allow it.
         // For now, let's allow negative if admins specifically want it, or restrict to 0.
         if (user.balance < 0) {
             user.balance = 0; // Prevent negative balances

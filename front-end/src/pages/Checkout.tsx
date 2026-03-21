@@ -85,6 +85,7 @@ export const Checkout: React.FC = () => {
 
     // Initial Check & Load Data
     const [freeShippingThreshold, setFreeShippingThreshold] = useState(100);
+    const [taxRate, setTaxRate] = useState(19);
 
     useEffect(() => {
         // Fetch Settings & Shipping Methods
@@ -105,6 +106,9 @@ export const Checkout: React.FC = () => {
                     }
                     if (settings.payment) {
                         setPaymentConfig(settings.payment);
+                    }
+                    if (settings.taxRate !== undefined) {
+                        setTaxRate(settings.taxRate);
                     }
                 }
 
@@ -489,6 +493,7 @@ export const Checkout: React.FC = () => {
                             handleRemoveCoupon={handleRemoveCoupon}
                             getFinalTotal={getFinalTotal}
                             freeShippingThreshold={freeShippingThreshold}
+                            taxRate={taxRate}
                         />
                     </div>
                 </div>

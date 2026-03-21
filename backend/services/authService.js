@@ -13,7 +13,7 @@ class AuthService {
      * Generate short-lived Access Token
      */
     generateAccessToken(userId) {
-        if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET not defined');
+        if (!process.env.JWT_SECRET) {throw new Error('JWT_SECRET not defined');}
         return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
     }
 
@@ -23,13 +23,13 @@ class AuthService {
     async generateRefreshToken(userId) {
         const token = crypto.randomBytes(40).toString('hex');
         const expiryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-        
+
         await RefreshToken.create({
             token,
             user: userId,
             expiryDate
         });
-        
+
         return { token, expiryDate };
     }
 
@@ -51,11 +51,11 @@ class AuthService {
 
         // Check uniqueness
         const emailExists = await User.findOne({ email });
-        if (emailExists) throw new Error('User already exists with this email');
+        if (emailExists) {throw new Error('User already exists with this email');}
 
         if (phone) {
             const phoneExists = await User.findOne({ phone });
-            if (phoneExists) throw new Error('This phone number is already registered');
+            if (phoneExists) {throw new Error('This phone number is already registered');}
         }
 
         if (!this.validatePassword(password)) {
@@ -102,7 +102,7 @@ class AuthService {
      */
     async loginUser(email, password) {
         const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
-        if (!user) throw new Error('Invalid credentials');
+        if (!user) {throw new Error('Invalid credentials');}
 
         // Check Lock
         if (user.lockUntil && user.lockUntil > Date.now()) {
@@ -141,7 +141,7 @@ class AuthService {
             verificationTokenExpire: { $gt: Date.now() }
         });
 
-        if (!user) throw new Error('Invalid or expired verification token');
+        if (!user) {throw new Error('Invalid or expired verification token');}
 
         user.isVerified = true;
         user.verificationToken = undefined;

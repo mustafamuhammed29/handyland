@@ -102,7 +102,7 @@ exports.createProductReview = async (req, res) => {
 exports.getProductReviews = async (req, res) => {
     try {
         const product = await productService.getProductById(req.params.id);
-        if (!product) return res.status(404).json({ message: 'Product not found' });
+        if (!product) {return res.status(404).json({ message: 'Product not found' });}
         const reviews = await Review.find({ product: product._id }).populate('user', 'name');
         res.json(reviews);
     } catch (error) {
@@ -113,7 +113,7 @@ exports.getProductReviews = async (req, res) => {
 exports.getProductQuestions = async (req, res) => {
     try {
         const product = await productService.getProductById(req.params.id);
-        if (!product) return res.status(404).json({ message: 'Product not found' });
+        if (!product) {return res.status(404).json({ message: 'Product not found' });}
         const questions = await Question.find({ product: product._id })
             .populate('user', 'name')
             .sort({ createdAt: -1 });
@@ -127,7 +127,7 @@ exports.askQuestion = async (req, res) => {
     try {
         const { question } = req.body;
         const product = await productService.getProductById(req.params.id);
-        if (!product) return res.status(404).json({ message: 'Product not found' });
+        if (!product) {return res.status(404).json({ message: 'Product not found' });}
         const newQuestion = await Question.create({
             user: req.user._id,
             product: product._id,
@@ -143,7 +143,7 @@ exports.answerQuestion = async (req, res) => {
     try {
         const { answer } = req.body;
         const question = await Question.findById(req.params.id);
-        if (!question) return res.status(404).json({ message: 'Question not found' });
+        if (!question) {return res.status(404).json({ message: 'Question not found' });}
         question.answer = answer;
         question.isAnswered = true;
         question.answeredBy = req.user._id;
@@ -160,10 +160,10 @@ exports.validateStock = async (req, res) => {
         const validation = await productService.validateStock(items);
 
         if (!validation.isValid) {
-            return res.status(400).json({ 
-                success: false, 
-                errors: validation.errors, 
-                message: validation.errors.map(e => e.message).join(', ') 
+            return res.status(400).json({
+                success: false,
+                errors: validation.errors,
+                message: validation.errors.map(e => e.message).join(', ')
             });
         }
         res.json({ success: true });

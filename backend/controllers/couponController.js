@@ -132,7 +132,7 @@ exports.validateCoupon = async (req, res) => {
         let discount = 0;
         if (coupon.discountType === 'percentage') {
             discount = ((cartTotal || 0) * coupon.discountValue) / 100;
-            if (coupon.maxDiscount) discount = Math.min(discount, coupon.maxDiscount);
+            if (coupon.maxDiscount) {discount = Math.min(discount, coupon.maxDiscount);}
         } else {
             discount = coupon.discountValue;
         }
@@ -157,9 +157,9 @@ exports.validateCoupon = async (req, res) => {
 // @param   couponCode, userId, userEmail
 exports.recordCouponUsage = async (couponCode, userId, userEmail) => {
     try {
-        if (!couponCode) return;
+        if (!couponCode) {return;}
         const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
-        if (!coupon) return;
+        if (!coupon) {return;}
 
         // Increment usedCount
         coupon.usedCount = (coupon.usedCount || 0) + 1;

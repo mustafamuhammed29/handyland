@@ -54,7 +54,7 @@ const getIO = () => {
 // Emit helpers
 const emitOrderUpdate = (userId, order) => {
     const socket = getIO();
-    if (!socket) return;
+    if (!socket) {return;}
 
     // Notify the user
     if (userId) {
@@ -78,7 +78,7 @@ const emitOrderUpdate = (userId, order) => {
 
 const emitNewOrder = (order) => {
     const socket = getIO();
-    if (!socket) return;
+    if (!socket) {return;}
     socket.to('admin').emit('order:new', {
         orderId: order._id,
         orderNumber: order.orderNumber,
@@ -89,7 +89,7 @@ const emitNewOrder = (order) => {
 
 const emitNotification = (userId, notification) => {
     const socket = getIO();
-    if (!socket) return;
+    if (!socket) {return;}
     socket.to(`user:${userId}`).emit('notification', notification);
 };
 

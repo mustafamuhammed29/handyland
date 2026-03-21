@@ -49,7 +49,7 @@ exports.updateLoaner = async (req, res) => {
             { brand, model, imei, status, notes },
             { new: true, runValidators: true }
         );
-        if (!loaner) return res.status(404).json({ message: 'Loaner phone not found' });
+        if (!loaner) {return res.status(404).json({ message: 'Loaner phone not found' });}
         res.json(loaner);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -62,7 +62,7 @@ exports.updateLoaner = async (req, res) => {
 exports.deleteLoaner = async (req, res) => {
     try {
         const result = await LoanerPhone.findByIdAndDelete(req.params.id);
-        if (!result) return res.status(404).json({ message: 'Loaner phone not found' });
+        if (!result) {return res.status(404).json({ message: 'Loaner phone not found' });}
         res.json({ message: 'Loaner phone removed' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -77,8 +77,8 @@ exports.lendPhone = async (req, res) => {
         const { customerName, customerPhone, customerEmail, dueDate, notes } = req.body;
         const loaner = await LoanerPhone.findById(req.params.id);
 
-        if (!loaner) return res.status(404).json({ message: 'Loaner phone not found' });
-        if (loaner.status === 'Lent') return res.status(400).json({ message: 'Phone is already lent out.' });
+        if (!loaner) {return res.status(404).json({ message: 'Loaner phone not found' });}
+        if (loaner.status === 'Lent') {return res.status(400).json({ message: 'Phone is already lent out.' });}
 
         loaner.status = 'Lent';
         loaner.currentCustomer = {
@@ -89,7 +89,7 @@ exports.lendPhone = async (req, res) => {
         loaner.lentDate = new Date();
         loaner.dueDate = new Date(dueDate);
 
-        if (notes) loaner.notes = notes;
+        if (notes) {loaner.notes = notes;}
 
         await loaner.save();
         res.json(loaner);
@@ -106,7 +106,7 @@ exports.returnPhone = async (req, res) => {
         const { status, notes } = req.body;
         const loaner = await LoanerPhone.findById(req.params.id);
 
-        if (!loaner) return res.status(404).json({ message: 'Loaner phone not found' });
+        if (!loaner) {return res.status(404).json({ message: 'Loaner phone not found' });}
 
         // Reset customer details
         loaner.status = status || 'Available';  // Can be moved to 'Maintenance' if returned damaged
@@ -114,7 +114,7 @@ exports.returnPhone = async (req, res) => {
         loaner.lentDate = null;
         loaner.dueDate = null;
 
-        if (notes !== undefined) loaner.notes = notes;
+        if (notes !== undefined) {loaner.notes = notes;}
 
         await loaner.save();
         res.json(loaner);

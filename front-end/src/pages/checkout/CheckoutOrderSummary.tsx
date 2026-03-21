@@ -17,6 +17,7 @@ interface CheckoutOrderSummaryProps {
     handleRemoveCoupon: () => void;
     getFinalTotal: () => number;
     freeShippingThreshold: number;
+    taxRate: number;
 }
 
 export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
@@ -31,6 +32,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
     handleRemoveCoupon,
     getFinalTotal,
     freeShippingThreshold,
+    taxRate,
 }) => {
     return (
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 sticky top-28 shadow-2xl">
@@ -121,10 +123,10 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     <span>Subtotal</span>
                     <span>{formatPrice(cartTotal)}</span>
                 </div>
-                {/* FIXED M-6: Show tax breakdown so users aren't surprised */}
+                {/* Dynamic tax breakdown */}
                 <div className="flex justify-between text-slate-400 text-sm">
-                    <span>Tax (19% VAT)</span>
-                    <span>{formatPrice(cartTotal * 0.19)}</span>
+                    <span>Tax ({taxRate}% VAT)</span>
+                    <span>{formatPrice((getFinalTotal() * taxRate) / (100 + taxRate))}</span>
                 </div>
                 <div className="flex justify-between text-emerald-400 text-sm">
                     <span>Shipping</span>
@@ -140,7 +142,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     <span>Total</span>
                     <span>{formatPrice(getFinalTotal())}</span>
                 </div>
-                <p className="text-[10px] text-slate-500 text-right">incl. 19% VAT</p>
+                <p className="text-[10px] text-slate-500 text-right">incl. {taxRate}% VAT</p>
             </div>
 
             {/* Trust Badges */}

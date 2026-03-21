@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     TrendingUp, Package, Wrench, ShoppingCart,
-    ArrowRight, Activity, BarChart3
+    ArrowRight, Activity, BarChart3, ChevronRight 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from 'recharts';
 
 interface DashboardOverviewProps {
     stats: any;
@@ -86,18 +89,48 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         },
         {
             label: 'Sell Device',
-            icon: <BarChart3 className="w-5 h-5" />,
+            icon: <TrendingUp className="w-5 h-5" />,
             onClick: () => navigate('/valuation'),
             color: 'from-emerald-600 to-teal-600',
         },
     ];
 
+    // Prepare chart data for the last 6 months
+    const chartData = useMemo(() => {
+        const data = [];
+        const today = new Date();
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            const monthName = d.toLocaleDateString('de-DE', { month: 'short' });
+            
+            // Calculate total spent in this month
+            const spent = orders
+                .filter((o: any) => {
+                    const orderDate = new Date(o.createdAt);
+                    return orderDate.getMonth() === d.getMonth() && orderDate.getFullYear() === d.getFullYear();
+                })
+                .reduce((sum: number, o: any) => sum + (o.totalAmount || 0), 0);
+                
+            data.push({ name: monthName, spent });
+        }
+        return data;
+    }, [orders]);
+
     if (isLoading) {
         return (
-            <div className="space-y-6 animate-pulse">
-                <div className="h-32 bg-slate-800/50 rounded-2xl"></div>
-                <div className="h-32 bg-slate-800/50 rounded-2xl"></div>
-                <div className="h-32 bg-slate-800/50 rounded-2xl"></div>
+            <div className="space-y-8">
+                {/* Skeleton Stats Grid */}
+                <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-6">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 md:p-6 h-36 relative overflow-hidden">
+                            <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+                        </div>
+                    ))}
+                </div>
+                {/* Skeleton Chart */}
+                <div className="bg-slate-900/50 border border-slate-800 rounded-2xl h-80 relative overflow-hidden">
+                     <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+                </div>
             </div>
         );
     }
@@ -105,21 +138,21 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     return (
         <div className="space-y-8">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-6">
                 {statCards.map((stat, idx) => (
                     <div
                         key={idx}
-                        className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-all duration-300 group"
+                        className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-4 md:p-6 hover:border-slate-700 transition-all duration-300 group overflow-hidden"
                     >
-                        <div className="flex items-start justify-between mb-4">
-                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
+                        <div className="flex items-start justify-between mb-3 md:mb-4">
+                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform shrink-0`}>
                                 {stat.icon}
                             </div>
                         </div>
-                        <h3 className="text-3xl font-black text-white mb-1">{stat.value}</h3>
-                        <p className="text-sm text-slate-400 mb-2">{stat.label}</p>
-                        <div className="flex items-center gap-2 text-xs">
-                            <span className="text-emerald-400 font-medium">{stat.change}</span>
+                        <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 truncate" title={stat.value}>{stat.value}</h3>
+                        <p className="text-[10px] sm:text-xs md:text-sm text-slate-400 mb-1 md:mb-2 truncate">{stat.label}</p>
+                        <div className="flex items-center gap-1 md:gap-2 text-[9px] md:text-xs">
+                            <span className="text-emerald-400 font-medium truncate">{stat.change}</span>
                         </div>
                     </div>
                 ))}
@@ -145,6 +178,50 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
                     ))}
+                </div>
+            </div>
+
+            {/* Financial Analytics Chart */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 group">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-brand-secondary" />
+                            Spending Analytics
+                        </h3>
+                        <p className="text-sm text-slate-400 mt-1">Your total purchases over the last 6 months</p>
+                    </div>
+                </div>
+                <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="colorSpent" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4}/>
+                                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                            <XAxis dataKey="name" stroke="#64748b" tick={{fill: '#64748b', fontSize: 12}} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#64748b" tick={{fill: '#64748b', fontSize: 12}} tickLine={false} axisLine={false} tickFormatter={(value) => `€${value}`} />
+                            <Tooltip 
+                                contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}
+                                itemStyle={{ color: '#06b6d4', fontWeight: 'bold' }}
+                                labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
+                                formatter={(value: number | undefined) => [`€${Number(value || 0).toFixed(2)}`, 'Spent']}
+                            />
+                            <Area 
+                                type="monotone" 
+                                dataKey="spent" 
+                                stroke="#06b6d4" 
+                                strokeWidth={3}
+                                strokeLinecap="round"
+                                fillOpacity={1} 
+                                fill="url(#colorSpent)" 
+                                activeDot={{ r: 6, fill: '#06b6d4', stroke: '#fff', strokeWidth: 2, className: "animate-pulse" }}
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
 

@@ -35,7 +35,7 @@ const sendEmail = async (options) => {
             console.log('----------------------------------------------------');
 
             // Only throw here if you strictly want the API to fail. For development/robustness, we log and swallow the error.
-            // throw new Error('Email service failed: ' + error.message); 
+            // throw new Error('Email service failed: ' + error.message);
         }
     } else {
         console.log('----------------------------------------------------');
@@ -50,7 +50,7 @@ const sendEmail = async (options) => {
 const sendOrderConfirmation = async (order) => {
     // Try to get email from user object if populated, otherwise use what's in shippingAddress or metadata
     let email = order.shippingAddress?.email;
-    if (!email && order.user && order.user.email) email = order.user.email;
+    if (!email && order.user && order.user.email) {email = order.user.email;}
 
     // Fallback if still not found
     if (!email) {

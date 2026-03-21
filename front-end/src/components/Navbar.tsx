@@ -62,8 +62,8 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
   const hasBanner = settings.announcementBanner?.enabled && settings.announcementBanner?.text;
 
   return (
-    <nav className={`fixed left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50 rtl:left-auto rtl:right-1/2 rtl:translate-x-1/2 transition-all duration-500 ${hasBanner ? 'top-14' : 'top-6'}`}>
-      <div className="bg-white/80 dark:bg-[#0b1121]/80 backdrop-blur-2xl rounded-2xl px-6 py-3 border border-black/5 dark:border-white/[0.05] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] flex items-center justify-between w-full transition-all">
+    <nav className={`fixed left-1/2 -translate-x-1/2 w-[98%] max-w-[1600px] z-50 rtl:left-auto rtl:right-1/2 rtl:translate-x-1/2 transition-all duration-500 ${hasBanner ? 'top-14' : 'top-6'}`}>
+      <div className="bg-white/80 dark:bg-[#0b1121]/80 backdrop-blur-2xl rounded-2xl px-3 md:px-6 py-3 border border-black/5 dark:border-white/[0.05] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] flex items-center justify-between w-full transition-all">
         
         {/* Left: Logo & Brand */}
         <div className="flex items-center shrink-0">
@@ -71,14 +71,14 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-xl flex items-center justify-center me-3 shadow-[0_0_20px_rgba(6,182,212,0.3)] group-hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] group-hover:rotate-12 transition-all duration-300">
               <Smartphone className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase hidden sm:block">
+            <span className="text-[17px] sm:text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase block">
               {settings.navbar?.logoText || 'HANDY'}<span className="text-brand-primary drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">{settings.navbar?.logoAccentText || 'LAND'}</span>
             </span>
           </Link>
         </div>
 
         {/* Center: Navigation Links */}
-        <div className="hidden lg:flex flex-1 justify-center items-center px-2 xl:px-4">
+        <div className="hidden xl:flex flex-1 justify-center items-center px-2 xl:px-4">
           <div className="flex items-center justify-center gap-1 xl:gap-2">
           {navItems.map((item) => {
             const isActive = item.path === '/'
@@ -124,7 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
         </div>
 
         {/* Right: Action Icons */}
-        <div className="flex items-center justify-end gap-1 sm:gap-2 shrink-0 pr-2">
+        <div className="flex items-center justify-end gap-1 sm:gap-2 shrink-0 pe-2">
           
           <div className="hidden sm:block">
              <button
@@ -139,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
              </button>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2 border-l border-black/10 dark:border-white/[0.05] pl-2 ml-1">
+          <div className="flex items-center gap-1 sm:gap-2 border-s border-black/10 dark:border-white/[0.05] ps-2 ms-1">
             {(settings.navbar?.showLanguageSwitcher !== false) && (
               <LanguageSwitcher />
             )}
@@ -175,18 +175,18 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
 
             </div>
 
-          <div className="flex lg:hidden items-center border-l border-black/10 dark:border-white/[0.05] pl-2 ml-1">
+          <div className="flex xl:hidden items-center border-s border-black/10 dark:border-white/[0.05] ps-2 ms-1">
             <button
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label="Toggle navigation menu"
-              className="w-10 h-10 flex items-center justify-center rounded-full transition-all active:scale-90 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 group outline-none"
-            >
-              {isOpen ? (
-                <X className="w-4 h-4 text-brand-primary group-hover:text-brand-secondary drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
-              ) : (
-                <Menu className="w-4 h-4 text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white" />
-              )}
-            </button>
+               onClick={() => setIsOpen(!isOpen)}
+               aria-label="Toggle navigation menu"
+               className="w-10 h-10 flex items-center justify-center rounded-full transition-all active:scale-90 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 group outline-none"
+             >
+               {isOpen ? (
+                 <X className="w-4 h-4 text-brand-primary group-hover:text-brand-secondary drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
+               ) : (
+                 <Menu className="w-4 h-4 text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white" />
+               )}
+             </button>
           </div>
         </div>
 
@@ -194,7 +194,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
 
       {/* Mobile Nav Menu Drawer */}
       {isOpen && (
-        <div id="mobile-menu" className="lg:hidden absolute top-[calc(100%+0.75rem)] left-0 right-0 w-full max-h-[85vh] bg-white/95 dark:bg-[#0b1121]/95 backdrop-blur-3xl border border-black/5 dark:border-white/[0.05] rounded-3xl flex flex-col px-6 py-6 gap-3 animate-in fade-in slide-in-from-top-4 duration-300 z-50 overflow-y-auto custom-scrollbar shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+        <div id="mobile-menu" className="xl:hidden absolute top-[calc(100%+0.75rem)] left-0 right-0 w-full max-h-[85vh] bg-white/95 dark:bg-[#0b1121]/95 backdrop-blur-3xl border border-black/5 dark:border-white/[0.05] rounded-3xl flex flex-col px-6 py-6 gap-3 animate-in fade-in slide-in-from-top-4 duration-300 z-50 overflow-y-auto custom-scrollbar shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
           <div className="w-full mb-2">
             <button
                onClick={() => {
