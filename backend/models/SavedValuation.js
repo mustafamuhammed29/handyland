@@ -65,7 +65,6 @@ const SavedValuationSchema = new mongoose.Schema({
 
 // Performance indexes (FIX 7)
 SavedValuationSchema.index({ user: 1, createdAt: -1 });
-SavedValuationSchema.index({ quoteReference: 1 }, { unique: true, sparse: true });
 SavedValuationSchema.index({ status: 1 });
 SavedValuationSchema.index({ isQuote: 1, createdAt: -1 });
 
