@@ -190,7 +190,6 @@ OrderSchema.pre('save', function () {
 // Add Indexes (FIX 10)
 OrderSchema.index({ user: 1, createdAt: -1 }); // Fast user order listings
 OrderSchema.index({ status: 1 }); // Status-based queries and stats
-OrderSchema.index({ orderNumber: 1 }, { unique: true }); // Unique order number lookups
 OrderSchema.index({ createdAt: -1 }); // Timeline/sorting queries
 
 module.exports = mongoose.model('Order', OrderSchema);

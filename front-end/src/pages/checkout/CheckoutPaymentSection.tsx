@@ -58,23 +58,25 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
             </div>
             <h3 className="font-bold text-white mb-4">Payment Method</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <button
-                    onClick={() => setSelectedPaymentMethod('bank_transfer')}
-                    className={`p-6 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${selectedPaymentMethod === 'bank_transfer'
-                        ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500 shadow-lg shadow-blue-900/20'
-                        : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
-                        }`}
-                >
-                    <div className={`w-12 h-12 flex items-center justify-center rounded-full ${selectedPaymentMethod === 'bank_transfer' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-400'}`}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                        </svg>
-                    </div>
-                    <div className="text-center">
-                        <span className="font-bold text-white block">Bank Transfer</span>
-                        <span className="text-xs text-slate-400">Vorkasse / Überweisung</span>
-                    </div>
-                </button>
+                {paymentConfig?.bankTransfer?.enabled !== false && (
+                    <button
+                        onClick={() => setSelectedPaymentMethod('bank_transfer')}
+                        className={`p-6 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${selectedPaymentMethod === 'bank_transfer'
+                            ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500 shadow-lg shadow-blue-900/20'
+                            : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                            }`}
+                    >
+                        <div className={`w-12 h-12 flex items-center justify-center rounded-full ${selectedPaymentMethod === 'bank_transfer' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-400'}`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                            </svg>
+                        </div>
+                        <div className="text-center">
+                            <span className="font-bold text-white block">Bank Transfer</span>
+                            <span className="text-xs text-slate-400">Vorkasse / Überweisung</span>
+                        </div>
+                    </button>
+                )}
 
                 {/* PayPal */}
                 {paymentConfig?.paypal?.enabled && paymentConfig?.paypal?.clientId && (
