@@ -209,6 +209,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
                     profileMsg={profileMsg}
                     saveProfile={saveProfile}
                     setProfileMsg={setProfileMsg}
+                    onUpdateProfile={onUpdateProfile}
                 />
             )}
 

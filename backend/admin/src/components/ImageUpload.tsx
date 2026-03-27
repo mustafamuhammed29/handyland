@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
+import { api } from '../utils/api';
 
 interface ImageUploadProps {
     value: string;
@@ -25,11 +26,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Pro
         formData.append('image', file);
 
         try {
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
+            const res = await api.post('/api/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
-            const data = await res.json();
+            const data = res.data;
             if (data.imageUrl) {
                 onChange(data.imageUrl);
             } else {
@@ -52,6 +52,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Pro
                     <img src={value} alt="Uploaded" className="h-full object-contain" />
                     <button
                         type="button"
+                        title="Remove image"
+                        aria-label="Remove image"
                         onClick={() => onChange('')}
                         className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     >
@@ -60,7 +62,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Pro
                 </div>
             ) : (
                 <div
-                    className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${dragActive ? 'border-blue-500 bg-blue-500/10' : 'border-slate-800 hover:border-slate-600'
+                    className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${dragActive ? 'border-blue-500 bg-blue-500/10' : 'border-slate-800 hover:border-slate-600'
                         }`}
                     onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                     onDragLeave={() => setDragActive(false)}
@@ -83,6 +85,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Pro
                             <input
                                 type="file"
                                 accept="image/*"
+                                title="Upload image file"
+                                aria-label="Upload image file"
                                 className="absolute inset-0 opacity-0 cursor-pointer"
                                 onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
                             />

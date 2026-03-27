@@ -1,4 +1,5 @@
 const Translation = require('../models/Translation');
+const { clearCache } = require('../middleware/cache');
 
 // @desc    Get all translations (Admin panel format)
 // @route   GET /api/translations
@@ -63,6 +64,7 @@ exports.updateTranslation = async (req, res) => {
         }
 
         await translation.save();
+        clearCache('/api/translations');
 
         res.status(200).json({
             success: true,
@@ -95,6 +97,8 @@ exports.createTranslation = async (req, res) => {
             values: values || {}
         });
 
+        clearCache('/api/translations');
+
         res.status(201).json({
             success: true,
             data: translation
@@ -118,6 +122,7 @@ exports.deleteTranslation = async (req, res) => {
         }
 
         await translation.deleteOne();
+        clearCache('/api/translations');
 
         res.status(200).json({
             success: true,

@@ -100,12 +100,11 @@ interface Settings {
         formTitle?: string;
         formButton?: string;
         socialLinks?: {
-            facebook?: string;
-            instagram?: string;
-            twitter?: string;
-            linkedin?: string;
-            youtube?: string;
-        };
+            platform: string;
+            url: string;
+            iconName: string;
+            colorClass: string;
+        }[];
         whatsappPhone?: string;
         whatsappMessage?: string;
     };

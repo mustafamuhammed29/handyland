@@ -58,6 +58,14 @@ const OrderSchema = new mongoose.Schema({
     couponCode: {
         type: String
     },
+    appliedPoints: {
+        type: Number,
+        default: 0
+    },
+    pointsEarned: {
+        type: Number,
+        default: 0
+    },
     status: {
         type: String,
         enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],

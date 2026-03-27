@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auditLogger = require('./auditLogger');
 
 // Protect routes - verify JWT token
 exports.protect = async (req, res, next) => {
@@ -9,13 +10,13 @@ exports.protect = async (req, res, next) => {
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     }
+    // Check for adminToken (Admin Panel uses this, must take priority)
+    else if (req.cookies && req.cookies.adminToken) {
+        token = req.cookies.adminToken;
+    }
     // Fallback to cookie (Customer Frontend utilizes this)
     else if (req.cookies && req.cookies.accessToken) {
         token = req.cookies.accessToken;
-    }
-    // Also check for adminToken (Admin Panel uses this)
-    else if (req.cookies && req.cookies.adminToken) {
-        token = req.cookies.adminToken;
     }
 
     // Make sure token exists
@@ -122,6 +123,11 @@ exports.authorize = (...roles) => {
             });
         }
 
+        // Trigger audit logger asynchronously if the user is an admin
+        if (req.user.role === 'admin') {
+            auditLogger(req, res, () => {});
+        }
+
         next();
     };
 };
@@ -132,10 +138,10 @@ exports.optionalProtect = async (req, res, next) => {
 
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies && req.cookies.accessToken) {
-        token = req.cookies.accessToken;
     } else if (req.cookies && req.cookies.adminToken) {
         token = req.cookies.adminToken;
+    } else if (req.cookies && req.cookies.accessToken) {
+        token = req.cookies.accessToken;
     }
 
     if (!token) {

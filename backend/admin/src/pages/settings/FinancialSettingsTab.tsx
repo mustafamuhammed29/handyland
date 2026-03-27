@@ -148,6 +148,60 @@ export const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({ sett
                     )}
                 </div>
             </div>
+
+            {/* Eco-Impact Gamification Settings */}
+            <div>
+                <h3 className="text-xl font-bold text-emerald-400 mb-2 text-glow">Eco-Impact Gamification 🌍</h3>
+                <p className="text-slate-400 text-sm mb-4">Control the environmental impact metrics shown on the user dashboard.</p>
+                <div className="p-5 border border-emerald-900/30 rounded-2xl bg-emerald-950/20 space-y-5">
+                    <div className="flex items-center justify-between pb-4 border-b border-emerald-900/30">
+                        <div>
+                            <span className="text-white font-bold block">Enable Eco-Impact Widget</span>
+                            <span className="text-slate-400 text-xs">Show the Gamification card on the customer dashboard.</span>
+                        </div>
+                        <button
+                            type="button"
+                            title="Toggle Eco-Impact Widget"
+                            aria-label="Toggle Eco-Impact Widget"
+                            onClick={() => handleChange('ecoImpact', 'enabled', !settings.ecoImpact?.enabled)}
+                            className={`relative w-12 h-6 rounded-full transition-all ${settings.ecoImpact?.enabled !== false ? 'bg-emerald-500' : 'bg-slate-700'
+                                }`}
+                        >
+                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${settings.ecoImpact?.enabled !== false ? 'translate-x-6' : 'translate-x-0'
+                                }`} />
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-slate-300 text-sm font-bold mb-2">CO₂ Saved per device (kg)</label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                title="CO2 Saved per device"
+                                aria-label="CO2 Saved per device"
+                                value={settings.ecoImpact?.co2PerDevice ?? 79}
+                                onChange={(e) => handleChange('ecoImpact', 'co2PerDevice', Number(e.target.value))}
+                                className="w-full bg-slate-900 border border-emerald-900/50 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none transition-all"
+                            />
+                            <p className="text-xs text-slate-500 mt-2">Avg: 79kg (manufacturing footprint of a smartphone).</p>
+                        </div>
+                        <div>
+                            <label className="block text-slate-300 text-sm font-bold mb-2">E-Waste Prevented per device (kg)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                title="E-Waste Prevented per device"
+                                aria-label="E-Waste Prevented per device"
+                                value={settings.ecoImpact?.eWastePerDevice ?? 0.18}
+                                onChange={(e) => handleChange('ecoImpact', 'eWastePerDevice', Number(e.target.value))}
+                                className="w-full bg-slate-900 border border-emerald-900/50 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none transition-all"
+                            />
+                            <p className="text-xs text-slate-500 mt-2">Avg: 0.18kg (180g weight of a smartphone + battery).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

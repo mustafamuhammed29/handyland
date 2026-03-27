@@ -8,6 +8,7 @@ import { AuthProvider } from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
 import { ThemeProvider } from '../context/ThemeContext';
+import { CookieProvider } from '../context/CookieContext';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -34,19 +35,21 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
         <QueryClientProvider client={queryClient}>
             <HelmetProvider>
                 <ThemeProvider>
-                    <ToastProvider>
-                        <LanguageProvider>
-                            <SettingsProvider>
-                                <AuthProvider>
-                                    <WishlistProvider>
-                                        <CartProvider>
-                                            {children}
-                                        </CartProvider>
-                                    </WishlistProvider>
-                                </AuthProvider>
-                            </SettingsProvider>
-                        </LanguageProvider>
-                    </ToastProvider>
+                    <CookieProvider>
+                        <ToastProvider>
+                            <LanguageProvider>
+                                <SettingsProvider>
+                                    <AuthProvider>
+                                        <WishlistProvider>
+                                            <CartProvider>
+                                                {children}
+                                            </CartProvider>
+                                        </WishlistProvider>
+                                    </AuthProvider>
+                                </SettingsProvider>
+                            </LanguageProvider>
+                        </ToastProvider>
+                    </CookieProvider>
                 </ThemeProvider>
             </HelmetProvider>
         </QueryClientProvider>

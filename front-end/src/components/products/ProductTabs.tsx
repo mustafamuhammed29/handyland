@@ -50,7 +50,10 @@ export const ProductTabs: React.FC<ProductTabsProps> = ({
                             {product.description || "The ultimate device for power users. Featuring a stunning display, all-day battery life, and a pro-grade camera system. Each unit is rigorously tested and certified by our technicians to ensure 100% functionality."}
                         </p>
                         <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {['Professional Inspection', 'New Battery Installed', 'Original Accessories', 'Sanitized & Cleaned'].map((feat, i) => (
+                            {(Array.isArray(product.features) && product.features.some((f: string) => f.trim() !== '') 
+                                ? product.features.filter((f: string) => f.trim() !== '') 
+                                : ['Professional Inspection', 'New Battery Installed', 'Original Accessories', 'Sanitized & Cleaned']
+                            ).map((feat: string, i: number) => (
                                 <li key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                                     <div className="w-6 h-6 rounded-full bg-brand-primary/20 text-brand-primary flex items-center justify-center"><Check className="w-3 h-3" /></div>
                                     {feat}

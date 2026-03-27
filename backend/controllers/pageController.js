@@ -32,17 +32,20 @@ exports.getAllPages = async (req, res) => {
 // @access  Private/Admin
 exports.createOrUpdatePage = async (req, res) => {
     try {
-        const { slug, title, content } = req.body;
+        const { slug, title, content, seo } = req.body;
 
         let page = await Page.findOne({ slug });
 
         if (page) {
             page.title = title || page.title;
             page.content = content || page.content;
+            if (seo !== undefined) {
+                page.seo = seo;
+            }
             page.lastUpdated = Date.now();
             await page.save();
         } else {
-            page = await Page.create({ slug, title, content });
+            page = await Page.create({ slug, title, content, seo });
         }
 
         res.json(page);

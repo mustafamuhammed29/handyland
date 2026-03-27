@@ -95,97 +95,123 @@ const Dashboard: React.FC = () => {
             title: 'Total Users',
             value: stats?.totalUsers || 0,
             icon: Users,
-            color: 'blue',
+            style: {
+                bg: 'bg-blue-500/10',
+                text: 'text-blue-400',
+                borderTop: 'border-t-blue-500',
+                shadow: 'group-hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]'
+            },
             subtitle: `${stats?.activeUsers || 0} active`
         },
         {
             title: 'Total Orders',
             value: stats?.totalOrders || 0,
             icon: ShoppingCart,
-            color: 'purple',
+            style: {
+                bg: 'bg-purple-500/10',
+                text: 'text-purple-400',
+                borderTop: 'border-t-purple-500',
+                shadow: 'group-hover:shadow-[0_0_20px_rgba(168,85,247,0.3)]'
+            },
             subtitle: `${stats?.pendingOrders || 0} pending`
         },
         {
             title: 'Total Revenue',
             value: `€${(stats?.totalRevenue || 0).toFixed(2)}`,
             icon: DollarSign,
-            color: 'green',
+            style: {
+                bg: 'bg-emerald-500/10',
+                text: 'text-emerald-400',
+                borderTop: 'border-t-emerald-500',
+                shadow: 'group-hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+            },
             subtitle: `${stats?.deliveredOrders || 0} delivered`
         },
         {
             title: 'Delivered Orders',
             value: stats?.deliveredOrders || 0,
             icon: Package,
-            color: 'cyan',
+            style: {
+                bg: 'bg-cyan-500/10',
+                text: 'text-cyan-400',
+                borderTop: 'border-t-cyan-500',
+                shadow: 'group-hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]'
+            },
             subtitle: 'Successfully completed'
         }
     ];
 
     return (
-        <div className="p-6">
+        <div className="p-2 sm:p-6 lg:p-8 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-black text-white mb-2">Dashboard</h1>
-                <p className="text-slate-400">Welcome to HandyLand Admin Panel</p>
+            <div className="mb-10 relative z-10">
+                <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-2">Dashboard Overview</h1>
+                <p className="text-slate-400 font-medium tracking-wide">Welcome back to the HandyLand Command Center.</p>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* Premium Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 {statCards.map((card, index) => {
                     const Icon = card.icon;
                     return (
                         <div
                             key={index}
-                            className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-all"
+                            className={`glass-card border-t-2 ${card.style.borderTop} rounded-2xl p-6 transition-all duration-500 transform hover:-translate-y-2 relative overflow-hidden group ${card.style.shadow}`}
                         >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className={`p-3 bg-${card.color}-600/10 rounded-lg`}>
-                                    <Icon className={`w-6 h-6 text-${card.color}-400`} />
+                            {/* Subtle background glow effect over the card */}
+                            <div className={`absolute top-0 right-0 w-32 h-32 ${card.style.bg} blur-[50px] -mr-10 -mt-10 rounded-full opacity-50 transition-opacity duration-300 group-hover:opacity-100`} />
+                            
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className={`p-3.5 ${card.style.bg} rounded-xl shadow-inner`}>
+                                        <Icon className={`w-6 h-6 ${card.style.text}`} />
+                                    </div>
+                                    <TrendingUp className="w-5 h-5 text-emerald-400 opacity-80" />
                                 </div>
-                                <TrendingUp className="w-4 h-4 text-green-400" />
+                                <h3 className="text-slate-400 text-sm font-semibold mb-1 uppercase tracking-wider">{card.title}</h3>
+                                <p className="text-4xl font-black text-white mb-2 tracking-tight">{card.value}</p>
+                                <p className="text-xs text-slate-500 font-medium">{card.subtitle}</p>
                             </div>
-                            <h3 className="text-slate-400 text-sm font-medium mb-1">{card.title}</h3>
-                            <p className="text-3xl font-bold text-white mb-1">{card.value}</p>
-                            <p className="text-xs text-slate-500">{card.subtitle}</p>
                         </div>
                     );
                 })}
             </div>
 
             {/* Analytics Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-xl p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <div className="glass-panel rounded-2xl p-6 lg:p-8 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-500">
                     <h2 className="text-xl font-bold text-white mb-6">Sales Overview (Last 30 Days)</h2>
-                    <div className="h-72 w-full">
+                    <div className="h-80 w-full relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={timelineData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                                <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `€${value}`} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dy={10} />
+                                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `€${value}`} dx={-10} />
                                 <LineTooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#38bdf8' }}
-                                    formatter={(value: any) => [`€${Number(value)}`, 'Sales']}
+                                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)' }}
+                                    itemStyle={{ color: '#38bdf8', fontWeight: 'bold' }}
+                                    formatter={(value: any) => [`€${Number(value).toFixed(2)}`, 'Revenue']}
                                 />
-                                <Line type="monotone" dataKey="sales" stroke="#38bdf8" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#38bdf8' }} />
+                                <Line type="monotone" dataKey="sales" stroke="#38bdf8" strokeWidth={4} dot={{ r: 0 }} activeDot={{ r: 8, fill: '#38bdf8', stroke: '#0f172a', strokeWidth: 3 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-xl p-6">
+                <div className="glass-panel rounded-2xl p-6 lg:p-8 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-500">
                     <h2 className="text-xl font-bold text-white mb-6">Repair Tickets by Status</h2>
-                    <div className="h-72 w-full">
+                    <div className="h-80 w-full relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={repairStats}
                                     cx="50%"
                                     cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={100}
-                                    paddingAngle={5}
+                                    innerRadius={75}
+                                    outerRadius={110}
+                                    paddingAngle={8}
                                     dataKey="value"
+                                    stroke="none"
                                 >
                                     {repairStats.map((_, index) => {
                                         const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -193,43 +219,57 @@ const Dashboard: React.FC = () => {
                                     })}
                                 </Pie>
                                 <PieTooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
-                                    itemStyle={{ color: '#fff' }}
+                                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }}
+                                    itemStyle={{ color: '#fff', fontWeight: 'bold' }}
                                 />
-                                <Legend wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }} />
+                                <Legend wrapperStyle={{ fontSize: '13px', color: '#cbd5e1', paddingTop: '20px' }} iconType="circle" />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-xl p-6">
-                <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Ultra-Modern Quick Actions */}
+            <div className="mb-6">
+                <h2 className="text-xl font-bold text-white mb-6">Quick Actions</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Link
                         to="/users"
-                        className="p-4 bg-blue-600/10 border border-blue-600/20 rounded-lg hover:bg-blue-600/20 transition-all group"
+                        className="glass-panel p-6 rounded-2xl border border-blue-500/20 hover:bg-blue-900/20 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(59,130,246,0.15)] flex items-center gap-5"
                     >
-                        <Users className="w-8 h-8 text-blue-400 mb-2" />
-                        <h3 className="font-bold text-white group-hover:text-blue-400">Manage Users</h3>
-                        <p className="text-sm text-slate-400">View and manage all users</p>
+                        <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-400 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <Users className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-white text-lg">Manage Users</h3>
+                            <p className="text-sm text-slate-400 mt-0.5">View and manage accounts</p>
+                        </div>
                     </Link>
+                    
                     <Link
                         to="/orders"
-                        className="p-4 bg-purple-600/10 border border-purple-600/20 rounded-lg hover:bg-purple-600/20 transition-all group"
+                        className="glass-panel p-6 rounded-2xl border border-purple-500/20 hover:bg-purple-900/20 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(168,85,247,0.15)] flex items-center gap-5"
                     >
-                        <ShoppingCart className="w-8 h-8 text-purple-400 mb-2" />
-                        <h3 className="font-bold text-white group-hover:text-purple-400">View Orders</h3>
-                        <p className="text-sm text-slate-400">Manage all orders</p>
+                        <div className="w-14 h-14 bg-gradient-to-br from-purple-600 to-purple-400 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <ShoppingCart className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-white text-lg">View Orders</h3>
+                            <p className="text-sm text-slate-400 mt-0.5">Fulfill pending requests</p>
+                        </div>
                     </Link>
+
                     <Link
                         to="/emails"
-                        className="p-4 bg-cyan-600/10 border border-cyan-600/20 rounded-lg hover:bg-cyan-600/20 transition-all group"
+                        className="glass-panel p-6 rounded-2xl border border-cyan-500/20 hover:bg-cyan-900/20 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(6,182,212,0.15)] flex items-center gap-5"
                     >
-                        <Mail className="w-8 h-8 text-cyan-400 mb-2" />
-                        <h3 className="font-bold text-white group-hover:text-cyan-400">Email Templates</h3>
-                        <p className="text-sm text-slate-400">Manage email templates</p>
+                        <div className="w-14 h-14 bg-gradient-to-br from-cyan-600 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <Mail className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-white text-lg">Email Marketing</h3>
+                            <p className="text-sm text-slate-400 mt-0.5">Manage automated flows</p>
+                        </div>
                     </Link>
                 </div>
             </div>

@@ -28,6 +28,7 @@ const helmetMiddleware = helmet({
     frameguard: { action: 'deny' },
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
 });
 
 // ── CORS ───────────────────────────────────────────────────────────────────────

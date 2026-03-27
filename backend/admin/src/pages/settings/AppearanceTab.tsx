@@ -1,9 +1,18 @@
 import { Input, Toggle } from '../SettingsManager';
+import { Palette, Globe2, LayoutTemplate, Mail } from 'lucide-react';
 
 export const AppearanceTab = ({ settings, handleChange }: any) => {
     return (
         <div className="space-y-6">
-            <h3 className="text-xl font-bold text-white mb-4">General Appearance</h3>
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-pink-500/10 rounded-xl">
+                    <Palette className="text-pink-400" size={24} />
+                </div>
+                <div>
+                    <h3 className="text-xl font-bold text-white">General Appearance & Info</h3>
+                    <p className="text-slate-400 text-sm">Main branding elements, global text, and localization settings.</p>
+                </div>
+            </div>
             <Input label="Site Name" value={settings.siteName} onChange={(v: string) => handleChange(null, 'siteName', v)} />
 
             <div className="p-4 border border-slate-700 rounded-xl bg-slate-900/50">
@@ -17,9 +26,17 @@ export const AppearanceTab = ({ settings, handleChange }: any) => {
                 </div>
             </div>
 
-            <Input label="Contact Email" value={settings.contactEmail} onChange={(v: string) => handleChange(null, 'contactEmail', v)} />
-            <Input label="Free Shipping Threshold (€)" value={settings.freeShippingThreshold?.toString()} onChange={(v: string) => handleChange(null, 'freeShippingThreshold', Number(v))} type="number" />
-            <Input label="Footer Text" value={settings.footerText} onChange={(v: string) => handleChange(null, 'footerText', v)} />
+            <div className="p-5 border border-slate-700 rounded-xl bg-slate-900/50 space-y-4">
+                <h4 className="text-blue-400 font-bold mb-2 flex items-center gap-2 px-1">
+                    <Globe2 size={18} /> Basic Store Info
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input label="Site Name (Title)" value={settings.siteName} onChange={(v: string) => handleChange(null, 'siteName', v)} placeholder="HANDYLAND" />
+                    <Input label="Contact Email" value={settings.contactEmail} onChange={(v: string) => handleChange(null, 'contactEmail', v)} placeholder="info@handyland.de" />
+                    <Input label="Free Shipping Threshold (€)" value={settings.freeShippingThreshold?.toString()} onChange={(v: string) => handleChange(null, 'freeShippingThreshold', Number(v))} type="number" />
+                    <Input label="Global Footer Text" value={settings.footerText} onChange={(v: string) => handleChange(null, 'footerText', v)} placeholder="© 2026 HANDYLAND" />
+                </div>
+            </div>
 
             <div className="p-4 border border-blue-900/40 rounded-xl bg-blue-950/20">
                 <h4 className="text-blue-400 font-bold mb-4">Localization & Language</h4>

@@ -20,6 +20,10 @@ const productSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true },
     barcode: { type: String, unique: true, sparse: true },
     description: String,
+    features: {
+        type: [String],
+        default: []
+    },
     image: String,
     images: [String],
     category: String,

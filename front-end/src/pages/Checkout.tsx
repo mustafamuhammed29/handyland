@@ -61,6 +61,10 @@ export const Checkout: React.FC = () => {
     const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
     const [selectedMethodId, setSelectedMethodId] = useState<string>('');
     const [isLoadingMethods, setIsLoadingMethods] = useState(true);
+    const [features, setFeatures] = useState<any>(null);
+
+    // Points Redemption State
+    const [appliedPoints, setAppliedPoints] = useState(0);
 
     // Payment Config State
     const [paymentConfig, setPaymentConfig] = useState<any | null>(null);
@@ -109,6 +113,9 @@ export const Checkout: React.FC = () => {
                     }
                     if (settings.taxRate !== undefined) {
                         setTaxRate(settings.taxRate);
+                    }
+                    if (settings.features) {
+                        setFeatures(settings.features);
                     }
                 }
 
@@ -272,7 +279,9 @@ export const Checkout: React.FC = () => {
         }
 
         const discount = coupon ? coupon.discount : 0;
-        return Math.max(0, cartTotal + shippingCost - discount);
+        const redeemRate = features?.loyalty?.redeemRate || 100;
+        const pointsDiscount = appliedPoints / redeemRate;
+        return Math.max(0, cartTotal + shippingCost - discount - pointsDiscount);
     };
 
     const getShippingCostDisplay = (method: ShippingMethod) => {
@@ -332,6 +341,7 @@ export const Checkout: React.FC = () => {
             shippingMethod: selectedMethod?.name || 'Standard',
             couponCode: coupon?.code,
             discountAmount: coupon?.discount,
+            appliedPoints: appliedPoints,
             email: shippingDetails.email // Important for Guest Checkout
         };
 
@@ -482,6 +492,10 @@ export const Checkout: React.FC = () => {
                     {/* FIXED: Extracted to CheckoutOrderSummary sub-component (FIX 5) */}
                     <div className="lg:col-span-1">
                         <CheckoutOrderSummary
+                            user={user}
+                            features={features}
+                            appliedPoints={appliedPoints}
+                            setAppliedPoints={setAppliedPoints}
                             cart={cart}
                             cartTotal={cartTotal}
                             coupon={coupon}

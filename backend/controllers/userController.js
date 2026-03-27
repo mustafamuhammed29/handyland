@@ -17,6 +17,10 @@ exports.updateUserProfile = async (req, res) => {
         user.name = req.body.name || user.name;
         user.phone = req.body.phone || user.phone;
         user.address = req.body.address || user.address;
+        
+        if (req.body.avatar !== undefined) {
+            user.avatar = req.body.avatar;
+        }
 
         // Only allow email update if not taken by another user
         if (req.body.email && req.body.email !== user.email) {
@@ -52,6 +56,7 @@ exports.updateUserProfile = async (req, res) => {
                 email: updatedUser.email,
                 phone: updatedUser.phone,
                 address: updatedUser.address,
+                avatar: updatedUser.avatar,
                 role: updatedUser.role
             }
         });

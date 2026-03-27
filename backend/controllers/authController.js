@@ -94,7 +94,8 @@ exports.login = async (req, res) => {
                 isVerified: user.isVerified,
                 phone: user.phone,
                 addresses: addresses,
-                address: user.address
+                address: user.address,
+                avatar: user.avatar
             }
         });
     } catch (error) {
@@ -142,6 +143,10 @@ exports.updateProfile = async (req, res) => {
             address: req.body.address,
             preferredLanguage: req.body.preferredLanguage
         };
+
+        if (req.body.avatar !== undefined) {
+            fieldsToUpdate.avatar = req.body.avatar;
+        }
 
         // FIXED: Check phone uniqueness before updating (FIX 4)
         if (req.body.phone) {

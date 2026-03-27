@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageCode } from '../types';
 
-import { Send, MapPin, Phone, Mail, Globe, MessageSquare, User, AtSign, Radio, CheckCircle2, Facebook, Instagram, Twitter, Linkedin, Youtube } from 'lucide-react';
+import { Send, MapPin, Phone, Mail, Globe, MessageSquare, User, AtSign, Radio, CheckCircle2, Facebook, Instagram, Twitter, Linkedin, Youtube, Twitch, Github, Video } from 'lucide-react';
 
 import { useSettings } from '../context/SettingsContext';
 import { api } from '../utils/api';
@@ -30,13 +30,9 @@ export const Contact: React.FC<ContactProps> = () => {
             message: 'How can we help you?'
         },
         buttonText: globalSettings?.contactSection?.formButton || 'Protokoll senden',
-        socialLinks: [
-            { icon: Facebook, url: globalSettings?.contactSection?.socialLinks?.facebook, color: 'hover:text-blue-500' },
-            { icon: Instagram, url: globalSettings?.contactSection?.socialLinks?.instagram, color: 'hover:text-pink-500' },
-            { icon: Twitter, url: globalSettings?.contactSection?.socialLinks?.twitter, color: 'hover:text-sky-400' },
-            { icon: Linkedin, url: globalSettings?.contactSection?.socialLinks?.linkedin, color: 'hover:text-blue-700' },
-            { icon: Youtube, url: globalSettings?.contactSection?.socialLinks?.youtube, color: 'hover:text-red-500' }
-        ].filter(link => link.url) // Only show links that exist
+        socialLinks: Array.isArray(globalSettings?.contactSection?.socialLinks) 
+            ? globalSettings.contactSection.socialLinks 
+            : []
     };
 
     const [loading, setLoading] = useState(false);
@@ -159,20 +155,36 @@ export const Contact: React.FC<ContactProps> = () => {
                         {settings.socialLinks.length > 0 && (
                             <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
                                 <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Social Connect</h4>
-                                <div className="flex gap-4">
-                                    {settings.socialLinks.map((social: any, index: number) => (
-                                        <a
-                                            key={index}
-                                            href={social.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={`w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-all hover:scale-110 hover:border-slate-400 dark:hover:border-slate-600 ${social.color}`}
-                                            title={`Visit our ${social.icon.name || 'social media'} page`}
-                                            aria-label={`Visit our ${social.icon.name || 'social media'} page`}
-                                        >
-                                            <social.icon size={20} />
-                                        </a>
-                                    ))}
+                                <div className="flex flex-wrap gap-4">
+                                    {settings.socialLinks.map((social: any, index: number) => {
+                                        const iconMap: Record<string, React.ElementType> = {
+                                            'Facebook': Facebook,
+                                            'Instagram': Instagram,
+                                            'Twitter': Twitter,
+                                            'Linkedin': Linkedin,
+                                            'Youtube': Youtube,
+                                            'Twitch': Twitch,
+                                            'Github': Github,
+                                            'MessageCircle': MessageSquare,
+                                            'Send': Send,
+                                            'Video': Video,
+                                        };
+                                        const IconComponent = iconMap[social.iconName] || Globe;
+                                        
+                                        return (
+                                            <a
+                                                key={index}
+                                                href={social.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-all hover:scale-110 hover:border-slate-400 dark:hover:border-slate-600 ${social.colorClass || 'hover:text-brand-primary'}`}
+                                                title={`Visit our ${social.platform || 'social media'} page`}
+                                                aria-label={`Visit our ${social.platform || 'social media'} page`}
+                                            >
+                                                <IconComponent size={20} />
+                                            </a>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}

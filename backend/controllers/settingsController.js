@@ -1,4 +1,5 @@
 const Settings = require('../models/Settings');
+const { clearCache } = require('../middleware/cache');
 const User = require('../models/User');
 const Review = require('../models/Review');
 const RepairTicket = require('../models/RepairTicket');
@@ -96,7 +97,8 @@ exports.updateSettings = async (req, res) => {
             'siteName', 'contactEmail', 'footerText', 'navbar', 'language',
             'hero', 'stats', 'valuation', 'content',
             'repairArchive', 'sections', 'contactSection', 'footerSection',
-            'freeShippingThreshold', 'payment', 'announcementBanner', 'promoPopup', 'socialAuth'
+            'freeShippingThreshold', 'payment', 'announcementBanner', 'promoPopup', 'socialAuth',
+            'invoice', 'seo', 'taxRate', 'vipTiers', 'ecoImpact', 'quickReplies'
         ];
 
         allowedFields.forEach(field => {
@@ -115,6 +117,8 @@ exports.updateSettings = async (req, res) => {
                 { new: true, runValidators: true, upsert: true } // upsert creates if not found
             );
         }
+
+        clearCache('/api/settings');
 
         res.status(200).json(settings);
     } catch (error) {

@@ -86,6 +86,21 @@ const settingsSchema = new mongoose.Schema({
             delay: 5
         }
     },
+    features: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            comparisonEngine: true,
+            cartUpselling: true,
+            loyalty: {
+                enabled: true,
+                earnRate: 10,     
+                redeemRate: 100,  
+                silverThreshold: 500,
+                goldThreshold: 2000,
+                platinumThreshold: 5000
+            }
+        }
+    },
     socialAuth: {
         type: mongoose.Schema.Types.Mixed,
         default: {
@@ -127,6 +142,43 @@ const settingsSchema = new mongoose.Schema({
             { id: 'platinum', name: 'Platinum', color: 'from-slate-200 to-slate-400', minSpent: 5000, maxSpent: 10000 },
             { id: 'diamond', name: 'Diamond', color: 'from-cyan-300 to-blue-500', minSpent: 10000, maxSpent: 50000 }
         ]
+    },
+    ecoImpact: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            enabled: true,
+            co2PerDevice: 79,
+            eWastePerDevice: 0.18
+        }
+    },
+    invoice: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            logoUrl: '',
+            primaryColor: '#00bcd4',
+            companyName: 'HandyLand GmbH',
+            companyAddress: 'Tech Street 123 - 10115 Berlin - Germany',
+            vatNumber: 'DE123456789',
+            bankName: '',
+            iban: '',
+            bic: '',
+            footerText: 'Thank you for your business!',
+            prefix: 'HL-',
+            titleLabel: 'Invoice',
+            dateLabel: 'Date:',
+            numberLabel: 'Invoice #:',
+            vatIdLabel: 'VAT ID:',
+            subtotalLabel: 'Subtotal:',
+            taxLabel: 'VAT',
+            shippingLabel: 'Shipping:',
+            discountLabel: 'Discount',
+            totalLabel: 'Total:',
+            printBtnLabel: 'Print Invoice',
+            closeBtnLabel: 'Close',
+            itemLabel: 'Item',
+            quantityLabel: 'Quantity',
+            priceLabel: 'Price'
+        }
     }
 }, { timestamps: true });
 

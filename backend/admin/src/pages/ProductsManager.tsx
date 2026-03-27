@@ -22,6 +22,7 @@ export default function ProductsManager() {
         color: '',
         display: '',
         description: '',
+        features: ['', '', '', ''],
         category: 'Smartphones',
         stock: 0,
         seo: {
@@ -133,6 +134,9 @@ export default function ProductsManager() {
             color: product.color || '',
             display: product.display || '',
             description: product.description || '',
+            features: Array.isArray(product.features) && product.features.length > 0 
+                ? [...product.features, ...Array(4).fill('')].slice(0, 4) 
+                : ['', '', '', ''],
             category: product.category || 'Smartphones',
             stock: product.stock ?? 0,
             seo: {
@@ -192,6 +196,7 @@ export default function ProductsManager() {
             color: '',
             display: '',
             description: '',
+            features: ['', '', '', ''],
             category: 'Smartphones',
             stock: 0,
             seo: {
@@ -510,6 +515,29 @@ export default function ProductsManager() {
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 />
+                            </div>
+
+                            {/* Custom Overview Features */}
+                            <div className="p-4 border border-slate-700/50 rounded-xl bg-slate-900/30 space-y-4">
+                                <h4 className="text-blue-400 font-bold text-sm">Product Overview Features</h4>
+                                <p className="text-xs text-slate-400">Add up to 4 custom bullet points to show on the product page details tab. (Leave empty to use defaults)</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[0, 1, 2, 3].map(index => (
+                                        <div key={index} className="space-y-1">
+                                            <label className="text-xs font-medium text-slate-400">Feature {index + 1}</label>
+                                            <input
+                                                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-sm text-white focus:border-blue-500 outline-none"
+                                                placeholder={`e.g. ${['Professional Inspection', 'New Battery Installed', 'Original Accessories', 'Sanitized & Cleaned'][index]}`}
+                                                value={formData.features[index]}
+                                                onChange={e => {
+                                                    const newFeatures = [...formData.features];
+                                                    newFeatures[index] = e.target.value;
+                                                    setFormData({ ...formData, features: newFeatures });
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* SEO settings section */}

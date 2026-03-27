@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home, Bell, ClipboardList, Heart, Search } from 'lucide-react';
+import { Menu, X, Smartphone, Wrench, BarChart3, ShoppingBag, User as UserIcon, ShoppingCart, Home, Bell, ClipboardList, Heart, Search, Layers } from 'lucide-react';
 import { User } from '../types';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
@@ -113,6 +113,15 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             );
           })}
           
+          {(!(settings as any).features || (settings as any).features.comparisonEngine !== false) && (
+            <Link
+              to="/compare"
+              className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-purple-500/50 text-purple-500 hover:bg-purple-500/10 transition-all duration-200 xl:mx-2"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              Compare
+            </Link>
+          )}
           <Link
             to="/track-repair"
             className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"

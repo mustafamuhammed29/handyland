@@ -3,6 +3,16 @@ const Accessory = require('../models/Accessory');
 exports.getAccessories = async (req, res) => {
     try {
         const query = req.query.includeOutOfStock === 'true' ? {} : { stock: { $gt: 0 } };
+        
+        if (req.query.search) {
+            const escapedSearch = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            query.$or = [
+                { name: { $regex: escapedSearch, $options: 'i' } },
+                { description: { $regex: escapedSearch, $options: 'i' } },
+                { type: { $regex: escapedSearch, $options: 'i' } }
+            ];
+        }
+
         const accessories = await Accessory.find(query);
         res.json(accessories);
     } catch (error) {
@@ -23,6 +33,23 @@ exports.createAccessory = async (req, res) => {
     } catch (error) {
         console.error("Create Accessory Error:", error);
         res.status(500).json({ message: "Error saving data: " + error.message });
+    }
+};
+
+exports.getAccessoryById = async (req, res) => {
+    try {
+        const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.id);
+        const query = isObjectId ? { _id: req.params.id } : { id: req.params.id };
+
+        const accessory = await Accessory.findOne(query);
+        if (accessory) {
+            res.json(accessory);
+        } else {
+            res.status(404).json({ message: "Accessory not found" });
+        }
+    } catch (error) {
+        console.error("Get Accessory By Id Error:", error);
+        res.status(500).json({ message: "Error reading data: " + error.message });
     }
 };
 

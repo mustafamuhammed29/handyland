@@ -1,18 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useTranslation } from 'react-i18next';
-import { ShoppingCart, ArrowRight, Minus, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, ArrowRight, Minus, Plus, Trash2, ArrowLeft, Sparkles } from 'lucide-react';
 import { LanguageCode } from '../types';
+import { api } from '../utils/api';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface CartProps {
     lang: LanguageCode;
 }
 
 export const Cart: React.FC<CartProps> = ({ lang }) => {
-    const { cart, updateQuantity, removeFromCart, cartTotal, finalTotal, freeShippingThreshold } = useCart();
+    const { cart, updateQuantity, removeFromCart, cartTotal, finalTotal, freeShippingThreshold, addToCart } = useCart();
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const [upsellItems, setUpsellItems] = useState<any[]>([]);
+    const [features, setFeatures] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [upsellRes, settingsRes] = await Promise.all([
+                    fetch('/api/accessories'),
+                    api.get('/api/settings')
+                ]);
+                
+                if (upsellRes.ok) {
+                    const data = await upsellRes.json();
+                    setUpsellItems(data.slice(0, 3)); // show top 3
+                }
+
+                const sData = (settingsRes as any)?.data || settingsRes;
+                setFeatures(sData?.features);
+            } catch (err) {
+                console.error('Failed to fetch cart data:', err);
+            }
+        };
+        fetchData();
+    }, []);
 
     const isRtl = lang === 'ar';
     const isFreeShipping = finalTotal >= freeShippingThreshold;
@@ -125,8 +151,47 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                         ))}
                     </div>
 
+                    {/* Smart Cart Upselling */}
+                    {features?.cartUpselling !== false && upsellItems.length > 0 && (
+                        <div className="mt-12 bg-slate-900/40 border border-brand-primary/20 rounded-2xl p-6 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl -z-10 group-hover:bg-brand-primary/10 transition-colors"></div>
+                            <div className="flex items-center gap-2 mb-6 text-brand-primary">
+                                <Sparkles className="w-6 h-6 animate-pulse" />
+                                <h3 className="text-xl font-bold text-white">{t('cart.frequentlyBought', 'Complete Your Setup')}</h3>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
+                                {upsellItems.map((item) => (
+                                    <div key={item._id || item.id} className="bg-slate-950/80 backdrop-blur-sm rounded-xl p-4 border border-slate-800 hover:border-brand-primary/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all flex flex-col group/item relative overflow-hidden">
+                                        <div className="h-28 bg-white/5 rounded-lg p-2 mb-4 flex items-center justify-center relative">
+                                            <img src={getImageUrl(item.image)} alt={item.name} className="max-h-full object-contain drop-shadow-lg group-hover/item:scale-110 transition-transform duration-500" />
+                                        </div>
+                                        <h4 className="text-white font-bold text-sm mb-1 line-clamp-2 leading-tight flex-1" title={item.name}>{item.name}</h4>
+                                        <div className="flex justify-between items-center mt-3">
+                                            <div className="text-brand-primary font-bold text-base">€{item.price.toFixed(2)}</div>
+                                            <button 
+                                                onClick={() => {
+                                                    addToCart({
+                                                        id: item._id || item.id,
+                                                        title: item.name,
+                                                        subtitle: item.tag || 'Accessory',
+                                                        price: item.price,
+                                                        image: item.image,
+                                                        category: 'accessory'
+                                                    });
+                                                }}
+                                                className="px-3 py-1.5 bg-slate-800 hover:bg-brand-primary hover:text-black text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1 active:scale-95"
+                                            >
+                                                <Plus className="w-3 h-3" /> Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Order Summary */}
-                    <div className="lg:col-span-4 lg:sticky lg:top-28 self-start">
+                    <div className="lg:col-span-4 lg:sticky lg:top-28 self-start mt-8 lg:mt-0">
                         <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/60 shadow-2xl rounded-2xl p-6 sm:p-8">
                             <h2 className="text-2xl font-bold text-white mb-6 border-b border-slate-800 pb-4">
                                 {t('cart.summary', 'Order Summary')}

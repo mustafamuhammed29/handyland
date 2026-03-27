@@ -72,6 +72,28 @@ exports.syncCart = async (req, res) => {
             { upsert: true, new: true, setDefaultsOnInsert: true }
         );
 
+        // FIXED: Clean up any existing duplicates (from previous race conditions) before processing
+        const uniqueProducts = new Set();
+        const duplicateIds = [];
+        cart.items.forEach(item => {
+            if (item.product) {
+                const pid = item.product.toString();
+                if (uniqueProducts.has(pid)) {
+                    duplicateIds.push(item._id);
+                } else {
+                    uniqueProducts.add(pid);
+                }
+            }
+        });
+
+        if (duplicateIds.length > 0) {
+            await Cart.updateOne(
+                { user: req.user.id },
+                { $pull: { items: { _id: { $in: duplicateIds } } } }
+            );
+            cart = await Cart.findOne({ user: req.user.id }); // Refresh
+        }
+
         // Merge logic
         // 1. Create a map of existing server items
         const serverMap = new Map();
@@ -81,7 +103,7 @@ exports.syncCart = async (req, res) => {
             }
         });
 
-        // 2. Process local items
+        // 2. Process local items synchronously
         if (localItems && Array.isArray(localItems)) {
             for (const local of localItems) {
                 // Validate ObjectId to prevent CastError/Crash
@@ -98,16 +120,27 @@ exports.syncCart = async (req, res) => {
                     // Update quantity atomically
                     const existing = serverMap.get(productId);
                     const newQuantity = local.quantity || existing.quantity;
-                    await Cart.findOneAndUpdate(
+                    await Cart.updateOne(
                         { user: req.user.id, "items.product": productId },
                         { $set: { "items.$.quantity": newQuantity } }
                     );
                 } else {
-                    // Add new item atomically
-                    await Cart.findOneAndUpdate(
-                        { user: req.user.id },
+                    // Atomic update to avoid race conditions pushing duplicates
+                    const addResult = await Cart.updateOne(
+                        { user: req.user.id, "items.product": { $ne: productId } },
                         { $push: { items: { product: productId, productType, quantity: local.quantity || 1 } } }
                     );
+                    
+                    if (addResult.modifiedCount === 0) {
+                        // Product was added by a parallel request race condition just now
+                        await Cart.updateOne(
+                            { user: req.user.id, "items.product": productId },
+                            { $set: { "items.$.quantity": local.quantity || 1 } }
+                        );
+                    }
+                    
+                    // Add it to map so if localItems has duplicates itself, it hits the update block
+                    serverMap.set(productId, { quantity: local.quantity || 1 });
                 }
             }
         }
@@ -199,12 +232,19 @@ exports.updateCart = async (req, res) => {
                     return res.status(400).json({ success: false, message: `Only ${stockDoc.stock} units available for ${stockDoc.name}` });
                 }
 
-                // Add new item atomically
-                await Cart.findOneAndUpdate(
-                    { user: req.user.id },
-                    { $push: { items: { product: id, productType: typeToSave, quantity } } },
-                    { upsert: true, setDefaultsOnInsert: true }
+                // Add new item atomically using resilient atomic update pattern
+                const addResult = await Cart.updateOne(
+                    { user: req.user.id, "items.product": { $ne: id } },
+                    { $push: { items: { product: id, productType: typeToSave, quantity } } }
                 );
+
+                if (addResult.modifiedCount === 0) {
+                     // Parallel request already added it
+                     await Cart.updateOne(
+                         { user: req.user.id, "items.product": id },
+                         { $set: { "items.$.quantity": quantity } }
+                     );
+                }
             }
         }
 

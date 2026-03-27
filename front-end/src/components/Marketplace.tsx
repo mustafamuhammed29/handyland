@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Search, Grid, List } from 'lucide-react';
+import { Search, Grid, List, Layers } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
+import { api } from '../utils/api';
 import { SEO } from './SEO';
 import { useMarketplace } from '../hooks/useMarketplace';
 import { useWishlist } from '../hooks/useWishlist';
 import { FilterSidebar } from './marketplace/FilterSidebar';
 import { ProductGrid } from './marketplace/ProductGrid';
-import { ProductDetailModal } from './marketplace/ProductDetailModal';
 import { LanguageCode, PhoneListing, CartItem } from '../types';
 import { getImageUrl } from '../utils/imageUrl';
 
 interface MarketplaceProps {
     lang: LanguageCode;
+    hideSEO?: boolean;
 }
 
-export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
+export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { addToCart } = useCart();
@@ -27,8 +28,15 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
     const mp = useMarketplace();
     const { wishlist, isInWishlist, toggleWishlist, loadingId: wishlistLoadingId } = useWishlist();
 
-    const [selectedProduct, setSelectedProduct] = useState<PhoneListing | null>(null);
     const [showFilters, setShowFilters] = useState(false);
+    const [features, setFeatures] = useState<any>(null);
+
+    React.useEffect(() => {
+        api.get('/api/settings').then((res: any) => {
+            const data = res.data || res;
+            setFeatures(data?.features);
+        }).catch(err => console.error("Could not fetch settings", err));
+    }, []);
 
     // Static options (could be moved to a config file/service)
     const ramOptions = ['4GB', '6GB', '8GB', '12GB', '16GB'];
@@ -80,18 +88,13 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
             className="relative z-10 pt-[120px] pb-16 min-h-screen" 
             onMouseMove={handleMouseMove}
         >
-            <SEO
-                title="Marketplace - Buy & Sell Refurbished Phones"
-                description="Browse our wide selection of certified refurbished smartphones. Best prices, warranty included, and thoroughly tested."
-                canonical="https://handyland.com/marketplace"
-            />
-
-            <ProductDetailModal
-                product={selectedProduct}
-                onClose={() => setSelectedProduct(null)}
-                onAddToCart={handleAddToCart}
-                onBuyNow={handleBuyNow}
-            />
+            {!hideSEO && (
+                <SEO
+                    title="Marketplace - Buy & Sell Refurbished Phones"
+                    description="Browse our wide selection of certified refurbished smartphones. Best prices, warranty included, and thoroughly tested."
+                    canonical="https://handyland.com/marketplace"
+                />
+            )}
 
             <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-6 lg:gap-8">
                 
@@ -150,6 +153,17 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                                     <option value="price_desc">Price: High to Low</option>
                                 </select>
                                 <div className="flex items-center gap-1 border-l border-black/10 dark:border-white/10 pl-2">
+                                    {(!features || features.comparisonEngine !== false) && (
+                                        <button 
+                                            aria-label="Compare Devices" 
+                                            title="Compare Devices"
+                                            onClick={() => navigate('/compare')} 
+                                            className="px-3 md:px-4 py-2 flex items-center justify-center gap-2 rounded-xl md:rounded-lg transition-all bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-black font-bold mr-1"
+                                        >
+                                            <Layers className="w-4 h-4" />
+                                            <span className="hidden md:inline text-sm">Compare</span>
+                                        </button>
+                                    )}
                                     <button 
                                         aria-label="Grid View" 
                                         onClick={() => mp.setViewMode('grid')} 
@@ -178,7 +192,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang }) => {
                         loadingWishlistId={wishlistLoadingId}
                         onToggleWishlist={handleToggleWishlist}
                         onAddToCart={handleAddToCart}
-                        onSelect={setSelectedProduct}
+                        onSelect={(product) => navigate(`/marketplace/${product.id || (product as any)._id}`)}
                         onClearFilters={() => {
                             mp.setSearchTerm('');
                             mp.setFilterBrand('All');

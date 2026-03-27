@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, AlertCircle, Shield, Bell, Gift, Globe } from 'lucide-react';
+import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, AlertCircle, Shield, Bell, Gift, Globe, FileText, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../utils/api';
@@ -12,6 +12,8 @@ import { SectionsTab } from './settings/SectionsTab';
 import { ContactSettingsTab } from './settings/ContactSettingsTab';
 import { AppearanceTab } from './settings/AppearanceTab';
 import { FinancialSettingsTab } from './settings/FinancialSettingsTab';
+import { InvoiceSettingsTab } from './settings/InvoiceSettingsTab';
+import { FeaturesTab } from './settings/FeaturesTab';
 
 interface HeroSettings {
     headline: string;
@@ -114,6 +116,18 @@ interface SocialAuthSettings {
     facebook: boolean;
 }
 
+interface FeatureSettings {
+    comparisonEngine: boolean;
+    cartUpselling: boolean;
+    loyalty: {
+        enabled: boolean;
+        earnRate: number;
+        redeemRate: number;
+        silverThreshold: number;
+        goldThreshold: number;
+        platinumThreshold: number;
+    }
+}
 
 interface Settings {
     siteName: string;
@@ -164,6 +178,38 @@ interface Settings {
         minSpent: number;
         maxSpent: number;
     }[];
+    ecoImpact?: {
+        enabled: boolean;
+        co2PerDevice: number;
+        eWastePerDevice: number;
+    };
+    invoice?: {
+        logoUrl: string;
+        primaryColor: string;
+        companyName: string;
+        companyAddress: string;
+        vatNumber: string;
+        bankName: string;
+        iban: string;
+        bic: string;
+        footerText: string;
+        prefix: string;
+        titleLabel: string;
+        dateLabel: string;
+        numberLabel: string;
+        vatIdLabel: string;
+        subtotalLabel: string;
+        taxLabel: string;
+        shippingLabel: string;
+        discountLabel: string;
+        totalLabel: string;
+        printBtnLabel: string;
+        closeBtnLabel: string;
+        itemLabel: string;
+        quantityLabel: string;
+        priceLabel: string;
+    };
+    features?: FeatureSettings;
 }
 
 interface EmailTemplateData {
@@ -244,7 +290,50 @@ export default function SettingsManager() {
             { id: 'gold', name: 'Gold', color: 'from-amber-400 to-yellow-600', minSpent: 2000, maxSpent: 5000 },
             { id: 'platinum', name: 'Platinum', color: 'from-slate-200 to-slate-400', minSpent: 5000, maxSpent: 10000 },
             { id: 'diamond', name: 'Diamond', color: 'from-cyan-300 to-blue-500', minSpent: 10000, maxSpent: 50000 }
-        ]
+        ],
+        ecoImpact: {
+            enabled: true,
+            co2PerDevice: 79,
+            eWastePerDevice: 0.18
+        },
+        invoice: {
+            logoUrl: '',
+            primaryColor: '#00bcd4',
+            companyName: 'HandyLand GmbH',
+            companyAddress: 'Tech Street 123 - 10115 Berlin - Germany',
+            vatNumber: 'DE123456789',
+            bankName: '',
+            iban: '',
+            bic: '',
+            footerText: 'Thank you for your business!',
+            prefix: 'HL-',
+            titleLabel: 'Invoice',
+            dateLabel: 'Date:',
+            numberLabel: 'Invoice #:',
+            vatIdLabel: 'VAT ID:',
+            subtotalLabel: 'Subtotal:',
+            taxLabel: 'VAT',
+            shippingLabel: 'Shipping:',
+            discountLabel: 'Discount',
+            totalLabel: 'Total:',
+            printBtnLabel: 'Print Invoice',
+            closeBtnLabel: 'Close',
+            itemLabel: 'Item',
+            quantityLabel: 'Quantity',
+            priceLabel: 'Price'
+        },
+        features: {
+            comparisonEngine: true,
+            cartUpselling: true,
+            loyalty: {
+                enabled: true,
+                earnRate: 10,
+                redeemRate: 100,
+                silverThreshold: 500,
+                goldThreshold: 2000,
+                platinumThreshold: 5000
+            }
+        }
     });
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
@@ -273,6 +362,7 @@ export default function SettingsManager() {
                 setSettings(prev => ({
                     ...prev,
                     ...data,
+                    features: { ...prev.features, ...(data.features || {}) },
                     promoPopup: { ...prev.promoPopup, ...(data.promoPopup || {}) },
                     announcementBanner: { ...prev.announcementBanner, ...(data.announcementBanner || {}) },
                     seo: { ...prev.seo, ...(data.seo || {}) },
@@ -364,6 +454,7 @@ export default function SettingsManager() {
         { id: 'financials', label: 'Financials & Loyalty', icon: Gift },
         { id: 'auth', label: 'Authentication', icon: Shield },
         { id: 'hero', label: 'Hero Section', icon: MonitorPlay },
+        { id: 'features', label: 'Feature Controls', icon: Zap },
         { id: 'stats', label: 'Live Stats', icon: BarChart },
         { id: 'archive', label: 'Repair Archive', icon: ScanLine },
         { id: 'content', label: 'Content', icon: MessageSquare },
@@ -371,6 +462,7 @@ export default function SettingsManager() {
         { id: 'layout', label: 'Layout Control', icon: LayoutTemplate },
         { id: 'banner', label: '📢 Announcement', icon: Layers },
         { id: 'promo', label: '🎁 Promo Popup', icon: Layers },
+        { id: 'invoice', label: '🧾 Invoice Settings', icon: FileText },
         { id: 'seo', label: 'SEO & Meta', icon: Globe },
         { id: 'scripts', label: '💬 Support Scripts', icon: MessageSquare },
     ];
@@ -413,36 +505,62 @@ export default function SettingsManager() {
                 {/* Content */}
                 <div className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-8">
                     {activeTab === 'general' && <AppearanceTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'features' && <FeaturesTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'financials' && <FinancialSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'auth' && <SocialAuthTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'hero' && <HeroSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'layout' && <SectionsTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'invoice' && <InvoiceSettingsTab settings={settings} handleChange={handleChange} />}
 
                     {activeTab === 'stats' && (
                         <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-white mb-4">Live Performance Stats</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input label="Devices Repaired" value={settings.stats?.devicesRepaired?.toString()} onChange={(v) => handleChange('stats', 'devicesRepaired', Number(v))} type="number" />
-                                <Input label="Happy Customers" value={settings.stats?.happyCustomers?.toString()} onChange={(v) => handleChange('stats', 'happyCustomers', Number(v))} type="number" />
-                                <Input label="Average Rating (out of 5)" value={settings.stats?.averageRating?.toString()} onChange={(v) => handleChange('stats', 'averageRating', Number(v))} type="number" />
-                                <Input label="Years Experience" value={settings.stats?.marketExperience?.toString()} onChange={(v) => handleChange('stats', 'marketExperience', Number(v))} type="number" />
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-emerald-500/10 rounded-xl">
+                                    <BarChart className="text-emerald-400" size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">Live Performance Stats</h3>
+                                    <p className="text-slate-400 text-sm">Control the numbers displayed in the impact statistics row.</p>
+                                </div>
+                            </div>
+                            <div className="p-5 border border-slate-700 rounded-xl bg-slate-900/50">
+                                <h4 className="text-emerald-400 font-bold mb-4">Core Numbers</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input label="Devices Repaired / Traded" value={settings.stats?.devicesRepaired?.toString()} onChange={(v) => handleChange('stats', 'devicesRepaired', Number(v))} type="number" />
+                                    <Input label="Happy Customers" value={settings.stats?.happyCustomers?.toString()} onChange={(v) => handleChange('stats', 'happyCustomers', Number(v))} type="number" />
+                                    <Input label="Average Rating (out of 5)" value={settings.stats?.averageRating?.toString()} onChange={(v) => handleChange('stats', 'averageRating', Number(v))} type="number" />
+                                    <Input label="Years Experience in Market" value={settings.stats?.marketExperience?.toString()} onChange={(v) => handleChange('stats', 'marketExperience', Number(v))} type="number" />
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'archive' && (
                         <div className="space-y-6">
-                            <div className="flex justify-between items-start">
-                                <h3 className="text-xl font-bold text-white mb-4">Repair Archive Settings</h3>
-                                <Link to="/archive" className="flex items-center gap-2 text-cyan-400 hover:text-white font-bold text-sm bg-slate-800 px-4 py-2 rounded-lg">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-purple-500/10 rounded-xl">
+                                        <ScanLine className="text-purple-400" size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">Repair Archive Overview</h3>
+                                        <p className="text-slate-400 text-sm">Configure the texts and metrics of the Repair Showcase section.</p>
+                                    </div>
+                                </div>
+                                <Link to="/archive" className="flex items-center gap-2 text-cyan-400 hover:text-white font-bold text-sm bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 transition">
                                     Manage Repair Cases <ArrowRight size={16} />
                                 </Link>
                             </div>
-                            <Input label="Section Title" value={settings.repairArchive?.title} onChange={(v) => handleChange('repairArchive', 'title', v)} />
-                            <Input label="Section Subtitle" value={settings.repairArchive?.subtitle} onChange={(v) => handleChange('repairArchive', 'subtitle', v)} />
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input label="CTA Button Text" value={settings.repairArchive?.buttonText} onChange={(v) => handleChange('repairArchive', 'buttonText', v)} />
-                                <Input label="Total Repairs Counter" value={settings.repairArchive?.totalRepairs?.toString()} onChange={(v) => handleChange('repairArchive', 'totalRepairs', Number(v))} type="number" />
+                            
+                            <div className="p-5 border border-slate-700 rounded-xl bg-slate-900/50 space-y-4">
+                                <h4 className="text-purple-400 font-bold mb-2">Typography & CTA</h4>
+                                <Input label="Section Main Title" value={settings.repairArchive?.title} onChange={(v) => handleChange('repairArchive', 'title', v)} placeholder="REPAIR ARCHIVE" />
+                                <Input label="Section Subtitle" value={settings.repairArchive?.subtitle} onChange={(v) => handleChange('repairArchive', 'subtitle', v)} placeholder="Real documentation of our successful operations" />
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-800 mt-4">
+                                    <Input label="Action Button Text" value={settings.repairArchive?.buttonText} onChange={(v) => handleChange('repairArchive', 'buttonText', v)} placeholder="View Full Archive" />
+                                    <Input label="Live Counter: Total Success Stories" value={settings.repairArchive?.totalRepairs?.toString()} onChange={(v) => handleChange('repairArchive', 'totalRepairs', Number(v))} type="number" />
+                                </div>
                             </div>
                         </div>
                     )}
@@ -609,16 +727,31 @@ export default function SettingsManager() {
 
                     {activeTab === 'content' && (
                         <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-white mb-4">Section Content</h3>
-                            <div className="p-4 border border-slate-700 rounded-xl mb-4">
-                                <h4 className="text-blue-400 font-bold mb-4">Accessories Section</h4>
-                                <Input label="Title" value={settings.content.accessoriesTitle} onChange={(v) => handleChange('content', 'accessoriesTitle', v)} />
-                                <Input label="Subtitle" value={settings.content.accessoriesSubtitle} onChange={(v) => handleChange('content', 'accessoriesSubtitle', v)} />
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-amber-500/10 rounded-xl">
+                                    <MessageSquare className="text-amber-400" size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">Section Typography Context</h3>
+                                    <p className="text-slate-400 text-sm">Manage the dynamic headers for various blocks on the homepage.</p>
+                                </div>
                             </div>
-                            <div className="p-4 border border-slate-700 rounded-xl">
-                                <h4 className="text-blue-400 font-bold mb-4">Repair Section</h4>
-                                <Input label="Title" value={settings.content.repairTitle} onChange={(v) => handleChange('content', 'repairTitle', v)} />
-                                <Input label="Subtitle" value={settings.content.repairSubtitle} onChange={(v) => handleChange('content', 'repairSubtitle', v)} />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="p-5 border border-slate-700 rounded-xl bg-slate-900/50">
+                                    <h4 className="text-amber-400 font-bold mb-4 flex items-center gap-2">Accessories Block</h4>
+                                    <div className="space-y-4">
+                                        <Input label="Block Title" value={settings.content.accessoriesTitle} onChange={(v) => handleChange('content', 'accessoriesTitle', v)} placeholder="Premium Cases & Wraps" />
+                                        <Input label="Block Subtitle" value={settings.content.accessoriesSubtitle} onChange={(v) => handleChange('content', 'accessoriesSubtitle', v)} placeholder="We offer more than just repairs." />
+                                    </div>
+                                </div>
+                                <div className="p-5 border border-slate-700 rounded-xl bg-slate-900/50">
+                                    <h4 className="text-cyan-400 font-bold mb-4 flex items-center gap-2">Repair Services Block</h4>
+                                    <div className="space-y-4">
+                                        <Input label="Block Title" value={settings.content.repairTitle} onChange={(v) => handleChange('content', 'repairTitle', v)} placeholder="Certified Component Exchange" />
+                                        <Input label="Block Subtitle" value={settings.content.repairSubtitle} onChange={(v) => handleChange('content', 'repairSubtitle', v)} placeholder="Only OEM or top-grade components." />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -670,14 +803,11 @@ export default function SettingsManager() {
                                         className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-slate-400 text-sm font-bold mb-2">Default OpenGraph Image URL</label>
-                                    <input
-                                        type="text"
+                                <div className="mt-4">
+                                    <ImageUpload
+                                        label="Default OpenGraph Image (Used when sharing links)"
                                         value={settings.seo?.defaultOgImage || ''}
-                                        onChange={e => handleChange('seo', 'defaultOgImage', e.target.value)}
-                                        placeholder="https://..."
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                        onChange={(url: string) => handleChange('seo', 'defaultOgImage', url)}
                                     />
                                 </div>
                                 <div className="mt-4">
