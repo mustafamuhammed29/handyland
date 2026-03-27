@@ -11,7 +11,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     login: (email: string, password: string) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
     isAuthenticated: boolean;
     loading: boolean;
 }
@@ -62,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             setUser(adminData);
             setIsAuthenticated(true);
+            localStorage.setItem('adminUser', JSON.stringify(adminData));
             
         } catch (error: any) {
             // Ensure error message is shown to user
@@ -74,9 +75,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const logout = () => {
-        setUser(null);
-        setIsAuthenticated(false);
+    const logout = async () => {
+        try {
+            await api.post('/api/auth/logout');
+        } catch (error) {
+            console.error('Logout failed:', error);
+        } finally {
+            setUser(null);
+            setIsAuthenticated(false);
+            localStorage.removeItem('adminUser');
+        }
     };
 
     return (

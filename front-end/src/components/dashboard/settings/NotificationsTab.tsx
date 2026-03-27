@@ -7,7 +7,7 @@ function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange
             role="switch"
             title={label}
             aria-label={label}
-            aria-checked={checked ? 'true' : 'false'}
+            aria-checked={checked}
             onClick={() => onChange(!checked)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-blue-600' : 'bg-slate-700'}`}
         >

@@ -6,6 +6,9 @@ const { protect, authorize } = require('../middleware/auth');
 // Public - Get all accessories
 router.get('/', accessoriesController.getAccessories);
 
+// Public - Get single accessory
+router.get('/:id', accessoriesController.getAccessoryById);
+
 // Admin only - Create, Update, Delete
 router.post('/', protect, authorize('admin'), accessoriesController.createAccessory);
 router.put('/:id', protect, authorize('admin'), accessoriesController.updateAccessory);

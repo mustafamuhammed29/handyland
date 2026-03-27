@@ -2,6 +2,7 @@ const Product = require('../models/Product');
 const Review = require('../models/Review');
 const Question = require('../models/Question');
 const Accessory = require('../models/Accessory');
+const Order = require('../models/Order');
 const { v4: uuidv4 } = require('uuid');
 
 /**
@@ -177,7 +178,18 @@ class ProductService {
         if (!product) {throw new Error('Product not found');}
 
         const alreadyReviewed = await Review.findOne({ user: userId, product: product._id });
-        if (alreadyReviewed) {throw new Error('Product already reviewed');}
+        if (alreadyReviewed) {throw new Error('You have already reviewed this product');}
+
+        // Verify that the user has purchased the product and the order wasn't cancelled
+        const hasPurchased = await Order.findOne({
+            user: userId,
+            'items.product': product._id,
+            status: { $ne: 'cancelled' }
+        });
+
+        if (!hasPurchased) {
+            throw new Error('You must purchase this product to leave a review');
+        }
 
         const review = await Review.create({
             user: userId,

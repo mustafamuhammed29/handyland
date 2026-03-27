@@ -106,9 +106,15 @@ const cleanupExpiredTokens = async () => {
 };
 setInterval(cleanupExpiredTokens, 6 * 60 * 60 * 1000);
 
+// ── Background CRON Jobs ──────────────────────────────────────────────────────
+const startBackupJob = require('./utils/backupJob');
+const startCartRecoveryJob = require('./utils/cartRecoveryJob');
+
 // ── Boot ───────────────────────────────────────────────────────────────────────
 connectDB().then(() => {
     cleanupExpiredTokens();
+    startBackupJob();
+    startCartRecoveryJob();
     server.listen(PORT, () => {
         logger.info(`🚀 Server running on http://localhost:${PORT}`);
         logger.info(`📊 Admin Panel:  http://localhost:3001`);

@@ -1,10 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import {
-    User, Package, Wrench, Settings, LogOut, Activity,
-    Wallet, Shield, BarChart3, Heart, ExternalLink, Mail
+    LayoutDashboard,
+    UserCircle, Settings, LogOut, Activity,
+    Wallet, Shield, BarChart3, Heart, ExternalLink, Mail, Camera, User, Package, Wrench
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { User as UserType } from '../types';
+import { User as UserType, PhoneListing } from '../types';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { ContactInbox } from './ContactInbox';
 import {
@@ -15,9 +17,11 @@ import {
     DashboardValuations,
     DashboardWishlist,
     DashboardSettings,
-    NotificationBell
+    NotificationBell,
 } from './dashboard/index';
+import { AnimatePresence, motion } from 'framer-motion';
 import { api } from '../utils/api';
+import { getImageUrl } from '../utils/imageUrl';
 import { authService } from '../services/authService';
 import { orderService } from '../services/orderService';
 
@@ -29,6 +33,8 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout }) => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     // Use the new data fetching hook
     const dashboardData = useDashboardData(activeTab);
@@ -146,6 +152,50 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         }
     }, [wishlist]);
 
+    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Basic validation
+        if (!file.type.startsWith('image/')) {
+            toast.error('Bitte lade ein gültiges Bild hoch.');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            toast.error('Das Bild darf maximal 5MB groß sein.');
+            return;
+        }
+
+        setIsUploadingAvatar(true);
+        const loadingToast = toast.loading('Profilbild wird hochgeladen...');
+
+        try {
+            // 1. Upload to /api/upload
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            const uploadRes = await api.post('/api/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const data = (uploadRes as any)?.data || uploadRes;
+
+            if (data.success && data.imageUrl) {
+                // 2. Update user profile
+                await api.put('/api/users/profile', { avatar: data.imageUrl });
+                await user.refetch();
+                toast.success('Profilbild erfolgreich aktualisiert!', { id: loadingToast });
+            } else {
+                throw new Error('Upload failed');
+            }
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            toast.error('Fehler beim Hochladen des Profilbilds.', { id: loadingToast });
+        } finally {
+            setIsUploadingAvatar(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
     if (!currentUser) {
         return null;
     }
@@ -173,15 +223,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         {/* Profile Summary & VIP Tier */}
                         <div className="flex flex-col gap-5 mb-8">
                             <div className="flex items-center gap-4">
-                                <div className="relative">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-900/30">
-                                        {(currentUser.name || '?').charAt(0).toUpperCase()}
+                                <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                    <input 
+                                        type="file" 
+                                        title="Upload Profile Picture"
+                                        aria-label="Upload Profile Picture"
+                                        ref={fileInputRef} 
+                                        className="hidden" 
+                                        accept="image/jpeg, image/png, image/webp"
+                                        onChange={handleAvatarUpload}
+                                    />
+                                    <div className={`w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-900/30 overflow-hidden relative ${isUploadingAvatar ? 'opacity-50' : ''}`}>
+                                        {currentUser.avatar ? (
+                                            <img src={getImageUrl(currentUser.avatar)} alt="Profile" className="w-full h-full object-cover" />
+                                        ) : (
+                                            (currentUser.name || '?').charAt(0).toUpperCase()
+                                        )}
+                                        {/* Hover Overlay */}
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <Camera className="w-6 h-6 text-white" />
+                                        </div>
                                     </div>
                                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
                                 </div>
-                                <div className="overflow-hidden">
-                                    <h3 className="text-slate-900 dark:text-white font-bold truncate">{currentUser.name}</h3>
-                                    <div className="flex items-center gap-1 text-xs text-brand-primary">
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="text-slate-900 dark:text-white font-bold break-words leading-tight">{currentUser.name}</h3>
+                                    <div className="flex items-center gap-1 text-xs text-brand-primary mt-1">
                                         <Shield className="w-3 h-3" /> {isAdmin ? 'Administrator' : (
                                             currentUser.createdAt
                                                 ? `Mitglied seit ${new Date(currentUser.createdAt).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}`
@@ -196,7 +263,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 const totalSpent = orders.data?.reduce((sum: number, o: any) => sum + (o.totalAmount || 0), 0) || 0;
                                 
                                 // Dynamic VIP Tiers from Admin API
-                                const vipTiers = settings.data?.vipTiers || [
+                                const vipTiers = (settings.data?.vipTiers && settings.data.vipTiers.length > 0) ? settings.data.vipTiers : [
                                     { id: 'bronze', name: 'Bronze', color: 'from-[#cd7f32] to-[#8b5a2b]', minSpent: 0, maxSpent: 500 },
                                     { id: 'silver', name: 'Silver', color: 'from-slate-300 to-slate-500', minSpent: 500, maxSpent: 2000 },
                                     { id: 'gold', name: 'Gold', color: 'from-amber-400 to-yellow-600', minSpent: 2000, maxSpent: 5000 },
@@ -210,17 +277,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 
                                 // Determine the next tier
                                 const sortedAscending = [...vipTiers].sort((a, b) => a.minSpent - b.minSpent);
-                                const nextTierIndex = sortedAscending.findIndex(t => t.id === currentTier.id) + 1;
+                                const nextTierIndex = currentTier ? sortedAscending.findIndex(t => t.id === currentTier.id) + 1 : 1;
                                 const nextTier = nextTierIndex < sortedAscending.length ? sortedAscending[nextTierIndex] : null;
                                 
-                                const maxLimit = nextTier ? nextTier.minSpent : currentTier.maxSpent || currentTier.minSpent * 2 || 100000;
+                                const maxLimit = nextTier ? nextTier.minSpent : (currentTier?.maxSpent || (currentTier?.minSpent ? currentTier.minSpent * 2 : 500)) || 100000;
                                 const nextTierName = nextTier ? nextTier.name : 'Legend';
                                 
                                 const progress = Math.min((totalSpent / maxLimit) * 100, 100);
 
                                 return (
                                     <div className="bg-slate-800/20 dark:bg-black/20 rounded-2xl p-4 border border-slate-200 dark:border-white/5 relative overflow-hidden group">
-                                        <div className="absolute inset-0 bg-gradient-to-r opacity-5 group-hover:opacity-10 transition-opacity duration-500 mix-blend-overlay ${tier.color}"></div>
+                                        <div className={`absolute inset-0 bg-gradient-to-r opacity-5 group-hover:opacity-10 transition-opacity duration-500 mix-blend-overlay ${currentTier?.color || 'from-slate-500 to-slate-700'}`}></div>
                                         <div className="flex justify-between items-end mb-2 relative z-10">
                                             <div>
                                                 <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold mb-0.5">Handyland VIP</p>
@@ -284,7 +351,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                             {/* Mobile visual separator */}
                             <div className="lg:hidden w-px bg-slate-200 dark:bg-slate-800 my-2 mx-1 shrink-0"></div>
 
-                            <div className="flex items-center gap-2 lg:gap-4 shrink-0 px-2 lg:px-0">
+                            {isAdmin && (
+                                <a
+                                    href={ADMIN_PANEL_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="shrink-0 snap-start lg:w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 font-medium bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg hover:shadow-blue-500/20"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <ExternalLink className="w-4 h-4" />
+                                        <span className="whitespace-nowrap">Admin Panel</span>
+                                    </div>
+                                </a>
+                            )}
+
+                            <div className="flex items-center gap-2 lg:gap-4 shrink-0 px-2 lg:px-0 mt-2">
                                 <NotificationBell userId={currentUser?._id} />
                                 <button
                                     onClick={() => { logout(); navigate('/'); }}
@@ -304,7 +385,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                     {/* Public Tabs */}
                     {activeTab === 'overview' && (
                         <DashboardOverview
-                            stats={stats.data || {}}
+                            user={currentUser}
+                            userName={currentUser?.name}
+                            stats={stats.data}
+                            settings={settings.data}
                             orders={orders.data || []}
                             repairs={repairs.data || []}
                             promotions={promotions.data || []}
@@ -348,7 +432,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
                     {activeTab === 'wishlist' && (
                         <DashboardWishlist
-                            wishlistItems={wishlist.data || []}
+                            wishlistItems={(wishlist.data as unknown as PhoneListing[]) || []}
                             isLoading={wishlist.isLoading}
                             onRemove={handleRemoveWishlistItem}
                         />

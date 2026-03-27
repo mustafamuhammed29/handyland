@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSettings } from '../context/SettingsContext';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface SEOProps {
     title?: string;
@@ -34,7 +35,10 @@ export const SEO: React.FC<SEOProps> = ({
         
     const finalDescription = description || seoSettings.defaultMetaDescription || '';
     const finalKeywords = keywords || seoSettings.defaultKeywords || '';
-    const finalOgImage = ogImage || seoSettings.defaultOgImage || '/og-image.jpg';
+    
+    // Resolve absolute paths for images to ensure they show up in external link sharing
+    const rawOg = ogImage || seoSettings.defaultOgImage || '/og-image.jpg';
+    const finalOgImage = rawOg.startsWith('http') ? rawOg : getImageUrl(rawOg);
 
     return (
         <Helmet>
@@ -61,7 +65,7 @@ export const SEO: React.FC<SEOProps> = ({
 
             {/* Dynamic Favicon */}
             {seoSettings.faviconUrl && (
-                <link rel="icon" href={seoSettings.faviconUrl} />
+                <link rel="icon" href={getImageUrl(seoSettings.faviconUrl)} />
             )}
 
             {/* Google Analytics */}
@@ -69,20 +73,20 @@ export const SEO: React.FC<SEOProps> = ({
                 <script async src={`https://www.googletagmanager.com/gtag/js?id=${seoSettings.googleAnalyticsId}`}></script>
             )}
             {seoSettings.googleAnalyticsId && (
-                <script>
-                    {`
+                <script type="text/javascript" dangerouslySetInnerHTML={{
+                    __html: `
                         window.dataLayer = window.dataLayer || [];
                         function gtag(){dataLayer.push(arguments);}
                         gtag('js', new Date());
                         gtag('config', '${seoSettings.googleAnalyticsId}');
-                    `}
-                </script>
+                    `
+                }} />
             )}
 
             {/* Facebook Pixel */}
             {seoSettings.facebookPixelId && (
-                <script>
-                    {`
+                <script type="text/javascript" dangerouslySetInnerHTML={{
+                    __html: `
                         !function(f,b,e,v,n,t,s)
                         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
                         n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -93,8 +97,8 @@ export const SEO: React.FC<SEOProps> = ({
                         'https://connect.facebook.net/en_US/fbevents.js');
                         fbq('init', '${seoSettings.facebookPixelId}');
                         fbq('track', 'PageView');
-                    `}
-                </script>
+                    `
+                }} />
             )}
         </Helmet>
     );

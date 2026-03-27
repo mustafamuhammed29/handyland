@@ -72,12 +72,18 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
 
             setIsLoading(true);
             try {
-                // Adjust endpoint based on your actual backend search route
-                // Assuming /api/products supports a search or q query param
-                const res = await api.get<any>(`/api/products?search=${encodeURIComponent(query)}&limit=5`);
-                const responseData = res as any;
-                const data = responseData.data?.products || responseData.products || responseData.data || [];
-                setResults(Array.isArray(data) ? data : []);
+                const [productsRes, accessoriesRes] = await Promise.all([
+                    api.get<any>(`/api/products?search=${encodeURIComponent(query)}&limit=5`),
+                    api.get<any>(`/api/accessories?search=${encodeURIComponent(query)}`)
+                ]);
+                
+                const pData = (productsRes as any).data?.products || (productsRes as any).products || (productsRes as any).data || [];
+                const aData = ((accessoriesRes as any).data || accessoriesRes || []).map((a: any) => ({ ...a, isAccessory: true }));
+                
+                let combined = [...(Array.isArray(pData) ? pData : []), ...(Array.isArray(aData) ? aData : [])];
+                
+                // Sort combined by relevance (starts with query) roughly or leave as is
+                setResults(combined.slice(0, 8));
                 setSelectedIndex(0);
             } catch (error) {
                 console.error("Search failed", error);
@@ -106,7 +112,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
             } else if (e.key === 'Enter') {
                 e.preventDefault();
                 if (query && results[selectedIndex]) {
-                    handleSelectResult(results[selectedIndex].id);
+                    handleSelectResult(results[selectedIndex]);
                 } else if (!query && defaultSuggestions[selectedIndex]) {
                     defaultSuggestions[selectedIndex].action();
                     onClose();
@@ -130,9 +136,13 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
         }
     }, [selectedIndex]);
 
-    const handleSelectResult = (id: string | undefined) => {
-        if (id) {
-            navigate(`/products/${id}`);
+    const handleSelectResult = (item: SearchResult) => {
+        if (item.id) {
+            if ((item as any).isAccessory) {
+                navigate(`/accessories/${item.id}`);
+            } else {
+                navigate(`/products/${item.id}`);
+            }
             onClose();
         }
     };
@@ -218,7 +228,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                                                     <li
                                                         key={product.id || (product as any)._id}
                                                         onMouseEnter={() => setSelectedIndex(idx)}
-                                                        onClick={() => handleSelectResult(product.id || (product as any)._id)}
+                                                        onClick={() => handleSelectResult(product)}
                                                         className={`flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-colors ${
                                                             isSelected ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                                         }`}
@@ -233,22 +243,32 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <div className="flex items-center justify-between mb-1">
-                                                                <span className="font-bold text-slate-900 dark:text-white truncate">{product.model}</span>
+                                                                <span className="font-bold text-slate-900 dark:text-white truncate">{(product as any).name || product.model || 'Unknown Item'}</span>
                                                                 <span className="font-bold text-brand-primary whitespace-nowrap ml-2">{formatPrice(product.price)}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-xs text-slate-500 truncate">
-                                                                <span>{product.storage}</span>
-                                                                <span>•</span>
-                                                                <span>{product.color}</span>
-                                                                <span>•</span>
-                                                                <span className={`px-1.5 rounded-sm ${
-                                                                    product.condition?.toLowerCase() === 'new' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
-                                                                    product.condition?.toLowerCase() === 'fair' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' :
-                                                                    'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                                                                }`}>
-                                                                    {product.condition}
-                                                                </span>
-                                                            </div>
+                                                            {(product.storage || product.color || product.condition) ? (
+                                                                <div className="flex items-center gap-2 text-xs text-slate-500 truncate">
+                                                                    {product.storage && <span>{product.storage}</span>}
+                                                                    {(product.storage && product.color) && <span>•</span>}
+                                                                    {product.color && <span>{product.color}</span>}
+                                                                    {((product.storage || product.color) && product.condition) && <span>•</span>}
+                                                                    {product.condition && (
+                                                                        <span className={`px-1.5 rounded-sm ${
+                                                                            product.condition?.toLowerCase() === 'new' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                                                                            product.condition?.toLowerCase() === 'fair' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' :
+                                                                            'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                                                                        }`}>
+                                                                            {product.condition}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex items-center gap-2 text-xs text-slate-500 truncate">
+                                                                    <span className="px-1.5 rounded-sm bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Accessory</span>
+                                                                    {(product as any).type && <span>• {(product as any).type}</span>}
+                                                                    {(product as any).brand && <span>• {(product as any).brand}</span>}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </li>
                                                 );

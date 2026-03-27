@@ -31,7 +31,9 @@ const upload = process.env.CLOUDINARY_URL
 
 router.post('/upload', uploadLimiter, protect, upload.single('image'), (req, res) => {
     if (!req.file) {return res.status(400).json({ success: false, message: 'No file uploaded' });}
-    const imageUrl = req.file.path || `/uploads/${req.file.filename}`;
+    const imageUrl = (req.file.path && req.file.path.startsWith('http')) 
+        ? req.file.path 
+        : `/uploads/${req.file.filename}`;
     res.json({ success: true, imageUrl });
 });
 
@@ -55,6 +57,7 @@ router.use('/email-templates', require('./emailTemplateRoutes'));
 router.use('/stats', require('./statsRoutes'));
 router.use('/repair-archive', require('./repairArchiveRoutes'));
 router.use('/valuation', require('./valuationRoutes'));
+router.use('/audit-logs', require('./auditRoutes'));
 router.use('/promotions', require('./promotionsRoutes'));
 router.use('/addresses', require('./addressRoutes'));
 router.use('/transactions', require('./transactionRoutes'));

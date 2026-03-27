@@ -83,13 +83,9 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
                 </h1>
 
                 <div className="prose prose-invert prose-lg max-w-none text-slate-300">
-                    {/* Render plain text with paragraph breaks */}
-                    {content.split('\n').map((paragraph, idx) => (
-                        <p key={idx} className="mb-4 leading-relaxed whitespace-pre-line">
-                            {paragraph} || <br className="hidden" />
-                        </p>
-                    ))}
-                    {content === '' && (
+                    {content ? (
+                        <div dangerouslySetInnerHTML={{ __html: content }} />
+                    ) : (
                         <p className="text-slate-600 italic">No content has been added to this page yet.</p>
                     )}
                 </div>

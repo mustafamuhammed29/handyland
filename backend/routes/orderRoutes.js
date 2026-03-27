@@ -42,6 +42,7 @@ router.put('/admin/:id/approve-bank-transfer', protect, authorize('admin'), requ
 router.get('/', protect, getMyOrders); // Convenience route for GET /api/orders
 router.get('/my', protect, getMyOrders);
 router.get('/:id', optionalProtect, getOrder);
+router.get('/:id/invoice', optionalProtect, generateInvoice);
 router.post('/apply-coupon', protect, applyCoupon);
 router.post('/', protect, validate(createOrderRules), createOrder);
 router.post('/:id/receipt', optionalProtect, upload.single('receipt'), require('../controllers/orderController').uploadPaymentReceipt);

@@ -182,20 +182,27 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                 ))}
 
                 {filteredOrders.length === 0 && (
-                    <div className="text-center py-16 border-2 border-dashed border-slate-800 rounded-2xl">
-                        <Package className="w-16 h-16 mx-auto mb-4 text-slate-700" />
-                        <p className="text-lg font-bold text-white mb-1">No orders yet</p>
-                        <p className="text-sm text-slate-500 mb-6">
-                            {orderSearch || orderFilter !== 'all' ? 'Try adjusting your filters or search.' : 'Browse our marketplace and place your first order!'}
-                        </p>
-                        {!orderSearch && orderFilter === 'all' && (
-                            <button
-                                onClick={() => navigate('/marketplace')}
-                                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-colors"
-                            >
-                                Browse Marketplace →
-                            </button>
-                        )}
+                    <div className="relative overflow-hidden text-center py-20 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl group transition-all duration-500 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-[60px] group-hover:bg-blue-500/20 transition-all duration-700 pointer-events-none"></div>
+                        <div className="relative z-10 flex flex-col items-center">
+                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)] flex items-center justify-center mb-6 border border-white/5">
+                                <Package className="w-10 h-10 text-blue-400 opacity-80" />
+                            </div>
+                            <h3 className="text-2xl font-black text-white mb-2 tracking-tight">Noch keine Bestellungen</h3>
+                            <p className="text-base text-slate-400 mb-8 max-w-sm mx-auto">
+                                {orderSearch || orderFilter !== 'all' 
+                                    ? 'Keine Ergebnisse für deine Suche. Bitte passe die Filter an.' 
+                                    : 'Dein Profil ist noch ganz neu. Entdecke erstklassige Premium-Geräte in unserem Marktplatz!'}
+                            </p>
+                            {!orderSearch && orderFilter === 'all' && (
+                                <button
+                                    onClick={() => navigate('/marketplace')}
+                                    className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-brand-primary hover:scale-105 active:scale-95 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-900/30 w-full sm:w-auto flex items-center justify-center gap-2"
+                                >
+                                    Zum Marktplatz <ChevronRight className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

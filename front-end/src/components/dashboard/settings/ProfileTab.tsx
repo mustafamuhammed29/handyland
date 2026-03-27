@@ -1,6 +1,9 @@
-import React from 'react';
-import { User, Mail, Phone, Check, AlertCircle, Save, Loader2, Pencil } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { User, Mail, Phone, Check, AlertCircle, Save, Loader2, Pencil, Camera, Trash2 } from 'lucide-react';
 import { User as UserType } from '../../../types';
+import toast from 'react-hot-toast';
+import { api } from '../../../utils/api';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 interface ProfileFormState {
     name: string;
@@ -24,6 +27,7 @@ interface ProfileTabProps {
     profileMsg: ProfileMsgState | null;
     saveProfile: () => void;
     setProfileMsg: React.Dispatch<React.SetStateAction<ProfileMsgState | null>>;
+    onUpdateProfile: (data: Partial<UserType>) => void;
 }
 
 export const ProfileTab: React.FC<ProfileTabProps> = ({
@@ -36,7 +40,62 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     profileMsg,
     saveProfile,
     setProfileMsg,
+    onUpdateProfile,
 }) => {
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Bitte lade ein gültiges Bild hoch.');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Das Bild darf maximal 5MB groß sein.');
+            return;
+        }
+
+        setIsUploadingAvatar(true);
+        const loadingToast = toast.loading('Profilbild wird hochgeladen...');
+
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            const uploadRes = await api.post('/api/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const data = (uploadRes as any)?.data || uploadRes;
+
+            if (data.success && data.imageUrl) {
+                // Call parent's onUpdateProfile to make the PUT request and refetch
+                onUpdateProfile({ avatar: data.imageUrl });
+                toast.success('Profilbild erfolgreich aktualisiert!', { id: loadingToast });
+            } else {
+                throw new Error('Upload failed');
+            }
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            toast.error('Fehler beim Hochladen des Profilbilds.', { id: loadingToast });
+        } finally {
+            setIsUploadingAvatar(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const handleRemoveAvatar = async () => {
+        const loadingToast = toast.loading('Profilbild wird entfernt...');
+        try {
+            onUpdateProfile({ avatar: '' });
+            toast.success('Profilbild erfolgreich entfernt!', { id: loadingToast });
+        } catch (error) {
+            toast.error('Fehler beim Entfernen des Profilbilds.', { id: loadingToast });
+        }
+    };
+
     return (
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-slate-800/60 flex items-center justify-between">
@@ -75,13 +134,47 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             <div className="p-6 space-y-5">
                 {/* Avatar */}
                 <div className="flex items-center gap-4 mb-2">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-900/20 select-none">
-                        {(profileForm.name || user.name || '?').charAt(0).toUpperCase()}
+                    <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                        <input 
+                            type="file" 
+                            title="Upload Profile Picture"
+                            aria-label="Upload Profile Picture"
+                            ref={fileInputRef} 
+                            className="hidden" 
+                            accept="image/jpeg, image/png, image/webp"
+                            onChange={handleAvatarUpload}
+                        />
+                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-900/20 select-none overflow-hidden relative ${isUploadingAvatar ? 'opacity-50' : ''}`}>
+                            {user.avatar ? (
+                                <img src={getImageUrl(user.avatar)} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                (profileForm.name || user.name || '?').charAt(0).toUpperCase()
+                            )}
+                            
+                            {/* Hover Overlay */}
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                {isUploadingAvatar ? (
+                                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                                ) : (
+                                    <Camera className="w-6 h-6 text-white" />
+                                )}
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <p className="text-white font-bold">{user.name}</p>
                         <p className="text-slate-400 text-sm">{user.email}</p>
-                        <p className="text-blue-400/70 text-xs mt-0.5">Member since {new Date((user as any).createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                        <div className="flex items-center gap-3 mt-1.5">
+                            <p className="text-blue-400/70 text-xs">Member since {new Date((user as any).createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                            {user.avatar && (
+                                <button 
+                                    onClick={handleRemoveAvatar}
+                                    className="flex items-center gap-1 text-[10px] text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 px-2 py-0.5 rounded-md transition-colors border border-red-400/20"
+                                >
+                                    <Trash2 className="w-3 h-3" /> Remove Photo
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 

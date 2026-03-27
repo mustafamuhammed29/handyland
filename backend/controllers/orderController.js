@@ -134,19 +134,61 @@ exports.createOrder = async (req, res) => {
 
         const finalAmount = Math.max(0, totalAmount + shippingFee + taxAmount - appliedDiscount);
 
-        // Create order
-        const [order] = await Order.create([{
-            user: req.user.id,
+        // Create the order
+        const order = await Order.create({
+            user: req.user ? req.user._id : undefined,
             items: orderItems,
-            totalAmount: finalAmount,
+            shippingAddress,
+            contactEmail: req.body.contactEmail || (req.user ? req.user.email : undefined), // Track guest email
+            paymentMethod,
+            totalAmount: finalAmount, // Store the final calculated amount
             tax: taxAmount,
             shippingFee,
-            shippingAddress,
-            paymentMethod,
-            notes,
             couponCode: couponCode || undefined,
-            discountAmount: appliedDiscount
-        }]);
+            discountAmount: appliedDiscount,
+            appliedPoints: req.body.appliedPoints || 0 // Store points applied for this order
+        });
+
+        // Smart Loyalty & Rewards Logic
+        if (req.user) {
+            const User = require('../models/User');
+            const Settings = require('../models/Settings');
+            
+            const currentUser = await User.findById(req.user._id);
+            const settingsDoc = await Settings.findOne() || {};
+            const loyaltyConfig = settingsDoc.features?.loyalty || {
+                enabled: true,
+                earnRate: 10,
+                redeemRate: 100,
+                silverThreshold: 500,
+                goldThreshold: 2000,
+                platinumThreshold: 5000
+            };
+            
+            if (currentUser && loyaltyConfig.enabled !== false) {
+                // Deduct redeemed points (if any)
+                let pointsToDeduct = req.body.appliedPoints || 0;
+                let newLoyaltyPoints = (currentUser.loyaltyPoints || 0) - pointsToDeduct;
+
+                // Grant points for this purchase
+                const pointsEarned = Math.floor(totalAmount * (loyaltyConfig.earnRate || 10)); // Use pre-discount/tax total for points calculation
+                newLoyaltyPoints += pointsEarned;
+
+                // Simple auto-tiering mechanism based on points thresholds
+                let newLevel = 1; // Regular
+                if (newLoyaltyPoints >= (loyaltyConfig.platinumThreshold || 5000)) newLevel = 4; // Platinum
+                else if (newLoyaltyPoints >= (loyaltyConfig.goldThreshold || 2000)) newLevel = 3; // Gold
+                else if (newLoyaltyPoints >= (loyaltyConfig.silverThreshold || 500)) newLevel = 2; // Silver
+
+                currentUser.loyaltyPoints = newLoyaltyPoints;
+                currentUser.membershipLevel = newLevel;
+                await currentUser.save();
+                
+                // Add tracking information to the order (for UI display)
+                order.pointsEarned = pointsEarned;
+                await order.save();
+            }
+        }
 
         // Update Stock and Sold
         for (const item of orderItems) {
@@ -499,6 +541,18 @@ exports.getInvoice = async (req, res) => {
             return res.status(403).json({ success: false, message: 'Not authorized' });
         }
 
+        // Fetch Dynamic Settings
+        const Settings = require('../models/Settings');
+        const settings = await Settings.findOne() || {};
+        const invoiceSettings = settings.invoice || {
+            companyName: 'HandyLand',
+            companyAddress: 'Tech Street 123 - 10115 Berlin - Germany',
+            vatNumber: 'DE123456789',
+            footerText: 'Thank you for your business!',
+            prefix: 'HL-'
+        };
+        const taxRate = settings.taxRate || 19;
+
         // Format Date
         const date = new Date(order.createdAt).toLocaleDateString('de-DE', {
             year: 'numeric', month: 'long', day: 'numeric'
@@ -528,7 +582,7 @@ exports.getInvoice = async (req, res) => {
                     .text-right { text-align: right; }
                     .totals { width: 300px; margin-left: auto; }
                     .totals-row { display: flex; justify-content: space-between; padding: 5px 0; }
-                    .totals-row.grand-total { font-weight: bold; font-size: 18px; border-top: 2px solid #333; margin-top: 10px; padding-top: 10px; }
+                    .totals-row.grand-total { font-weight: bold; font-size: 18px; border-top: 2px solid ${invoiceSettings.primaryColor || '#333'}; margin-top: 10px; padding-top: 10px; color: ${invoiceSettings.primaryColor || '#000'} }
                     .footer { text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #777; }
                     @media print {
                         body { padding: 0; }
@@ -538,17 +592,23 @@ exports.getInvoice = async (req, res) => {
             </head>
             <body>
                 <div class="invoice-header">
-                    <div class="logo">Handy<span>Land</span></div>
+                    <div class="logo">
+                        ${invoiceSettings.logoUrl 
+                            ? `<img src="${invoiceSettings.logoUrl.startsWith('http') ? invoiceSettings.logoUrl : `${req.protocol}://${req.get('host')}${invoiceSettings.logoUrl}`}" alt="Logo" style="max-height: 40px; object-fit: contain;" />` 
+                            : `<span style="color: #000">${(invoiceSettings.companyName || 'HandyLand').replace('Land', '')}</span><span style="color: ${invoiceSettings.primaryColor || '#00bcd4'}">Land</span>`
+                        }
+                    </div>
                     <div class="invoice-details">
-                        <div class="invoice-title">Invoice</div>
-                        <div>Date: ${date}</div>
-                        <div>Invoice #: ${order.orderNumber}</div>
+                        <div class="invoice-title" style="color: ${invoiceSettings.primaryColor || '#333'}">${invoiceSettings.titleLabel || 'Invoice'}</div>
+                        <div>${invoiceSettings.dateLabel || 'Date:'} ${date}</div>
+                        <div>${invoiceSettings.numberLabel || 'Invoice #:'} ${invoiceSettings.prefix || 'HL-'}${order.orderNumber}</div>
+                        ${invoiceSettings.vatNumber ? `<div>${invoiceSettings.vatIdLabel || 'VAT ID:'} ${invoiceSettings.vatNumber}</div>` : ''}
                     </div>
                 </div>
 
                 <div class="bill-to">
                     <div class="bill-to-section">
-                        <h3>Bill To:</h3>
+                        <h3 style="border-bottom-color: ${invoiceSettings.primaryColor || '#eee'}; color: ${invoiceSettings.primaryColor || '#777'}">Bill To:</h3>
                         <div>${order.shippingAddress.fullName}</div>
                         <div>${order.shippingAddress.street}</div>
                         <div>${order.shippingAddress.zipCode} ${order.shippingAddress.city}</div>
@@ -556,7 +616,7 @@ exports.getInvoice = async (req, res) => {
                         <div>${order.shippingAddress.phone}</div>
                     </div>
                     <div class="bill-to-section">
-                        <h3>Ship To:</h3>
+                        <h3 style="border-bottom-color: ${invoiceSettings.primaryColor || '#eee'}; color: ${invoiceSettings.primaryColor || '#777'}">Ship To:</h3>
                         <div>${order.shippingAddress.fullName}</div>
                         <div>${order.shippingAddress.street}</div>
                         <div>${order.shippingAddress.zipCode} ${order.shippingAddress.city}</div>
@@ -567,10 +627,10 @@ exports.getInvoice = async (req, res) => {
                 <table>
                     <thead>
                         <tr>
-                            <th>Item</th>
-                            <th class="text-right">Price</th>
-                            <th class="text-right">Qty</th>
-                            <th class="text-right">Total</th>
+                            <th>${invoiceSettings.itemLabel || 'Item'}</th>
+                            <th>${invoiceSettings.quantityLabel || 'Quantity'}</th>
+                            <th>${invoiceSettings.priceLabel || 'Price'}</th>
+                            <th>${invoiceSettings.totalLabel || 'Total'}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -590,34 +650,41 @@ exports.getInvoice = async (req, res) => {
 
                 <div class="totals">
                     <div class="totals-row">
-                        <span>Subtotal:</span>
+                        <span>${invoiceSettings.subtotalLabel || 'Subtotal:'}</span>
                         <span>${(order.totalAmount - order.shippingFee - order.tax + order.discountAmount).toFixed(2)}€</span>
                     </div>
                     <div class="totals-row">
-                        <span>VAT (19%):</span>
+                        <span>${invoiceSettings.taxLabel || 'VAT'} (${taxRate}%):</span>
                         <span>${order.tax.toFixed(2)}€</span>
                     </div>
                     <div class="totals-row">
-                        <span>Shipping:</span>
+                        <span>${invoiceSettings.shippingLabel || 'Shipping:'}</span>
                         <span>${order.shippingFee.toFixed(2)}€</span>
                     </div>
                     ${order.discountAmount > 0 ? `
                     <div class="totals-row" style="color: green;">
-                        <span>Discount (${order.couponCode || 'Promo'}):</span>
+                        <span>${invoiceSettings.discountLabel || 'Discount'} (${order.couponCode || 'Promo'}):</span>
                         <span>-${order.discountAmount.toFixed(2)}€</span>
                     </div>
                     ` : ''}
                     <div class="totals-row grand-total">
-                        <span>Total:</span>
+                        <span>${invoiceSettings.totalLabel || 'Total:'}</span>
                         <span>${order.totalAmount.toFixed(2)}€</span>
                     </div>
                 </div>
 
                 <div class="footer">
-                    <p>Thank you for your business!</p>
-                    <p>HandyLand GmbH - Tech Street 123 - 10115 Berlin - Germany</p>
-                    <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 5px;">Print Invoice</button>
-                    <button class="no-print" onclick="window.close()" style="margin-top: 20px; padding: 10px 20px; background: #ccc; color: #333; border: none; cursor: pointer; border-radius: 5px; margin-left: 10px;">Close</button>
+                    <p style="font-weight: bold; color: #555;">${invoiceSettings.footerText || 'Thank you for your business!'}</p>
+                    <p>${invoiceSettings.companyAddress || 'Tech Street 123 - 10115 Berlin - Germany'}</p>
+                    ${(invoiceSettings.bankName || invoiceSettings.iban || invoiceSettings.bic) ? `
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: center; gap: 20px; font-size: 11px; color: #888;">
+                        ${invoiceSettings.bankName ? `<span>Bank: ${invoiceSettings.bankName}</span>` : ''}
+                        ${invoiceSettings.iban ? `<span>IBAN: ${invoiceSettings.iban}</span>` : ''}
+                        ${invoiceSettings.bic ? `<span>BIC: ${invoiceSettings.bic}</span>` : ''}
+                    </div>
+                    ` : ''}
+                    <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: ${invoiceSettings.primaryColor || '#333'}; color: #fff; border: none; cursor: pointer; border-radius: 5px;">${invoiceSettings.printBtnLabel || 'Print Invoice'}</button>
+                    <button class="no-print" onclick="window.close()" style="margin-top: 20px; padding: 10px 20px; background: #ccc; color: #333; border: none; cursor: pointer; border-radius: 5px; margin-left: 10px;">${invoiceSettings.closeBtnLabel || 'Close'}</button>
                 </div>
             </body>
             </html>

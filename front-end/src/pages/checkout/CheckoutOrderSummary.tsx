@@ -1,11 +1,15 @@
 import React from 'react';
-import { CheckCircle, Tag, X, Loader2, ShieldCheck, Truck } from 'lucide-react';
+import { CheckCircle, Tag, X, Loader2, ShieldCheck, Truck, Trophy, Zap } from 'lucide-react';
 import { formatPrice } from '../../utils/formatPrice';
 import { TrustBadges } from '../../components/products/TrustBadges';
 
 // FIXED: Extracted from Checkout.tsx for better maintainability (FIX 5)
 
 interface CheckoutOrderSummaryProps {
+    user?: any;
+    features?: any;
+    appliedPoints: number;
+    setAppliedPoints: (points: number) => void;
     cart: any[];
     cartTotal: number;
     coupon: any;
@@ -21,6 +25,10 @@ interface CheckoutOrderSummaryProps {
 }
 
 export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
+    user,
+    features,
+    appliedPoints,
+    setAppliedPoints,
     cart,
     cartTotal,
     coupon,
@@ -118,6 +126,49 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                 {couponError && <p className="text-red-400 text-xs mt-2 animate-in slide-in-from-top-1">{couponError}</p>}
             </div>
 
+            {/* Loyalty Points Redemption */}
+            {features?.loyalty?.enabled !== false && user && (user.loyaltyPoints || 0) > 0 && (
+                <div className="pt-6 border-t border-slate-800">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                            <Trophy className="w-4 h-4 text-amber-400" />
+                            <span className="text-sm font-bold text-white">HandyLand Rewards</span>
+                        </div>
+                        <span className="text-xs text-white/50">{user.loyaltyPoints} PTS available</span>
+                    </div>
+                    
+                    {appliedPoints > 0 ? (
+                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-center justify-between animate-in fade-in">
+                            <div className="flex items-center gap-2 text-amber-500">
+                                <Zap className="w-4 h-4" />
+                                <span className="font-bold text-sm">-{appliedPoints} PTS Applied</span>
+                            </div>
+                            <button onClick={() => setAppliedPoints(0)} aria-label="Remove points" className="text-slate-400 hover:text-white p-1 transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ) : (
+                        <button 
+                            onClick={() => {
+                                const availableForThisOrder = Math.min(
+                                    user.loyaltyPoints,
+                                    cartTotal * (features?.loyalty?.redeemRate || 100)
+                                );
+                                setAppliedPoints(availableForThisOrder);
+                            }}
+                            className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-4 py-2.5 flex items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all border border-slate-700 hover:border-amber-500/50"
+                        >
+                            <Trophy className="w-4 h-4 text-amber-500" /> Apply {Math.min(user.loyaltyPoints, cartTotal * (features?.loyalty?.redeemRate || 100))} Points
+                        </button>
+                    )}
+                    {appliedPoints > 0 && (
+                        <p className="text-[10px] text-slate-500 mt-2 text-center">
+                            Note: {(features?.loyalty?.redeemRate || 100)} Points = {formatPrice(1)}
+                        </p>
+                    )}
+                </div>
+            )}
+
             <div className="mt-6 pt-6 border-t border-slate-800 space-y-3">
                 <div className="flex justify-between text-slate-400">
                     <span>Subtotal</span>
@@ -136,6 +187,12 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     <div className="flex justify-between text-emerald-400 text-sm">
                         <span>Discount</span>
                         <span>- {formatPrice(coupon.discount)}</span>
+                    </div>
+                )}
+                {appliedPoints > 0 && (
+                    <div className="flex justify-between text-amber-400 text-sm">
+                        <span>Rewards Discount</span>
+                        <span>- {formatPrice(appliedPoints / 100)}</span>
                     </div>
                 )}
                 <div className="flex justify-between text-white font-bold text-xl pt-4 border-t border-slate-800 mt-2">

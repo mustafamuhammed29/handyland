@@ -42,11 +42,12 @@ const RepairGallery = React.lazy(() => import('../components/RepairGallery').the
 const SellDevice = React.lazy(() => import('../pages/SellDevice').then(m => ({ default: m.SellDevice })));
 const MyValuations = React.lazy(() => import('../pages/MyValuations').then(m => ({ default: m.MyValuations })));
 const SellerStudio = React.lazy(() => import('../components/SellerStudio').then(m => ({ default: m.SellerStudio })));
-
+const ComparePage = React.lazy(() => import('../pages/ComparePage').then(m => ({ default: m.ComparePage })));
 // Lazy Load Components
 const Marketplace = React.lazy(() => import('../components/Marketplace').then(module => ({ default: module.Marketplace })));
 const Repair = React.lazy(() => import('../components/Repair').then(module => ({ default: module.Repair })));
 const ProductDetails = React.lazy(() => import('../components/ProductDetails').then(module => ({ default: module.ProductDetails })));
+const AccessoryDetails = React.lazy(() => import('../components/AccessoryDetails').then(module => ({ default: module.AccessoryDetails })));
 const Checkout = React.lazy(() => import('../pages/Checkout').then(module => ({ default: module.Checkout })));
 const CartPage = React.lazy(() => import('../pages/Cart').then(module => ({ default: module.Cart })));
 const OrderDetails = React.lazy(() => import('../pages/OrderDetails').then(module => ({ default: module.OrderDetails })));
@@ -68,11 +69,7 @@ const Home = ({ lang }: { lang: LanguageCode }) => {
 
     return (
         <>
-            <SEO
-                title="Premium Refurbished Smartphones & Repair Services"
-                description="HandyLand offers certified refurbished smartphones, expert repair services, and instant valuations. Shop sustainable tech today."
-                canonical="https://handyland.com"
-            />
+            <SEO canonical="https://handyland.com" />
             {sections.hero && <Hero lang={lang} />}
             {sections.stats && <Stats />}
             {sections.repairGallery && (
@@ -87,7 +84,7 @@ const Home = ({ lang }: { lang: LanguageCode }) => {
                             {t('market', 'Market')} Highlights
                         </h3>
                         <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="w-8 h-8 border-2 border-blue-500 rounded-full animate-spin border-t-transparent"></div></div>}>
-                            <Marketplace lang={lang} />
+                            <Marketplace lang={lang} hideSEO={true} />
                         </Suspense>
                     </div>
                 </div>
@@ -118,11 +115,7 @@ export const AppRouter = () => {
         return () => window.removeEventListener('handyland:navigate', handleNavigation);
     }, [navigate]);
 
-    useEffect(() => {
-        if (settings?.siteName) {
-            document.title = settings.siteName;
-        }
-    }, [settings?.siteName]);
+    // Document title is now purely handled by SEO.tsx and Helmet Provider
 
     if (settingsError) {
         return <GlobalError onRetry={() => window.location.reload()} />;
@@ -154,6 +147,8 @@ export const AppRouter = () => {
                             <Route path="/valuation" element={<PageTransition><Valuation lang={lang} /></PageTransition>} />
                             <Route path="/sell/:quoteRef" element={<PageTransition><SellDevice /></PageTransition>} />
                             <Route path="/products/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
+                            <Route path="/accessories/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><AccessoryDetails /></Suspense></PageTransition>} />
+                            <Route path="/compare" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ComparePage /></Suspense></PageTransition>} />
                             <Route path="contact" element={<PageTransition><Contact /></PageTransition>} />
                             <Route path="checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
                             <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />

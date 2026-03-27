@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CheckCircle, MoveHorizontal, ScanLine, Smartphone, Hammer, Wand2, Droplets, Monitor, Cpu, Filter, Clock, Activity, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, MoveHorizontal, ScanLine, Smartphone, Hammer, Wand2, Droplets, Monitor, Cpu, Filter, Clock, Activity, X, Star, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface RepairGalleryProps {}
@@ -17,6 +18,7 @@ import { getImageUrl } from '../utils/imageUrl';
 // ... (keep props interface)
 
 export const RepairGallery: React.FC<RepairGalleryProps> = () => {
+    const navigate = useNavigate();
     const { settings: globalSettings } = useSettings();
     const { t } = useTranslation();
     const [sliderPosition, setSliderPosition] = useState(50);
@@ -205,6 +207,10 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
                             {/* Bottom Info Bar - ensure it stays above the absolute container */}
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent p-6 space-y-3 z-40 pointer-events-none">
+                                <div className="flex items-center gap-2 text-yellow-500 mb-1">
+                                    {[1, 2, 3, 4, 5].map(star => <Star key={star} className="w-4 h-4 fill-current" />)}
+                                    <span className="text-white text-xs font-bold ml-1 tracking-wide">VERIFIED REPAIR</span>
+                                </div>
                                 <h3 className="text-2xl font-bold text-white flex items-center gap-3">
                                     {activeProject.title}
                                     <span className={`text-xs px-3 py-1 rounded-full font-bold ${activeProject.difficulty === 'Expert' ? 'bg-red-500/20 text-red-400 border border-red-500/50' :
@@ -215,28 +221,38 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                         LVL: {activeProject.difficulty}
                                     </span>
                                 </h3>
-                                <p className="text-slate-400 text-sm font-mono">{activeProject.description || activeProject.desc}</p>
-                                <div className="flex items-center gap-4 text-xs text-slate-500">
-                                    <div className="flex items-center gap-1">
-                                        <Clock className="w-3 h-3" />
-                                        {activeProject.time}
-                                    </div>
-                                    <div className="flex items-center gap-1">
+                                <p className="text-slate-400 text-sm font-mono max-w-2xl">{activeProject.description || activeProject.desc}</p>
+                                <div className="flex flex-wrap items-center gap-4 text-xs font-bold mt-2">
+                                    <div className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
                                         <Activity className="w-3 h-3" />
-                                        {activeProject.category}
+                                        SAVED UP TO 65% VS NEW
+                                    </div>
+                                    <div className="flex items-center gap-1 text-slate-400 bg-slate-800/50 px-2 py-1 rounded border border-slate-700">
+                                        <Clock className="w-3 h-3" />
+                                        {activeProject.time || '1-2 Hours'}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Scan Button */}
-                        <button
-                            onClick={handleScan}
-                            className="mt-4 w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 group"
-                        >
-                            <ScanLine className="w-5 h-5 group-hover:animate-pulse" />
-                            <span>INITIATE DIAGNOSTIC SCAN</span>
-                        </button>
+                        {/* Action Buttons */}
+                        <div className="mt-4 grid grid-cols-2 gap-4">
+                            <button
+                                onClick={handleScan}
+                                className="w-full py-4 bg-slate-900 border-2 border-slate-800 hover:border-brand-primary/50 text-slate-300 font-bold rounded-xl transition-all flex items-center justify-center gap-2 group"
+                            >
+                                <ScanLine className="w-5 h-5 group-hover:text-brand-primary" />
+                                <span>DIAGNOSTIC SCAN</span>
+                            </button>
+                            
+                            <button
+                                onClick={() => navigate('/repair')}
+                                className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-cyan-400 hover:to-blue-500 text-slate-900 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] font-black rounded-xl transition-all flex items-center justify-center gap-2 group"
+                            >
+                                <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                <span>BOOK SIMILAR REPAIR</span>
+                            </button>
+                        </div>
                     </div>
 
                     {/* RIGHT: Case Files Grid */}
