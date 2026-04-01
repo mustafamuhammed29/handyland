@@ -19,6 +19,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
     const [features, setFeatures] = useState<any>(null);
 
     useEffect(() => {
+        let ignore = false;
         const fetchData = async () => {
             try {
                 const [upsellRes, settingsRes] = await Promise.all([
@@ -26,20 +27,23 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                     api.get('/api/settings')
                 ]);
                 
-                if (upsellRes) {
+                if (upsellRes && !ignore) {
                     const data = (upsellRes as any).data || upsellRes;
                     if (Array.isArray(data)) {
                         setUpsellItems(data.slice(0, 3)); // show top 3
                     }
                 }
 
-                const sData = (settingsRes as any)?.data || settingsRes;
-                setFeatures(sData?.features);
+                if (!ignore) {
+                    const sData = (settingsRes as any)?.data || settingsRes;
+                    setFeatures(sData?.features);
+                }
             } catch (err) {
                 console.error('Failed to fetch cart data:', err);
             }
         };
         fetchData();
+        return () => { ignore = true; };
     }, []);
 
     const isRtl = lang === 'ar';

@@ -23,6 +23,7 @@ export const OrderDetails = () => {
     const [paymentConfig, setPaymentConfig] = useState<any>(null);
     const [uploading, setUploading] = useState(false);
     const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -82,16 +83,18 @@ export const OrderDetails = () => {
     };
 
     const handleCancelOrder = async () => {
-        if (!order || !window.confirm('Are you sure you want to cancel this order?')) return;
+        if (!order) return;
         setCancelling(true);
         try {
             const res = await orderService.cancelOrder(order._id);
             if (res.success) {
                 setOrder({ ...order, status: 'cancelled' });
                 addToast('Order cancelled successfully', 'success');
+                setShowCancelConfirm(false);
             }
         } catch (err: any) {
             addToast(err.response?.data?.message || 'Failed to cancel order', 'error');
+            setShowCancelConfirm(false);
         } finally {
             setCancelling(false);
         }
@@ -100,6 +103,13 @@ export const OrderDetails = () => {
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || !e.target.files[0] || !order) return;
         const file = e.target.files[0];
+        
+        if (file.size > 5 * 1024 * 1024) {
+            addToast('File size must be less than 5MB', 'error');
+            e.target.value = '';
+            return;
+        }
+
         const formData = new FormData();
         formData.append('receipt', file);
         try {
@@ -149,6 +159,37 @@ export const OrderDetails = () => {
 
     return (
         <div className="min-h-screen pt-28 pb-12 px-4 max-w-4xl mx-auto">
+            {/* Cancel Confirmation Dialog */}
+            {showCancelConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+                    <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                        <div className="flex items-center gap-2 text-amber-400 mb-4">
+                            <AlertTriangle className="w-5 h-5" />
+                            <h3 className="text-lg font-bold">Cancel Order</h3>
+                        </div>
+                        <p className="text-slate-300 text-sm mb-6">
+                            Are you sure you want to cancel this order? This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowCancelConfirm(false)}
+                                className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors font-medium"
+                                disabled={cancelling}
+                            >
+                                Keep Order
+                            </button>
+                            <button
+                                onClick={handleCancelOrder}
+                                disabled={cancelling}
+                                className="flex-1 py-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/30 border border-transparent transition-colors font-bold"
+                            >
+                                {cancelling ? 'Cancelling...' : 'Yes, Cancel it'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Breadcrumbs */}
             <Breadcrumbs items={[
                 { label: 'Home', path: '/' },
@@ -358,15 +399,18 @@ export const OrderDetails = () => {
                     </button>
                     {order.status === 'pending' && (
                         <button
-                            onClick={handleCancelOrder}
+                            onClick={() => setShowCancelConfirm(true)}
                             disabled={cancelling}
                             className="w-full py-3 border border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-500/30 rounded-xl transition-colors font-bold text-sm disabled:opacity-50"
                         >
-                            {cancelling ? 'Cancelling...' : 'Cancel Order'}
+                            Cancel Order
                         </button>
                     )}
                     {order.status === 'delivered' && (
-                        <button className="w-full py-3 border border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-500/30 rounded-xl transition-colors font-bold text-sm">
+                        <button 
+                            onClick={() => addToast('Return functionality is coming soon!', 'info')}
+                            className="w-full py-3 border border-slate-800 text-slate-400 hover:text-blue-400 hover:border-blue-500/30 rounded-xl transition-colors font-bold text-sm"
+                        >
                             Request Return / Refund
                         </button>
                     )}

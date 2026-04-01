@@ -147,7 +147,7 @@ router.get('/admin/users', protect, (req, res, next) => {
 router.get('/me', protect, authController.getMe);
 router.put('/updateprofile', protect, authController.updateProfile);
 router.put('/changepassword', protect, authController.changePassword);
-router.get('/refresh', authController.refreshToken);
+router.post('/refresh', authController.refreshToken);
 router.post('/logout', protect, authController.logout);
 
 module.exports = router;

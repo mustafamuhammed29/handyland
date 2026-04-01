@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { User } from '../types';
 import i18n from '../i18n';
+import { api } from '../utils/api';
 
 interface AuthContextType {
     user: User | null;
@@ -28,7 +29,7 @@ const getSafeUserForStorage = (user: User) => ({
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(() => {
         try {
-            const storedUser = localStorage.getItem('user');
+            const storedUser = sessionStorage.getItem('user');
             return storedUser ? JSON.parse(storedUser) : null;
         } catch {
             return null;
@@ -48,14 +49,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [user?.preferredLanguage]);
 
-    const refreshAccessToken = async (): Promise<boolean> => {
+    const refreshAccessToken = useCallback(async (): Promise<boolean> => {
         try {
             await authService.refreshToken();
             return true;
         } catch (error) {
             return false;
         }
-    };
+    }, []);
 
 
     // Guard against React StrictMode double-invocation
@@ -63,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let ignore = false; // cleanup flag to cancel stale invocations
 
         const initAuth = async () => {
-            const storedUser = localStorage.getItem('user');
+            const storedUser = sessionStorage.getItem('user');
 
             if (!storedUser) {
                 if (!ignore) setLoading(false);
@@ -80,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     const { user } = await authService.getMe();
                     if (!ignore) {
                         setUser(user);
-                localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
+                sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                     }
                 } catch {
                     // Try refresh before giving up
@@ -90,21 +91,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             try {
                                 const { user } = await authService.getMe();
                                 setUser(user);
-                        localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
+                        sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                             } catch {
                                 setUser(null);
-                                localStorage.removeItem('user');
+                                sessionStorage.removeItem('user');
                             }
                         } else {
                             setUser(null);
-                            localStorage.removeItem('user');
+                            sessionStorage.removeItem('user');
                         }
                     }
                 }
             } catch (parseError) {
                 if (!ignore) {
                     setUser(null);
-                    localStorage.removeItem('user');
+                    sessionStorage.removeItem('user');
                 }
             }
 
@@ -119,12 +120,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // FIXED: Added error handling to loginWithToken (FIX 11)
     const loginWithToken = async (token: string) => {
         try {
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             const { user: userData } = await authService.getMe();
-            localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(userData)));
+            sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(userData)));
             setUser(userData);
         } catch (error) {
             setUser(null);
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('user');
+            delete api.defaults.headers.common['Authorization'];
             throw new Error('Social login failed. Please try again.');
         }
     };
@@ -138,7 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 // FIXED: [Removed localStorage.setItem for accessToken and refreshToken to prevent XSS vulnerability]
 
-                localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(data.user)));
+                sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(data.user)));
                 setUser(data.user);
 
                 // Check if user was redirected from valuation flow
@@ -170,7 +173,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
         // FIXED: [Removed localStorage.removeItem for tokens as they are cleared server-side via cookies]
 
         authService.logout().catch(err => {
