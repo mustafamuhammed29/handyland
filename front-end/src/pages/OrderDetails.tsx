@@ -48,9 +48,8 @@ export const OrderDetails = () => {
         if (order?.paymentMethod === 'bank_transfer') {
             const fetchSettings = async () => {
                 try {
-                    const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
-                    const res = await fetch(`${baseUrl}/api/settings`);
-                    const data = await res.json();
+                    const res = await api.get('/api/settings');
+                    const data = (res as any)?.data || res;
                     if (data && data?.payment?.bankTransfer) {
                         setPaymentConfig(data.payment.bankTransfer);
                     }
@@ -68,11 +67,11 @@ export const OrderDetails = () => {
             // Map order item to cart item structure
             // Assuming item has product details mapped or populated
             const cartItem = {
-                id: item.product._id || item.product, // specific to how backend returns it
+                id: item.product?._id || item.product, // specific to how backend returns it
                 title: item.name,
                 subtitle: item.productType,
                 price: item.price,
-                image: item.image || item.product.image || '',
+                image: item.image || item.product?.image || '',
                 category: item.productType === 'Accessory' ? 'accessory' : 'device' as any,
                 quantity: 1
             };

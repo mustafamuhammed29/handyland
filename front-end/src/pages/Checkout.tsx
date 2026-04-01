@@ -101,9 +101,8 @@ export const Checkout: React.FC = () => {
                     orderService.fetchShippingMethods()
                 ]);
 
-                // Fetch Settings includes payment config now
-                // Settings endpoint returns the object directly (api interceptor unwraps response.data)
-                const settings = settingsRes as any;
+                // Settings endpoint returns the object directly (api interceptor unwraps response.data or it could be inside .data)
+                const settings = (settingsRes as any)?.data || settingsRes;
                 if (settings) {
                     if (settings.freeShippingThreshold !== undefined) {
                         setFreeShippingThreshold(settings.freeShippingThreshold);

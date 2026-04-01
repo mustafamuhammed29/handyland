@@ -235,7 +235,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                         </div>
                         
                         {/* Urgency UI */}
-                        {product.stock > 0 && product.stock < 10 && (
+                        {((product.stock || 0) > 0) && ((product.stock || 0) < 10) && (
                             <div className="flex items-center gap-2 mb-4 bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-lg w-fit animate-pulse">
                                 <span className="relative flex h-2 w-2">
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
@@ -254,7 +254,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                     ))}
                                 </div>
                             </div>
-                            <span className="text-slate-400 text-sm">{product.numReviews || reviews.length} Reviews</span>
+                            <span className="text-slate-400 text-sm">{product.numReviews || reviews?.length || 0} Reviews</span>
                         </div>
 
                         <div className="flex items-end gap-3 mb-8">
@@ -262,9 +262,9 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                 {product.price}{t('currency', '€')}
                             </div>
                             {/* Stock Indicator */}
-                            <div className={`text-sm mb-2 font-medium ${product.stock > 0 ? (product.stock < 5 ? 'text-orange-400' : 'text-green-400') : 'text-red-500'}`}>
-                                {product.stock > 0
-                                    ? (product.stock < 5 ? `Only ${product.stock} left in stock!` : 'In Stock')
+                            <div className={`text-sm mb-2 font-medium ${(product.stock || 0) > 0 ? ((product.stock || 0) < 5 ? 'text-orange-400' : 'text-green-400') : 'text-red-500'}`}>
+                                {(product.stock || 0) > 0
+                                    ? ((product.stock || 0) < 5 ? `Only ${product.stock} left in stock!` : 'In Stock')
                                     : 'Out of Stock'
                                 }
                             </div>
@@ -320,14 +320,14 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                     <span className="w-12 text-center font-mono text-slate-900 dark:text-white">{quantity}</span>
                                     <button
                                         onClick={() => {
-                                            if (quantity >= product.stock) {
-                                                addToast(`Maximum available stock: ${product.stock}`, 'error');
+                                            if (quantity >= (product.stock || 0)) {
+                                                addToast(`Maximum available stock: ${product.stock || 0}`, 'error');
                                             } else {
                                                 setQuantity(q => q + 1);
                                             }
                                         }}
                                         className="px-3 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white transition-colors dark:hover:bg-slate-800 rounded-r-lg"
-                                        disabled={quantity >= product.stock}
+                                        disabled={quantity >= (product.stock || 0)}
                                     >+</button>
                                 </div>
                             </div>
@@ -355,14 +355,14 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                 </button>
                                 <button
                                     onClick={handleAddToCart}
-                                    disabled={product.stock === 0}
+                                    disabled={!product.stock || product.stock <= 0}
                                     className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 
-                                        ${product.stock > 0
+                                        ${(product.stock || 0) > 0
                                             ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]'
                                             : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
                                 >
                                     <ShoppingCart className="w-5 h-5" />
-                                    {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                                    {((product.stock || 0) > 0) ? 'Add to Cart' : 'Out of Stock'}
                                 </button>
                             </div>
                             <div className="flex justify-center gap-6 text-xs text-slate-500">
