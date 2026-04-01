@@ -18,7 +18,12 @@ import { CheckoutPaymentSection } from './checkout/CheckoutPaymentSection';
 import { CheckoutOrderSummary } from './checkout/CheckoutOrderSummary';
 
 // Initialize Stripe (Move to env var in production)
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+    console.error('VITE_STRIPE_PUBLIC_KEY is not configured. Stripe payments will not work.');
+}
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
+    ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY) 
+    : null;
 
 // Removed CheckoutProps
 

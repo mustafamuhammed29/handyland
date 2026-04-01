@@ -21,6 +21,11 @@ const validateIban = (iban: string): { valid: boolean; message?: string } => {
         AT: /^AT\d{18}$/,
         CH: /^CH\d{19}$/
     };
+
+    if (!lengths[countryCode]) {
+        return { valid: false, message: 'We currently only support IBANs from Germany (DE), Austria (AT), and Switzerland (CH)' };
+    }
+
     if (lengths[countryCode] && cleaned.length !== lengths[countryCode]) {
         return { valid: false, message: `${countryCode} IBAN muss genau ${lengths[countryCode]} Zeichen lang sein` };
     }
@@ -36,6 +41,12 @@ const validateIban = (iban: string): { valid: boolean; message?: string } => {
 const formatIban = (value: string): string => {
     const cleaned = value.replace(/\s/g, '').toUpperCase();
     return cleaned.replace(/(.{4})/g, '$1 ').trim();
+};
+
+const maskIban = (iban: string) => {
+    const cleaned = iban.replace(/\s/g, '').toUpperCase();
+    if (cleaned.length < 10) return iban;
+    return cleaned.slice(0, 6) + ' **** **** ' + cleaned.slice(-4);
 };
 
 export const SellDevice = () => {
@@ -75,8 +86,13 @@ export const SellDevice = () => {
             const pendingRaw = sessionStorage.getItem('pendingValuationQuote');
             if (pendingRaw) {
                 try {
-                    const { quoteData } = JSON.parse(pendingRaw);
-                    if (quoteData?.quoteReference === quoteRef) {
+                    const parsed = JSON.parse(pendingRaw);
+                    const quoteData = parsed.quoteData || parsed;
+                    const timestamp = parsed.timestamp || Date.now(); // Fallback if no timestamp
+                    
+                    if (Date.now() - timestamp > 30 * 60 * 1000) {
+                        sessionStorage.removeItem('pendingValuationQuote');
+                    } else if (quoteData?.quoteReference === quoteRef) {
                         resolvedQuote = {
                             reference: quoteData.quoteReference,
                             model: quoteData.model,
@@ -285,7 +301,7 @@ export const SellDevice = () => {
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">IBAN:</span>
-                                <span className="text-white font-mono text-xs">{formData.iban}</span>
+                                <span className="text-white font-mono text-xs">{maskIban(formData.iban)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Auszahlung:</span>

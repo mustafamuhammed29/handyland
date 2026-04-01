@@ -1,26 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, TrendingUp, DollarSign, Smartphone, ShoppingBag, Info, AlertTriangle } from 'lucide-react';
+import { api } from '../utils/api';
 
 export const MarketPrices: React.FC = () => {
     const { t } = useTranslation();
     const [devices, setDevices] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeBrand, setActiveBrand] = useState('All');
 
     useEffect(() => {
         const fetchDevices = async () => {
             try {
-                const res = await fetch('/api/valuation/devices');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        setDevices(data);
-                    }
+                const res = await api.get('/api/valuation/devices');
+                const data = (res as any)?.data || res;
+                if (Array.isArray(data)) {
+                    setDevices(data);
+                } else {
+                    setError('Received invalid data format from server.');
                 }
             } catch (err) {
                 console.error('Failed to fetch devices', err);
+                setError('Failed to load market prices. Please try again later.');
             } finally {
                 setLoading(false);
             }
@@ -89,6 +92,12 @@ export const MarketPrices: React.FC = () => {
                 {loading ? (
                     <div className="flex justify-center items-center py-20">
                         <div className="w-12 h-12 border-4 border-slate-800 border-t-brand-primary rounded-full animate-spin"></div>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-20 bg-red-900/10 rounded-3xl border border-red-500/20">
+                        <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold text-red-400 mb-2">Error Loading Data</h3>
+                        <p className="text-slate-400">{error}</p>
                     </div>
                 ) : filteredDevices.length === 0 ? (
                     <div className="text-center py-20 bg-slate-900/30 rounded-3xl border border-slate-800 border-dashed">

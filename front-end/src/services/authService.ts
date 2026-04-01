@@ -160,7 +160,7 @@ export const authService = {
 
     refreshToken: async (): Promise<{ token: string }> => {
         try {
-            const response = await api.get('/api/auth/refresh');
+            const response = await api.post('/api/auth/refresh');
             return response as any;
         } catch (error) {
             console.error('Auth Service Refresh Token Error:', error);
