@@ -93,8 +93,8 @@ const settingsSchema = new mongoose.Schema({
             cartUpselling: true,
             loyalty: {
                 enabled: true,
-                earnRate: 10,     
-                redeemRate: 100,  
+                earnRate: 10,
+                redeemRate: 100,
                 silverThreshold: 500,
                 goldThreshold: 2000,
                 platinumThreshold: 5000

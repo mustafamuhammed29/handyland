@@ -108,7 +108,7 @@ exports.syncCart = async (req, res) => {
             for (const local of localItems) {
                 const productCategory = local.category ? local.category.toLowerCase() : '';
                 const productType = (productCategory === 'device' || productCategory === 'phone') ? 'Product' : (productCategory === 'accessory' ? 'Accessory' : 'Product');
-                
+
                 // Resolve real ObjectId from UUID or ObjectId
                 let realId = local.id;
                 if (!mongoose.isValidObjectId(local.id)) {
@@ -138,7 +138,7 @@ exports.syncCart = async (req, res) => {
                         { user: req.user.id, "items.product": { $ne: productId } },
                         { $push: { items: { product: productId, productType, quantity: local.quantity || 1 } } }
                     );
-                    
+
                     if (addResult.modifiedCount === 0) {
                         // Product was added by a parallel request race condition just now
                         await Cart.updateOne(
@@ -146,7 +146,7 @@ exports.syncCart = async (req, res) => {
                             { $set: { "items.$.quantity": local.quantity || 1 } }
                         );
                     }
-                    
+
                     // Add it to map so if localItems has duplicates itself, it hits the update block
                     serverMap.set(productId, { quantity: local.quantity || 1 });
                 }

@@ -104,23 +104,21 @@ export const OrderDetails = () => {
         formData.append('receipt', file);
         try {
             setUploading(true);
-            const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
-
-            const res = await fetch(`${baseUrl}/api/orders/${order._id || id}/receipt`, {
-                method: 'POST',
-                credentials: 'include',
-                body: formData
-            });
-            const data = await res.json();
-            if (data.success) {
+            const res = await api.post(`/api/orders/${order._id || id}/receipt`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            } as any) as any;
+            
+            const data = res?.data || res;
+            
+            if (data?.success) {
                 setReceiptUrl(data.receiptUrl);
                 addToast('Receipt uploaded successfully!', 'success');
                 setOrder({ ...order, paymentReceipt: data.receiptUrl } as any);
             } else {
-                addToast(data.message || 'Failed to upload receipt', 'error');
+                addToast(data?.message || 'Failed to upload receipt', 'error');
             }
-        } catch (err) {
-            addToast('Error uploading receipt', 'error');
+        } catch (err: any) {
+            addToast(err?.response?.data?.message || 'Error uploading receipt', 'error');
         } finally {
             setUploading(false);
         }

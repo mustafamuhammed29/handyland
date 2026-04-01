@@ -15,7 +15,7 @@ const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 
 function getCached(key) {
     const entry = cache.get(key);
-    if (!entry) return null;
+    if (!entry) {return null;}
     if (Date.now() - entry.ts > CACHE_TTL) { cache.delete(key); return null; }
     return entry.data;
 }
@@ -108,8 +108,8 @@ exports.applyPrice = async (req, res) => {
 
         const oldPrice = blueprint.basePrice;
 
-        if (newBasePrice) blueprint.basePrice = Number(newBasePrice);
-        if (storagePrices) blueprint.storagePrices = storagePrices;
+        if (newBasePrice) {blueprint.basePrice = Number(newBasePrice);}
+        if (storagePrices) {blueprint.storagePrices = storagePrices;}
 
         // Store research metadata for audit trail
         blueprint.priceResearch = {

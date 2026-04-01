@@ -19,7 +19,7 @@ exports.verify2FA = async (req, res) => {
     const { token } = req.body;
     const user = await User.findById(req.user._id).select('+twoFactorSecret');
     const verified = speakeasy.totp.verify({ secret: user.twoFactorSecret, encoding: 'base32', token, window: 2 });
-    if (!verified) return res.status(400).json({ success: false, message: 'Invalid 2FA token' });
+    if (!verified) {return res.status(400).json({ success: false, message: 'Invalid 2FA token' });}
     await User.findByIdAndUpdate(req.user._id, { twoFactorEnabled: true });
     res.json({ success: true, message: '2FA enabled successfully' });
   } catch (error) {

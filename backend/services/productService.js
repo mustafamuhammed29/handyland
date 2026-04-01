@@ -152,20 +152,20 @@ class ProductService {
 
         const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(id);
 
-        const productQuery = productIds.length > 0 
-            ? Product.find({ $or: [{ id: { $in: productIds } }, { _id: { $in: productIds.filter(isValidObjectId) } }] }) 
+        const productQuery = productIds.length > 0
+            ? Product.find({ $or: [{ id: { $in: productIds } }, { _id: { $in: productIds.filter(isValidObjectId) } }] })
             : Promise.resolve([]);
-            
-        const accessoryQuery = accessoryIds.length > 0 
-            ? Accessory.find({ $or: [{ id: { $in: accessoryIds } }, { _id: { $in: accessoryIds.filter(isValidObjectId) } }] }) 
+
+        const accessoryQuery = accessoryIds.length > 0
+            ? Accessory.find({ $or: [{ id: { $in: accessoryIds } }, { _id: { $in: accessoryIds.filter(isValidObjectId) } }] })
             : Promise.resolve([]);
 
         const [products, accessories] = await Promise.all([productQuery, accessoryQuery]);
 
         const productMap = {};
-        [...products, ...accessories].forEach(p => { 
-            if (p.id) productMap[p.id] = p; 
-            if (p._id) productMap[p._id.toString()] = p; 
+        [...products, ...accessories].forEach(p => {
+            if (p.id) {productMap[p.id] = p;}
+            if (p._id) {productMap[p._id.toString()] = p;}
         });
 
         const errors = [];

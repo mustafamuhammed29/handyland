@@ -6,10 +6,10 @@ exports.cacheMiddleware = (durationInSeconds) => {
         if (req.method !== 'GET') {
             return next();
         }
-        
+
         const key = req.originalUrl;
         const cachedResponse = cache.get(key);
-        
+
         if (cachedResponse) {
             console.log(`[Cache Hit] ${key}`);
             return res.json(cachedResponse);

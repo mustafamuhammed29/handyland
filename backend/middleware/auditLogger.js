@@ -3,13 +3,13 @@ const AuditLog = require('../models/AuditLog');
 const auditLogger = async (req, res, next) => {
     // We only log if req.user exists, is admin, and method modifies data
     if (req.user && req.user.role === 'admin' && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
-        
+
         // Clone and sanitize body payload
         const payload = { ...req.body };
         delete payload.password;
         delete payload.currentPassword;
         delete payload.newPassword;
-        
+
         // Hide sensitive payment keys if they are somehow updated
         if (payload.payment) {
              delete payload.payment;

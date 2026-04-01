@@ -6,7 +6,7 @@ const auditLogger = require('./auditLogger');
 exports.protect = async (req, res, next) => {
     const appType = req.headers['x-app-type'];
     let token;
-    
+
     // Check for Authorization header first (Some tools/postman might use this)
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
@@ -21,8 +21,8 @@ exports.protect = async (req, res, next) => {
     }
     // Fallback for legacy requests without header (prioritize adminToken for safety)
     else {
-        if (req.cookies && req.cookies.adminToken) token = req.cookies.adminToken;
-        else if (req.cookies && req.cookies.accessToken) token = req.cookies.accessToken;
+        if (req.cookies && req.cookies.adminToken) {token = req.cookies.adminToken;}
+        else if (req.cookies && req.cookies.accessToken) {token = req.cookies.accessToken;}
     }
 
     // Make sure token exists
@@ -142,7 +142,7 @@ exports.authorize = (...roles) => {
 exports.optionalProtect = async (req, res, next) => {
     const appType = req.headers['x-app-type'];
     let token;
-    
+
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     } else if (appType === 'admin') {
@@ -150,8 +150,8 @@ exports.optionalProtect = async (req, res, next) => {
     } else if (appType === 'frontend') {
         token = req.cookies && req.cookies.accessToken;
     } else {
-        if (req.cookies && req.cookies.adminToken) token = req.cookies.adminToken;
-        else if (req.cookies && req.cookies.accessToken) token = req.cookies.accessToken;
+        if (req.cookies && req.cookies.adminToken) {token = req.cookies.adminToken;}
+        else if (req.cookies && req.cookies.accessToken) {token = req.cookies.accessToken;}
     }
 
     if (!token) {

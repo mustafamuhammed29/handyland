@@ -70,7 +70,7 @@ exports.deleteSupplier = async (req, res) => {
         if (!supplier) {
             return res.status(404).json({ success: false, message: 'Supplier not found' });
         }
-        
+
         // Disable instead of hard delete
         supplier.isActive = false;
         await supplier.save();

@@ -24,11 +24,11 @@ const startBackupJob = () => {
             let successCount = 0;
 
             for (const modelName in models) {
-                if (EXCLUDED_MODELS.has(modelName)) continue; // Skip sensitive models
+                if (EXCLUDED_MODELS.has(modelName)) {continue;} // Skip sensitive models
 
                 const Model = models[modelName];
                 const data = await Model.find({}).lean();
-                
+
                 if (data && data.length > 0) {
                     const filePath = path.join(dailyDir, `${modelName}.json`);
                     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));

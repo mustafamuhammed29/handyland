@@ -151,11 +151,11 @@ exports.saveMissingTranslation = async (req, res) => {
         for (const key of keys) {
             const fallbackValue = req.body[key] || '';
             const existing = await Translation.findOne({ key });
-            
+
             if (!existing) {
                 // Determine namespace from key if it has a prefix, otherwise use the param
                 const dbNamespace = key.includes('.') ? key.split('.')[0] : (namespace || 'translation');
-                
+
                 await Translation.create({
                     key,
                     namespace: dbNamespace,
@@ -189,17 +189,17 @@ exports.saveMissingTranslation = async (req, res) => {
 exports.autoTranslate = async (req, res) => {
     try {
         const { text, from = 'en', toLangs = ['de', 'ar', 'tr', 'ru', 'fa'] } = req.body;
-        if (!text) return res.status(400).json({ success: false, error: 'Text is required for translation' });
+        if (!text) {return res.status(400).json({ success: false, error: 'Text is required for translation' });}
 
         const results = {};
-        
+
         // Loop through target languages and translate using free MyMemory API
         for (const lang of toLangs) {
             try {
                 // MyMemory has a 500 words/day limit for free anonymous usage, sufficient for key translations.
                 const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${lang}&de=test@example.com`);
                 const data = await response.json();
-                
+
                 if (data.responseData && data.responseData.translatedText) {
                     // MyMemory sometimes echoes the search query or includes "MYMEMORY WARNING"
                     const translated = data.responseData.translatedText;
@@ -213,7 +213,7 @@ exports.autoTranslate = async (req, res) => {
                 }
             } catch(e) {
                 console.error(`Translation fail for ${lang}:`, e.message);
-                results[lang] = text; 
+                results[lang] = text;
             }
         }
 

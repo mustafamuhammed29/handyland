@@ -36,8 +36,8 @@ const upload = process.env.CLOUDINARY_URL
 
 router.post('/upload', uploadLimiter, protect, upload.single('image'), (req, res) => {
     if (!req.file) {return res.status(400).json({ success: false, message: 'No file uploaded' });}
-    const imageUrl = (req.file.path && req.file.path.startsWith('http')) 
-        ? req.file.path 
+    const imageUrl = (req.file.path && req.file.path.startsWith('http'))
+        ? req.file.path
         : `/uploads/${req.file.filename}`;
     res.json({ success: true, imageUrl });
 });

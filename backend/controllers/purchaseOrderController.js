@@ -89,7 +89,7 @@ exports.createPurchaseOrder = async (req, res) => {
     try {
         req.body.createdBy = req.user._id;
         const po = await PurchaseOrder.create(req.body);
-        
+
         res.status(201).json({ success: true, data: po });
     } catch (error) {
         console.error('Error creating PO:', error);
@@ -119,7 +119,7 @@ exports.updatePurchaseOrderStatus = async (req, res) => {
         // If status changes to Received, automatically update inventory
         if (status === 'Received') {
             po.actualDeliveryDate = Date.now();
-            let missingItems = [];
+            const missingItems = [];
             const userName = req.user ? `${req.user.name}` : 'Admin';
 
             for (const item of po.items) {

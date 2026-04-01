@@ -176,11 +176,11 @@ exports.adminBulkSend = async (req, res) => {
 exports.updateMessageStatus = async (req, res) => {
     try {
         const updateData = {};
-        if (req.body.status) updateData.status = req.body.status;
-        if (req.body.isArchived !== undefined) updateData.isArchived = req.body.isArchived;
+        if (req.body.status) {updateData.status = req.body.status;}
+        if (req.body.isArchived !== undefined) {updateData.isArchived = req.body.isArchived;}
 
         const updatedMessage = await Message.findByIdAndUpdate(req.params.id, updateData, { new: true });
-        
+
         if (updatedMessage) {
             res.json(updatedMessage);
         } else {
