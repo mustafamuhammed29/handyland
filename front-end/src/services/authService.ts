@@ -4,8 +4,6 @@ import { User } from '../types';
 interface LoginResponse {
     success: boolean;
     token: string;
-    // FIXED: refreshToken is sent as HttpOnly Cookie by backend, not in response body
-    refreshToken?: never;
     user: User & { deviceInfo?: any };
 }
 interface RegisterResponse {

@@ -16,11 +16,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// FIXED M-4: Only store minimal, non-sensitive user data in localStorage
 const getSafeUserForStorage = (user: User) => ({
     id: user.id || (user as any)._id,
     name: user.name,
     email: user.email,
+    role: user.role,
+    preferredLanguage: user.preferredLanguage,
     isLoggedIn: true,
 });
 
@@ -47,15 +48,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [user?.preferredLanguage]);
 
-    //  Refresh Token Function
     const refreshAccessToken = async (): Promise<boolean> => {
         try {
-            const data = await authService.refreshToken();
-            if (data?.token) {
-                // FIXED: [Security root - removed localStorage.setItem('accessToken', ...)]
-                return true;
-            }
-            return false;
+            await authService.refreshToken();
+            return true;
         } catch (error) {
             return false;
         }
@@ -124,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const loginWithToken = async (token: string) => {
         try {
             const { user: userData } = await authService.getMe();
-            localStorage.setItem('user', JSON.stringify(userData));
+            localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(userData)));
             setUser(userData);
         } catch (error) {
             setUser(null);

@@ -49,10 +49,10 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
             id: phone.id,
             title: phone.model || (phone as any).name || 'Unknown Product',
             subtitle: `${phone.storage || ''} • ${phone.color || ''}`.replace(/^ • | • $/g, '') || '',
-            price: phone.price,
-            image: phone.images?.[0] || phone.imageUrl || '',
+            price: phone.price || 0,
+            image: getImageUrl(phone.images?.[0] || phone.imageUrl || ''),
             category: 'device',
-            stock: phone.stock ?? 0
+            stock: phone.stock || 0
         });
         addToast(`${phone.model} added to cart`, 'success');
     }, [addToCart, addToast]);
@@ -66,12 +66,12 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
         e.stopPropagation();
         toggleWishlist({
             id: product.id || String((product as any)._id),
-            title: product.model || (product as any).title,
-            price: product.price,
-            image: product.images?.[0] || product.imageUrl,
+            title: product.model || (product as any).title || (product as any).name || 'Unknown',
+            price: product.price || 0,
+            image: getImageUrl(product.images?.[0] || product.imageUrl || ''),
             category: 'device',
             quantity: 1,
-            stock: product.stock
+            stock: product.stock || 0
         });
     }, [toggleWishlist]);
 

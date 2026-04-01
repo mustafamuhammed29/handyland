@@ -22,13 +22,15 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
         const fetchData = async () => {
             try {
                 const [upsellRes, settingsRes] = await Promise.all([
-                    fetch('/api/accessories'),
+                    api.get('/api/accessories'),
                     api.get('/api/settings')
                 ]);
                 
-                if (upsellRes.ok) {
-                    const data = await upsellRes.json();
-                    setUpsellItems(data.slice(0, 3)); // show top 3
+                if (upsellRes) {
+                    const data = (upsellRes as any).data || upsellRes;
+                    if (Array.isArray(data)) {
+                        setUpsellItems(data.slice(0, 3)); // show top 3
+                    }
                 }
 
                 const sData = (settingsRes as any)?.data || settingsRes;
@@ -93,7 +95,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 {/* Image */}
                                 <div className="w-full sm:w-32 h-32 bg-white rounded-xl overflow-hidden flex-shrink-0 border border-slate-200 p-2">
                                     <img
-                                        src={item.image}
+                                        src={getImageUrl(item.image)}
                                         alt={item.title || (item as any).name}
                                         className="w-full h-full object-contain"
                                         onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150'; }}

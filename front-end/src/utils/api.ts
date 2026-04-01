@@ -30,8 +30,7 @@ api.interceptors.request.use(
         // If making a mutating request and token is missing, fetch it automatically
         if (!csrfToken && config.method && ['post', 'put', 'delete', 'patch'].includes(config.method.toLowerCase())) {
             try {
-                // Hitting any public GET endpoint generates the CSRF token
-                await axios.get('/api/', { baseURL: API_BASE_URL, withCredentials: true });
+                await axios.get('/api/auth/csrf', { baseURL: API_BASE_URL, withCredentials: true });
                 csrfToken = document.cookie
                     .split('; ')
                     .find(row => row.startsWith('XSRF-TOKEN='))

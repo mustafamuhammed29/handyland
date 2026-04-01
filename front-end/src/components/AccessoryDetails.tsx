@@ -147,7 +147,7 @@ export const AccessoryDetails: React.FC = () => {
                             </button>
                         </div>
                         
-                        {accessory.stock > 0 && accessory.stock < 5 && (
+                        {((accessory.stock || 0) > 0) && ((accessory.stock || 0) < 5) && (
                             <div className="text-orange-500 font-bold mb-4 text-sm animate-pulse">
                                 🔥 Limited Stock: Only {accessory.stock} left!
                             </div>
@@ -157,8 +157,8 @@ export const AccessoryDetails: React.FC = () => {
                             <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">
                                 {accessory.price}{t('currency', '€')}
                             </div>
-                            <div className={`text-sm mb-2 font-medium ${accessory.stock > 0 ? 'text-green-400' : 'text-red-500'}`}>
-                                {accessory.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                            <div className={`text-sm mb-2 font-medium ${(accessory.stock || 0) > 0 ? 'text-green-400' : 'text-red-500'}`}>
+                                {(accessory.stock || 0) > 0 ? 'In Stock' : 'Out of Stock'}
                             </div>
                         </div>
 
@@ -201,14 +201,14 @@ export const AccessoryDetails: React.FC = () => {
                                         title="Increase quantity" 
                                         aria-label="Increase quantity"
                                         onClick={() => {
-                                            if (quantity >= accessory.stock) {
-                                                addToast(`Maximum stock: ${accessory.stock}`, 'error');
+                                            if (quantity >= (accessory.stock || 0)) {
+                                                addToast(`Maximum stock: ${accessory.stock || 0}`, 'error');
                                             } else {
                                                 setQuantity(q => q + 1);
                                             }
                                         }}
                                         className="px-3 py-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-r-lg"
-                                        disabled={quantity >= accessory.stock}
+                                        disabled={quantity >= (accessory.stock || 0)}
                                     >+</button>
                                 </div>
                             </div>
@@ -236,14 +236,14 @@ export const AccessoryDetails: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={handleAddToCart}
-                                    disabled={accessory.stock === 0}
+                                    disabled={!accessory.stock || accessory.stock <= 0}
                                     className={`flex-1 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all
-                                        ${accessory.stock > 0
+                                        ${(accessory.stock || 0) > 0
                                             ? 'bg-brand-primary hover:bg-brand-secondary text-white shadow-lg shadow-brand-primary/20 hover:shadow-brand-secondary/40'
                                             : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}`}
                                 >
                                     <ShoppingCart className="w-5 h-5" />
-                                    {accessory.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                                    {((accessory.stock || 0) > 0) ? 'Add to Cart' : 'Out of Stock'}
                                 </button>
                             </div>
                         </div>

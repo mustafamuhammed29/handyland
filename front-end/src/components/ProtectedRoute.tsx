@@ -2,7 +2,7 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Loader } from 'lucide-react';
+import { GlobalLoader } from './GlobalLoader';
 
 interface ProtectedRouteProps {
     children?: React.ReactNode;
@@ -14,18 +14,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
     const location = useLocation();
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        );
+        return <GlobalLoader />;
     }
 
     if (!user) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    if (allowedRoles && !allowedRoles.includes(user.role)) {
+    if (allowedRoles && !allowedRoles.includes(user?.role)) {
         return <Navigate to="/dashboard" replace />;
     }
 

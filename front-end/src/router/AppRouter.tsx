@@ -140,17 +140,17 @@ export const AppRouter = () => {
                     <Routes location={location} key={location.pathname}>
                         <Route path="/" element={<PublicLayout lang={lang} user={user} cartCount={cart.length} />}>
                             <Route path="/" element={<PageTransition><Home lang={lang} /></PageTransition>} />
-                            <Route path="/marketplace" element={<Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense>} />
-                            <Route path="/marketplace/:id" element={<Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense>} />
+                            <Route path="/marketplace" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense></PageTransition>} />
+                            <Route path="/marketplace/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition>} />
                             <Route path="/orders/:id" element={<ProtectedRoute><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
-                            <Route path="/accessories" element={<PageTransition><Accessories lang={lang} /></PageTransition>} />
-                            <Route path="/repair" element={<PageTransition><Repair lang={lang} /></PageTransition>} />
-                            <Route path="/valuation" element={<PageTransition><Valuation lang={lang} /></PageTransition>} />
-                            <Route path="/sell/:quoteRef" element={<PageTransition><SellDevice /></PageTransition>} />
-                            <Route path="/products/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
+                            <Route path="/accessories" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Accessories lang={lang} /></Suspense></PageTransition>} />
+                            <Route path="/repair" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Repair lang={lang} /></Suspense></PageTransition>} />
+                            <Route path="/valuation" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Valuation lang={lang} /></Suspense></PageTransition>} />
+                            <Route path="/sell/:quoteRef" element={<PageTransition><Suspense fallback={<GlobalLoader />}><SellDevice /></Suspense></PageTransition>} />
+                            <Route path="/products/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition>} />
                             <Route path="/accessories/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><AccessoryDetails /></Suspense></PageTransition>} />
                             <Route path="/compare" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ComparePage /></Suspense></PageTransition>} />
-                            <Route path="contact" element={<PageTransition><Contact /></PageTransition>} />
+                            <Route path="contact" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Contact /></Suspense></PageTransition>} />
                             <Route path="checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
                             <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
                             <Route path="login" element={<PageTransition><Login /></PageTransition>} />
@@ -180,17 +180,17 @@ export const AppRouter = () => {
 
                         <Route element={<ProtectedRoute />}>
                             <Route path="dashboard" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Dashboard user={user} logout={logout} /></Suspense></PageTransition>} />
-                            <Route path="dashboard/valuations" element={<PageTransition><MyValuations /></PageTransition>} />
-                            <Route path="seller" element={<PageTransition><SellerStudio lang={lang} /></PageTransition>} />
+                            <Route path="dashboard/valuations" element={<PageTransition><Suspense fallback={<GlobalLoader />}><MyValuations /></Suspense></PageTransition>} />
+                            <Route path="seller" element={<PageTransition><Suspense fallback={<GlobalLoader />}><SellerStudio lang={lang} /></Suspense></PageTransition>} />
                         </Route>
 
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </AnimatePresence>
-
-                <CartDrawer />
-                <WhatsAppWidget />
             </Suspense>
+
+            <CartDrawer />
+            <WhatsAppWidget />
         </div>
     );
 };
