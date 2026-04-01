@@ -1,4 +1,16 @@
 const mongoose = require('mongoose');
+
+// ── XSS Protection ────────────────────────────────────────────────────────────
+// Escapes HTML special characters to prevent XSS injection in server-rendered HTML
+const escapeHtml = (str) => {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Transaction = require('../models/Transaction');
@@ -90,26 +102,38 @@ exports.createOrder = async (req, res) => {
         let totalAmount = 0;
         const orderItems = [];
 
+        // ── ATOMIC stock deduction (Issue #2 fix — prevents race conditions) ──────
+        // Using findOneAndUpdate with $gte condition ensures stock is checked and
+        // decremented atomically. If stock is insufficient, returns null (no update).
         for (const item of items) {
             let product;
             if (item.productType === 'Product') {
-                product = await Product.findById(item.product);
+                product = await Product.findOneAndUpdate(
+                    { _id: item.product, stock: { $gte: item.quantity } },
+                    { $inc: { stock: -item.quantity, sold: item.quantity } },
+                    { new: true }
+                );
             } else if (item.productType === 'Accessory') {
-                product = await Accessory.findById(item.product);
+                product = await Accessory.findOneAndUpdate(
+                    { _id: item.product, stock: { $gte: item.quantity } },
+                    { $inc: { stock: -item.quantity, sold: item.quantity } },
+                    { new: true }
+                );
             }
 
+            // null means either product not found OR insufficient stock (atomic check)
             if (!product) {
-                return res.status(404).json({
-                    success: false,
-                    message: `Product not found: ${item.product}`
-                });
-            }
-
-            // Check Stock
-            if (product.stock < item.quantity) {
+                // Rollback any stock already decremented in this loop
+                for (const rolled of orderItems) {
+                    if (rolled.productType === 'Product') {
+                        await Product.findByIdAndUpdate(rolled.product, { $inc: { stock: rolled.quantity, sold: -rolled.quantity } });
+                    } else if (rolled.productType === 'Accessory') {
+                        await Accessory.findByIdAndUpdate(rolled.product, { $inc: { stock: rolled.quantity, sold: -rolled.quantity } });
+                    }
+                }
                 return res.status(400).json({
                     success: false,
-                    message: `Insufficient stock for ${product.name}. Available: ${product.stock}`
+                    message: `Insufficient stock or product not found: ${item.product}`
                 });
             }
 
@@ -189,15 +213,7 @@ exports.createOrder = async (req, res) => {
                 await order.save();
             }
         }
-
-        // Update Stock and Sold
-        for (const item of orderItems) {
-            if (item.productType === 'Product') {
-                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
-            } else if (item.productType === 'Accessory') {
-                await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity, sold: item.quantity } });
-            }
-        }
+        // NOTE: Stock was already decremented atomically in the loop above (Issue #2 fix).
 
         // Record coupon usage (per-account tracking) — only for authenticated users
         if (couponCode && req.user) {
@@ -342,8 +358,8 @@ exports.cancelOrder = async (req, res) => {
             });
         }
 
-        // Make sure user is order owner
-        if (order.user.toString() !== req.user.id) {
+        // Make sure user is order owner (Issue #3 fix: guard against guest/null orders)
+        if (!order.user || order.user.toString() !== req.user.id) {
             return res.status(403).json({
                 success: false,
                 message: 'Not authorized to cancel this order'
@@ -460,7 +476,9 @@ exports.updateOrderStatus = async (req, res) => {
             order.status = status;
 
             // Rollback stock and sold count if order is cancelled by admin
-            if (status === 'cancelled' && oldStatus !== 'cancelled' && oldStatus !== 'pending' && oldStatus !== 'pending_payment') {
+            // Issue #6 fix: include 'pending' in rollback — stock is deducted at order creation
+            // for ALL statuses, so cancelling a 'pending' order must restore stock too.
+            if (status === 'cancelled' && oldStatus !== 'cancelled' && oldStatus !== 'pending_payment') {
                 for (const item of order.items) {
                     if (item.productType === 'Product') {
                         const Product = require('../models/Product');
@@ -626,18 +644,18 @@ exports.getInvoice = async (req, res) => {
                 <div class="bill-to">
                     <div class="bill-to-section">
                         <h3 style="border-bottom-color: ${invoiceSettings.primaryColor || '#eee'}; color: ${invoiceSettings.primaryColor || '#777'}">Bill To:</h3>
-                        <div>${order.shippingAddress.fullName}</div>
-                        <div>${order.shippingAddress.street}</div>
-                        <div>${order.shippingAddress.zipCode} ${order.shippingAddress.city}</div>
-                        <div>${order.shippingAddress.country}</div>
-                        <div>${order.shippingAddress.phone}</div>
+                        <div>${escapeHtml(order.shippingAddress.fullName)}</div>
+                        <div>${escapeHtml(order.shippingAddress.street)}</div>
+                        <div>${escapeHtml(order.shippingAddress.zipCode)} ${escapeHtml(order.shippingAddress.city)}</div>
+                        <div>${escapeHtml(order.shippingAddress.country)}</div>
+                        <div>${escapeHtml(order.shippingAddress.phone)}</div>
                     </div>
                     <div class="bill-to-section">
                         <h3 style="border-bottom-color: ${invoiceSettings.primaryColor || '#eee'}; color: ${invoiceSettings.primaryColor || '#777'}">Ship To:</h3>
-                        <div>${order.shippingAddress.fullName}</div>
-                        <div>${order.shippingAddress.street}</div>
-                        <div>${order.shippingAddress.zipCode} ${order.shippingAddress.city}</div>
-                        <div>${order.shippingAddress.country}</div>
+                        <div>${escapeHtml(order.shippingAddress.fullName)}</div>
+                        <div>${escapeHtml(order.shippingAddress.street)}</div>
+                        <div>${escapeHtml(order.shippingAddress.zipCode)} ${escapeHtml(order.shippingAddress.city)}</div>
+                        <div>${escapeHtml(order.shippingAddress.country)}</div>
                     </div>
                 </div>
 
@@ -654,8 +672,8 @@ exports.getInvoice = async (req, res) => {
                         ${order.items.map(item => `
                         <tr>
                             <td>
-                                <div><strong>${item.name}</strong></div>
-                                <div style="font-size: 12px; color: #777;">${item.productType}</div>
+                                <div><strong>${escapeHtml(item.name)}</strong></div>
+                                <div style="font-size: 12px; color: #777;">${escapeHtml(item.productType)}</div>
                             </td>
                             <td class="text-right">${item.price.toFixed(2)}€</td>
                             <td class="text-right">${item.quantity}</td>

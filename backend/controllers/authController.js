@@ -389,8 +389,7 @@ exports.forgotPassword = async (req, res) => {
 
             return res.status(500).json({
                 success: false,
-                message: 'Error sending email. Please try again later.',
-                error: emailError.message
+                message: 'Error sending email. Please try again later.'
             });
         }
     } catch (error) {
@@ -508,8 +507,8 @@ exports.resendVerification = async (req, res) => {
             console.error('Detailed Verification Email Error:', emailError);
             return res.status(500).json({
                 success: false,
-                message: 'Error sending email. Please try again later.',
-                error: emailError.message
+                message: 'Error sending email. Please try again later.'
+                // NOTE: emailError.message intentionally omitted — never leak internal details
             });
         }
     } catch (error) {
