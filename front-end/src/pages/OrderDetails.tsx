@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Truck, CheckCircle, Clock, MapPin, CreditCard, Repeat, AlertTriangle, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api';
 import { orderService } from '../services/orderService';
 import { useToast } from '../context/ToastContext';
@@ -15,6 +16,7 @@ export const OrderDetails = () => {
     const navigate = useNavigate();
     const { addToast } = useToast();
     const { addToCart } = useCart();
+    const { t } = useTranslation();
 
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
@@ -32,11 +34,11 @@ export const OrderDetails = () => {
                 if (res.success) {
                     setOrder(res.order);
                 } else {
-                    setError('Order not found');
+                    setError(t('orders.notFound'));
                 }
             } catch (err: any) {
                 console.error(err);
-                setError(err.message || 'Failed to load order');
+                setError(err.message || t('orders.notFound'));
             } finally {
                 setLoading(false);
             }
@@ -78,7 +80,7 @@ export const OrderDetails = () => {
             };
             addToCart(cartItem);
         });
-        addToast("All items added to cart", "success");
+        addToast(t('orders.addedToCart'), "success");
         // Open cart drawer? (optional, requires context update or ref)
     };
 
@@ -89,11 +91,11 @@ export const OrderDetails = () => {
             const res = await orderService.cancelOrder(order._id);
             if (res.success) {
                 setOrder({ ...order, status: 'cancelled' });
-                addToast('Order cancelled successfully', 'success');
+                addToast(t('orders.cancelSuccess'), 'success');
                 setShowCancelConfirm(false);
             }
         } catch (err: any) {
-            addToast(err.response?.data?.message || 'Failed to cancel order', 'error');
+            addToast(err.response?.data?.message || t('orders.cancelFailed'), 'error');
             setShowCancelConfirm(false);
         } finally {
             setCancelling(false);
@@ -122,13 +124,13 @@ export const OrderDetails = () => {
             
             if (data?.success) {
                 setReceiptUrl(data.receiptUrl);
-                addToast('Receipt uploaded successfully!', 'success');
+                addToast(t('orders.receiptUploaded'), 'success');
                 setOrder({ ...order, paymentReceipt: data.receiptUrl } as any);
             } else {
-                addToast(data?.message || 'Failed to upload receipt', 'error');
+                addToast(data?.message || t('orders.uploadError'), 'error');
             }
         } catch (err: any) {
-            addToast(err?.response?.data?.message || 'Error uploading receipt', 'error');
+            addToast(err?.response?.data?.message || t('orders.uploadError'), 'error');
         } finally {
             setUploading(false);
         }
@@ -146,10 +148,10 @@ export const OrderDetails = () => {
         return (
             <div className="min-h-screen pt-32 pb-12 px-4 max-w-3xl mx-auto text-center">
                 <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-white mb-2">Order Not Found</h2>
-                <p className="text-slate-400 mb-8">{error || "We couldn't find the order you're looking for."}</p>
+                <h2 className="text-2xl font-bold text-white mb-2">{t('orders.notFound')}</h2>
+                <p className="text-slate-400 mb-8">{error}</p>
                 <button onClick={() => navigate('/dashboard')} className="bg-slate-800 text-white px-6 py-2 rounded-xl hover:bg-slate-700">
-                    Back to Dashboard
+                    {t('orders.backToDashboard')}
                 </button>
             </div>
         );
@@ -165,7 +167,7 @@ export const OrderDetails = () => {
                     <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
                         <div className="flex items-center gap-2 text-amber-400 mb-4">
                             <AlertTriangle className="w-5 h-5" />
-                            <h3 className="text-lg font-bold">Cancel Order</h3>
+                            <h3 className="text-lg font-bold">{t('orders.cancelOrder')}</h3>
                         </div>
                         <p className="text-slate-300 text-sm mb-6">
                             Are you sure you want to cancel this order? This action cannot be undone.
@@ -176,14 +178,14 @@ export const OrderDetails = () => {
                                 className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors font-medium"
                                 disabled={cancelling}
                             >
-                                Keep Order
+                                {t('orders.keepOrder')}
                             </button>
                             <button
                                 onClick={handleCancelOrder}
                                 disabled={cancelling}
                                 className="flex-1 py-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/30 border border-transparent transition-colors font-bold"
                             >
-                                {cancelling ? 'Cancelling...' : 'Yes, Cancel it'}
+                                {cancelling ? t('orders.cancelling') : t('orders.confirmCancel')}
                             </button>
                         </div>
                     </div>
@@ -276,7 +278,7 @@ export const OrderDetails = () => {
                     {/* Items */}
                     <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 overflow-hidden">
                         <h2 className="font-bold text-white mb-4 flex items-center gap-2">
-                            <Package className="w-5 h-5 text-blue-400" /> Items
+                            <Package className="w-5 h-5 text-blue-400" /> {t('orders.items')}
                         </h2>
                         <div className="space-y-4">
                             {order.items.map((item: any, idx: number) => (
@@ -302,7 +304,7 @@ export const OrderDetails = () => {
                         </div>
                         <div className="pt-4 mt-4 border-t border-slate-800 flex justify-end">
                             <button onClick={handleBuyAgain} className="text-sm font-bold text-brand-primary hover:text-brand-primary flex items-center gap-2 transition-colors">
-                                <Repeat className="w-4 h-4" /> Buy Again
+                                <Repeat className="w-4 h-4" /> {t('orders.buyAgain')}
                             </button>
                         </div>
                     </div>
@@ -319,23 +321,23 @@ export const OrderDetails = () => {
                 <div className="space-y-6">
                     {/* Summary */}
                     <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
-                        <h2 className="font-bold text-white mb-4">Order Summary</h2>
+                        <h2 className="font-bold text-white mb-4">{t('checkout.orderSummary')}</h2>
                         <div className="space-y-3 text-sm">
                             <div className="flex justify-between text-slate-400">
-                                <span>Subtotal</span>
+                                <span>{t('orders.subtotal')}</span>
                                 <span>€{(order.totalAmount - (order.tax || 0) - (order.shippingFee || 0)).toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-slate-400">
-                                <span>Shipping</span>
+                                <span>{t('orders.shipping')}</span>
                                 <span>€{(order.shippingFee || 0).toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-slate-400">
-                                <span>Tax</span>
+                                <span>{t('orders.tax')}</span>
                                 <span>€{(order.tax || 0).toFixed(2)}</span>
                             </div>
                             <div className="h-px bg-slate-800 my-2"></div>
                             <div className="flex justify-between text-white font-bold text-lg">
-                                <span>Total</span>
+                                <span>{t('orders.total')}</span>
                                 <span>€{order.totalAmount.toFixed(2)}</span>
                             </div>
                         </div>
@@ -344,7 +346,7 @@ export const OrderDetails = () => {
                     {/* Shipping Address */}
                     <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
                         <h2 className="font-bold text-white mb-4 flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-emerald-400" /> Delivery Details
+                            <MapPin className="w-4 h-4 text-emerald-400" /> {t('orders.deliveryDetails')}
                         </h2>
                         {order.shippingAddress ? (
                             <div className="text-sm text-slate-400 space-y-1">
@@ -362,7 +364,7 @@ export const OrderDetails = () => {
                     {/* Payment Info */}
                     <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
                         <h2 className="font-bold text-white mb-4 flex items-center gap-2">
-                            <CreditCard className="w-4 h-4 text-yellow-400" /> Payment
+                            <CreditCard className="w-4 h-4 text-yellow-400" /> {t('orders.payment')}
                         </h2>
                         <div className="text-sm text-slate-400">
                             <div className="flex justify-between mb-1">
@@ -395,7 +397,7 @@ export const OrderDetails = () => {
                         onClick={() => orderService.downloadInvoice(order._id)}
                         className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors font-bold text-sm"
                     >
-                        Download Invoice
+                        {t('orders.downloadInvoice')}
                     </button>
                     {order.status === 'pending' && (
                         <button
@@ -403,15 +405,16 @@ export const OrderDetails = () => {
                             disabled={cancelling}
                             className="w-full py-3 border border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-500/30 rounded-xl transition-colors font-bold text-sm disabled:opacity-50"
                         >
-                            Cancel Order
+                            {t('orders.cancelOrder')}
                         </button>
                     )}
                     {order.status === 'delivered' && (
                         <button 
-                            onClick={() => addToast('Return functionality is coming soon!', 'info')}
-                            className="w-full py-3 border border-slate-800 text-slate-400 hover:text-blue-400 hover:border-blue-500/30 rounded-xl transition-colors font-bold text-sm"
+                            disabled
+                            title={t('common.comingSoon')}
+                            className="w-full py-3 border border-slate-800 text-slate-500 cursor-not-allowed rounded-xl font-bold text-sm"
                         >
-                            Request Return / Refund
+                            {t('orders.requestRefund')}
                         </button>
                     )}
                 </div>

@@ -5,14 +5,15 @@ import {
     AlertTriangle, ShieldCheck, X, Home, Plus, Loader2
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api';
 import { authService } from '../services/authService';
 
 // IBAN validation for DE/AT/CH
-const validateIban = (iban: string): { valid: boolean; message?: string } => {
+const validateIban = (iban: string, t: any): { valid: boolean; message?: string } => {
     const cleaned = iban.replace(/\s/g, '').toUpperCase();
     if (cleaned.length < 15 || cleaned.length > 34) {
-        return { valid: false, message: 'IBAN muss zwischen 15 und 34 Zeichen lang sein' };
+        return { valid: false, message: t('sellDevice.ibanLength', { length: 34 }) }; // Just generic fallback for max length if needed, handled properly in translation
     }
     const countryCode = cleaned.substring(0, 2);
     const lengths: Record<string, number> = { DE: 22, AT: 20, CH: 21 };
@@ -23,17 +24,17 @@ const validateIban = (iban: string): { valid: boolean; message?: string } => {
     };
 
     if (!lengths[countryCode]) {
-        return { valid: false, message: 'We currently only support IBANs from Germany (DE), Austria (AT), and Switzerland (CH)' };
+        return { valid: false, message: t('sellDevice.ibanCountryOnly') };
     }
 
     if (lengths[countryCode] && cleaned.length !== lengths[countryCode]) {
-        return { valid: false, message: `${countryCode} IBAN muss genau ${lengths[countryCode]} Zeichen lang sein` };
+        return { valid: false, message: t('sellDevice.ibanCountryError', { country: countryCode, length: lengths[countryCode] }) };
     }
     if (patterns[countryCode] && !patterns[countryCode].test(cleaned)) {
-        return { valid: false, message: `Ungültiges Format für ${countryCode} IBAN` };
+        return { valid: false, message: t('sellDevice.ibanFormat') };
     }
     if (!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(cleaned)) {
-        return { valid: false, message: 'Ungültiges IBAN-Format' };
+        return { valid: false, message: t('sellDevice.ibanFormat') };
     }
     return { valid: true };
 };
@@ -53,6 +54,7 @@ export const SellDevice = () => {
     const { quoteRef } = useParams();
     const navigate = useNavigate();
     const { addToast } = useToast();
+    const { t } = useTranslation();
 
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,7 +116,7 @@ export const SellDevice = () => {
 
             if (isTemp && !resolvedQuote) {
                 // Temp quote with no session data = expired/unusable, restart
-                addToast('Dein Angebot ist abgelaufen. Bitte starte eine neue Bewertung.', 'error');
+                addToast(t('sellDevice.offerExpired'), 'error');
                 setTimeout(() => navigate('/valuation'), 2500);
                 setLoading(false);
                 return;
@@ -128,12 +130,12 @@ export const SellDevice = () => {
                         resolvedQuote = data.quote;
                         setQuote(data.quote);
                     } else if (!resolvedQuote) {
-                        addToast('Ungültiges oder abgelaufenes Angebot', 'error');
+                        addToast(t('sellDevice.offerExpired'), 'error');
                         setTimeout(() => navigate('/valuation'), 3000);
                     }
                 } catch {
                     if (!resolvedQuote) {
-                        addToast('Angebot nicht gefunden. Bitte erstelle ein neues Angebot.', 'error');
+                        addToast(t('sellDevice.offerExpired'), 'error');
                         setTimeout(() => navigate('/valuation'), 3000);
                     }
                 }
@@ -202,7 +204,7 @@ export const SellDevice = () => {
         const { name, value } = e.target;
         if (name === 'iban') {
             setFormData({ ...formData, iban: formatIban(value) });
-            const result = validateIban(value);
+            const result = validateIban(value, t);
             setErrors(prev => result.valid ? { ...prev, iban: '' } : { ...prev, iban: result.message || '' });
         } else {
             setFormData({ ...formData, [name]: value });
@@ -212,14 +214,14 @@ export const SellDevice = () => {
 
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
-        if (!formData.fullName.trim()) newErrors.fullName = 'Name ist erforderlich';
-        if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Gültige E-Mail erforderlich';
-        if (!formData.address.trim()) newErrors.address = 'Adresse ist erforderlich';
-        if (!formData.city.trim()) newErrors.city = 'Stadt ist erforderlich';
-        if (!formData.postalCode.trim()) newErrors.postalCode = 'Postleitzahl ist erforderlich';
-        if (!formData.bankName.trim()) newErrors.bankName = 'Bankname ist erforderlich';
-        const ibanResult = validateIban(formData.iban);
-        if (!ibanResult.valid) newErrors.iban = ibanResult.message || 'Ungültige IBAN';
+        if (!formData.fullName.trim()) newErrors.fullName = t('common.required');
+        if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = t('common.required');
+        if (!formData.address.trim()) newErrors.address = t('common.required');
+        if (!formData.city.trim()) newErrors.city = t('common.required');
+        if (!formData.postalCode.trim()) newErrors.postalCode = t('common.required');
+        if (!formData.bankName.trim()) newErrors.bankName = t('common.required');
+        const ibanResult = validateIban(formData.iban, t);
+        if (!ibanResult.valid) newErrors.iban = ibanResult.message || t('sellDevice.ibanFormat');
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -239,14 +241,14 @@ export const SellDevice = () => {
             if (data.success) {
                 setShowConfirm(false);
                 sessionStorage.removeItem('pendingValuationQuote');
-                addToast('Verkauf bestätigt! Du erhältst eine E-Mail mit dem Versandlabel.', 'success');
+                addToast(t('sellDevice.saleConfirmed'), 'success');
                 setTimeout(() => navigate('/dashboard'), 3000);
             } else {
-                addToast(data.message || 'Fehler bei der Bestätigung', 'error');
+                addToast(data.message || t('common.error'), 'error');
                 setIsSubmitting(false);
             }
         } catch (err: any) {
-            const errorMsg = err.response?.data?.message || 'Netzwerkfehler. Bitte versuche es erneut.';
+            const errorMsg = err.response?.data?.message || t('common.error');
             addToast(errorMsg, 'error');
             setIsSubmitting(false);
         }
@@ -276,31 +278,31 @@ export const SellDevice = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2 text-amber-400">
                                 <AlertTriangle className="w-5 h-5" />
-                                <h3 className="text-lg font-bold">Bankdaten prüfen</h3>
+                                <h3 className="text-lg font-bold">{t('sellDevice.checkBankDetails')}</h3>
                             </div>
-                            <button onClick={() => setShowConfirm(false)} title="Schließen" className="text-slate-500 hover:text-white">
+                            <button onClick={() => setShowConfirm(false)} title={t('common.close')} className="text-slate-500 hover:text-white">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
                         <p className="text-slate-400 text-sm mb-4">
-                            Bitte überprüfe deine Bankdaten sorgfältig. Falsche Angaben können deine Auszahlung verzögern.
+                            {t('sellDevice.verifyBankWarning')}
                         </p>
                         <div className="bg-slate-950 rounded-xl p-4 mb-4 space-y-2 text-sm">
                             <div className="flex justify-between">
-                                <span className="text-slate-500">Name:</span>
+                                <span className="text-slate-500">{t('sellDevice.fullName')}:</span>
                                 <span className="text-white font-medium">{formData.fullName}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-500">Versandadresse:</span>
+                                <span className="text-slate-500">{t('sellDevice.shippingAddress')}:</span>
                                 <span className="text-white text-right">{formData.address}, {formData.postalCode} {formData.city}</span>
                             </div>
                             <div className="h-px bg-slate-800 my-1"></div>
                             <div className="flex justify-between">
-                                <span className="text-slate-500">Bank:</span>
+                                <span className="text-slate-500">{t('sellDevice.bankName')}:</span>
                                 <span className="text-white font-medium">{formData.bankName}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-500">IBAN:</span>
+                                <span className="text-slate-500">{t('sellDevice.ibanLabel')}:</span>
                                 <span className="text-white font-mono text-xs">{maskIban(formData.iban)}</span>
                             </div>
                             <div className="flex justify-between">
@@ -313,7 +315,7 @@ export const SellDevice = () => {
                                 onClick={() => setShowConfirm(false)}
                                 className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors font-medium"
                             >
-                                Zurück
+                                {t('sellDevice.backBtn')}
                             </button>
                             <button
                                 onClick={handleSubmit}
@@ -321,7 +323,7 @@ export const SellDevice = () => {
                                 className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
                             >
                                 {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
-                                {isSubmitting ? 'Wird bearbeitet...' : 'Bestätigen'}
+                                {isSubmitting ? t('sellDevice.processing') : t('sellDevice.confirmBtn')}
                             </button>
                         </div>
                     </div>
@@ -331,9 +333,9 @@ export const SellDevice = () => {
             <div className="max-w-3xl mx-auto">
                 {/* Header */}
                 <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-bold text-white mb-2">Verkauf abschließen</h1>
+                    <h1 className="text-3xl font-bold text-white mb-2">{t('sellDevice.completeOrder')}</h1>
                     <p className="text-slate-400">
-                        Referenz: <span className="text-brand-primary font-mono mr-4">{quoteRef}</span>
+                        Reference: <span className="text-brand-primary font-mono mr-4">{quoteRef}</span>
                         {quote && <span className="text-emerald-400 font-bold">Angebot: €{quote.price}</span>}
                     </p>
                 </div>
@@ -344,7 +346,7 @@ export const SellDevice = () => {
                         {/* Contact Info */}
                         <div>
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <User className="w-5 h-5 text-brand-primary" /> Kontaktdaten
+                                <User className="w-5 h-5 text-brand-primary" /> {t('sellDevice.contactInfo')}
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -380,13 +382,13 @@ export const SellDevice = () => {
                         {/* Shipping Address */}
                         <div>
                             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-purple-400" /> Versandadresse
+                                <MapPin className="w-5 h-5 text-purple-400" /> {t('sellDevice.shippingAddress')}
                             </h3>
 
                             {/* Saved Addresses */}
                             {savedAddresses.length > 0 && (
                                 <div className="mb-4">
-                                    <p className="text-sm text-slate-400 mb-3">Gespeicherte Adressen:</p>
+                                    <p className="text-sm text-slate-400 mb-3">{t('sellDevice.savedAddresses')}:</p>
                                     <div className="grid gap-3 md:grid-cols-2">
                                         {savedAddresses.map((addr: any) => (
                                             <button
@@ -432,7 +434,7 @@ export const SellDevice = () => {
                                             <div className="flex items-center gap-3">
                                                 <Plus className={`w-4 h-4 ${useManual ? 'text-brand-primary' : 'text-slate-500'}`} />
                                                 <span className={`text-sm font-medium ${useManual ? 'text-brand-primary' : 'text-slate-400'}`}>
-                                                    Andere Adresse eingeben
+                                                    {t('sellDevice.manualEntry')}
                                                 </span>
                                             </div>
                                         </button>
@@ -497,13 +499,13 @@ export const SellDevice = () => {
                         {/* Payout / Bank Details */}
                         <div>
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <CreditCard className="w-5 h-5 text-emerald-400" /> Auszahlungsdaten (Banküberweisung)
+                                <CreditCard className="w-5 h-5 text-emerald-400" /> Payout (Bank Transfer)
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <input
                                         name="bankName"
-                                        placeholder="Bankname"
+                                        placeholder={t('sellDevice.bankName')}
                                         required
                                         value={formData.bankName}
                                         className={`w-full bg-slate-950 border ${errors.bankName ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-brand-primary outline-none`}
@@ -514,16 +516,16 @@ export const SellDevice = () => {
                                 <div>
                                     <input
                                         name="iban"
-                                        placeholder="IBAN (z.B. DE89 3704 0044 0532 0130 00)"
+                                        placeholder={t('sellDevice.ibanLabel')}
                                         required
                                         value={formData.iban}
                                         className={`w-full bg-slate-950 border ${errors.iban ? 'border-red-500' : 'border-slate-700'} rounded-lg p-3 text-white font-mono text-sm focus:border-brand-primary outline-none`}
                                         onChange={handleChange}
                                     />
                                     {errors.iban && <p className="text-red-400 text-xs mt-1">{errors.iban}</p>}
-                                    {formData.iban && !errors.iban && validateIban(formData.iban).valid && (
+                                    {formData.iban && !errors.iban && validateIban(formData.iban, t).valid && (
                                         <p className="text-emerald-400 text-xs mt-1 flex items-center gap-1">
-                                            <CheckCircle2 className="w-3 h-3" /> IBAN gültig
+                                            <CheckCircle2 className="w-3 h-3" /> {t('sellDevice.ibanValid')}
                                         </p>
                                     )}
                                 </div>
@@ -534,9 +536,8 @@ export const SellDevice = () => {
                         <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 flex items-start gap-4">
                             <Truck className="w-6 h-6 text-brand-primary shrink-0" />
                             <div className="text-sm text-slate-400">
-                                <p className="text-white font-bold mb-1">Kostenloser Versand inklusive</p>
-                                Wir schicken dir sofort ein vorfrankiertes Versandetikett per E-Mail.
-                                Sende dein Gerät innerhalb von <span className="text-amber-400 font-semibold">48 Stunden</span>, um deinen Preis zu sichern.
+                                <p className="text-white font-bold mb-1">{t('sellDevice.freeShipping')}</p>
+                                {t('sellDevice.freeShippingDesc', { hours: 48 })}
                             </div>
                         </div>
 
@@ -544,7 +545,7 @@ export const SellDevice = () => {
                             type="submit"
                             className="w-full py-4 rounded-xl bg-gradient-to-r from-brand-secondary to-brand-primary hover:from-brand-secondary/90 hover:to-brand-primary/90 text-white font-bold text-lg shadow-lg shadow-brand-primary/20 transition-all flex items-center justify-center gap-2"
                         >
-                            Prüfen & Verkauf bestätigen <ArrowRight className="w-5 h-5" />
+                            {t('sellDevice.completeOrder')} <ArrowRight className="w-5 h-5" />
                         </button>
                     </form>
                 </div>

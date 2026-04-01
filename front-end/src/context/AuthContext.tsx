@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
     // FIXED: Added error handling to loginWithToken (FIX 11)
-    const loginWithToken = async (token: string) => {
+    const loginWithToken = useCallback(async (token: string) => {
         try {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             const { user: userData } = await authService.getMe();
@@ -130,9 +130,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             delete api.defaults.headers.common['Authorization'];
             throw new Error('Social login failed. Please try again.');
         }
-    };
+    }, []);
 
-    const login = async (email: string, password: string, redirectTo?: string) => {
+    const login = useCallback(async (email: string, password: string, redirectTo?: string) => {
 
         try {
             const data = await authService.login(email, password);
@@ -169,9 +169,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (error) {
             throw error;
         }
-    };
+    }, [navigate]);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         setUser(null);
         sessionStorage.removeItem('user');
         // FIXED: [Removed localStorage.removeItem for tokens as they are cleared server-side via cookies]
@@ -180,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         navigate('/login');
-    };
+    }, [navigate]);
 
     return (
         <AuthContext.Provider value={{ user, setUser, login, loginWithToken, logout, isAuthenticated: !!user, loading }}>
