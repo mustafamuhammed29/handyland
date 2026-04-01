@@ -14,6 +14,37 @@ export const api = axios.create({
     timeout: 10000
 });
 
+// Request interceptor for CSRF Protection
+api.interceptors.request.use(
+    async (config) => {
+        let csrfToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('XSRF-TOKEN='))
+            ?.split('=')?.[1];
+
+        if (!csrfToken && config.method && ['post', 'put', 'delete', 'patch'].includes(config.method.toLowerCase())) {
+            try {
+                await axios.get('/api/auth/csrf', { baseURL: API_URL, withCredentials: true });
+                csrfToken = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('XSRF-TOKEN='))
+                    ?.split('=')?.[1];
+            } catch (err) {
+                console.error('Failed to pre-fetch CSRF token', err);
+            }
+        }
+
+        if (csrfToken) {
+            config.headers['X-XSRF-Token'] = csrfToken;
+        }
+
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 // Response Interceptor (Handle 401)
 api.interceptors.response.use(
     (response) => response,

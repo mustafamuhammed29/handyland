@@ -108,26 +108,26 @@ const applySecurityMiddleware = (app) => {
     app.use(compression());
     app.use(corsMiddleware);
     app.use('/api/', generalLimiter);
-    
+
     // Bypass json parser for stripe webhook
     app.use((req, res, next) => {
-        if (req.originalUrl.includes('/api/payment/webhook')) return next();
+        if (req.originalUrl.includes('/api/payment/webhook')) {return next();}
         return express.json({ limit: '10mb' })(req, res, next);
     });
-    
+
     // Bypass urlencoded for stripe webhook
     app.use((req, res, next) => {
-        if (req.originalUrl.includes('/api/payment/webhook')) return next();
+        if (req.originalUrl.includes('/api/payment/webhook')) {return next();}
         return express.urlencoded({ extended: false, limit: '10mb' })(req, res, next);
     });
     app.use(mongoSanitize);
-    
+
     // Bypass xss for stripe webhook
     app.use((req, res, next) => {
-        if (req.originalUrl.includes('/api/payment/webhook')) return next();
+        if (req.originalUrl.includes('/api/payment/webhook')) {return next();}
         return xssSanitize(req, res, next);
     });
-    
+
     app.use(cookieParser());
     app.use(csrfMiddleware);
 };

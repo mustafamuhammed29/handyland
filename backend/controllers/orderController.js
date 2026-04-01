@@ -153,7 +153,7 @@ exports.createOrder = async (req, res) => {
         if (req.user) {
             const User = require('../models/User');
             const Settings = require('../models/Settings');
-            
+
             const currentUser = await User.findById(req.user._id);
             const settingsDoc = await Settings.findOne() || {};
             const loyaltyConfig = settingsDoc.features?.loyalty || {
@@ -164,10 +164,10 @@ exports.createOrder = async (req, res) => {
                 goldThreshold: 2000,
                 platinumThreshold: 5000
             };
-            
+
             if (currentUser && loyaltyConfig.enabled !== false) {
                 // Deduct redeemed points (if any)
-                let pointsToDeduct = req.body.appliedPoints || 0;
+                const pointsToDeduct = req.body.appliedPoints || 0;
                 let newLoyaltyPoints = (currentUser.loyaltyPoints || 0) - pointsToDeduct;
 
                 // Grant points for this purchase
@@ -176,14 +176,14 @@ exports.createOrder = async (req, res) => {
 
                 // Simple auto-tiering mechanism based on points thresholds
                 let newLevel = 1; // Regular
-                if (newLoyaltyPoints >= (loyaltyConfig.platinumThreshold || 5000)) newLevel = 4; // Platinum
-                else if (newLoyaltyPoints >= (loyaltyConfig.goldThreshold || 2000)) newLevel = 3; // Gold
-                else if (newLoyaltyPoints >= (loyaltyConfig.silverThreshold || 500)) newLevel = 2; // Silver
+                if (newLoyaltyPoints >= (loyaltyConfig.platinumThreshold || 5000)) {newLevel = 4;} // Platinum
+                else if (newLoyaltyPoints >= (loyaltyConfig.goldThreshold || 2000)) {newLevel = 3;} // Gold
+                else if (newLoyaltyPoints >= (loyaltyConfig.silverThreshold || 500)) {newLevel = 2;} // Silver
 
                 currentUser.loyaltyPoints = newLoyaltyPoints;
                 currentUser.membershipLevel = newLevel;
                 await currentUser.save();
-                
+
                 // Add tracking information to the order (for UI display)
                 order.pointsEarned = pointsEarned;
                 await order.save();
@@ -610,8 +610,8 @@ exports.getInvoice = async (req, res) => {
             <body>
                 <div class="invoice-header">
                     <div class="logo">
-                        ${invoiceSettings.logoUrl 
-                            ? `<img src="${invoiceSettings.logoUrl.startsWith('http') ? invoiceSettings.logoUrl : `${req.protocol}://${req.get('host')}${invoiceSettings.logoUrl}`}" alt="Logo" style="max-height: 40px; object-fit: contain;" />` 
+                        ${invoiceSettings.logoUrl
+                            ? `<img src="${invoiceSettings.logoUrl.startsWith('http') ? invoiceSettings.logoUrl : `${req.protocol}://${req.get('host')}${invoiceSettings.logoUrl}`}" alt="Logo" style="max-height: 40px; object-fit: contain;" />`
                             : `<span style="color: #000">${(invoiceSettings.companyName || 'HandyLand').replace('Land', '')}</span><span style="color: ${invoiceSettings.primaryColor || '#00bcd4'}">Land</span>`
                         }
                     </div>

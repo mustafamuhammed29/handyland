@@ -40,7 +40,7 @@ const initSocket = (httpServer) => {
     io.on('connection', (socket) => {
         // Join user-specific room — only allowed if token matches the requested userId
         socket.on('join', (userId) => {
-            if (!userId) return;
+            if (!userId) {return;}
 
             const verified = socket.verifiedUser;
             if (!verified || (verified.id !== userId && verified.role !== 'admin')) {

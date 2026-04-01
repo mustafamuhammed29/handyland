@@ -98,7 +98,7 @@ exports.getInventoryItems = async (req, res) => {
 
         // Aggregation pipeline starting with Products
         let pipeline = [];
-        
+
         // Ensure itemType is appended in each collection
         if (typeFilter === 'All' || typeFilter === 'Product') {
             pipeline.push({ $addFields: { itemType: 'Product' } });
@@ -130,11 +130,11 @@ exports.getInventoryItems = async (req, res) => {
                 pipeline = partsPipeline; // if only repair requested, start with this
             }
         }
-        
+
         // If typeFilter is Accessory or RepairPart and NOT All, we need to run aggregate on the specific model
         let TargetModel = Product;
-        if (typeFilter === 'Accessory') TargetModel = Accessory;
-        if (typeFilter === 'RepairPart') TargetModel = RepairPart;
+        if (typeFilter === 'Accessory') {TargetModel = Accessory;}
+        if (typeFilter === 'RepairPart') {TargetModel = RepairPart;}
 
         // Apply filters
         if (Object.keys(matchStage).length > 0) {

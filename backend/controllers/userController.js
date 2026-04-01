@@ -17,7 +17,7 @@ exports.updateUserProfile = async (req, res) => {
         user.name = req.body.name || user.name;
         user.phone = req.body.phone || user.phone;
         user.address = req.body.address || user.address;
-        
+
         if (req.body.avatar !== undefined) {
             user.avatar = req.body.avatar;
         }

@@ -100,9 +100,9 @@ exports.login = async (req, res) => {
         });
     } catch (error) {
         let status = 400;
-        if (error.isBlocked) status = 403;
-        else if (error.message.includes('locked')) status = 423;
-        else if (error.message.includes('verify') || error.isVerified === false) status = 401;
+        if (error.isBlocked) {status = 403;}
+        else if (error.message.includes('locked')) {status = 423;}
+        else if (error.message.includes('verify') || error.isVerified === false) {status = 401;}
 
         res.status(status).json({
             success: false,

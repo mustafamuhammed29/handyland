@@ -3,7 +3,7 @@ const Accessory = require('../models/Accessory');
 exports.getAccessories = async (req, res) => {
     try {
         const query = req.query.includeOutOfStock === 'true' ? {} : { stock: { $gt: 0 } };
-        
+
         if (req.query.search) {
             const escapedSearch = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             query.$or = [

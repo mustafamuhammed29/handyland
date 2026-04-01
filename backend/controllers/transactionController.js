@@ -9,7 +9,7 @@ const fs = require('fs');
 const receiptStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const dir = path.join(__dirname, '../uploads/receipts');
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        if (!fs.existsSync(dir)) {fs.mkdirSync(dir, { recursive: true });}
         cb(null, dir);
     },
     filename: (req, file, cb) => {
@@ -23,8 +23,8 @@ exports.receiptUpload = multer({
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
     fileFilter: (req, file, cb) => {
         const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-        if (allowed.includes(file.mimetype)) cb(null, true);
-        else cb(new Error('Nur Bilder (JPG, PNG, WebP) oder PDF erlaubt'), false);
+        if (allowed.includes(file.mimetype)) {cb(null, true);}
+        else {cb(new Error('Nur Bilder (JPG, PNG, WebP) oder PDF erlaubt'), false);}
     }
 });
 
@@ -305,7 +305,7 @@ exports.createBankTransferTopUp = async (req, res) => {
         }
 
         const user = await User.findById(req.user.id);
-        if (!user) return res.status(404).json({ success: false, message: 'Benutzer nicht gefunden' });
+        if (!user) {return res.status(404).json({ success: false, message: 'Benutzer nicht gefunden' });}
 
         // Create a *pending* transaction — NO balance credited yet
         const transaction = await Transaction.create({
@@ -344,7 +344,7 @@ exports.uploadTransactionReceipt = async (req, res) => {
 
         if (!transaction) {
             // Clean up uploaded file if transaction not found
-            if (req.file) fs.unlink(req.file.path, () => {});
+            if (req.file) {fs.unlink(req.file.path, () => {});}
             return res.status(404).json({ success: false, message: 'Transaktion nicht gefunden oder bereits abgeschlossen' });
         }
 
@@ -355,7 +355,7 @@ exports.uploadTransactionReceipt = async (req, res) => {
         // Delete old receipt if exists
         if (transaction.receiptUrl) {
             const oldPath = path.join(__dirname, '..', transaction.receiptUrl);
-            if (fs.existsSync(oldPath)) fs.unlink(oldPath, () => {});
+            if (fs.existsSync(oldPath)) {fs.unlink(oldPath, () => {});}
         }
 
         const receiptUrl = `/uploads/receipts/${req.file.filename}`;
@@ -369,7 +369,7 @@ exports.uploadTransactionReceipt = async (req, res) => {
         });
 
     } catch (error) {
-        if (req.file) fs.unlink(req.file.path, () => {});
+        if (req.file) {fs.unlink(req.file.path, () => {});}
         console.error('Upload receipt error:', error);
         res.status(500).json({ success: false, message: 'Fehler beim Hochladen des Belegs', error: error.message });
     }
