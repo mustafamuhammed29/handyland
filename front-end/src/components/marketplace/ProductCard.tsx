@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Cpu, Signal, Heart, ShoppingCart, Layers } from 'lucide-react';
+import { Cpu, Signal, Heart, ShoppingCart, Layers, BarChart2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PhoneListing } from '../../types';
 import { formatPrice } from '../../utils/formatPrice';
@@ -26,6 +27,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     onSelect
 }) => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     const getProductImage = (p: any) => {
         if (p.images && p.images.length > 0) return getImageUrl(p.images[0]);
@@ -77,6 +79,13 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                             className={`px-4 py-2 border rounded-lg transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait ${isWishlisted ? 'bg-red-500/10 border-red-500/30 text-red-600 dark:bg-red-500/20 dark:border-red-500/50 dark:text-red-500' : 'border-slate-200 bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700'}`}
                         >
                             <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+                        </button>
+                        <button
+                            title={t('compare.addDevice', 'Add to compare')}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/compare?devices=${(product as any)._id || product.id}`); }}
+                            className="px-4 py-2 border rounded-lg transition-all text-sm flex items-center gap-2 border-slate-200 bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700"
+                        >
+                            <BarChart2 className="w-4 h-4" />
                         </button>
                         <button onClick={() => onSelect(product)} className="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-900 dark:border-slate-700 dark:hover:bg-slate-800 dark:text-white font-bold rounded-lg transition-all text-sm">
                             {t('common.learnMore')}
@@ -146,6 +155,14 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                             className={`p-2 flex-1 md:flex-none flex justify-center items-center md:p-3 rounded-lg md:rounded-xl transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-wait ${isWishlisted ? 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-500 border-red-500/30 hover:bg-red-500/20 dark:hover:bg-red-500/30' : 'bg-slate-100 text-slate-500 border-slate-200 hover:text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:text-white dark:hover:bg-slate-700'}`}
                         >
                             <Heart className={`w-4 h-4 md:w-5 md:h-5 transition-transform ${isWishlisted ? 'fill-current' : ''}`} />
+                        </motion.button>
+                        <motion.button
+                            whileTap={{ scale: 0.9 }}
+                            title={t('compare.addDevice', 'Add to compare')}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/compare?devices=${(product as any)._id || product.id}`); }}
+                            className="p-2 flex-1 md:flex-none flex justify-center items-center md:p-3 rounded-lg md:rounded-xl transition-all duration-300 group/btn border bg-slate-100 text-slate-500 border-slate-200 hover:text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:text-white dark:hover:bg-slate-700"
+                        >
+                            <BarChart2 className="w-4 h-4 md:w-5 md:h-5 transition-transform" />
                         </motion.button>
                         <motion.button
                             whileTap={{ scale: 0.9 }}

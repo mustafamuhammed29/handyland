@@ -135,12 +135,16 @@
     "step1": "اختر المواصفات",
     "step2": "سعة التخزين",
     "step3": "فحص الحالة",
+    "step4BodyTitle": "الحالة المادية",
+    "step5FuncTitle": "الفحص الوظيفي",
     "next": "التالي",
     "back": "رجوع",
     "submit": "احصل على التقييم",
     "result": "القيمة المقدرة",
     "sellNow": "بع الآن",
-    "saveValuation": "حفظ التقييم"
+    "saveValuation": "حفظ التقييم",
+    "yourOffer": "عرضك",
+    "newValuation": "تقييم جديد"
   },
   "accessories": {
     "title": "الإكسسوارات",

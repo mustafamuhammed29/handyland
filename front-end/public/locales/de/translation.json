@@ -144,12 +144,16 @@
     "step1": "Konfiguration auswählen",
     "step2": "Speicherkapazität",
     "step3": "Zustandsprüfung",
+    "step4BodyTitle": "Physischer Zustand",
+    "step5FuncTitle": "Funktionsprüfung",
     "next": "Weiter",
     "back": "Zurück",
     "submit": "Wert berechnen",
     "result": "Geschätzter Wert",
     "sellNow": "Jetzt verkaufen",
-    "saveValuation": "Bewertung speichern"
+    "saveValuation": "Bewertung speichern",
+    "yourOffer": "Ihr Angebot",
+    "newValuation": "Neue Bewertung"
   },
   "accessories": {
     "title": "Zubehör",
