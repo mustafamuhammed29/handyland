@@ -41,7 +41,8 @@ const UserSchema = new mongoose.Schema({
     phone: {
         type: String,
         trim: true,
-        sparse: true // allow multiple null values
+        sparse: true, // allow multiple null values
+        match: [/^\+?[1-9]\d{1,14}$/, 'Please add a valid phone number']
     },
     // Social Auth
     provider: {
@@ -121,7 +122,8 @@ UserSchema.pre('save', async function () {
         // 1. Encrypt Refresh Token
         if (this.isModified('refreshToken') && this.refreshToken) {
             const crypto = require('crypto');
-            this.refreshToken = crypto.createHash('sha256').update(this.refreshToken).digest('hex');
+            const secret = process.env.REFRESH_TOKEN_SECRET || 'fallback_secret';
+            this.refreshToken = crypto.createHmac('sha256', secret).update(this.refreshToken).digest('hex');
         }
 
         // 2. Hash Password
@@ -145,6 +147,7 @@ UserSchema.methods.generateVerificationToken = function () {
     const crypto = require('crypto');
     const token = crypto.randomBytes(20).toString('hex');
     this.verificationToken = crypto.createHash('sha256').update(token).digest('hex');
+    this.verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
     return token;
 };
 

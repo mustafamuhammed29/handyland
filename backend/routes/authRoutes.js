@@ -36,6 +36,20 @@ const loginLimiter = isDevelopment
         }
     });
 
+const registerLimiter = isDevelopment
+    ? (req, res, next) => {
+        console.log('⚠️  Register rate limiting disabled in development mode');
+        next();
+    }
+    : rateLimit({
+        windowMs: 60 * 60 * 1000, // 1 hour window
+        max: 5, // limit each IP to 5 registrations per hour
+        message: {
+            success: false,
+            message: 'Too many accounts created from this IP, please try again after an hour'
+        }
+    });
+
 // Validation rules
 const registerRules = [
     body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 100 }).withMessage('Name too long'),
@@ -80,7 +94,7 @@ router.get('/csrf', (req, res) => res.status(204).send());
  *       400:
  *         description: User already exists or validation error
  */
-router.post('/register', validate(registerRules), authController.register);
+router.post('/register', registerLimiter, validate(registerRules), authController.register);
 
 /**
  * @swagger
