@@ -13,6 +13,7 @@ interface AuthContextType {
     logout: () => void;
     isAuthenticated: boolean;
     loading: boolean;
+    isVerified: boolean; // true only after backend confirmation via getMe()
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,6 +37,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     });
     const [loading, setLoading] = useState<boolean>(true);
+    // isVerified: only becomes true after the backend confirms the session via getMe().
+    // Until then, user data from sessionStorage must NOT be trusted for role-based rendering.
+    const [isVerified, setIsVerified] = useState<boolean>(false);
     const navigate = useNavigate();
 
     // Sync preferred language
@@ -81,7 +85,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     const { user } = await authService.getMe();
                     if (!ignore) {
                         setUser(user);
-                sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
+                        setIsVerified(true); // Session confirmed by backend
+                        sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                     }
                 } catch {
                     // Try refresh before giving up
@@ -91,13 +96,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             try {
                                 const { user } = await authService.getMe();
                                 setUser(user);
-                        sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
+                                setIsVerified(true); // Session confirmed after refresh
+                                sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                             } catch {
                                 setUser(null);
+                                setIsVerified(false);
                                 sessionStorage.removeItem('user');
                             }
                         } else {
                             setUser(null);
+                            setIsVerified(false);
                             sessionStorage.removeItem('user');
                         }
                     }
@@ -124,8 +132,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const { user: userData } = await authService.getMe();
             sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(userData)));
             setUser(userData);
+            setIsVerified(true); // Social login confirmed by backend
         } catch (error) {
             setUser(null);
+            setIsVerified(false);
             sessionStorage.removeItem('user');
             delete api.defaults.headers.common['Authorization'];
             throw new Error('Social login failed. Please try again.');
@@ -143,6 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(data.user)));
                 setUser(data.user);
+                setIsVerified(true); // Login confirmed directly by backend
 
                 // Check if user was redirected from valuation flow
                 const pendingQuote = sessionStorage.getItem('pendingValuationQuote');
@@ -173,6 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const logout = useCallback(() => {
         setUser(null);
+        setIsVerified(false); // Reset verification on logout
         sessionStorage.removeItem('user');
         // FIXED: [Removed localStorage.removeItem for tokens as they are cleared server-side via cookies]
 
@@ -183,7 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [navigate]);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, login, loginWithToken, logout, isAuthenticated: !!user, loading }}>
+        <AuthContext.Provider value={{ user, setUser, login, loginWithToken, logout, isAuthenticated: !!user, loading, isVerified }}>
             {children}
         </AuthContext.Provider>
     );

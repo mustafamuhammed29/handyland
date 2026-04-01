@@ -1,6 +1,11 @@
 import { api } from '../utils/api';
 import { User } from '../types';
 
+// Only log auth errors in development — avoids leaking stack traces / API details in production
+const devLog = (...args: unknown[]) => {
+    if (import.meta.env.DEV) console.error(...args);
+};
+
 interface LoginResponse {
     success: boolean;
     token: string;
@@ -20,7 +25,7 @@ export const authService = {
             const response = await api.post('/api/auth/login', { email, password });
             return response as any;
         } catch (error: any) {
-            console.error('Auth Service Login Error:', error);
+            devLog('Auth Service Login Error:', error);
             throw error.response?.data || { message: error.message || 'Login failed' };
         }
     },
@@ -31,7 +36,7 @@ export const authService = {
             const response = await api.post('/api/auth/register', userData);
             return response as any;
         } catch (error: any) {
-            console.error('Auth Service Register Error:', error.response?.data || error);
+            devLog('Auth Service Register Error:', error.response?.data || error);
             throw error.response?.data || { message: error.message || 'Registration failed' };
         }
     },
@@ -41,7 +46,7 @@ export const authService = {
             const response = await api.post('/api/auth/logout', {});
             return response as any;
         } catch (error: any) {
-            console.error('Auth Service Logout Error:', error);
+            devLog('Auth Service Logout Error:', error);
             throw error.response?.data || { message: error.message || 'Logout failed' };
         }
     },
@@ -51,7 +56,7 @@ export const authService = {
             const response = await api.get(`/api/auth/verify-email/${token}`);
             return response as any;
         } catch (error: any) {
-            console.error('Auth Service Verify Email Error:', error);
+            devLog('Auth Service Verify Email Error:', error);
             throw error.response?.data || { message: error.message || 'Verification failed' };
         }
     },
@@ -61,7 +66,7 @@ export const authService = {
             const response = await api.post('/api/auth/resend-verification', { email });
             return response as any;
         } catch (error: any) {
-            console.error('Auth Service Resend Verification Error:', error);
+            devLog('Auth Service Resend Verification Error:', error);
             throw error.response?.data || { message: error.message || 'Resend verification failed' };
         }
     },
@@ -72,7 +77,7 @@ export const authService = {
             const response = await api.post('/api/auth/forgot-password', { email });
             return response as any;
         } catch (error) {
-            console.error('Auth Service Forgot Password Error:', error);
+            devLog('Auth Service Forgot Password Error:', error);
             throw error;
         }
     },
@@ -83,7 +88,7 @@ export const authService = {
             const response = await api.post(`/api/auth/reset-password/${token}`, { password });
             return response as any;
         } catch (error) {
-            console.error('Auth Service Reset Password Error:', error);
+            devLog('Auth Service Reset Password Error:', error);
             throw error;
         }
     },
@@ -93,7 +98,7 @@ export const authService = {
             const response = await api.get('/api/auth/me');
             return response as any;
         } catch (error) {
-            console.error('Auth Service Get Me Error:', error);
+            devLog('Auth Service Get Me Error:', error);
             throw error;
         }
     },
@@ -103,7 +108,7 @@ export const authService = {
             const response = await api.put('/api/auth/updateprofile', data);
             return response as any;
         } catch (error) {
-            console.error('Auth Service Update Profile Error:', error);
+            devLog('Auth Service Update Profile Error:', error);
             throw error;
         }
     },
@@ -113,7 +118,7 @@ export const authService = {
             const response = await api.put('/api/auth/changepassword', { currentPassword: passwords.oldPassword, newPassword: passwords.newPassword });
             return response as any;
         } catch (error) {
-            console.error('Auth Service Update Password Error:', error);
+            devLog('Auth Service Update Password Error:', error);
             throw error;
         }
     },
@@ -123,7 +128,7 @@ export const authService = {
             const response = await api.post('/api/addresses', address);
             return response as any;
         } catch (error) {
-            console.error('Auth Service Add Address Error:', error);
+            devLog('Auth Service Add Address Error:', error);
             throw error;
         }
     },
@@ -133,7 +138,7 @@ export const authService = {
             const response = await api.get('/api/addresses');
             return response as any;
         } catch (error) {
-            console.error('Auth Service Get Addresses Error:', error);
+            devLog('Auth Service Get Addresses Error:', error);
             throw error;
         }
     },
@@ -143,7 +148,7 @@ export const authService = {
             const response = await api.put(`/api/addresses/${id}`, address);
             return response as any;
         } catch (error) {
-            console.error('Auth Service Update Address Error:', error);
+            devLog('Auth Service Update Address Error:', error);
             throw error;
         }
     },
@@ -153,7 +158,7 @@ export const authService = {
             const response = await api.delete(`/api/addresses/${id}`);
             return response as any;
         } catch (error) {
-            console.error('Auth Service Delete Address Error:', error);
+            devLog('Auth Service Delete Address Error:', error);
             throw error;
         }
     },
@@ -163,7 +168,7 @@ export const authService = {
             const response = await api.post('/api/auth/refresh');
             return response as any;
         } catch (error) {
-            console.error('Auth Service Refresh Token Error:', error);
+            devLog('Auth Service Refresh Token Error:', error);
             throw error;
         }
     }

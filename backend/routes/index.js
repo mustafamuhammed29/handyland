@@ -74,9 +74,7 @@ router.use('/shipping-methods', require('./shippingRoutes'));
 router.use('/pages', require('./pageRoutes'));
 router.use('/coupons', require('./couponRoutes'));
 router.use('/loaners', require('./loanerRoutes'));
-router.use('/loaner', require('./loanerRoutes'));        // alias
 router.use('/warranties', require('./warrantyRoutes'));
-router.use('/warranty', require('./warrantyRoutes'));    // alias
 router.use('/price-research', require('./priceResearchRoutes'));
 router.use('/suppliers', require('./supplierRoutes'));
 router.use('/purchase-orders', require('./purchaseOrderRoutes'));

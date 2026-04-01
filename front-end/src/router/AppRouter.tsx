@@ -55,9 +55,28 @@ const GuestTicketTracking = React.lazy(() => import('../pages/GuestTicketTrackin
 const Dashboard = React.lazy(() => import('../components/Dashboard').then(module => ({ default: module.Dashboard })));
 
 const AdminRedirect = () => {
+    const adminUrl = import.meta.env.VITE_ADMIN_URL;
+    const isProduction = import.meta.env.PROD;
+
     useEffect(() => {
-        window.location.href = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3001';
-    }, []);
+        // In production, only redirect if VITE_ADMIN_URL is explicitly set.
+        // Falling back to localhost in production would silently break for end-users.
+        const target = adminUrl || (isProduction ? null : 'http://localhost:3001');
+        if (target) {
+            window.location.href = target;
+        }
+    }, [adminUrl, isProduction]);
+
+    if (!adminUrl && isProduction) {
+        return (
+            <div className="min-h-screen flex items-center justify-center flex-col gap-4 p-8 text-center">
+                <div className="text-4xl">⚙️</div>
+                <h1 className="text-xl font-bold text-slate-800 dark:text-white">Admin panel not configured</h1>
+                <p className="text-slate-500 text-sm">Please set <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">VITE_ADMIN_URL</code> in your environment.</p>
+            </div>
+        );
+    }
+
     return null;
 };
 
@@ -150,16 +169,16 @@ export const AppRouter = () => {
                             <Route path="/products/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition>} />
                             <Route path="/accessories/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><AccessoryDetails /></Suspense></PageTransition>} />
                             <Route path="/compare" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ComparePage /></Suspense></PageTransition>} />
-                            <Route path="contact" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Contact /></Suspense></PageTransition>} />
-                            <Route path="checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
-                            <Route path="payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
-                            <Route path="login" element={<PageTransition><Login /></PageTransition>} />
-                            <Route path="verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
-                            <Route path="verify-email-notice" element={<PageTransition><VerifyEmailNotice /></PageTransition>} />
-                            <Route path="reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
-                            <Route path="forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
-                            <Route path="register" element={<PageTransition><Register /></PageTransition>} />
-                            <Route path="auth/callback" element={<SocialAuthCallback />} />
+                            <Route path="/contact" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Contact /></Suspense></PageTransition>} />
+                            <Route path="/checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
+                            <Route path="/payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
+                            <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+                            <Route path="/verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
+                            <Route path="/verify-email-notice" element={<PageTransition><VerifyEmailNotice /></PageTransition>} />
+                            <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+                            <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+                            <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+                            <Route path="/auth/callback" element={<SocialAuthCallback />} />
                             <Route path="/track-repair" element={<PageTransition><Suspense fallback={<GlobalLoader />}><GuestTicketTracking /></Suspense></PageTransition>} />
 
                             <Route path="/products" element={<Navigate to="/marketplace" replace />} />
@@ -179,9 +198,9 @@ export const AppRouter = () => {
                         </Route>
 
                         <Route element={<ProtectedRoute />}>
-                            <Route path="dashboard" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Dashboard user={user} logout={logout} /></Suspense></PageTransition>} />
-                            <Route path="dashboard/valuations" element={<PageTransition><Suspense fallback={<GlobalLoader />}><MyValuations /></Suspense></PageTransition>} />
-                            <Route path="seller" element={<PageTransition><Suspense fallback={<GlobalLoader />}><SellerStudio lang={lang} /></Suspense></PageTransition>} />
+                            <Route path="/dashboard" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Dashboard user={user} logout={logout} /></Suspense></PageTransition>} />
+                            <Route path="/dashboard/valuations" element={<PageTransition><Suspense fallback={<GlobalLoader />}><MyValuations /></Suspense></PageTransition>} />
+                            <Route path="/seller" element={<PageTransition><Suspense fallback={<GlobalLoader />}><SellerStudio lang={lang} /></Suspense></PageTransition>} />
                         </Route>
 
                         <Route path="*" element={<NotFound />} />

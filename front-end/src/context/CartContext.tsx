@@ -47,6 +47,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [coupon, setCoupon] = useState<Coupon | null>(null);
+    // Mutex to prevent race conditions on rapid quantity updates (Issue #12 fix)
+    const [updating, setUpdating] = useState<Set<string | number>>(new Set());
     const { settings } = useSettings();
     const freeShippingThreshold = settings?.freeShippingThreshold ?? 100;
 
@@ -198,27 +200,35 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const updateQuantity = async (id: string | number, delta: number) => {
-        // Calculate based on REF to minimize closure staleness
-        const itemToUpdate = cartRef.current.find(item => item.id === id);
-        if (!itemToUpdate) return;
+        // Mutex guard: ignore rapid clicks while an update for this item is in flight
+        if (updating.has(id)) return;
+        setUpdating(prev => { const s = new Set(prev); s.add(id); return s; });
 
-        const itemCategory = itemToUpdate.category;
-        const maxAllowed = itemToUpdate.stock ?? Infinity;
-        const requestedQty = (itemToUpdate.quantity || 1) + delta;
-        const newQty = Math.min(requestedQty, maxAllowed);
-        const shouldRemove = newQty < 1;
+        try {
+            // Calculate based on REF to minimize closure staleness
+            const itemToUpdate = cartRef.current.find(item => item.id === id);
+            if (!itemToUpdate) return;
 
-        if (shouldRemove) {
-            setCart((prev) => prev.filter((item) => item.id !== id));
-        } else {
-            setCart((prev) => prev.map(item =>
-                item.id === id ? { ...item, quantity: newQty } : item
-            ));
-        }
+            const itemCategory = itemToUpdate.category;
+            const maxAllowed = itemToUpdate.stock ?? Infinity;
+            const requestedQty = (itemToUpdate.quantity || 1) + delta;
+            const newQty = Math.min(requestedQty, maxAllowed);
+            const shouldRemove = newQty < 1;
 
-        if (user) {
-            // If newQty < 1, we send 0 to remove
-            debouncedApiUpdate(id, shouldRemove ? 0 : newQty, itemCategory);
+            if (shouldRemove) {
+                setCart((prev) => prev.filter((item) => item.id !== id));
+            } else {
+                setCart((prev) => prev.map(item =>
+                    item.id === id ? { ...item, quantity: newQty } : item
+                ));
+            }
+
+            if (user) {
+                // If newQty < 1, we send 0 to remove
+                debouncedApiUpdate(id, shouldRemove ? 0 : newQty, itemCategory);
+            }
+        } finally {
+            setUpdating(prev => { const s = new Set(prev); s.delete(id); return s; });
         }
     };
 
