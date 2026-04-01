@@ -14,8 +14,10 @@ i18n
     react: { useSuspense: false },
     interpolation: { escapeValue: false },
     detection: {
-      order: ['localStorage', 'navigator'],
+      // FIX 3: extended order — querystring lets ?lang=ar override for testing
+      order: ['localStorage', 'querystring', 'navigator'],
       lookupLocalStorage: 'handyland_lang',
+      lookupQuerystring: 'lang',
       caches: ['localStorage'],
     },
     backend: {

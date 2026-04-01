@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Search, Plus, X, Smartphone, CheckCircle2, Battery, Cpu, Camera, Monitor, Zap } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUrl';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { api } from '../utils/api';
 
 export const ComparePage: React.FC = () => {
     const { t } = useTranslation();
@@ -17,18 +18,15 @@ export const ComparePage: React.FC = () => {
         // Fetch products list for search
         const fetchProducts = async () => {
             try {
-                const res = await fetch('/api/products');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        setProducts(data);
-                    } else if (data && Array.isArray(data.data)) {
-                        setProducts(data.data);
-                    } else if (data && Array.isArray(data.products)) {
-                        setProducts(data.products);
-                    } else {
-                        setProducts([]);
-                    }
+                const data: any = await api.get('/api/products');
+                if (Array.isArray(data)) {
+                    setProducts(data);
+                } else if (data && Array.isArray(data.data)) {
+                    setProducts(data.data);
+                } else if (data && Array.isArray(data.products)) {
+                    setProducts(data.products);
+                } else {
+                    setProducts([]);
                 }
             } catch (err) {
                 console.error(err);
@@ -109,7 +107,7 @@ export const ComparePage: React.FC = () => {
                                 {isSearching?.slotIndex === slotIndex ? (
                                     <div className="absolute inset-0 bg-slate-900 z-20 flex flex-col p-4 animate-in fade-in zoom-in-95 duration-200">
                                         <div className="flex justify-between items-center mb-4">
-                                            <h3 className="font-bold text-slate-300">Select a device</h3>
+                                            <h3 className="font-bold text-slate-300">{t('compare.selectDevice', 'Select a device')}</h3>
                                             <button onClick={() => setIsSearching(null)} title="Close search" className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400"/></button>
                                         </div>
                                         <div className="relative mb-4">
@@ -117,7 +115,7 @@ export const ComparePage: React.FC = () => {
                                             <input 
                                                 autoFocus
                                                 type="text" 
-                                                placeholder="Search products..." 
+                                                placeholder={t('compare.searchProducts', 'Search products...')}
                                                 value={searchTerm}
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                                 className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-brand-primary transition-colors"
@@ -126,15 +124,15 @@ export const ComparePage: React.FC = () => {
                                         <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
                                             {filteredSearch.map(p => (
                                                 <button 
-                                                    key={p._id} 
+                                                    key={p._id || p.id} 
                                                     onClick={() => handleSelectProduct(p, slotIndex)}
                                                     className="w-full flex items-center gap-3 p-2 hover:bg-slate-800 rounded-lg transition-colors text-left"
                                                 >
-                                                    <img src={getImageUrl(p.images?.[0])} alt={p.name} className="w-10 h-10 object-contain bg-white rounded-md p-1" />
+                                                    <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-10 h-10 object-contain bg-white rounded-md p-1" />
                                                     <span className="font-bold text-sm truncate">{p.name}</span>
                                                 </button>
                                             ))}
-                                            {filteredSearch.length === 0 && <div className="text-center text-slate-500 mt-8 text-sm">No devices found.</div>}
+                                            {filteredSearch.length === 0 && <div className="text-center text-slate-500 mt-8 text-sm">{t('compare.noDevicesFound', 'No devices found.')}</div>}
                                         </div>
                                     </div>
                                 ) : product ? (
@@ -148,19 +146,19 @@ export const ComparePage: React.FC = () => {
                                         </button>
                                         <div className="h-40 w-full mb-6 relative flex items-center justify-center">
                                             <div className="absolute inset-0 bg-brand-primary/10 rounded-full blur-[40px] -z-10 group-hover:bg-brand-primary/20 transition-all"></div>
-                                            <img src={getImageUrl(product.images?.[0])} alt={product.name || product.model} className="w-auto h-full max-w-full rounded-2xl object-cover mb-4 shadow-xl group-hover:scale-105 transition-transform duration-500" />
+                                            <img src={getImageUrl(product.images?.[0] || product.image || product.thumbnail)} alt={product.name || product.model} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-auto h-full max-w-full rounded-2xl object-cover mb-4 shadow-xl group-hover:scale-105 transition-transform duration-500" />
                                         </div>
                                         <h3 className="text-xl font-black text-center mb-2">{product.name || product.model}</h3>
                                         
                                         <div className="flex flex-col items-center justify-center gap-1 mb-4">
                                             {product.specs?.globalPrice && (
-                                                <div className="text-slate-400 text-sm line-through decoration-red-500/50">Market Ø €{product.specs.globalPrice}</div>
+                                                <div className="text-slate-400 text-sm line-through decoration-red-500/50">{t('compare.marketAverage', 'Market Ø')} €{product.specs.globalPrice}</div>
                                             )}
                                             <div className="text-brand-primary font-black text-2xl flex items-center gap-2">
                                                 €{product.pricing?.basePrice || product.price}
                                                 {product.specs?.globalPrice && Number(product.specs.globalPrice) > Number(product.price) && (
                                                     <span className="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                        Save €{Number(product.specs.globalPrice) - Number(product.price)}
+                                                        {t('compare.save', 'Save')} €{Number(product.specs.globalPrice) - Number(product.price)}
                                                     </span>
                                                 )}
                                             </div>
@@ -169,7 +167,7 @@ export const ComparePage: React.FC = () => {
                                             onClick={() => navigate(`/products/${product.id || product._id}`)}
                                             className="px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-full text-sm font-bold transition-colors"
                                         >
-                                            View Details
+                                            {t('compare.viewDetails', 'View Details')}
                                         </button>
                                     </>
                                 ) : (
@@ -180,7 +178,7 @@ export const ComparePage: React.FC = () => {
                                         <div className="w-20 h-20 rounded-full border-2 border-dashed border-slate-800 hover:border-brand-primary flex items-center justify-center transition-colors">
                                             <Plus className="w-8 h-8" />
                                         </div>
-                                        <span className="font-bold">Add Device to Compare</span>
+                                        <span className="font-bold">{t('compare.addDevice', 'Add Device to Compare')}</span>
                                     </button>
                                 )}
                             </div>
@@ -197,25 +195,25 @@ export const ComparePage: React.FC = () => {
                                     {/* Specifications Section */}
                                     <tr className="bg-slate-950/80">
                                         <td className="w-1/4 p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Cpu className="w-4 h-4"/> Hardware 
+                                            <Cpu className="w-4 h-4"/> {t('compare.hardware', 'Hardware')}
                                         </td>
                                         {slots.map(i => (
                                             <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
                                         ))}
                                     </tr>
                                     <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Processor</td>
+                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.processor', 'Processor')}</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-bold">
-                                                {selectedProducts[i]?.specs?.processor || selectedProducts[i]?.specifications?.processor || selectedProducts[i]?.processor || '-'}
+                                                {selectedProducts[i]?.processor || selectedProducts[i]?.specs?.processor || selectedProducts[i]?.specifications?.processor || '-'}
                                             </td>
                                         ))}
                                     </tr>
                                     <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Storage Options</td>
+                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.storage', 'Storage Options')}</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 text-sm">
-                                                {selectedProducts[i]?.storage || '-'}
+                                                {selectedProducts[i]?.storage || selectedProducts[i]?.specs?.storage || '-'}
                                             </td>
                                         ))}
                                     </tr>
@@ -223,17 +221,17 @@ export const ComparePage: React.FC = () => {
                                     {/* Display Section */}
                                     <tr className="bg-slate-950/80">
                                         <td className="p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Monitor className="w-4 h-4"/> Display
+                                            <Monitor className="w-4 h-4"/> {t('compare.display', 'Display')}
                                         </td>
                                         {slots.map(i => (
                                             <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
                                         ))}
                                     </tr>
                                     <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Screen Size</td>
+                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.screenSize', 'Screen Size')}</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-bold">
-                                                {selectedProducts[i]?.specs?.display || selectedProducts[i]?.specifications?.display || selectedProducts[i]?.display || '-'}
+                                                {selectedProducts[i]?.display || selectedProducts[i]?.specs?.display || selectedProducts[i]?.specifications?.display || '-'}
                                             </td>
                                         ))}
                                     </tr>
@@ -241,17 +239,17 @@ export const ComparePage: React.FC = () => {
                                     {/* Camera Section */}
                                     <tr className="bg-slate-950/80">
                                         <td className="p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Camera className="w-4 h-4"/> Camera
+                                            <Camera className="w-4 h-4"/> {t('compare.camera', 'Camera')}
                                         </td>
                                         {slots.map(i => (
                                             <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
                                         ))}
                                     </tr>
                                     <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Main Camera</td>
+                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.mainCamera', 'Main Camera')}</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 text-sm leading-relaxed">
-                                                {selectedProducts[i]?.specs?.camera || selectedProducts[i]?.specifications?.camera || selectedProducts[i]?.camera || '-'}
+                                                {selectedProducts[i]?.camera || selectedProducts[i]?.specs?.camera || selectedProducts[i]?.specifications?.camera || '-'}
                                             </td>
                                         ))}
                                     </tr>
@@ -259,17 +257,17 @@ export const ComparePage: React.FC = () => {
                                     {/* Battery Section */}
                                     <tr className="bg-slate-950/80">
                                         <td className="p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Battery className="w-4 h-4"/> Power & Battery
+                                            <Battery className="w-4 h-4"/> {t('compare.batteryCategory', 'Power & Battery')}
                                         </td>
                                         {slots.map(i => (
                                             <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
                                         ))}
                                     </tr>
                                     <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Battery Specs</td>
+                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.batterySpecs', 'Battery Specs')}</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-medium">
-                                                {selectedProducts[i]?.specs?.battery || selectedProducts[i]?.battery || '-'}
+                                                {selectedProducts[i]?.battery || selectedProducts[i]?.specs?.battery || '-'}
                                             </td>
                                         ))}
                                     </tr>
@@ -277,7 +275,7 @@ export const ComparePage: React.FC = () => {
                                     {/* Performance Section */}
                                     <tr className="hover:bg-slate-800/20 transition-colors bg-slate-900/30">
                                         <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800 flex items-center gap-2">
-                                            <Zap className="w-4 h-4 text-amber-500" /> Benchmark Score
+                                            <Zap className="w-4 h-4 text-amber-500" /> {t('compare.benchmarkScore', 'Benchmark Score')}
                                         </td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-black text-amber-500">
@@ -289,17 +287,17 @@ export const ComparePage: React.FC = () => {
                                     {/* General Section */}
                                     <tr className="bg-slate-950/80">
                                         <td className="p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Zap className="w-4 h-4"/> General
+                                            <Zap className="w-4 h-4"/> {t('compare.general', 'General')}
                                         </td>
                                         {slots.map(i => (
                                             <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
                                         ))}
                                     </tr>
                                     <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Colors</td>
+                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.colors', 'Colors')}</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-medium capitalize">
-                                                {selectedProducts[i]?.color || '-'}
+                                                {selectedProducts[i]?.color || selectedProducts[i]?.specs?.color || '-'}
                                             </td>
                                         ))}
                                     </tr>

@@ -24,17 +24,21 @@ exports.getTranslationsByLocale = async (req, res) => {
     try {
         const { lang } = req.params;
 
-        // Find all translation rows that have a value for the requested language
         const translations = await Translation.find();
 
-        // Compact into the { "key.nested": "value" } structure i18next expects
         const result = {};
 
         translations.forEach(doc => {
-            // We use the 'en' translation as fallback if the target string is empty
-            const value = doc.values[lang] || doc.values['en'] || doc.key;
+            const rawValue = doc.values[lang];
+            const rawEn    = doc.values['en'];
 
-            // i18next handles dot notation ('nav.home') natively, meaning we can just return a flat key map
+            // FIX: If the stored value equals the key name, it is polluted data
+            // (i18next saveMissing sends the key itself as a placeholder).
+            // Return empty string so the UI shows '-' instead of the key.
+            const cleanValue = (v) =>
+                v && v !== doc.key ? v : null;
+
+            const value = cleanValue(rawValue) || cleanValue(rawEn) || '';
             result[doc.key] = value;
         });
 
@@ -147,26 +151,31 @@ exports.saveMissingTranslation = async (req, res) => {
 
         let updated = false;
 
-        // Loop through keys and create them if they do not exist
         for (const key of keys) {
-            const fallbackValue = req.body[key] || '';
+            // FIX: i18next sends the key itself as the fallback value when a key is missing.
+            // e.g. body = { "valuation.newValuation": "valuation.newValuation" }
+            // We must reject this — storing the key as a value poisons the DB.
+            const rawFallback = req.body[key] || '';
+            const fallbackValue = rawFallback === key ? '' : rawFallback;
+
             const existing = await Translation.findOne({ key });
 
             if (!existing) {
-                // Determine namespace from key if it has a prefix, otherwise use the param
+                // Register the key so admins can fill it in the Translation Manager
                 const dbNamespace = key.includes('.') ? key.split('.')[0] : (namespace || 'translation');
-
                 await Translation.create({
                     key,
                     namespace: dbNamespace,
                     values: {
-                        en: fallbackValue, // fallback just so it's not totally empty
+                        // Only store a real value — never the key name
+                        ...(fallbackValue ? { [lang]: fallbackValue } : {})
                     }
                 });
                 updated = true;
-            } else if (!existing.values[lang] && fallbackValue) {
-                // Optionally update the existing key's lang field if it was empty
+            } else if (fallbackValue && !existing.values[lang]) {
+                // Only fill in a genuinely missing language slot with a real value
                 existing.values[lang] = fallbackValue;
+                existing.markModified('values');
                 await existing.save();
                 updated = true;
             }

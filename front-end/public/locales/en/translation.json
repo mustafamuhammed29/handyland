@@ -144,12 +144,16 @@
     "step1": "Select Configuration",
     "step2": "Storage Capacity",
     "step3": "Condition Check",
+    "step4BodyTitle": "Physical Condition",
+    "step5FuncTitle": "Functional Check",
     "next": "Next",
     "back": "Back",
     "submit": "Get Value",
     "result": "Estimated Value",
     "sellNow": "Sell Now",
-    "saveValuation": "Save Valuation"
+    "saveValuation": "Save Valuation",
+    "yourOffer": "Your Offer",
+    "newValuation": "New Valuation"
   },
   "accessories": {
     "title": "Accessories",

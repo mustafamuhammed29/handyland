@@ -260,7 +260,7 @@ const Login: React.FC = () => {
                     </div>
                 </div>
 
-                <p className="text-center text-slate-500 text-sm mt-6">Protected User Area • HandyLand © 2025</p>
+                <p className="text-center text-slate-500 text-sm mt-6">HandyLand © {new Date().getFullYear()}</p>
             </div>
         </div>
     );

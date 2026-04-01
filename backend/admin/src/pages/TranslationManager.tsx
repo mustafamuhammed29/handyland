@@ -42,6 +42,10 @@ export default function TranslationManager() {
     // Namespace tabs feature
     const [activeTab, setActiveTab] = useState<string>('translation');
     const [autoTranslating, setAutoTranslating] = useState(false);
+    // Bulk auto-translate state
+    const [bulkTranslating, setBulkTranslating] = useState(false);
+    const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+    const [bulkResult, setBulkResult] = useState<{ updated: number; errors: number } | null>(null);
 
     const namespaces = Array.from(new Set(translations.map(t => t.namespace || 'translation'))).sort();
     
@@ -146,6 +150,80 @@ export default function TranslationManager() {
         }
     };
 
+    /**
+     * Bulk: for every row in the current tab that has at least one missing language value,
+     * call /api/translations/auto-translate and then save the result back to the DB.
+     * Processes rows sequentially to avoid hammering the MyMemory free API.
+     */
+    const handleBulkAutoTranslate = async () => {
+        // Rows that have at least ONE missing language field
+        const missingRows = tabTranslations.filter(t =>
+            SUPPORTED_LANGUAGES.some(l => !t.values?.[l.code])
+        );
+
+        if (missingRows.length === 0) {
+            alert('✅ All translations in this tab are already complete!');
+            return;
+        }
+
+        if (!window.confirm(`This will auto-translate ${missingRows.length} incomplete keys in "${currentTab}" using MyMemory (free API, ~500 words/day limit).\n\nContinue?`)) return;
+
+        setBulkTranslating(true);
+        setBulkProgress({ done: 0, total: missingRows.length });
+        setBulkResult(null);
+
+        let updated = 0;
+        let errors = 0;
+
+        for (let i = 0; i < missingRows.length; i++) {
+            const row = missingRows[i];
+            setBulkProgress({ done: i, total: missingRows.length });
+
+            // Prefer EN as source, fallback to DE
+            const sourceText = row.values?.en || row.values?.de;
+            const sourceLang = row.values?.en ? 'en' : 'de';
+
+            if (!sourceText) {
+                errors++;
+                continue; // nothing to translate from
+            }
+
+            // Only translate into languages that are actually missing
+            const toLangs = SUPPORTED_LANGUAGES
+                .map(l => l.code)
+                .filter(c => c !== sourceLang && !row.values?.[c as keyof typeof row.values]);
+
+            if (toLangs.length === 0) continue; // already complete
+
+            try {
+                const res = await api.post('/api/translations/auto-translate', {
+                    text: sourceText,
+                    from: sourceLang,
+                    toLangs
+                });
+
+                if (res.data.success) {
+                    const mergedValues = { ...row.values, ...res.data.translated };
+                    await api.put(`/api/translations/${row._id}`, { values: mergedValues });
+                    // Update local state so the table reflects changes immediately
+                    setTranslations(prev =>
+                        prev.map(t => t._id === row._id ? { ...t, values: mergedValues as any } : t)
+                    );
+                    updated++;
+                }
+            } catch {
+                errors++;
+            }
+
+            // Small delay to respect MyMemory rate limits
+            await new Promise(r => setTimeout(r, 400));
+        }
+
+        setBulkProgress({ done: missingRows.length, total: missingRows.length });
+        setBulkResult({ updated, errors });
+        setBulkTranslating(false);
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center flex-wrap gap-4">
@@ -180,7 +258,7 @@ export default function TranslationManager() {
                 </div>
 
                 {/* Header Actions */}
-                <div className="p-4 border-b border-slate-800 flex gap-4">
+                <div className="p-4 border-b border-slate-800 flex gap-4 flex-wrap items-center">
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input
@@ -191,6 +269,34 @@ export default function TranslationManager() {
                             className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 transition-colors"
                         />
                     </div>
+
+                    {/* BULK AUTO-TRANSLATE BUTTON */}
+                    <button
+                        onClick={handleBulkAutoTranslate}
+                        disabled={bulkTranslating}
+                        className="flex items-center gap-2 px-4 py-2 bg-violet-600/20 hover:bg-violet-600/30 border border-violet-500/30 text-violet-300 hover:text-violet-200 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-wait"
+                        title="Auto-translate all rows in this tab that have missing language values"
+                    >
+                        {bulkTranslating
+                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            : <Sparkles className="w-4 h-4" />
+                        }
+                        {bulkTranslating && bulkProgress
+                            ? `Translating... ${bulkProgress.done}/${bulkProgress.total}`
+                            : 'Auto Translate Tab'
+                        }
+                    </button>
+
+                    {/* Result toast */}
+                    {bulkResult && !bulkTranslating && (
+                        <div className="flex items-center gap-3 px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm">
+                            <span className="text-emerald-400 font-bold">✅ {bulkResult.updated} updated</span>
+                            {bulkResult.errors > 0 && <span className="text-red-400">{bulkResult.errors} failed</span>}
+                            <button onClick={() => setBulkResult(null)} className="text-slate-500 hover:text-white ml-1" title="Dismiss">
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Table */}
