@@ -4,6 +4,7 @@ const Message = require('../models/Message');
 const User = require('../models/User');
 const { protect, authorize, optionalProtect } = require('../middleware/auth');
 const { notify } = require('../utils/notificationService');
+const { emitAdminNotification } = require('../utils/socket');
 
 // @desc    Submit a new message
 // @route   POST /api/messages
@@ -40,6 +41,16 @@ router.post('/', optionalProtect, async (req, res) => {
         });
 
         res.status(201).json({ success: true, message: 'Message sent successfully', data: newMessage });
+
+        // 🔔 Notify admins in real-time
+        emitAdminNotification('new_message', {
+            title: 'Neue Nachricht',
+            body: `${name}: "${message.substring(0, 80)}${message.length > 80 ? '…' : ''}"`,
+            icon: '💬',
+            link: '/messages',
+            senderName: name,
+            senderEmail: email,
+        });
     } catch (error) {
         console.error('Error sending message:', error);
         res.status(500).json({ message: 'Server Error' });

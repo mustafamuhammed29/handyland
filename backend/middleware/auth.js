@@ -4,19 +4,25 @@ const auditLogger = require('./auditLogger');
 
 // Protect routes - verify JWT token
 exports.protect = async (req, res, next) => {
+    const appType = req.headers['x-app-type'];
     let token;
-
-    // Check for Authorization header first (Admin Panel prioritizes this)
+    
+    // Check for Authorization header first (Some tools/postman might use this)
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     }
-    // Check for adminToken (Admin Panel uses this, must take priority)
-    else if (req.cookies && req.cookies.adminToken) {
-        token = req.cookies.adminToken;
+    // If request explicitly comes from admin panel, ONLY look for adminToken
+    else if (appType === 'admin') {
+        token = req.cookies && req.cookies.adminToken;
     }
-    // Fallback to cookie (Customer Frontend utilizes this)
-    else if (req.cookies && req.cookies.accessToken) {
-        token = req.cookies.accessToken;
+    // If request explicitly comes from frontend panel, ONLY look for accessToken
+    else if (appType === 'frontend') {
+        token = req.cookies && req.cookies.accessToken;
+    }
+    // Fallback for legacy requests without header (prioritize adminToken for safety)
+    else {
+        if (req.cookies && req.cookies.adminToken) token = req.cookies.adminToken;
+        else if (req.cookies && req.cookies.accessToken) token = req.cookies.accessToken;
     }
 
     // Make sure token exists
@@ -134,14 +140,18 @@ exports.authorize = (...roles) => {
 
 // Optional authentication (for Guest/User shared routes)
 exports.optionalProtect = async (req, res, next) => {
+    const appType = req.headers['x-app-type'];
     let token;
-
+    
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies && req.cookies.adminToken) {
-        token = req.cookies.adminToken;
-    } else if (req.cookies && req.cookies.accessToken) {
-        token = req.cookies.accessToken;
+    } else if (appType === 'admin') {
+        token = req.cookies && req.cookies.adminToken;
+    } else if (appType === 'frontend') {
+        token = req.cookies && req.cookies.accessToken;
+    } else {
+        if (req.cookies && req.cookies.adminToken) token = req.cookies.adminToken;
+        else if (req.cookies && req.cookies.accessToken) token = req.cookies.accessToken;
     }
 
     if (!token) {

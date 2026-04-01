@@ -23,7 +23,7 @@ export const AnnouncementBanner: React.FC = () => {
         cyan: 'bg-brand-primary text-white',
     };
 
-    const colorClass = colorMap[banner.color] || colorMap.blue;
+    const colorClass = colorMap[banner.color || 'blue'] || colorMap.blue;
 
     return (
         <div className={`fixed top-0 left-0 right-0 z-[100] ${colorClass} px-4 py-2.5 flex items-center justify-center gap-3 text-sm font-medium shadow-lg`}>

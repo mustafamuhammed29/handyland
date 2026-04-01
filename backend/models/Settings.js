@@ -179,6 +179,16 @@ const settingsSchema = new mongoose.Schema({
             quantityLabel: 'Quantity',
             priceLabel: 'Price'
         }
+    },
+    accountSuspension: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            title: 'Account Suspended',
+            subtitle: 'حسابك محظور من قِبَل الإدارة',
+            message: 'Your account has been suspended. Please contact support for assistance.',
+            supportEmail: 'support@handyland.com',
+            supportLabel: 'Contact Support'
+        }
     }
 }, { timestamps: true });
 

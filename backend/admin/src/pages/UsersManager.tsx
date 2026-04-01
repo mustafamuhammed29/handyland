@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Trash2, CheckSquare, Square, CheckCircle, AlertCircle, Lock, Unlock } from 'lucide-react';
+import { Search, Trash2, CheckCircle, AlertCircle, Lock, Unlock, Users, Shield, UserCheck, UserX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../utils/api';
 
 interface User {
@@ -11,31 +11,135 @@ interface User {
     createdAt: string;
     loginAttempts?: number;
     lockUntil?: string | null;
+    avatar?: string;
 }
+
+interface UserStats {
+    totalUsers: number;
+    activeUsers: number;
+    inactiveUsers: number;
+    usersByRole: Record<string, number>;
+}
+
+// Helper to get initials avatar with a consistent pseudo-random color based on name
+const Avatar = ({ name, url }: { name: string, url?: string }) => {
+    if (url) return <img src={url} alt={name} className="w-10 h-10 rounded-full object-cover border-2 border-slate-700/50 shadow-sm" />;
+    
+    const initial = name ? name.charAt(0).toUpperCase() : '?';
+    const bgColors = ['bg-blue-500', 'bg-emerald-500', 'bg-purple-500', 'bg-amber-500', 'bg-pink-500', 'bg-cyan-500'];
+    const colorIndex = name ? name.length % bgColors.length : 0;
+    
+    return (
+        <div className={`w-10 h-10 rounded-full ${bgColors[colorIndex]} text-white flex items-center justify-center font-bold text-lg shadow-[0_2px_10px_rgba(0,0,0,0.2)] border-2 border-slate-700/50`}>
+            {initial}
+        </div>
+    );
+};
+
+// Pagination Controls Component
+const Pagination = ({ currentPage, totalPages, totalItems, itemsPerPage, setPage }: any) => {
+    if (totalPages <= 1) return null;
+    return (
+        <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-slate-900/60 border-t border-slate-800 backdrop-blur-md gap-4">
+            <div className="text-sm font-medium text-slate-400">
+                Showing <span className="text-white font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-white font-bold">{Math.min(currentPage * itemsPerPage, totalItems)}</span> of <span className="text-white font-bold">{totalItems}</span> users
+            </div>
+            <div className="flex items-center gap-2 bg-slate-800/50 p-1 rounded-xl border border-slate-700/50">
+                <button
+                    onClick={() => setPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    title="Previous page"
+                    aria-label="Go to previous page"
+                    className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                >
+                    <ChevronLeft size={18} />
+                </button>
+                <div className="px-4 py-1 text-sm font-bold text-slate-200">
+                    Page {currentPage} of {totalPages}
+                </div>
+                <button
+                    onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    title="Next page"
+                    aria-label="Go to next page"
+                    className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                >
+                    <ChevronRight size={18} />
+                </button>
+            </div>
+        </div>
+    );
+};
 
 const UsersManager: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
+    const [stats, setStats] = useState<UserStats | null>(null);
     const [loading, setLoading] = useState(true);
+    
+    // Pagination & Search States
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [page, setPage] = useState(1);
+    const [limit] = useState(15);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalUsersCount, setTotalUsersCount] = useState(0);
+
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    // Debounce search input
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+            setPage(1); // Reset to page 1 on new search
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [search]);
+
+    // Fetch Stats once
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await api.get('/api/users/admin/stats');
+                const data = (response as any)?.data || response;
+                if (data.success) setStats(data.stats);
+            } catch (error) {
+                console.error('Error fetching user stats:', error);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    // Fetch Users when parameters change
+    useEffect(() => {
+        fetchUsers();
+    }, [page, limit, roleFilter, statusFilter, debouncedSearch]);
 
     const showToast = (type: 'success' | 'error', text: string) => {
         setToast({ type, text });
         setTimeout(() => setToast(null), 3500);
     };
 
-    useEffect(() => {
-        fetchUsers();
-    }, [roleFilter]);
-
     const fetchUsers = async () => {
+        setLoading(true);
         try {
-            const url = `/api/users/admin/all${roleFilter ? `?role=${roleFilter}` : ''}`;
+            const queryParams = new URLSearchParams({
+                page: page.toString(),
+                limit: limit.toString(),
+                ...(debouncedSearch && { search: debouncedSearch }),
+                ...(roleFilter && { role: roleFilter }),
+                ...(statusFilter && { status: statusFilter === 'active' ? 'active' : 'inactive' })
+            });
+            const url = `/api/users/admin/all?${queryParams.toString()}`;
             const response = await api.get(url);
             const data = (response as any)?.data || response;
-            if (data.success) setUsers(data.users);
+            if (data.success) {
+                setUsers(data.users);
+                setTotalPages(data.totalPages);
+                setTotalUsersCount(data.count);
+            }
         } catch (error) {
             console.error('Error fetching users:', error);
         } finally {
@@ -43,11 +147,15 @@ const UsersManager: React.FC = () => {
         }
     };
 
+    // Action Handlers
     const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
         try {
             const response = await api.put(`/api/users/admin/${userId}/status`, { isActive: !currentStatus });
             const data = (response as any)?.data || response;
-            if (data.success) { fetchUsers(); showToast('success', `User ${!currentStatus ? 'activated' : 'deactivated'}`); }
+            if (data.success) { 
+                setUsers(users.map(u => u._id === userId ? { ...u, isActive: !currentStatus } : u));
+                showToast('success', `User account ${!currentStatus ? 'activated' : 'deactivated'}`); 
+            }
         } catch (error) {
             showToast('error', 'Failed to update user status');
         }
@@ -57,21 +165,24 @@ const UsersManager: React.FC = () => {
         try {
             const response = await api.put(`/api/users/admin/${userId}/role`, { role: newRole });
             const data = (response as any)?.data || response;
-            if (data.success) { fetchUsers(); showToast('success', `Role changed to ${newRole}`); }
-        } catch (error) {
-            showToast('error', 'Failed to update role');
+            if (data.success) { 
+                setUsers(users.map(u => u._id === userId ? { ...u, role: newRole } : u));
+                showToast('success', `User role upgraded to ${newRole}`); 
+            }
+        } catch (error: any) {
+            showToast('error', error.response?.data?.message || 'Failed to update role');
         }
     };
 
     const deleteUser = async (userId: string) => {
-        if (!window.confirm('Are you sure you want to delete this user?')) return;
+        if (!window.confirm('Are you absolutely sure you want to delete this user completely?')) return;
         try {
             await api.delete(`/api/users/admin/${userId}`);
             fetchUsers();
             setSelectedUsers(selectedUsers.filter(id => id !== userId));
-            showToast('success', 'User deleted');
-        } catch (error) {
-            showToast('error', 'Failed to delete user');
+            showToast('success', 'User account permanently deleted.');
+        } catch (error: any) {
+            showToast('error', error.response?.data?.message || 'Failed to delete user');
         }
     };
 
@@ -79,255 +190,314 @@ const UsersManager: React.FC = () => {
         try {
             const response = await api.put(`/api/users/admin/${userId}/unlock`, {});
             const data = (response as any)?.data || response;
-            if (data.success) { fetchUsers(); showToast('success', 'Account unlocked successfully'); }
+            if (data.success) { 
+                setUsers(users.map(u => u._id === userId ? { ...u, lockUntil: null, loginAttempts: 0 } : u));
+                showToast('success', 'Security lock removed successfully.'); 
+            }
         } catch (error) {
             showToast('error', 'Failed to unlock account');
         }
     };
 
+    // Bulk Actions
     const handleBulkDelete = async () => {
-        if (!window.confirm(`Delete ${selectedUsers.length} selected users?`)) return;
+        if (!window.confirm(`Delete ${selectedUsers.length} selected users? This action is irreversible.`)) return;
         try {
             await Promise.all(selectedUsers.map(userId => api.delete(`/api/users/admin/${userId}`)));
             fetchUsers();
             setSelectedUsers([]);
-            showToast('success', `${selectedUsers.length} users deleted`);
+            showToast('success', `${selectedUsers.length} users successfully deleted`);
         } catch (error) {
-            showToast('error', 'Bulk delete failed');
+            showToast('error', 'Bulk delete failed for some users');
         }
     };
 
     const handleBulkRoleChange = async (newRole: string) => {
         if (!newRole) return;
-        if (!window.confirm(`Change role of ${selectedUsers.length} users to ${newRole}?`)) return;
+        if (!window.confirm(`Change the permissions of ${selectedUsers.length} users to [${newRole.toUpperCase()}]?`)) return;
         try {
             await Promise.all(selectedUsers.map(userId => api.put(`/api/users/admin/${userId}/role`, { role: newRole })));
             fetchUsers();
             setSelectedUsers([]);
-            showToast('success', `Role changed to ${newRole} for ${selectedUsers.length} users`);
+            showToast('success', `Roles changed successfully`);
         } catch (error) {
             showToast('error', 'Bulk role change failed');
         }
     };
 
-    const filteredUsers = users.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(search.toLowerCase()) ||
-            user.email.toLowerCase().includes(search.toLowerCase());
-        const matchesRole = roleFilter === '' || user.role === roleFilter;
-        return matchesSearch && matchesRole;
-    });
-
     const handleSelectAll = () => {
-        if (selectedUsers.length === filteredUsers.length) {
-            setSelectedUsers([]);
-        } else {
-            setSelectedUsers(filteredUsers.map(u => u._id));
-        }
+        if (selectedUsers.length === users.length) setSelectedUsers([]);
+        else setSelectedUsers(users.map(u => u._id));
     };
 
     const toggleSelectUser = (userId: string) => {
-        if (selectedUsers.includes(userId)) {
-            setSelectedUsers(selectedUsers.filter(id => id !== userId));
-        } else {
-            setSelectedUsers([...selectedUsers, userId]);
-        }
+        if (selectedUsers.includes(userId)) setSelectedUsers(selectedUsers.filter(id => id !== userId));
+        else setSelectedUsers([...selectedUsers, userId]);
     };
 
     return (
-        <div className="p-6">
-            {/* Toast */}
+        <div className="p-8 pb-20">
+            {/* Elegant Toast */}
             {toast && (
-                <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium animate-in slide-in-from-right-4 ${toast.type === 'success'
-                    ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300'
-                    : 'bg-red-900/90 border-red-500/50 text-red-300'
+                <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl border text-sm font-bold transition-all animate-in slide-in-from-top-6 ${toast.type === 'success'
+                    ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300 backdrop-blur-md'
+                    : 'bg-red-900/90 border-red-500/50 text-red-300 backdrop-blur-md'
                     }`}>
                     {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                     {toast.text}
                 </div>
             )}
+
             {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-3xl font-black text-white mb-2">User Management</h1>
-                <p className="text-slate-400">Manage all platform users</p>
+            <div className="mb-8">
+                <h1 className="text-3xl font-black text-white mb-2 tracking-tight">User Intelligence</h1>
+                <p className="text-slate-400 font-medium">Manage accounts, roles, access permissions and security states in one unified hub.</p>
             </div>
 
-            {/* Filters */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-xl p-4 mb-6">
-                <div className="flex flex-wrap gap-4">
-                    <div className="flex-1 min-w-[200px]">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
-                            <input
-                                type="text"
-                                placeholder="Search users..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
+            {/* Premium Stats Dashboard */}
+            {stats && (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                    {/* Total Users */}
+                    <div className="group bg-gradient-to-br from-slate-900/60 to-slate-800/30 border border-slate-700/50 hover:border-blue-500/50 rounded-2xl p-6 backdrop-blur-md transition-all duration-300 hover:shadow-[0_0_25px_rgba(59,130,246,0.15)] relative overflow-hidden">
+                        <div className="flex justify-between items-start mb-2 relative z-10">
+                            <div>
+                                <p className="text-slate-400 text-sm font-semibold tracking-wide uppercase mb-1">Total Users</p>
+                                <h3 className="text-4xl font-black text-white">{stats.totalUsers.toLocaleString()}</h3>
+                            </div>
+                            <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-400 group-hover:bg-blue-500/20 transition-colors shadow-inner">
+                                <Users size={24} strokeWidth={2.5} />
+                            </div>
                         </div>
                     </div>
+
+                    {/* Admins & Sellers */}
+                    <div className="group bg-gradient-to-br from-slate-900/60 to-slate-800/30 border border-slate-700/50 hover:border-purple-500/50 rounded-2xl p-6 backdrop-blur-md transition-all duration-300 hover:shadow-[0_0_25px_rgba(168,85,247,0.15)] relative overflow-hidden">
+                        <div className="flex justify-between items-start mb-2 relative z-10">
+                            <div>
+                                <p className="text-slate-400 text-sm font-semibold tracking-wide uppercase mb-1">Staff / Admins</p>
+                                <div className="flex items-center gap-3">
+                                    <h3 className="text-4xl font-black text-white">{stats.usersByRole?.admin || 0}</h3>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">{stats.usersByRole?.seller || 0} Sellers</span>
+                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{stats.usersByRole?.user || 0} Standard</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400 group-hover:bg-purple-500/20 transition-colors shadow-inner">
+                                <Shield size={24} strokeWidth={2.5} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Active */}
+                    <div className="group bg-gradient-to-br from-slate-900/60 to-slate-800/30 border border-slate-700/50 hover:border-emerald-500/50 rounded-2xl p-6 backdrop-blur-md transition-all duration-300 hover:shadow-[0_0_25px_rgba(16,185,129,0.15)] relative overflow-hidden">
+                        <div className="flex justify-between items-start mb-2 relative z-10">
+                            <div>
+                                <p className="text-slate-400 text-sm font-semibold tracking-wide uppercase mb-1">Active Accounts</p>
+                                <h3 className="text-4xl font-black text-emerald-400">{stats.activeUsers.toLocaleString()}</h3>
+                            </div>
+                            <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400 group-hover:bg-emerald-500/20 transition-colors shadow-inner">
+                                <UserCheck size={24} strokeWidth={2.5} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Disabled */}
+                    <div className="group bg-gradient-to-br from-slate-900/60 to-slate-800/30 border border-slate-700/50 hover:border-red-500/50 rounded-2xl p-6 backdrop-blur-md transition-all duration-300 hover:shadow-[0_0_25px_rgba(239,68,68,0.15)] relative overflow-hidden">
+                        <div className="flex justify-between items-start mb-2 relative z-10">
+                            <div>
+                                <p className="text-slate-400 text-sm font-semibold tracking-wide uppercase mb-1">Blocked Accounts</p>
+                                <h3 className="text-4xl font-black text-red-500">{stats.inactiveUsers.toLocaleString()}</h3>
+                            </div>
+                            <div className="p-3 bg-red-500/10 rounded-2xl text-red-400 group-hover:bg-red-500/20 transition-colors shadow-inner">
+                                <UserX size={24} strokeWidth={2.5} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Smart Toolbar */}
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6 bg-slate-900/40 p-3 rounded-2xl border border-slate-700/50 backdrop-blur-md shadow-lg">
+                <div className="relative w-full lg:max-w-md">
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-400/70" />
+                    <input
+                        type="text"
+                        placeholder="Search by name, email..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-slate-900/60 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 font-medium focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
+                    />
+                </div>
+
+                <div className="flex flex-wrap gap-3 w-full lg:w-auto items-center">
                     <select
+                        title="Filter by Role"
                         value={roleFilter}
-                        onChange={(e) => setRoleFilter(e.target.value)}
-                        className="px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        aria-label="Filter Users by Role"
+                        onChange={(e) => {setRoleFilter(e.target.value); setPage(1);}}
+                        className="bg-slate-900/80 border border-slate-700/50 rounded-xl px-4 py-3 text-white text-sm font-bold outline-none focus:border-blue-500 min-w-[140px] shadow-inner transition-all cursor-pointer"
                     >
                         <option value="">All Roles</option>
-                        <option value="user">Users</option>
-                        <option value="seller">Sellers</option>
-                        <option value="admin">Admins</option>
+                        <option value="user">User</option>
+                        <option value="seller">Seller</option>
+                        <option value="admin">Admin</option>
+                    </select>
+
+                    <select
+                        title="Filter by Status"
+                        value={statusFilter}
+                        onChange={(e) => {setStatusFilter(e.target.value); setPage(1);}}
+                        className="bg-slate-900/80 border border-slate-700/50 rounded-xl px-4 py-3 text-white text-sm font-bold outline-none focus:border-blue-500 min-w-[140px] shadow-inner transition-all cursor-pointer"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Disabled</option>
                     </select>
                 </div>
             </div>
 
-            {/* Bulk Actions */}
+            {/* Bulk Actions Context Bar */}
             {selectedUsers.length > 0 && (
-                <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 mb-6 flex items-center justify-between animate-in fade-in slide-in-from-top-4">
-                    <div className="flex items-center gap-2">
-                        <span className="text-blue-400 font-bold">{selectedUsers.length}</span>
-                        <span className="text-slate-300">users selected</span>
+                <div className="bg-blue-600/10 border border-blue-500/30 rounded-2xl p-4 mb-6 flex items-center justify-between shadow-[0_5px_15px_rgba(59,130,246,0.1)] animate-in fade-in slide-in-from-top-4 backdrop-blur-md">
+                    <div className="flex items-center gap-3">
+                        <div className="px-3 py-1 bg-blue-500 text-white rounded-lg font-black text-sm">{selectedUsers.length}</div>
+                        <span className="text-blue-300 font-bold tracking-wide">Users Selected</span>
                     </div>
                     <div className="flex items-center gap-4">
                         <select
                             onChange={(e) => handleBulkRoleChange(e.target.value)}
                             value=""
-                            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            aria-label="Bulk Change Role"
+                            title="Change role for selected users"
+                            aria-label="Change role for selected users"
+                            className="px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm font-semibold focus:outline-none focus:border-blue-500 cursor-pointer shadow-inner"
                         >
-                            <option value="" disabled>Change Role To...</option>
+                            <option value="" disabled>Change Role to...</option>
                             <option value="user">User</option>
                             <option value="seller">Seller</option>
                             <option value="admin">Admin</option>
                         </select>
                         <button
                             onClick={handleBulkDelete}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-400 hover:bg-red-600/30 rounded-lg transition-colors font-medium"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-all font-bold shadow-lg shadow-red-900/20"
                         >
-                            <Trash2 className="w-4 h-4" />
-                            Delete Selected
+                            <Trash2 size={16} /> Delete Forever
                         </button>
                     </div>
                 </div>
             )}
 
-            {/* Users Table */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-xl overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-slate-800">
-                                <th className="px-6 py-4 text-left">
-                                    <button
-                                        onClick={handleSelectAll}
-                                        className="text-slate-400 hover:text-white transition-colors flex items-center"
-                                        aria-label={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0 ? "Deselect All" : "Select All"}
-                                        title={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0 ? "Deselect All" : "Select All"}
-                                    >
-                                        {selectedUsers.length === filteredUsers.length && filteredUsers.length > 0 ? (
-                                            <CheckSquare className="w-5 h-5 text-blue-500" />
-                                        ) : (
-                                            <Square className="w-5 h-5" />
-                                        )}
-                                    </button>
+            {/* Premium Data Table */}
+            <div className="bg-slate-900/40 border border-slate-700/50 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl relative">
+                {loading && (
+                    <div className="absolute inset-0 z-20 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
+                        <div className="text-blue-400 font-bold animate-pulse text-lg flex items-center gap-3">
+                            <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div> Loading Data...
+                        </div>
+                    </div>
+                )}
+                <div className="overflow-x-auto min-h-[400px]">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-900/90 border-b border-slate-700/80 text-slate-300 text-[13px] uppercase tracking-wider font-bold">
+                            <tr>
+                                <th className="p-5 pl-6 w-12">
+                                    <input
+                                        type="checkbox"
+                                        title="Select All"
+                                        checked={selectedUsers.length === users.length && users.length > 0}
+                                        onChange={handleSelectAll}
+                                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500 cursor-pointer focus:ring-0 focus:ring-offset-0"
+                                    />
                                 </th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">User</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Role</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Status</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Account</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-300">Joined</th>
-                                <th className="px-6 py-4 text-right text-sm font-semibold text-slate-300">Actions</th>
+                                <th className="p-5">User Profile</th>
+                                <th className="p-5">Role Permission</th>
+                                <th className="p-5">Account Status</th>
+                                <th className="p-5">Security</th>
+                                <th className="p-5">Joined Date</th>
+                                <th className="p-5 pr-6 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {loading ? (
+                        <tbody className="divide-y divide-slate-800/50 relative">
+                            {users.length === 0 && !loading ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-slate-400">
-                                        Loading users...
-                                    </td>
-                                </tr>
-                            ) : filteredUsers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-slate-400">
-                                        No users found
-                                    </td>
+                                    <td colSpan={7} className="p-10 text-center text-slate-400 font-medium">No users found matching your search or filters.</td>
                                 </tr>
                             ) : (
-                                filteredUsers.map((user) => (
+                                users.map(user => (
                                     <tr
                                         key={user._id}
-                                        className={`border-b border-slate-800/50 transition-colors ${selectedUsers.includes(user._id) ? 'bg-blue-900/20' : 'hover:bg-slate-800/30'}`}
+                                        className={`transition-all duration-200 group ${selectedUsers.includes(user._id) ? 'bg-blue-900/10' : 'hover:bg-slate-800/40'}`}
                                     >
-                                        <td className="px-6 py-4">
-                                            <button
-                                                onClick={() => toggleSelectUser(user._id)}
-                                                className="text-slate-400 hover:text-white transition-colors flex items-center"
-                                                aria-label={selectedUsers.includes(user._id) ? "Deselect User" : "Select User"}
-                                            >
-                                                {selectedUsers.includes(user._id) ? (
-                                                    <CheckSquare className="w-5 h-5 text-blue-500" />
-                                                ) : (
-                                                    <Square className="w-5 h-5" />
-                                                )}
-                                            </button>
+                                        <td className="p-5 pl-6">
+                                            <input
+                                                type="checkbox"
+                                                title="Select User"
+                                                checked={selectedUsers.includes(user._id)}
+                                                onChange={() => toggleSelectUser(user._id)}
+                                                className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500 cursor-pointer focus:ring-0 focus:ring-offset-0"
+                                            />
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div>
-                                                <p className="font-medium text-white">{user.name}</p>
-                                                <p className="text-sm text-slate-400">{user.email}</p>
+                                        <td className="p-5">
+                                            <div className="flex items-center gap-4">
+                                                <Avatar name={user.name} url={user.avatar} />
+                                                <div>
+                                                    <p className="font-bold text-white text-sm truncate max-w-[200px]">{user.name}</p>
+                                                    <p className="text-xs text-slate-400 font-medium truncate max-w-[200px]">{user.email}</p>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="p-5">
                                             <select
                                                 value={user.role}
                                                 onChange={(e) => changeUserRole(user._id, e.target.value)}
-                                                className="px-3 py-1 bg-slate-800 border border-slate-700 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider border focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer shadow-sm
+                                                    ${user.role === 'admin' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' : 
+                                                      user.role === 'seller' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 
+                                                      'bg-slate-800 text-slate-300 border-slate-700'}`}
                                                 aria-label="Change User Role"
                                             >
-                                                <option value="user">User</option>
-                                                <option value="seller">Seller</option>
-                                                <option value="admin">Admin</option>
+                                                <option className="bg-slate-900 text-slate-300" value="user">User</option>
+                                                <option className="bg-slate-900 text-amber-500" value="seller">Seller</option>
+                                                <option className="bg-slate-900 text-purple-400" value="admin">Admin</option>
                                             </select>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="p-5">
                                             <button
                                                 onClick={() => toggleUserStatus(user._id, user.isActive)}
-                                                className={`px-3 py-1 rounded-full text-xs font-medium ${user.isActive
-                                                    ? 'bg-green-600/20 text-green-400'
-                                                    : 'bg-red-600/20 text-red-400'
-                                                    }`}
+                                                className={`flex items-center justify-center w-full px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-sm ${user.isActive ? 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30' : 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30'}`}
+                                                title={`Click to ${user.isActive ? 'Block' : 'Unblock'} user`}
                                             >
-                                                {user.isActive ? 'Active' : 'Inactive'}
+                                                {user.isActive ? 'Block User' : 'Unblock User'}
                                             </button>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="p-5">
                                             {user.lockUntil && new Date(user.lockUntil) > new Date() ? (
-                                                <span className="flex items-center gap-1 text-amber-400 text-xs font-bold">
-                                                    <Lock className="w-3 h-3" /> Locked
-                                                </span>
+                                                <div className="flex items-center gap-2 bg-amber-500/10 text-amber-500 border border-amber-500/20 px-3 py-1.5 rounded-lg text-xs font-bold w-max">
+                                                    <Lock size={14} /> Locked Out
+                                                </div>
                                             ) : (
-                                                <span className="text-slate-500 text-xs">—</span>
+                                                <span className="text-slate-500 text-xs font-medium">Clear</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-slate-400 text-sm">
-                                            {new Date(user.createdAt).toLocaleDateString()}
+                                        <td className="p-5 text-slate-400 text-xs font-mono font-medium">
+                                            {new Date(user.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end gap-2">
+                                        <td className="p-5 pr-6">
+                                            <div className="flex items-center justify-end gap-3">
                                                 {user.lockUntil && new Date(user.lockUntil) > new Date() && (
                                                     <button
                                                         onClick={() => unlockUser(user._id)}
-                                                        className="p-2 text-amber-400 hover:bg-amber-600/10 rounded-lg transition-colors"
-                                                        title="Unlock account"
+                                                        className="text-amber-500 hover:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 p-2 rounded-lg transition-colors border border-amber-500/20"
+                                                        title="Unlock Security Ban"
                                                     >
-                                                        <Unlock className="w-4 h-4" />
+                                                        <Unlock size={16} />
                                                     </button>
                                                 )}
                                                 <button
                                                     onClick={() => deleteUser(user._id)}
-                                                    className="p-2 text-red-400 hover:bg-red-600/10 rounded-lg transition-colors"
-                                                    title="Delete user"
+                                                    className="text-slate-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
+                                                    title="Permanently Delete User"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 size={18} />
                                                 </button>
                                             </div>
                                         </td>
@@ -337,17 +507,15 @@ const UsersManager: React.FC = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            {/* Stats Footer */}
-            <div className="mt-4 flex items-center justify-between text-sm text-slate-400">
-                <div className="flex items-center gap-4">
-                    <p>Total Users: {filteredUsers.length}</p>
-                    {selectedUsers.length > 0 && (
-                        <p className="text-blue-400 font-medium">{selectedUsers.length} users selected</p>
-                    )}
-                </div>
-                <p>Showing {filteredUsers.length} results</p>
+                
+                {/* Advanced Server-side Pagination Engine */}
+                <Pagination 
+                    currentPage={page} 
+                    totalPages={totalPages} 
+                    totalItems={totalUsersCount} 
+                    itemsPerPage={limit} 
+                    setPage={setPage} 
+                />
             </div>
         </div>
     );

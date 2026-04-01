@@ -5,6 +5,13 @@
  */
 'use strict';
 
+const Sentry = require('@sentry/node');
+Sentry.init({
+  dsn: process.env.SENTRY_DSN || '',
+  environment: process.env.NODE_ENV || 'development',
+  tracesSampleRate: 1.0,
+});
+
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
@@ -73,7 +80,8 @@ app.get('/health', async (req, res) => {
     }
 });
 
-app.get('/api/status', (req, res) => {
+const { protect, authorize } = require('./middleware/auth');
+app.get('/api/status', protect, authorize('admin'), (req, res) => {
     const dbStates = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
     res.json({
         status: 'ok',

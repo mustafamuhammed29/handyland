@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
                   }`}
               >
                 <span className={`relative z-10 flex items-center gap-2 transition-transform duration-300 ${isActive ? '' : 'group-hover:-translate-y-[1px]'}`}>
-                  <span className={`transition-colors duration-300 ${isActive ? 'text-brand-primary' : 'text-slate-400 dark:text-slate-500 group-hover:text-brand-primary'}`}>
+                  <span className={`transition-colors duration-300 ${isActive ? 'text-brand-primary' : 'text-slate-400 dark:text-slate-400 group-hover:text-brand-primary'}`}>
                     {item.icon}
                   </span>
                   <span>{item.label}</span>

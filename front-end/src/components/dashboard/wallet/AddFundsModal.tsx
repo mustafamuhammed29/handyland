@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Wallet, X, Loader2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Wallet, X, Loader2, Copy, CheckCircle, Upload, FileText, ArrowLeft, Building2, AlertCircle } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { api } from '../../../utils/api';
 import { useToast } from '../../../context/ToastContext';
@@ -11,21 +11,64 @@ interface AddFundsModalProps {
     onSuccess: () => void;
 }
 
+type Step = 'select' | 'bank_details';
+
 export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, onSuccess }) => {
     const { addToast } = useToast();
     const { settings } = useSettings();
     const paymentConfig = settings?.payment;
+    const bankConfig = paymentConfig?.bankTransfer;
 
+    const [step, setStep] = useState<Step>('select');
     const [amount, setAmount] = useState<string>('50');
     const [customAmount, setCustomAmount] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedMethod, setSelectedMethod] = useState<'stripe' | 'paypal' | 'bank_transfer' | null>(null);
+
+    // Bank Transfer Step 2 state
+    const [transactionId, setTransactionId] = useState<string | null>(null);
+    const [receiptFile, setReceiptFile] = useState<File | null>(null);
+    const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [copiedField, setCopiedField] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const presetAmounts = ['20', '50', '100', '200'];
 
     if (!isOpen) return null;
 
     const getFinalAmount = () => amount === 'custom' ? parseFloat(customAmount) : parseFloat(amount);
+
+    const handleClose = () => {
+        if (isProcessing || isUploading) return;
+        // Reset all state
+        setStep('select');
+        setAmount('50');
+        setCustomAmount('');
+        setSelectedMethod(null);
+        setTransactionId(null);
+        setReceiptFile(null);
+        setReceiptPreview(null);
+        onClose();
+    };
+
+    const handleCopy = (text: string, field: string) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCopiedField(field);
+            setTimeout(() => setCopiedField(null), 2000);
+        });
+    };
+
+    const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setReceiptFile(file);
+        if (file.type.startsWith('image/')) {
+            setReceiptPreview(URL.createObjectURL(file));
+        } else {
+            setReceiptPreview(null);
+        }
+    };
 
     const handleProcessPayment = async () => {
         const finalAmount = getFinalAmount();
@@ -38,7 +81,6 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
             addToast('Maximalbetrag ist 5.000 €', 'error');
             return;
         }
-
         if (!selectedMethod) {
             addToast('Bitte wählen Sie eine Zahlungsmethode', 'error');
             return;
@@ -56,17 +98,18 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                     throw new Error('Keine Checkout-URL erhalten');
                 }
             } else if (selectedMethod === 'bank_transfer') {
+                // Create pending transaction first
                 const res = await api.post('/api/transactions/bank-transfer', { amount: finalAmount }) as any;
-                if (res.data?.success || res.success) {
-                    addToast('Banküberweisung beantragt. Bitte prüfen Sie Ihre Anweisungen.', 'success');
-                    onClose();
-                    onSuccess();
+                const data = res?.data || res;
+                if (data?.success) {
+                    setTransactionId(data.transactionId || data.transaction?._id);
+                    setStep('bank_details');
                 } else {
-                    throw new Error('Fehler beim Beantragen der Banküberweisung');
+                    throw new Error('Fehler beim Erstellen des Antrags');
                 }
             }
         } catch (error: any) {
-            console.error('Top-up session error:', error);
+            console.error('Top-up error:', error);
             addToast(error?.response?.data?.message || 'Zahlung fehlgeschlagen. Bitte Admin kontaktieren.', 'error');
         } finally {
             if (selectedMethod !== 'stripe') {
@@ -75,24 +118,71 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
         }
     };
 
+    const handleUploadReceipt = async () => {
+        if (!receiptFile) {
+            addToast('Bitte laden Sie Ihren Zahlungsbeleg hoch', 'error');
+            return;
+        }
+        if (!transactionId) {
+            addToast('Transaktions-ID fehlt', 'error');
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('receipt', receiptFile);
+            const res = await api.post(`/api/transactions/${transactionId}/upload-receipt`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            } as any) as any;
+            const data = res?.data || res;
+            if (data?.success) {
+                addToast('✅ Beleg hochgeladen! Der Admin wird Ihren Transfer bestätigen.', 'success');
+                onSuccess();
+                handleClose();
+            } else {
+                throw new Error('Upload fehlgeschlagen');
+            }
+        } catch (error: any) {
+            addToast(error?.response?.data?.message || 'Fehler beim Hochladen des Belegs', 'error');
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const finalAmount = getFinalAmount();
+    const displayAmount = amount === 'custom' ? (customAmount || '0') : amount;
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 min-h-screen">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
-                onClick={() => !isProcessing && onClose()}
+                onClick={handleClose}
             />
 
             {/* Modal Content */}
             <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-slate-800">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <Wallet className="w-5 h-5 text-blue-400" /> Add Funds
-                    </h3>
+                    <div className="flex items-center gap-2">
+                        {step === 'bank_details' && (
+                            <button
+                                onClick={() => setStep('select')}
+                                className="text-slate-400 hover:text-white transition-colors mr-1"
+                                aria-label="Go back"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                        )}
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <Wallet className="w-5 h-5 text-blue-400" />
+                            {step === 'select' ? 'Add Funds' : 'Banküberweisung'}
+                        </h3>
+                    </div>
                     <button
-                        onClick={() => !isProcessing && onClose()}
-                        disabled={isProcessing}
+                        onClick={handleClose}
+                        disabled={isProcessing || isUploading}
                         aria-label="Close modal"
                         title="Close modal"
                         className="text-slate-400 hover:text-white transition-colors disabled:opacity-50"
@@ -103,167 +193,279 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
 
                 {/* Body */}
                 <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
-                    {/* Amount Selection */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-3">Betrag auswählen</label>
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                            {presetAmounts.map((preset) => (
+
+                    {/* ===== STEP 1: Select Amount & Method ===== */}
+                    {step === 'select' && (
+                        <>
+                            {/* Amount Selection */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-3">Betrag auswählen</label>
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    {presetAmounts.map((preset) => (
+                                        <button
+                                            key={preset}
+                                            onClick={() => setAmount(preset)}
+                                            className={`py-3 rounded-xl border font-bold transition-all ${amount === preset
+                                                ? 'bg-blue-600/20 border-blue-500 text-blue-400'
+                                                : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                                                }`}
+                                        >
+                                            €{preset}
+                                        </button>
+                                    ))}
+                                </div>
+                                <input
+                                    type="number"
+                                    value={customAmount}
+                                    onChange={(e) => { setAmount('custom'); setCustomAmount(e.target.value); }}
+                                    onFocus={() => setAmount('custom')}
+                                    placeholder="Eigener Betrag (min. €5)"
+                                    title="Eigener Betrag"
+                                    min="5"
+                                    max="5000"
+                                    className={`w-full px-4 py-3 rounded-xl border transition-all bg-slate-950 font-bold focus:outline-none ${amount === 'custom'
+                                        ? 'border-blue-500 text-blue-400 ring-2 ring-blue-500/20'
+                                        : 'border-slate-800 text-slate-300'
+                                        }`}
+                                />
+                            </div>
+
+                            {/* Payment Method Selection */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-3">Zahlungsmethode</label>
+                                <div className="space-y-3">
+                                    {/* Stripe / Credit Card */}
+                                    {paymentConfig?.stripe?.enabled !== false && (
+                                        <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${selectedMethod === 'stripe' ? 'bg-blue-600/20 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}>
+                                            <input
+                                                type="radio"
+                                                name="walletPaymentMethod"
+                                                value="stripe"
+                                                checked={selectedMethod === 'stripe'}
+                                                onChange={() => setSelectedMethod('stripe')}
+                                                className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
+                                            />
+                                            <div className="flex-1">
+                                                <div className="font-bold text-white text-sm">Credit Card (Stripe)</div>
+                                                <div className="text-xs text-slate-400 mt-0.5">Secure payment via Stripe</div>
+                                            </div>
+                                        </label>
+                                    )}
+
+                                    {/* PayPal */}
+                                    {paymentConfig?.paypal?.enabled && paymentConfig?.paypal?.clientId && (
+                                        <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${selectedMethod === 'paypal' ? 'bg-blue-600/20 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}>
+                                            <input
+                                                type="radio"
+                                                name="walletPaymentMethod"
+                                                value="paypal"
+                                                checked={selectedMethod === 'paypal'}
+                                                onChange={() => setSelectedMethod('paypal')}
+                                                className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
+                                            />
+                                            <div className="flex-1">
+                                                <div className="font-bold text-white text-sm">PayPal</div>
+                                                <div className="text-xs text-slate-400 mt-0.5">Fast and safe</div>
+                                            </div>
+                                        </label>
+                                    )}
+
+                                    {/* Bank Transfer */}
+                                    {bankConfig?.enabled !== false && (
+                                        <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${selectedMethod === 'bank_transfer' ? 'bg-blue-600/20 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}>
+                                            <input
+                                                type="radio"
+                                                name="walletPaymentMethod"
+                                                value="bank_transfer"
+                                                checked={selectedMethod === 'bank_transfer'}
+                                                onChange={() => setSelectedMethod('bank_transfer')}
+                                                className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
+                                            />
+                                            <div className="flex-1">
+                                                <div className="font-bold text-white text-sm flex items-center gap-2">
+                                                    <Building2 className="w-4 h-4 text-blue-400" />
+                                                    Banküberweisung
+                                                </div>
+                                                <div className="text-xs text-slate-400 mt-0.5">Manueller Einzahlungsbeleg — Admin-Bestätigung erforderlich</div>
+                                            </div>
+                                        </label>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Submit Actions */}
+                            {selectedMethod === 'paypal' && paymentConfig?.paypal?.clientId ? (
+                                <PayPalScriptProvider options={{ clientId: paymentConfig.paypal.clientId, currency: "EUR", intent: "capture" }}>
+                                    <PayPalButtons
+                                        style={{ layout: "vertical", shape: "rect", color: "blue" }}
+                                        createOrder={async () => {
+                                            const fa = getFinalAmount();
+                                            if (isNaN(fa) || fa < 5) { addToast('Mindestbetrag ist 5 €', 'error'); return ""; }
+                                            try {
+                                                const res: any = await api.post('/api/transactions/paypal/create-topup', { amount: fa });
+                                                if (res.data?.success || res.success) return res.data?.id || res.id;
+                                                addToast("Error initiating PayPal checkout", "error");
+                                                return "";
+                                            } catch (error: any) {
+                                                addToast(error.response?.data?.message || "Failed to initiate PayPal", "error");
+                                                return "";
+                                            }
+                                        }}
+                                        onApprove={async (data) => {
+                                            try {
+                                                setIsProcessing(true);
+                                                const res: any = await api.post('/api/transactions/paypal/capture-topup', { orderID: data.orderID });
+                                                if (res.data?.success || res.success) {
+                                                    addToast('Wallet erfolgreich mit PayPal aufgeladen! 🎉', 'success');
+                                                    handleClose(); onSuccess();
+                                                } else { addToast("PayPal Payment failed", "error"); }
+                                            } catch (error: any) {
+                                                addToast(error.response?.data?.message || "Error finalizing PayPal transaction.", "error");
+                                            } finally { setIsProcessing(false); }
+                                        }}
+                                        onError={(err) => { console.error("PayPal Error:", err); addToast("PayPal payment was cancelled or failed.", "error"); }}
+                                    />
+                                </PayPalScriptProvider>
+                            ) : (
                                 <button
-                                    key={preset}
-                                    onClick={() => setAmount(preset)}
-                                    className={`py-3 rounded-xl border font-bold transition-all ${amount === preset
-                                        ? 'bg-blue-600/20 border-blue-500 text-blue-400'
-                                        : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                                    onClick={handleProcessPayment}
+                                    disabled={isProcessing || !selectedMethod}
+                                    className="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
+                                >
+                                    {isProcessing ? (
+                                        <><Loader2 className="w-5 h-5 animate-spin" /> Verarbeitung...</>
+                                    ) : (
+                                        <>Weiter — €{displayAmount} →</>
+                                    )}
+                                </button>
+                            )}
+                        </>
+                    )}
+
+                    {/* ===== STEP 2: Bank Details + Receipt Upload ===== */}
+                    {step === 'bank_details' && (
+                        <>
+                            {/* Info Banner */}
+                            <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                                <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                                <div className="text-sm text-amber-300">
+                                    <p className="font-bold mb-1">Admin-Bestätigung erforderlich</p>
+                                    <p className="text-amber-400/80">Ihr Guthaben wird erst nach Prüfung durch den Admin gutgeschrieben.</p>
+                                </div>
+                            </div>
+
+                            {/* Transfer Amount */}
+                            <div className="p-4 bg-blue-600/10 border border-blue-500/30 rounded-xl text-center">
+                                <p className="text-slate-400 text-sm mb-1">Zu überweisender Betrag</p>
+                                <p className="text-3xl font-black text-blue-400">€{finalAmount.toFixed(2)}</p>
+                            </div>
+
+                            {/* Bank Details */}
+                            <div>
+                                <h4 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                                    <Building2 className="w-4 h-4 text-blue-400" />
+                                    Bankverbindung
+                                </h4>
+                                <div className="space-y-2 bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                                    {[
+                                        { label: 'Kontoinhaber', value: bankConfig?.accountHolder || 'HandyLand GmbH', field: 'holder' },
+                                        { label: 'Bank', value: bankConfig?.bankName || '—', field: 'bank' },
+                                        { label: 'IBAN', value: bankConfig?.iban || '—', field: 'iban' },
+                                        { label: 'BIC', value: bankConfig?.bic || '—', field: 'bic' },
+                                        { label: 'Verwendungszweck', value: `Wallet-${transactionId?.slice(-8).toUpperCase() || 'XXXXX'}`, field: 'ref' },
+                                    ].map(({ label, value, field }) => (
+                                        <div key={field} className="flex items-center justify-between gap-3 py-1.5 border-b border-slate-700/40 last:border-0">
+                                            <span className="text-xs text-slate-500 shrink-0 w-28">{label}</span>
+                                            <span className={`text-sm font-mono font-semibold flex-1 truncate ${field === 'ref' ? 'text-amber-400' : 'text-white'}`}>{value}</span>
+                                            {value !== '—' && (
+                                                <button
+                                                    onClick={() => handleCopy(value, field)}
+                                                    className="text-slate-500 hover:text-blue-400 transition-colors shrink-0"
+                                                    title={`${label} kopieren`}
+                                                >
+                                                    {copiedField === field
+                                                        ? <CheckCircle className="w-4 h-4 text-emerald-400" />
+                                                        : <Copy className="w-4 h-4" />
+                                                    }
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                {bankConfig?.instructions && (
+                                    <p className="mt-2 text-xs text-slate-500 leading-relaxed">{bankConfig.instructions}</p>
+                                )}
+                            </div>
+
+                            {/* Receipt Upload */}
+                            <div>
+                                <h4 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                                    <Upload className="w-4 h-4 text-blue-400" />
+                                    Zahlungsbeleg hochladen
+                                </h4>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp,application/pdf"
+                                    onChange={handleReceiptChange}
+                                    className="hidden"
+                                    title="Beleg hochladen"
+                                />
+                                <div
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${receiptFile
+                                        ? 'border-emerald-500/50 bg-emerald-500/5'
+                                        : 'border-slate-700 hover:border-blue-500/50 bg-slate-800/30 hover:bg-blue-500/5'
                                         }`}
                                 >
-                                    €{preset}
-                                </button>
-                            ))}
-                        </div>
-                        <input
-                            type="number"
-                            value={customAmount}
-                            onChange={(e) => { setAmount('custom'); setCustomAmount(e.target.value); }}
-                            onFocus={() => setAmount('custom')}
-                            placeholder="Eigener Betrag (min. €5)"
-                            title="Eigener Betrag"
-                            min="5"
-                            max="5000"
-                            className={`w-full px-4 py-3 rounded-xl border transition-all bg-slate-950 font-bold focus:outline-none ${amount === 'custom'
-                                ? 'border-blue-500 text-blue-400 ring-2 ring-blue-500/20'
-                                : 'border-slate-800 text-slate-300'
-                                }`}
-                        />
-                    </div>
-
-                    {/* Payment Method Selection */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-3">Zahlungsmethode</label>
-                        <div className="space-y-3">
-                            {/* Stripe / Credit Card */}
-                            {paymentConfig?.stripe?.enabled !== false && (
-                                <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${selectedMethod === 'stripe' ? 'bg-blue-600/20 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}>
-                                    <input
-                                        type="radio"
-                                        name="walletPaymentMethod"
-                                        value="stripe"
-                                        checked={selectedMethod === 'stripe'}
-                                        onChange={() => setSelectedMethod('stripe')}
-                                        className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
-                                    />
-                                    <div className="flex-1">
-                                        <div className="font-bold text-white text-sm">Credit Card (Stripe)</div>
-                                        <div className="text-xs text-slate-400 mt-0.5">Secure payment via Stripe</div>
-                                    </div>
-                                </label>
-                            )}
-
-                            {/* PayPal */}
-                            {paymentConfig?.paypal?.enabled && paymentConfig?.paypal?.clientId && (
-                                <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${selectedMethod === 'paypal' ? 'bg-blue-600/20 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}>
-                                    <input
-                                        type="radio"
-                                        name="walletPaymentMethod"
-                                        value="paypal"
-                                        checked={selectedMethod === 'paypal'}
-                                        onChange={() => setSelectedMethod('paypal')}
-                                        className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
-                                    />
-                                    <div className="flex-1">
-                                        <div className="font-bold text-white text-sm">PayPal</div>
-                                        <div className="text-xs text-slate-400 mt-0.5">Fast and safe</div>
-                                    </div>
-                                    <svg className="w-6 h-6 text-[#00457C]" viewBox="0 0 256 256" fill="currentColor">
-                                        <path d="M208.2,74.7c-4.4-17.7-18.7-27.1-41-28.7c-3.1-0.2-6.5-0.3-10-0.3H82.4c-6.8,0-12.7,5-13.8,11.8L40,245.8c-0.2,1.3,0.8,2.4,2,2.4 h41.8c6.1,0,11.3-4.5,12.3-10.5l8.5-59.3h27.4c29.1,0,52.3-11.8,59-42.3C195.9,114.3,197,93.6,193.3,77.5L208.2,74.7z M144.2,143.7 c-4.6,23.3-25.7,23.3-43,23.3H87.1l14.9-103.7h27.6c11.6,0,22,0.6,28.3,7C163.6,76.1,161.4,103.1,144.2,143.7z" />
-                                    </svg>
-                                </label>
-                            )}
-
-                            {/* Bank Transfer */}
-                            {paymentConfig?.bankTransfer?.enabled !== false && (
-                                <div>
-                                    <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${selectedMethod === 'bank_transfer' ? 'bg-blue-600/20 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}>
-                                        <input
-                                            type="radio"
-                                            name="walletPaymentMethod"
-                                            value="bank_transfer"
-                                            checked={selectedMethod === 'bank_transfer'}
-                                            onChange={() => setSelectedMethod('bank_transfer')}
-                                            className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
-                                        />
-                                        <div className="flex-1">
-                                            <div className="font-bold text-white text-sm">Bank Transfer</div>
-                                            <div className="text-xs text-slate-400 mt-0.5">Manual deposit</div>
+                                    {receiptPreview ? (
+                                        <img src={receiptPreview} alt="Beleg Vorschau" className="max-h-32 mx-auto rounded-lg object-contain" />
+                                    ) : receiptFile ? (
+                                        <div className="flex flex-col items-center gap-2">
+                                            <FileText className="w-10 h-10 text-emerald-400" />
+                                            <p className="text-sm font-medium text-emerald-400">{receiptFile.name}</p>
                                         </div>
-                                    </label>
-                                    {selectedMethod === 'bank_transfer' && (
-                                        <div className="mt-2 p-3 bg-slate-800 rounded-lg border border-slate-700 text-xs text-slate-300">
-                                            {paymentConfig?.bankTransfer?.instructions || "Transfer funds to our bank account. Your wallet will be credited once payment clears."}
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-2">
+                                            <Upload className="w-10 h-10 text-slate-500" />
+                                            <p className="text-sm text-slate-400">Beleg hier ablegen oder klicken</p>
+                                            <p className="text-xs text-slate-600">JPG, PNG, WebP oder PDF — max. 10 MB</p>
                                         </div>
                                     )}
                                 </div>
-                            )}
-                        </div>
-                    </div>
+                                {receiptFile && (
+                                    <button
+                                        onClick={() => { setReceiptFile(null); setReceiptPreview(null); }}
+                                        className="mt-2 text-xs text-red-400 hover:text-red-300 transition-colors"
+                                    >
+                                        Datei entfernen
+                                    </button>
+                                )}
+                            </div>
 
-                    {/* Submit Actions */}
-                    {selectedMethod === 'paypal' && paymentConfig?.paypal?.clientId ? (
-                        <PayPalScriptProvider options={{ clientId: paymentConfig.paypal.clientId, currency: "EUR", intent: "capture" }}>
-                            <PayPalButtons
-                                style={{ layout: "vertical", shape: "rect", color: "blue" }}
-                                createOrder={async () => {
-                                    const finalAmount = getFinalAmount();
-                                    if (isNaN(finalAmount) || finalAmount < 5) {
-                                        addToast('Mindestbetrag ist 5 €', 'error');
-                                        return "";
-                                    }
-                                    try {
-                                        const res: any = await api.post('/api/transactions/paypal/create-topup', { amount: finalAmount });
-                                        if (res.data?.success || res.success) {
-                                            return res.data?.id || res.id;
-                                        }
-                                        addToast("Error initiating PayPal checkout", "error");
-                                        return "";
-                                    } catch (error: any) {
-                                        addToast(error.response?.data?.message || "Failed to initiate PayPal", "error");
-                                        return "";
-                                    }
-                                }}
-                                onApprove={async (data, actions) => {
-                                    try {
-                                        setIsProcessing(true);
-                                        const res: any = await api.post('/api/transactions/paypal/capture-topup', { orderID: data.orderID });
-                                        if (res.data?.success || res.success) {
-                                            addToast('Wallet erfolgreich mit PayPal aufgeladen! 🎉', 'success');
-                                            onClose();
-                                            onSuccess();
-                                        } else {
-                                            addToast("PayPal Payment failed", "error");
-                                        }
-                                    } catch (error: any) {
-                                        addToast(error.response?.data?.message || "Error finalizing PayPal transaction.", "error");
-                                    } finally {
-                                        setIsProcessing(false);
-                                    }
-                                }}
-                                onError={(err) => {
-                                    console.error("PayPal Error:", err);
-                                    addToast("PayPal payment was cancelled or failed.", "error");
-                                }}
-                            />
-                        </PayPalScriptProvider>
-                    ) : (
-                        <button
-                            onClick={handleProcessPayment}
-                            disabled={isProcessing || !selectedMethod}
-                            className="w-full py-4 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isProcessing ? (
-                                <><Loader2 className="w-5 h-5 animate-spin" /> Verarbeitung... </>
-                            ) : (
-                                <>Weiter — €{amount === 'custom' ? (customAmount || '0') : amount}</>
-                            )}
-                        </button>
+                            {/* Submit Button */}
+                            <button
+                                onClick={handleUploadReceipt}
+                                disabled={isUploading || !receiptFile}
+                                className="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
+                            >
+                                {isUploading ? (
+                                    <><Loader2 className="w-5 h-5 animate-spin" /> Hochladen...</>
+                                ) : (
+                                    <><CheckCircle className="w-5 h-5" /> Beleg einreichen & Anfrage senden</>
+                                )}
+                            </button>
+
+                            <p className="text-center text-xs text-slate-600">
+                                Kein Beleg zur Hand? Sie können diesen Schritt überspringen — Ihr Antrag wird als "ausstehend" gespeichert.{' '}
+                                <button
+                                    onClick={() => { onSuccess(); handleClose(); }}
+                                    className="text-blue-400 hover:text-blue-300 underline"
+                                >
+                                    Jetzt überspringen
+                                </button>
+                            </p>
+                        </>
                     )}
                 </div>
             </div>

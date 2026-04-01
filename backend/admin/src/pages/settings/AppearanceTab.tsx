@@ -1,5 +1,5 @@
 import { Input, Toggle } from '../SettingsManager';
-import { Palette, Globe2, LayoutTemplate, Mail } from 'lucide-react';
+import { Palette, Globe2 } from 'lucide-react';
 
 export const AppearanceTab = ({ settings, handleChange }: any) => {
     return (

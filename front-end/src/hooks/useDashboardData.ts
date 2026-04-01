@@ -118,16 +118,15 @@ export function useWalletTransactions(options?: { enabled?: boolean }) {
         queryKey: dashboardKeys.wallet(),
         enabled: options?.enabled ?? true,
         queryFn: async () => {
-            const res = await api.get<any>('/api/transactions') as any;
-            const transactions = normalizeResponse(res, 'transactions');
-            // Calculate balance from transactions
-            const balance = transactions.reduce((sum: number, t: any) => {
-                if (t.type === 'credit' || t.type === 'deposit' || t.type === 'refund') {
-                    return sum + (t.amount || 0);
-                }
-                return sum - (t.amount || 0);
-            }, 0);
-            return { balance, transactions };
+            // Fetch transactions list
+            const txRes = await api.get<any>('/api/transactions') as any;
+            const transactions = normalizeResponse(txRes, 'transactions');
+
+            // Fetch real balance from user profile (source of truth — only counts approved/completed transactions)
+            const meRes = await authService.getMe();
+            const userBalance = meRes?.user?.balance ?? 0;
+
+            return { balance: userBalance, transactions };
         },
         staleTime: 1 * 60 * 1000, // 1 minute
         retry: 2,

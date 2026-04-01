@@ -26,7 +26,7 @@ const startCartRecoveryJob = () => {
                             <h2>مرحباً ${cart.user.name.split(' ')[0]}،</h2>
                             <p>لاحظنا أنك تركت بعض العناصر الرائعة في سلة التسوق الخاصة بك في HandyLand!</p>
                             <p>لا تفوت الفرصة، أكمل عملية الشراء الآن قبل نفاذ الكمية.</p>
-                            <a href="${process.env.STORE_URL}/cart" style="display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px;">إكمال الشراء</a>
+                            <a href="${process.env.FRONTEND_URL}/cart" style="display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px;">إكمال الشراء</a>
                         `;
 
                         // Checking if sendEmail exists, handling missing params

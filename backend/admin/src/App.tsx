@@ -12,6 +12,7 @@ import ArchiveManager from './pages/ArchiveManager';
 import RepairTicketManager from './pages/RepairTicketManager';
 import PageManager from './pages/PageManager';
 import ValuationManager from './pages/ValuationManager';
+import CompareManager from './pages/CompareManager';
 import OrdersManager from './pages/OrdersManager';
 import UsersManager from './pages/UsersManager';
 import EmailManager from './pages/EmailManager';
@@ -27,6 +28,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoanerManager from './pages/LoanerManager';
 import WarrantyManager from './pages/WarrantyManager';
 import TranslationManager from './pages/TranslationManager';
+import { NotificationBell } from './components/NotificationBell';
+import { useAdminNotifications } from './hooks/useAdminNotifications';
 
 const SidebarLink = ({ to, icon: Icon, label }: { to: string, icon: React.ElementType, label: string }) => {
   const location = useLocation();
@@ -54,12 +57,12 @@ const SidebarSectionHeader = ({ title }: { title: string }) => (
 
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { notifications, unreadCount, isConnected, markAllRead, markOneRead, clearAll } = useAdminNotifications(isAuthenticated);
 
   const handleLogout = () => {
     logout();
-    // Redirect to login page after logout
     setTimeout(() => {
       navigate('/login', { replace: true });
     }, 100);
@@ -125,6 +128,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarSectionHeader title="System Configuration" />
           <SidebarLink to="/wallet" icon={CreditCard} label="Wallet Manager" />
           <SidebarLink to="/inventory" icon={Box} label="Inventory & Sales" />
+          <SidebarLink to="/compare-manager" icon={Smartphone} label="Global Compare" />
           <SidebarLink to="/payment" icon={CreditCard} label="Payments" />
           <SidebarLink to="/shipping" icon={Truck} label="Shipping" />
           <SidebarLink to="/pages" icon={FileText} label="Content Pages" />
@@ -145,13 +149,40 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 ml-[280px] p-8 relative min-h-screen">
+      <main className="flex-1 ml-[280px] flex flex-col relative min-h-screen">
+        {/* Top Bar */}
+        <div className="sticky top-0 z-30 flex items-center justify-between px-8 py-3 bg-[#060B19]/90 backdrop-blur-xl border-b border-slate-800/60">
+          <div className="text-sm text-slate-500 font-medium">
+            HandyLand Admin Console
+          </div>
+          <div className="flex items-center gap-3">
+            <NotificationBell
+              notifications={notifications}
+              unreadCount={unreadCount}
+              isConnected={isConnected}
+              onMarkAllRead={markAllRead}
+              onMarkOneRead={markOneRead}
+              onClearAll={clearAll}
+            />
+            {user && (
+              <div className="flex items-center gap-2 pl-3 border-l border-slate-800">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-sm text-slate-300 font-medium hidden sm:block">{user.name}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1 p-8 relative">
           {/* Ambient Glows for premium feel */}
           <div className="fixed top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none z-0" />
           <div className="fixed bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 blur-[150px] rounded-full pointer-events-none z-0" />
           
-        <div className="max-w-[1600px] mx-auto relative z-10 w-full">
-          {children}
+          <div className="max-w-[1600px] mx-auto relative z-10 w-full">
+            {children}
+          </div>
         </div>
       </main>
     </div>
@@ -195,6 +226,7 @@ function AppContent() {
                   <Route path="/loaners" element={<LoanerManager />} />
                   <Route path="/warranties" element={<WarrantyManager />} />
                   <Route path="/valuation" element={<ValuationManager />} />
+                  <Route path="/compare-manager" element={<CompareManager />} />
                   <Route path="/messages" element={<MessagesManager />} />
                   <Route path="/pages" element={<PageManager />} />
                   <Route path="/reviews" element={<ReviewsManager />} />

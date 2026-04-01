@@ -3,7 +3,7 @@ import { Trash2 } from 'lucide-react';
 
 interface FinancialSettingsTabProps {
     settings: any;
-    handleChange: (section: string | null, key: string, value: any) => void;
+    handleChange: (section: any, key: string, value: any) => void;
 }
 
 export const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({ settings, handleChange }) => {

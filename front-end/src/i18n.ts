@@ -20,7 +20,9 @@ i18n
     },
     backend: {
       loadPath: '/api/translations/locales/{{lng}}',
+      addPath: '/api/translations/missing/{{lng}}/{{ns}}',
     },
+    saveMissing: true,
   });
 
 export default i18n;

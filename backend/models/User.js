@@ -60,6 +60,8 @@ const UserSchema = new mongoose.Schema({
     avatar: {
         type: String // URL from social provider or upload
     },
+    twoFactorSecret: { type: String, select: false },
+    twoFactorEnabled: { type: Boolean, default: false },
 
     isActive: {
         type: Boolean,

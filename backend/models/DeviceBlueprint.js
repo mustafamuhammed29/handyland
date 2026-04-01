@@ -38,7 +38,21 @@ const deviceBlueprintSchema = new mongoose.Schema({
     nonFunctionalMultiplier: { type: Number, default: 0.4 },
 
     category: { type: String, default: 'Smartphone' },
-    active: { type: Boolean, default: true }
+    active: { type: Boolean, default: true },
+
+    // === eBay Price Research Metadata ===
+    priceResearch: {
+        lastUpdated: { type: Date },
+        source: { type: String, default: 'eBay.de Completed Listings' },
+        marketAvg: { type: Number },          // avg sold price on eBay.de
+        previousBasePrice: { type: Number },  // price before the update (audit trail)
+        ebayCount: { type: Number },          // how many sold listings found
+        suggestedBuyback: {
+            conservative: { type: Number },   // 52% of market
+            balanced: { type: Number },       // 58% of market
+            aggressive: { type: Number },     // 65% of market
+        }
+    }
 }, {
     timestamps: true
 });

@@ -6,6 +6,8 @@ const {
     createPayPalTopUp,
     capturePayPalTopUp,
     createBankTransferTopUp,
+    uploadTransactionReceipt,
+    receiptUpload,
     getAllTransactions,
     updateTransactionStatus
 } = require('../controllers/transactionController');
@@ -23,6 +25,7 @@ router.post('/confirm-topup', confirmTopUp);
 router.post('/paypal/create-topup', createPayPalTopUp);
 router.post('/paypal/capture-topup', capturePayPalTopUp);
 router.post('/bank-transfer', createBankTransferTopUp);
+router.post('/:id/upload-receipt', receiptUpload.single('receipt'), uploadTransactionReceipt);
 
 // Admin Routes
 router.get('/admin', authorize('admin'), getAllTransactions);

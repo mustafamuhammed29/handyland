@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, Loader, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Loader, Eye, EyeOff, ShieldOff } from 'lucide-react';
 import { validateEmail, validateRequired } from '../validation';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
@@ -50,6 +50,7 @@ const Login: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [showResend, setShowResend] = useState(false);
     const [resendSuccess, setResendSuccess] = useState(false);
+    const [isBlocked, setIsBlocked] = useState(false);
     const location = useLocation();
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -57,6 +58,7 @@ const Login: React.FC = () => {
         setError('');
         setShowResend(false);
         setResendSuccess(false);
+        setIsBlocked(false);
 
         if (!validateRequired(email)) { setError('Email is required'); return; }
         if (!validateEmail(email)) { setError('Please enter a valid email address'); return; }
@@ -68,9 +70,15 @@ const Login: React.FC = () => {
             await login(email, password, redirectPath);
         } catch (err: any) {
             const errorMessage = err.message || 'Invalid email or password';
-            setError(errorMessage);
-            if (errorMessage.toLowerCase().includes('verify') || (err.data && err.data.isVerified === false)) {
-                setShowResend(true);
+            // Check if account is blocked
+            if (err.isBlocked || err.data?.isBlocked) {
+                setIsBlocked(true);
+                setError(errorMessage);
+            } else {
+                setError(errorMessage);
+                if (errorMessage.toLowerCase().includes('verify') || (err.data && err.data.isVerified === false)) {
+                    setShowResend(true);
+                }
             }
         } finally {
             setLoading(false);
@@ -118,8 +126,34 @@ const Login: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Error Message */}
-                    {error && (
+                    {/* Blocked Account Banner */}
+                    {isBlocked && (
+                        <div className="mb-6 p-5 bg-red-900/30 border-2 border-red-500/70 rounded-xl flex flex-col gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-red-500/20 rounded-lg">
+                                    <ShieldOff className="w-6 h-6 text-red-400" />
+                                </div>
+                                <div>
+                                    <p className="text-red-300 font-bold text-sm">
+                                        {(settings as any).accountSuspension?.title || 'Account Suspended'}
+                                    </p>
+                                    <p className="text-red-400/80 text-xs mt-0.5">
+                                        {(settings as any).accountSuspension?.subtitle || 'حسابك محظور من قِبَل الإدارة'}
+                                    </p>
+                                </div>
+                            </div>
+                            <p className="text-red-400 text-sm leading-relaxed">{error}</p>
+                            <a
+                                href={`mailto:${(settings as any).accountSuspension?.supportEmail || 'support@handyland.com'}`}
+                                className="text-xs text-orange-400 hover:text-orange-300 underline font-semibold transition-colors"
+                            >
+                                📩 {(settings as any).accountSuspension?.supportLabel || 'Contact Support'}: {(settings as any).accountSuspension?.supportEmail || 'support@handyland.com'}
+                            </a>
+                        </div>
+                    )}
+
+                    {/* Error Message (non-blocked errors) */}
+                    {error && !isBlocked && (
                         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex flex-col items-start gap-3">
                             <div className="flex items-center gap-3">
                                 <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />

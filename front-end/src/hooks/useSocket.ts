@@ -10,6 +10,9 @@ const SOCKET_URL = ENV.API_URL.endsWith('/api')
 let socket: Socket | null = null;
 
 const getSocket = (): Socket => {
+    // Read the JWT token stored by the auth system
+    const token = localStorage.getItem('handyland_token') || '';
+
     if (!socket) {
         socket = io(SOCKET_URL, {
             autoConnect: false,
@@ -18,7 +21,11 @@ const getSocket = (): Socket => {
             reconnection: true,
             reconnectionDelay: 2000,
             reconnectionAttempts: 3,
+            auth: { token },                      // sent in handshake for server-side JWT verification
         });
+    } else if (token && socket.auth) {
+        // Update auth token if socket already exists (e.g. after login)
+        (socket as any).auth = { token };
     }
     return socket;
 };

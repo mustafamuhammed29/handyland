@@ -18,40 +18,7 @@ exports.getSettings = async (req, res) => {
             settings = await Settings.create({});
         }
 
-        // Calculate dynamic stats parallely
-        const [
-            happyCustomers,
-            devicesRepaired,
-            avgRatingAgg,
-            oldestOrder
-        ] = await Promise.all([
-            User.countDocuments({ role: 'user' }),
-            RepairTicket.countDocuments(), // Count all tickets as "repaired" or in-process
-            Review.aggregate([
-                { $group: { _id: null, avg: { $avg: "$rating" } } }
-            ]),
-            Order.findOne().sort({ createdAt: 1 }).select('createdAt')
-        ]);
-
-        // Calculate Market Experience
-        let marketExperience = settings.stats?.marketExperience || 0;
-        if (!marketExperience && oldestOrder) {
-            const startYear = oldestOrder.createdAt.getFullYear();
-            const currentYear = new Date().getFullYear();
-            marketExperience = currentYear - startYear;
-            if (marketExperience < 1) {marketExperience = 1;} // Minimum 1 year if active
-        }
-
-        // Overlay dynamic stats
         const settingsObj = settings.toObject();
-
-        settingsObj.stats = {
-            ...settingsObj.stats,
-            happyCustomers: happyCustomers || 0,
-            devicesRepaired: devicesRepaired || 0,
-            averageRating: avgRatingAgg.length > 0 ? parseFloat(avgRatingAgg[0].avg.toFixed(1)) : 5.0, // Default 5 if no reviews
-            marketExperience: marketExperience
-        };
 
         // Secure Payment Config (Mask Secret Key and Webhook Secret)
         if (settingsObj.payment) {

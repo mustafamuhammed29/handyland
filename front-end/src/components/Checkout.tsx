@@ -93,7 +93,7 @@ export const Checkout: React.FC = () => {
                 image: item.image,
                 quantity: item.quantity || 1,
                 product: item.id,
-                productType: 'Product'
+                productType: (item.category === 'accessory' || item.category === 'Accessory') ? 'Accessory' : 'Product'
             }));
 
             const res = await api.post('/api/payment/create-checkout-session', {

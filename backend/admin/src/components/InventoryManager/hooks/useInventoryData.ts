@@ -13,9 +13,11 @@ export function useInventoryData() {
     });
 
     const [items, setItems] = useState<any[]>([]);
+    const [totalItemsCount, setTotalItemsCount] = useState(0);
     const [sales, setSales] = useState<any[]>([]);
     const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [itemsLoading, setItemsLoading] = useState(false);
 
     const [activeTab, setActiveTab] = useState<'items' | 'sales' | 'history'>('items');
     const [searchTerm, setSearchTerm] = useState('');
@@ -29,25 +31,56 @@ export function useInventoryData() {
     const [historyPage, setHistoryPage] = useState(1);
     const itemsPerPage = 15;
 
+    // Use debounced search text for API calls
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
     const fetchInventoryData = async () => {
         setLoading(true);
         try {
-            const [statsRes, itemsRes, salesRes, historyRes] = await Promise.all([
+            const [statsRes, salesRes, historyRes] = await Promise.all([
                 api.get('/api/inventory/stats'),
-                api.get('/api/inventory/items'),
                 api.get('/api/inventory/sales?limit=100'),
                 api.get('/api/inventory/history?limit=100')
             ]);
 
             if (statsRes.data?.success) setStats(statsRes.data.data);
-            if (itemsRes.data?.success) setItems(itemsRes.data.data);
             if (salesRes.data?.success) setSales(salesRes.data.data);
             if (historyRes.data?.success) setHistory(historyRes.data.data);
 
         } catch (error) {
-            console.error("Failed to load inventory data", error);
+            console.error("Failed to load inventory stats", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchItems = async () => {
+        setItemsLoading(true);
+        try {
+            const res = await api.get('/api/inventory/items', {
+                params: {
+                    page: itemsPage,
+                    limit: itemsPerPage,
+                    search: debouncedSearch,
+                    type: typeFilter,
+                    stock: stockFilter
+                }
+            });
+            if (res.data?.success) {
+                setItems(res.data.data);
+                setTotalItemsCount(res.data.totalItems || 0);
+            }
+        } catch (error) {
+            console.error("Failed to load items", error);
+        } finally {
+            setItemsLoading(false);
         }
     };
 
@@ -55,28 +88,16 @@ export function useInventoryData() {
         fetchInventoryData();
     }, []);
 
+    useEffect(() => {
+        fetchItems();
+    }, [itemsPage, debouncedSearch, typeFilter, stockFilter, sortConfig]);
+
     const processedItems = useMemo(() => {
-        let result = items;
+        let result = [...items];
 
-        if (searchTerm) {
-            const searchLower = searchTerm.toLowerCase();
-            result = result.filter(item =>
-                (item.name && item.name.toLowerCase().includes(searchLower)) ||
-                (item.barcode && item.barcode.toLowerCase() === searchLower) ||
-                (item.barcode && item.barcode.toLowerCase().includes(searchLower)) ||
-                (item.category && item.category.toLowerCase().includes(searchLower))
-            );
-        }
-
-        if (typeFilter !== 'All') {
-            result = result.filter(item => item.itemType === typeFilter);
-        }
-
-        if (stockFilter === 'Low') {
-            result = result.filter(item => item.stock > 0 && item.stock <= (item.minStock || 5));
-        } else if (stockFilter === 'Out') {
-            result = result.filter(item => item.stock === 0);
-        }
+        // Server handles search and filtering by type/stock. 
+        // We only handle local sorting here on the current page if needed, 
+        // though full backend sorting is recommended for complete sets.
 
         if (sortConfig !== null) {
             result.sort((a, b) => {
@@ -89,14 +110,12 @@ export function useInventoryData() {
                 return 0;
             });
         }
-
+        
         return result;
-    }, [items, searchTerm, typeFilter, stockFilter, sortConfig]);
+    }, [items, sortConfig]);
 
-    const itemsPageData = useMemo(() => {
-        const startIndex = (itemsPage - 1) * itemsPerPage;
-        return processedItems.slice(startIndex, startIndex + itemsPerPage);
-    }, [processedItems, itemsPage]);
+    // Items are already paginated by the server
+    const itemsPageData = processedItems;
 
     const salesPageData = useMemo(() => {
         const startIndex = (salesPage - 1) * itemsPerPage;
@@ -122,6 +141,8 @@ export function useInventoryData() {
         sales,
         history,
         loading,
+        itemsLoading,
+        totalItemsCount,
         activeTab, setActiveTab,
         searchTerm, setSearchTerm,
         typeFilter, setTypeFilter,
@@ -135,6 +156,7 @@ export function useInventoryData() {
         itemsPageData,
         salesPageData,
         historyPageData,
-        fetchInventoryData
+        fetchInventoryData,
+        fetchItems
     };
 }

@@ -1,6 +1,32 @@
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
 const Settings = require('../models/Settings');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Multer storage for receipt uploads
+const receiptStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = path.join(__dirname, '../uploads/receipts');
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `receipt-${req.user.id}-${Date.now()}${ext}`);
+    }
+});
+
+exports.receiptUpload = multer({
+    storage: receiptStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+    fileFilter: (req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+        if (allowed.includes(file.mimetype)) cb(null, true);
+        else cb(new Error('Nur Bilder (JPG, PNG, WebP) oder PDF erlaubt'), false);
+    }
+});
 
 // Helper: get Stripe instance (same pattern as paymentController)
 const getStripe = async () => {
@@ -263,7 +289,7 @@ exports.capturePayPalTopUp = async (req, res) => {
 // Bank Transfer Wallet Top-Up
 // ==========================================
 
-// @desc    Create pending Bank Transfer Top-up
+// @desc    Create pending Bank Transfer Top-up (NO immediate balance credit)
 // @route   POST /api/transactions/bank-transfer
 // @access  Private
 exports.createBankTransferTopUp = async (req, res) => {
@@ -278,7 +304,10 @@ exports.createBankTransferTopUp = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Maximalbetrag ist 5.000 €' });
         }
 
-        // Create a *pending* transaction record
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'Benutzer nicht gefunden' });
+
+        // Create a *pending* transaction — NO balance credited yet
         const transaction = await Transaction.create({
             user: req.user.id,
             amount: parsedAmount,
@@ -290,13 +319,59 @@ exports.createBankTransferTopUp = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Antrag auf Banküberweisung erstellt. Bitte überweisen Sie den Betrag auf unser Konto.',
+            message: 'Antrag auf Banküberweisung erstellt. Bitte laden Sie Ihren Zahlungsbeleg hoch.',
+            transactionId: transaction._id,
             transaction
         });
 
     } catch (error) {
         console.error('Bank Transfer top-up error:', error);
         res.status(500).json({ success: false, message: 'Fehler beim Erstellen des Antrags', error: error.message });
+    }
+};
+
+// @desc    Upload receipt for a pending bank transfer transaction
+// @route   POST /api/transactions/:id/upload-receipt
+// @access  Private
+exports.uploadTransactionReceipt = async (req, res) => {
+    try {
+        const transaction = await Transaction.findOne({
+            _id: req.params.id,
+            user: req.user.id,
+            paymentMethod: 'bank_transfer',
+            status: 'pending'
+        });
+
+        if (!transaction) {
+            // Clean up uploaded file if transaction not found
+            if (req.file) fs.unlink(req.file.path, () => {});
+            return res.status(404).json({ success: false, message: 'Transaktion nicht gefunden oder bereits abgeschlossen' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Kein Beleg-Datei hochgeladen' });
+        }
+
+        // Delete old receipt if exists
+        if (transaction.receiptUrl) {
+            const oldPath = path.join(__dirname, '..', transaction.receiptUrl);
+            if (fs.existsSync(oldPath)) fs.unlink(oldPath, () => {});
+        }
+
+        const receiptUrl = `/uploads/receipts/${req.file.filename}`;
+        transaction.receiptUrl = receiptUrl;
+        await transaction.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Zahlungsbeleg erfolgreich hochgeladen. Der Admin wird Ihre Zahlung prüfen.',
+            receiptUrl
+        });
+
+    } catch (error) {
+        if (req.file) fs.unlink(req.file.path, () => {});
+        console.error('Upload receipt error:', error);
+        res.status(500).json({ success: false, message: 'Fehler beim Hochladen des Belegs', error: error.message });
     }
 };
 

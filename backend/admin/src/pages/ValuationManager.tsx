@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Plus, Search, Trash2, Edit, Save, X, Calculator, ClipboardList, Package, Banknote, TrendingUp, ChevronDown, ChevronUp, MessageSquare, Send, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
+
+const PriceResearchManager = lazy(() => import('./PriceResearchManager'));
 
 interface ScreenModifiers {
     hervorragend: number;
@@ -66,7 +68,7 @@ const DEFAULT_FORM: Partial<DeviceBlueprint> = {
 };
 
 const ValuationManager = () => {
-    const [activeSection, setActiveSection] = useState<'blueprints' | 'quotes'>('blueprints');
+    const [activeSection, setActiveSection] = useState<'blueprints' | 'quotes' | 'research'>('blueprints');
 
     // --- BLUEPRINTS STATE ---
     const [devices, setDevices] = useState<DeviceBlueprint[]>([]);
@@ -462,6 +464,15 @@ const ValuationManager = () => {
                         }`}
                 >
                     <ClipboardList size={16} /> Angebote {quoteStats.totalCount > 0 ? `(${quoteStats.totalCount})` : ''}
+                </button>
+                <button
+                    onClick={() => setActiveSection('research')}
+                    className={`flex items-center gap-2 px-5 py-3 font-bold text-sm border-b-2 -mb-px transition-colors ${activeSection === 'research'
+                        ? 'border-emerald-400 text-emerald-400'
+                        : 'border-transparent text-slate-400 hover:text-slate-200'
+                        }`}
+                >
+                    <TrendingUp size={16} /> 📈 Preisrecherche
                 </button>
             </div>
 
@@ -1371,6 +1382,18 @@ const ValuationManager = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* ── PRICE RESEARCH SECTION ── */}
+            {activeSection === 'research' && (
+                <Suspense fallback={
+                    <div className="flex items-center justify-center py-24 text-slate-400">
+                        <div className="w-8 h-8 border-2 border-slate-600 border-t-emerald-400 rounded-full animate-spin mr-3" />
+                        Preisrecherche wird geladen...
+                    </div>
+                }>
+                    <PriceResearchManager />
+                </Suspense>
+            )}
         </div>
     );
 };

@@ -17,10 +17,15 @@ const startBackupJob = () => {
             const dailyDir = path.join(backupDir, `backup-${timestamp}`);
             fs.mkdirSync(dailyDir, { recursive: true });
 
+            // Models excluded from backup for security (contain sensitive PII/financial data)
+            const EXCLUDED_MODELS = new Set(['User', 'RefreshToken', 'SavedValuation']);
+
             const models = mongoose.models;
             let successCount = 0;
 
             for (const modelName in models) {
+                if (EXCLUDED_MODELS.has(modelName)) continue; // Skip sensitive models
+
                 const Model = models[modelName];
                 const data = await Model.find({}).lean();
                 

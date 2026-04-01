@@ -66,26 +66,102 @@ exports.getInventoryStats = async (req, res) => {
 // @access  Private/Admin
 exports.getInventoryItems = async (req, res) => {
     try {
-        const selectFields = 'name category subCategory brand model barcode stock minStock sold price costPrice supplierName supplierContact image isActive';
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 15;
+        const skip = (page - 1) * limit;
+        const search = req.query.search ? req.query.search.toLowerCase() : '';
+        const typeFilter = req.query.type || 'All';
+        const stockFilter = req.query.stock || 'All';
 
-        const products = await Product.find({}, selectFields).lean();
-        const accessories = await Accessory.find({}, selectFields).lean();
-        const parts = await RepairPart.find({}, selectFields).lean();
+        const matchStage = {};
 
-        // Standardize output format
-        const formattedProducts = products.map(p => ({ ...p, itemType: 'Product' }));
-        const formattedAccessories = accessories.map(a => ({ ...a, itemType: 'Accessory' }));
-        const formattedParts = parts.map(rp => ({ ...rp, itemType: 'RepairPart' }));
+        if (search) {
+            matchStage.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { barcode: { $regex: search, $options: 'i' } },
+                { category: { $regex: search, $options: 'i' } }
+            ];
+        }
 
-        const allItems = [...formattedProducts, ...formattedAccessories, ...formattedParts];
+        if (stockFilter === 'Low') {
+            matchStage.$expr = { $and: [ { $gt: ["$stock", 0] }, { $lte: ["$stock", { $ifNull: ["$minStock", 5] }] } ] };
+        } else if (stockFilter === 'Out') {
+            matchStage.stock = 0;
+        }
 
-        // Sort by stock ascending (lowest stock first)
-        allItems.sort((a, b) => a.stock - b.stock);
+        // Base projection
+        const projectStage = {
+            name: 1, category: 1, subCategory: 1, brand: 1, model: 1, barcode: 1,
+            stock: 1, minStock: 1, sold: 1, price: 1, costPrice: 1,
+            supplierName: 1, supplierContact: 1, image: 1, isActive: 1, itemType: 1
+        };
+
+        // Aggregation pipeline starting with Products
+        let pipeline = [];
+        
+        // Ensure itemType is appended in each collection
+        if (typeFilter === 'All' || typeFilter === 'Product') {
+            pipeline.push({ $addFields: { itemType: 'Product' } });
+            pipeline.push({ $project: projectStage });
+        }
+
+        // Union with Accessories
+        if (typeFilter === 'All' || typeFilter === 'Accessory') {
+            const accessoryPipeline = [
+                { $addFields: { itemType: 'Accessory' } },
+                { $project: projectStage }
+            ];
+            if (typeFilter === 'All') {
+                pipeline.push({ $unionWith: { coll: "accessories", pipeline: accessoryPipeline } });
+            } else if (typeFilter === 'Accessory') {
+                pipeline = accessoryPipeline; // if only accessory requested, start with this
+            }
+        }
+
+        // Union with RepairParts
+        if (typeFilter === 'All' || typeFilter === 'RepairPart') {
+            const partsPipeline = [
+                { $addFields: { itemType: 'RepairPart' } },
+                { $project: projectStage }
+            ];
+            if (typeFilter === 'All') {
+                pipeline.push({ $unionWith: { coll: "repairparts", pipeline: partsPipeline } });
+            } else if (typeFilter === 'RepairPart') {
+                pipeline = partsPipeline; // if only repair requested, start with this
+            }
+        }
+        
+        // If typeFilter is Accessory or RepairPart and NOT All, we need to run aggregate on the specific model
+        let TargetModel = Product;
+        if (typeFilter === 'Accessory') TargetModel = Accessory;
+        if (typeFilter === 'RepairPart') TargetModel = RepairPart;
+
+        // Apply filters
+        if (Object.keys(matchStage).length > 0) {
+            pipeline.push({ $match: matchStage });
+        }
+
+        // Sort by stock ascending internally before pagination
+        pipeline.push({ $sort: { stock: 1, name: 1 } });
+
+        // Clone pipeline for count before skipping and limiting
+        const countPipeline = [...pipeline, { $count: 'total' }];
+        const totalCountParams = await TargetModel.aggregate(countPipeline);
+        const totalItems = totalCountParams.length > 0 ? totalCountParams[0].total : 0;
+
+        // Apply pagination
+        pipeline.push({ $skip: skip });
+        pipeline.push({ $limit: limit });
+
+        const items = await TargetModel.aggregate(pipeline);
 
         res.json({
             success: true,
-            count: allItems.length,
-            data: allItems
+            count: items.length,
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            currentPage: page,
+            data: items
         });
     } catch (error) {
         console.error('Error fetching inventory items:', error);

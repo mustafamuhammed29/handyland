@@ -43,7 +43,7 @@ export default function RepairManager() {
         e.stopPropagation();
         if (!confirm('Are you sure you want to delete this device and all its services?')) return;
         try {
-            await api.delete(`/api/repairs/${id}`);
+            await api.delete(`/api/repairs/devices/${id}`);
             fetchDevices();
             if (selectedDevice?.id === id) setSelectedDevice(null);
         } catch (error) {
@@ -68,8 +68,8 @@ export default function RepairManager() {
         e.preventDefault();
         try {
             const url = deviceForm.id
-                ? `/api/repairs/${deviceForm.id}`
-                : '/api/repairs';
+                ? `/api/repairs/devices/${deviceForm.id}`
+                : '/api/repairs/devices';
 
             if (deviceForm.id) {
                 await api.put(url, deviceForm);
@@ -105,7 +105,7 @@ export default function RepairManager() {
     const handleSaveServices = async () => {
         if (!selectedDevice) return;
         try {
-            const response = await api.put(`/api/repairs/${selectedDevice.id}/services`, { services: editedServices });
+            const response = await api.put(`/api/repairs/devices/${selectedDevice.id}/services`, { services: editedServices });
             const updatedDevice = response.data;
 
             setDevices(devices.map(d => d.id === updatedDevice.id ? updatedDevice : d));
@@ -155,12 +155,16 @@ export default function RepairManager() {
                                     <button
                                         onClick={(e) => handleEditDevice(e, device)}
                                         className="p-1 text-slate-400 hover:text-white"
+                                        title="Edit Device"
+                                        aria-label="Edit Device"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={(e) => handleDeleteDevice(e, device.id)}
                                         className="p-1 text-slate-400 hover:text-red-500"
+                                        title="Delete Device"
+                                        aria-label="Delete Device"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -181,7 +185,7 @@ export default function RepairManager() {
 
                     <div className="flex justify-between items-end mb-6">
                         <div className="flex items-center gap-4">
-                            <img src={selectedDevice.image} className="w-20 h-20 rounded-xl object-cover border border-slate-700" />
+                            <img src={selectedDevice.image} alt={selectedDevice.model} title={selectedDevice.model} className="w-20 h-20 rounded-xl object-cover border border-slate-700" />
                             <div>
                                 <h2 className="text-3xl font-black text-white">{selectedDevice.model}</h2>
                                 <p className="text-slate-400">Manage Services</p>
@@ -212,6 +216,8 @@ export default function RepairManager() {
                                     <tr key={index} className="hover:bg-slate-800/30">
                                         <td className="p-4">
                                             <select
+                                                title="Service Type"
+                                                aria-label="Service Type"
                                                 className="bg-slate-950 text-white w-full outline-none border-b border-transparent focus:border-blue-500 text-xs font-mono uppercase p-1"
                                                 value={service.type}
                                                 onChange={(e) => handleServiceChange(index, 'type', e.target.value)}
@@ -227,6 +233,8 @@ export default function RepairManager() {
                                         </td>
                                         <td className="p-4">
                                             <input
+                                                title="Service Label"
+                                                placeholder="Service label"
                                                 className="bg-transparent text-white w-full outline-none border-b border-transparent focus:border-blue-500 transition-colors"
                                                 value={service.label}
                                                 onChange={(e) => handleServiceChange(index, 'label', e.target.value)}
@@ -235,6 +243,8 @@ export default function RepairManager() {
                                         <td className="p-4">
                                             <input
                                                 type="number"
+                                                title="Service Price"
+                                                placeholder="Price"
                                                 className="bg-slate-950 text-emerald-400 font-bold w-24 p-2 rounded border border-slate-800 focus:border-emerald-500 outline-none"
                                                 value={service.price}
                                                 onChange={(e) => handleServiceChange(index, 'price', Number(e.target.value))}
@@ -242,6 +252,8 @@ export default function RepairManager() {
                                         </td>
                                         <td className="p-4">
                                             <input
+                                                title="Service Duration"
+                                                placeholder="e.g. 1h"
                                                 className="bg-transparent text-white w-full outline-none border-b border-transparent focus:border-blue-500 transition-colors"
                                                 value={service.duration}
                                                 onChange={(e) => handleServiceChange(index, 'duration', e.target.value)}
@@ -249,13 +261,15 @@ export default function RepairManager() {
                                         </td>
                                         <td className="p-4">
                                             <input
+                                                title="Warranty Period"
+                                                placeholder="e.g. 1 Year"
                                                 className="bg-transparent text-white w-full outline-none border-b border-transparent focus:border-blue-500 transition-colors"
                                                 value={service.warranty}
                                                 onChange={(e) => handleServiceChange(index, 'warranty', e.target.value)}
                                             />
                                         </td>
                                         <td className="p-4 text-right">
-                                            <button onClick={() => handleDeleteService(index)} className="text-red-500 hover:text-red-400 p-2">
+                                            <button onClick={() => handleDeleteService(index)} className="text-red-500 hover:text-red-400 p-2" title="Delete Service" aria-label="Delete Service">
                                                 <Trash2 size={16} />
                                             </button>
                                         </td>
@@ -279,13 +293,15 @@ export default function RepairManager() {
             {isDeviceModalOpen && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-slate-900 border border-slate-700 p-8 rounded-2xl w-full max-w-md shadow-2xl relative">
-                        <button onClick={() => setIsDeviceModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white"><X size={24} /></button>
+                        <button onClick={() => setIsDeviceModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white" title="Close" aria-label="Close"><X size={24} /></button>
                         <h3 className="text-2xl font-bold text-white mb-6">{deviceForm.id ? 'Edit Device' : 'Add New Device'}</h3>
 
                         <form onSubmit={handleDeviceSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-bold text-slate-400 mb-1">Model Name</label>
                                 <input
+                                    title="Model Name"
+                                    placeholder="e.g. iPhone 15 Pro"
                                     className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                     value={deviceForm.model}
                                     onChange={e => setDeviceForm({ ...deviceForm, model: e.target.value })}
@@ -296,6 +312,8 @@ export default function RepairManager() {
                             <div>
                                 <label className="block text-sm font-bold text-slate-400 mb-1">Brand</label>
                                 <select
+                                    title="Brand"
+                                    aria-label="Brand"
                                     className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
                                     value={deviceForm.brand}
                                     onChange={e => setDeviceForm({ ...deviceForm, brand: e.target.value })}

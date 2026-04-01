@@ -152,19 +152,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                         </p>
                     </div>
 
-                    {/* Contact Support / Create Custom Ticket */}
-                    {searchTerm && (
-                        <button
-                            onClick={() => handleOpenTicketModal(searchTerm, 'Custom Diagnostics requested from Search')}
-                            className="group relative px-6 py-3 bg-blue-900/20 border border-blue-500/30 rounded-xl overflow-hidden hover:bg-blue-900/40 transition-all"
-                        >
-                            <div className="absolute inset-0 bg-blue-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                            <div className="relative flex items-center gap-2 text-blue-400 font-bold text-sm">
-                                <Activity className="w-4 h-4" />
-                                Request Custom Diagnostics
-                            </div>
-                        </button>
-                    )}
+                    {/* The Custom Diagnostics button has been removed based on user feedback */}
                 </div>
 
                 {/* Search & Interface Panel */}
@@ -192,6 +180,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 <RepairCatalogList
                     filteredDevices={filteredDevices}
                     setSelectedDevice={setSelectedDevice}
+                    searchTerm={searchTerm}
                 />
 
             </div>

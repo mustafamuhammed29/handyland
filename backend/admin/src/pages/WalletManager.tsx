@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, CheckCircle, XCircle, Wallet, Edit, Loader2, AlertCircle } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Wallet, Edit, Loader2, AlertCircle, FileText, ExternalLink } from 'lucide-react';
 import { api } from '../utils/api';
 
 interface Transaction {
@@ -10,6 +10,7 @@ interface Transaction {
     paymentMethod: string;
     description: string;
     createdAt: string;
+    receiptUrl?: string;
     user: {
         _id: string;
         name: string;
@@ -234,6 +235,23 @@ const WalletManager: React.FC = () => {
                                                 </td>
                                                 <td className="px-6 py-4 font-bold text-emerald-400">
                                                     +€{tx.amount.toFixed(2)}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {tx.receiptUrl ? (
+                                                        <a
+                                                            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${tx.receiptUrl}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium"
+                                                            title="View Receipt"
+                                                        >
+                                                            <FileText className="w-4 h-4" />
+                                                            <span>View</span>
+                                                            <ExternalLink className="w-3 h-3" />
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-slate-600 text-xs italic">No receipt</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-1 text-xs rounded-full font-medium ${tx.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400' :

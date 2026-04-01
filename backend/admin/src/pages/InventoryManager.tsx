@@ -8,6 +8,7 @@ import { SalesTable } from '../components/InventoryManager/components/SalesTable
 import { HistoryTable } from '../components/InventoryManager/components/HistoryTable';
 import { QuickEditModal } from '../components/InventoryManager/components/QuickEditModal';
 import { AddRepairPartModal } from '../components/InventoryManager/components/AddRepairPartModal';
+import { useBarcodeScanner } from '../components/InventoryManager/hooks/useBarcodeScanner';
 
 export default function InventoryManager() {
     const {
@@ -15,6 +16,8 @@ export default function InventoryManager() {
         sales,
         history,
         loading,
+        itemsLoading,
+        totalItemsCount,
         activeTab, setActiveTab,
         searchTerm, setSearchTerm,
         typeFilter, setTypeFilter,
@@ -24,7 +27,6 @@ export default function InventoryManager() {
         salesPage, setSalesPage,
         historyPage, setHistoryPage,
         itemsPerPage,
-        processedItems,
         itemsPageData,
         salesPageData,
         historyPageData,
@@ -33,9 +35,14 @@ export default function InventoryManager() {
 
     const {
         isEditModalOpen, setIsEditModalOpen,
-        editingItem, handleEditClick, handleUpdateItem,
+        editingItem, handleEditClick, handleUpdateItem, handleInlineUpdate,
         isAddPartModalOpen, setIsAddPartModalOpen, handleAddPartSave
     } = useInventoryActions(fetchInventoryData);
+
+    useBarcodeScanner((barcode) => {
+        setSearchTerm(barcode);
+        setItemsPage(1);
+    });
 
     const [editForm, setEditForm] = React.useState({ price: 0, costPrice: 0, stock: 0, reason: 'Manual Correction', notes: '' });
 
@@ -75,25 +82,25 @@ export default function InventoryManager() {
 
             <StatCards stats={stats} />
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                <StockTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            <StockTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-                {activeTab === 'items' && (
-                    <div className="flex flex-wrap gap-4 w-full md:w-auto items-center">
-                        <div className="relative max-w-xs w-full shrink-0">
-                            <input
-                                type="text"
-                                placeholder="Scan Barcode or Search..."
-                                className="w-full bg-slate-900/40 border border-slate-700/50 rounded-xl px-4 py-3 pl-10 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 backdrop-blur-md transition-all shadow-inner"
-                                value={searchTerm}
-                                onChange={(e) => { setSearchTerm(e.target.value); setItemsPage(1); }}
-                            />
-                            <div className="absolute left-3 top-3.5 text-slate-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5v14" /><path d="M8 5v14" /><path d="M12 5v14" /><path d="M17 5v14" /><path d="M21 5v14" /></svg>
-                            </div>
+            {activeTab === 'items' && (
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 bg-slate-900/40 p-3 rounded-2xl border border-slate-700/50 backdrop-blur-md shadow-lg">
+                    <div className="relative w-full md:max-w-md">
+                        <input
+                            type="text"
+                            placeholder="Scan Barcode or Search Inventory..."
+                            className="w-full bg-slate-900/60 border border-slate-700/50 rounded-xl px-4 py-3 pl-11 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
+                            value={searchTerm}
+                            onChange={(e) => { setSearchTerm(e.target.value); setItemsPage(1); }}
+                        />
+                        <div className="absolute left-3.5 top-3.5 text-blue-400/70">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5v14" /><path d="M8 5v14" /><path d="M12 5v14" /><path d="M17 5v14" /><path d="M21 5v14" /></svg>
                         </div>
+                    </div>
 
-                        <div className="flex bg-slate-900/60 p-1.5 rounded-xl backdrop-blur-md border border-slate-700/50 shrink-0 overflow-x-auto hide-scrollbar">
+                    <div className="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto items-center">
+                        <div className="flex bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/50 shrink-0 shadow-inner">
                             {[
                                 { id: 'All', label: 'All' },
                                 { id: 'Product', label: 'Devices' },
@@ -103,7 +110,7 @@ export default function InventoryManager() {
                                 <button
                                     key={filter.id}
                                     onClick={() => { setTypeFilter(filter.id as any); setItemsPage(1); }}
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${typeFilter === filter.id ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20' : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
+                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm ${typeFilter === filter.id ? 'bg-slate-700 text-white shadow-slate-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'
                                         }`}
                                 >
                                     {filter.label}
@@ -114,17 +121,17 @@ export default function InventoryManager() {
                         <select
                             title="Filter by Stock Status"
                             aria-label="Filter by Stock Status"
-                            className="bg-slate-900/40 border border-slate-700/50 rounded-xl px-4 py-3 text-white appearance-none outline-none focus:border-blue-500 min-w-[130px] backdrop-blur-md transition-all shadow-inner"
+                            className="bg-slate-900/80 border border-slate-700/50 rounded-xl px-4 py-3 text-white text-sm font-bold appearance-none outline-none focus:border-blue-500 min-w-[140px] shadow-inner transition-all cursor-pointer"
                             value={stockFilter}
                             onChange={(e: any) => { setStockFilter(e.target.value); setItemsPage(1); }}
                         >
-                            <option value="All">All Stock</option>
-                            <option value="Low">Low Stock</option>
+                            <option value="All">All Stock Levels</option>
+                            <option value="Low">Low Stock Alerts</option>
                             <option value="Out">Out of Stock</option>
                         </select>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             {loading ? (
                 <div className="bg-slate-900/40 border border-slate-700/50 rounded-2xl p-20 text-center text-slate-400 backdrop-blur-md animate-pulse">
@@ -133,19 +140,27 @@ export default function InventoryManager() {
             ) : (
                 <>
                     {activeTab === 'items' && (
-                        <InventoryTable
-                            itemsPageData={itemsPageData}
-                            processedItemsCount={processedItems.length}
-                            itemsPage={itemsPage}
-                            setItemsPage={setItemsPage}
-                            itemsPerPage={itemsPerPage}
-                            sortConfig={sortConfig}
-                            handleSort={handleSort}
-                            handleEditClick={handleEditClick}
-                            setSearchTerm={setSearchTerm}
-                            setTypeFilter={setTypeFilter}
-                            setStockFilter={setStockFilter}
-                        />
+                        <div className="relative">
+                            {itemsLoading && (
+                                <div className="absolute inset-0 z-10 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center rounded-2xl">
+                                    <div className="text-blue-400 font-medium animate-pulse">Loading inventory...</div>
+                                </div>
+                            )}
+                            <InventoryTable
+                                itemsPageData={itemsPageData}
+                                processedItemsCount={totalItemsCount}
+                                itemsPage={itemsPage}
+                                setItemsPage={setItemsPage}
+                                itemsPerPage={itemsPerPage}
+                                sortConfig={sortConfig}
+                                handleSort={handleSort}
+                                handleEditClick={handleEditClick}
+                                handleInlineUpdate={handleInlineUpdate}
+                                setSearchTerm={setSearchTerm}
+                                setTypeFilter={setTypeFilter}
+                                setStockFilter={setStockFilter}
+                            />
+                        </div>
                     )}
 
                     {activeTab === 'sales' && (
