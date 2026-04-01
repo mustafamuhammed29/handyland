@@ -122,8 +122,8 @@ UserSchema.pre('save', async function () {
         // 1. Encrypt Refresh Token
         if (this.isModified('refreshToken') && this.refreshToken) {
             const crypto = require('crypto');
-            const secret = process.env.REFRESH_TOKEN_SECRET || 'fallback_secret';
-            this.refreshToken = crypto.createHmac('sha256', secret).update(this.refreshToken).digest('hex');
+            if (!process.env.REFRESH_TOKEN_SECRET) throw new Error('REFRESH_TOKEN_SECRET is not defined');
+            this.refreshToken = crypto.createHmac('sha256', process.env.REFRESH_TOKEN_SECRET).update(this.refreshToken).digest('hex');
         }
 
         // 2. Hash Password

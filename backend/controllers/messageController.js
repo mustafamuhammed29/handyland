@@ -132,7 +132,7 @@ exports.adminBulkSend = async (req, res) => {
         if (!recipients || !recipients.length || !message) {
             return res.status(400).json({ success: false, message: 'recipients and message are required' });
         }
-        const created = await Promise.all(
+        const results = await Promise.allSettled(
             recipients.map(r => Message.create({
                 user: r.userId || null,
                 name: r.name,
@@ -143,6 +143,7 @@ exports.adminBulkSend = async (req, res) => {
                 replies: [] // no duplication
             }))
         );
+        const created = results.filter(r => r.status === 'fulfilled').map(r => r.value);
         res.status(201).json({ success: true, count: created.length, data: created });
 
         // Notify each recipient in background
@@ -174,13 +175,13 @@ exports.adminBulkSend = async (req, res) => {
 // @access  Private/Admin
 exports.updateMessageStatus = async (req, res) => {
     try {
-        const message = await Message.findById(req.params.id);
+        const updateData = {};
+        if (req.body.status) updateData.status = req.body.status;
+        if (req.body.isArchived !== undefined) updateData.isArchived = req.body.isArchived;
 
-        if (message) {
-            message.status = req.body.status || message.status;
-            message.isArchived = req.body.isArchived !== undefined ? req.body.isArchived : message.isArchived;
-
-            const updatedMessage = await Message.findByIdAndUpdate(req.params.id, message, { new: true });
+        const updatedMessage = await Message.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        
+        if (updatedMessage) {
             res.json(updatedMessage);
         } else {
             res.status(404).json({ message: 'Message not found' });
