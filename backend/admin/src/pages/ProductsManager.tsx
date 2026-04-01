@@ -35,7 +35,7 @@ export default function ProductsManager() {
 
     const fetchProducts = async () => {
         try {
-            const res = await api.get('/api/products');
+            const res = await api.get('/api/products?includeOutOfStock=true&limit=1000');
             // Safety check: ensure response data is an array
             if (Array.isArray(res.data)) {
                 setProducts(res.data);

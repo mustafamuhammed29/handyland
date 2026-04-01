@@ -101,14 +101,16 @@ exports.getBlueprints = async (req, res) => {
             _id: bp._id,
             brand: bp.brand,
             modelName: bp.model,
-            imageUrl: bp.image,
+            imageUrl: bp.imageUrl || bp.image,
             basePrice: bp.basePrice,
+            category: bp.category || 'Smartphone',
             validStorages: bp.validStorages,
             storagePrices: bp.storagePrices ? Object.fromEntries(bp.storagePrices) : {},
             screenModifiers: bp.screenModifiers,
             bodyModifiers: bp.bodyModifiers,
             functionalMultiplier: bp.functionalMultiplier,
-            nonFunctionalMultiplier: bp.nonFunctionalMultiplier
+            nonFunctionalMultiplier: bp.nonFunctionalMultiplier,
+            priceResearch: bp.priceResearch
         }));
         res.json(mappedBlueprints);
     } catch (error) {

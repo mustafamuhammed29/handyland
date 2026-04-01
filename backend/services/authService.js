@@ -3,6 +3,7 @@ const RefreshToken = require('../models/RefreshToken');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendEmail, sendTemplateEmail } = require('../utils/emailService');
+const { emitAdminNotification } = require('../utils/socket');
 
 /**
  * Service for handling Authentication business logic.
@@ -76,6 +77,16 @@ class AuthService {
         // Async email sending (don't await to avoid blocking response)
         this.sendVerificationEmail(user, verificationToken).catch(err => console.error('Email error:', err));
 
+        // 🔔 Notify ALL connected admins immediately
+        emitAdminNotification('new_user', {
+            title: 'Neuer Benutzer',
+            body: `${user.name} hat sich gerade registriert.`,
+            icon: '👤',
+            link: '/users',
+            userName: user.name,
+            userEmail: user.email,
+        });
+
         return user;
     }
 
@@ -123,6 +134,13 @@ class AuthService {
         // Reset Attempts
         if (user.loginAttempts > 0) {
             await User.updateOne({ _id: user._id }, { $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } });
+        }
+
+        // Check if account is blocked/deactivated by admin
+        if (user.isActive === false) {
+            const err = new Error('Your account has been suspended. Please contact support for assistance.');
+            err.isBlocked = true;
+            throw err;
         }
 
         if (process.env.REQUIRE_EMAIL_VERIFICATION !== 'false' && !user.isVerified) {

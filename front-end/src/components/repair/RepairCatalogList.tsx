@@ -3,13 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { Monitor, Battery, ChevronRight, AlertTriangle } from 'lucide-react';
 import { RepairDevice } from './types';
 import { LazyImage } from '../ui/LazyImage';
+import { Link } from 'react-router-dom';
+import { MessageSquare } from 'lucide-react';
 
 interface RepairCatalogListProps {
     filteredDevices: RepairDevice[];
     setSelectedDevice: (device: RepairDevice) => void;
+    searchTerm?: string;
 }
 
-export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDevices, setSelectedDevice }) => {
+export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDevices, setSelectedDevice, searchTerm = '' }) => {
     const { t } = useTranslation();
 
     return (
@@ -71,8 +74,31 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                     <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-600">
                         <AlertTriangle className="w-8 h-8" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">No Devices Found</h3>
-                    <p className="text-slate-500">Try adjusting your search parameters.</p>
+                    {searchTerm ? (
+                        <div className="flex flex-col items-center">
+                            <h3 className="text-xl font-bold text-white mb-2">Device Not Found</h3>
+                            <p className="text-slate-500 mb-6">We don't have standard pricing for "<span className="text-slate-300">{searchTerm}</span>" yet.</p>
+                            <Link 
+                                to={`/contact?subject=Repair Inquiry: ${searchTerm}`}
+                                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20"
+                            >
+                                <MessageSquare className="w-5 h-5" />
+                                Contact Us for a Quote
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center">
+                            <h3 className="text-xl font-bold text-white mb-2">Service Catalog Empty</h3>
+                            <p className="text-slate-500 mb-6">There are currently no standard repair services listed.</p>
+                            <Link 
+                                to="/contact"
+                                className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-bold transition-all"
+                            >
+                                <MessageSquare className="w-5 h-5" />
+                                Contact Support
+                            </Link>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

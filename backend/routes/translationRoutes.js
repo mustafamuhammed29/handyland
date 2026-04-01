@@ -15,12 +15,17 @@ const router = express.Router();
 // Public endpoint used dynamically by i18next-http-backend
 router.get('/locales/:lang', cacheMiddleware(86400), getTranslationsByLocale);
 
+// Auto-capture missing keys from frontend
+router.post('/missing/:lang/:namespace', require('../controllers/translationController').saveMissingTranslation);
+
 // Admin restricted endpoints
 router.use(protect);
 router.use(authorize('admin'));
 
+router.post('/auto-translate', require('../controllers/translationController').autoTranslate);
+
 router.route('/')
-    .get(cacheMiddleware(86400), getAllTranslations)
+    .get(getAllTranslations)
     .post(createTranslation);
 
 router.route('/:id')

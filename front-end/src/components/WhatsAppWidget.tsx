@@ -5,7 +5,7 @@ export const WhatsAppWidget = () => {
     const { settings } = useSettings();
 
     // Using global shop phone number or fallback
-    const rawPhone = settings?.contactSection?.whatsappPhone || settings?.contactSection?.phone || '4915123456789';
+    const rawPhone = import.meta.env.VITE_WHATSAPP_PHONE || settings?.contactSection?.whatsappPhone || settings?.contactSection?.phone || '4915123456789';
     const phoneNumber = rawPhone.replace(/\D/g, ''); // Extract only digits for wa.me link
 
     const message = settings?.contactSection?.whatsappMessage || "Hello, I need help with HandyLand services.";

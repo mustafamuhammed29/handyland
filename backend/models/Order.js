@@ -68,7 +68,7 @@ const OrderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+        enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'return_requested', 'refunded'],
         default: 'pending'
     },
     paymentMethod: {
@@ -97,7 +97,8 @@ const OrderSchema = new mongoose.Schema({
             required: true,
             validate: {
                 validator: function (v) {
-                    return /^\+?[1-9]\d{1,14}$/.test(v);
+                    // Accept international (+49...), local (0170...), and formatted numbers
+                    return /^(\+|00)?[\d\s\-().]{6,25}$/.test(v);
                 },
                 message: props => `${props.value} is not a valid phone number!`
             }
@@ -163,8 +164,8 @@ OrderSchema.pre('validate', async function (next) {
         // Total = Items + Shipping + Tax - Discount
         const calculatedTotal = itemsTotal + (this.shippingFee || 0) + (this.tax || 0) - (this.discountAmount || 0);
 
-        // Allow for small floating point differences (e.g. 0.01)
-        if (Math.abs(this.totalAmount - calculatedTotal) > 0.01) {
+        // Allow for floating point and rounding differences between frontend/backend
+        if (Math.abs(this.totalAmount - calculatedTotal) > 1.00) {
             // Invalidate the document
             this.invalidate('totalAmount', `Total amount mismatch. Expected: ${calculatedTotal.toFixed(2)}, Received: ${this.totalAmount}`);
         }

@@ -8,15 +8,20 @@ const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const { protect } = require('../middleware/auth');
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
-
 // ── Auth rate limiter ──────────────────────────────────────────────────────────
-const authLimiter = rateLimit({
+const rawAuthLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: isDevelopment ? 1000 : 5,
+    max: 5,
     skipSuccessfulRequests: true,
     message: { success: false, message: 'Too many authentication attempts, please try again later.' },
 });
+
+const authLimiter = (req, res, next) => {
+    if (process.env.NODE_ENV !== 'production') {
+        return next();
+    }
+    return rawAuthLimiter(req, res, next);
+};
 
 // ── Upload (rate limited + auth) ───────────────────────────────────────────────
 const uploadLimiter = rateLimit({
@@ -40,6 +45,7 @@ router.post('/upload', uploadLimiter, protect, upload.single('image'), (req, res
 // ── Feature routes ─────────────────────────────────────────────────────────────
 router.use('/auth', authLimiter, require('./authRoutes'));
 router.use('/auth', require('./socialAuthRoutes'));
+router.use('/auth/2fa', require('./twoFactorRoutes'));
 router.use('/reviews', require('./reviewRoutes'));
 router.use('/cart', require('./cartRoutes'));
 router.use('/settings', require('./settingsRoutes'));
@@ -71,5 +77,8 @@ router.use('/loaners', require('./loanerRoutes'));
 router.use('/loaner', require('./loanerRoutes'));        // alias
 router.use('/warranties', require('./warrantyRoutes'));
 router.use('/warranty', require('./warrantyRoutes'));    // alias
+router.use('/price-research', require('./priceResearchRoutes'));
+router.use('/suppliers', require('./supplierRoutes'));
+router.use('/purchase-orders', require('./purchaseOrderRoutes'));
 
 module.exports = router;

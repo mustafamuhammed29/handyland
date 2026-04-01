@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Plus, X, Smartphone, CheckCircle2, Battery, Cpu, Camera, Monitor, Zap } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUrl';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const ComparePage: React.FC = () => {
     const { t } = useTranslation();
@@ -11,6 +11,7 @@ export const ComparePage: React.FC = () => {
     const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearching, setIsSearching] = useState<{ slotIndex: number } | null>(null);
+    const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
         // Fetch products list for search
@@ -36,18 +37,46 @@ export const ComparePage: React.FC = () => {
         fetchProducts();
     }, []);
 
+    // Effect to sync URL params to selectedProducts once products are loaded
+    useEffect(() => {
+        if (products.length > 0) {
+            const deviceIds = searchParams.get('devices')?.split(',') || [];
+            if (deviceIds.length > 0 && selectedProducts.length === 0) {
+                const initialSelected = [null, null, null];
+                deviceIds.forEach((id, index) => {
+                    if (index < 3) {
+                        const found = products.find(p => p._id === id || p.id === id);
+                        if (found) initialSelected[index] = found;
+                    }
+                });
+                setSelectedProducts(initialSelected);
+            }
+        }
+    }, [products, searchParams]);
+
+    const updateUrlParams = (newSelected: any[]) => {
+        const ids = newSelected.filter(Boolean).map(p => p._id || p.id).join(',');
+        if (ids) {
+            setSearchParams({ devices: ids });
+        } else {
+            setSearchParams({});
+        }
+    };
+
     const handleSelectProduct = (product: any, slotIndex: number) => {
         const newSelected = [...selectedProducts];
         newSelected[slotIndex] = product;
         setSelectedProducts(newSelected);
+        updateUrlParams(newSelected);
         setIsSearching(null);
         setSearchTerm('');
     };
 
     const handleRemoveProduct = (slotIndex: number) => {
         const newSelected = [...selectedProducts];
-        newSelected.splice(slotIndex, 1);
+        newSelected[slotIndex] = undefined; // Set to undefined instead of splicing to keep the slot
         setSelectedProducts(newSelected);
+        updateUrlParams(newSelected);
     };
 
     // Prepare exactly 3 slots for UI layout
@@ -117,14 +146,27 @@ export const ComparePage: React.FC = () => {
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
-                                        <div className="h-40 w-full mb-6 relative">
+                                        <div className="h-40 w-full mb-6 relative flex items-center justify-center">
                                             <div className="absolute inset-0 bg-brand-primary/10 rounded-full blur-[40px] -z-10 group-hover:bg-brand-primary/20 transition-all"></div>
-                                            <img src={getImageUrl(product.images?.[0])} alt={product.name} className="w-full h-full object-contain mb-4 filter drop-shadow-2xl group-hover:scale-105 transition-transform duration-500" />
+                                            <img src={getImageUrl(product.images?.[0])} alt={product.name || product.model} className="w-auto h-full max-w-full rounded-2xl object-cover mb-4 shadow-xl group-hover:scale-105 transition-transform duration-500" />
                                         </div>
-                                        <h3 className="text-xl font-black text-center mb-2">{product.name}</h3>
-                                        <div className="text-brand-primary font-bold text-xl mb-4">€{product.pricing?.basePrice || product.price}</div>
+                                        <h3 className="text-xl font-black text-center mb-2">{product.name || product.model}</h3>
+                                        
+                                        <div className="flex flex-col items-center justify-center gap-1 mb-4">
+                                            {product.specs?.globalPrice && (
+                                                <div className="text-slate-400 text-sm line-through decoration-red-500/50">Market Ø €{product.specs.globalPrice}</div>
+                                            )}
+                                            <div className="text-brand-primary font-black text-2xl flex items-center gap-2">
+                                                €{product.pricing?.basePrice || product.price}
+                                                {product.specs?.globalPrice && Number(product.specs.globalPrice) > Number(product.price) && (
+                                                    <span className="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                                        Save €{Number(product.specs.globalPrice) - Number(product.price)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                         <button 
-                                            onClick={() => navigate(`/products/${product._id}`)}
+                                            onClick={() => navigate(`/products/${product.id || product._id}`)}
                                             className="px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-full text-sm font-bold transition-colors"
                                         >
                                             View Details
@@ -165,7 +207,7 @@ export const ComparePage: React.FC = () => {
                                         <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Processor</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-bold">
-                                                {selectedProducts[i]?.specifications?.processor || selectedProducts[i]?.processor || '-'}
+                                                {selectedProducts[i]?.specs?.processor || selectedProducts[i]?.specifications?.processor || selectedProducts[i]?.processor || '-'}
                                             </td>
                                         ))}
                                     </tr>
@@ -173,7 +215,7 @@ export const ComparePage: React.FC = () => {
                                         <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Storage Options</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 text-sm">
-                                                {selectedProducts[i]?.pricing?.storage?.map((s:any) => s.capacity).join(', ') || '-'}
+                                                {selectedProducts[i]?.storage || '-'}
                                             </td>
                                         ))}
                                     </tr>
@@ -191,7 +233,7 @@ export const ComparePage: React.FC = () => {
                                         <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Screen Size</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-bold">
-                                                {selectedProducts[i]?.specifications?.display || selectedProducts[i]?.display || '-'}
+                                                {selectedProducts[i]?.specs?.display || selectedProducts[i]?.specifications?.display || selectedProducts[i]?.display || '-'}
                                             </td>
                                         ))}
                                     </tr>
@@ -209,7 +251,37 @@ export const ComparePage: React.FC = () => {
                                         <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Main Camera</td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 text-sm leading-relaxed">
-                                                {selectedProducts[i]?.specifications?.camera || selectedProducts[i]?.camera || '-'}
+                                                {selectedProducts[i]?.specs?.camera || selectedProducts[i]?.specifications?.camera || selectedProducts[i]?.camera || '-'}
+                                            </td>
+                                        ))}
+                                    </tr>
+
+                                    {/* Battery Section */}
+                                    <tr className="bg-slate-950/80">
+                                        <td className="p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
+                                            <Battery className="w-4 h-4"/> Power & Battery
+                                        </td>
+                                        {slots.map(i => (
+                                            <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
+                                        ))}
+                                    </tr>
+                                    <tr className="hover:bg-slate-800/20 transition-colors">
+                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Battery Specs</td>
+                                        {slots.map(i => (
+                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-medium">
+                                                {selectedProducts[i]?.specs?.battery || selectedProducts[i]?.battery || '-'}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                    
+                                    {/* Performance Section */}
+                                    <tr className="hover:bg-slate-800/20 transition-colors bg-slate-900/30">
+                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800 flex items-center gap-2">
+                                            <Zap className="w-4 h-4 text-amber-500" /> Benchmark Score
+                                        </td>
+                                        {slots.map(i => (
+                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-black text-amber-500">
+                                                {selectedProducts[i]?.specs?.benchmarkScore || '-'}
                                             </td>
                                         ))}
                                     </tr>
@@ -226,13 +298,8 @@ export const ComparePage: React.FC = () => {
                                     <tr className="hover:bg-slate-800/20 transition-colors">
                                         <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">Colors</td>
                                         {slots.map(i => (
-                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50">
-                                                <div className="flex gap-2 flex-wrap">
-                                                    {selectedProducts[i]?.pricing?.colors?.map((c:any) => (
-                                                        <div key={c.name} title={c.name} className="w-5 h-5 rounded-full border border-slate-600" style={{backgroundColor: c.hex}}></div>
-                                                    ))}
-                                                    {!selectedProducts[i]?.pricing?.colors && '-'}
-                                                </div>
+                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-medium capitalize">
+                                                {selectedProducts[i]?.color || '-'}
                                             </td>
                                         ))}
                                     </tr>

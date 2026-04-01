@@ -9,9 +9,9 @@ const { protect, authorize } = require('../middleware/auth');
 router.get('/', (req, res) => res.status(200).json({ success: true, message: 'Valuation API is healthy' }));
 
 router.get('/devices', valuationController.getBlueprints);
-router.post('/devices', protect, valuationController.createBlueprint);
-router.put('/devices/:id', protect, valuationController.updateBlueprint);
-router.delete('/devices/:id', protect, valuationController.deleteBlueprint);
+router.post('/devices', protect, authorize('admin'), valuationController.createBlueprint);
+router.put('/devices/:id', protect, authorize('admin'), valuationController.updateBlueprint);
+router.delete('/devices/:id', protect, authorize('admin'), valuationController.deleteBlueprint);
 // Bulk operations
 router.delete('/devices', protect, authorize('admin'), valuationController.bulkDeleteBlueprints);
 router.post('/devices/reseed', protect, authorize('admin'), valuationController.reseedBlueprints);

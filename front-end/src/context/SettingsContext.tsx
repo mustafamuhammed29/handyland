@@ -57,7 +57,7 @@ interface SectionSettings {
 }
 
 interface FooterSettings {
-    aboutText: string;
+    aboutText?: string;
     tagline?: string;
     copyright?: string;
     quickLinks: boolean;
@@ -161,6 +161,10 @@ interface Settings {
         bankTransfer?: {
             enabled: boolean;
             instructions: string;
+            bankName?: string;
+            accountHolder?: string;
+            iban?: string;
+            bic?: string;
         };
     };
 }

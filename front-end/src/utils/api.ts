@@ -9,22 +9,37 @@ export const api = axios.create({
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
+        'x-app-type': 'frontend'
     },
     timeout: 30000,
 });
 
 // Request interceptor
 api.interceptors.request.use(
-    (config) => {
+    async (config) => {
         // Frontend relies entirely on HTTP-Only cookies (withCredentials: true)
         // We do not send Authorization headers here to prevent mixing with Admin panel tokens.
 
         // CSRF: Read the XSRF-TOKEN cookie (set by server on first GET) and forward it as a header
         // for all state-changing requests. Safe methods (GET/HEAD/OPTIONS) are excluded by the server.
-        const csrfToken = document.cookie
+        let csrfToken = document.cookie
             .split('; ')
             .find(row => row.startsWith('XSRF-TOKEN='))
             ?.split('=')?.[1];
+
+        // If making a mutating request and token is missing, fetch it automatically
+        if (!csrfToken && config.method && ['post', 'put', 'delete', 'patch'].includes(config.method.toLowerCase())) {
+            try {
+                // Hitting any public GET endpoint generates the CSRF token
+                await axios.get('/api/', { baseURL: API_BASE_URL, withCredentials: true });
+                csrfToken = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('XSRF-TOKEN='))
+                    ?.split('=')?.[1];
+            } catch (err) {
+                console.error('Failed to pre-fetch CSRF token', err);
+            }
+        }
 
         if (csrfToken) {
             config.headers['X-XSRF-Token'] = csrfToken;
@@ -50,7 +65,7 @@ api.interceptors.response.use(
             // Only redirect if NOT already on login/public pages
             const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
             const currentPath = window.location.pathname;
-            const isPublicPath = publicPaths.some(path => currentPath.includes(path));
+            const isPublicPath = publicPaths.includes(currentPath) || currentPath === '/';
 
             if (!isPublicPath) {
                 window.dispatchEvent(new CustomEvent('handyland:navigate', { detail: '/login' }));
@@ -59,8 +74,10 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        // Handle 401 Unauthorized for other endpoints
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Handle 401 Unauthorized for other endpoints, but NEVER for login/register/forgot-password/reset-password
+        const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') || originalRequest?.url?.includes('/auth/register');
+        
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
             originalRequest._retry = true;
 
             try {
@@ -79,13 +96,29 @@ api.interceptors.response.use(
                 // Only redirect if NOT on public pages
                 const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
                 const currentPath = window.location.pathname;
-                const isPublicPath = publicPaths.some(path => currentPath.includes(path));
+                const isPublicPath = publicPaths.includes(currentPath) || currentPath === '/';
 
                 if (!isPublicPath) {
                     window.dispatchEvent(new CustomEvent('handyland:navigate', { detail: '/login' }));
                 }
 
                 return Promise.reject(refreshError);
+            }
+        }
+
+        // Handle 403 Forbidden (Blocked account or Unverified Email)
+        if (error.response?.status === 403) {
+            const isAuthError = error.response.data?.accountDeactivated || error.response.data?.emailNotVerified;
+            if (isAuthError) {
+                localStorage.removeItem('user');
+                // Only redirect if NOT on public pages
+                const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
+                const currentPath = window.location.pathname;
+                const isPublicPath = publicPaths.includes(currentPath) || currentPath === '/';
+
+                if (!isPublicPath) {
+                    window.dispatchEvent(new CustomEvent('handyland:navigate', { detail: '/login' }));
+                }
             }
         }
 

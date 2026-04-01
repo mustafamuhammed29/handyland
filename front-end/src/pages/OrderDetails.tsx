@@ -339,7 +339,7 @@ export const OrderDetails = () => {
                                             case 'sepa_debit': return 'SEPA Direct Debit';
                                             case 'sofort': return 'Sofort';
                                             case 'cod': return 'Cash on Delivery';
-                                            default: return order.paymentMethod.charAt(0).toUpperCase() + order.paymentMethod.slice(1);
+                                            default: return order.paymentMethod ? order.paymentMethod.charAt(0).toUpperCase() + order.paymentMethod.slice(1) : 'Unknown';
                                         }
                                     })()}
                                 </span>

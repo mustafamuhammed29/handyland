@@ -12,10 +12,11 @@
         "format": "prettier --write \"**/*.js\" --ignore-path .gitignore"
     },
     "keywords": [],
-    "author": "",
+    "author": "HandyLand Team",
     "license": "ISC",
     "dependencies": {
         "@paypal/checkout-server-sdk": "^1.0.3",
+        "@sentry/node": "^10.46.0",
         "axios": "^1.13.4",
         "axios-cookiejar-support": "^6.0.5",
         "bcryptjs": "^3.0.3",
@@ -42,8 +43,10 @@
         "passport": "^0.7.0",
         "passport-facebook": "^3.0.0",
         "passport-google-oauth20": "^2.0.0",
+        "qrcode": "^1.5.4",
         "sharp": "^0.34.5",
         "socket.io": "^4.8.3",
+        "speakeasy": "^2.0.0",
         "stripe": "^20.3.1",
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^5.0.1",
@@ -62,4 +65,5 @@
         "puppeteer": "^24.38.0",
         "supertest": "^7.2.2"
     }
+
 }

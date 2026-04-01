@@ -1,4 +1,3 @@
-import React from 'react';
 import { Toggle } from '../SettingsManager';
 import { Layers, MonitorPlay, BarChart, Image as ImageIcon, ShoppingBag, Headphones, Smartphone } from 'lucide-react';
 

@@ -93,6 +93,10 @@ class ProductService {
     }
 
     async getProductById(id) {
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+        if (isValidObjectId) {
+            return await Product.findOne({ $or: [{ _id: id }, { id }] });
+        }
         return await Product.findOne({ id });
     }
 
@@ -111,19 +115,26 @@ class ProductService {
             if (updateData[field] !== undefined) {cleanData[field] = updateData[field];}
         });
 
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+        const query = isValidObjectId ? { $or: [{ _id: id }, { id }] } : { id };
+
         return await Product.findOneAndUpdate(
-            { id },
+            query,
             cleanData,
             { new: true, runValidators: true }
         );
     }
 
     async deleteProduct(id) {
-        return await Product.findOneAndDelete({ id });
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+        const query = isValidObjectId ? { $or: [{ _id: id }, { id }] } : { id };
+        return await Product.findOneAndDelete(query);
     }
 
     async getRelatedProducts(productId) {
-        const product = await Product.findOne({ id: productId });
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(productId);
+        const query = isValidObjectId ? { $or: [{ _id: productId }, { id: productId }] } : { id: productId };
+        const product = await Product.findOne(query);
         if (!product) {return [];}
 
         return await Product.find({

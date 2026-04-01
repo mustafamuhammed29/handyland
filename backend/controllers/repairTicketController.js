@@ -311,8 +311,11 @@ exports.getTicket = async (req, res) => {
             });
         }
 
-        // Ensure user owns ticket
-        if (ticket.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        // FIX: ticket.user may be null for guest tickets — guard before calling .toString()
+        const isOwner = ticket.user && ticket.user.toString() === req.user?.id;
+        const isAdmin = req.user?.role === 'admin';
+
+        if (!isOwner && !isAdmin) {
             return res.status(403).json({
                 success: false,
                 message: 'Not authorized'

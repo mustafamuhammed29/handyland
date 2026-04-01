@@ -1,4 +1,3 @@
-import React from 'react';
 import { Input } from '../SettingsManager';
 import { MessageSquare, Plus, Trash2, Link as LinkIcon } from 'lucide-react';
 
@@ -128,6 +127,7 @@ export const ContactSettingsTab = ({ settings, handleChange }: any) => {
                                         value={link.iconName || 'Facebook'}
                                         onChange={(e) => updateSocialLink(index, 'iconName', e.target.value)}
                                         className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-brand-primary outline-none"
+                                        title="Icon Style"
                                     >
                                         {AVAILABLE_ICONS.map(icon => (
                                             <option key={icon.id} value={icon.id}>{icon.label}</option>

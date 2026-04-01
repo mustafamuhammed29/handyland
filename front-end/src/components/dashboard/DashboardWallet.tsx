@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, Plus, TrendingUp, TrendingDown, Download, X, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
+import { Wallet, Plus, TrendingUp, TrendingDown, Download, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { BarChart, Bar, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 import { WalletTransaction } from '../../types';
 import { api } from '../../utils/api';
@@ -96,6 +96,27 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
         <div className="space-y-6 relative">
             <h2 className="text-2xl font-bold text-white">My Wallet</h2>
 
+            {/* Pending Requests Banner */}
+            {(() => {
+                const pendingCount = transactions.filter((t: any) => t.status === 'pending').length;
+                if (pendingCount === 0) return null;
+                return (
+                    <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl animate-in fade-in slide-in-from-top-2">
+                        <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="font-bold text-amber-300 text-sm">
+                                {pendingCount === 1
+                                    ? '1 ausstehende Überweisung'
+                                    : `${pendingCount} ausstehende Überweisungen`}
+                            </p>
+                            <p className="text-amber-400/70 text-xs mt-0.5">
+                                Ihr Guthaben wird gutgeschrieben, sobald der Admin Ihren Zahlungsbeleg bestätigt hat.
+                            </p>
+                        </div>
+                    </div>
+                );
+            })()}
+
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Balance Card */}
                 <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-8 text-white relative overflow-hidden group">
@@ -119,13 +140,13 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                     <div className="space-y-4 flex-1">
                         <div>
                             <p className="text-slate-400 text-sm">Total Transactions</p>
-                            <p className="text-2xl font-bold text-white">{transactions.length}</p>
+                            <p className="text-2xl font-bold text-white">{transactions.filter((t: any) => t.status === 'completed').length}</p>
                         </div>
                         <div>
                             <p className="text-slate-400 text-sm">This Month</p>
                             <p className="text-2xl font-bold text-emerald-400">
                                 +€{transactions
-                                    .filter(t => new Date(t.date || Date.now()).getMonth() === currentMonth)
+                                    .filter((t: any) => t.status === 'completed' && new Date(t.date || Date.now()).getMonth() === currentMonth)
                                     .reduce((sum, t) => sum + (t.amount || 0), 0)
                                     .toFixed(2)}
                             </p>
@@ -136,8 +157,8 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                     <div className="h-24 w-full mt-4 border-t border-slate-800/50 pt-4">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={[
-                                { name: 'In', value: transactions.filter(t => t.type === 'deposit' || t.type === 'refund').reduce((s, t) => s + t.amount, 0) },
-                                { name: 'Out', value: transactions.filter(t => t.type !== 'deposit' && t.type !== 'refund').reduce((s, t) => s + t.amount, 0) }
+                                { name: 'In', value: transactions.filter((t: any) => (t.type === 'deposit' || t.type === 'refund') && t.status === 'completed').reduce((s, t) => s + t.amount, 0) },
+                                { name: 'Out', value: transactions.filter((t: any) => t.type !== 'deposit' && t.type !== 'refund' && t.status === 'completed').reduce((s, t) => s + t.amount, 0) }
                             ]}>
                                 <Tooltip
                                     cursor={{ fill: 'transparent' }}
@@ -176,35 +197,84 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                 </div>
 
                 <div className="space-y-3">
-                    {transactions.slice(0, 5).map((transaction, idx) => (
-                        <div
-                            key={idx}
-                            className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${transaction.type === 'deposit' || transaction.type === 'credit' || transaction.type === 'refund'
-                                    ? 'bg-emerald-600/20'
-                                    : 'bg-red-600/20'
+                    {transactions.slice(0, 10).map((transaction, idx) => {
+                        const isPending = (transaction as any).status === 'pending';
+                        const isFailed = (transaction as any).status === 'failed';
+                        const isIncoming = transaction.type === 'deposit' || transaction.type === 'credit' || transaction.type === 'refund';
+
+                        return (
+                            <div
+                                key={idx}
+                                className={`flex items-center justify-between p-4 rounded-xl transition-colors border ${
+                                    isPending
+                                        ? 'bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10'
+                                        : isFailed
+                                        ? 'bg-red-500/5 border-red-500/20'
+                                        : 'bg-slate-800/30 border-transparent hover:bg-slate-800/50'
+                                }`}
+                            >
+                                <div className="flex items-center gap-4">
+                                    {/* Icon */}
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                        isPending ? 'bg-amber-500/20' :
+                                        isFailed  ? 'bg-red-500/20' :
+                                        isIncoming ? 'bg-emerald-600/20' : 'bg-red-600/20'
                                     }`}>
-                                    {transaction.type === 'deposit' || transaction.type === 'credit' || transaction.type === 'refund' ? (
-                                        <TrendingUp className="w-5 h-5 text-emerald-400" />
-                                    ) : (
-                                        <TrendingDown className="w-5 h-5 text-red-400" />
+                                        {isPending ? (
+                                            <Clock className="w-5 h-5 text-amber-400 animate-pulse" />
+                                        ) : isFailed ? (
+                                            <XCircle className="w-5 h-5 text-red-400" />
+                                        ) : isIncoming ? (
+                                            <TrendingUp className="w-5 h-5 text-emerald-400" />
+                                        ) : (
+                                            <TrendingDown className="w-5 h-5 text-red-400" />
+                                        )}
+                                    </div>
+
+                                    {/* Description + Date */}
+                                    <div>
+                                        <p className="text-white font-medium text-sm">
+                                            {transaction.description || (transaction.type === 'deposit' ? 'Wallet Deposit' : 'Purchase')}
+                                        </p>
+                                        <p className="text-xs text-slate-500 mt-0.5">
+                                            {new Date(transaction.date || (transaction as any).createdAt || Date.now()).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Right side: amount + status badge */}
+                                <div className="flex flex-col items-end gap-1.5">
+                                    <p className={`font-bold text-sm ${
+                                        isPending ? 'text-amber-400' :
+                                        isFailed  ? 'text-slate-500 line-through' :
+                                        isIncoming ? 'text-emerald-400' : 'text-red-400'
+                                    }`}>
+                                        {isIncoming ? '+' : '-'}€{transaction.amount?.toFixed(2)}
+                                    </p>
+
+                                    {/* Status Badge */}
+                                    {isPending && (
+                                        <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                            <Clock className="w-2.5 h-2.5" />
+                                            Ausstehend — Admin-Prüfung
+                                        </span>
+                                    )}
+                                    {isFailed && (
+                                        <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                                            <XCircle className="w-2.5 h-2.5" />
+                                            Abgelehnt
+                                        </span>
+                                    )}
+                                    {!isPending && !isFailed && (transaction as any).status === 'completed' && isIncoming && (
+                                        <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                            <CheckCircle className="w-2.5 h-2.5" />
+                                            Genehmigt
+                                        </span>
                                     )}
                                 </div>
-                                <div>
-                                    <p className="text-white font-medium">{transaction.description || (transaction.type === 'deposit' ? 'Wallet Deposit' : 'Purchase')}</p>
-                                    <p className="text-sm text-slate-400">
-                                        {new Date(transaction.date || (transaction as any).createdAt || Date.now()).toLocaleDateString()}
-                                    </p>
-                                </div>
                             </div>
-                            <p className={`font-bold ${transaction.type === 'deposit' || transaction.type === 'credit' || transaction.type === 'refund' ? 'text-emerald-400' : 'text-red-400'
-                                }`}>
-                                {transaction.type === 'deposit' || transaction.type === 'credit' || transaction.type === 'refund' ? '+' : '-'}€{transaction.amount?.toFixed(2)}
-                            </p>
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     {transactions.length === 0 && (
                         <div className="text-center py-8 text-slate-500">

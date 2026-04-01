@@ -33,6 +33,21 @@ export function useInventoryActions(refreshData: () => void) {
         }
     };
 
+    const handleInlineUpdate = async (item: any, field: string, value: any) => {
+        try {
+            const endpoint = `/api/inventory/${item.itemType}/${item._id}/stock`;
+            const payload: any = { reason: 'Inline Edit', notes: '' };
+            payload[field] = value;
+            
+            await api.put(endpoint, payload);
+            refreshData(); // Refresh API to show new stock
+            return { success: true };
+        } catch (error) {
+            console.error(`Failed to inline update ${field}`, error);
+            return { success: false, error: 'Update failed' };
+        }
+    };
+
     const handleAddPartSave = async (addPartForm: any) => {
         try {
             await api.post('/api/repair-parts', addPartForm);
@@ -47,7 +62,7 @@ export function useInventoryActions(refreshData: () => void) {
 
     return {
         isEditModalOpen, setIsEditModalOpen,
-        editingItem, handleEditClick, handleUpdateItem,
+        editingItem, handleEditClick, handleUpdateItem, handleInlineUpdate,
         isAddPartModalOpen, setIsAddPartModalOpen, handleAddPartSave
     };
 }

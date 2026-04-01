@@ -106,15 +106,23 @@ exports.syncCart = async (req, res) => {
         // 2. Process local items synchronously
         if (localItems && Array.isArray(localItems)) {
             for (const local of localItems) {
-                // Validate ObjectId to prevent CastError/Crash
-                if (!mongoose.isValidObjectId(local.id)) {
-                    console.warn(`Skipping invalid cart item ID during sync: ${local.id}`);
-                    continue;
-                }
-
                 const productCategory = local.category ? local.category.toLowerCase() : '';
                 const productType = (productCategory === 'device' || productCategory === 'phone') ? 'Product' : (productCategory === 'accessory' ? 'Accessory' : 'Product');
-                const productId = local.id;
+                
+                // Resolve real ObjectId from UUID or ObjectId
+                let realId = local.id;
+                if (!mongoose.isValidObjectId(local.id)) {
+                    const Model = productType === 'Product' ? Product : Accessory;
+                    const doc = await Model.findOne({ id: local.id }).select('_id');
+                    if (doc) {
+                        realId = doc._id.toString();
+                    } else {
+                        console.warn(`Skipping invalid cart item ID during sync (not found): ${local.id}`);
+                        continue;
+                    }
+                }
+
+                const productId = realId;
 
                 if (serverMap.has(productId)) {
                     // Update quantity atomically
@@ -195,36 +203,43 @@ exports.syncCart = async (req, res) => {
 // @access  Private
 exports.updateCart = async (req, res) => {
     try {
-        const { id, productType, quantity } = req.body; // id is productId
+        const { id, productType, quantity } = req.body; // id could be ObjectId or UUID
+
+        const mongoose = require('mongoose');
+        const catLower = productType ? productType.toLowerCase() : '';
+        const typeToSave = (catLower === 'device' || catLower === 'phone') ? 'Product' : (catLower === 'accessory' ? 'Accessory' : 'Product');
+        const Model = typeToSave === 'Product' ? Product : Accessory;
+
+        // Resolve real ObjectId
+        let realId = id;
+        if (!mongoose.isValidObjectId(id)) {
+            const doc = await Model.findOne({ id }).select('_id');
+            if (doc) {
+                realId = doc._id.toString();
+            } else {
+                return res.status(404).json({ success: false, message: 'Product not found' });
+            }
+        }
 
         if (quantity <= 0) {
             // Remove item atomically
             await Cart.findOneAndUpdate(
                 { user: req.user.id },
-                { $pull: { items: { product: id } } }
+                { $pull: { items: { product: realId } } }
             );
         } else {
             // Check if item exists first
-            const existing = await Cart.findOne({ user: req.user.id, "items.product": id });
+            const existing = await Cart.findOne({ user: req.user.id, "items.product": realId });
 
             if (existing) {
                 // Update quantity atomically
                 await Cart.findOneAndUpdate(
-                    { user: req.user.id, "items.product": id },
+                    { user: req.user.id, "items.product": realId },
                     { $set: { "items.$.quantity": quantity } }
                 );
             } else {
-                // Determine model reference
-                const catLower = productType ? productType.toLowerCase() : '';
-                const typeToSave = (catLower === 'device' || catLower === 'phone') ? 'Product' : (catLower === 'accessory' ? 'Accessory' : 'Product');
-
                 // FIXED: Validate stock before adding new item (FIX 9)
-                let stockDoc;
-                if (typeToSave === 'Product') {
-                    stockDoc = await Product.findById(id).select('stock name');
-                } else {
-                    stockDoc = await Accessory.findById(id).select('stock name');
-                }
+                const stockDoc = await Model.findById(realId).select('stock name');
                 if (!stockDoc) {
                     return res.status(404).json({ success: false, message: 'Product not found' });
                 }
@@ -234,14 +249,14 @@ exports.updateCart = async (req, res) => {
 
                 // Add new item atomically using resilient atomic update pattern
                 const addResult = await Cart.updateOne(
-                    { user: req.user.id, "items.product": { $ne: id } },
-                    { $push: { items: { product: id, productType: typeToSave, quantity } } }
+                    { user: req.user.id, "items.product": { $ne: realId } },
+                    { $push: { items: { product: realId, productType: typeToSave, quantity } } }
                 );
 
                 if (addResult.modifiedCount === 0) {
                      // Parallel request already added it
                      await Cart.updateOne(
-                         { user: req.user.id, "items.product": id },
+                         { user: req.user.id, "items.product": realId },
                          { $set: { "items.$.quantity": quantity } }
                      );
                 }

@@ -65,7 +65,7 @@ const warrantySchema = new mongoose.Schema({
 });
 
 // Pre-save middleware to automatically calculate end date and status
-warrantySchema.pre('save', function (next) {
+warrantySchema.pre('save', async function () {
     if (this.isModified('startDate') || this.isModified('durationDays')) {
         const start = new Date(this.startDate);
         this.endDate = new Date(start.getTime() + this.durationDays * 24 * 60 * 60 * 1000);
@@ -75,8 +75,6 @@ warrantySchema.pre('save', function (next) {
     if (this.status === 'Active' && this.endDate < new Date()) {
         this.status = 'Expired';
     }
-
-    next();
 });
 
 module.exports = mongoose.model('Warranty', warrantySchema);

@@ -17,8 +17,9 @@ const helmetMiddleware = helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "js.stripe.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+            // NOTE: If inline styles break, add a nonce-based approach — do not re-add unsafe-inline
+            scriptSrc: ["'self'", "js.stripe.com"],
+            styleSrc: ["'self'", "fonts.googleapis.com"],
             fontSrc: ["'self'", "fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "blob:", "res.cloudinary.com", "images.unsplash.com"],
             connectSrc: ["'self'", "api.stripe.com"],
@@ -55,18 +56,19 @@ const corsMiddleware = cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-XSRF-Token'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-XSRF-Token', 'x-app-type'],
     exposedHeaders: ['Set-Cookie'],
 });
 
 // ── Rate limiters ──────────────────────────────────────────────────────────────
+const isDevelopment = process.env.NODE_ENV !== 'production';
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: parseInt(process.env.RATE_LIMIT_MAX) || 1000,
+    max: parseInt(process.env.RATE_LIMIT_MAX) || (isDevelopment ? 3000 : 300),
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => req.method === 'OPTIONS',
+    skip: (req) => req.method === 'OPTIONS' || isDevelopment,
 });
 
 // ── XSS sanitization ────────────────────────────────────────────────────────
@@ -90,6 +92,7 @@ const CSRF_EXCLUDED_PATHS = [
     '/api/payment/webhook',
     '/api/auth/google/callback',
     '/api/auth/facebook/callback',
+    '/api/translations/missing',
 ];
 const csrfMiddleware = (req, res, next) => {
     if (CSRF_EXCLUDED_PATHS.some(p => req.path.startsWith(p))) {return next();}
@@ -105,10 +108,26 @@ const applySecurityMiddleware = (app) => {
     app.use(compression());
     app.use(corsMiddleware);
     app.use('/api/', generalLimiter);
-    app.use(express.json({ limit: '10mb' }));
-    app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+    
+    // Bypass json parser for stripe webhook
+    app.use((req, res, next) => {
+        if (req.originalUrl.includes('/api/payment/webhook')) return next();
+        return express.json({ limit: '10mb' })(req, res, next);
+    });
+    
+    // Bypass urlencoded for stripe webhook
+    app.use((req, res, next) => {
+        if (req.originalUrl.includes('/api/payment/webhook')) return next();
+        return express.urlencoded({ extended: false, limit: '10mb' })(req, res, next);
+    });
     app.use(mongoSanitize);
-    app.use(xssSanitize);
+    
+    // Bypass xss for stripe webhook
+    app.use((req, res, next) => {
+        if (req.originalUrl.includes('/api/payment/webhook')) return next();
+        return xssSanitize(req, res, next);
+    });
+    
     app.use(cookieParser());
     app.use(csrfMiddleware);
 };

@@ -1,4 +1,5 @@
 const { Server } = require('socket.io');
+const jwt = require('jsonwebtoken');
 
 let io;
 
@@ -18,25 +19,50 @@ const initSocket = (httpServer) => {
         }
     });
 
-    io.on('connection', (socket) => {
-        console.log(`[Socket.IO] Client connected: ${socket.id}`);
+    // ── JWT Authentication Middleware ─────────────────────────────────────────
+    io.use((socket, next) => {
+        const token = socket.handshake.auth?.token;
+        if (!token) {
+            // Allow connection but socket will have no verified identity
+            socket.verifiedUser = null;
+            return next();
+        }
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            socket.verifiedUser = decoded; // { id, role, ... }
+            next();
+        } catch {
+            socket.verifiedUser = null;
+            next(); // Still allow connection, but restrict room joins below
+        }
+    });
 
-        // Join user-specific room for private notifications
+    io.on('connection', (socket) => {
+        // Join user-specific room — only allowed if token matches the requested userId
         socket.on('join', (userId) => {
-            if (userId) {
-                socket.join(`user:${userId}`);
-                console.log(`[Socket.IO] User ${userId} joined their room`);
+            if (!userId) return;
+
+            const verified = socket.verifiedUser;
+            if (!verified || (verified.id !== userId && verified.role !== 'admin')) {
+                console.warn(`[Socket.IO] Unauthorized join attempt for user:${userId} by socket ${socket.id}`);
+                return;
             }
+
+            socket.join(`user:${userId}`);
         });
 
-        // Join admin room
+        // Join admin room — only allowed for verified admins
         socket.on('join:admin', () => {
+            const verified = socket.verifiedUser;
+            if (!verified || verified.role !== 'admin') {
+                console.warn(`[Socket.IO] Unauthorized admin join attempt by socket ${socket.id}`);
+                return;
+            }
             socket.join('admin');
-            console.log(`[Socket.IO] Admin joined`);
         });
 
         socket.on('disconnect', () => {
-            console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
+            // Silent disconnect — no log needed in production
         });
     });
 
@@ -89,8 +115,24 @@ const emitNewOrder = (order) => {
 
 const emitNotification = (userId, notification) => {
     const socket = getIO();
-    if (!socket) {return;}
+    if (!socket) { return; }
     socket.to(`user:${userId}`).emit('notification', notification);
 };
 
-module.exports = { initSocket, getIO, emitOrderUpdate, emitNewOrder, emitNotification };
+/**
+ * Emit a generic real-time notification to ALL connected admins.
+ * @param {'new_user'|'new_order'|'new_message'|'new_repair'|'new_valuation'} type
+ * @param {Object} payload
+ */
+const emitAdminNotification = (type, payload) => {
+    const socket = getIO();
+    if (!socket) { return; }
+    socket.to('admin').emit('admin:notification', {
+        id: Date.now(),
+        type,
+        ...payload,
+        timestamp: new Date().toISOString(),
+    });
+};
+
+module.exports = { initSocket, getIO, emitOrderUpdate, emitNewOrder, emitNotification, emitAdminNotification };

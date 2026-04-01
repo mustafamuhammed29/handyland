@@ -131,6 +131,7 @@ export const AppRouter = () => {
 
     return (
         <div className={`min-h-screen font-sans bg-transparent selection:bg-brand-primary/30 selection:text-brand-primary ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+            <SEO />
             <AnnouncementBanner />
             <OfflineBanner />
             <PromoModal />

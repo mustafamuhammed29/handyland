@@ -1,4 +1,3 @@
-import React from 'react';
 import { Input } from '../SettingsManager';
 import { Type, Smartphone, Activity, Palette, ShieldCheck, Gamepad2 } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
@@ -99,21 +98,21 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
                     <div>
                         <label className="block text-slate-400 text-sm font-bold mb-2">Accent Color</label>
                         <div className="flex items-center gap-2">
-                            <input type="color" value={settings.hero?.accentColor || '#0ea5e9'} onChange={(e) => handleChange('hero', 'accentColor', e.target.value)} className="w-10 h-10 rounded cursor-pointer bg-transparent border-none p-0" />
+                            <input type="color" value={settings.hero?.accentColor || '#0ea5e9'} onChange={(e) => handleChange('hero', 'accentColor', e.target.value)} className="w-10 h-10 rounded cursor-pointer bg-transparent border-none p-0" title="Accent Color" />
                             <span className="text-slate-300">{settings.hero?.accentColor}</span>
                         </div>
                     </div>
                     <div>
                         <label className="block text-slate-400 text-sm font-bold mb-2">Dark Mode Bg Start</label>
                         <div className="flex items-center gap-2">
-                            <input type="color" value={settings.hero?.bgStart || '#0f172a'} onChange={(e) => handleChange('hero', 'bgStart', e.target.value)} className="w-10 h-10 rounded cursor-pointer bg-transparent border-none p-0" />
+                            <input type="color" value={settings.hero?.bgStart || '#0f172a'} onChange={(e) => handleChange('hero', 'bgStart', e.target.value)} className="w-10 h-10 rounded cursor-pointer bg-transparent border-none p-0" title="Dark Mode Background Start" />
                             <span className="text-slate-300">{settings.hero?.bgStart}</span>
                         </div>
                     </div>
                     <div>
                         <label className="block text-slate-400 text-sm font-bold mb-2">Dark Mode Bg End</label>
                         <div className="flex items-center gap-2">
-                            <input type="color" value={settings.hero?.bgEnd || '#020617'} onChange={(e) => handleChange('hero', 'bgEnd', e.target.value)} className="w-10 h-10 rounded cursor-pointer bg-transparent border-none p-0" />
+                            <input type="color" value={settings.hero?.bgEnd || '#020617'} onChange={(e) => handleChange('hero', 'bgEnd', e.target.value)} className="w-10 h-10 rounded cursor-pointer bg-transparent border-none p-0" title="Dark Mode Background End" />
                             <span className="text-slate-300">{settings.hero?.bgEnd}</span>
                         </div>
                     </div>

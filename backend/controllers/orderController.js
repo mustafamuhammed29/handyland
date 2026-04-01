@@ -17,7 +17,7 @@ if (process.env.STRIPE_SECRET_KEY) {
     };
 }
 const { sendEmail, emailTemplates } = require('../utils/emailService');
-const { emitOrderUpdate, emitNewOrder } = require('../utils/socket');
+const { emitOrderUpdate, emitNewOrder, emitAdminNotification } = require('../utils/socket');
 
 // @desc    Apply Coupon
 // @route   POST /api/orders/apply-coupon
@@ -199,8 +199,8 @@ exports.createOrder = async (req, res) => {
             }
         }
 
-        // Record coupon usage (per-account tracking)
-        if (couponCode) {
+        // Record coupon usage (per-account tracking) — only for authenticated users
+        if (couponCode && req.user) {
             const { recordCouponUsage } = require('./couponController');
             await recordCouponUsage(couponCode, req.user.id, req.user.email);
         }
@@ -233,6 +233,18 @@ exports.createOrder = async (req, res) => {
             success: true,
             message: 'Order created successfully',
             order
+        });
+
+        // 🔔 Real-time admin notification
+        emitNewOrder(order);
+        emitAdminNotification('new_order', {
+            title: 'Neue Bestellung',
+            body: `#${order.orderNumber} · ${orderItems.length} Artikel · €${finalAmount.toFixed(2)}`,
+            icon: '🛎️',
+            link: '/orders',
+            orderNumber: order.orderNumber,
+            total: finalAmount,
+            customerName: shippingAddress?.fullName || (req.user ? req.user.name : 'Gast'),
         });
     } catch (error) {
         console.error('Create order error:', error);
@@ -346,11 +358,15 @@ exports.cancelOrder = async (req, res) => {
             });
         }
 
+        // FIX: Save old status BEFORE changing it so the rollback guard is correct
+        const oldStatus = order.status;
         order.status = 'cancelled';
         await order.save();
 
-        // Rollback Stock and Sold only if it wasn't pending (pending orders haven't deducted stock yet)
-        if (order.status !== 'pending' && order.status !== 'pending_payment') {
+        // Rollback stock only for 'processing' orders (stock was already deducted).
+        // 'pending' orders also deduct stock on creation, so we roll back for both.
+        // Only skip rollback if the order was never fulfilled (e.g. pending_payment).
+        if (oldStatus !== 'pending_payment') {
             for (const item of order.items) {
                 if (item.productType === 'Product') {
                     await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
@@ -382,6 +398,7 @@ exports.cancelOrder = async (req, res) => {
         });
     }
 };
+
 
 // ============ ADMIN ONLY ENDPOINTS ============
 

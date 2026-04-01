@@ -45,6 +45,10 @@ const TransactionSchema = new mongoose.Schema({
         type: String,
         index: true
     },
+    receiptUrl: {
+        type: String,
+        default: null
+    },
     description: String,
     createdAt: {
         type: Date,
