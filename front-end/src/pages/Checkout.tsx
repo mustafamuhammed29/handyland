@@ -149,21 +149,20 @@ export const Checkout: React.FC = () => {
         // Determine initial step based on auth
         if (user) {
             setStep(2);
-            let prefilledAddress = '';
-            // Robust check for string address and specifically avoiding "[object Object]"
-            if (typeof user.address === 'string' && user.address !== '[object Object]' && user.address.trim() !== '') {
-                prefilledAddress = user.address;
-            } else if (user.addresses && user.addresses.length > 0) {
-                const defaultAddr = user.addresses.find(a => a.isDefault) || user.addresses[0];
-                prefilledAddress = defaultAddr.street || '';
-            }
-
+            // FIXED C: Map address fields correctly (FIX C)
+            // Logically: user.addresses or user.address
+            const defaultAddr = user.addresses?.find((a: any) => a.isDefault) || user.addresses?.[0];
+            
             setShippingDetails(prev => ({
                 ...prev,
-                fullName: user.name || '',
-                email: user.email || '',
-                phone: user.phone || '', // Added phone prefill
-                address: prefilledAddress
+                fullName: user.name || prev.fullName,
+                email: user.email || prev.email,
+                phone: user.phone || prev.phone,
+                // FIXED C: Real mapping
+                address: defaultAddr?.street || user.address || prev.address,
+                city: defaultAddr?.city || prev.city,
+                zipCode: defaultAddr?.postalCode || defaultAddr?.zipCode || prev.zipCode,
+                country: defaultAddr?.country || prev.country || 'Germany'
             }));
         }
 

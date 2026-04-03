@@ -48,14 +48,16 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     <img
                         src={getProductImage(product)}
                         alt={product.model}
-                        onError={(e: any) => { e.target.src = '/placeholder-device.svg'; }}
+                        onError={(e: any) => { e.target.onerror = null; e.target.src = '/images/placeholder.png'; }}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                 </div>
                 <div className="flex-1 flex flex-col justify-center">
                     <div className="flex justify-between items-start mb-2">
                         <div>
-                            <div className="text-xs text-brand-primary font-mono uppercase mb-1">{product.brand || (product as any).category}</div>
+                            <div className="text-xs text-brand-primary font-mono uppercase mb-1">
+                                {(product.category as any)?.name || product.category || product.brand || 'Smartphone'}
+                            </div>
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white hover:text-brand-primary cursor-pointer" onClick={() => onSelect(product)}>{product.model || (product as any).name}</h3>
                         </div>
                         <div className="text-right pr-12">

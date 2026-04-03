@@ -61,7 +61,7 @@ export const Stats: React.FC = () => {
   const stats = [
     {
       icon: <Wrench className="w-6 h-6" />,
-      value: settings?.stats?.devicesRepaired || 50000,
+      value: settings?.stats?.devicesRepaired || 250,
       suffix: '+',
       label: 'Devices Repaired',
       color: 'text-brand-primary',
@@ -70,12 +70,21 @@ export const Stats: React.FC = () => {
     },
     {
       icon: <Users className="w-6 h-6" />,
-      value: settings?.stats?.happyCustomers || 15000,
+      value: settings?.stats?.happyCustomers || 180,
       suffix: '+',
-      label: 'Active Users',
+      label: 'Happy Customers',
       color: 'text-purple-400',
       border: 'group-hover:border-purple-500/50',
       bg: 'group-hover:bg-purple-500/10'
+    },
+    {
+      icon: <Trophy className="w-6 h-6" />,
+      value: settings?.stats?.yearsExperience || 2,
+      suffix: '+',
+      label: 'Years Experience',
+      color: 'text-amber-400',
+      border: 'group-hover:border-amber-500/50',
+      bg: 'group-hover:bg-amber-500/10'
     },
     {
       icon: <Star className="w-6 h-6" />,
@@ -86,15 +95,6 @@ export const Stats: React.FC = () => {
       border: 'group-hover:border-yellow-500/50',
       bg: 'group-hover:bg-yellow-500/10',
       isDecimal: true
-    },
-    {
-      icon: <History className="w-6 h-6" />,
-      value: settings?.stats?.successRate || 99,
-      suffix: '%',
-      label: 'Success Rate',
-      color: 'text-emerald-400',
-      border: 'group-hover:border-emerald-500/50',
-      bg: 'group-hover:bg-emerald-500/10'
     },
   ];
 

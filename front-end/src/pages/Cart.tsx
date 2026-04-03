@@ -113,7 +113,9 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                             <h3 className="text-lg sm:text-xl font-bold text-white line-clamp-2 leading-snug">
                                                 {item.title || (item as any).name}
                                             </h3>
-                                            <p className="text-slate-400 text-sm mt-1">{item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : ''}</p>
+                                            <p className="text-slate-400 text-sm mt-1">
+                                                {(item.category as any)?.name || (typeof item.category === 'string' && item.category !== 'device' ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : 'Smartphone')}
+                                            </p>
                                         </div>
                                         <div className="text-right flex-shrink-0">
                                             <div className="text-xl font-bold text-white">€{item.price.toFixed(2)}</div>
