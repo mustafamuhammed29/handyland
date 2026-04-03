@@ -170,8 +170,6 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                         </div>
 
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none opacity-50 hidden md:flex">
-                            <span className="text-[10px] text-blue-400 border border-blue-900 px-2 py-0.5 rounded bg-blue-900/20">CMD</span>
-                            <span className="text-[10px] text-slate-500">SYSTEM_READY</span>
                         </div>
                     </div>
                 </div>

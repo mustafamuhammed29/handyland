@@ -24,6 +24,7 @@ import { api } from '../utils/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { authService } from '../services/authService';
 import { orderService } from '../services/orderService';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardProps {
     user: UserType | null;
@@ -35,6 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const [activeTab, setActiveTab] = useState('overview');
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const { t } = useTranslation();
 
     // Use the new data fetching hook
     const dashboardData = useDashboardData(activeTab);
@@ -201,14 +203,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     }
 
     const navItems = [
-        { id: 'overview', label: 'Overview', icon: <Activity className="w-4 h-4" /> },
-        { id: 'orders', label: 'My Orders', icon: <Package className="w-4 h-4" /> },
-        { id: 'repairs', label: 'Active Repairs', icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.length || 0 },
-        { id: 'valuations', label: 'My Valuations', icon: <BarChart3 className="w-4 h-4" /> },
-        { id: 'wallet', label: 'Digital Wallet', icon: <Wallet className="w-4 h-4" /> },
-        { id: 'wishlist', label: 'Wishlist', icon: <Heart className="w-4 h-4" /> },
-        { id: 'messages', label: 'Messages', icon: <Mail className="w-4 h-4" /> },
-        { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
+        { id: 'overview', label: t('dashboard.overview', 'Overview'), icon: <Activity className="w-4 h-4" /> },
+        { id: 'orders', label: t('orders.title', 'My Orders'), icon: <Package className="w-4 h-4" /> },
+        { id: 'repairs', label: t('repairs.title', 'Active Repairs'), icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.length || 0 },
+        { id: 'valuations', label: t('valuations.title', 'My Valuations'), icon: <BarChart3 className="w-4 h-4" /> },
+        { id: 'wallet', label: t('wallet.title', 'Digital Wallet'), icon: <Wallet className="w-4 h-4" /> },
+        { id: 'wishlist', label: t('wishlist.title', 'Wishlist'), icon: <Heart className="w-4 h-4" /> },
+        { id: 'messages', label: t('messages.title', 'Messages'), icon: <Mail className="w-4 h-4" /> },
+        { id: 'settings', label: t('settings.title', 'Settings'), icon: <Settings className="w-4 h-4" /> },
     ];
 
     const ADMIN_PANEL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3001';
@@ -373,7 +375,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                     className="flex items-center justify-center w-10 h-10 lg:w-auto lg:h-auto rounded-xl bg-white/50 dark:bg-slate-800/50 lg:bg-transparent text-slate-600 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors"
                                 >
                                     <LogOut className="w-5 h-5" />
-                                    <span className="hidden lg:inline ml-2 font-medium">Logout</span>
+                                    <span className="hidden lg:inline ml-2 font-medium">{t('auth.logout', 'Logout')}</span>
                                 </button>
                             </div>
                         </nav>
