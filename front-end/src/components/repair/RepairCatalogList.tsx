@@ -17,7 +17,17 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDevices.length > 0 ? (
+            {!searchTerm ? (
+                <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl">
+                    <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-600">
+                        <Monitor className="w-8 h-8" />
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <h3 className="text-xl font-bold text-white mb-2">{t('repair.searchPlaceholder', 'SEARCH DEVICE MODEL (e.g. iPhone 15, S24)...')}</h3>
+                        <p className="text-slate-500 mb-6">{t('repair.enterDeviceToStart', 'Enter your device model above to see repair options.')}</p>
+                    </div>
+                </div>
+            ) : filteredDevices.length > 0 ? (
                 filteredDevices.map((device) => (
                     <button
                         key={device.id}
@@ -88,14 +98,14 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                     </div>
                     {searchTerm ? (
                         <div className="flex flex-col items-center">
-                            <h3 className="text-xl font-bold text-white mb-2">Device Not Found</h3>
-                            <p className="text-slate-500 mb-6">We don't have standard pricing for "<span className="text-slate-300">{searchTerm}</span>" yet.</p>
+                            <h3 className="text-xl font-bold text-white mb-2">{t('repair.deviceNotFound', 'Device Not Found')}</h3>
+                            <p className="text-slate-500 mb-6">{t('repair.noPricingYet', 'We don\'t have standard pricing for "{{device}}" yet.', { device: searchTerm })}</p>
                             <Link 
                                 to={`/contact?subject=Repair Inquiry: ${searchTerm}`}
                                 className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20"
                             >
                                 <MessageSquare className="w-5 h-5" />
-                                Contact Us for a Quote
+                                {t('repair.contactForQuote', 'Contact Us for a Quote')}
                             </Link>
                         </div>
                     ) : (

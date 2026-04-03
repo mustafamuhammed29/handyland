@@ -42,8 +42,14 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
 
     useEffect(() => {
         const loadRepairs = async () => {
+            if (!searchTerm || searchTerm.trim() === '') {
+                setRepairCatalog([]);
+                setLoading(false);
+                return;
+            }
             try {
-                const response = await api.get<RepairDevice[]>('/api/repairs');
+                setLoading(true);
+                const response = await api.get<RepairDevice[]>(`/api/repairs?search=${searchTerm}`);
 
                 // Axios returns the data in the .data property, but interceptor already unwraps it
                 // So 'response' IS the data (RepairDevice[])
@@ -60,13 +66,15 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 setLoading(false);
             }
         };
-        loadRepairs();
-    }, []);
 
-    const filteredDevices = repairCatalog.filter(device =>
-        device.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        device.brand.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+        const timeoutId = setTimeout(() => {
+            loadRepairs();
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
+
+    const filteredDevices = repairCatalog;
 
     const handleOpenTicketModal = (deviceModel: string, serviceLabel?: string) => {
         setSelectedServiceForTicket({ device: deviceModel, service: serviceLabel || 'General Diagnostic' });

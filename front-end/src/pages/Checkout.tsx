@@ -286,8 +286,9 @@ export const Checkout: React.FC = () => {
         const discount = coupon ? coupon.discount : 0;
         const redeemRate = features?.loyalty?.redeemRate || 100;
         const pointsDiscount = appliedPoints / redeemRate;
-        const taxAmount = cartTotal * 0.19;
-        return Math.max(0, cartTotal + shippingCost + taxAmount - discount - pointsDiscount);
+        const discountedSubtotal = Math.max(0, cartTotal - pointsDiscount - discount);
+        const taxAmount = Math.round(discountedSubtotal * 0.19 * 100) / 100;
+        return Math.max(0, discountedSubtotal + shippingCost + taxAmount);
     };
 
     const getShippingCostDisplay = (method: ShippingMethod) => {

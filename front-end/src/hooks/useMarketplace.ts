@@ -79,7 +79,12 @@ export const useMarketplace = () => {
         viewMode, setViewMode,
         
         // Data
-        products: data?.products || [],
+        products: (data?.products || []).filter((product: PhoneListing) => 
+            !debouncedSearchTerm || 
+            (product as any).name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+            product.brand?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+            product.model?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        ),
         totalPages: data?.totalPages || 1,
         isLoading,
         isError

@@ -292,7 +292,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                         <div className={`absolute inset-0 bg-gradient-to-r opacity-5 group-hover:opacity-10 transition-opacity duration-500 mix-blend-overlay ${currentTier?.color || 'from-slate-500 to-slate-700'}`}></div>
                                         <div className="flex justify-between items-end mb-2 relative z-10">
                                             <div>
-                                                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold mb-0.5">Handyland VIP</p>
+                                                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold mb-0.5">{t('dashboard.spendTier', 'Ausgaben-Level')}</p>
                                                 <div className="flex items-center gap-1.5">
                                                     <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentTier.color} shadow-[0_0_8px_currentColor]`}></span>
                                                     <span className={`text-sm font-black text-transparent bg-clip-text bg-gradient-to-r ${currentTier.color}`}>
@@ -316,7 +316,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                                 </div>
                                             </div>
                                             <div className="flex justify-between mt-1.5">
-                                                <span className="text-[9px] font-medium text-slate-500">€{maxLimit - totalSpent > 0 ? (maxLimit - totalSpent).toFixed(2) : 0} to {nextTierName}</span>
+                                                <span className="text-[9px] font-medium text-slate-500">
+                                                    {!nextTier ? 'Max Tier Reached!' : `€${(maxLimit - totalSpent).toFixed(2)} to ${nextTierName}`}
+                                                </span>
                                                 <span className="text-[9px] font-bold text-slate-400">€{maxLimit}</span>
                                             </div>
                                         </div>

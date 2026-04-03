@@ -10,6 +10,7 @@ import { Order } from '../types';
 import { ENV } from '../config/env';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { VisualOrderTimeline } from '../components/VisualOrderTimeline';
+import { formatPrice } from '../utils/formatPrice';
 
 export const OrderDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -235,19 +236,19 @@ export const OrderDetails = () => {
                             <div className="bg-slate-900 rounded-xl p-4 space-y-2 mb-6 text-sm relative z-10 border border-slate-800">
                                 <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                     <span className="text-slate-400">Bank:</span>
-                                    <span className="text-white font-bold select-all">{paymentConfig?.bankName || "Pending Configuration"}</span>
+                                    <span className="text-white font-bold select-all">{paymentConfig?.bankName || import.meta.env.VITE_BANK_NAME || "Pending Configuration"}</span>
                                 </div>
                                 <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                     <span className="text-slate-400">Account Holder:</span>
-                                    <span className="text-white font-bold select-all">{paymentConfig?.accountHolder || "Your Company"}</span>
+                                    <span className="text-white font-bold select-all">{paymentConfig?.accountHolder || import.meta.env.VITE_BANK_HOLDER || "Your Company"}</span>
                                 </div>
                                 <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                     <span className="text-slate-400">IBAN:</span>
-                                    <span className="text-white font-bold select-all">{paymentConfig?.iban || "DE00 0000 0000 0000 0000 00"}</span>
+                                    <span className="text-white font-bold select-all">{paymentConfig?.iban || import.meta.env.VITE_BANK_IBAN || "DE00 0000 0000 0000 0000 00"}</span>
                                 </div>
                                 <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                     <span className="text-slate-400">BIC:</span>
-                                    <span className="text-white font-bold select-all">{paymentConfig?.bic || "XXXXXXXX"}</span>
+                                    <span className="text-white font-bold select-all">{paymentConfig?.bic || import.meta.env.VITE_BANK_BIC || "XXXXXXXX"}</span>
                                 </div>
                                 <div className="flex justify-between items-center bg-blue-500/20 p-2 rounded border border-blue-500/30 mt-4">
                                     <span className="text-blue-300 font-bold">Reference:</span>
@@ -294,10 +295,10 @@ export const OrderDetails = () => {
                                     </div>
                                     <div className="flex-1">
                                         <div className="text-white font-medium line-clamp-1">{item.name}</div>
-                                        <div className="text-xs text-slate-500 mt-1">Qty: {item.quantity} × €{item.price.toFixed(2)}</div>
+                                        <div className="text-xs text-slate-500 mt-1">Qty: {item.quantity} × {formatPrice(item.price)}</div>
                                     </div>
                                     <div className="text-white font-bold">
-                                        €{(item.quantity * item.price).toFixed(2)}
+                                        {formatPrice(item.quantity * item.price)}
                                     </div>
                                 </div>
                             ))}

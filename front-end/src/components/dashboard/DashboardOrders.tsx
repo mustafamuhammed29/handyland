@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Order } from '../../types';
 import { VisualOrderTimeline } from '../VisualOrderTimeline';
+import { formatPrice } from '../../utils/formatPrice';
 
 interface DashboardOrdersProps {
     orders: Order[];
@@ -111,7 +112,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <div className="text-right">
-                                        <p className="text-white font-bold text-lg">€{order.totalAmount?.toFixed(2)}</p>
+                                        <p className="text-white font-bold text-lg">{formatPrice(order.totalAmount || 0)}</p>
                                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(order.status)}`}>
                                             {order.status}
                                         </span>
@@ -145,9 +146,9 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                             )}
                                             <div className="flex-1">
                                                 <p className="text-white font-medium">{item.name}</p>
-                                                <p className="text-sm text-slate-400">{t('orders.item.qty', 'Qty')}: {item.quantity}</p>
+                                                <p className="text-sm text-slate-400">{t('orders.item.qty', 'Qty')}: {item.quantity} × {formatPrice(item.price || 0)}</p>
                                             </div>
-                                            <p className="text-white font-bold">€{item.price?.toFixed(2)}</p>
+                                            <p className="text-white font-bold">{formatPrice((item.price || 0) * (item.quantity || 1))}</p>
                                         </div>
                                     ))}
                                 </div>
