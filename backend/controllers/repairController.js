@@ -2,7 +2,20 @@ const RepairDevice = require('../models/RepairDevice');
 
 exports.getRepairCatalog = async (req, res) => {
     try {
-        const devices = await RepairDevice.find();
+        const { search } = req.query;
+        let query = {};
+        
+        if (search) {
+            query = {
+                $or: [
+                    { brand: { $regex: search, $options: 'i' } },
+                    { model: { $regex: search, $options: 'i' } },
+                    { name: { $regex: search, $options: 'i' } }
+                ]
+            };
+        }
+        
+        const devices = await RepairDevice.find(query);
         res.json(devices);
     } catch (error) {
         res.status(500).json({ message: error.message });

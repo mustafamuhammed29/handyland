@@ -198,7 +198,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     const redeemRate = features?.loyalty?.redeemRate || 100;
                     const loyaltyDiscount = appliedPoints / redeemRate;
                     const discountedSubtotal = Math.max(0, cartTotal - loyaltyDiscount - couponDiscount);
-                    const taxAmount = discountedSubtotal * 0.19;
+                    const taxAmount = Math.round(discountedSubtotal * 0.19 * 100) / 100;
                     
                     const selectedMethod = (window as any).selectedShippingMethod; // We might need a better way if this isn't passed
                     // Re-calculate shipping logic to match Checkout.tsx

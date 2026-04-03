@@ -141,7 +141,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         <div className="z-10 relative h-full flex flex-col justify-between">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <p className="text-white/70 text-[10px] font-bold tracking-widest uppercase mb-1">{t('dashboard.rewards.title', 'HandyLand Rewards')}</p>
+                                    <p className="text-white/70 text-[10px] font-bold tracking-widest uppercase mb-1">{t('dashboard.rewardsTier', 'Belohnungs-Stufe')}</p>
                                     <h3 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-2">
                                         <Trophy className="w-5 h-5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
                                         {user?.membershipLevel === 4 ? t('dashboard.rewards.tier.platinum', 'Platinum') : user?.membershipLevel === 3 ? t('dashboard.rewards.tier.gold', 'Gold') : user?.membershipLevel === 2 ? t('dashboard.rewards.tier.silver', 'Silver') : t('dashboard.rewards.tier.member', 'Member')}

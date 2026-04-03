@@ -231,19 +231,19 @@ const PaymentSuccess: React.FC = () => {
                                     <div className="bg-slate-900 rounded-lg p-4 space-y-2 mb-6">
                                         <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                             <span className="text-slate-400 text-sm">Bank:</span>
-                                            <span className="text-white font-bold select-all">{paymentConfig?.bankName || "Pending Configuration"}</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.bankName || import.meta.env.VITE_BANK_NAME || "Pending Configuration"}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                             <span className="text-slate-400 text-sm">Account Holder:</span>
-                                            <span className="text-white font-bold select-all">{paymentConfig?.accountHolder || "Your Company"}</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.accountHolder || import.meta.env.VITE_BANK_HOLDER || "Your Company"}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                             <span className="text-slate-400 text-sm">IBAN:</span>
-                                            <span className="text-white font-bold select-all">{paymentConfig?.iban || "DE00 0000 0000 0000 0000 00"}</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.iban || import.meta.env.VITE_BANK_IBAN || "DE00 0000 0000 0000 0000 00"}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                             <span className="text-slate-400 text-sm">BIC:</span>
-                                            <span className="text-white font-bold select-all">{paymentConfig?.bic || "XXXXXXXX"}</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.bic || import.meta.env.VITE_BANK_BIC || "XXXXXXXX"}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-blue-500/20 p-2 rounded border border-blue-500/30 mt-4">
                                             <span className="text-blue-300 text-sm font-bold">Reference:</span>
