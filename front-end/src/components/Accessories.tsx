@@ -206,8 +206,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
                 {/* Bottom Bar decoration */}
                 <div className="mt-12 flex items-center justify-between text-xs font-mono text-slate-400 dark:text-slate-600 border-t border-slate-200 dark:border-slate-900 pt-4">
-                    <span>ARMORY_STATUS: ONLINE</span>
-                    <span>SECURE_CONNECTION_V4</span>
+                    <span className="opacity-0">.</span>
                 </div>
 
             </div>

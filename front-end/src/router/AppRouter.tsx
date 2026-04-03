@@ -208,7 +208,7 @@ export const AppRouter = () => {
                 </AnimatePresence>
             </Suspense>
 
-            <CartDrawer />
+            {location.pathname !== '/cart' && location.pathname !== '/checkout' && <CartDrawer />}
             <WhatsAppWidget />
         </div>
     );

@@ -37,6 +37,9 @@ export default defineConfig(({ mode }) => {
         }
       })
     ],
+    optimizeDeps: {
+      include: ['react-is'],
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

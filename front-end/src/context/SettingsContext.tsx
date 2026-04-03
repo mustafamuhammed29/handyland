@@ -39,6 +39,7 @@ interface StatsSettings {
     averageRating: number;
     marketExperience: number;
     successRate?: number;
+    yearsExperience?: number;
 }
 
 interface RepairArchiveSettings {

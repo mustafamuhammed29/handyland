@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, Tag, X, Loader2, ShieldCheck, Truck, Trophy, Zap } from 'lucide-react';
 import { formatPrice } from '../../utils/formatPrice';
 import { TrustBadges } from '../../components/products/TrustBadges';
@@ -42,6 +43,8 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
     freeShippingThreshold,
     taxRate,
 }) => {
+    const { t } = useTranslation();
+
     return (
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 sticky top-28 shadow-2xl">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between">
@@ -173,32 +176,48 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     <span>Subtotal</span>
                     <span>{formatPrice(cartTotal)}</span>
                 </div>
-                {/* Dynamic tax breakdown */}
-                <div className="flex justify-between text-slate-400 text-sm">
-                    <span>Tax (19% VAT)</span>
-                    <span>{formatPrice(cartTotal * 0.19)}</span>
-                </div>
-                <div className="flex justify-between text-emerald-400 text-sm">
-                    <span>Shipping</span>
-                    <span>{cartTotal >= freeShippingThreshold ? 'FREE' : formatPrice(5.99)}</span>
-                </div>
-                {coupon && (
-                    <div className="flex justify-between text-emerald-400 text-sm">
-                        <span>Discount</span>
-                        <span>- {formatPrice(coupon.discount)}</span>
-                    </div>
-                )}
-                {appliedPoints > 0 && (
+                
+                {(coupon || appliedPoints > 0) && (
                     <div className="flex justify-between text-amber-400 text-sm">
-                        <span>Rewards Discount</span>
-                        <span>- {formatPrice(appliedPoints / 100)}</span>
+                        <span>Discount {(coupon && appliedPoints > 0) ? '(Reward + Coupon)' : coupon ? '(Coupon)' : '(Reward)'}</span>
+                        <span>- {formatPrice((coupon?.discount || 0) + (appliedPoints / (features?.loyalty?.redeemRate || 100)))}</span>
                     </div>
                 )}
-                <div className="flex justify-between text-white font-bold text-xl pt-4 border-t border-slate-800 mt-2">
-                    <span>Total</span>
-                    <span>{formatPrice(getFinalTotal())}</span>
-                </div>
-                <p className="text-[10px] text-slate-500 text-right">incl. {taxRate}% VAT</p>
+
+                {/* FIXED BUG-01: Correct logic (Loyalty Discount applied BEFORE tax) */}
+                {/* discountedSubtotal = cartTotal - (loyaltyDiscount + couponDiscount) */}
+                {(() => {
+                    const couponDiscount = coupon?.discount || 0;
+                    const redeemRate = features?.loyalty?.redeemRate || 100;
+                    const loyaltyDiscount = appliedPoints / redeemRate;
+                    const discountedSubtotal = Math.max(0, cartTotal - loyaltyDiscount - couponDiscount);
+                    const taxAmount = discountedSubtotal * 0.19;
+                    
+                    const selectedMethod = (window as any).selectedShippingMethod; // We might need a better way if this isn't passed
+                    // Re-calculate shipping logic to match Checkout.tsx
+                    let shippingCost = 5.99;
+                    if (cartTotal >= freeShippingThreshold) {
+                        shippingCost = 0;
+                    }
+
+                    return (
+                        <>
+                            <div className="flex justify-between text-slate-400 text-sm">
+                                <span>{t('checkout.tax', 'Tax (19% VAT)')}</span>
+                                <span>{formatPrice(taxAmount)}</span>
+                            </div>
+                            <div className={`flex justify-between text-sm ${shippingCost === 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
+                                <span>Shipping</span>
+                                <span>{shippingCost === 0 ? 'FREE' : formatPrice(shippingCost)}</span>
+                            </div>
+                            <div className="flex justify-between text-white font-bold text-xl pt-4 border-t border-slate-800 mt-2">
+                                <span>Total</span>
+                                <span>{formatPrice(getFinalTotal())}</span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 text-right">incl. {taxRate}% VAT</p>
+                        </>
+                    );
+                })()}
             </div>
 
             {/* Trust Badges */}

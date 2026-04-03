@@ -42,7 +42,7 @@ exports.getCart = async (req, res) => {
                     subtitle,
                     price: details.price,
                     image: details.images && details.images.length > 0 ? details.images[0] : (details.image || ''),
-                    category: item.productType === 'Product' ? 'device' : 'accessory',
+                    category: details.category || (item.productType === 'Product' ? 'device' : 'accessory'),
                     quantity: item.quantity,
                     productType: item.productType
                 });
@@ -183,7 +183,7 @@ exports.syncCart = async (req, res) => {
                     subtitle,
                     price: details.price,
                     image: details.images && details.images.length > 0 ? details.images[0] : (details.image || ''),
-                    category: item.productType === 'Product' ? 'device' : 'accessory',
+                    category: details.category || (item.productType === 'Product' ? 'device' : 'accessory'),
                     quantity: item.quantity,
                     productType: item.productType
                 });
