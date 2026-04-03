@@ -45,7 +45,7 @@ router.get('/:id', optionalProtect, getOrder);
 router.get('/:id/invoice', optionalProtect, generateInvoice);
 router.post('/apply-coupon', protect, applyCoupon);
 router.post('/', protect, validate(createOrderRules), createOrder);
-router.post('/:id/receipt', optionalProtect, upload.single('receipt'), require('../controllers/orderController').uploadPaymentReceipt);
+router.post('/:id/receipt', protect, upload.single('receipt'), require('../controllers/orderController').uploadPaymentReceipt); // BUG-NEW-09 fix: require auth
 router.route('/:id/pay').put(protect, updateOrderToPaid);
 router.route('/:id/deliver').put(protect, authorize('admin', 'staff'), updateOrderToDelivered);
 router.route('/:id/refund').post(protect, requestRefund);

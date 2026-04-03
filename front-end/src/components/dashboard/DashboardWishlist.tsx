@@ -3,6 +3,7 @@ import { Heart, ShoppingCart, Trash2, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { PhoneListing } from '../../types';
+import { formatPrice } from '../../utils/formatPrice';
 
 interface DashboardWishlistProps {
     wishlistItems: PhoneListing[];
@@ -77,10 +78,13 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
 
                         <div className="p-4">
                             <h3 className="font-bold text-white mb-1">{item.model}</h3>
-                            <p className="text-sm text-slate-400 mb-3">{item.brand} • {item.storage}</p>
+                            <p className="text-sm text-slate-400 mb-3">
+                                {item.brand || (item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : 'Product')}
+                                {item.storage ? ` • ${item.storage}` : ''}
+                            </p>
 
                             <div className="flex items-center justify-between mb-4">
-                                <span className="text-2xl font-bold text-white">€{item.price}</span>
+                                <span className="text-xl font-bold text-white">{formatPrice(item.price)}</span>
                                 {item.stock > 0 ? (
                                     <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
                                         In Stock

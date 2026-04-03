@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { ShoppingCart, X, Trash2, ArrowRight, Zap, Heart, Tag, Truck, Check, Loader2 } from 'lucide-react';
@@ -14,6 +14,9 @@ interface CartDrawerProps {}
 
 export const CartDrawer: React.FC<CartDrawerProps> = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    if (location.pathname === '/cart' || location.pathname === '/checkout') return null;
     const {
         cart, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen,
         cartTotal, finalTotal,

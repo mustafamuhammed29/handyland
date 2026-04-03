@@ -38,6 +38,7 @@ interface StatsSettings {
     happyCustomers: number;
     averageRating: number;
     marketExperience: number;
+    successRate?: number;
 }
 
 interface RepairArchiveSettings {
@@ -217,7 +218,8 @@ const defaultSettings: Settings = {
         devicesRepaired: 0,
         happyCustomers: 0,
         averageRating: 0,
-        marketExperience: 0
+        marketExperience: 0,
+        successRate: 0
     },
     repairArchive: {
         title: '',
@@ -375,7 +377,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     valuation: { ...defaultSettings.valuation, ...(safeData.valuation || {}) },
                     sections: { ...defaultSettings.sections, ...(safeData.sections || {}) },
                     contactSection: { ...defaultSettings.contactSection, ...(safeData.contactSection || {}) },
-                    footerSection: { ...defaultSettings.footerSection, ...(safeData.footerSection || {}) },
+                    footerSection: { ...defaultSettings.footerSection, ...(safeData.footerSection || {}) } as FooterSettings,
                     navbar: { ...defaultSettings.navbar, ...(safeData.navbar || {}) },
                     socialAuth: { ...defaultSettings.socialAuth, ...(safeData.socialAuth || {}) },
                     theme: { ...defaultSettings.theme, ...(safeData.theme || {}) },
@@ -437,7 +439,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 valuation: { ...prev.valuation, ...(freshData.valuation || {}) },
                 sections: { ...prev.sections, ...(freshData.sections || {}) },
                 contactSection: { ...prev.contactSection, ...(freshData.contactSection || {}) },
-                footerSection: { ...prev.footerSection, ...(freshData.footerSection || {}) },
+                footerSection: { ...prev.footerSection, ...(freshData.footerSection || {}) } as FooterSettings,
                 navbar: { ...prev.navbar, ...(freshData.navbar || {}) },
                 socialAuth: { ...prev.socialAuth, ...(freshData.socialAuth || {}) },
                 theme: { ...prev.theme, ...(freshData.theme || {}) },

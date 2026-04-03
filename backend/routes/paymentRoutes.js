@@ -13,7 +13,9 @@ const { protect, authorize, optionalProtect } = require('../middleware/auth');
 
 // Stripe Routes
 router.post('/create-checkout-session', optionalProtect, createCheckoutSession);
-router.post('/success', handlePaymentSuccess);
+// BUG-NEW-01 fix: optionalProtect captures req.user when a cookie exists;
+// full 'protect' would break Stripe server-side callbacks that have no user token.
+router.post('/success', optionalProtect, handlePaymentSuccess);
 router.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 router.get('/:sessionId', protect, getPaymentDetails);
 router.post('/refund', protect, authorize('admin', 'staff'), createRefund);

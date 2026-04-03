@@ -113,7 +113,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                             <h3 className="text-lg sm:text-xl font-bold text-white line-clamp-2 leading-snug">
                                                 {item.title || (item as any).name}
                                             </h3>
-                                            <p className="text-slate-400 text-sm mt-1">{item.category}</p>
+                                            <p className="text-slate-400 text-sm mt-1">{item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : ''}</p>
                                         </div>
                                         <div className="text-right flex-shrink-0">
                                             <div className="text-xl font-bold text-white">€{item.price.toFixed(2)}</div>
@@ -216,12 +216,16 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                         <span className="text-slate-400">Calculated at checkout</span>
                                     )}
                                 </div>
-                                {/* Free shipping progress bar could go here */}
-                                {!isFreeShipping && freeShippingThreshold > 0 && cartTotal < freeShippingThreshold && (
+                                {/* Free Shipping Progress */}
+                                {freeShippingThreshold > 0 && (
                                     <div className="mt-4 pt-4 border-t border-slate-800">
                                         <div className="flex justify-between text-xs text-slate-400 mb-2">
-                                            <span>Add €{(freeShippingThreshold - cartTotal).toFixed(2)} for Free Shipping</span>
-                                            <span>{Math.round((cartTotal / freeShippingThreshold) * 100)}%</span>
+                                            {Math.max(0, freeShippingThreshold - cartTotal) > 0 ? (
+                                                <span>Add €{Math.max(0, freeShippingThreshold - cartTotal).toFixed(2)} for Free Shipping</span>
+                                            ) : (
+                                                <span className="text-emerald-400 font-bold">You've unlocked Free Shipping!</span>
+                                            )}
+                                            <span>{Math.min(100, Math.round((cartTotal / freeShippingThreshold) * 100))}%</span>
                                         </div>
                                         <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                                             <div 

@@ -22,7 +22,14 @@ const helmetMiddleware = helmet({
             styleSrc: ["'self'", "fonts.googleapis.com"],
             fontSrc: ["'self'", "fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "blob:", "res.cloudinary.com", "images.unsplash.com"],
-            connectSrc: ["'self'", "api.stripe.com"],
+            connectSrc: [
+                "'self'",
+                "api.stripe.com",
+                // ARCH-01 fix: include ws/wss for Socket.io WebSocket connections
+                "ws://localhost:*",
+                "wss://localhost:*",
+                ...(process.env.FRONTEND_URL ? [`wss://${new URL(process.env.FRONTEND_URL).host}`] : [])
+            ],
             frameSrc: ["'self'", "js.stripe.com", "hooks.stripe.com"],
         },
     },
@@ -50,7 +57,14 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 const corsMiddleware = cors({
     origin: (origin, callback) => {
-        if (!origin) {return callback(null, true);}
+        // BUG-NEW-10 fix: reject no-origin requests in production.
+        // In dev, allow no-origin (Postman, curl) for convenience.
+        if (!origin) {
+            if (process.env.NODE_ENV === 'production') {
+                return callback(new Error('CORS: Requests without origin are not allowed in production'), false);
+            }
+            return callback(null, true);
+        }
         if (allowedOrigins.includes(origin)) {return callback(null, true);}
         return callback(new Error('CORS: Origin not allowed'), false);
     },
@@ -68,7 +82,9 @@ const generalLimiter = rateLimit({
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => req.method === 'OPTIONS' || isDevelopment,
+    // BUG-NEW-02 fix: never skip rate limiting based on NODE_ENV.
+    // High dev limit (3000) makes it non-intrusive while still active.
+    skip: (req) => req.method === 'OPTIONS',
 });
 
 // ── XSS sanitization ────────────────────────────────────────────────────────

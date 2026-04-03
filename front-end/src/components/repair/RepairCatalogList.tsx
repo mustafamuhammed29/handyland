@@ -42,7 +42,9 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                             </div>
                             <div>
                                 <div className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mb-1">{device.brand}</div>
-                                <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">{device.model}</h3>
+                                <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                                    {(device.model && !device.model.includes('يشر')) ? device.model : 'Unknown Device'}
+                                </h3>
                             </div>
                         </div>
 
@@ -51,13 +53,13 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                                 <span className="text-slate-500 text-xs flex items-center gap-2">
                                     <Monitor className="w-3 h-3" /> Screen Repair
                                 </span>
-                                <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'screen')?.price || 'N/A'}{t('common.currency')}</span>
+                                <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'screen')?.price || 'N/A'}€</span>
                             </div>
                             <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-slate-800/50 group-hover:border-blue-500/20 transition-colors">
                                 <span className="text-slate-500 text-xs flex items-center gap-2">
                                     <Battery className="w-3 h-3" /> Battery
                                 </span>
-                                <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'battery')?.price || 'N/A'}{t('common.currency')}</span>
+                                <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'battery')?.price || 'N/A'}€</span>
                             </div>
                         </div>
 

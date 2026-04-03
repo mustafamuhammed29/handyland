@@ -157,10 +157,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                 
                                 <div className="w-full bg-black/40 rounded-full h-2.5 mb-2 overflow-hidden border border-white/5 relative">
                                     <div className="absolute inset-0 bg-white/5"></div>
-                                    <div className="bg-gradient-to-r from-brand-primary to-purple-500 h-full rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" style={{ width: `${Math.min(((user?.loyaltyPoints || 0) % 2000) / 2000 * 100, 100)}%` }}></div>
+                                    {user?.membershipLevel === 4 ? (
+                                        <div className="bg-gradient-to-r from-brand-primary to-purple-500 h-full rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" style={{ width: '100%' }}></div>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-brand-primary to-purple-500 h-full rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" style={{ width: `${Math.min(((user?.loyaltyPoints || 0) % 2000) / 2000 * 100, 100)}%` }}></div>
+                                    )}
                                 </div>
                                 <p className="text-[11px] text-white/50 font-medium">
-                                    {2000 - ((user?.loyaltyPoints || 0) % 2000)} pts to next tier update
+                                    {user?.membershipLevel === 4 ? 'Max Tier Reached!' : `${2000 - ((user?.loyaltyPoints || 0) % 2000)} pts to next tier update`}
                                 </p>
                             </div>
                         </div>
