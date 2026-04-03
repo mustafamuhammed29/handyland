@@ -1,5 +1,6 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 interface RevenueChartProps {
     data: { date: string; earnings: number }[];
@@ -7,13 +8,18 @@ interface RevenueChartProps {
 }
 
 export const RevenueChart: React.FC<RevenueChartProps> = ({ data, height = 300 }) => {
+    const { t, i18n } = useTranslation();
+    const currentLocale = i18n.language || 'de-DE';
+
     // Custom tooltip for premium look
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl shadow-xl">
                     <p className="text-slate-400 text-xs font-medium mb-1">{label}</p>
-                    <p className="text-brand-primary font-bold text-lg">€{payload[0].value.toFixed(2)}</p>
+                    <p className="text-brand-primary font-bold text-lg">
+                        {new Intl.NumberFormat(currentLocale, { style: 'currency', currency: 'EUR' }).format(payload[0].value)}
+                    </p>
                 </div>
             );
         }
@@ -50,7 +56,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data, height = 300 }
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: '#94a3b8', fontSize: 12 }}
-                        tickFormatter={(value) => `€${value}`}
+                        tickFormatter={(value) => new Intl.NumberFormat(currentLocale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value)}
                         dx={-10}
                         orientation='left'
                         width={60}

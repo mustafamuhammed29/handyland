@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShoppingBag, Wrench, Tag, Newspaper, Loader2, Check, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
     return (
@@ -7,7 +8,7 @@ function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange
             role="switch"
             title={label}
             aria-label={label}
-            aria-checked={checked}
+            aria-checked={checked ? "true" : "false"}
             onClick={() => onChange(!checked)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-blue-600' : 'bg-slate-700'}`}
         >
@@ -18,12 +19,6 @@ function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange
 
 const NOTIF_KEYS = ['orderUpdates', 'repairStatus', 'promotions', 'newsletter'] as const;
 export type NotifKey = typeof NOTIF_KEYS[number];
-const NOTIF_ITEMS: { key: NotifKey; label: string; desc: string; icon: React.ReactNode; def: boolean }[] = [
-    { key: 'orderUpdates', label: 'Order Updates', desc: 'Get notified when your order status changes', icon: <ShoppingBag className="w-5 h-5" />, def: true },
-    { key: 'repairStatus', label: 'Repair Status', desc: 'Updates on your repair and service tickets', icon: <Wrench className="w-5 h-5" />, def: true },
-    { key: 'promotions', label: 'Promotions & Deals', desc: 'Special offers and exclusive discounts', icon: <Tag className="w-5 h-5" />, def: false },
-    { key: 'newsletter', label: 'Newsletter', desc: 'Weekly product updates and news', icon: <Newspaper className="w-5 h-5" />, def: false },
-];
 
 interface NotificationsTabProps {
     notifs: Record<NotifKey, boolean>;
@@ -42,22 +37,31 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
     notifSaved,
     notifError,
 }) => {
+    const { t } = useTranslation();
+
+    const NOTIF_ITEMS: { key: NotifKey; label: string; desc: string; icon: React.ReactNode; def: boolean }[] = [
+        { key: 'orderUpdates', label: t('settings.notifications.items.orderUpdates.label', 'Order Updates'), desc: t('settings.notifications.items.orderUpdates.desc', 'Get notified when your order status changes'), icon: <ShoppingBag className="w-5 h-5" />, def: true },
+        { key: 'repairStatus', label: t('settings.notifications.items.repairStatus.label', 'Repair Status'), desc: t('settings.notifications.items.repairStatus.desc', 'Updates on your repair and service tickets'), icon: <Wrench className="w-5 h-5" />, def: true },
+        { key: 'promotions', label: t('settings.notifications.items.promotions.label', 'Promotions & Deals'), desc: t('settings.notifications.items.promotions.desc', 'Special offers and exclusive discounts'), icon: <Tag className="w-5 h-5" />, def: false },
+        { key: 'newsletter', label: t('settings.notifications.items.newsletter.label', 'Newsletter'), desc: t('settings.notifications.items.newsletter.desc', 'Weekly product updates and news'), icon: <Newspaper className="w-5 h-5" />, def: false },
+    ];
+
     return (
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-slate-800/60 flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-bold text-white">Notification Preferences</h3>
-                    <p className="text-slate-400 text-sm mt-0.5">Choose what you want to be notified about</p>
+                    <h3 className="text-lg font-bold text-white">{t('settings.notifications.title', 'Notification Preferences')}</h3>
+                    <p className="text-slate-400 text-sm mt-0.5">{t('settings.notifications.subtitle', 'Choose what you want to be notified about')}</p>
                 </div>
                 <div className="flex items-center gap-2">
                     {notifSaving && (
                         <span className="flex items-center gap-1 text-slate-400 text-xs">
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t('common.saving', 'Saving...')}
                         </span>
                     )}
                     {notifSaved && !notifSaving && (
                         <span className="flex items-center gap-1 text-emerald-400 text-xs font-medium">
-                            <Check className="w-3.5 h-3.5" /> Saved to account
+                            <Check className="w-3.5 h-3.5" /> {t('settings.notifications.saved', 'Saved to account')}
                         </span>
                     )}
                 </div>
@@ -106,7 +110,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                 )}
             </div>
             <div className="p-4 border-t border-slate-800/60 bg-slate-950/30">
-                <p className="text-slate-500 text-xs text-center">Changes are saved automatically to your account across all devices.</p>
+                <p className="text-slate-500 text-xs text-center">{t('settings.notifications.footer', 'Changes are saved automatically to your account across all devices.')}</p>
             </div>
         </div>
     );

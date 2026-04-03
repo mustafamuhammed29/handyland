@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 interface Reply {
     _id: string;
@@ -29,6 +30,7 @@ export const DashboardMessages: React.FC = () => {
     const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
     const [replyText, setReplyText] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const { t } = useTranslation();
 
     // New Message State
     const [isCreatingNew, setIsCreatingNew] = useState(false);
@@ -53,7 +55,7 @@ export const DashboardMessages: React.FC = () => {
             setMessages(msgs);
         } catch (error) {
             console.error('Failed to fetch messages', error);
-            addToast('Failed to load messages', 'error');
+            addToast(t('messages.error.fetch', 'Failed to load messages'), 'error');
         } finally {
             setLoading(false);
         }
@@ -76,7 +78,7 @@ export const DashboardMessages: React.FC = () => {
             setReplyText('');
         } catch (error) {
             console.error('Failed to send reply', error);
-            addToast('Failed to send message', 'error');
+            addToast(t('messages.error.send', 'Failed to send message'), 'error');
         } finally {
             setSubmitting(false);
         }
@@ -99,10 +101,10 @@ export const DashboardMessages: React.FC = () => {
             setSelectedMessage(newMsg);
             setIsCreatingNew(false);
             setNewMsgContent('');
-            addToast('Support ticket created!', 'success');
+            addToast(t('messages.create.success', 'Support ticket created!'), 'success');
         } catch (err) {
             console.error('Failed to create ticket', err);
-            addToast('Failed to create ticket', 'error');
+            addToast(t('messages.error.create', 'Failed to create ticket'), 'error');
         } finally {
             setSubmitting(false);
         }
@@ -110,18 +112,18 @@ export const DashboardMessages: React.FC = () => {
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!window.confirm('Are you sure you want to delete this conversation?')) return;
+        if (!window.confirm(t('messages.delete.confirm', 'Are you sure you want to delete this conversation?'))) return;
         try {
             await api.delete(`/api/messages/${id}`);
             setMessages(prev => prev.filter(msg => msg._id !== id));
             if (selectedMessage?._id === id) setSelectedMessage(null);
-            addToast('Conversation deleted', 'success');
+            addToast(t('messages.delete.success', 'Conversation deleted'), 'success');
         } catch (error) {
-            addToast('Failed to delete conversation', 'error');
+            addToast(t('messages.error.delete', 'Failed to delete conversation'), 'error');
         }
     };
 
-    if (loading) return <div className="text-white flex items-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> Loading messages...</div>;
+    if (loading) return <div className="text-white flex items-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> {t('common.loadingMessages', 'Loading messages...')}</div>;
 
     return (
         <div className="space-y-6">
@@ -129,14 +131,14 @@ export const DashboardMessages: React.FC = () => {
                 <div>
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-2">
                         <Mail className="w-6 h-6 text-blue-400" />
-                        Support Messages
+                        {t('messages.title', 'Support Messages')}
                     </h2>
-                    <p className="text-slate-400">View and respond to your support tickets.</p>
+                    <p className="text-slate-400">{t('messages.subtitle', 'View and respond to your support tickets.')}</p>
                 </div>
                 {messages.some(m => m.status !== 'closed') ? (
                     <div className="bg-yellow-500/10 border border-yellow-500/50 text-yellow-400 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2">
                         <MessageSquare className="w-4 h-4" />
-                        You have an active ticket.
+                        {t('messages.activeTicket', 'You have an active ticket.')}
                     </div>
                 ) : (
                     <button
@@ -144,7 +146,7 @@ export const DashboardMessages: React.FC = () => {
                         className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors"
                     >
                         <Plus className="w-5 h-5" />
-                        New Ticket
+                        {t('messages.newTicket', 'New Ticket')}
                     </button>
                 )}
             </div>
@@ -153,14 +155,14 @@ export const DashboardMessages: React.FC = () => {
                 {/* Thread List */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl flex flex-col overflow-hidden">
                     <div className="p-4 border-b border-slate-800 bg-slate-950/50">
-                        <h3 className="font-bold text-white">Your Conversations</h3>
+                        <h3 className="font-bold text-white">{t('messages.list.title', 'Your Conversations')}</h3>
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
                         {messages.length === 0 ? (
                             <div className="text-center p-8 text-slate-500">
                                 <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-20" />
-                                <p className="text-sm">No support tickets found.</p>
+                                <p className="text-sm">{t('messages.list.empty', 'No support tickets found.')}</p>
                             </div>
                         ) : (
                             messages.map((msg, idx) => (
@@ -176,7 +178,7 @@ export const DashboardMessages: React.FC = () => {
                                         }`}
                                 >
                                     <div className="flex justify-between items-start mb-1">
-                                        <div className="font-bold text-white truncate pr-2">Ticket #{msg._id.slice(-6).toUpperCase()}</div>
+                                        <div className="font-bold text-white truncate pr-2">{t('messages.list.ticketNumber', 'Ticket')} #{msg._id.slice(-6).toUpperCase()}</div>
                                     </div>
                                     <div className="text-sm text-slate-400 line-clamp-2 mb-2">{msg.message}</div>
                                     <div className="text-[10px] text-slate-500 flex justify-between items-center">
@@ -186,7 +188,7 @@ export const DashboardMessages: React.FC = () => {
                                                 : msg.status === 'closed' ? 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
                                                     : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                                                 }`}>
-                                                {msg.status === 'replied' ? 'Answered' : msg.status === 'closed' ? 'Closed' : 'Pending'}
+                                                {msg.status === 'replied' ? t('messages.status.replied', 'Answered') : msg.status === 'closed' ? t('messages.status.closed', 'Closed') : t('messages.status.pending', 'Pending')}
                                             </span>
                                         </div>
                                     </div>
@@ -209,14 +211,14 @@ export const DashboardMessages: React.FC = () => {
                                 className="flex flex-col h-full absolute inset-0 bg-slate-900"
                             >
                                 <div className="p-6 border-b border-slate-800">
-                                    <h2 className="text-xl font-bold text-white mb-1">Create New Support Ticket</h2>
-                                    <p className="text-slate-400 text-sm">Describe your issue or question below.</p>
+                                    <h2 className="text-xl font-bold text-white mb-1">{t('messages.create.title', 'Create New Support Ticket')}</h2>
+                                    <p className="text-slate-400 text-sm">{t('messages.create.subtitle', 'Describe your issue or question below.')}</p>
                                 </div>
                                 <form onSubmit={handleCreateNew} className="p-6 flex-1 flex flex-col">
                                     <textarea
                                         value={newMsgContent}
                                         onChange={(e) => setNewMsgContent(e.target.value)}
-                                        placeholder="Type your message here..."
+                                        placeholder={t('messages.create.placeholder', 'Type your message here...')}
                                         className="w-full flex-1 mb-4 p-4 bg-slate-800/50 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 focus:bg-slate-800 transition-all resize-none shadow-inner"
                                         required
                                     />
@@ -226,7 +228,7 @@ export const DashboardMessages: React.FC = () => {
                                             onClick={() => setIsCreatingNew(false)}
                                             className="px-6 py-3 rounded-xl font-bold text-slate-300 hover:bg-slate-800 transition-colors"
                                         >
-                                            Cancel
+                                            {t('common.cancel', 'Cancel')}
                                         </button>
                                         <button
                                             type="submit"
@@ -234,7 +236,7 @@ export const DashboardMessages: React.FC = () => {
                                             className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 disabled:opacity-50 transition-colors shadow-lg shadow-blue-500/25"
                                         >
                                             {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                                            Submit Ticket
+                                            {t('messages.create.submit', 'Submit Ticket')}
                                         </button>
                                     </div>
                                 </form>
@@ -251,16 +253,16 @@ export const DashboardMessages: React.FC = () => {
                                 <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950/30 backdrop-blur-sm z-10 sticky top-0">
                                     <div>
                                         <h2 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
-                                            Ticket #{selectedMessage._id.slice(-6).toUpperCase()}
+                                            {t('messages.list.ticketNumber', 'Ticket')} #{selectedMessage._id.slice(-6).toUpperCase()}
                                             <span className={`inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full border ${selectedMessage.status === 'replied' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : selectedMessage.status === 'closed' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
-                                                {selectedMessage.status === 'replied' ? 'SUPPORT ANSWERED' : selectedMessage.status === 'closed' ? 'RESOLVED & CLOSED' : 'PENDING RESPONSE'}
+                                                {selectedMessage.status === 'replied' ? t('messages.status.repliedUpper', 'SUPPORT ANSWERED') : selectedMessage.status === 'closed' ? t('messages.status.closedUpper', 'RESOLVED & CLOSED') : t('messages.status.pendingUpper', 'PENDING RESPONSE')}
                                             </span>
                                         </h2>
                                     </div>
                                     <button
                                         onClick={(e) => handleDelete(selectedMessage._id, e)}
                                         className="p-2 text-slate-400 hover:text-red-400 bg-slate-900 rounded-lg border border-slate-800 hover:border-red-500/50 transition-colors shadow-sm"
-                                        title="Delete Ticket"
+                                        title={t('messages.delete.title', 'Delete Ticket')}
                                     >
                                         <Trash2 className="w-5 h-5" />
                                     </button>
@@ -270,8 +272,8 @@ export const DashboardMessages: React.FC = () => {
                                     {/* Original Message (Customer - Right Side Chat Bubble) */}
                                     <div className="self-end max-w-[85%]">
                                         <div className="flex items-center justify-end gap-2 mb-1">
-                                            <span className="text-xs text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(selectedMessage.createdAt).toLocaleString()}</span>
-                                            <span className="font-bold text-slate-300 text-sm">You</span>
+                                            <span className="text-xs text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(selectedMessage.createdAt).toLocaleString(t('common.locale', 'en-US'))}</span>
+                                            <span className="font-bold text-slate-300 text-sm">{t('common.you', 'You')}</span>
                                         </div>
                                         <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm p-4 shadow-md shadow-blue-900/20">
                                             <p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedMessage.message}</p>
@@ -289,11 +291,11 @@ export const DashboardMessages: React.FC = () => {
                                         >
                                             <div className={`flex items-center gap-2 mb-1 ${reply.isAdmin ? 'justify-start' : 'justify-end'}`}>
                                                 {reply.isAdmin && <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] font-bold text-blue-400">HL</div>}
-                                                {!reply.isAdmin && <span className="text-xs text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(reply.createdAt).toLocaleString()}</span>}
+                                                {!reply.isAdmin && <span className="text-xs text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(reply.createdAt).toLocaleString(t('common.locale', 'en-US'))}</span>}
                                                 <span className={`font-bold text-sm ${reply.isAdmin ? 'text-slate-200' : 'text-slate-300'}`}>
-                                                    {reply.isAdmin ? 'HandyLand Support' : 'You'}
+                                                    {reply.isAdmin ? t('common.support', 'HandyLand Support') : t('common.you', 'You')}
                                                 </span>
-                                                {reply.isAdmin && <span className="text-xs text-slate-500 flex items-center gap-1 ml-2"><Clock className="w-3 h-3" /> {new Date(reply.createdAt).toLocaleString()}</span>}
+                                                {reply.isAdmin && <span className="text-xs text-slate-500 flex items-center gap-1 ml-2"><Clock className="w-3 h-3" /> {new Date(reply.createdAt).toLocaleString(t('common.locale', 'en-US'))}</span>}
                                             </div>
 
                                             <div className={`${reply.isAdmin
@@ -316,7 +318,7 @@ export const DashboardMessages: React.FC = () => {
                                                 type="text"
                                                 value={replyText}
                                                 onChange={(e) => setReplyText(e.target.value)}
-                                                placeholder="Type your reply to support..."
+                                                placeholder={t('messages.view.replyPlaceholder', 'Type your reply to support...')}
                                                 className="flex-1 bg-slate-900 border border-slate-700 rounded-full px-5 text-white focus:border-blue-500 outline-none transition-colors shadow-inner"
                                             />
                                             <button
@@ -330,7 +332,7 @@ export const DashboardMessages: React.FC = () => {
                                     </div>
                                 ) : (
                                     <div className="p-4 border-t border-slate-800 bg-slate-900/80 backdrop-blur flex items-center justify-center">
-                                        <p className="text-slate-400 text-sm italic font-medium">This ticket has been marked as resolved and closed.</p>
+                                        <p className="text-slate-400 text-sm italic font-medium">{t('messages.view.closed', 'This ticket has been marked as resolved and closed.')}</p>
                                     </div>
                                 )}
                             </motion.div>
@@ -351,8 +353,8 @@ export const DashboardMessages: React.FC = () => {
                                 >
                                     <MessageSquare className="w-10 h-10 text-slate-500" />
                                 </motion.div>
-                                <h3 className="text-xl font-bold text-white mb-2">Select a Conversation</h3>
-                                <p className="max-w-xs mx-auto mb-8 text-sm">Click on a ticket from the left sidebar to view the conversation or start a new ticket.</p>
+                                <h3 className="text-xl font-bold text-white mb-2">{t('messages.view.emptyTitle', 'Select a Conversation')}</h3>
+                                <p className="max-w-xs mx-auto mb-8 text-sm">{t('messages.view.emptySubtitle', 'Click on a ticket from the left sidebar to view the conversation or start a new ticket.')}</p>
 
                                 {!messages.some(m => m.status !== 'closed') && (
                                     <motion.button
@@ -361,7 +363,7 @@ export const DashboardMessages: React.FC = () => {
                                         onClick={() => setIsCreatingNew(true)}
                                         className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-blue-500/20"
                                     >
-                                        Start New Ticket
+                                        {t('messages.view.emptyCta', 'Start New Ticket')}
                                     </motion.button>
                                 )}
                             </motion.div>

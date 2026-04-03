@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, Plus, TrendingUp, TrendingDown, Download, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 import { WalletTransaction } from '../../types';
 import { api } from '../../utils/api';
@@ -20,6 +21,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
     transactions,
     isLoading
 }) => {
+    const { t } = useTranslation();
     const currentMonth = new Date().getMonth();
     const { refetch } = useDashboardData().wallet;
     const { addToast } = useToast();
@@ -39,7 +41,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
             // Confirm the top-up with the backend
             api.post('/api/transactions/confirm-topup', { sessionId })
                 .then(() => {
-                    addToast('Wallet erfolgreich aufgeladen! 🎉', 'success');
+                    addToast(t('wallet.toast.success', 'Wallet successfully topped up! 🎉'), 'success');
                     refetch();
                 })
                 .catch((err: any) => {
@@ -48,25 +50,25 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                         // Already processed via webhook — just refresh
                         refetch();
                     } else {
-                        addToast(msg || 'Fehler beim Bestätigen der Zahlung', 'error');
+                        addToast(msg || t('wallet.toast.error', 'Error confirming payment'), 'error');
                     }
                 });
         } else if (walletStatus === 'cancelled') {
             window.history.replaceState({}, '', window.location.pathname);
-            addToast('Zahlung wurde abgebrochen.', 'info');
+            addToast(t('wallet.toast.cancelled', 'Payment was cancelled.'), 'info');
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleExportCSV = () => {
         if (transactions.length === 0) return;
         const rows = [
-            ['Datum', 'Typ', 'Beschreibung', 'Betrag (€)', 'Status'],
-            ...transactions.map(t => [
-                new Date(t.date || (t as any).createdAt || Date.now()).toLocaleDateString('de-DE'),
-                t.type,
-                t.description || '',
-                (t.type === 'deposit' || t.type === 'credit' || t.type === 'refund' ? '+' : '-') + (t.amount?.toFixed(2) ?? '0.00'),
-                t.status
+            [t('common.date', 'Date'), t('common.type', 'Type'), t('common.description', 'Description'), t('common.amount', 'Amount'), t('common.status', 'Status')],
+            ...transactions.map(t_ => [
+                new Date(t_.date || (t_ as any).createdAt || Date.now()).toLocaleDateString(t('common.locale', 'en-US')),
+                t_.type,
+                t_.description || '',
+                (t_.type === 'deposit' || t_.type === 'credit' || t_.type === 'refund' ? '+' : '-') + (t_.amount?.toFixed(2) ?? '0.00'),
+                t_.status
             ])
         ];
         const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -74,7 +76,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `wallet-transaktionen-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.download = `wallet-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -94,7 +96,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
 
     return (
         <div className="space-y-6 relative">
-            <h2 className="text-2xl font-bold text-white">My Wallet</h2>
+            <h2 className="text-2xl font-bold text-white">{t('wallet.title', 'My Wallet')}</h2>
 
             {/* Pending Requests Banner */}
             {(() => {
@@ -106,11 +108,11 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                         <div>
                             <p className="font-bold text-amber-300 text-sm">
                                 {pendingCount === 1
-                                    ? '1 ausstehende Überweisung'
-                                    : `${pendingCount} ausstehende Überweisungen`}
+                                    ? t('wallet.pending.count_one', '1 pending transfer')
+                                    : t('wallet.pending.count_other', { defaultValue: '{{count}} pending transfers', count: pendingCount })}
                             </p>
                             <p className="text-amber-400/70 text-xs mt-0.5">
-                                Ihr Guthaben wird gutgeschrieben, sobald der Admin Ihren Zahlungsbeleg bestätigt hat.
+                                {t('wallet.pending.subtitle', 'Your balance will be credited as soon as the admin has confirmed your payment receipt.')}
                             </p>
                         </div>
                     </div>
@@ -124,13 +126,13 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                         <Wallet className="w-32 h-32" />
                     </div>
                     <div className="relative z-10">
-                        <div className="text-blue-100 mb-2 font-medium">Available Balance</div>
+                        <div className="text-blue-100 mb-2 font-medium">{t('wallet.balance.label', 'Available Balance')}</div>
                         <div className="text-4xl font-bold mb-8">€{balance?.toFixed(2) || '0.00'}</div>
                         <button
                             onClick={handleAddFundsClick}
                             className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors flex items-center gap-2"
                         >
-                            <Plus className="w-4 h-4" /> Add Funds
+                            <Plus className="w-4 h-4" /> {t('wallet.balance.add', 'Add Funds')}
                         </button>
                     </div>
                 </div>
@@ -139,15 +141,15 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                 <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 flex flex-col justify-center">
                     <div className="space-y-4 flex-1">
                         <div>
-                            <p className="text-slate-400 text-sm">Total Transactions</p>
-                            <p className="text-2xl font-bold text-white">{transactions.filter((t: any) => t.status === 'completed').length}</p>
+                            <p className="text-slate-400 text-sm">{t('wallet.stats.total', 'Total Transactions')}</p>
+                            <p className="text-2xl font-bold text-white">{transactions.filter((t_any: any) => t_any.status === 'completed').length}</p>
                         </div>
                         <div>
-                            <p className="text-slate-400 text-sm">This Month</p>
+                            <p className="text-slate-400 text-sm">{t('wallet.stats.month', 'This Month')}</p>
                             <p className="text-2xl font-bold text-emerald-400">
                                 +€{transactions
-                                    .filter((t: any) => t.status === 'completed' && new Date(t.date || Date.now()).getMonth() === currentMonth)
-                                    .reduce((sum, t) => sum + (t.amount || 0), 0)
+                                    .filter((t_any: any) => t_any.status === 'completed' && new Date(t_any.date || Date.now()).getMonth() === currentMonth)
+                                    .reduce((sum, t_any) => sum + (t_any.amount || 0), 0)
                                     .toFixed(2)}
                             </p>
                         </div>
@@ -184,15 +186,15 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
             {/* Transaction History */}
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-white">Recent Transactions</h3>
+                    <h3 className="text-xl font-bold text-white">{t('wallet.list.title', 'Recent Transactions')}</h3>
                     <button
                         onClick={handleExportCSV}
                         disabled={transactions.length === 0}
-                        title="CSV herunterladen"
+                        title={t('common.exportCSV', 'Download CSV')}
                         className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         <Download className="w-4 h-4" />
-                        Exportieren
+                        {t('common.export', 'Export')}
                     </button>
                 </div>
 
@@ -234,10 +236,10 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                                     {/* Description + Date */}
                                     <div>
                                         <p className="text-white font-medium text-sm">
-                                            {transaction.description || (transaction.type === 'deposit' ? 'Wallet Deposit' : 'Purchase')}
+                                            {transaction.description || (transaction.type === 'deposit' ? t('wallet.transaction.deposit', 'Wallet Deposit') : t('wallet.transaction.purchase', 'Purchase'))}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-0.5">
-                                            {new Date(transaction.date || (transaction as any).createdAt || Date.now()).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                            {new Date(transaction.date || (transaction as any).createdAt || Date.now()).toLocaleDateString(t('common.locale', 'en-US'), { day: '2-digit', month: 'short', year: 'numeric' })}
                                         </p>
                                     </div>
                                 </div>
@@ -256,19 +258,19 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                                     {isPending && (
                                         <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
                                             <Clock className="w-2.5 h-2.5" />
-                                            Ausstehend — Admin-Prüfung
+                                            {t('wallet.status.pending', 'Pending — Admin Review')}
                                         </span>
                                     )}
                                     {isFailed && (
                                         <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
                                             <XCircle className="w-2.5 h-2.5" />
-                                            Abgelehnt
+                                            {t('wallet.status.rejected', 'Rejected')}
                                         </span>
                                     )}
                                     {!isPending && !isFailed && (transaction as any).status === 'completed' && isIncoming && (
                                         <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                                             <CheckCircle className="w-2.5 h-2.5" />
-                                            Genehmigt
+                                            {t('wallet.status.approved', 'Approved')}
                                         </span>
                                     )}
                                 </div>
@@ -279,7 +281,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                     {transactions.length === 0 && (
                         <div className="text-center py-8 text-slate-500">
                             <Wallet className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                            <p>No transactions yet</p>
+                            <p>{t('wallet.list.empty', 'No transactions yet')}</p>
                         </div>
                     )}
                 </div>

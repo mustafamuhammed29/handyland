@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Plus, Search, Edit2, Trash2, Save, X, CheckSquare, Square } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -20,6 +21,7 @@ export const DashboardAccessories: React.FC = () => {
     const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
     const [currentAccessory, setCurrentAccessory] = useState<Partial<Accessory>>({});
     const [searchTerm, setSearchTerm] = useState('');
+    const { t } = useTranslation();
     const { addToast } = useToast();
 
     useEffect(() => {
@@ -32,7 +34,7 @@ export const DashboardAccessories: React.FC = () => {
             setAccessories(res.data || res);
         } catch (error) {
             console.error('Failed to fetch accessories', error);
-            addToast('Failed to load accessories', 'error');
+            addToast(t('accessories.error.load', 'Failed to load accessories'), 'error');
         } finally {
             setLoading(false);
         }
@@ -44,28 +46,28 @@ export const DashboardAccessories: React.FC = () => {
                 const res = await api.put(`/api/accessories/${currentAccessory._id}`, currentAccessory);
                 const updated = res.data || res;
                 setAccessories(prev => prev.map(a => a._id === updated._id ? updated : a));
-                addToast('Accessory updated', 'success');
+                addToast(t('accessories.success.updated', 'Accessory updated'), 'success');
             } else {
                 const res = await api.post('/api/accessories', currentAccessory);
                 const created = res.data || res;
                 setAccessories(prev => [...prev, created]);
-                addToast('Accessory created', 'success');
+                addToast(t('accessories.success.created', 'Accessory created'), 'success');
             }
             setIsEditing(false);
             setCurrentAccessory({});
         } catch (error) {
-            addToast('Operation failed', 'error');
+            addToast(t('common.error.operation', 'Operation failed'), 'error');
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Delete this accessory?')) return;
+        if (!window.confirm(t('accessories.deleteConfirm', 'Delete this accessory?'))) return;
         try {
             await api.delete(`/api/accessories/${id}`);
             setAccessories(prev => prev.filter(a => a._id !== id));
-            addToast('Accessory deleted', 'success');
+            addToast(t('accessories.success.deleted', 'Accessory deleted'), 'success');
         } catch (error) {
-            addToast('Failed to delete', 'error');
+            addToast(t('common.error.delete', 'Failed to delete'), 'error');
         }
     };
 
@@ -86,14 +88,14 @@ export const DashboardAccessories: React.FC = () => {
     };
 
     const handleBulkDelete = async () => {
-        if (!window.confirm(`Delete ${selectedAccessories.length} selected accessories?`)) return;
+        if (!window.confirm(t('accessories.bulkDeleteConfirm', { defaultValue: 'Delete {{count}} selected accessories?', count: selectedAccessories.length }))) return;
         try {
             await Promise.all(selectedAccessories.map(id => api.delete(`/api/accessories/${id}`)));
             setAccessories(prev => prev.filter(a => !selectedAccessories.includes(a._id)));
             setSelectedAccessories([]);
-            addToast('Accessories deleted', 'success');
+            addToast(t('accessories.success.bulkDeleted', 'Accessories deleted'), 'success');
         } catch (error) {
-            addToast('Failed to perform bulk delete', 'error');
+            addToast(t('accessories.error.bulkDelete', 'Failed to perform bulk delete'), 'error');
         }
     };
 
@@ -109,7 +111,7 @@ export const DashboardAccessories: React.FC = () => {
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                     <Package className="w-6 h-6 text-blue-400" />
-                    Accessories Manager
+                    {t('accessories.title', 'Accessories Manager')}
                 </h2>
                 <button
                     onClick={() => {
@@ -119,7 +121,7 @@ export const DashboardAccessories: React.FC = () => {
                     className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors"
                 >
                     <Plus className="w-4 h-4" />
-                    Add Accessory
+                    {t('accessories.add', 'Add Accessory')}
                 </button>
             </div>
 
@@ -128,14 +130,14 @@ export const DashboardAccessories: React.FC = () => {
                 <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-4">
                     <div className="flex items-center gap-2">
                         <span className="text-blue-400 font-bold">{selectedAccessories.length}</span>
-                        <span className="text-slate-300">accessories selected</span>
+                        <span className="text-slate-300">{t('accessories.selected', 'accessories selected')}</span>
                     </div>
                     <button
                         onClick={handleBulkDelete}
                         className="flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-400 hover:bg-red-600/30 rounded-lg transition-colors font-medium"
                     >
                         <Trash2 className="w-4 h-4" />
-                        Delete Selected
+                        {t('accessories.deleteSelected', 'Delete Selected')}
                     </button>
                 </div>
             )}
@@ -158,7 +160,7 @@ export const DashboardAccessories: React.FC = () => {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input
                         type="text"
-                        placeholder="Search accessories..."
+                        placeholder={t('accessories.searchPlaceholder', 'Search accessories...')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-colors"
@@ -198,7 +200,7 @@ export const DashboardAccessories: React.FC = () => {
                             )}
                             <div className="absolute top-2 right-2">
                                 <span className={`px-2 py-1 rounded text-xs font-bold ${acc.inStock ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
-                                    {acc.inStock ? 'In Stock' : 'Out of Stock'}
+                                    {acc.inStock ? t('common.inStock', 'In Stock') : t('common.outOfStock', 'Out of Stock')}
                                 </span>
                             </div>
                         </div>
@@ -218,7 +220,7 @@ export const DashboardAccessories: React.FC = () => {
                                     }}
                                     className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
                                 >
-                                    <Edit2 className="w-4 h-4" /> Edit
+                                    <Edit2 className="w-4 h-4" /> {t('common.edit', 'Edit')}
                                 </button>
                                 <button
                                     onClick={() => handleDelete(acc._id)}
@@ -240,7 +242,7 @@ export const DashboardAccessories: React.FC = () => {
                     <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden">
                         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
                             <h3 className="text-xl font-bold text-white">
-                                {currentAccessory._id ? 'Edit Accessory' : 'New Accessory'}
+                                {currentAccessory._id ? t('accessories.editTitle', 'Edit Accessory') : t('accessories.newTitle', 'New Accessory')}
                             </h3>
                             <button onClick={() => setIsEditing(false)} className="text-slate-400 hover:text-white" aria-label="Close Modal" title="Close Modal">
                                 <X className="w-6 h-6" />
@@ -248,7 +250,7 @@ export const DashboardAccessories: React.FC = () => {
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-1">Name</label>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">{t('common.name', 'Name')}</label>
                                 <input
                                     type="text"
                                     value={currentAccessory.name || ''}
@@ -260,7 +262,7 @@ export const DashboardAccessories: React.FC = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-400 mb-1">Price</label>
+                                    <label className="block text-sm font-medium text-slate-400 mb-1">{t('common.price', 'Price')}</label>
                                     <input
                                         type="number"
                                         value={currentAccessory.price || ''}
@@ -271,7 +273,7 @@ export const DashboardAccessories: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-400 mb-1">Category</label>
+                                    <label className="block text-sm font-medium text-slate-400 mb-1">{t('common.category', 'Category')}</label>
                                     <input
                                         type="text"
                                         value={currentAccessory.category || ''}
@@ -283,7 +285,7 @@ export const DashboardAccessories: React.FC = () => {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-1">Description</label>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">{t('common.description', 'Description')}</label>
                                 <textarea
                                     value={currentAccessory.description || ''}
                                     onChange={e => setCurrentAccessory({ ...currentAccessory, description: e.target.value })}
@@ -293,7 +295,7 @@ export const DashboardAccessories: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-1">Image URL</label>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">{t('common.imageUrl', 'Image URL')}</label>
                                 <input
                                     type="text"
                                     value={currentAccessory.image || ''}
@@ -311,13 +313,13 @@ export const DashboardAccessories: React.FC = () => {
                                     onChange={e => setCurrentAccessory({ ...currentAccessory, inStock: e.target.checked })}
                                     className="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600"
                                 />
-                                <label htmlFor="inStock" className="text-white">In Stock</label>
+                                <label htmlFor="inStock" className="text-white">{t('common.inStock', 'In Stock')}</label>
                             </div>
                         </div>
                         <div className="p-6 border-t border-slate-800 flex justify-end gap-2">
-                            <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-slate-800 text-white rounded-lg">Cancel</button>
+                            <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-slate-800 text-white rounded-lg">{t('common.cancel', 'Cancel')}</button>
                             <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold flex items-center gap-2">
-                                <Save className="w-4 h-4" /> Save
+                                <Save className="w-4 h-4" /> {t('common.save', 'Save')}
                             </button>
                         </div>
                     </div>

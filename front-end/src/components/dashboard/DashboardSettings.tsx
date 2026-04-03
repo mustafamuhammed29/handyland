@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { User, Bell, Shield, MapPin } from 'lucide-react';
 import { User as UserType, Address } from '../../types';
 import { api } from '../../utils/api';
+import { useTranslation } from 'react-i18next';
 
 import { ProfileTab } from './settings/ProfileTab';
 import { SecurityTab } from './settings/SecurityTab';
@@ -32,6 +33,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
     onUpdateAddress,
     onDeleteAddress
 }) => {
+    const { t } = useTranslation();
     const [tab, setTab] = useState<Tab>('profile');
 
     // ── Profile ──
@@ -60,10 +62,10 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
         try {
             const res = await api.put('/api/users/profile', profileForm) as any;
             onUpdateProfile(res?.user || res?.data || profileForm);
-            setProfileMsg({ type: 'ok', text: 'Profile updated successfully!' });
+            setProfileMsg({ type: 'ok', text: t('settings.profile.success', 'Profile updated successfully!') });
             setProfileEditing(false);
         } catch (err: any) {
-            setProfileMsg({ type: 'err', text: err?.response?.data?.message || 'Failed to update profile.' });
+            setProfileMsg({ type: 'err', text: err?.response?.data?.message || t('settings.profile.error', 'Failed to update profile.') });
         } finally {
             setProfileSaving(false);
         }
@@ -78,16 +80,16 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
     const savePassword = async (e: React.FormEvent) => {
         e.preventDefault();
         setPwMsg(null);
-        if (pwForm.newPw !== pwForm.confirm) { setPwMsg({ type: 'err', text: 'New passwords do not match.' }); return; }
-        if (pwForm.newPw.length < 8) { setPwMsg({ type: 'err', text: 'Password must be at least 8 characters.' }); return; }
+        if (pwForm.newPw !== pwForm.confirm) { setPwMsg({ type: 'err', text: t('settings.security.error.mismatch', 'New passwords do not match.') }); return; }
+        if (pwForm.newPw.length < 8) { setPwMsg({ type: 'err', text: t('settings.security.error.length', 'Password must be at least 8 characters.') }); return; }
         setPwSaving(true);
         try {
             await api.put('/api/users/change-password', { currentPassword: pwForm.current, newPassword: pwForm.newPw });
             onUpdatePassword(pwForm.current, pwForm.newPw);
-            setPwMsg({ type: 'ok', text: 'Password updated successfully!' });
+            setPwMsg({ type: 'ok', text: t('settings.security.success', 'Password updated successfully!') });
             setPwForm({ current: '', newPw: '', confirm: '' });
         } catch (err: any) {
-            setPwMsg({ type: 'err', text: err?.response?.data?.message || 'Failed to update password.' });
+            setPwMsg({ type: 'err', text: err?.response?.data?.message || t('settings.security.error.generic', 'Failed to update password.') });
         } finally {
             setPwSaving(false);
         }
@@ -124,7 +126,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
             setNotifSaved(true);
             setTimeout(() => setNotifSaved(false), 2500);
         } catch {
-            setNotifError('Failed to save. Will retry on next change.');
+            setNotifError(t('settings.notifications.error', 'Failed to save. Will retry on next change.'));
         } finally {
             setNotifSaving(false);
         }
@@ -168,20 +170,20 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
         }
     };
 
-    const deleteAddr = (id: string) => { if (window.confirm('Delete this address?')) onDeleteAddress(id); };
+    const deleteAddr = (id: string) => { if (window.confirm(t('settings.addresses.confirmDelete', 'Delete this address?'))) onDeleteAddress(id); };
 
     const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-        { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
-        { id: 'security', label: 'Security', icon: <Shield className="w-4 h-4" /> },
-        { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
-        { id: 'addresses', label: 'Addresses', icon: <MapPin className="w-4 h-4" /> },
+        { id: 'profile', label: t('settings.tabs.profile', 'Profile'), icon: <User className="w-4 h-4" /> },
+        { id: 'security', label: t('settings.tabs.security', 'Security'), icon: <Shield className="w-4 h-4" /> },
+        { id: 'notifications', label: t('settings.tabs.notifications', 'Notifications'), icon: <Bell className="w-4 h-4" /> },
+        { id: 'addresses', label: t('settings.tabs.addresses', 'Addresses'), icon: <MapPin className="w-4 h-4" /> },
     ];
 
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-white">Account Settings</h2>
-                <p className="text-slate-400 text-sm mt-1">Manage your profile, security and preferences.</p>
+                <h2 className="text-2xl font-bold text-white">{t('settings.title', 'Account Settings')}</h2>
+                <p className="text-slate-400 text-sm mt-1">{t('settings.subtitle', 'Manage your profile, security and preferences.')}</p>
             </div>
 
             {/* Tab Bar */}

@@ -53,13 +53,23 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                                 <span className="text-slate-500 text-xs flex items-center gap-2">
                                     <Monitor className="w-3 h-3" /> Screen Repair
                                 </span>
-                                <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'screen')?.price || 'N/A'}€</span>
+                                <span className="text-white font-mono text-xs font-bold">
+                                    {(() => {
+                                        const p = device.services?.find(s => s.type === 'screen')?.price;
+                                        return (p && p > 0) ? `${p}€` : 'N/A';
+                                    })()}
+                                </span>
                             </div>
                             <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-slate-800/50 group-hover:border-blue-500/20 transition-colors">
                                 <span className="text-slate-500 text-xs flex items-center gap-2">
                                     <Battery className="w-3 h-3" /> Battery
                                 </span>
-                                <span className="text-white font-mono text-xs font-bold">{device.services?.find(s => s.type === 'battery')?.price || 'N/A'}€</span>
+                                <span className="text-white font-mono text-xs font-bold">
+                                    {(() => {
+                                        const p = device.services?.find(s => s.type === 'battery')?.price;
+                                        return (p && p > 0) ? `${p}€` : 'N/A';
+                                    })()}
+                                </span>
                             </div>
                         </div>
 

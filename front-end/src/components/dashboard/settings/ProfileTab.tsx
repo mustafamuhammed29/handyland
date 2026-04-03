@@ -4,6 +4,7 @@ import { User as UserType } from '../../../types';
 import toast from 'react-hot-toast';
 import { api } from '../../../utils/api';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileFormState {
     name: string;
@@ -42,6 +43,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     setProfileMsg,
     onUpdateProfile,
 }) => {
+    const { t } = useTranslation();
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,16 +52,16 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         if (!file) return;
 
         if (!file.type.startsWith('image/')) {
-            toast.error('Bitte lade ein gültiges Bild hoch.');
+            toast.error(t('settings.profile.avatar.invalidType', 'Bitte lade ein gültiges Bild hoch.'));
             return;
         }
         if (file.size > 5 * 1024 * 1024) {
-            toast.error('Das Bild darf maximal 5MB groß sein.');
+            toast.error(t('settings.profile.avatar.tooLarge', 'Das Bild darf maximal 5MB groß sein.'));
             return;
         }
 
         setIsUploadingAvatar(true);
-        const loadingToast = toast.loading('Profilbild wird hochgeladen...');
+        const loadingToast = toast.loading(t('settings.profile.avatar.uploading', 'Profilbild wird hochgeladen...'));
 
         try {
             const formData = new FormData();
@@ -73,13 +75,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             if (data.success && data.imageUrl) {
                 // Call parent's onUpdateProfile to make the PUT request and refetch
                 onUpdateProfile({ avatar: data.imageUrl });
-                toast.success('Profilbild erfolgreich aktualisiert!', { id: loadingToast });
+                toast.success(t('settings.profile.avatar.updated', 'Profilbild erfolgreich aktualisiert!'), { id: loadingToast });
             } else {
                 throw new Error('Upload failed');
             }
         } catch (error) {
             console.error('Error uploading avatar:', error);
-            toast.error('Fehler beim Hochladen des Profilbilds.', { id: loadingToast });
+            toast.error(t('settings.profile.avatar.uploadError', 'Fehler beim Hochladen des Profilbilds.'), { id: loadingToast });
         } finally {
             setIsUploadingAvatar(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -87,12 +89,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     };
 
     const handleRemoveAvatar = async () => {
-        const loadingToast = toast.loading('Profilbild wird entfernt...');
+        const loadingToast = toast.loading(t('settings.profile.avatar.removing', 'Profilbild wird entfernt...'));
         try {
             onUpdateProfile({ avatar: '' });
-            toast.success('Profilbild erfolgreich entfernt!', { id: loadingToast });
+            toast.success(t('settings.profile.avatar.removed', 'Profilbild erfolgreich entfernt!'), { id: loadingToast });
         } catch (error) {
-            toast.error('Fehler beim Entfernen des Profilbilds.', { id: loadingToast });
+            toast.error(t('settings.profile.avatar.removeError', 'Fehler beim Entfernen des Profilbilds.'), { id: loadingToast });
         }
     };
 
@@ -100,13 +102,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-slate-800/60 flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-bold text-white">Profile Information</h3>
-                    <p className="text-slate-400 text-sm mt-0.5">Update your personal details</p>
+                    <h3 className="text-lg font-bold text-white">{t('settings.profile.title', 'Profile Information')}</h3>
+                    <p className="text-slate-400 text-sm mt-0.5">{t('settings.profile.subtitle', 'Update your personal details')}</p>
                 </div>
                 {!profileEditing ? (
                     <button onClick={() => setProfileEditing(true)}
                         className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 bg-blue-400/5 hover:bg-blue-400/10 px-3 py-1.5 rounded-xl transition-colors border border-blue-400/20">
-                        <Pencil className="w-3.5 h-3.5" /> Edit
+                        <Pencil className="w-3.5 h-3.5" /> {t('common.edit', 'Edit')}
                     </button>
                 ) : (
                     <div className="flex gap-2">
@@ -121,12 +123,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                             setProfileMsg(null);
                         }}
                             className="px-3 py-1.5 text-sm rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors">
-                            Cancel
+                            {t('common.cancel', 'Cancel')}
                         </button>
                         <button onClick={saveProfile} disabled={profileSaving}
                             className="flex items-center gap-2 px-4 py-1.5 text-sm rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold disabled:opacity-50 transition-colors">
                             {profileSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                            Save
+                            {t('common.save', 'Save')}
                         </button>
                     </div>
                 )}
@@ -165,13 +167,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                         <p className="text-white font-bold">{user.name}</p>
                         <p className="text-slate-400 text-sm">{user.email}</p>
                         <div className="flex items-center gap-3 mt-1.5">
-                            <p className="text-blue-400/70 text-xs">Member since {new Date((user as any).createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                            <p className="text-blue-400/70 text-xs">{t('settings.profile.memberSince', 'Member since')} {new Date((user as any).createdAt || Date.now()).toLocaleDateString(t('common.locale', 'en-US'), { month: 'long', year: 'numeric' })}</p>
                             {user.avatar && (
                                 <button 
                                     onClick={handleRemoveAvatar}
                                     className="flex items-center gap-1 text-[10px] text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 px-2 py-0.5 rounded-md transition-colors border border-red-400/20"
                                 >
-                                    <Trash2 className="w-3 h-3" /> Remove Photo
+                                    <Trash2 className="w-3 h-3" /> {t('settings.profile.avatar.remove', 'Remove Photo')}
                                 </button>
                             )}
                         </div>
@@ -186,9 +188,9 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                 )}
 
                 {[
-                    { id: 'name', label: 'Full Name', icon: <User className="w-4 h-4" />, type: 'text', key: 'name' as const, placeholder: 'John Doe' },
-                    { id: 'email', label: 'Email Address', icon: <Mail className="w-4 h-4" />, type: 'email', key: 'email' as const, placeholder: 'john@example.com', disabled: true },
-                    { id: 'phone', label: 'Phone Number', icon: <Phone className="w-4 h-4" />, type: 'tel', key: 'phone' as const, placeholder: '+1 234 567 890' },
+                    { id: 'name', label: t('settings.profile.fullName', 'Full Name'), icon: <User className="w-4 h-4" />, type: 'text', key: 'name' as const, placeholder: 'John Doe' },
+                    { id: 'email', label: t('settings.profile.email', 'Email Address'), icon: <Mail className="w-4 h-4" />, type: 'email', key: 'email' as const, placeholder: 'john@example.com', disabled: true },
+                    { id: 'phone', label: t('settings.profile.phone', 'Phone Number'), icon: <Phone className="w-4 h-4" />, type: 'tel', key: 'phone' as const, placeholder: '+1 234 567 890' },
                 ].map(f => (
                     <div key={f.id}>
                         <label htmlFor={`profile-${f.id}`} className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
@@ -210,7 +212,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
 
                 <div>
                     <label htmlFor="profile-language" className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
-                        <span className="text-slate-500">🌍</span> Preferred Language
+                        <span className="text-slate-500">🌍</span> {t('settings.profile.language.title', 'Preferred Language')}
                     </label>
                     <select
                         id="profile-language"
@@ -228,7 +230,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                         <option value="ru">Russian (Русский)</option>
                         <option value="fa">Persian (فارسی)</option>
                     </select>
-                    <p className="text-xs text-slate-500 mt-2">This language will be used across the interface and for your personalized notifications.</p>
+                    <p className="text-xs text-slate-500 mt-2">{t('settings.profile.language.description', 'This language will be used across the interface and for your personalized notifications.')}</p>
                 </div>
             </div>
         </div>

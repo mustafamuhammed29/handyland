@@ -1,16 +1,17 @@
 export const getImageUrl = (path: string | undefined | null): string => {
-  // حالة 1: لا يوجد مسار — أرجع placeholder
-  if (!path || path.trim() === '') {
-    return '/placeholder-device.svg';
+  // 1. Check if path is empty/invalid
+  if (!path || (typeof path === 'string' && path.trim() === '')) {
+    return '/placeholder-phone.png';
   }
   
-  // حالة 2: رابط كامل http/https — أرجعه مباشرة
-  if (path.startsWith('http://') || path.startsWith('https://')) {
+  // 2. If it's already a full URL, return it
+  if (typeof path === 'string' && (path.startsWith('http://') || path.startsWith('https://'))) {
     return path;
   }
   
-  // حالة 3: مسار نسبي يبدأ بـ / — أضف base URL
+  // 3. Otherwise, prepend the API base URL
   const base = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${base}${cleanPath}`;
+  // Ensure we don't have double slashes
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${base}/${cleanPath}`;
 };

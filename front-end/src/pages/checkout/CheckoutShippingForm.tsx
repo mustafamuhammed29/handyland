@@ -80,7 +80,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                                 onClick={() => {
                                     setShippingDetails(prev => ({
                                         ...prev,
-                                        fullName: addr.name || prev.fullName,
+                                        fullName: prev.fullName && prev.fullName.trim() !== '' ? prev.fullName : (addr.name || prev.fullName),
                                         address: addr.street || '',
                                         city: addr.city || '',
                                         state: addr.state || '',

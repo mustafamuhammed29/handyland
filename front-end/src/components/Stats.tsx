@@ -92,8 +92,8 @@ export const Stats: React.FC = () => {
       suffix: '/5',
       label: 'Average Rating',
       color: 'text-yellow-400',
-      border: 'group-hover:border-yellow-500/50',
-      bg: 'group-hover:bg-yellow-500/10',
+      border: 'group-hover:border-brand-secondary/50',
+      bg: 'group-hover:bg-brand-secondary/10',
       isDecimal: true
     },
   ];
@@ -111,9 +111,9 @@ export const Stats: React.FC = () => {
 
         {/* Section Header */}
         <div className="flex items-center gap-3 mb-10 justify-center md:justify-start opacity-80">
-          <Activity className="w-5 h-5 text-blue-500 animate-pulse" />
-          <span className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">Live Performance Data</span>
-          <div className="h-px bg-gradient-to-r from-blue-500/50 to-transparent w-32"></div>
+          <Activity className="w-5 h-5 text-brand-primary animate-pulse" />
+          <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-[0.2em]">Our Trust Metrics</span>
+          <div className="h-px bg-gradient-to-r from-brand-primary/50 to-transparent w-32"></div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
@@ -127,8 +127,11 @@ export const Stats: React.FC = () => {
 
               <div className="relative z-10 flex flex-col items-center w-full">
                 {/* Icon Container */}
-                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center mb-3 md:mb-4 shadow-lg ${stat.color} group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
-                  {stat.icon}
+                <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center mb-4 md:mb-6 shadow-xl group-hover:scale-110 transition-all duration-500 flex-shrink-0 relative overflow-hidden`}>
+                  <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 opacity-50"></div>
+                  <div className="relative z-10 text-brand-primary drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">
+                    {stat.icon}
+                  </div>
                 </div>
 
                 {/* Value */}

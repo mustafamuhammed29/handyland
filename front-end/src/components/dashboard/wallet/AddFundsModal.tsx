@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Wallet, X, Loader2, Copy, CheckCircle, Upload, FileText, ArrowLeft, Building2, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { api } from '../../../utils/api';
 import { useToast } from '../../../context/ToastContext';
@@ -14,6 +15,7 @@ interface AddFundsModalProps {
 type Step = 'select' | 'bank_details';
 
 export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    const { t } = useTranslation();
     const { addToast } = useToast();
     const { settings } = useSettings();
     const paymentConfig = settings?.payment;
@@ -72,17 +74,16 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
 
     const handleProcessPayment = async () => {
         const finalAmount = getFinalAmount();
-
         if (isNaN(finalAmount) || finalAmount < 5) {
-            addToast('Mindestbetrag ist 5 €', 'error');
+            addToast(t('wallet.modal.error.minAmount', 'Minimum amount is 5 €'), 'error');
             return;
         }
         if (finalAmount > 5000) {
-            addToast('Maximalbetrag ist 5.000 €', 'error');
+            addToast(t('wallet.modal.error.maxAmount', 'Maximum amount is 5,000 €'), 'error');
             return;
         }
         if (!selectedMethod) {
-            addToast('Bitte wählen Sie eine Zahlungsmethode', 'error');
+            addToast(t('wallet.modal.error.selectMethod', 'Please select a payment method'), 'error');
             return;
         }
 
@@ -95,7 +96,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                 if (url) {
                     window.location.href = url;
                 } else {
-                    throw new Error('Keine Checkout-URL erhalten');
+                    throw new Error(t('wallet.modal.error.noUrl', 'No checkout URL received'));
                 }
             } else if (selectedMethod === 'bank_transfer') {
                 // Create pending transaction first
@@ -105,12 +106,12 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                     setTransactionId(data.transactionId || data.transaction?._id);
                     setStep('bank_details');
                 } else {
-                    throw new Error('Fehler beim Erstellen des Antrags');
+                    throw new Error(t('wallet.modal.error.createRequest', 'Error creating request'));
                 }
             }
         } catch (error: any) {
             console.error('Top-up error:', error);
-            addToast(error?.response?.data?.message || 'Zahlung fehlgeschlagen. Bitte Admin kontaktieren.', 'error');
+            addToast(error?.response?.data?.message || t('wallet.modal.error.failedContactAdmin', 'Payment failed. Please contact admin.'), 'error');
         } finally {
             if (selectedMethod !== 'stripe') {
                 setIsProcessing(false);
@@ -120,11 +121,11 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
 
     const handleUploadReceipt = async () => {
         if (!receiptFile) {
-            addToast('Bitte laden Sie Ihren Zahlungsbeleg hoch', 'error');
+            addToast(t('wallet.modal.error.noReceipt', 'Please upload your payment receipt'), 'error');
             return;
         }
         if (!transactionId) {
-            addToast('Transaktions-ID fehlt', 'error');
+            addToast(t('wallet.modal.error.noTransactionId', 'Transaction ID missing'), 'error');
             return;
         }
 
@@ -137,14 +138,14 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
             } as any) as any;
             const data = res?.data || res;
             if (data?.success) {
-                addToast('✅ Beleg hochgeladen! Der Admin wird Ihren Transfer bestätigen.', 'success');
+                addToast(t('wallet.modal.success.receiptUploaded', 'Receipt uploaded! The admin will confirm your transfer.'), 'success');
                 onSuccess();
                 handleClose();
             } else {
-                throw new Error('Upload fehlgeschlagen');
+                throw new Error(t('wallet.modal.error.uploadFailed', 'Upload failed'));
             }
         } catch (error: any) {
-            addToast(error?.response?.data?.message || 'Fehler beim Hochladen des Belegs', 'error');
+            addToast(error?.response?.data?.message || t('wallet.modal.error.uploadError', 'Error uploading receipt'), 'error');
         } finally {
             setIsUploading(false);
         }
@@ -177,7 +178,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                         )}
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
                             <Wallet className="w-5 h-5 text-blue-400" />
-                            {step === 'select' ? 'Add Funds' : 'Banküberweisung'}
+                            {step === 'select' ? t('wallet.modal.title.add', 'Add Funds') : t('wallet.modal.title.bankTransfer', 'Bank Transfer')}
                         </h3>
                     </div>
                     <button
@@ -199,7 +200,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                         <>
                             {/* Amount Selection */}
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-3">Betrag auswählen</label>
+                                <label className="block text-sm font-medium text-slate-400 mb-3">{t('wallet.modal.label.selectAmount', 'Select Amount')}</label>
                                 <div className="grid grid-cols-2 gap-3 mb-3">
                                     {presetAmounts.map((preset) => (
                                         <button
@@ -219,8 +220,8 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                     value={customAmount}
                                     onChange={(e) => { setAmount('custom'); setCustomAmount(e.target.value); }}
                                     onFocus={() => setAmount('custom')}
-                                    placeholder="Eigener Betrag (min. €5)"
-                                    title="Eigener Betrag"
+                                    placeholder={t('wallet.modal.label.customAmount', 'Custom amount (min. €5)')}
+                                    title={t('wallet.modal.label.customAmount', 'Custom amount')}
                                     min="5"
                                     max="5000"
                                     className={`w-full px-4 py-3 rounded-xl border transition-all bg-slate-950 font-bold focus:outline-none ${amount === 'custom'
@@ -232,7 +233,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
 
                             {/* Payment Method Selection */}
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-3">Zahlungsmethode</label>
+                                <label className="block text-sm font-medium text-slate-400 mb-3">{t('wallet.modal.label.paymentMethod', 'Payment Method')}</label>
                                 <div className="space-y-3">
                                     {/* Stripe / Credit Card */}
                                     {paymentConfig?.stripe?.enabled !== false && (
@@ -246,8 +247,8 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                                 className="w-4 h-4 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-600"
                                             />
                                             <div className="flex-1">
-                                                <div className="font-bold text-white text-sm">Credit Card (Stripe)</div>
-                                                <div className="text-xs text-slate-400 mt-0.5">Secure payment via Stripe</div>
+                                                <div className="font-bold text-white text-sm">{t('wallet.method.stripe.title', 'Credit Card (Stripe)')}</div>
+                                                <div className="text-xs text-slate-400 mt-0.5">{t('wallet.method.stripe.subtitle', 'Secure payment via Stripe')}</div>
                                             </div>
                                         </label>
                                     )}
@@ -265,7 +266,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                             />
                                             <div className="flex-1">
                                                 <div className="font-bold text-white text-sm">PayPal</div>
-                                                <div className="text-xs text-slate-400 mt-0.5">Fast and safe</div>
+                                                <div className="text-xs text-slate-400 mt-0.5">{t('wallet.method.paypal.subtitle', 'Fast and safe')}</div>
                                             </div>
                                         </label>
                                     )}
@@ -284,9 +285,9 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                             <div className="flex-1">
                                                 <div className="font-bold text-white text-sm flex items-center gap-2">
                                                     <Building2 className="w-4 h-4 text-blue-400" />
-                                                    Banküberweisung
+                                                    {t('wallet.modal.title.bankTransfer', 'Bank Transfer')}
                                                 </div>
-                                                <div className="text-xs text-slate-400 mt-0.5">Manueller Einzahlungsbeleg — Admin-Bestätigung erforderlich</div>
+                                                <div className="text-xs text-slate-400 mt-0.5">{t('wallet.method.bankTransfer.subtitle', 'Manual deposit receipt — admin confirmation required')}</div>
                                             </div>
                                         </label>
                                     )}
@@ -300,7 +301,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                         style={{ layout: "vertical", shape: "rect", color: "blue" }}
                                         createOrder={async () => {
                                             const fa = getFinalAmount();
-                                            if (isNaN(fa) || fa < 5) { addToast('Mindestbetrag ist 5 €', 'error'); return ""; }
+                                            if (isNaN(fa) || fa < 5) { addToast(t('wallet.modal.error.minAmount', 'Minimum amount is 5 €'), 'error'); return ""; }
                                             try {
                                                 const res: any = await api.post('/api/transactions/paypal/create-topup', { amount: fa });
                                                 if (res.data?.success || res.success) return res.data?.id || res.id;
@@ -316,7 +317,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                                 setIsProcessing(true);
                                                 const res: any = await api.post('/api/transactions/paypal/capture-topup', { orderID: data.orderID });
                                                 if (res.data?.success || res.success) {
-                                                    addToast('Wallet erfolgreich mit PayPal aufgeladen! 🎉', 'success');
+                                                    addToast(t('wallet.modal.success.paypal', 'Wallet successfully topped up with PayPal! 🎉'), 'success');
                                                     handleClose(); onSuccess();
                                                 } else { addToast("PayPal Payment failed", "error"); }
                                             } catch (error: any) {
@@ -333,9 +334,9 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                     className="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
                                 >
                                     {isProcessing ? (
-                                        <><Loader2 className="w-5 h-5 animate-spin" /> Verarbeitung...</>
+                                        <><Loader2 className="w-5 h-5 animate-spin" /> {t('common.processing', 'Processing...')}</>
                                     ) : (
-                                        <>Weiter — €{displayAmount} →</>
+                                        <>{t('common.nextWithAmount', { defaultValue: 'Next — €{{amount}} →', amount: displayAmount })}</>
                                     )}
                                 </button>
                             )}
@@ -349,14 +350,14 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                             <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
                                 <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                                 <div className="text-sm text-amber-300">
-                                    <p className="font-bold mb-1">Admin-Bestätigung erforderlich</p>
-                                    <p className="text-amber-400/80">Ihr Guthaben wird erst nach Prüfung durch den Admin gutgeschrieben.</p>
+                                    <p className="font-bold mb-1">{t('wallet.modal.bank.adminRequired', 'Admin confirmation required')}</p>
+                                    <p className="text-amber-400/80">{t('wallet.modal.bank.adminSubtitle', 'Your balance will be credited only after verification by the admin.')}</p>
                                 </div>
                             </div>
 
                             {/* Transfer Amount */}
                             <div className="p-4 bg-blue-600/10 border border-blue-500/30 rounded-xl text-center">
-                                <p className="text-slate-400 text-sm mb-1">Zu überweisender Betrag</p>
+                                <p className="text-slate-400 text-sm mb-1">{t('wallet.modal.bank.amountToTransfer', 'Amount to transfer')}</p>
                                 <p className="text-3xl font-black text-blue-400">€{finalAmount.toFixed(2)}</p>
                             </div>
 
@@ -364,15 +365,15 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                             <div>
                                 <h4 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
                                     <Building2 className="w-4 h-4 text-blue-400" />
-                                    Bankverbindung
+                                    {t('wallet.modal.bank.detailsTitle', 'Bank Connection')}
                                 </h4>
                                 <div className="space-y-2 bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
                                     {[
-                                        { label: 'Kontoinhaber', value: bankConfig?.accountHolder || 'HandyLand GmbH', field: 'holder' },
-                                        { label: 'Bank', value: bankConfig?.bankName || '—', field: 'bank' },
+                                        { label: t('wallet.modal.bank.label.holder', 'Account Holder'), value: bankConfig?.accountHolder || 'HandyLand GmbH', field: 'holder' },
+                                        { label: t('wallet.modal.bank.label.bank', 'Bank'), value: bankConfig?.bankName || '—', field: 'bank' },
                                         { label: 'IBAN', value: bankConfig?.iban || '—', field: 'iban' },
                                         { label: 'BIC', value: bankConfig?.bic || '—', field: 'bic' },
-                                        { label: 'Verwendungszweck', value: `Wallet-${transactionId?.slice(-8).toUpperCase() || 'XXXXX'}`, field: 'ref' },
+                                        { label: t('wallet.modal.bank.label.reference', 'Reason for payment'), value: `Wallet-${transactionId?.slice(-8).toUpperCase() || 'XXXXX'}`, field: 'ref' },
                                     ].map(({ label, value, field }) => (
                                         <div key={field} className="flex items-center justify-between gap-3 py-1.5 border-b border-slate-700/40 last:border-0">
                                             <span className="text-xs text-slate-500 shrink-0 w-28">{label}</span>
@@ -401,7 +402,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                             <div>
                                 <h4 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
                                     <Upload className="w-4 h-4 text-blue-400" />
-                                    Zahlungsbeleg hochladen
+                                    {t('wallet.modal.bank.uploadTitle', 'Upload Payment Receipt')}
                                 </h4>
                                 <input
                                     ref={fileInputRef}
@@ -409,7 +410,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                     accept="image/jpeg,image/png,image/webp,application/pdf"
                                     onChange={handleReceiptChange}
                                     className="hidden"
-                                    title="Beleg hochladen"
+                                    title={t('wallet.modal.bank.uploadTitle', 'Upload Receipt')}
                                 />
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
@@ -428,8 +429,8 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                     ) : (
                                         <div className="flex flex-col items-center gap-2">
                                             <Upload className="w-10 h-10 text-slate-500" />
-                                            <p className="text-sm text-slate-400">Beleg hier ablegen oder klicken</p>
-                                            <p className="text-xs text-slate-600">JPG, PNG, WebP oder PDF — max. 10 MB</p>
+                                            <p className="text-sm text-slate-400">{t('wallet.modal.bank.uploadPlaceholder', 'Drop receipt here or click')}</p>
+                                            <p className="text-xs text-slate-600">{t('wallet.modal.bank.uploadHint', 'JPG, PNG, WebP or PDF — max. 10 MB')}</p>
                                         </div>
                                     )}
                                 </div>
@@ -438,7 +439,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                         onClick={() => { setReceiptFile(null); setReceiptPreview(null); }}
                                         className="mt-2 text-xs text-red-400 hover:text-red-300 transition-colors"
                                     >
-                                        Datei entfernen
+                                        {t('common.removeFile', 'Remove file')}
                                     </button>
                                 )}
                             </div>
@@ -450,19 +451,19 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                 className="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
                             >
                                 {isUploading ? (
-                                    <><Loader2 className="w-5 h-5 animate-spin" /> Hochladen...</>
+                                    <><Loader2 className="w-5 h-5 animate-spin" /> {t('common.uploading', 'Uploading...')}</>
                                 ) : (
-                                    <><CheckCircle className="w-5 h-5" /> Beleg einreichen & Anfrage senden</>
+                                    <><CheckCircle className="w-5 h-5" /> {t('wallet.modal.bank.submit', 'Submit Receipt & Send Request')}</>
                                 )}
                             </button>
 
                             <p className="text-center text-xs text-slate-600">
-                                Kein Beleg zur Hand? Sie können diesen Schritt überspringen — Ihr Antrag wird als "ausstehend" gespeichert.{' '}
+                                {t('wallet.modal.bank.skipText', 'No receipt at hand? You can skip this step — your request will be saved as "pending".')}{' '}
                                 <button
                                     onClick={() => { onSuccess(); handleClose(); }}
                                     className="text-blue-400 hover:text-blue-300 underline"
                                 >
-                                    Jetzt überspringen
+                                    {t('common.skipNow', 'Skip now')}
                                 </button>
                             </p>
                         </>

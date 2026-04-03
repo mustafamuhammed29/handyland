@@ -2,6 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, Tag, X, Loader2, ShieldCheck, Truck, Trophy, Zap } from 'lucide-react';
 import { formatPrice } from '../../utils/formatPrice';
+import { getImageUrl } from '../../utils/imageUrl';
+import { FREE_SHIPPING_THRESHOLD } from '../../utils/constants';
 import { TrustBadges } from '../../components/products/TrustBadges';
 
 // FIXED: Extracted from Checkout.tsx for better maintainability (FIX 5)
@@ -54,16 +56,16 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
 
             <div className="space-y-4 max-h-80 overflow-y-auto pr-2 custom-scrollbar mb-6">
                 {/* Free Shipping Progress */}
-                {cartTotal < freeShippingThreshold ? (
+                {cartTotal < FREE_SHIPPING_THRESHOLD ? (
                     <div className="bg-slate-950/50 rounded-xl p-4 border border-blue-500/30 mb-4">
                         <div className="flex justify-between text-xs font-bold mb-2">
-                            <span className="text-blue-400">Add {formatPrice(Math.max(0, freeShippingThreshold - cartTotal))} for Free Shipping</span>
-                            <span className="text-slate-500">{Math.round((cartTotal / freeShippingThreshold) * 100)}%</span>
+                            <span className="text-blue-400">Add {formatPrice(Math.max(0, FREE_SHIPPING_THRESHOLD - cartTotal))} for Free Shipping</span>
+                            <span className="text-slate-500">{Math.round((cartTotal / FREE_SHIPPING_THRESHOLD) * 100)}%</span>
                         </div>
                         <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
                             <div
                                 className="bg-blue-500 h-full rounded-full transition-all duration-500"
-                                style={{ width: `${Math.min(100, (cartTotal / freeShippingThreshold) * 100)}%` }}
+                                style={{ width: `${Math.min(100, (cartTotal / FREE_SHIPPING_THRESHOLD) * 100)}%` }}
                             ></div>
                         </div>
                     </div>
@@ -76,7 +78,12 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                 {cart.map((item, idx) => (
                     <div key={idx} className="flex gap-3 items-start group">
                         <div className="w-16 h-16 bg-slate-950 rounded-lg overflow-hidden flex-shrink-0 border border-slate-800 relative">
-                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                            <img
+                                src={getImageUrl(item.image)}
+                                alt={item.title}
+                                className="w-full h-full object-cover"
+                                onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }}
+                            />
                             {item.quantity && item.quantity > 1 && (
                                 <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg">
                                     x{item.quantity}
