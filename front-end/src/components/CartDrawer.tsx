@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
 import { formatPrice } from '../utils/formatPrice';
 import { getImageUrl } from '../utils/imageUrl';
-import { getImageUrl } from '../utils/imageUrl';
 import { useTranslation } from 'react-i18next';
 import { FREE_SHIPPING_THRESHOLD } from '../utils/constants';
 
