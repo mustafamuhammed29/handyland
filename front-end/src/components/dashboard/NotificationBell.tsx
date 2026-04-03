@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, ShoppingBag, Wrench, MessageSquare, Info, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../utils/api';
 import { useSocket } from '../../hooks/useSocket';
 
@@ -21,6 +22,7 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(false);
+    const { t } = useTranslation();
     const panelRef = useRef<HTMLDivElement>(null);
     const { onNotification } = useSocket(userId);
 
@@ -93,10 +95,10 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
 
     const timeAgo = (date: string) => {
         const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-        if (s < 60) return 'just now';
-        if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-        if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-        return `${Math.floor(s / 86400)}d ago`;
+        if (s < 60) return t('common.timeAgo.justNow', 'just now');
+        if (s < 3600) return t('common.timeAgo.minutesAgo', { count: Math.floor(s / 60), defaultValue: '{{count}}m ago' });
+        if (s < 86400) return t('common.timeAgo.hoursAgo', { count: Math.floor(s / 3600), defaultValue: '{{count}}h ago' });
+        return t('common.timeAgo.daysAgo', { count: Math.floor(s / 86400), defaultValue: '{{count}}d ago' });
     };
 
     // Styling logic based on variant
@@ -107,8 +109,8 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
             {/* Bell Button */}
             <button
                 onClick={() => setOpen(v => !v)}
-                title="Notifications"
-                aria-label="Open notifications"
+                title={t('notifications.title', 'Notifications')}
+                aria-label={t('notifications.open', 'Open notifications')}
                 className={isNavbar
                     ? "relative w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 group outline-none bg-transparent hover:bg-white/5"
                     : "relative p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors outline-none"
@@ -135,21 +137,21 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                     <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
                         <div className="flex items-center gap-2">
                             <Bell className="w-4 h-4 text-blue-400" />
-                            <span className="text-white font-bold text-sm">Notifications</span>
+                            <span className="text-white font-bold text-sm">{t('notifications.title', 'Notifications')}</span>
                             {unread > 0 && (
                                 <span className="text-[10px] bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded-full font-bold border border-blue-500/20">
-                                    {unread} new
+                                    {t('notifications.newCount', { count: unread, defaultValue: '{{count}} new' })}
                                 </span>
                             )}
                         </div>
                         <div className="flex items-center gap-2">
                             {unread > 0 && (
-                                <button onClick={markAllRead} title="Mark all as read"
+                                <button onClick={markAllRead} title={t('notifications.markAllRead', 'Mark all as read')}
                                     className="text-[11px] text-slate-400 hover:text-emerald-400 px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-1 font-medium">
-                                    <Check className="w-3 h-3" /> All read
+                                    <Check className="w-3 h-3" /> {t('notifications.allRead', 'All read')}
                                 </button>
                             )}
-                            <button onClick={() => setOpen(false)} title="Close"
+                            <button onClick={() => setOpen(false)} title={t('common.close', 'Close')}
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-red-500/20 hover:text-red-400 transition-colors">
                                 <X className="w-4 h-4" />
                             </button>
@@ -165,7 +167,7 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                         ) : notifications.length === 0 ? (
                             <div className="flex flex-col items-center py-12 text-slate-500 gap-3">
                                 <Bell className="w-10 h-10 opacity-20" />
-                                <p className="text-sm">No notifications yet</p>
+                                <p className="text-sm">{t('notifications.empty.title', 'No notifications yet')}</p>
                             </div>
                         ) : (
                             notifications.map(n => (
@@ -198,7 +200,7 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                         <div className="px-4 py-2 border-t border-slate-800 bg-slate-950/60 backdrop-blur-md flex justify-center">
                             <button onClick={fetchNotifs}
                                 className="text-[11px] font-medium text-slate-400 hover:text-white transition-colors py-1">
-                                Refresh notifications
+                                {t('notifications.refresh', 'Refresh notifications')}
                             </button>
                         </div>
                     )}

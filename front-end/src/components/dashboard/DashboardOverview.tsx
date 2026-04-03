@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardOverviewProps {
     user?: any;
@@ -33,16 +34,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     isLoading
 }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     
     // Personalization: Dynamic Greeting
     const [greeting, setGreeting] = useState({ text: 'Willkommen', icon: <Sun className="w-6 h-6 text-amber-500" /> });
 
     useEffect(() => {
         const hour = new Date().getHours();
-        if (hour < 12) setGreeting({ text: 'Guten Morgen', icon: <CloudSun className="w-6 h-6 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" /> });
-        else if (hour < 18) setGreeting({ text: 'Guten Tag', icon: <Sun className="w-6 h-6 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" /> });
-        else setGreeting({ text: 'Guten Abend', icon: <Moon className="w-6 h-6 text-blue-300 drop-shadow-[0_0_8px_rgba(147,197,253,0.6)]" /> });
-    }, []);
+        if (hour < 12) setGreeting({ text: t('dashboard.greeting.morning', 'Guten Morgen'), icon: <CloudSun className="w-6 h-6 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" /> });
+        else if (hour < 18) setGreeting({ text: t('dashboard.greeting.day', 'Guten Tag'), icon: <Sun className="w-6 h-6 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" /> });
+        else setGreeting({ text: t('dashboard.greeting.evening', 'Guten Abend'), icon: <Moon className="w-6 h-6 text-blue-300 drop-shadow-[0_0_8px_rgba(147,197,253,0.6)]" /> });
+    }, [t]);
 
     // Derived Statistics
     const totalOrders = orders.length;
@@ -98,21 +100,21 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             <div className="flex items-center gap-3 mb-2">
                                 {greeting.icon}
                                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                                    {greeting.text}, {userName?.split(' ')[0] || 'Member'}!
+                                    {greeting.text}, {userName?.split(' ')[0] || t('common.member', 'Member')}!
                                 </h2>
                             </div>
                             <p className="text-slate-400 text-sm max-w-md leading-relaxed">
                                 {pendingOrders > 0 || activeRepairs > 0 
-                                    ? `Hier ist dein Status-Update: Du hast ${pendingOrders} aktive ${pendingOrders === 1 ? 'Bestellung' : 'Bestellungen'} und ${activeRepairs} Geräte in Reparatur.`
-                                    : 'Alles ist auf dem neuesten Stand. Entdecke unsere neuesten Angebote im Marktplatz oder nutze unsere Reparatur-Services.'}
+                                    ? t('dashboard.hero.statusUpdate', { defaultValue: `Hier ist dein Status-Update: Du hast {{pendingOrders}} aktive Bestellungen und {{activeRepairs}} Geräte in Reparatur.`, pendingOrders, activeRepairs })
+                                    : t('dashboard.hero.allClear', 'Alles ist auf dem neuesten Stand. Entdecke unsere neuesten Angebote im Marktplatz oder nutze unsere Reparatur-Services.')}
                             </p>
                             
                             <div className="flex flex-wrap gap-3 mt-6">
                                 <button onClick={() => navigate('/marketplace')} className="px-5 py-2.5 bg-white text-slate-900 rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                                    Marktplatz
+                                    {t('dashboard.hero.marketplace', 'Marktplatz')}
                                 </button>
                                 <button onClick={() => navigate('/repair')} className="px-5 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-700 border border-white/5 transition-all">
-                                    Neuer Reparaturauftrag
+                                    {t('dashboard.hero.newRepair', 'Neuer Reparaturauftrag')}
                                 </button>
                             </div>
                         </div>
@@ -121,10 +123,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             <div className="bg-black/20 border border-white/5 rounded-2xl p-4 flex-1 sm:w-48 backdrop-blur-md">
                                 <div className="flex items-center gap-2 text-brand-primary mb-1">
                                     <Clock className="w-4 h-4" />
-                                    <span className="text-xs font-bold font-mono">AKTIV</span>
+                                    <span className="text-xs font-bold font-mono">{t('dashboard.hero.active', 'AKTIV')}</span>
                                 </div>
                                 <p className="text-2xl font-black text-white">{pendingOrders + activeRepairs + pendingValuations}</p>
-                                <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Laufende Vorgänge</p>
+                                <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-1">{t('dashboard.hero.ongoing', 'Laufende Vorgänge')}</p>
                             </div>
                         </div>
                     </div>
@@ -139,10 +141,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         <div className="z-10 relative h-full flex flex-col justify-between">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <p className="text-white/70 text-[10px] font-bold tracking-widest uppercase mb-1">HandyLand Rewards</p>
+                                    <p className="text-white/70 text-[10px] font-bold tracking-widest uppercase mb-1">{t('dashboard.rewards.title', 'HandyLand Rewards')}</p>
                                     <h3 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-2">
                                         <Trophy className="w-5 h-5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
-                                        {user?.membershipLevel === 4 ? 'Platinum' : user?.membershipLevel === 3 ? 'Gold' : user?.membershipLevel === 2 ? 'Silver' : 'Member'}
+                                        {user?.membershipLevel === 4 ? t('dashboard.rewards.tier.platinum', 'Platinum') : user?.membershipLevel === 3 ? t('dashboard.rewards.tier.gold', 'Gold') : user?.membershipLevel === 2 ? t('dashboard.rewards.tier.silver', 'Silver') : t('dashboard.rewards.tier.member', 'Member')}
                                     </h3>
                                 </div>
                                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20">
@@ -152,7 +154,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                             <div className="mt-4">
                                 <div className="flex justify-between items-end mb-2">
-                                    <span className="text-4xl sm:text-5xl font-black text-white drop-shadow-md tracking-tighter">{user?.loyaltyPoints || 0} <span className="text-sm font-bold text-white/50 tracking-normal">PTS</span></span>
+                                    <span className="text-4xl sm:text-5xl font-black text-white drop-shadow-md tracking-tighter">{user?.loyaltyPoints || 0} <span className="text-sm font-bold text-white/50 tracking-normal">{t('dashboard.rewards.pts', 'PTS')}</span></span>
                                 </div>
                                 
                                 <div className="w-full bg-black/40 rounded-full h-2.5 mb-2 overflow-hidden border border-white/5 relative">
@@ -164,7 +166,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                     )}
                                 </div>
                                 <p className="text-[11px] text-white/50 font-medium">
-                                    {user?.membershipLevel === 4 ? 'Max Tier Reached!' : `${2000 - ((user?.loyaltyPoints || 0) % 2000)} pts to next tier update`}
+                                    {user?.membershipLevel === 4 ? t('dashboard.rewards.maxTier', 'Max Tier Reached!') : t('dashboard.rewards.nextTier', { defaultValue: '{{pts}} pts to next tier update', pts: 2000 - ((user?.loyaltyPoints || 0) % 2000) })}
                                 </p>
                             </div>
                         </div>
@@ -240,7 +242,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                 <div>
                                     <h3 className="text-xl font-bold text-white tracking-tight">{title}</h3>
                                     <p className="text-brand-primary text-sm font-bold flex items-center gap-2 mt-1">
-                                        <Activity className="w-4 h-4 animate-pulse" /> LIVE TRACKING
+                                        <Activity className="w-4 h-4 animate-pulse" /> {t('dashboard.tracking.live', 'LIVE TRACKING')}
                                     </p>
                                 </div>
                             </div>
@@ -296,18 +298,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         <div className="relative z-10">
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full text-emerald-400 text-xs font-bold mb-4">
                                 <Leaf className="w-3.5 h-3.5" />
-                                Dein Eco-Impact
+                                {t('dashboard.eco.title', 'Dein Eco-Impact')}
                             </div>
-                            <h3 className="text-3xl font-black text-white mb-2">{co2Saved}<span className="text-xl text-emerald-500 ml-1">kg</span></h3>
+                            <h3 className="text-3xl font-black text-white mb-2">{co2Saved}<span className="text-xl text-emerald-500 ml-1">{t('dashboard.eco.unit', 'kg')}</span></h3>
                             <p className="text-emerald-100/70 text-sm leading-relaxed">
-                                CO₂ eingespart durch reparierte oder generalüberholte Geräte anstatt Neukauf! 🌍
+                                {t('dashboard.eco.co2Desc', 'CO₂ eingespart durch reparierte oder generalüberholte Geräte anstatt Neukauf! 🌍')}
                             </p>
                         </div>
 
                         <div className="mt-6 flex items-center justify-between border-t border-emerald-500/20 pt-4 relative z-10">
                             <div>
-                                <p className="text-[10px] text-emerald-400/60 uppercase font-bold tracking-wider">Verhinderter E-Schrott</p>
-                                <p className="text-white font-bold">{eWasteSaved.toFixed(2)} kg</p>
+                                <p className="text-[10px] text-emerald-400/60 uppercase font-bold tracking-wider">{t('dashboard.eco.eWasteTitle', 'Verhinderter E-Schrott')}</p>
+                                <p className="text-white font-bold">{eWasteSaved.toFixed(2)} {t('dashboard.eco.unit', 'kg')}</p>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] group-hover:scale-110 transition-transform">
                                 <Trophy className="w-5 h-5" />
@@ -322,9 +324,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         <div>
                             <h3 className="text-xl font-bold text-white flex items-center gap-2">
                                 <BarChart3 className="w-5 h-5 text-brand-secondary drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                                Ausgaben Übersicht
+                                {t('dashboard.spending.title', 'Ausgaben Übersicht')}
                             </h3>
-                            <p className="text-sm text-slate-400 mt-1">Deine gesamten Käufe der letzten 6 Monate</p>
+                            <p className="text-sm text-slate-400 mt-1">{t('dashboard.spending.desc', 'Deine gesamten Käufe der letzten 6 Monate')}</p>
                         </div>
                     </div>
                     
@@ -367,7 +369,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
                             <Zap className="w-5 h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
-                            Aktivitäten
+                            {t('dashboard.activities.title', 'Aktivitäten')}
                         </h3>
                     </div>
                     
@@ -401,7 +403,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                 return (
                                     <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-70">
                                         <Activity className="w-10 h-10 mb-3" />
-                                        <p className="text-sm font-medium">Keine aktuellen Aktivitäten.</p>
+                                        <p className="text-sm font-medium">{t('dashboard.activities.empty', 'Keine aktuellen Aktivitäten.')}</p>
                                     </div>
                                 );
                             }
@@ -435,32 +437,32 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             <ShoppingCart className="w-5 h-5" />
                         </div>
                         <p className="text-2xl font-black text-white">{totalOrders}</p>
-                        <p className="text-xs text-slate-400 mt-1">Gesamtbestellungen</p>
+                        <p className="text-xs text-slate-400 mt-1">{t('dashboard.stats.orders', 'Gesamtbestellungen')}</p>
                     </div>
                     <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-4 sm:p-5 hover:bg-slate-800/50 transition-colors group">
                         <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <Wrench className="w-5 h-5" />
                         </div>
                         <p className="text-2xl font-black text-white">{repairs.length}</p>
-                        <p className="text-xs text-slate-400 mt-1">Reparatur-Historie</p>
+                        <p className="text-xs text-slate-400 mt-1">{t('dashboard.stats.repairs', 'Reparatur-Historie')}</p>
                     </div>
                     <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-4 sm:p-5 hover:bg-slate-800/50 transition-colors group">
                         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <TrendingUp className="w-5 h-5" />
                         </div>
                         <p className="text-2xl font-black text-white">{valuations.length}</p>
-                        <p className="text-xs text-slate-400 mt-1">Geräte verkauft</p>
+                        <p className="text-xs text-slate-400 mt-1">{t('dashboard.stats.valuations', 'Geräte verkauft')}</p>
                     </div>
                     {promotions.length > 0 ? (
                         <div className="bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 backdrop-blur-xl border border-brand-primary/30 rounded-2xl p-4 sm:p-5 hover:border-brand-primary/50 transition-colors relative overflow-hidden group hover:cursor-pointer" onClick={() => navigate('/marketplace')}>
                             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/20 rounded-full blur-[40px] group-hover:bg-brand-primary/40 transition-all duration-700 -translate-y-1/2 translate-x-1/2"></div>
-                            <h4 className="text-brand-primary font-black mb-1 drop-shadow-md">Special Offers! 🔥</h4>
+                            <h4 className="text-brand-primary font-black mb-1 drop-shadow-md">{t('dashboard.promotions.title', 'Special Offers! 🔥')}</h4>
                             <p className="text-xs text-white/80 line-clamp-2">{promotions[0].title}</p>
-                            <p className="text-[10px] text-brand-primary/80 mt-2 flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">Jetzt entdecken <ArrowRight className="w-3 h-3" /></p>
+                            <p className="text-[10px] text-brand-primary/80 mt-2 flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">{t('dashboard.promotions.cta', 'Jetzt entdecken')} <ArrowRight className="w-3 h-3" /></p>
                         </div>
                     ) : (
                          <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-4 sm:p-5 flex flex-col justify-center">
-                            <p className="text-sm text-slate-400 text-center">Weitere Features bald verfügbar</p>
+                            <p className="text-sm text-slate-400 text-center">{t('dashboard.stats.comingSoon', 'Weitere Features bald verfügbar')}</p>
                         </div>
                     )}
                 </div>

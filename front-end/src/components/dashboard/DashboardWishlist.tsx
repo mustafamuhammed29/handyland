@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { PhoneListing } from '../../types';
 import { formatPrice } from '../../utils/formatPrice';
+import { getImageUrl } from '../../utils/imageUrl';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardWishlistProps {
     wishlistItems: PhoneListing[];
@@ -16,6 +18,7 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
     isLoading,
     onRemove
 }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { addToCart } = useCart();
 
@@ -47,8 +50,8 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">My Wishlist</h2>
-                    <p className="text-slate-400 text-sm">{wishlistItems.length} items saved</p>
+                    <h2 className="text-2xl font-bold text-white">{t('wishlist.title', 'My Wishlist')}</h2>
+                    <p className="text-slate-400 text-sm">{t('wishlist.count', { defaultValue: '{{count}} items saved', count: wishlistItems.length })}</p>
                 </div>
             </div>
 
@@ -61,15 +64,16 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                         <div className="relative">
                             {item.images && item.images.length > 0 && (
                                 <img
-                                    src={item.images[0]}
+                                    src={getImageUrl(item.images[0])}
                                     alt={item.model}
                                     className="w-full h-48 object-cover"
+                                    onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }}
                                 />
                             )}
                             <button
                                 onClick={() => onRemove(item.id)}
-                                aria-label="Remove item from wishlist"
-                                title="Remove from wishlist"
+                                aria-label={t('wishlist.actions.remove', 'Remove item from wishlist')}
+                                title={t('wishlist.actions.remove', 'Remove from wishlist')}
                                 className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-full transition-colors"
                             >
                                 <Trash2 className="w-4 h-4" />
@@ -87,11 +91,11 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                                 <span className="text-xl font-bold text-white">{formatPrice(item.price)}</span>
                                 {item.stock > 0 ? (
                                     <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
-                                        In Stock
+                                        {t('common.inStock', 'In Stock')}
                                     </span>
                                 ) : (
                                     <span className="text-xs text-red-400 bg-red-500/10 px-2 py-1 rounded">
-                                        Out of Stock
+                                        {t('common.outOfStock', 'Out of Stock')}
                                     </span>
                                 )}
                             </div>
@@ -103,12 +107,12 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                                     className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-xl font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     <ShoppingCart className="w-4 h-4" />
-                                    Add to Cart
+                                    {t('common.addToCart', 'Add to Cart')}
                                 </button>
                                 <button
                                     onClick={() => navigate(`/product/${item.id}`)}
-                                    aria-label="View product details"
-                                    title="View product"
+                                    aria-label={t('wishlist.actions.view', 'View product details')}
+                                    title={t('wishlist.actions.view', 'View product')}
                                     className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors"
                                 >
                                     <ExternalLink className="w-4 h-4" />
@@ -132,15 +136,15 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                                 </span>
                             </div>
                         </div>
-                        <h4 className="text-xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Your wishlist is empty</h4>
+                        <h4 className="text-xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">{t('wishlist.empty.title', 'Your wishlist is empty')}</h4>
                         <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-[280px] leading-relaxed">
-                            Save items you love and keep track of price drops. Let's find your next favorite device!
+                            {t('wishlist.empty.subtitle', "Save items you love and keep track of price drops. Let's find your next favorite device!")}
                         </p>
                         <button
                             onClick={() => navigate('/marketplace')}
                             className="group relative px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold transition-all hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 overflow-hidden"
                         >
-                            <span className="relative z-10">Browse Marketplace</span>
+                            <span className="relative z-10">{t('wishlist.empty.cta', 'Browse Marketplace')}</span>
                             <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-rose-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </button>
                     </div>

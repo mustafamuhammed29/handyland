@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, Plus, Star, Pencil, Trash2 } from 'lucide-react';
 import { Address } from '../../../types';
+import { useTranslation } from 'react-i18next';
 
 interface AddressesTabProps {
     addresses: Address[];
@@ -15,16 +16,17 @@ export const AddressesTab: React.FC<AddressesTabProps> = ({
     openEditAddr,
     deleteAddr,
 }) => {
+    const { t } = useTranslation();
     return (
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-slate-800/60 flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-bold text-white">Saved Addresses</h3>
-                    <p className="text-slate-400 text-sm mt-0.5">{addresses.length} address{addresses.length !== 1 ? 'es' : ''} saved</p>
+                    <h3 className="text-lg font-bold text-white">{t('settings.addresses.title', 'Saved Addresses')}</h3>
+                    <p className="text-slate-400 text-sm mt-0.5">{t('settings.addresses.count', { defaultValue: '{{count}} address{{plural}} saved', count: addresses.length, plural: addresses.length !== 1 ? 'es' : '' })}</p>
                 </div>
                 <button onClick={openAddAddr}
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors shadow-md shadow-blue-900/20">
-                    <Plus className="w-4 h-4" /> Add Address
+                    <Plus className="w-4 h-4" /> {t('settings.addresses.add', 'Add Address')}
                 </button>
             </div>
 
@@ -35,12 +37,12 @@ export const AddressesTab: React.FC<AddressesTabProps> = ({
                             <MapPin className="w-7 h-7 opacity-40" />
                         </div>
                         <div className="text-center">
-                            <p className="font-medium text-slate-400">No saved addresses yet</p>
-                            <p className="text-sm text-slate-500 mt-1">Add a shipping address for faster checkout</p>
+                            <p className="font-medium text-slate-400">{t('settings.addresses.empty.title', 'No saved addresses yet')}</p>
+                            <p className="text-sm text-slate-500 mt-1">{t('settings.addresses.empty.subtitle', 'Add a shipping address for faster checkout')}</p>
                         </div>
                         <button onClick={openAddAddr}
                             className="mt-2 flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 border border-blue-500/30 hover:border-blue-400/50 px-4 py-2 rounded-xl transition-colors">
-                            <Plus className="w-4 h-4" /> Add your first address
+                            <Plus className="w-4 h-4" /> {t('settings.addresses.empty.cta', 'Add your first address')}
                         </button>
                     </div>
                 ) : (
@@ -48,7 +50,7 @@ export const AddressesTab: React.FC<AddressesTabProps> = ({
                         <div key={addr._id} className={`relative p-4 rounded-xl border transition-all ${addr.isDefault ? 'border-blue-600/50 bg-blue-900/10' : 'border-slate-800 bg-slate-800/30 hover:border-slate-700'}`}>
                             {addr.isDefault && (
                                 <span className="absolute top-3 right-3 flex items-center gap-1 text-[10px] bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20 font-bold">
-                                    <Star className="w-2.5 h-2.5" /> Default
+                                    <Star className="w-2.5 h-2.5" /> {t('common.default', 'Default')}
                                 </span>
                             )}
                             <div className="flex items-start gap-3">
@@ -68,11 +70,11 @@ export const AddressesTab: React.FC<AddressesTabProps> = ({
                             <div className="flex gap-2 mt-3 ml-12">
                                 <button onClick={() => openEditAddr(addr)}
                                     className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 bg-blue-400/5 hover:bg-blue-400/10 px-3 py-1.5 rounded-lg transition-colors border border-blue-400/15">
-                                    <Pencil className="w-3 h-3" /> Edit
+                                    <Pencil className="w-3 h-3" /> {t('common.edit', 'Edit')}
                                 </button>
                                 <button onClick={() => addr._id && deleteAddr(addr._id)}
                                     className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 bg-red-400/5 hover:bg-red-400/10 px-3 py-1.5 rounded-lg transition-colors border border-red-400/15">
-                                    <Trash2 className="w-3 h-3" /> Delete
+                                    <Trash2 className="w-3 h-3" /> {t('common.delete', 'Delete')}
                                 </button>
                             </div>
                         </div>

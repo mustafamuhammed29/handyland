@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Wrench, MessageSquare, ChevronRight, Send, Loader2 } from 'lucide-react';
 import { RepairTicket } from '../../types';
 import { api } from '../../utils/api';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardRepairsProps {
     repairs: RepairTicket[];
@@ -12,6 +13,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
     repairs,
     isLoading
 }) => {
+    const { t } = useTranslation();
     const [expandedRepairId, setExpandedRepairId] = useState<string | null>(null);
     const [localRepairs, setLocalRepairs] = useState<RepairTicket[]>([]);
     const [newNoteText, setNewNoteText] = useState('');
@@ -38,7 +40,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
             }
         } catch (err) {
             console.error('Failed to add note', err);
-            alert('Failed to add note. Please try again.');
+            alert(t('repairs.chat.error.send', 'Failed to add message. Please try again.'));
         } finally {
             setIsSubmittingNote(null);
         }
@@ -82,7 +84,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Active Repairs</h2>
+            <h2 className="text-2xl font-bold text-white">{t('repairs.title', 'Active Repairs')}</h2>
 
             <div className="space-y-4">
                 {localRepairs.map((ticket) => (
@@ -108,7 +110,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                     </div>
                                 </div>
                                 <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${getStatusColor(ticket.status)}`}>
-                                    {ticket.status}
+                                    {t(`repairs.status.${ticket.status}`, ticket.status)}
                                 </span>
                             </div>
 
@@ -121,17 +123,23 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                 ></div>
 
                                 <div className="relative z-10 flex justify-between">
-                                    {['Received', 'Diag', 'Repair', 'Test', 'Ready'].map((step, idx) => {
+                                    {[
+                                        { key: 'received', label: t('repairs.timeline.received', 'Received') },
+                                        { key: 'diagnosing', label: t('repairs.timeline.diag', 'Diag') },
+                                        { key: 'repairing', label: t('repairs.timeline.repair', 'Repair') },
+                                        { key: 'testing', label: t('repairs.timeline.test', 'Test') },
+                                        { key: 'ready', label: t('repairs.timeline.ready', 'Ready') }
+                                    ].map((step, idx) => {
                                         const currentStep = idx + 1;
                                         const active = currentStep <= getStatusStep(ticket.status);
                                         return (
-                                            <div key={step} className="flex flex-col items-center gap-2">
+                                            <div key={step.key} className="flex flex-col items-center gap-2">
                                                 <div className={`w-3 h-3 rounded-full border-2 transition-colors ${active
                                                     ? 'bg-brand-primary border-brand-primary shadow-[0_0_10px_#06b6d4]'
                                                     : 'bg-slate-900 border-slate-700'
                                                     }`}></div>
                                                 <span className={`text-[10px] font-bold uppercase ${active ? 'text-brand-primary' : 'text-slate-600'
-                                                    }`}>{step}</span>
+                                                    }`}>{step.label}</span>
                                             </div>
                                         );
                                     })}
@@ -143,19 +151,19 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                 <div className="flex items-center gap-4">
                                     {ticket.estimatedCompletion ? (
                                         <div className="text-xs text-slate-500">
-                                            Est. Fertigstellung:{' '}
+                                            {t('repairs.item.estCompletion', 'Est. Completion')}:{' '}
                                             <span className="text-white font-bold">
-                                                {new Date(ticket.estimatedCompletion).toLocaleDateString('de-DE', {
+                                                {new Date(ticket.estimatedCompletion).toLocaleDateString(t('common.locale', 'en-US'), {
                                                     weekday: 'short', day: '2-digit', month: 'short'
                                                 })}
                                             </span>
                                         </div>
                                     ) : (
-                                        <div className="text-xs text-slate-600">Fertigstellung: noch kein Datum</div>
+                                        <div className="text-xs text-slate-600">{t('repairs.item.noEstCompletion', 'Completion: TBD')}</div>
                                     )}
                                     {((ticket as any).estimatedCost !== undefined || ticket.cost !== undefined) && (
                                         <div className="text-xs text-slate-500">
-                                            Kosten: <span className="text-brand-primary font-bold">€{(ticket as any).estimatedCost || ticket.cost}</span>
+                                            {t('repairs.item.cost', 'Cost')}: <span className="text-brand-primary font-bold">€{(ticket as any).estimatedCost || ticket.cost}</span>
                                         </div>
                                     )}
                                 </div>
@@ -166,7 +174,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                     }}
                                     className="text-sm text-brand-primary font-bold hover:text-brand-primary flex items-center gap-1"
                                 >
-                                    {expandedRepairId === (ticket.id || ticket._id) ? 'Hide Details' : 'View Details'}
+                                    {expandedRepairId === (ticket.id || ticket._id) ? t('repairs.actions.hideDetails', 'Hide Details') : t('repairs.actions.viewDetails', 'View Details')}
                                     <ChevronRight className={`w-4 h-4 transition-transform ${expandedRepairId === (ticket.id || ticket._id) ? 'rotate-90' : ''}`} />
                                 </button>
                             </div>
@@ -179,7 +187,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                 <div className="flex flex-col h-[400px]">
                                     {/* Chat Header */}
                                     <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
-                                        <MessageSquare className="w-4 h-4" /> Ticket Chat
+                                        <MessageSquare className="w-4 h-4" /> {t('repairs.chat.title', 'Ticket Chat')}
                                     </h4>
                                     
                                     {/* Chat Window */}
@@ -188,7 +196,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                             {/* Legacy Notes Handling & Messages Map */}
                                             {(!ticket.messages || ticket.messages.length === 0) && !ticket.notes && !ticket.technicianNotes ? (
                                                 <div className="flex items-center justify-center h-full text-slate-600 text-sm italic">
-                                                    Keine Nachrichten bisher. Sende die erste Nachricht!
+                                                    {t('repairs.chat.empty', 'Keine Nachrichten bisher. Sende die erste Nachricht!')}
                                                 </div>
                                             ) : (
                                                 <div className="space-y-4">
@@ -216,7 +224,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                                                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                                                                 </div>
                                                                 <span className={`text-[10px] text-slate-500 font-mono ${msg.role === 'customer' ? 'text-right pr-1' : 'text-left pl-1'} `}>
-                                                                    {new Date(msg.timestamp).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
+                                                                    {new Date(msg.timestamp).toLocaleString(t('common.locale', 'en-US'), { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -230,7 +238,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                             <textarea 
                                                 value={newNoteText}
                                                 onChange={(e) => setNewNoteText(e.target.value)}
-                                                placeholder="Schreibe eine Nachricht..."
+                                                placeholder={t('repairs.chat.placeholder', 'Schreibe eine Nachricht...')}
                                                 className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 pr-12 text-sm text-white focus:border-blue-500 outline-none resize-none h-14 min-h-[56px] shadow-inner"
                                                 disabled={isSubmittingNote === (ticket.id || ticket._id)}
                                                 onKeyDown={(e) => {
@@ -258,15 +266,15 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                 {repairs.length === 0 && (
                     <div className="text-center py-16 border-2 border-dashed border-slate-800 rounded-2xl">
                         <Wrench className="w-16 h-16 mx-auto mb-4 text-slate-700" />
-                        <p className="text-lg font-bold text-white mb-1">No active repairs</p>
+                        <p className="text-lg font-bold text-white mb-1">{t('repairs.empty.title', 'No active repairs')}</p>
                         <p className="text-sm text-slate-500 mb-6">
-                            Need a repair? Browse our service catalog and contact us to get started.
+                            {t('repairs.empty.subtitle', 'Need a repair? Browse our service catalog and contact us to get started.')}
                         </p>
                         <a
                             href="/repair"
                             className="inline-block px-6 py-2.5 bg-brand-primary hover:bg-brand-primary text-white rounded-xl text-sm font-bold transition-colors"
                         >
-                            View Repair Services →
+                            {t('repairs.empty.cta', 'View Repair Services')} →
                         </a>
                     </div>
                 )}

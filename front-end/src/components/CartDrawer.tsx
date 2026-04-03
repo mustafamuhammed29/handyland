@@ -8,7 +8,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { api } from '../utils/api';
 import { formatPrice } from '../utils/formatPrice';
+import { getImageUrl } from '../utils/imageUrl';
+import { getImageUrl } from '../utils/imageUrl';
 import { useTranslation } from 'react-i18next';
+import { FREE_SHIPPING_THRESHOLD } from '../utils/constants';
 
 interface CartDrawerProps {}
 
@@ -16,7 +19,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    if (location.pathname === '/cart' || location.pathname === '/checkout') return null;
+    // BUG-03 fix: Prevent rendering on cart/checkout pages to avoid visual conflicts
+    const isCartPage = location.pathname === '/cart' || location.pathname === '/checkout';
+    if (isCartPage) return null;
+
     const {
         cart, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen,
         cartTotal, finalTotal,
@@ -31,9 +37,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
 
-    // Free Shipping Threshold (Dynamic)
-    const progress = Math.min((cartTotal / freeShippingThreshold) * 100, 100);
-    const remainingForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
+    const threshold = FREE_SHIPPING_THRESHOLD;
+    const progress = Math.min((cartTotal / threshold) * 100, 100);
+    const remainingForFreeShipping = Math.max(0, threshold - cartTotal);
 
     const handleCheckout = () => {
         setIsCartOpen(false);
@@ -183,7 +189,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                         whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" }}
                                     >
                                         <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden flex-shrink-0 pointer-events-none">
-                                            <img src={item.image} className="w-full h-full object-cover" alt="" />
+                                            <img
+                                                src={getImageUrl(item.image)}
+                                                className="w-full h-full object-cover"
+                                                alt=""
+                                                onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }}
+                                            />
                                         </div>
 
                                         <div className="flex-1 min-w-0 flex flex-col justify-between">

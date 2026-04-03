@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Package, Download, ChevronRight, Search, Filter, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Order } from '../../types';
 import { VisualOrderTimeline } from '../VisualOrderTimeline';
 
@@ -16,6 +17,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
     onDownloadInvoice
 }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
     const [orderFilter, setOrderFilter] = useState('all');
     const [orderSearch, setOrderSearch] = useState('');
@@ -56,8 +58,8 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
             {/* Header & Filters */}
             <div className="flex flex-col md:flex-row gap-4 justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">My Orders</h2>
-                    <p className="text-slate-400 text-sm">{filteredOrders.length} orders found</p>
+                    <h2 className="text-2xl font-bold text-white">{t('orders.title', 'My Orders')}</h2>
+                    <p className="text-slate-400 text-sm">{t('orders.count', { defaultValue: '{{count}} orders found', count: filteredOrders.length })}</p>
                 </div>
 
                 <div className="flex gap-3">
@@ -65,7 +67,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                         <input
                             type="text"
-                            placeholder="Search orders..."
+                            placeholder={t('orders.search.placeholder', 'Search orders...')}
                             value={orderSearch}
                             onChange={(e) => setOrderSearch(e.target.value)}
                             className="pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
@@ -77,11 +79,11 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         onChange={(e) => setOrderFilter(e.target.value)}
                         className="px-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                     >
-                        <option value="all">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
+                        <option value="all">{t('orders.filter.all', 'All Status')}</option>
+                        <option value="pending">{t('orders.status.pending', 'Pending')}</option>
+                        <option value="processing">{t('orders.status.processing', 'Processing')}</option>
+                        <option value="delivered">{t('orders.status.delivered', 'Delivered')}</option>
+                        <option value="cancelled">{t('orders.status.cancelled', 'Cancelled')}</option>
                     </select>
                 </div>
             </div>
@@ -101,9 +103,9 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                         <Package className="w-6 h-6 text-blue-400" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-white">Order {order.orderNumber || `#${order._id?.slice(-8)}`}</h3>
+                                        <h3 className="font-bold text-white">{t('orders.item.number', 'Order')} {order.orderNumber || `#${order._id?.slice(-8)}`}</h3>
                                         <p className="text-sm text-slate-400">
-                                            {new Date(order.createdAt).toLocaleDateString()} • {order.items?.length || 0} items
+                                            {new Date(order.createdAt).toLocaleDateString()} • {t('orders.item.count', { defaultValue: '{{count}} items', count: order.items?.length || 0 })}
                                         </p>
                                     </div>
                                 </div>
@@ -143,7 +145,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                             )}
                                             <div className="flex-1">
                                                 <p className="text-white font-medium">{item.name}</p>
-                                                <p className="text-sm text-slate-400">Qty: {item.quantity}</p>
+                                                <p className="text-sm text-slate-400">{t('orders.item.qty', 'Qty')}: {item.quantity}</p>
                                             </div>
                                             <p className="text-white font-bold">€{item.price?.toFixed(2)}</p>
                                         </div>
@@ -158,7 +160,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                             className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-xl text-sm font-bold transition-colors"
                                         >
                                             <Upload className="w-4 h-4" />
-                                            Upload Receipt
+                                            {t('orders.actions.uploadReceipt', 'Upload Receipt')}
                                         </button>
                                     )}
                                     <button
@@ -166,13 +168,13 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                         className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition-colors"
                                     >
                                         <Download className="w-4 h-4" />
-                                        Download Invoice
+                                        {t('orders.actions.downloadInvoice', 'Download Invoice')}
                                     </button>
                                     <button
                                         onClick={() => navigate(`/orders/${order._id}`)}
                                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-colors"
                                     >
-                                        View Details
+                                        {t('orders.actions.viewDetails', 'View Details')}
                                         <ChevronRight className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -188,18 +190,18 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)] flex items-center justify-center mb-6 border border-white/5">
                                 <Package className="w-10 h-10 text-blue-400 opacity-80" />
                             </div>
-                            <h3 className="text-2xl font-black text-white mb-2 tracking-tight">Noch keine Bestellungen</h3>
+                            <h3 className="text-2xl font-black text-white mb-2 tracking-tight">{t('orders.empty.title', 'Noch keine Bestellungen')}</h3>
                             <p className="text-base text-slate-400 mb-8 max-w-sm mx-auto">
                                 {orderSearch || orderFilter !== 'all' 
-                                    ? 'Keine Ergebnisse für deine Suche. Bitte passe die Filter an.' 
-                                    : 'Dein Profil ist noch ganz neu. Entdecke erstklassige Premium-Geräte in unserem Marktplatz!'}
+                                    ? t('orders.empty.noResults', 'Keine Ergebnisse für deine Suche. Bitte passe die Filter an.') 
+                                    : t('orders.empty.newProfile', 'Dein Profil ist noch ganz neu. Entdecke erstklassige Premium-Geräte in unserem Marktplatz!')}
                             </p>
                             {!orderSearch && orderFilter === 'all' && (
                                 <button
                                     onClick={() => navigate('/marketplace')}
                                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-brand-primary hover:scale-105 active:scale-95 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-900/30 w-full sm:w-auto flex items-center justify-center gap-2"
                                 >
-                                    Zum Marktplatz <ChevronRight className="w-4 h-4" />
+                                    {t('orders.empty.cta', 'Zum Marktplatz')} <ChevronRight className="w-4 h-4" />
                                 </button>
                             )}
                         </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, Lock, EyeOff, Eye, AlertCircle, Check, Loader2, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 function PasswordStrength({ password }: { password: string }) {
     const checks = {
@@ -9,8 +10,14 @@ function PasswordStrength({ password }: { password: string }) {
         special: /[^A-Za-z0-9]/.test(password),
     };
     const score = Object.values(checks).filter(Boolean).length;
+    const { t } = useTranslation();
     const bar = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-emerald-500'];
-    const label = ['Weak', 'Fair', 'Good', 'Strong'];
+    const label = [
+        t('settings.security.strength.weak', 'Weak'),
+        t('settings.security.strength.fair', 'Fair'),
+        t('settings.security.strength.good', 'Good'),
+        t('settings.security.strength.strong', 'Strong')
+    ];
     if (!password) return null;
     return (
         <div className="mt-2 space-y-2">
@@ -20,7 +27,12 @@ function PasswordStrength({ password }: { password: string }) {
                 ))}
             </div>
             <div className="flex gap-4 flex-wrap">
-                {Object.entries({ '8+ chars': checks.length, 'Uppercase': checks.uppercase, 'Number': checks.number, 'Symbol': checks.special }).map(([k, v]) => (
+                {Object.entries({ 
+                    [t('settings.security.checks.length', '8+ chars')]: checks.length, 
+                    [t('settings.security.checks.uppercase', 'Uppercase')]: checks.uppercase, 
+                    [t('settings.security.checks.number', 'Number')]: checks.number, 
+                    [t('settings.security.checks.symbol', 'Symbol')]: checks.special 
+                }).map(([k, v]) => (
                     <span key={k} className={`text-[11px] flex items-center gap-1 ${v ? 'text-emerald-400' : 'text-slate-500'}`}>
                         {v ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />} {k}
                     </span>
@@ -52,11 +64,12 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
     showPw,
     setShowPw,
 }) => {
+    const { t } = useTranslation();
     return (
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-slate-800/60">
-                <h3 className="text-lg font-bold text-white">Change Password</h3>
-                <p className="text-slate-400 text-sm mt-0.5">Use a strong, unique password for your account</p>
+                <h3 className="text-lg font-bold text-white">{t('settings.security.title', 'Change Password')}</h3>
+                <p className="text-slate-400 text-sm mt-0.5">{t('settings.security.subtitle', 'Use a strong, unique password for your account')}</p>
             </div>
             <form onSubmit={savePassword} className="p-6 space-y-5">
                 {pwMsg && (
@@ -69,7 +82,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
                 {/* Current password */}
                 <div>
                     <label htmlFor="pw-current" className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
-                        <Lock className="w-4 h-4 text-slate-500" /> Current Password
+                        <Lock className="w-4 h-4 text-slate-500" /> {t('settings.security.currentPassword', 'Current Password')}
                     </label>
                     <div className="relative">
                         <input id="pw-current" type={showPw.current ? 'text' : 'password'} required value={pwForm.current}
@@ -87,12 +100,12 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
                 {/* New password */}
                 <div>
                     <label htmlFor="pw-new" className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
-                        <Lock className="w-4 h-4 text-slate-500" /> New Password
+                        <Lock className="w-4 h-4 text-slate-500" /> {t('settings.security.newPassword', 'New Password')}
                     </label>
                     <div className="relative">
                         <input id="pw-new" type={showPw.new ? 'text' : 'password'} required value={pwForm.newPw}
                             onChange={e => setPwForm(p => ({ ...p, newPw: e.target.value }))}
-                            placeholder="Min. 8 characters"
+                            placeholder={t('settings.security.newPasswordPlaceholder', 'Min. 8 characters')}
                             className="w-full px-4 py-3 pr-12 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-blue-500 transition-colors" />
                         <button type="button" onClick={() => setShowPw(p => ({ ...p, new: !p.new }))}
                             aria-label="Toggle new password visibility"
@@ -106,7 +119,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
                 {/* Confirm password */}
                 <div>
                     <label htmlFor="pw-confirm" className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
-                        <Lock className="w-4 h-4 text-slate-500" /> Confirm New Password
+                        <Lock className="w-4 h-4 text-slate-500" /> {t('settings.security.confirmPassword', 'Confirm New Password')}
                     </label>
                     <div className="relative">
                         <input id="pw-confirm" type={showPw.confirm ? 'text' : 'password'} required value={pwForm.confirm}
@@ -120,17 +133,17 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
                         </button>
                     </div>
                     {pwForm.confirm && pwForm.newPw !== pwForm.confirm && (
-                        <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><X className="w-3 h-3" /> Passwords do not match</p>
+                        <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><X className="w-3 h-3" /> {t('settings.security.error.match', 'Passwords do not match')}</p>
                     )}
                     {pwForm.confirm && pwForm.newPw === pwForm.confirm && pwForm.confirm.length > 0 && (
-                        <p className="text-emerald-400 text-xs mt-1 flex items-center gap-1"><Check className="w-3 h-3" /> Passwords match</p>
+                        <p className="text-emerald-400 text-xs mt-1 flex items-center gap-1"><Check className="w-3 h-3" /> {t('settings.security.success.match', 'Passwords match')}</p>
                     )}
                 </div>
 
                 <button type="submit" disabled={pwSaving || !pwForm.current || !pwForm.newPw || !pwForm.confirm}
                     className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-900/20">
                     {pwSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
-                    Update Password
+                    {t('settings.security.submit', 'Update Password')}
                 </button>
             </form>
         </div>

@@ -85,7 +85,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                     id: productData.id || productData._id || id,
                     model: productData.name || productData.model,
                     specs: {
-                        cpu: productData.processor || productData.specs?.cpu || 'Standard Chip',
+                        cpu: productData.processor || productData.chipset || 'See full specs',
                         battery: productData.battery || productData.specs?.battery || 'Standard Battery',
                         screen: productData.display || productData.specs?.screen || 'HD Display',
                         ram: productData.specs?.ram || 'N/A',
@@ -203,6 +203,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                         src={getImageUrl(activeImage)}
                         alt="Zoomed Product"
                         className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                        onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-phone.png'; }}
                         onClick={(e) => e.stopPropagation()}
                     />
                 </div>
@@ -259,7 +260,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
 
                         <div className="flex items-end gap-3 mb-8">
                             <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">
-                                {product.price}{t('currency', '€')}
+                                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(product.price)}
                             </div>
                             {/* Stock Indicator */}
                             <div className={`text-sm mb-2 font-medium ${(product.stock || 0) > 0 ? ((product.stock || 0) < 5 ? 'text-orange-400' : 'text-green-400') : 'text-red-500'}`}>

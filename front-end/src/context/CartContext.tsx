@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import { useSettings } from './SettingsContext';
 import { api } from '../utils/api';
 import { debounce } from '../utils/debounce';
+import { FREE_SHIPPING_THRESHOLD } from '../utils/constants';
 
 interface Coupon {
     code: string;
@@ -50,7 +51,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Mutex to prevent race conditions on rapid quantity updates (Issue #12 fix)
     const [updating, setUpdating] = useState<Set<string | number>>(new Set());
     const { settings } = useSettings();
-    const freeShippingThreshold = settings?.freeShippingThreshold ?? 100;
+    const freeShippingThreshold = settings?.freeShippingThreshold ?? FREE_SHIPPING_THRESHOLD;
 
     // Persistence (Local)
     useEffect(() => {

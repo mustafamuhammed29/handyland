@@ -6,6 +6,7 @@ import { ShoppingCart, ArrowRight, Minus, Plus, Trash2, ArrowLeft, Sparkles } fr
 import { LanguageCode } from '../types';
 import { api } from '../utils/api';
 import { getImageUrl } from '../utils/imageUrl';
+import { FREE_SHIPPING_THRESHOLD } from '../utils/constants';
 
 interface CartProps {
     lang: LanguageCode;
@@ -47,7 +48,8 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
     }, []);
 
     const isRtl = lang === 'ar';
-    const isFreeShipping = finalTotal >= freeShippingThreshold;
+    const threshold = FREE_SHIPPING_THRESHOLD; 
+    const isFreeShipping = finalTotal >= threshold;
 
     if (cart.length === 0) {
         return (
@@ -102,7 +104,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                         src={getImageUrl(item.image)}
                                         alt={item.title || (item as any).name}
                                         className="w-full h-full object-contain"
-                                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150'; }}
+                                        onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }}
                                     />
                                 </div>
 
@@ -171,7 +173,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 {upsellItems.map((item) => (
                                     <div key={item._id || item.id} className="bg-slate-950/80 backdrop-blur-sm rounded-xl p-4 border border-slate-800 hover:border-brand-primary/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all flex flex-col group/item relative overflow-hidden">
                                         <div className="h-28 bg-white/5 rounded-lg p-2 mb-4 flex items-center justify-center relative">
-                                            <img src={getImageUrl(item.image)} alt={item.name} className="max-h-full object-contain drop-shadow-lg group-hover/item:scale-110 transition-transform duration-500" />
+                                            <img src={getImageUrl(item.image)} alt={item.name} className="max-h-full object-contain drop-shadow-lg group-hover/item:scale-110 transition-transform duration-500" onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }} />
                                         </div>
                                         <h4 className="text-white font-bold text-sm mb-1 line-clamp-2 leading-tight flex-1" title={item.name}>{item.name}</h4>
                                         <div className="flex justify-between items-center mt-3">
@@ -222,17 +224,17 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 {freeShippingThreshold > 0 && (
                                     <div className="mt-4 pt-4 border-t border-slate-800">
                                         <div className="flex justify-between text-xs text-slate-400 mb-2">
-                                            {Math.max(0, freeShippingThreshold - cartTotal) > 0 ? (
-                                                <span>Add €{Math.max(0, freeShippingThreshold - cartTotal).toFixed(2)} for Free Shipping</span>
+                                            {Math.max(0, threshold - cartTotal) > 0 ? (
+                                                <span>Add €{Math.max(0, threshold - cartTotal).toFixed(2)} for Free Shipping</span>
                                             ) : (
                                                 <span className="text-emerald-400 font-bold">You've unlocked Free Shipping!</span>
                                             )}
-                                            <span>{Math.min(100, Math.round((cartTotal / freeShippingThreshold) * 100))}%</span>
+                                            <span>{Math.min(100, Math.round((cartTotal / threshold) * 100))}%</span>
                                         </div>
                                         <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                                             <div 
                                                 className="bg-blue-500 h-1.5 transition-all duration-500 ease-out rounded-full"
-                                                style={{ width: `${Math.min((cartTotal / freeShippingThreshold) * 100, 100)}%` }}
+                                                style={{ width: `${Math.min((cartTotal / threshold) * 100, 100)}%` }}
                                             />
                                         </div>
                                     </div>
