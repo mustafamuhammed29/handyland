@@ -159,7 +159,6 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 </div>
                             </div>
                         ))}
-                    </div>
 
                     {/* Smart Cart Upselling */}
                     {features?.cartUpselling !== false && upsellItems.length > 0 && (
@@ -199,6 +198,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                             </div>
                         </div>
                     )}
+                    </div>
 
                     {/* Order Summary */}
                     <div className="lg:col-span-4 lg:sticky lg:top-28 self-start mt-8 lg:mt-0">
