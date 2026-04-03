@@ -113,7 +113,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     <motion.img
                         whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.4 }}
-                        src={getProductImage(product)}
+                        src={getImageUrl(product.images?.[0] || (product as any).image)}
                         alt={product.model || (product as any).name || 'Product'}
                         onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-phone.png'; }}
                         loading="lazy"
