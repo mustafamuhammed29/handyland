@@ -9,7 +9,9 @@ const Sentry = require('@sentry/node');
 Sentry.init({
   dsn: process.env.SENTRY_DSN || '',
   environment: process.env.NODE_ENV || 'development',
-  tracesSampleRate: 1.0,
+  // BUG-NEW-04 fix: 100% sampling in production causes performance overhead and high Sentry cost.
+  // Use 10% in production and full sampling in dev for debugging.
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 });
 
 const http = require('http');
@@ -52,31 +54,33 @@ const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {fs.mkdirSync(uploadDir, { recursive: true });}
 app.use('/uploads', express.static(uploadDir));
 
-// ── Swagger docs ───────────────────────────────────────────────────────────────
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpecs = require('./config/swagger');
-app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+// ARCH-02 fix: Only expose Swagger docs in non-production environments.
+// In production, API documentation should be protected or disabled.
+if (process.env.NODE_ENV !== 'production') {
+    const swaggerUi = require('swagger-ui-express');
+    const swaggerSpecs = require('./config/swagger');
+    app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+}
 
 // ── Feature routes (all 30+ routes via index) ──────────────────────────────────
 app.use('/api', require('./routes/index'));
 
 // ── Root & health ──────────────────────────────────────────────────────────────
+// ARCH-03/04 fix: Minimal info in production — don't leak docs URL or uptime.
 app.get('/', (req, res) => {
-    res.json({
-        message: 'HandyLand Backend API',
-        version: '1.0.0',
-        docs: '/api/api-docs',
-        health: '/health',
-    });
+    res.json({ status: 'ok' });
 });
 
 app.get('/health', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) {throw new Error('Database not connected');}
         await mongoose.connection.db.admin().ping();
-        res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
+        // Omit uptime in production — it reveals deployment timing
+        const payload = { status: 'ok', timestamp: new Date().toISOString() };
+        if (process.env.NODE_ENV !== 'production') {payload.uptime = process.uptime();}
+        res.status(200).json(payload);
     } catch (error) {
-        res.status(503).json({ status: 'error', message: error.message });
+        res.status(503).json({ status: 'error' });
     }
 });
 

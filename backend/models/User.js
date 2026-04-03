@@ -81,7 +81,8 @@ const UserSchema = new mongoose.Schema({
     // Wallet & Loyalty
     balance: {
         type: Number,
-        default: 0.00
+        default: 0.00,
+        min: [0, 'Balance cannot be negative'] // BUG-NEW-13 fix
     },
     loyaltyPoints: {
         type: Number,

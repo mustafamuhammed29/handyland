@@ -19,6 +19,7 @@ interface ShippingFormData {
     phone: string;
     address: string;
     city: string;
+    state: string;
     zipCode: string;
     country: string;
 }
@@ -82,6 +83,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                                         fullName: addr.name || prev.fullName,
                                         address: addr.street || '',
                                         city: addr.city || '',
+                                        state: addr.state || '',
                                         zipCode: addr.zipCode || addr.postalCode || '',
                                         country: addr.country || 'Germany',
                                         phone: addr.phone || prev.phone
@@ -172,7 +174,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                     />
                     {formErrors.address && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.address}</p>}
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-400">City</label>
                         <input
@@ -184,6 +186,18 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                             placeholder="Berlin"
                         />
                         {formErrors.city && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.city}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-400">State / Region</label>
+                        <input
+                            type="text"
+                            name="state"
+                            value={formData.state}
+                            onChange={onChange}
+                            className={`w-full bg-black/40 border ${formErrors.state ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
+                            placeholder="BE"
+                        />
+                        {formErrors.state && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.state}</p>}
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-400">Zip Code</label>

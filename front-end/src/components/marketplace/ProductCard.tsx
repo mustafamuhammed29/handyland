@@ -48,7 +48,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     <img
                         src={getProductImage(product)}
                         alt={product.model}
-                        onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
+                        onError={(e: any) => { e.target.src = '/placeholder-device.svg'; }}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                 </div>
@@ -113,7 +113,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         transition={{ duration: 0.4 }}
                         src={getProductImage(product)}
                         alt={product.model || (product as any).name || 'Product'}
-                        onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
+                        onError={(e: any) => { e.target.src = '/placeholder-device.svg'; }}
                         loading="lazy"
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100"
                     />

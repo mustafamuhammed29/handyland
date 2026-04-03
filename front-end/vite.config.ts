@@ -50,8 +50,7 @@ export default defineConfig(({ mode }) => {
             'vendor-ui': ['framer-motion', 'lucide-react', 'clsx', 'tailwind-merge'],
             'vendor-utils': ['axios', 'i18next', 'react-i18next', '@tanstack/react-query'],
             'vendor-payment': ['@stripe/stripe-js', '@stripe/react-stripe-js', '@paypal/react-paypal-js'],
-            'vendor-charts': ['recharts'],
-            'vendor-ai': ['@google/genai']
+            'vendor-charts': ['recharts']
           }
         }
       },

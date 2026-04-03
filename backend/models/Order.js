@@ -144,17 +144,14 @@ OrderSchema.pre('validate', async function (next) {
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
 
-        const lastOrder = await this.constructor.findOne({
-            orderNumber: new RegExp(`^HL-${year}${month}${day}`)
-        }).sort({ orderNumber: -1 });
-
-        let sequence = 1;
-        if (lastOrder) {
-            const lastSequence = parseInt(lastOrder.orderNumber.split('-').pop());
-            sequence = lastSequence + 1;
-        }
-
-        this.orderNumber = `HL-${year}${month}${day}-${String(sequence).padStart(4, '0')}`;
+// BUG-NEW-05 fix: replaced sequential query-based generation with crypto random suffix.
+        // Old approach had two problems:
+        //   1. Race condition: two concurrent orders could query same "last" and get same sequence
+        //   2. Predictable: HL-YYYYMMDD-0001 reveals daily order volume
+        // crypto.randomBytes(3).toString('hex') gives 6 hex chars = 16^6 = 16M combinations per day
+        const crypto = require('crypto');
+        const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
+        this.orderNumber = `HL-${year}${month}${day}-${randomSuffix}`;
     }
 
     // 2. Integrity Check: Verify Total Amount

@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "^1.39.0",
     "@hookform/resolvers": "^5.2.2",
     "@paypal/react-paypal-js": "^9.0.0",
     "@sentry/react": "^10.46.0",
@@ -18,10 +17,8 @@
     "@tailwindcss/postcss": "^4.2.1",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.90.20",
-    "@types/crypto-js": "^4.2.2",
     "axios": "^1.13.5",
     "clsx": "^2.1.1",
-    "crypto-js": "^4.2.0",
     "framer-motion": "^12.34.5",
     "i18next": "^25.8.13",
     "i18next-browser-languagedetector": "^8.2.1",
@@ -33,6 +30,7 @@
     "react-hook-form": "^7.71.1",
     "react-hot-toast": "^2.6.0",
     "react-i18next": "^16.5.4",
+    "react-is": "^19.2.4",
     "react-phone-number-input": "^3.4.16",
     "react-router-dom": "^7.13.0",
     "recharts": "^3.7.0",
@@ -42,8 +40,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
-    "@types/react": "^19.2.13",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
     "@types/react-helmet-async": "^1.0.1",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.27",

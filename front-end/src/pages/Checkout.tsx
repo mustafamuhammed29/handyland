@@ -34,6 +34,7 @@ const shippingSchema = z.object({
     phone: z.string().regex(/^(\+|00)?[1-9][0-9\s\-().]{6,20}$/, "Invalid phone number format"),
     address: z.string().min(5, "Address is too short").max(200, "Address is too long"),
     city: z.string().min(2, "City is required").max(100, "City name too long"),
+    state: z.string().min(2, "State/Region is required"),
     zipCode: z.string().regex(/^[0-9]{4,10}$/, "Invalid Zip/Postal Code (4-10 digits)"),
     country: z.string().min(2, "Country is required"),
 });
@@ -82,6 +83,7 @@ export const Checkout: React.FC = () => {
         phone: '',
         address: '',
         city: '',
+        state: '',
         zipCode: '',
         country: 'Germany'
     });
@@ -285,7 +287,8 @@ export const Checkout: React.FC = () => {
         const discount = coupon ? coupon.discount : 0;
         const redeemRate = features?.loyalty?.redeemRate || 100;
         const pointsDiscount = appliedPoints / redeemRate;
-        return Math.max(0, cartTotal + shippingCost - discount - pointsDiscount);
+        const taxAmount = cartTotal * 0.19;
+        return Math.max(0, cartTotal + shippingCost + taxAmount - discount - pointsDiscount);
     };
 
     const getShippingCostDisplay = (method: ShippingMethod) => {

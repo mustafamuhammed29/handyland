@@ -18,6 +18,7 @@ export interface PhoneListing {
     camera?: string;
     ram?: string;
   };
+  category?: string;
   rating?: number;
   numReviews?: number;
 }
