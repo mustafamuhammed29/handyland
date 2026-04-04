@@ -163,7 +163,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="SEARCH DEVICE MODEL (e.g. iPhone 15, S24)..."
+                            placeholder={t('repair.searchPlaceholder', 'GERÄTEMODELL SUCHEN (z.B. iPhone 15, S24)...')}
                             className="w-full pl-14 pr-6 py-5 bg-black/50 border border-transparent rounded-2xl text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-lg font-mono placeholder:text-slate-600 transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}

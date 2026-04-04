@@ -155,7 +155,7 @@ export const Checkout: React.FC = () => {
             
             setShippingDetails(prev => ({
                 ...prev,
-                fullName: user.name || prev.fullName,
+                fullName: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.name || prev.fullName,
                 email: user.email || prev.email,
                 phone: user.phone || prev.phone,
                 // FIXED C: Real mapping

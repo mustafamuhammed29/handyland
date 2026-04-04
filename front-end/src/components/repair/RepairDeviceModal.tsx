@@ -36,7 +36,7 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
 
                 {/* LEFT: Device Visual & ID */}
                 <div className="w-full md:w-1/3 bg-slate-900/50 border-r border-slate-800 p-8 flex flex-col items-center justify-center relative">
-                    <div className="text-xs font-mono text-blue-500 mb-4 tracking-widest uppercase">Target System</div>
+                    <div className="text-xs font-mono text-blue-500 mb-4 tracking-widest uppercase">{t('repair.targetSystem', 'ZIELSYSTEM')}</div>
                     <div className="relative w-48 h-64 mb-6 group">
                         <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-50 group-hover:opacity-75 transition-opacity"></div>
                         <LazyImage
@@ -107,7 +107,7 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                     </div>
 
                     <div className="mt-8 p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-xs text-slate-500 font-mono">
-                        <p>NOTE: Prices include labor and premium parts. Diagnostic scan required before final repair confirmation.</p>
+                        <p>{t('repair.note', 'HINWEIS: Preise beinhalten Arbeit und Premium-Teile. Diagnosescan vor endgültiger Reparaturbestätigung erforderlich.')}</p>
                     </div>
                 </div>
             </div>

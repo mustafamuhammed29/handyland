@@ -15,7 +15,6 @@ export const ComparePage: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
-        // Fetch products list for search
         const fetchProducts = async () => {
             try {
                 const data: any = await api.get('/api/products');
@@ -35,7 +34,6 @@ export const ComparePage: React.FC = () => {
         fetchProducts();
     }, []);
 
-    // Effect to sync URL params to selectedProducts once products are loaded
     useEffect(() => {
         if (products.length > 0) {
             const deviceIds = searchParams.get('devices')?.split(',') || [];
@@ -72,12 +70,11 @@ export const ComparePage: React.FC = () => {
 
     const handleRemoveProduct = (slotIndex: number) => {
         const newSelected = [...selectedProducts];
-        newSelected[slotIndex] = undefined; // Set to undefined instead of splicing to keep the slot
+        newSelected[slotIndex] = undefined;
         setSelectedProducts(newSelected);
         updateUrlParams(newSelected);
     };
 
-    // Prepare exactly 3 slots for UI layout
     const slots = [0, 1, 2];
 
     const safeProducts = Array.isArray(products) ? products : [];
@@ -89,7 +86,6 @@ export const ComparePage: React.FC = () => {
         selectedProducts.forEach(product => {
             if (!product) return;
             
-            // Map core fields to "Stammdaten" (Master Data) like the screenshot
             if (!specMap['Stammdaten']) specMap['Stammdaten'] = new Set();
             if (product.brand) specMap['Stammdaten'].add('Marke');
             if (product.model || product.name) specMap['Stammdaten'].add('Modell');
@@ -111,7 +107,6 @@ export const ComparePage: React.FC = () => {
                     if (!specMap[category]) specMap[category] = new Set();
                     Object.keys(categoryValue).forEach(key => specMap[category].add(key));
                 } else if (typeof categoryValue === 'string' || typeof categoryValue === 'number' || typeof categoryValue === 'boolean') {
-                    // Legacy flat specs (processor, display) mapped to Hauptmerkmale
                     const keyName = category.charAt(0).toUpperCase() + category.slice(1);
                     if (['Processor', 'Display', 'Camera', 'Battery'].includes(keyName)) {
                         if (!specMap['Hauptmerkmale']) specMap['Hauptmerkmale'] = new Set();
@@ -131,7 +126,6 @@ export const ComparePage: React.FC = () => {
                 keys: Array.from(keysSet)
             }));
             
-        // Order categories for optimal visualization
         return finalized.sort((a, b) => {
             if (a.category === 'Stammdaten') return -1;
             if (b.category === 'Stammdaten') return 1;
@@ -154,7 +148,6 @@ export const ComparePage: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Selection Slots */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                     {slots.map((slotIndex) => {
                         const product = selectedProducts[slotIndex];
@@ -166,7 +159,7 @@ export const ComparePage: React.FC = () => {
                                     <div className="absolute inset-0 bg-slate-900 z-20 flex flex-col p-4 animate-in fade-in zoom-in-95 duration-200">
                                         <div className="flex justify-between items-center mb-4">
                                             <h3 className="font-bold text-slate-300">{t('compare.selectDevice', 'Select a device')}</h3>
-                                            <button onClick={() => setIsSearching(null)} title="Close search" className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400"/></button>
+                                            <button onClick={() => setIsSearching(null)} title={t('common.close', 'Close')} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400"/></button>
                                         </div>
                                         <div className="relative mb-4">
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -197,7 +190,7 @@ export const ComparePage: React.FC = () => {
                                     <>
                                         <button 
                                             onClick={() => handleRemoveProduct(slotIndex)}
-                                            title="Remove device"
+                                            title={t('common.remove', 'Remove')}
                                             className="absolute top-4 right-4 p-2 bg-slate-950 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors z-10"
                                         >
                                             <X className="w-4 h-4" />

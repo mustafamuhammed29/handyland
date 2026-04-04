@@ -124,7 +124,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
                     <div className="flex flex-col gap-4 sticky md:relative top-0 z-[60] bg-slate-100/95 dark:bg-slate-950/95 md:bg-transparent dark:md:bg-transparent backdrop-blur-xl -mx-4 px-4 py-3 md:py-0 md:mx-0 md:px-0 md:backdrop-blur-none transition-colors border-b border-black/5 dark:border-white/5 md:border-transparent">
                         <div className="hidden md:flex justify-between items-end gap-4 mb-2">
                             <div>
-                                <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">MARKET<span className="text-brand-primary">PLACE</span></h2>
+                                <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">{t('marketplace.title', 'MARKT')}<span className="text-brand-primary">{t('marketplace.titleAccent', 'PLATZ')}</span></h2>
                                 <div className="h-1 w-16 md:w-24 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full"></div>
                             </div>
                         </div>
@@ -148,9 +148,9 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
                                     onChange={(e) => mp.setSort(e.target.value)} 
                                     className="bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl px-4 py-3 md:py-2 text-sm border-none focus:ring-1 focus:ring-brand-primary outline-none cursor-pointer font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
                                 >
-                                    <option value="newest">{t('marketplace.sort')} - Newest</option>
-                                    <option value="price_asc">Price: Low to High</option>
-                                    <option value="price_desc">Price: High to Low</option>
+                                    <option value="newest">{t('marketplace.sortNewest', 'Sortieren - Neueste')}</option>
+                                    <option value="price_asc">{t('marketplace.sortPriceLow', 'Preis: Aufsteigend')}</option>
+                                    <option value="price_desc">{t('marketplace.sortPriceHigh', 'Preis: Absteigend')}</option>
                                 </select>
                                 <div className="flex items-center gap-1 border-l border-black/10 dark:border-white/10 pl-2">
                                     {(!features || features.comparisonEngine !== false) && (
@@ -161,7 +161,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
                                             className="px-3 md:px-4 py-2 flex items-center justify-center gap-2 rounded-xl md:rounded-lg transition-all bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-black font-bold mr-1"
                                         >
                                             <Layers className="w-4 h-4" />
-                                            <span className="hidden md:inline text-sm">Compare</span>
+                                            <span className="hidden md:inline text-sm">{t('marketplace.compare', 'Vergleichen')}</span>
                                         </button>
                                     )}
                                     <button 
@@ -212,7 +212,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
                             {t('common.back')}
                         </button>
                         <span className="text-slate-500 dark:text-slate-400 font-mono">
-                            Page <span className="text-slate-900 dark:text-white font-bold">{mp.currentPage}</span> of {mp.totalPages}
+                            {t('common.page', 'Seite')} <span className="text-slate-900 dark:text-white font-bold">{mp.currentPage}</span> {t('common.of', 'von')} {mp.totalPages}
                         </span>
                         <button
                             onClick={() => mp.setCurrentPage(prev => Math.min(prev + 1, mp.totalPages))}

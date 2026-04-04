@@ -54,16 +54,18 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number, d
 };
 
 import { useSettings } from '../context/SettingsContext';
+import { useTranslation } from 'react-i18next';
 
 export const Stats: React.FC = () => {
   const { settings } = useSettings();
+  const { t } = useTranslation();
 
   const stats = [
     {
       icon: <Wrench className="w-6 h-6" />,
       value: settings?.stats?.devicesRepaired || 250,
       suffix: '+',
-      label: 'Devices Repaired',
+      label: t('stats.devicesRepaired', 'Geräte repariert'),
       color: 'text-brand-primary',
       border: 'group-hover:border-brand-primary/50',
       bg: 'group-hover:bg-brand-primary/10'
@@ -72,7 +74,7 @@ export const Stats: React.FC = () => {
       icon: <Users className="w-6 h-6" />,
       value: settings?.stats?.happyCustomers || 180,
       suffix: '+',
-      label: 'Happy Customers',
+      label: t('stats.happyCustomers', 'Zufriedene Kunden'),
       color: 'text-purple-400',
       border: 'group-hover:border-purple-500/50',
       bg: 'group-hover:bg-purple-500/10'
@@ -81,7 +83,7 @@ export const Stats: React.FC = () => {
       icon: <Trophy className="w-6 h-6" />,
       value: settings?.stats?.yearsExperience || 2,
       suffix: '+',
-      label: 'Years Experience',
+      label: t('stats.yearsExperience', 'Jahre Erfahrung'),
       color: 'text-amber-400',
       border: 'group-hover:border-amber-500/50',
       bg: 'group-hover:bg-amber-500/10'
@@ -90,7 +92,7 @@ export const Stats: React.FC = () => {
       icon: <Star className="w-6 h-6" />,
       value: settings?.stats?.averageRating || 4.9,
       suffix: '/5',
-      label: 'Average Rating',
+      label: t('stats.averageRating', 'Durchschnittsbewertung'),
       color: 'text-yellow-400',
       border: 'group-hover:border-brand-secondary/50',
       bg: 'group-hover:bg-brand-secondary/10',
@@ -112,7 +114,7 @@ export const Stats: React.FC = () => {
         {/* Section Header */}
         <div className="flex items-center gap-3 mb-10 justify-center md:justify-start opacity-80">
           <Activity className="w-5 h-5 text-brand-primary animate-pulse" />
-          <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-[0.2em]">Our Trust Metrics</span>
+          <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-[0.2em]">{t('stats.sectionTitle', 'Unsere Vertrauensmetriken')}</span>
           <div className="h-px bg-gradient-to-r from-brand-primary/50 to-transparent w-32"></div>
         </div>
 
