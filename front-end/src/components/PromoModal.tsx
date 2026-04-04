@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, Tag, Copy, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import { useTranslation } from 'react-i18next';
 
 export const PromoModal = () => {
     const { settings } = useSettings();
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     // Use a ref so close state persists across re-renders without triggering effects
@@ -77,7 +79,7 @@ export const PromoModal = () => {
 
                     <div className="space-y-3">
                         <h2 className="text-2xl sm:text-3xl font-black text-white px-4">
-                            {settings.promoPopup.title || 'Special Offer!'}
+                            {settings.promoPopup.title || t('promo.title', 'Sonderangebot!')}
                         </h2>
                         <p className="text-slate-300 leading-relaxed max-w-[280px] mx-auto text-sm sm:text-base">
                             {settings.promoPopup.message}
@@ -87,7 +89,7 @@ export const PromoModal = () => {
                     {settings.promoPopup.couponCode && (
                         <div className="pt-2">
                             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                                Your exclusive code
+                                {t('promo.yourCode', 'DEIN EXKLUSIVER CODE')}
                             </p>
                             <div
                                 onClick={handleCopy}
@@ -103,12 +105,12 @@ export const PromoModal = () => {
                                     {copied ? (
                                         <>
                                             <CheckCircle2 className="w-4 h-4" />
-                                            Copied!
+                                            {t('promo.copied', 'Kopiert!')}
                                         </>
                                     ) : (
                                         <>
                                             <Copy className="w-4 h-4" />
-                                            Copy
+                                            {t('promo.copy', 'Kopieren')}
                                         </>
                                     )}
                                 </div>
@@ -117,12 +119,12 @@ export const PromoModal = () => {
                                 <div className="mt-4 flex flex-col gap-2 text-sm text-slate-400 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
                                     <div className="flex items-center justify-center gap-2">
                                         <Clock className="w-4 h-4 text-blue-400" />
-                                        <span>Valid until: <span className="text-white font-medium">{new Date(settings.promoPopup.couponDetails.validUntil).toLocaleDateString()}</span></span>
+                                        <span>{t('promo.validUntil', 'Gültig bis')}: <span className="text-white font-medium">{new Date(settings.promoPopup.couponDetails.validUntil).toLocaleDateString()}</span></span>
                                     </div>
                                     {settings.promoPopup.couponDetails.usageLimit && (
                                         <div className="flex items-center justify-center gap-2">
                                             <AlertCircle className="w-4 h-4 text-emerald-400" />
-                                            <span>Coupons left: <span className="text-white font-medium">{Math.max(0, settings.promoPopup.couponDetails.usageLimit - settings.promoPopup.couponDetails.usedCount)}</span></span>
+                                            <span>{t('promo.couponsLeft', 'Gutscheine übrig')}: <span className="text-white font-medium">{Math.max(0, settings.promoPopup.couponDetails.usageLimit - settings.promoPopup.couponDetails.usedCount)}</span></span>
                                         </div>
                                     )}
                                 </div>
@@ -134,7 +136,7 @@ export const PromoModal = () => {
                         onClick={handleClose}
                         className="text-xs font-medium text-slate-500 hover:text-slate-300 underline-offset-4 hover:underline transition-colors mt-4 block mx-auto"
                     >
-                        No thanks, continue to site
+                        {t('promo.noThanks', 'Nein danke, weiter zur Seite')}
                     </button>
                 </div>
             </div>

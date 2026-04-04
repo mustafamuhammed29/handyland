@@ -27,7 +27,7 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                         {/* Status Light */}
                         <div className="absolute top-6 right-6 flex items-center gap-2">
                             <span className="text-[10px] font-bold text-slate-500 uppercase group-hover:text-blue-400 transition-colors">
-                                {device.services?.length || 0} Services
+                                {device.services?.length || 0} {t('repair.services', 'Dienste')}
                             </span>
                             <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse"></div>
                         </div>
@@ -51,7 +51,7 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                         <div className="space-y-2">
                             <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-slate-800/50 group-hover:border-blue-500/20 transition-colors">
                                 <span className="text-slate-500 text-xs flex items-center gap-2">
-                                    <Monitor className="w-3 h-3" /> Screen Repair
+                                    <Monitor className="w-3 h-3" /> {t('repair.screenReplacement', 'Displayreparatur')}
                                 </span>
                                 <span className="text-white font-mono text-xs font-bold">
                                     {(() => {
@@ -62,7 +62,7 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                             </div>
                             <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-slate-800/50 group-hover:border-blue-500/20 transition-colors">
                                 <span className="text-slate-500 text-xs flex items-center gap-2">
-                                    <Battery className="w-3 h-3" /> Battery
+                                    <Battery className="w-3 h-3" /> {t('repair.batteryReplacement', 'Akkutausch')}
                                 </span>
                                 <span className="text-white font-mono text-xs font-bold">
                                     {(() => {
@@ -74,9 +74,9 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                         </div>
 
                         <div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4 group-hover:border-blue-500/20">
-                            <span className="text-xs text-slate-500 font-mono">STATUS: SERVICEABLE</span>
+                            <span className="text-xs text-slate-500 font-mono">{t('repair.statusServiceable', 'STATUS: VERFÜGBAR')}</span>
                             <div className="flex items-center gap-1 text-blue-500 text-xs font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform">
-                                Open Diagnostics <ChevronRight className="w-3 h-3" />
+                                {t('repair.openDiagnostics', 'Diagnostik öffnen')} <ChevronRight className="w-3 h-3" />
                             </div>
                         </div>
                     </button>
@@ -100,14 +100,14 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                         </div>
                     ) : (
                         <div className="flex flex-col items-center">
-                            <h3 className="text-xl font-bold text-white mb-2">Service Catalog Empty</h3>
-                            <p className="text-slate-500 mb-6">There are currently no standard repair services listed.</p>
+                            <h3 className="text-xl font-bold text-white mb-2">{t('repair.catalogEmpty', 'Servicekatalog leer')}</h3>
+                            <p className="text-slate-500 mb-6">{t('repair.noServicesListed', 'Derzeit sind keine Standard-Reparaturdienste gelistet.')}</p>
                             <Link 
                                 to="/contact"
                                 className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-bold transition-all"
                             >
                                 <MessageSquare className="w-5 h-5" />
-                                Contact Support
+                                {t('repair.contactSupport', 'Support kontaktieren')}
                             </Link>
                         </div>
                     )}

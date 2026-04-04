@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader, Eye, EyeOff, ShieldOff } from 'lucide-react';
 import { validateEmail, validateRequired } from '../validation';
 import { useAuth } from '../context/AuthContext';
@@ -40,6 +40,7 @@ const SocialButton: React.FC<{ provider: 'google' | 'facebook'; disabled?: boole
 };
 
 const Login: React.FC = () => {
+    const navigate = useNavigate();
     const { login } = useAuth();
     const { settings } = useSettings();
     const { t } = useTranslation();
@@ -111,8 +112,8 @@ const Login: React.FC = () => {
                     <div className="inline-block p-4 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl shadow-2xl shadow-blue-900/50 mb-4">
                         <Lock className="w-12 h-12 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black text-white mb-2">{t('auth.loginTitle', 'Welcome Back')}</h1>
-                    <p className="text-slate-400 uppercase tracking-wider text-sm">HandyLand User Portal</p>
+                    <h1 className="text-4xl font-black text-white">{t('auth.welcomeBack', 'Willkommen')}</h1>
+                    <p className="text-slate-400 mt-2">{t('auth.loginSubtitle', 'Melde dich bei deinem Konto an')}</p>
                 </div>
 
                 {/* Login Card */}
@@ -218,9 +219,7 @@ const Login: React.FC = () => {
 
                         {/* Forgot Password */}
                         <div className="flex justify-end">
-                            <Link to="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                                Forgot Password?
-                            </Link>
+                            <Link to="/forgot-password" className="text-sm text-brand-primary hover:text-cyan-300 transition-colors">{t('auth.forgotPassword', 'Passwort vergessen?')}</Link>
                         </div>
 
                         {/* Login Button */}
@@ -229,7 +228,7 @@ const Login: React.FC = () => {
                             disabled={loading}
                             className="w-full py-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-bold rounded-lg shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            {loading ? <><Loader className="w-5 h-5 animate-spin" />Logging in...</> : 'Login to HandyLand'}
+                            {loading ? <><Loader className="w-5 h-5 animate-spin" />{t('auth.signingIn', 'Anmelden...')}</> : t('auth.signIn', 'Anmelden')}
                         </button>
                     </form>
 
@@ -251,12 +250,7 @@ const Login: React.FC = () => {
 
                     {/* Register Link */}
                     <div className="mt-6 pt-6 border-t border-slate-800">
-                        <p className="text-center text-slate-400 text-sm">
-                            Don't have an account?{' '}
-                            <Link to="/register" className="text-blue-400 font-semibold hover:text-blue-300 transition-colors">
-                                Create Account
-                            </Link>
-                        </p>
+                        <p className="text-center text-slate-500 text-sm mt-4">{t('auth.noAccount', 'Noch kein Konto?')} <Link to="/register" className="text-brand-primary hover:text-cyan-300">{t('auth.createOne', 'Erstelle eins')}</Link></p>
                     </div>
                 </div>
 

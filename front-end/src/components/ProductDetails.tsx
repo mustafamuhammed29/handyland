@@ -182,8 +182,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
             {/* Breadcrumbs */}
             <div className="max-w-7xl mx-auto mb-6">
                 <Breadcrumbs items={[
-                    { label: 'Home', path: '/' },
-                    { label: 'Marketplace', path: '/marketplace' },
+                    { label: t('product.breadcrumbHome', 'Startseite'), path: '/' },
+                    { label: t('product.breadcrumbMarketplace', 'Marktplatz'), path: '/marketplace' },
                     { label: `${product.brand} ${product.model}` }
                 ]} />
             </div>
@@ -255,7 +255,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                     ))}
                                 </div>
                             </div>
-                            <span className="text-slate-400 text-sm">{product.numReviews || reviews?.length || 0} Reviews</span>
+                            <span className="text-slate-400 text-sm">{product.numReviews || reviews?.length || 0} {t('product.reviews', 'Bewertungen')}</span>
                         </div>
 
                         <div className="flex items-end gap-3 mb-8">
@@ -265,8 +265,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                             {/* Stock Indicator */}
                             <div className={`text-sm mb-2 font-medium ${(product.stock || 0) > 0 ? ((product.stock || 0) < 5 ? 'text-orange-400' : 'text-green-400') : 'text-red-500'}`}>
                                 {(product.stock || 0) > 0
-                                    ? ((product.stock || 0) < 5 ? `Only ${product.stock} left in stock!` : 'In Stock')
-                                    : 'Out of Stock'
+                                    ? ((product.stock || 0) < 5 ? t('product.onlyLeft', 'Nur noch {{count}} auf Lager!', { count: product.stock }) : t('product.inStock', 'Auf Lager'))
+                                    : t('product.outOfStock', 'Nicht vorrätig')
                                 }
                             </div>
                         </div>
@@ -281,29 +281,29 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
                                 <Cpu className="w-5 h-5 text-brand-primary" />
                                 <div>
-                                    <div className="text-xs text-slate-500">Processor</div>
+                                    <div className="text-xs text-slate-500">{t('product.processor', 'Prozessor')}</div>
                                     <div className="text-sm font-bold text-slate-900 dark:text-slate-200">{product.specs?.cpu}</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
                                 <Battery className="w-5 h-5 text-green-400" />
                                 <div>
-                                    <div className="text-xs text-slate-500">Battery</div>
+                                    <div className="text-xs text-slate-500">{t('product.battery', 'Akku')}</div>
                                     <div className="text-sm font-bold text-slate-900 dark:text-slate-200">{product.specs?.battery}</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
                                 <Smartphone className="w-5 h-5 text-purple-400" />
                                 <div>
-                                    <div className="text-xs text-slate-500">Storage</div>
+                                    <div className="text-xs text-slate-500">{t('product.storage', 'Speicher')}</div>
                                     <div className="text-sm font-bold text-slate-900 dark:text-slate-200">{product.storage}</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
                                 <Shield className="w-5 h-5 text-orange-400" />
                                 <div>
-                                    <div className="text-xs text-slate-500">Warranty</div>
-                                    <div className="text-sm font-bold text-slate-900 dark:text-slate-200">12 Months</div>
+                                    <div className="text-xs text-slate-500">{t('product.warranty', 'Garantie')}</div>
+                                    <div className="text-sm font-bold text-slate-900 dark:text-slate-200">{t('product.warrantyValue', '12 Monate')}</div>
                                 </div>
                             </div>
                         </div>
@@ -311,7 +311,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                         <div className="mt-auto space-y-4">
                             {/* Quantity Selector */}
                             <div className="flex items-center gap-4 mb-4">
-                                <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">Quantity</span>
+                                <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">{t('product.quantity', 'Menge')}</span>
                                 <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm dark:shadow-none">
                                     <button
                                         onClick={() => setQuantity(q => Math.max(1, q - 1))}
@@ -363,12 +363,12 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                             : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
                                 >
                                     <ShoppingCart className="w-5 h-5" />
-                                    {((product.stock || 0) > 0) ? 'Add to Cart' : 'Out of Stock'}
+                                    {((product.stock || 0) > 0) ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Nicht vorrätig')}
                                 </button>
                             </div>
                             <div className="flex justify-center gap-6 text-xs text-slate-500">
-                                <span className="flex items-center gap-1"><Truck className="w-3 h-3" /> Free Shipping</span>
-                                <span className="flex items-center gap-1"><Check className="w-3 h-3" /> Verified Authentic</span>
+                                <span className="flex items-center gap-1"><Truck className="w-3 h-3" /> {t('product.freeShipping', 'Kostenloser Versand')}</span>
+                                <span className="flex items-center gap-1"><Check className="w-3 h-3" /> {t('product.verifiedAuthentic', 'Verifiziert Original')}</span>
                             </div>
                         </div>
                     </div>
@@ -385,7 +385,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                 {/* Related Products */}
                 {relatedProducts.length > 0 && (
                     <div className="border-t border-slate-200 dark:border-slate-900 pt-16">
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">You Might Also Like</h2>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">{t('product.youMightAlsoLike', 'Das könnte dir gefallen')}</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                             {relatedProducts.map((related) => (
                                 <div key={related.id} onClick={() => navigate(`/products/${related.id}`)} className="group cursor-pointer bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 transition-all hover:-translate-y-2 hover:border-brand-primary/50">

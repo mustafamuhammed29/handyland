@@ -84,7 +84,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                                 onClick={() => {
                                     setShippingDetails(prev => ({
                                         ...prev,
-                                        fullName: (user?.firstName && user?.lastName) ? `${user.firstName} ${user.lastName}` : (user?.name || prev.fullName),
+                                        fullName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || user?.name || prev.fullName,
                                         address: addr.street || '',
                                         city: addr.city || '',
                                         state: addr.state || '',
@@ -94,7 +94,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                                     }));
                                     setFormErrors({});
                                 }}
-                                className={`relative p-4 rounded-xl border cursor-pointer transition-all group ${formData.address === addr.street && formData.fullName === addr.name
+                                className={`relative p-4 rounded-xl border cursor-pointer transition-all group ${formData.address === addr.street
                                     ? 'bg-blue-600/10 border-blue-500 ring-1 ring-blue-500'
                                     : 'bg-black/20 border-slate-700 hover:border-slate-500 hover:bg-slate-800/50'
                                     }`}

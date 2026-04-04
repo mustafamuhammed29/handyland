@@ -67,7 +67,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                 >
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-700 backdrop-blur-md animate-in slide-in-from-bottom-4 fade-in duration-700">
                         <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: settings.hero.accentColor }}></span>
-                        <span className="text-xs font-bold tracking-widest uppercase" style={{ color: settings.hero.accentColor }}>Germany's #1 Tech Hub</span>
+                        <span className="text-xs font-bold tracking-widest uppercase" style={{ color: settings.hero.accentColor }}>{settings.hero.tagline || t('home.tagline', "Germany's #1 Tech Hub")}</span>
                     </div>
 
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white leading-tight tracking-tight whitespace-pre-line">
@@ -181,8 +181,8 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                                 <Smartphone className="w-4 h-4 md:w-5 md:h-5" />
                             </div>
                             <div className="min-w-0">
-                                <div className="text-[9px] md:text-xs text-slate-400 whitespace-nowrap">{settings.hero.stat1Title || 'Device Sold'}</div>
-                                <div className="text-[11px] md:text-base text-slate-900 dark:text-white font-bold whitespace-nowrap">{settings.hero.stat1Value || '+24% this week'}</div>
+                                <div className="text-[9px] md:text-xs text-slate-400 whitespace-nowrap">{settings.hero.stat1Title || t('home.deviceSold', 'Geräte verkauft')}</div>
+                                <div className="text-[11px] md:text-base text-slate-900 dark:text-white font-bold whitespace-nowrap">{settings.hero.stat1Value || t('home.thisWeek', '+24% diese Woche')}</div>
                             </div>
                         </div>
                     </div>
@@ -196,8 +196,8 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                                 <Star className="w-4 h-4 md:w-5 md:h-5 fill-purple-400" />
                             </div>
                             <div className="min-w-0">
-                                <div className="text-[9px] md:text-xs text-slate-400 whitespace-nowrap">{settings.hero.stat2Title || 'Customer Rating'}</div>
-                                <div className="text-[11px] md:text-base text-slate-900 dark:text-white font-bold whitespace-nowrap">{settings.hero.stat2Value || '4.9/5.0 Excellent'}</div>
+                                <div className="text-[9px] md:text-xs text-slate-400 whitespace-nowrap">{settings.hero.stat2Title || t('home.customerRating', 'Kundenbewertung')}</div>
+                                <div className="text-[11px] md:text-base text-slate-900 dark:text-white font-bold whitespace-nowrap">{settings.hero.stat2Value || t('home.excellent', '4.9/5.0 Ausgezeichnet')}</div>
                             </div>
                         </div>
                     </div>

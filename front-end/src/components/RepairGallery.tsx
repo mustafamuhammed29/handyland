@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 
 interface RepairGalleryProps {}
 
-const CATEGORIES = [
-    { id: 'all', label: 'All Cases', icon: <Filter className="w-4 h-4" /> },
-    { id: 'screen', label: 'Screens', icon: <Monitor className="w-4 h-4" /> },
-    { id: 'glass', label: 'Rear Glass', icon: <Smartphone className="w-4 h-4" /> },
-    { id: 'water', label: 'Water Dmg', icon: <Droplets className="w-4 h-4" /> },
-    { id: 'camera', label: 'Camera', icon: <ScanLine className="w-4 h-4" /> },
+const CATEGORIES_KEYS = [
+    { id: 'all', labelKey: 'repairGallery.allCases', labelFallback: 'Alle Fälle', icon: <Filter className="w-4 h-4" /> },
+    { id: 'screen', labelKey: 'repairGallery.screens', labelFallback: 'Displays', icon: <Monitor className="w-4 h-4" /> },
+    { id: 'glass', labelKey: 'repairGallery.rearGlass', labelFallback: 'Rückglas', icon: <Smartphone className="w-4 h-4" /> },
+    { id: 'water', labelKey: 'repairGallery.waterDmg', labelFallback: 'Wasserschaden', icon: <Droplets className="w-4 h-4" /> },
+    { id: 'camera', labelKey: 'repairGallery.camera', labelFallback: 'Kamera', icon: <ScanLine className="w-4 h-4" /> },
 ];
 
 import { useSettings } from '../context/SettingsContext';
@@ -76,7 +76,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
         return (
             <section className="py-24 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
                 <div className="max-w-7xl mx-auto px-4 text-center">
-                    <p className="text-slate-500">No public case studies verified yet.</p>
+                    <p className="text-slate-500">{t('repairGallery.noCases', 'Noch keine verifizierten Fallstudien.')}</p>
                 </div>
             </section>
         );
@@ -127,7 +127,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
                     {/* Filter Tabs */}
                     <div className="flex flex-wrap gap-2">
-                        {CATEGORIES.map(cat => (
+                        {CATEGORIES_KEYS.map(cat => (
                             <button
                                 key={cat.id}
                                 onClick={() => setFilter(cat.id)}
@@ -137,7 +137,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                     }`}
                             >
                                 {cat.icon}
-                                <span>{cat.label}</span>
+                                <span>{t(cat.labelKey, cat.labelFallback)}</span>
                             </button>
                         ))}
                     </div>
@@ -209,7 +209,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent p-6 space-y-3 z-40 pointer-events-none">
                                 <div className="flex items-center gap-2 text-yellow-500 mb-1">
                                     {[1, 2, 3, 4, 5].map(star => <Star key={star} className="w-4 h-4 fill-current" />)}
-                                    <span className="text-white text-xs font-bold ml-1 tracking-wide">VERIFIED REPAIR</span>
+                                    <span className="text-white text-xs font-bold ml-1 tracking-wide">{t('repairGallery.verifiedRepair', 'VERIFIZIERTE REPARATUR')}</span>
                                 </div>
                                 <h3 className="text-2xl font-bold text-white flex items-center gap-3">
                                     {activeProject.title}
@@ -242,7 +242,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                 className="w-full py-4 bg-slate-900 border-2 border-slate-800 hover:border-brand-primary/50 text-slate-300 font-bold rounded-xl transition-all flex items-center justify-center gap-2 group"
                             >
                                 <ScanLine className="w-5 h-5 group-hover:text-brand-primary" />
-                                <span>DIAGNOSTIC SCAN</span>
+                                <span>{t('repairGallery.diagnosticScan', 'DIAGNOSESCAN')}</span>
                             </button>
                             
                             <button
@@ -250,7 +250,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                 className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-cyan-400 hover:to-blue-500 text-slate-900 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] font-black rounded-xl transition-all flex items-center justify-center gap-2 group"
                             >
                                 <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                <span>BOOK SIMILAR REPAIR</span>
+                                <span>{t('repairGallery.bookRepair', 'ÄHNLICHE REPARATUR BUCHEN')}</span>
                             </button>
                         </div>
                     </div>
@@ -261,7 +261,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-2">
                                     <Activity className="w-5 h-5 text-brand-primary" />
-                                    <h3 className="text-white font-bold uppercase tracking-wider text-sm">Case Files ({filteredProjects.length})</h3>
+                                    <h3 className="text-white font-bold uppercase tracking-wider text-sm">{t('repairGallery.caseFiles', 'Fallakten')} ({filteredProjects.length})</h3>
                                 </div>
                             </div>
 
@@ -331,8 +331,8 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                         {/* Modal Header */}
                         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
                             <div>
-                                <h3 className="text-2xl font-bold text-white">All Repair Cases</h3>
-                                <p className="text-slate-500 text-sm mt-1">{comparisons.length} total cases</p>
+                                <h3 className="text-2xl font-bold text-white">{t('repairGallery.allRepairCases', 'Alle Reparaturfälle')}</h3>
+                                <p className="text-slate-500 text-sm mt-1">{comparisons.length} {t('repairGallery.totalCases', 'Fälle gesamt')}</p>
                             </div>
                             <button
                                 onClick={() => setShowAllModal(false)}
