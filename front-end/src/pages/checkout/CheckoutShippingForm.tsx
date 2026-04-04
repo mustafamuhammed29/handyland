@@ -68,14 +68,14 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 animate-in fade-in slide-in-from-left-4">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <Truck className="w-6 h-6 text-blue-500" /> {t('checkout.shipping_details', 'Shipping Details')}
+                <Truck className="w-6 h-6 text-blue-500" /> {t('checkout.shippingDetails', 'Versanddetails')}
             </h2>
 
             {/* Saved Addresses Selection */}
             {user && user.addresses && user.addresses.length > 0 && (
                 <div className="mb-8 p-4 bg-slate-950/50 rounded-xl border border-dashed border-slate-700">
                     <h3 className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider flex items-center gap-2">
-                        <Tag className="w-3 h-3" /> Select Saved Address
+                        <Tag className="w-3 h-3" /> {t('checkout.selectSavedAddress', 'GESPEICHERTE ADRESSE WÄHLEN')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {user.addresses.map((addr: any, idx: number) => (
@@ -115,7 +115,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                                     </div>
                                     {addr.isDefault && (
                                         <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full absolute top-3 right-3 shadow-lg shadow-blue-900/50">
-                                            Default
+                                            {t('checkout.default', 'Standard')}
                                         </span>
                                     )}
                                 </div>
@@ -128,7 +128,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
             <form onSubmit={onSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-400">{t('checkout.full_name', 'Full Name')}</label>
+                        <label className="text-sm font-bold text-slate-400">{t('checkout.fullName', 'Vollständiger Name')}</label>
                         <input
                             type="text"
                             name="fullName"
@@ -140,7 +140,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         {formErrors.fullName && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.fullName}</p>}
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-400">{t('checkout.email', 'Email')} (for order updates)</label>
+                        <label className="text-sm font-bold text-slate-400">{t('checkout.emailForUpdates', 'E-Mail (für Bestellupdates)')}</label>
                         <input
                             type="email"
                             name="email"
@@ -192,7 +192,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         {formErrors.city && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.city}</p>}
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-400">State / Region</label>
+                        <label className="text-sm font-bold text-slate-400">{t('checkout.stateRegion', 'Bundesland / Region')}</label>
                         <input
                             type="text"
                             name="state"
@@ -204,7 +204,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         {formErrors.state && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.state}</p>}
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-400">{t('checkout.zip', 'Zip Code')}</label>
+                        <label className="text-sm font-bold text-slate-400">{t('checkout.zipCode', 'Postleitzahl')}</label>
                         <input
                             type="text"
                             name="zipCode"
@@ -258,10 +258,10 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                             </label>
                         ))}
                         {shippingMethods.length === 0 && !isLoadingMethods && (
-                            <div className="text-slate-400 text-sm">No shipping methods available.</div>
+                            <div className="text-slate-400 text-sm">{t('checkout.noShippingMethods', 'Keine Versandmethoden verfügbar.')}</div>
                         )}
                         {isLoadingMethods && (
-                            <div className="text-slate-400 text-sm flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading shipping methods...</div>
+                            <div className="text-slate-400 text-sm flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {t('checkout.loadingMethods', 'Versandmethoden werden geladen...')}</div>
                         )}
                     </div>
                 </div>
@@ -303,7 +303,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         type="submit"
                         className="w-full md:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
                     >
-                        {t('checkout.proceed_payment', 'Proceed to Payment')} <ArrowRight className="w-4 h-4" />
+                        {t('checkout.proceedPayment', 'Weiter zur Zahlung')} <ArrowRight className="w-4 h-4" />
                     </button>
                 </div>
             </form>

@@ -71,7 +71,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     </div>
                 ) : (
                     <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 mb-4 flex items-center gap-2 text-emerald-400 text-sm font-bold animate-in fade-in">
-                        <CheckCircle className="w-4 h-4" /> {t('checkout.freeShippingQualified', "You've qualified for Free Standard Shipping!")}
+                        <CheckCircle className="w-4 h-4" /> {t('checkout.freeShippingQualified', 'Sie erhalten kostenlosen Standardversand!')}
                     </div>
                 )}
 
@@ -141,16 +141,16 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                             <Trophy className="w-4 h-4 text-amber-400" />
-                            <span className="text-sm font-bold text-white">HandyLand Rewards</span>
+                            <span className="text-sm font-bold text-white">{t('checkout.handylandRewards', 'HandyLand Punkte')}</span>
                         </div>
-                        <span className="text-xs text-white/50">{user.loyaltyPoints} PTS available</span>
+                        <span className="text-xs text-white/50">{user.loyaltyPoints} {t('checkout.ptsAvailable', 'Punkte verfügbar')}</span>
                     </div>
                     
                     {appliedPoints > 0 ? (
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-center justify-between animate-in fade-in">
                             <div className="flex items-center gap-2 text-amber-500">
                                 <Zap className="w-4 h-4" />
-                                <span className="font-bold text-sm">-{appliedPoints} PTS Applied</span>
+                                <span className="font-bold text-sm">-{appliedPoints} {t('checkout.ptsApplied', 'Punkte eingelöst')}</span>
                             </div>
                             <button onClick={() => setAppliedPoints(0)} aria-label="Remove points" className="text-slate-400 hover:text-white p-1 transition-colors">
                                 <X className="w-4 h-4" />
@@ -167,7 +167,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                             }}
                             className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-4 py-2.5 flex items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all border border-slate-700 hover:border-amber-500/50"
                         >
-                            <Trophy className="w-4 h-4 text-amber-500" /> Apply {Math.min(user.loyaltyPoints, cartTotal * (features?.loyalty?.redeemRate || 100))} Points
+                            <Trophy className="w-4 h-4 text-amber-500" /> {t('checkout.applyPoints', '{{count}} Punkte einlösen', { count: Math.min(user.loyaltyPoints, cartTotal * (features?.loyalty?.redeemRate || 100)) })}
                         </button>
                     )}
                     {appliedPoints > 0 && (
@@ -186,7 +186,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                 
                 {(coupon || appliedPoints > 0) && (
                     <div className="flex justify-between text-amber-400 text-sm">
-                        <span>Discount {(coupon && appliedPoints > 0) ? '(Reward + Coupon)' : coupon ? '(Coupon)' : '(Reward)'}</span>
+                        <span>{t('checkout.discount', 'Rabatt')} {(coupon && appliedPoints > 0) ? t('checkout.discountRewardCoupon', '(Punkte + Gutschein)') : coupon ? t('checkout.discountCoupon', '(Gutschein)') : t('checkout.discountReward', '(Punkte)')}</span>
                         <span>- {formatPrice((coupon?.discount || 0) + (appliedPoints / (features?.loyalty?.redeemRate || 100)))}</span>
                     </div>
                 )}
@@ -210,11 +210,11 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     return (
                         <>
                             <div className="flex justify-between text-slate-400 text-sm">
-                                <span>{t('checkout.tax', 'Tax (19% VAT)')}</span>
+                                <span>{t('checkout.taxVAT', 'MwSt. (19%)')}</span>
                                 <span>{formatPrice(taxAmount)}</span>
                             </div>
                             <div className={`flex justify-between text-sm ${shippingCost === 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
-                                <span>{t('checkout.shippingCost', 'Shipping')}</span>
+                                <span>{t('checkout.shippingCost', 'Versand')}</span>
                                 <span>{shippingCost === 0 ? t('checkout.free', 'FREE') : formatPrice(shippingCost)}</span>
                             </div>
                             <div className="flex justify-between text-white font-bold text-xl pt-4 border-t border-slate-800 mt-2">

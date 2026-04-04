@@ -175,6 +175,9 @@ export const Checkout: React.FC = () => {
                 if (parsed.address === '[object Object]') {
                     parsed.address = '';
                 }
+                // CRITICAL FIX: Never overwrite fullName from localStorage — it may contain an address label
+                // The user's real name was already set above from user.firstName + user.lastName
+                delete parsed.fullName;
                 setShippingDetails(prev => ({ ...prev, ...parsed }));
             } catch (e) {
             }
@@ -429,14 +432,14 @@ export const Checkout: React.FC = () => {
                     <div className="flex items-center gap-4">
                         <div className={`flex items-center gap-2 ${step >= 2 ? 'text-blue-500' : 'text-slate-600'}`}>
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-800'}`}>1</div>
-                            <span className="hidden md:inline font-bold">{t('checkout.shipping', 'Shipping')}</span>
+                            <span className="hidden md:inline font-bold">{t('checkout.stepShipping', 'Versand')}</span>
                         </div>
                         <div className="w-16 h-1 bg-slate-800">
                             <div className={`h-full bg-blue-600 transition-all duration-500 ${step >= 3 ? 'w-full' : 'w-0'}`}></div>
                         </div>
                         <div className={`flex items-center gap-2 ${step >= 3 ? 'text-blue-500' : 'text-slate-600'}`}>
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 3 ? 'bg-blue-600 text-white' : 'bg-slate-800'}`}>2</div>
-                            <span className="hidden md:inline font-bold">{t('checkout.payment', 'Payment')}</span>
+                            <span className="hidden md:inline font-bold">{t('checkout.stepPayment', 'Zahlung')}</span>
                         </div>
                     </div>
                 </div>

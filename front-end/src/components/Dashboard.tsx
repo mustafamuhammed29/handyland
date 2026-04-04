@@ -203,14 +203,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     }
 
     const navItems = [
-        { id: 'overview', label: t('dashboard.overview', 'Overview'), icon: <Activity className="w-4 h-4" /> },
-        { id: 'orders', label: t('orders.title', 'My Orders'), icon: <Package className="w-4 h-4" /> },
-        { id: 'repairs', label: t('repairs.title', 'Active Repairs'), icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.length || 0 },
-        { id: 'valuations', label: t('valuations.title', 'My Valuations'), icon: <BarChart3 className="w-4 h-4" /> },
-        { id: 'wallet', label: t('wallet.title', 'Digital Wallet'), icon: <Wallet className="w-4 h-4" /> },
-        { id: 'wishlist', label: t('wishlist.title', 'Wishlist'), icon: <Heart className="w-4 h-4" /> },
-        { id: 'messages', label: t('messages.title', 'Messages'), icon: <Mail className="w-4 h-4" /> },
-        { id: 'settings', label: t('settings.title', 'Settings'), icon: <Settings className="w-4 h-4" /> },
+        { id: 'overview', label: t('dashboard.overview', 'Übersicht'), icon: <Activity className="w-4 h-4" /> },
+        { id: 'orders', label: t('orders.title', 'Meine Bestellungen'), icon: <Package className="w-4 h-4" /> },
+        { id: 'repairs', label: t('repairs.title', 'Aktive Reparaturen'), icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.length || 0 },
+        { id: 'valuations', label: t('valuations.title', 'Meine Bewertungen'), icon: <BarChart3 className="w-4 h-4" /> },
+        { id: 'wallet', label: t('wallet.title', 'Digitale Brieftasche'), icon: <Wallet className="w-4 h-4" /> },
+        { id: 'wishlist', label: t('wishlist.title', 'Wunschliste'), icon: <Heart className="w-4 h-4" /> },
+        { id: 'messages', label: t('messages.title', 'Nachrichten'), icon: <Mail className="w-4 h-4" /> },
+        { id: 'settings', label: t('settings.title', 'Kontoeinstellungen'), icon: <Settings className="w-4 h-4" /> },
     ];
 
     const ADMIN_PANEL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3001';
@@ -253,8 +253,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                     <div className="flex items-center gap-1 text-xs text-brand-primary mt-1">
                                         <Shield className="w-3 h-3" /> {isAdmin ? t('dashboard.adminRole', 'Administrator') : (
                                             currentUser.createdAt
-                                                ? t('dashboard.memberSince', 'Member since {{date}}', { date: new Date(currentUser.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : (i18n.language === 'de' ? 'de-DE' : 'en-US'), { month: 'long', year: 'numeric' }) })
-                                                : t('dashboard.verifiedMember', 'Verified Member')
+                                                ? t('dashboard.memberSince', 'Mitglied seit {{date}}', { date: new Date(currentUser.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : (i18n.language === 'de' ? 'de-DE' : 'en-US'), { month: 'long', year: 'numeric' }) })
+                                                : t('dashboard.verifiedMember', 'Verifiziertes Mitglied')
                                         )}
                                     </div>
                                 </div>
@@ -301,7 +301,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[10px] text-slate-500 dark:text-slate-400">{t('dashboard.totalSpent', 'Total Spent')}</p>
+                                                <p className="text-[10px] text-slate-500 dark:text-slate-400">{t('dashboard.totalSpent', 'Gesamtausgaben')}</p>
                                                 <p className="text-sm font-bold text-slate-900 dark:text-white">€{totalSpent.toFixed(2)}</p>
                                             </div>
                                         </div>
@@ -317,7 +317,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                             </div>
                                             <div className="flex justify-between mt-1.5">
                                                 <span className="text-[9px] font-medium text-slate-500">
-                                                    {!nextTier ? t('dashboard.maxTierReached', 'Max Tier Reached!') : t('dashboard.toNextTier', '€{{amount}} to {{tier}}', { amount: (maxLimit - totalSpent).toFixed(2), tier: nextTierName })}
+                                                    {!nextTier ? t('dashboard.maxTierReached', 'Höchste Stufe erreicht!') : t('dashboard.toNextTier', '€{{amount}} bis {{tier}}', { amount: (maxLimit - totalSpent).toFixed(2), tier: nextTierName })}
                                                 </span>
                                                 <span className="text-[9px] font-bold text-slate-400">€{maxLimit}</span>
                                             </div>

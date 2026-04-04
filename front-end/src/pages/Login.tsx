@@ -12,7 +12,7 @@ const API_URL = ENV.API_URL;
 
 const SocialButton: React.FC<{ provider: 'google' | 'facebook'; disabled?: boolean }> = ({ provider, disabled }) => {
     const isGoogle = provider === 'google';
-    const label = isGoogle ? 'Continue with Google' : 'Continue with Facebook';
+    const label = isGoogle ? 'Mit Google fortfahren' : 'Mit Facebook fortfahren';
     const bg = isGoogle ? 'bg-white hover:bg-gray-50 text-gray-800 border border-gray-300' : 'bg-[#1877F2] hover:bg-[#166FE5] text-white';
     const href = `${API_URL}/api/auth/${provider}`;
 
@@ -118,7 +118,7 @@ const Login: React.FC = () => {
 
                 {/* Login Card */}
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl">
-                    <h2 className="text-2xl font-bold text-white mb-6">Login to Your Account</h2>
+                    <h2 className="text-2xl font-bold text-white mb-6">{t('auth.loginTitle', 'Bei deinem Konto anmelden')}</h2>
 
                     {/* Success Message */}
                     {resendSuccess && (
@@ -176,7 +176,7 @@ const Login: React.FC = () => {
                         {/* Email */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">
-                                {t('auth.emailLabel', 'Email Address')}
+                                {t('auth.emailLabel', 'E-Mail-Adresse')}
                             </label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
@@ -194,7 +194,7 @@ const Login: React.FC = () => {
                         {/* Password */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">
-                                {t('auth.passwordLabel', 'Password')}
+                                {t('auth.passwordLabel', 'Passwort')}
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
@@ -237,7 +237,7 @@ const Login: React.FC = () => {
                         <>
                             <div className="my-6 flex items-center gap-3">
                                 <div className="flex-1 h-px bg-slate-700" />
-                                <span className="text-slate-500 text-xs uppercase tracking-wider">or continue with</span>
+                                <span className="text-slate-500 text-xs uppercase tracking-wider">{t('auth.orContinueWith', 'ODER WEITER MIT')}</span>
                                 <div className="flex-1 h-px bg-slate-700" />
                             </div>
 
