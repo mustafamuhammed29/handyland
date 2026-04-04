@@ -44,6 +44,7 @@ interface Order {
         zipCode: string;
         country: string;
     };
+    shippingMethod?: string;
     trackingNumber?: string;
     notes?: string;
     createdAt: string;
@@ -420,7 +421,7 @@ const OrdersManager: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-bold text-white">€{order.totalAmount.toFixed(2)}</div>
-                                        <div className="text-xs text-slate-500">{order.paymentStatus}</div>
+                                        <div className="text-xs text-slate-500">{order.paymentStatus} · {order.shippingMethod || 'Standard'}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white ${getStatusColor(order.status)}`}>
@@ -476,6 +477,7 @@ const OrdersManager: React.FC = () => {
                                         <div><span className="text-slate-500">Date:</span> {new Date(selectedOrder.createdAt).toLocaleString()}</div>
                                         <div><span className="text-slate-500">Status:</span> <span className={`px-2 py-1 rounded text-white font-bold text-xs uppercase ${getStatusColor(selectedOrder.status)}`}>{selectedOrder.status}</span></div>
                                         <div><span className="text-slate-500">Payment:</span> {formatPaymentMethod(selectedOrder.paymentMethod)} ({selectedOrder.paymentStatus})</div>
+                                        <div><span className="text-slate-500">Shipping Method:</span> <strong className="text-white">{selectedOrder.shippingMethod || 'Standard'}</strong></div>
                                         {selectedOrder.trackingNumber && (
                                             <div><span className="text-slate-500">Tracking:</span> {selectedOrder.trackingNumber}</div>
                                         )}

@@ -36,7 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const [activeTab, setActiveTab] = useState('overview');
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     // Use the new data fetching hook
     const dashboardData = useDashboardData(activeTab);
@@ -251,10 +251,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 <div className="flex-1 min-w-0">
                                     <h3 className="text-slate-900 dark:text-white font-bold break-words leading-tight">{currentUser.name}</h3>
                                     <div className="flex items-center gap-1 text-xs text-brand-primary mt-1">
-                                        <Shield className="w-3 h-3" /> {isAdmin ? 'Administrator' : (
+                                        <Shield className="w-3 h-3" /> {isAdmin ? t('dashboard.adminRole', 'Administrator') : (
                                             currentUser.createdAt
-                                                ? `Mitglied seit ${new Date(currentUser.createdAt).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}`
-                                                : 'Verifiziertes Mitglied'
+                                                ? t('dashboard.memberSince', 'Member since {{date}}', { date: new Date(currentUser.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : (i18n.language === 'de' ? 'de-DE' : 'en-US'), { month: 'long', year: 'numeric' }) })
+                                                : t('dashboard.verifiedMember', 'Verified Member')
                                         )}
                                     </div>
                                 </div>
@@ -301,7 +301,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[10px] text-slate-500 dark:text-slate-400">Total Spent</p>
+                                                <p className="text-[10px] text-slate-500 dark:text-slate-400">{t('dashboard.totalSpent', 'Total Spent')}</p>
                                                 <p className="text-sm font-bold text-slate-900 dark:text-white">€{totalSpent.toFixed(2)}</p>
                                             </div>
                                         </div>
@@ -317,7 +317,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                             </div>
                                             <div className="flex justify-between mt-1.5">
                                                 <span className="text-[9px] font-medium text-slate-500">
-                                                    {!nextTier ? 'Max Tier Reached!' : `€${(maxLimit - totalSpent).toFixed(2)} to ${nextTierName}`}
+                                                    {!nextTier ? t('dashboard.maxTierReached', 'Max Tier Reached!') : t('dashboard.toNextTier', '€{{amount}} to {{tier}}', { amount: (maxLimit - totalSpent).toFixed(2), tier: nextTierName })}
                                                 </span>
                                                 <span className="text-[9px] font-bold text-slate-400">€{maxLimit}</span>
                                             </div>
@@ -364,7 +364,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 >
                                     <div className="flex items-center gap-3">
                                         <ExternalLink className="w-4 h-4" />
-                                        <span className="whitespace-nowrap">Admin Panel</span>
+                                        <span className="whitespace-nowrap">{t('dashboard.adminPanel', 'Admin Panel')}</span>
                                     </div>
                                 </a>
                             )}

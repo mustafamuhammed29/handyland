@@ -400,19 +400,19 @@ export const Checkout: React.FC = () => {
                     <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto">
                         <User className="w-8 h-8 text-blue-500" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white">How would you like to proceed?</h2>
-                    <p className="text-slate-400">Log in to save your order to your account, or continue as a guest.</p>
+                    <h2 className="text-2xl font-bold text-white">{t('checkout.proceed_title', 'How would you like to proceed?')}</h2>
+                    <p className="text-slate-400">{t('checkout.proceed_desc', 'Log in to save your order to your account, or continue as a guest.')}</p>
 
                     <div className="space-y-3">
                         <button onClick={() => navigate('/login?redirect=/checkout')} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all">
-                            Log In / Register
+                            {t('auth.login', 'Log In')} / {t('auth.register', 'Register')}
                         </button>
                         <div className="relative py-2">
                             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800"></div></div>
-                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-900 px-2 text-slate-500">Or</span></div>
+                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-900 px-2 text-slate-500">{t('common.or', 'Or')}</span></div>
                         </div>
                         <button onClick={() => { setGuestMode(true); setStep(2); }} className="w-full py-3 bg-transparent border border-slate-700 hover:bg-slate-800 text-white font-bold rounded-xl transition-all">
-                            Continue as Guest
+                            {t('checkout.guest_checkout', 'Continue as Guest')}
                         </button>
                     </div>
                 </div>
@@ -429,14 +429,14 @@ export const Checkout: React.FC = () => {
                     <div className="flex items-center gap-4">
                         <div className={`flex items-center gap-2 ${step >= 2 ? 'text-blue-500' : 'text-slate-600'}`}>
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-800'}`}>1</div>
-                            <span className="hidden md:inline font-bold">Shipping</span>
+                            <span className="hidden md:inline font-bold">{t('checkout.shipping', 'Shipping')}</span>
                         </div>
                         <div className="w-16 h-1 bg-slate-800">
                             <div className={`h-full bg-blue-600 transition-all duration-500 ${step >= 3 ? 'w-full' : 'w-0'}`}></div>
                         </div>
                         <div className={`flex items-center gap-2 ${step >= 3 ? 'text-blue-500' : 'text-slate-600'}`}>
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 3 ? 'bg-blue-600 text-white' : 'bg-slate-800'}`}>2</div>
-                            <span className="hidden md:inline font-bold">Payment</span>
+                            <span className="hidden md:inline font-bold">{t('checkout.payment', 'Payment')}</span>
                         </div>
                     </div>
                 </div>

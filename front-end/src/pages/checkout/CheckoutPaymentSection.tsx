@@ -3,6 +3,7 @@ import { CreditCard, ArrowLeft, ArrowRight, Loader2, Lock, Truck, ShieldCheck } 
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { api } from '../../utils/api';
 import { formatPrice } from '../../utils/formatPrice';
+import { useTranslation } from 'react-i18next';
 
 // FIXED: Extracted from Checkout.tsx for better maintainability (FIX 5)
 
@@ -46,6 +47,7 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
     shippingDetails,
     coupon,
 }) => {
+    const { t } = useTranslation();
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 animate-in fade-in slide-in-from-right-4">
             <div className="flex items-center gap-4 mb-6">
@@ -53,10 +55,10 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                    <CreditCard className="w-6 h-6 text-emerald-500" /> Payment
+                    <CreditCard className="w-6 h-6 text-emerald-500" /> {t('checkout.payment', 'Payment')}
                 </h2>
             </div>
-            <h3 className="font-bold text-white mb-4">Payment Method</h3>
+            <h3 className="font-bold text-white mb-4">{t('checkout.paymentMethod', 'Payment Method')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {paymentConfig?.bankTransfer?.enabled !== false && (
                     <button
@@ -72,7 +74,7 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
                             </svg>
                         </div>
                         <div className="text-center">
-                            <span className="font-bold text-white block">Bank Transfer</span>
+                            <span className="font-bold text-white block">{t('checkout.bank_transfer', 'Bank Transfer')}</span>
                             <span className="text-xs text-slate-400">Vorkasse / Überweisung</span>
                         </div>
                     </button>
@@ -94,7 +96,7 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
                         </div>
                         <div className="text-center">
                             <span className="font-bold text-white block">PayPal</span>
-                            <span className="text-xs text-slate-400">Fast & Secure</span>
+                            <span className="text-xs text-slate-400">{t('checkout.fast_secure', 'Fast & Secure')}</span>
                         </div>
                     </button>
                 )}
@@ -112,7 +114,7 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
                             <Truck className="w-6 h-6" />
                         </div>
                         <div className="text-center">
-                            <span className="font-bold text-white block">Cash on Delivery</span>
+                            <span className="font-bold text-white block">{t('checkout.cod_title', 'Cash on Delivery')}</span>
                             <span className="text-xs text-slate-400">Nachnahme / Barzahlung</span>
                         </div>
                     </button>
@@ -121,10 +123,10 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
 
             <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 mb-8 text-center">
                 <p className="text-slate-400 mb-6 text-sm">
-                    {selectedPaymentMethod === 'bank_transfer' && (paymentConfig?.bankTransfer?.instructions || "You will receive our bank details (IBAN/BIC) via email after placing the order. Your order will be shipped once the payment is received.")}
-                    {selectedPaymentMethod === 'cod' && "You will pay for your order directly to the courier upon delivery. Please have the exact amount ready."}
-                    {selectedPaymentMethod === 'paypal' && "You will be securely redirected to PayPal to complete your purchase."}
-                    {!selectedPaymentMethod && "Please select a payment method to continue."}
+                    {selectedPaymentMethod === 'bank_transfer' && (paymentConfig?.bankTransfer?.instructions || t('checkout.bank_instructions', "You will receive our bank details (IBAN/BIC) via email after placing the order. Your order will be shipped once the payment is received."))}
+                    {selectedPaymentMethod === 'cod' && t('checkout.cod_instructions', "You will pay for your order directly to the courier upon delivery. Please have the exact amount ready.")}
+                    {selectedPaymentMethod === 'paypal' && t('checkout.paypal_instructions', "You will be securely redirected to PayPal to complete your purchase.")}
+                    {!selectedPaymentMethod && t('checkout.select_payment_prompt', "Please select a payment method to continue.")}
                 </p>
 
                 {selectedPaymentMethod === 'paypal' && paymentConfig?.paypal?.clientId ? (
@@ -226,11 +228,11 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
                     >
                         {loading ? (
                             <>
-                                <Loader2 className="animate-spin w-5 h-5" /> Processing...
+                                <Loader2 className="animate-spin w-5 h-5" /> {t('checkout.processing', 'Processing...')}
                             </>
                         ) : (
                             <>
-                                Place Order Securely <span className="ml-1">{formatPrice(getFinalTotal())}</span> <ArrowRight className="w-5 h-5" />
+                                {t('checkout.placeOrder', 'Place Order Securely')} <span className="ml-1">{formatPrice(getFinalTotal())}</span> <ArrowRight className="w-5 h-5" />
                             </>
                         )}
                     </button>
@@ -238,9 +240,9 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
             </div>
 
             <div className="flex justify-center items-center gap-6 text-slate-500 text-xs md:text-sm">
-                <div className="flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-500" /> 256-bit SSL Encrypted</div>
+                <div className="flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-500" /> {t('checkout.ssl_encrypted', '256-bit SSL Encrypted')}</div>
                 <div className="w-px h-3 bg-slate-700"></div>
-                <div className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Payment</div>
+                <div className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> {t('checkout.secure_payment', 'Secure Payment')}</div>
             </div>
         </div>
     );

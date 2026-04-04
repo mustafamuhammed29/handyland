@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, Truck, CheckCircle2, Clock, Wrench } from 'lucide-react';
+import { Package, Truck, CheckCircle2, Clock, Wrench, Search, ShieldCheck, Inbox, XCircle } from 'lucide-react';
 
 interface TimelineStep {
     id: string;
@@ -22,10 +22,13 @@ export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ curren
         if (type === 'repair') {
             return [
                 { id: 'pending', label: 'Ticket Created', icon: <Package className="w-5 h-5" /> },
-                { id: 'processing', label: 'Device Received', icon: <Wrench className="w-5 h-5" /> },
-                { id: 'in_repair', label: 'In Repair', icon: <Clock className="w-5 h-5" /> },
-                { id: 'completed', label: 'Fixed & Shipped', icon: <Truck className="w-5 h-5" /> },
-                { id: 'delivered', label: 'Delivered', icon: <CheckCircle2 className="w-5 h-5" /> }
+                { id: 'received', label: 'Device Received', icon: <Inbox className="w-5 h-5" /> },
+                { id: 'diagnosing', label: 'Diagnosing', icon: <Search className="w-5 h-5" /> },
+                { id: 'waiting parts', label: 'Waiting Parts', icon: <Clock className="w-5 h-5" /> },
+                { id: 'repairing', label: 'Repairing', icon: <Wrench className="w-5 h-5" /> },
+                { id: 'testing', label: 'Testing', icon: <ShieldCheck className="w-5 h-5" /> },
+                { id: 'ready for pickup', label: 'Ready for Pickup', icon: <Truck className="w-5 h-5" /> },
+                { id: 'completed', label: 'Completed', icon: <CheckCircle2 className="w-5 h-5" /> }
             ];
         }
         // Default order steps
@@ -47,10 +50,9 @@ export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ curren
     // Assuming backend returns standard statuses or they match `id`.
     let currentStepIndex = steps.findIndex(s => s.id === normalizedStatus || normalizedStatus.includes(s.id));
 
-    // Fallback logic for common variations
-    if (currentStepIndex === -1) {
+    // For order common variations fallback
+    if (currentStepIndex === -1 && type === 'order') {
         if (normalizedStatus === 'created' || normalizedStatus === 'new') currentStepIndex = 0;
-        else if (normalizedStatus === 'diagnosing' || normalizedStatus === 'approved') currentStepIndex = 1; // Repair specific mapping
         else if (normalizedStatus === 'in-transit') currentStepIndex = 2; // Shipped / Fixed
         else if (normalizedStatus === 'completed') currentStepIndex = steps.length - 1; // Sometimes completed == delivered
     }
@@ -70,17 +72,18 @@ export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ curren
                     </div>
                 </div>
             ) : (
-                <div className="relative">
-                    {/* Progression Line (Background) */}
-                    <div className="absolute top-6 left-0 w-full h-1 bg-slate-800 rounded-full hidden md:block"></div>
+                <div className="overflow-x-auto pb-4 custom-scrollbar w-full">
+                    <div className="relative min-w-full md:min-w-[900px]">
+                        {/* Progression Line (Background) */}
+                        <div className="absolute top-6 left-6 right-6 h-1 bg-slate-800 rounded-full hidden md:block"></div>
 
-                    {/* Progression Line (Active Fill) */}
-                    <div
-                        className="absolute top-6 left-0 h-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full hidden md:block transition-all duration-1000 ease-out"
-                        style={{ width: `${currentStepIndex >= 0 ? (currentStepIndex / (steps.length - 1)) * 100 : 0}%` }}
-                    ></div>
+                        {/* Progression Line (Active Fill) */}
+                        <div
+                            className="absolute top-6 left-6 h-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full hidden md:block transition-all duration-1000 ease-out"
+                            style={{ width: `calc(${currentStepIndex >= 0 ? (currentStepIndex / (steps.length - 1)) * 100 : 0}% - 3rem)` }}
+                        ></div>
 
-                    <div className="flex flex-col md:flex-row justify-between relative z-10 gap-6 md:gap-0">
+                        <div className="flex flex-col md:flex-row justify-between relative z-10 gap-8 md:gap-2">
                         {steps.map((step, index) => {
                             const isCompleted = index < currentStepIndex;
                             const isActive = index === currentStepIndex;
@@ -97,7 +100,7 @@ export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ curren
                                     )}
 
                                     {/* Icon Container */}
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border-2 transition-all duration-500 z-10
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border-2 transition-all duration-500 z-10 md:mx-auto
                                         ${isCompleted ? 'bg-brand-primary border-cyan-400 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]' :
                                             isActive ? 'bg-slate-900 border-brand-primary text-brand-primary animate-pulse shadow-[0_0_20px_rgba(6,182,212,0.2)]' :
                                                 'bg-slate-900 border-slate-800 text-slate-600'}
@@ -106,11 +109,11 @@ export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ curren
                                     </div>
 
                                     {/* Text Info */}
-                                    <div className="md:text-center mt-1">
-                                        <p className={`font-bold text-sm ${isActive ? 'text-white' : isCompleted ? 'text-slate-300' : 'text-slate-500'}`}>
+                                    <div className="md:text-center mt-1 md:mt-2 md:max-w-[100px]">
+                                        <p className={`font-bold text-xs md:text-sm leading-tight md:break-words ${isActive ? 'text-white' : isCompleted ? 'text-slate-300' : 'text-slate-500'}`}>
                                             {step.label}
                                         </p>
-                                        <p className="text-xs font-mono text-slate-500 mt-0.5">
+                                        <p className="text-[10px] font-mono text-slate-500 mt-1">
                                             {historyItem ? new Date(historyItem.date).toLocaleDateString() : (isActive ? 'In Progress' : '')}
                                         </p>
                                     </div>
@@ -119,10 +122,8 @@ export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ curren
                         })}
                     </div>
                 </div>
+                </div>
             )}
         </div>
     );
 };
-
-// Quick fix for missing XCircle import in the cancelled state
-import { XCircle } from 'lucide-react';
