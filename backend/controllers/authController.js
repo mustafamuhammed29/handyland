@@ -295,7 +295,10 @@ exports.adminLogin = async (req, res) => {
             });
         }
 
-        const token = generateToken(user._id);
+        // Generate a 24-hour token for Admin to match the cookie lifetime
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+            expiresIn: '24h'
+        });
 
         res.cookie('adminToken', token, {
             httpOnly: true,
@@ -595,27 +598,33 @@ exports.getAllUsers = async (req, res) => {
 // @access  Private
 exports.logout = async (req, res) => {
     try {
-        if (req.cookies.refreshToken) {
-            await RefreshToken.deleteOne({ token: req.cookies.refreshToken });
+        const appType = req.headers['x-app-type'];
+
+        if (appType === 'admin') {
+            // Only log out from Admin Panel
+            res.clearCookie('adminToken', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
+        } else {
+            // Log out from Customer Portal
+            if (req.cookies.refreshToken) {
+                await RefreshToken.deleteOne({ token: req.cookies.refreshToken });
+            }
+
+            res.clearCookie('accessToken', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
+            });
+
+            res.clearCookie('refreshToken', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
+            });
         }
-
-        res.clearCookie('accessToken', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax'
-        });
-
-        res.clearCookie('refreshToken', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax'
-        });
-
-        res.clearCookie('adminToken', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax'
-        });
 
         res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {

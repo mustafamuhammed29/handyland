@@ -89,7 +89,7 @@ exports.applyCoupon = async (req, res) => {
 // @access  Private
 exports.createOrder = async (req, res) => {
     try {
-        const { items, shippingAddress, paymentMethod, notes, couponCode, discountAmount } = req.body;
+        const { items, shippingAddress, paymentMethod, shippingMethod, notes, couponCode, discountAmount } = req.body;
 
         if (!items || items.length === 0) {
             return res.status(400).json({
@@ -168,6 +168,7 @@ exports.createOrder = async (req, res) => {
             totalAmount: finalAmount, // Store the final calculated amount
             tax: taxAmount,
             shippingFee,
+            shippingMethod: shippingMethod || 'Standard',
             couponCode: couponCode || undefined,
             discountAmount: appliedDiscount,
             appliedPoints: req.body.appliedPoints || 0 // Store points applied for this order

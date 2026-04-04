@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, Tag, CheckCircle, ArrowRight, Loader2, Phone } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
+
 // FIXED: Extracted from Checkout.tsx for better maintainability (FIX 5)
 
 interface ShippingMethod {
@@ -61,10 +63,12 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
     setShippingDetails,
     setFormErrors,
 }) => {
+    const { t } = useTranslation();
+
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 animate-in fade-in slide-in-from-left-4">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <Truck className="w-6 h-6 text-blue-500" /> Shipping Details
+                <Truck className="w-6 h-6 text-blue-500" /> {t('checkout.shipping_details', 'Shipping Details')}
             </h2>
 
             {/* Saved Addresses Selection */}
@@ -124,7 +128,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
             <form onSubmit={onSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-400">Full Name</label>
+                        <label className="text-sm font-bold text-slate-400">{t('checkout.full_name', 'Full Name')}</label>
                         <input
                             type="text"
                             name="fullName"
@@ -136,7 +140,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         {formErrors.fullName && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.fullName}</p>}
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-400">Email (for order updates)</label>
+                        <label className="text-sm font-bold text-slate-400">{t('checkout.email', 'Email')} (for order updates)</label>
                         <input
                             type="email"
                             name="email"
@@ -150,7 +154,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-400">Phone</label>
+                    <label className="text-sm font-bold text-slate-400">{t('checkout.phone', 'Phone')}</label>
                     <input
                         type="tel"
                         name="phone"
@@ -163,7 +167,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-400">Address</label>
+                    <label className="text-sm font-bold text-slate-400">{t('checkout.address', 'Address')}</label>
                     <input
                         type="text"
                         name="address"
@@ -176,7 +180,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-400">City</label>
+                        <label className="text-sm font-bold text-slate-400">{t('checkout.city', 'City')}</label>
                         <input
                             type="text"
                             name="city"
@@ -200,7 +204,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         {formErrors.state && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.state}</p>}
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-400">Zip Code</label>
+                        <label className="text-sm font-bold text-slate-400">{t('checkout.zip', 'Zip Code')}</label>
                         <input
                             type="text"
                             name="zipCode"
@@ -212,7 +216,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         {formErrors.zipCode && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.zipCode}</p>}
                     </div>
                     <div className="space-y-2 col-span-2 md:col-span-1">
-                        <label className="text-sm font-bold text-slate-400">Country</label>
+                        <label className="text-sm font-bold text-slate-400">{t('checkout.country', 'Country')}</label>
                         <select
                             name="country"
                             value={formData.country}
@@ -230,7 +234,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
 
                 {/* Shipping Method Selection */}
                 <div className="pt-6 border-t border-slate-800">
-                    <h3 className="font-bold text-white mb-4">Shipping Method</h3>
+                    <h3 className="font-bold text-white mb-4">{t('checkout.shipping_method', 'Shipping Method')}</h3>
                     <div className="space-y-3">
                         {shippingMethods.map((method) => (
                             <label key={method._id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${selectedMethodId === method._id ? 'bg-blue-600/10 border-blue-500' : 'bg-black/20 border-slate-700 hover:border-slate-500'}`}>
@@ -289,7 +293,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                             className="hidden"
                         />
                         <span className={`text-sm ${error && !termsAccepted ? 'text-red-400 font-bold' : 'text-slate-400'} group-hover:text-slate-300`}>
-                            I agree to the <Link to="/agb" target="_blank" className="text-blue-400 hover:underline">Terms & Conditions</Link> and <Link to="/privacy" target="_blank" className="text-blue-400 hover:underline">Privacy Policy</Link>.
+                            {t('checkout.terms', 'I agree to the')} <Link to="/agb" target="_blank" className="text-blue-400 hover:underline">{t('checkout.terms_link', 'Terms & Conditions')}</Link> and <Link to="/privacy" target="_blank" className="text-blue-400 hover:underline">{t('checkout.privacy_link', 'Privacy Policy')}</Link>.
                         </span>
                     </label>
                 </div>
@@ -299,7 +303,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         type="submit"
                         className="w-full md:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
                     >
-                        Proceed to Payment <ArrowRight className="w-4 h-4" />
+                        {t('checkout.proceed_payment', 'Proceed to Payment')} <ArrowRight className="w-4 h-4" />
                     </button>
                 </div>
             </form>

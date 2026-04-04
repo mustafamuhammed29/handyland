@@ -42,11 +42,6 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
 
     useEffect(() => {
         const loadRepairs = async () => {
-            if (!searchTerm || searchTerm.trim() === '') {
-                setRepairCatalog([]);
-                setLoading(false);
-                return;
-            }
             try {
                 setLoading(true);
                 const response = await api.get<RepairDevice[]>(`/api/repairs?search=${searchTerm}`);

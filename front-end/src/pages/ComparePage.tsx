@@ -83,6 +83,64 @@ export const ComparePage: React.FC = () => {
     const safeProducts = Array.isArray(products) ? products : [];
     const filteredSearch = safeProducts.filter(p => (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
 
+    const getDynamicSpecs = () => {
+        const specMap: Record<string, Set<string>> = {};
+        
+        selectedProducts.forEach(product => {
+            if (!product) return;
+            
+            // Map core fields to "Stammdaten" (Master Data) like the screenshot
+            if (!specMap['Stammdaten']) specMap['Stammdaten'] = new Set();
+            if (product.brand) specMap['Stammdaten'].add('Marke');
+            if (product.model || product.name) specMap['Stammdaten'].add('Modell');
+            if (product.color) specMap['Stammdaten'].add('Farbe');
+            if (product.storage) specMap['Stammdaten'].add('Speicher');
+            if (product.condition) specMap['Stammdaten'].add('Zustand');
+            
+            if (!product.specs) return;
+            
+            Object.keys(product.specs).forEach(category => {
+                const categoryValue = product.specs[category];
+                if (category === 'globalPrice' || category === 'benchmarkScore') return;
+
+                if (
+                    categoryValue && 
+                    typeof categoryValue === 'object' && 
+                    !Array.isArray(categoryValue)
+                ) {
+                    if (!specMap[category]) specMap[category] = new Set();
+                    Object.keys(categoryValue).forEach(key => specMap[category].add(key));
+                } else if (typeof categoryValue === 'string' || typeof categoryValue === 'number' || typeof categoryValue === 'boolean') {
+                    // Legacy flat specs (processor, display) mapped to Hauptmerkmale
+                    const keyName = category.charAt(0).toUpperCase() + category.slice(1);
+                    if (['Processor', 'Display', 'Camera', 'Battery'].includes(keyName)) {
+                        if (!specMap['Hauptmerkmale']) specMap['Hauptmerkmale'] = new Set();
+                        specMap['Hauptmerkmale'].add(keyName);
+                    } else {
+                        if (!specMap['Weitere Details']) specMap['Weitere Details'] = new Set();
+                        specMap['Weitere Details'].add(keyName);
+                    }
+                }
+            });
+        });
+
+        const finalized = Object.entries(specMap)
+            .filter(([_, keysSet]) => keysSet.size > 0)
+            .map(([category, keysSet]) => ({
+                category,
+                keys: Array.from(keysSet)
+            }));
+            
+        // Order categories for optimal visualization
+        return finalized.sort((a, b) => {
+            if (a.category === 'Stammdaten') return -1;
+            if (b.category === 'Stammdaten') return 1;
+            if (a.category === 'Hauptmerkmale') return -1;
+            if (b.category === 'Hauptmerkmale') return 1;
+            return 0;
+        });
+    };
+
     return (
         <div className="min-h-screen bg-slate-950 pt-32 pb-24 text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -129,7 +187,7 @@ export const ComparePage: React.FC = () => {
                                                     className="w-full flex items-center gap-3 p-2 hover:bg-slate-800 rounded-lg transition-colors text-left"
                                                 >
                                                     <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-10 h-10 object-contain bg-white rounded-md p-1" />
-                                                    <span className="font-bold text-sm truncate">{p.name}</span>
+                                                    <span className="font-bold text-sm truncate">{p.name || p.model}</span>
                                                 </button>
                                             ))}
                                             {filteredSearch.length === 0 && <div className="text-center text-slate-500 mt-8 text-sm">{t('compare.noDevicesFound', 'No devices found.')}</div>}
@@ -192,115 +250,67 @@ export const ComparePage: React.FC = () => {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <tbody>
-                                    {/* Specifications Section */}
-                                    <tr className="bg-slate-950/80">
-                                        <td className="w-1/4 p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Cpu className="w-4 h-4"/> {t('compare.hardware', 'Hardware')}
-                                        </td>
-                                        {slots.map(i => (
-                                            <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
-                                        ))}
-                                    </tr>
-                                    <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.processor', 'Processor')}</td>
-                                        {slots.map(i => (
-                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-bold">
-                                                {selectedProducts[i]?.processor || selectedProducts[i]?.specs?.processor || selectedProducts[i]?.specifications?.processor || '-'}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                    <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.storage', 'Storage Options')}</td>
-                                        {slots.map(i => (
-                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 text-sm">
-                                                {selectedProducts[i]?.storage || selectedProducts[i]?.specs?.storage || '-'}
-                                            </td>
-                                        ))}
-                                    </tr>
-
-                                    {/* Display Section */}
-                                    <tr className="bg-slate-950/80">
-                                        <td className="p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Monitor className="w-4 h-4"/> {t('compare.display', 'Display')}
-                                        </td>
-                                        {slots.map(i => (
-                                            <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
-                                        ))}
-                                    </tr>
-                                    <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.screenSize', 'Screen Size')}</td>
-                                        {slots.map(i => (
-                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-bold">
-                                                {selectedProducts[i]?.display || selectedProducts[i]?.specs?.display || selectedProducts[i]?.specifications?.display || '-'}
-                                            </td>
-                                        ))}
-                                    </tr>
-
-                                    {/* Camera Section */}
-                                    <tr className="bg-slate-950/80">
-                                        <td className="p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Camera className="w-4 h-4"/> {t('compare.camera', 'Camera')}
-                                        </td>
-                                        {slots.map(i => (
-                                            <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
-                                        ))}
-                                    </tr>
-                                    <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.mainCamera', 'Main Camera')}</td>
-                                        {slots.map(i => (
-                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 text-sm leading-relaxed">
-                                                {selectedProducts[i]?.camera || selectedProducts[i]?.specs?.camera || selectedProducts[i]?.specifications?.camera || '-'}
-                                            </td>
-                                        ))}
-                                    </tr>
-
-                                    {/* Battery Section */}
-                                    <tr className="bg-slate-950/80">
-                                        <td className="p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Battery className="w-4 h-4"/> {t('compare.batteryCategory', 'Power & Battery')}
-                                        </td>
-                                        {slots.map(i => (
-                                            <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
-                                        ))}
-                                    </tr>
-                                    <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.batterySpecs', 'Battery Specs')}</td>
-                                        {slots.map(i => (
-                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-medium">
-                                                {selectedProducts[i]?.battery || selectedProducts[i]?.specs?.battery || '-'}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                    
-                                    {/* Performance Section */}
-                                    <tr className="hover:bg-slate-800/20 transition-colors bg-slate-900/30">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800 flex items-center gap-2">
+                                    <tr className="hover:bg-slate-800/20 transition-colors bg-slate-900/40">
+                                        <td className="p-4 md:p-6 text-slate-300 font-bold border-b border-slate-800 flex items-center gap-2">
                                             <Zap className="w-4 h-4 text-amber-500" /> {t('compare.benchmarkScore', 'Benchmark Score')}
                                         </td>
                                         {slots.map(i => (
-                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-black text-amber-500">
+                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-black text-amber-500 text-lg">
                                                 {selectedProducts[i]?.specs?.benchmarkScore || '-'}
                                             </td>
                                         ))}
                                     </tr>
 
-                                    {/* General Section */}
-                                    <tr className="bg-slate-950/80">
-                                        <td className="p-4 md:p-6 font-bold text-brand-secondary border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                                            <Zap className="w-4 h-4"/> {t('compare.general', 'General')}
-                                        </td>
-                                        {slots.map(i => (
-                                            <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>
-                                        ))}
-                                    </tr>
-                                    <tr className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="p-4 md:p-6 text-slate-400 font-medium border-b border-slate-800">{t('compare.colors', 'Colors')}</td>
-                                        {slots.map(i => (
-                                            <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-medium capitalize">
-                                                {selectedProducts[i]?.color || selectedProducts[i]?.specs?.color || '-'}
-                                            </td>
-                                        ))}
-                                    </tr>
+                                    {/* ── Dynamic Specifications Rendered ── */}
+                                    {getDynamicSpecs().map(({ category, keys }) => (
+                                        <React.Fragment key={category}>
+                                            <tr className="bg-slate-950/80">
+                                                <td className="p-4 md:p-6 font-bold text-emerald-400 border-b border-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
+                                                    <CheckCircle2 className="w-4 h-4"/> {category}
+                                                </td>
+                                                {slots.map(i => <td key={i} className="w-1/4 p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>)}
+                                            </tr>
+                                            {keys.map(specKey => (
+                                                <tr key={specKey} className="hover:bg-slate-800/20 transition-colors group">
+                                                    <td className="p-4 md:p-5 text-slate-400 font-medium border-b border-slate-800 group-hover:text-slate-300 transition-colors">{specKey}</td>
+                                                    {slots.map(i => {
+                                                        const p = selectedProducts[i];
+                                                        let specValue: any = undefined;
+                                                        
+                                                        if (p) {
+                                                            if (category === 'Stammdaten') {
+                                                                if (specKey === 'Marke') specValue = p.brand;
+                                                                if (specKey === 'Modell') specValue = p.model || p.name;
+                                                                if (specKey === 'Farbe') specValue = p.color || p.farbe;
+                                                                if (specKey === 'Speicher') specValue = p.storage || p.speicher;
+                                                                if (specKey === 'Zustand') specValue = p.condition;
+                                                            } else if (category === 'Hauptmerkmale' || category === 'Weitere Details') {
+                                                                const lowerKey = specKey.toLowerCase();
+                                                                specValue = p.specs?.[lowerKey] || p.specs?.[specKey];
+                                                            } else {
+                                                                specValue = p.specs?.[category]?.[specKey];
+                                                            }
+                                                        }
+                                                        
+                                                        let renderedValue: React.ReactNode = '-';
+                                                        if (specValue !== undefined && specValue !== null && specValue !== '') {
+                                                            if (typeof specValue === 'boolean') {
+                                                                renderedValue = specValue ? 'Ja' : 'Nein';
+                                                            } else {
+                                                                renderedValue = String(specValue);
+                                                            }
+                                                        }
+                                                        
+                                                        return (
+                                                            <td key={i} className="p-4 md:p-5 border-b border-slate-800 border-l border-slate-800/50 text-sm leading-relaxed text-slate-300 font-medium">
+                                                                {renderedValue}
+                                                            </td>
+                                                        );
+                                                    })}
+                                                </tr>
+                                            ))}
+                                        </React.Fragment>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>

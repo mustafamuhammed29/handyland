@@ -81,7 +81,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                     <h1 className="text-3xl sm:text-4xl font-black text-white flex items-center gap-3">
                         <ShoppingCart className="w-8 h-8 text-blue-500" />
                         {t('cart.title', 'Shopping Cart')}
-                        <span className="text-xl font-medium text-slate-500">({cart.length} {cart.length === 1 ? 'item' : 'items'})</span>
+                        <span className="text-xl font-medium text-slate-500">({cart.length} {cart.length === 1 ? t('cart.item', 'item') : t('cart.items', 'items')})</span>
                     </h1>
                     <button
                         onClick={() => navigate('/marketplace')}
@@ -150,10 +150,10 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                         <button
                                             onClick={() => removeFromCart(item.id)}
                                             className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-400/10 transition-colors flex items-center gap-2"
-                                            title="Remove Item"
+                                            title={t('cart.removeItem', 'Remove Item')}
                                         >
                                             <Trash2 className="w-5 h-5" />
-                                            <span className="text-sm font-medium hidden sm:inline">Remove</span>
+                                            <span className="text-sm font-medium hidden sm:inline">{t('cart.remove', 'Remove')}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -190,7 +190,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                                 }}
                                                 className="px-3 py-1.5 bg-slate-800 hover:bg-brand-primary hover:text-black text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1 active:scale-95"
                                             >
-                                                <Plus className="w-3 h-3" /> Add
+                                                <Plus className="w-3 h-3" /> {t('common.add', 'Add')}
                                             </button>
                                         </div>
                                     </div>
@@ -209,15 +209,15 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
 
                             <div className="space-y-4 mb-6 text-slate-300">
                                 <div className="flex justify-between items-center">
-                                    <span>Subtotal</span>
+                                    <span>{t('cart.subtotal', 'Subtotal')}</span>
                                     <span className="text-white font-medium">€{cartTotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span>Shipping</span>
+                                    <span>{t('cart.shipping', 'Shipping')}</span>
                                     {isFreeShipping ? (
-                                        <span className="text-emerald-400 font-medium tracking-wide text-sm bg-emerald-400/10 px-2 py-0.5 rounded-md border border-emerald-400/20">FREE</span>
+                                        <span className="text-emerald-400 font-medium tracking-wide text-sm bg-emerald-400/10 px-2 py-0.5 rounded-md border border-emerald-400/20">{t('cart.free', 'FREE')}</span>
                                     ) : (
-                                        <span className="text-slate-400">Calculated at checkout</span>
+                                        <span className="text-slate-400">{t('cart.calculatedAtCheckout', 'Calculated at checkout')}</span>
                                     )}
                                 </div>
                                 {/* Free Shipping Progress */}
@@ -225,9 +225,9 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                     <div className="mt-4 pt-4 border-t border-slate-800">
                                         <div className="flex justify-between text-xs text-slate-400 mb-2">
                                             {Math.max(0, threshold - cartTotal) > 0 ? (
-                                                <span>Add €{Math.max(0, threshold - cartTotal).toFixed(2)} for Free Shipping</span>
+                                                <span>{t('cart.addForFreeShipping', 'Add €{{amount}} for Free Shipping', { amount: Math.max(0, threshold - cartTotal).toFixed(2) })}</span>
                                             ) : (
-                                                <span className="text-emerald-400 font-bold">You've unlocked Free Shipping!</span>
+                                                <span className="text-emerald-400 font-bold">{t('cart.freeShippingUnlocked', "You've unlocked Free Shipping!")}</span>
                                             )}
                                             <span>{Math.min(100, Math.round((cartTotal / threshold) * 100))}%</span>
                                         </div>
@@ -243,12 +243,12 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
 
                             <div className="border-t border-slate-700 pt-6 mb-8">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-lg font-bold text-white">Total</span>
+                                    <span className="text-lg font-bold text-white">{t('cart.total', 'Total')}</span>
                                     <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
                                         €{finalTotal.toFixed(2)}
                                     </span>
                                 </div>
-                                <p className="text-xs text-slate-500 mt-2 text-right">Taxes included if applicable</p>
+                                <p className="text-xs text-slate-500 mt-2 text-right">{t('cart.taxesIncluded', 'Taxes included if applicable')}</p>
                             </div>
 
                             <button

@@ -67,12 +67,12 @@ export const TrustBadges: React.FC<TrustBadgesProps> = ({ className = '', varian
             {badges.map((badge, idx) => {
                 const Icon = badge.icon;
                 return (
-                    <div key={idx} className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col items-center text-center transition-all hover:-translate-y-1 hover:shadow-lg">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-transform hover:scale-110 ${badge.bg} ${badge.color}`}>
-                            <Icon className="w-6 h-6" />
+                    <div key={idx} className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 md:p-4 flex flex-col items-center text-center transition-all hover:-translate-y-1 hover:shadow-lg w-full min-w-0">
+                        <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-2 md:mb-3 transition-transform hover:scale-110 ${badge.bg} ${badge.color} shrink-0`}>
+                            <Icon className="w-5 h-5 md:w-6 md:h-6" />
                         </div>
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">{badge.title}</h4>
-                        <p className="text-xs text-slate-500">{badge.subtitle}</p>
+                        <h4 className="text-[11px] md:text-sm font-bold text-slate-900 dark:text-white mb-0.5 md:mb-1 w-full break-words hyphens-auto leading-tight">{badge.title}</h4>
+                        <p className="text-[9px] md:text-xs text-slate-500 w-full break-words hyphens-auto leading-tight">{badge.subtitle}</p>
                     </div>
                 );
             })}

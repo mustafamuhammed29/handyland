@@ -10,6 +10,7 @@ export default function CompareManager() {
     const [editingProduct, setEditingProduct] = useState<any>(null);
     const [researching, setResearching] = useState(false);
     const [globalStats, setGlobalStats] = useState<any>(null);
+    const [advancedSpecsJson, setAdvancedSpecsJson] = useState('');
 
     const [specsForm, setSpecsForm] = useState({
         processor: '',
@@ -47,6 +48,16 @@ export default function CompareManager() {
             benchmarkScore: product.specs?.benchmarkScore || '',
             globalPrice: product.specs?.globalPrice || ''
         });
+
+        const deepSpecs = { ...product.specs };
+        delete deepSpecs.processor;
+        delete deepSpecs.display;
+        delete deepSpecs.camera;
+        delete deepSpecs.battery;
+        delete deepSpecs.benchmarkScore;
+        delete deepSpecs.globalPrice;
+        
+        setAdvancedSpecsJson(Object.keys(deepSpecs).length > 0 ? JSON.stringify(deepSpecs, null, 2) : '');
     };
 
     const handleResearchEbay = async () => {
@@ -75,11 +86,21 @@ export default function CompareManager() {
     };
 
     const handleSaveSpecs = async () => {
+        let parsedAdvanced = {};
+        if (advancedSpecsJson.trim()) {
+            try {
+                parsedAdvanced = JSON.parse(advancedSpecsJson);
+            } catch (err) {
+                toast.error('Invalid JSON format in Advanced Specs.');
+                return;
+            }
+        }
+
         try {
             const updatedProduct = {
                 ...editingProduct,
                 specs: {
-                    ...editingProduct.specs,
+                    ...parsedAdvanced,
                     processor: specsForm.processor,
                     display: specsForm.display,
                     camera: specsForm.camera,
@@ -280,6 +301,19 @@ export default function CompareManager() {
                                                 />
                                             </div>
                                         </div>
+                                    </div>
+                                    
+                                    <div className="space-y-1 mt-4 pt-4 border-t border-slate-800">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-xs font-bold text-slate-400">Advanced: Raw Specs JSON (Grouped Data)</label>
+                                            <span className="text-[10px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded">Used for Dynamic Compare Page</span>
+                                        </div>
+                                        <textarea
+                                            className="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-white text-[11px] font-mono focus:outline-none focus:border-blue-500 h-28 custom-scrollbar resize-none"
+                                            placeholder='{"Hardware": {"RAM": "8GB CPU"}, "Kamera": {"Video": "8K"}}'
+                                            value={advancedSpecsJson}
+                                            onChange={e => setAdvancedSpecsJson(e.target.value)}
+                                        />
                                     </div>
 
                                 </div>
