@@ -15,7 +15,7 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number, d
           observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.01 }
     );
 
     if (countRef.current) {

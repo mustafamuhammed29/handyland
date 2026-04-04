@@ -49,7 +49,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             <div className="sticky top-24 flex flex-col gap-4">
                 <div className="flex justify-between items-end gap-4 md:hidden">
                     <div>
-                        <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">{t('marketplace.title', 'MARKT')}<span className="text-brand-primary">{t('marketplace.titleAccent', 'PLATZ')}</span></h2>
+                        <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">MARKT<span className="text-brand-primary">PLATZ</span></h2>
                         <div className="h-1 w-16 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full"></div>
                     </div>
                     <button onClick={() => setShowFilters(!showFilters)} aria-label="Toggle filters" className={`p-2 w-10 h-10 flex items-center justify-center rounded-xl transition-all ${showFilters ? 'bg-black/5 dark:bg-white/5 text-brand-primary border border-black/10 dark:border-white/10' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white glass-modern'}`}><Filter className="w-5 h-5" /></button>
@@ -65,7 +65,19 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('marketplace.condition', 'ZUSTAND')}</label>
                         <select aria-label="Filter by Condition" value={selectedCondition} onChange={(e) => setSelectedCondition(e.target.value)} className="bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm border border-transparent focus:border-brand-primary outline-none transition-colors">
                             <option value="">{t('marketplace.allConditions', 'Alle Zustände')}</option>
-                            {conditions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                            {conditions.map(opt => {
+                                const conditionLabels: Record<string, string> = {
+                                    'new': t('marketplace.cond.new', 'Neu'),
+                                    'like new': t('marketplace.cond.likeNew', 'Wie Neu'),
+                                    'very good': t('marketplace.cond.veryGood', 'Sehr Gut'),
+                                    'good': t('marketplace.cond.good', 'Gut'),
+                                    'fair': t('marketplace.cond.fair', 'Akzeptabel'),
+                                    'refurbished': t('marketplace.cond.refurbished', 'Generalüberholt'),
+                                    'used': t('marketplace.cond.used', 'Gebraucht'),
+                                    'excellent': t('marketplace.cond.excellent', 'Hervorragend'),
+                                };
+                                return <option key={opt} value={opt}>{conditionLabels[opt.toLowerCase()] || opt}</option>;
+                            })}
                         </select>
                     </div>
 

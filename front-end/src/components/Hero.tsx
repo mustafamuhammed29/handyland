@@ -111,15 +111,15 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     <div className="flex flex-wrap items-center gap-3 md:gap-6 pt-6 md:pt-8">
                         <div className="group flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-emerald-500/30 transition-all">
                             <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-emerald-300 transition-colors">{settings.hero.trustBadge1 || 'VERIFIED SELLERS'}</span>
+                            <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-emerald-300 transition-colors">{settings.hero.trustBadge1 || t('hero.trustBadge1', 'VERIFIZIERTE HÄNDLER')}</span>
                         </div>
                         <div className="group flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-blue-500/30 transition-all">
                             <Hexagon className="w-4 h-4 md:w-5 md:h-5 text-blue-400 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-blue-300 transition-colors">{settings.hero.trustBadge2 || '24/7 SUPPORT'}</span>
+                            <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-blue-300 transition-colors">{settings.hero.trustBadge2 || t('hero.trustBadge2', '24/7 SUPPORT')}</span>
                         </div>
                         <div className="group flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-purple-500/30 transition-all">
                             <Star className="w-4 h-4 md:w-5 md:h-5 text-purple-400 group-hover:scale-110 transition-transform fill-purple-400" />
-                            <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-purple-300 transition-colors">{settings.hero.trustBadge3 || '4.9★ RATED'}</span>
+                            <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-purple-300 transition-colors">{settings.hero.trustBadge3 || t('hero.trustBadge3', '4,9★ BEWERTET')}</span>
                         </div>
                     </div>
                 </div>
@@ -156,7 +156,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                             <div className="absolute bottom-6 md:bottom-8 left-5 md:left-6 right-5 md:right-6">
                                 <div className="flex justify-between items-end mb-4 gap-3">
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-brand-primary text-[10px] md:text-xs font-bold mb-1 truncate">{settings.hero.productLabel || 'CURRENT OFFER'}</div>
+                                        <div className="text-brand-primary text-[10px] md:text-xs font-bold mb-1 truncate">{settings.hero.productLabel || t('hero.currentOffer', 'AKTUELLES ANGEBOT')}</div>
                                         <div className="text-white text-lg md:text-xl font-black leading-tight break-words line-clamp-2 md:line-clamp-3">{settings.hero.productName || 'iPhone 15 Pro'}</div>
                                     </div>
                                     <div className="text-white text-lg md:text-xl font-bold whitespace-nowrap shrink-0">{settings.hero.productPrice || '€950'}</div>

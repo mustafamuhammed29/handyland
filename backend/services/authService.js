@@ -113,7 +113,7 @@ class AuthService {
      */
     async loginUser(email, password) {
         const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
-        if (!user) {throw new Error('Invalid credentials');}
+        if (!user) {throw new Error('Ungültige Anmeldedaten');}
 
         // Check Lock
         if (user.lockUntil && user.lockUntil > Date.now()) {
@@ -128,7 +128,7 @@ class AuthService {
                 user.lockUntil = Date.now() + 15 * 60 * 1000;
             }
             await User.updateOne({ _id: user._id }, { $set: { loginAttempts: user.loginAttempts, lockUntil: user.lockUntil } });
-            throw new Error('Invalid credentials');
+            throw new Error('Ungültige Anmeldedaten');
         }
 
         // Reset Attempts

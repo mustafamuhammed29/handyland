@@ -99,7 +99,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
 
             const response: any = await api.post('/api/repairs/tickets', payload);
             if (response?.success) {
-                addToast('Repair Ticket Created Successfully!', 'success');
+                addToast('Reparatur-Ticket erfolgreich erstellt!', 'success');
                 setShowTicketModal(false);
                 setSelectedDevice(null);
                 setTicketForm({ name: '', email: '', phone: '', notes: '', appointmentDate: '' });
@@ -113,11 +113,11 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                     });
                 }, 1500);
             } else {
-                addToast(response?.message || 'Failed to create repair ticket. Please try again.', 'error');
+                addToast(response?.message || 'Reparatur-Ticket konnte nicht erstellt werden. Bitte versuche es erneut.', 'error');
             }
         } catch (error) {
             console.error('Ticket creation error', error);
-            addToast('Failed to create repair ticket. Please try again.', 'error');
+            addToast('Reparatur-Ticket konnte nicht erstellt werden. Bitte versuche es erneut.', 'error');
         } finally {
             setSubmitting(false);
         }

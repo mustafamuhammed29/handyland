@@ -17,10 +17,27 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
   const settings = {
     companyInfo: {
       name: (globalSettings?.siteName || 'HANDYLAND').toUpperCase(),
-      tagline: globalSettings?.footerSection?.tagline || 'The global standard for premium device trading and repair.',
+      tagline: globalSettings?.footerSection?.tagline || t('footer.tagline', 'Der globale Standard für Premium-Gerätehandel und Reparatur.'),
       copyright: globalSettings?.footerSection?.copyright || '© 2026 HANDYLAND'
     },
-    columns: globalSettings?.footerSection?.columns || [],
+    columns: globalSettings?.footerSection?.columns || [
+      {
+        title: t('footer.shopTitle', 'SHOP'),
+        links: [
+          { label: t('footer.marketplace', 'MARKTPLATZ'), url: '/marketplace' },
+          { label: t('footer.accessories', 'ZUBEHÖR'), url: '/accessories' },
+          { label: t('footer.sellDevice', 'GERÄT VERKAUFEN'), url: '/valuation' },
+        ]
+      },
+      {
+        title: t('footer.servicesTitle', 'SERVICES'),
+        links: [
+          { label: t('footer.repair', 'REPARATUR'), url: '/repair' },
+          { label: t('footer.trackRepair', 'REPARATUR VERFOLGEN'), url: '/track-repair' },
+          { label: t('footer.support', 'SUPPORT'), url: '/kundenservice' },
+        ]
+      }
+    ],
     bottomLinks: globalSettings?.footerSection?.bottomLinks || []
   };
 

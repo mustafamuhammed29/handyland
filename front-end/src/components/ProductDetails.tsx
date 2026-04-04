@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { getImageUrl } from '../utils/imageUrl';
 import { formatPrice } from '../utils/formatPrice';
 import { Breadcrumbs } from './Breadcrumbs';
+import { cleanProductName } from '../utils/cleanProductName';
 import { ConditionGuide } from './products/ConditionGuide';
 import { TrustBadges } from './products/TrustBadges';
 import { ProductGallery } from './products/ProductGallery';
@@ -156,7 +157,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
         if (!product) return;
         addToCart({
             id: product.id,
-            title: product.model,
+            title: cleanProductName(product.model, product.brand),
             subtitle: `${product.storage} • ${product.color}`,
             price: product.price,
             image: activeImage,
@@ -173,8 +174,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 relative">
             <SEO
-                title={(product as any).seo?.metaTitle || `${product.model} - ${product.condition} | ${product.storage}`}
-                description={(product as any).seo?.metaDescription || `Gebrauchtes ${product.model} kaufen - ${product.storage} - ${product.color} im Zustand ${product.condition}. Zertifizierte Qualität, Garantie inklusive.`}
+                title={(product as any).seo?.metaTitle || `${cleanProductName(product.model, product.brand)} - ${product.condition} | ${product.storage}`}
+                description={(product as any).seo?.metaDescription || `Gebrauchtes ${cleanProductName(product.model, product.brand)} kaufen - ${product.storage} - ${product.color} im Zustand ${product.condition}. Zertifizierte Qualität, Garantie inklusive.`}
                 keywords={(product as any).seo?.keywords}
                 canonical={(product as any).seo?.canonicalUrl || window.location.href}
                 ogImage={(product as any).seo?.ogImage || getImageUrl(activeImage)}
@@ -184,7 +185,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                 <Breadcrumbs items={[
                     { label: t('product.breadcrumbHome', 'Startseite'), path: '/' },
                     { label: t('product.breadcrumbMarketplace', 'Marktplatz'), path: '/marketplace' },
-                    { label: product.model }
+                    { label: cleanProductName(product.model, product.brand) }
                 ]} />
             </div>
 
@@ -222,7 +223,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                     {/* Product Info */}
                     <div className="flex flex-col">
                         <div className="flex justify-between items-start">
-                            <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 leading-tight">{product.model}</h1>
+                            <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 leading-tight">{cleanProductName(product.model, product.brand)}</h1>
                             <button
                                 onClick={() => {
                                     navigator.clipboard.writeText(window.location.href);
@@ -282,7 +283,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                 <Cpu className="w-5 h-5 text-brand-primary" />
                                 <div>
                                     <div className="text-xs text-slate-500">{t('product.processor', 'Prozessor')}</div>
-                                    <div className="text-sm font-bold text-slate-900 dark:text-slate-200">{product.specs?.cpu}</div>
+                                    <div className="text-sm font-bold text-slate-900 dark:text-slate-200">{product.specs?.cpu || t('product.unknown', 'Unbekannt')}</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
@@ -337,7 +338,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                 <button
                                     onClick={() => toggleWishlist({
                                         id: product.id || (product as any)._id,
-                                        title: product.model || (product as any).title,
+                                        title: cleanProductName(product.model || (product as any).title, product.brand),
                                         price: product.price,
                                         image: activeImage,
                                         category: 'device',
@@ -393,7 +394,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                         <img src={getImageUrl(related.imageUrl)} alt={related.model} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                                     </div>
                                     <h4 className="font-bold text-slate-900 dark:text-white mb-1 truncate">{related.model}</h4>
-                                    <div className="text-brand-primary font-bold">{related.price}{t('currency', '€')}</div>
+                                    <div className="text-brand-primary font-bold">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(related.price)}</div>
                                 </div>
                             ))}
                         </div>
