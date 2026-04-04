@@ -67,7 +67,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                 >
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-700 backdrop-blur-md animate-in slide-in-from-bottom-4 fade-in duration-700">
                         <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: settings.hero.accentColor }}></span>
-                        <span className="text-xs font-bold tracking-widest uppercase" style={{ color: settings.hero.accentColor }}>{settings.hero.tagline || t('home.tagline', "Germany's #1 Tech Hub")}</span>
+                        <span className="text-xs font-bold tracking-widest uppercase" style={{ color: settings.hero.accentColor }}>{settings.hero.tagline || t('home.tagline', "DEUTSCHLANDS #1 TECH-HUB")}</span>
                     </div>
 
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white leading-tight tracking-tight whitespace-pre-line">

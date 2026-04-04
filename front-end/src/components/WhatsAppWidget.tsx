@@ -20,7 +20,7 @@ export const WhatsAppWidget = () => {
             aria-label="Chat on WhatsApp"
         >
             <div className="absolute right-16 px-4 py-2 bg-slate-900 border border-slate-700 text-white text-sm font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
-                Need Help? Chat with us!
+                Hilfe benötigt? Chatte mit uns!
                 <div className="absolute top-1/2 -right-1 -mt-1 border-t-4 border-b-4 border-l-4 border-transparent border-l-slate-700"></div>
             </div>
             <svg

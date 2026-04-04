@@ -23,11 +23,11 @@ export const Contact: React.FC<ContactProps> = () => {
         email: globalSettings?.contactSection?.email || 'support@handyland.de',
         mapUrl: globalSettings?.contactSection?.mapUrl || '',
         formspreeEndpoint: '',
-        title: globalSettings?.contactSection?.formTitle || 'Secure Message Channel',
+        title: globalSettings?.contactSection?.formTitle || 'Sicherer Nachrichtenkanal',
         labels: {
-            name: 'Your full name...',
-            email: 'Your email address...',
-            message: 'How can we help you?'
+            name: 'Ihr vollständiger Name...',
+            email: 'Ihre E-Mail-Adresse...',
+            message: 'Wie können wir Ihnen helfen?'
         },
         buttonText: globalSettings?.contactSection?.formButton || 'Protokoll senden',
         socialLinks: Array.isArray(globalSettings?.contactSection?.socialLinks) 
@@ -84,7 +84,7 @@ export const Contact: React.FC<ContactProps> = () => {
                 <div className="text-center mb-16">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/30 border border-brand-primary/30 text-brand-primary text-xs font-mono mb-4 animate-pulse">
                         <Radio className="w-3 h-3" />
-                        <span>SIGNAL_STRENGTH: 100%</span>
+                        <span>SIGNALSTÄRKE: 100%</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
                         {t('contactTitle', 'Contact Us')}
@@ -124,7 +124,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                     <MapPin className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <div className="text-xs text-slate-300 dark:text-slate-400 font-mono">HQ COORDINATES</div>
+                                    <div className="text-xs text-slate-300 dark:text-slate-400 font-mono">{t('contact.hqCoordinates', 'HQ-STANDORT')}</div>
                                     <div className="text-white font-bold text-lg">{settings.location.name}</div>
                                 </div>
                             </div>
@@ -154,7 +154,7 @@ export const Contact: React.FC<ContactProps> = () => {
                         {/* Social Media Icons */}
                         {settings.socialLinks.length > 0 && (
                             <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
-                                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Social Connect</h4>
+                                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">{t('contact.socialConnect', 'Soziale Netzwerke')}</h4>
                                 <div className="flex flex-wrap gap-4">
                                     {settings.socialLinks.map((social: any, index: number) => {
                                         const iconMap: Record<string, React.ElementType> = {

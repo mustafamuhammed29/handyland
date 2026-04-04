@@ -39,8 +39,8 @@ export const ProductStickyBar: React.FC<ProductStickyBarProps> = ({ product, han
                                     : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
                         >
                             <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
-                            <span className="hidden sm:inline">{product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
-                            <span className="sm:hidden">{product.stock > 0 ? 'Add' : 'Out'}</span>
+                            <span className="hidden sm:inline">{product.stock > 0 ? 'In den Warenkorb' : 'Nicht vorrätig'}</span>
+                            <span className="sm:hidden">{product.stock > 0 ? 'Kaufen' : 'Aus'}</span>
                         </button>
                     </div>
                 </motion.div>

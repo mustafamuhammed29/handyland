@@ -104,10 +104,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                 >
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <ShoppingCart className="w-5 h-5 text-brand-primary" /> {t('cart', 'Your Cart')}
+                            <ShoppingCart className="w-5 h-5 text-brand-primary" /> {t('cart', 'Warenkorb')}
                             <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs px-2 py-0.5 rounded-full">{cart.length}</span>
                         </h3>
-                        <button onClick={() => setIsCartOpen(false)} aria-label="Close cart" className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+                        <button onClick={() => setIsCartOpen(false)} aria-label={t('cart.close', 'Warenkorb schließen')} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
                             <X className="w-6 h-6" />
                         </button>
                     </div>
@@ -117,8 +117,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                         <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
                             <Truck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                             {remainingForFreeShipping > 0
-                                ? <span>{t('cart.addForFreeShipping', 'Add {{amount}} for Free Shipping', { amount: formatPrice(remainingForFreeShipping) })}</span>
-                                : <span className="text-emerald-500 dark:text-emerald-400">{t('cart.freeShippingUnlocked', "You've unlocked Free Shipping!")}</span>
+                                ? <span>{t('cart.addForFreeShipping', 'Noch {{amount}} für kostenlosen Versand', { amount: formatPrice(remainingForFreeShipping) })}</span>
+                                : <span className="text-emerald-500 dark:text-emerald-400">{t('cart.freeShippingUnlocked', 'Du hast kostenlosen Versand freigeschaltet!')}</span>
                             }
                         </div>
                         <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -146,15 +146,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                     </span>
                                 </div>
                             </div>
-                            <h4 className="text-xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">{t('cart.emptyTitle', 'Your cart is empty')}</h4>
+                            <h4 className="text-xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">{t('cart.emptyTitle', 'Dein Warenkorb ist leer')}</h4>
                             <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-[240px] leading-relaxed">
-                                {t('cart.emptyText', "Looks like you haven't added anything to your cart yet. Discover our top products!")}
+                                {t('cart.emptyText', 'Sieht so aus, als hättest du noch nichts in deinen Warenkorb gelegt. Entdecke unsere Top-Produkte!')}
                             </p>
                             <button
                                 onClick={() => { setIsCartOpen(false); navigate('/marketplace'); }}
                                 className="group relative px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold transition-all hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 overflow-hidden"
                             >
-                                <span className="relative z-10">{t('cart.shopNow', 'Start Shopping')}</span>
+                                <span className="relative z-10">{t('cart.shopNow', 'Jetzt einkaufen')}</span>
                                 <div className="absolute inset-0 bg-gradient-to-r from-brand-primary to-brand-secondary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </button>
                         </div>
@@ -204,24 +204,24 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                                         <button
                                                             onClick={() => handleToggleWishlist(item)}
                                                             className={`${isInWishlist(item.id) ? 'text-pink-500' : 'text-slate-500 hover:text-pink-400'} transition-colors`}
-                                                            title={isInWishlist(item.id) ? "Remove from Favorites" : "Add to Favorites"}
-                                                            aria-label={`Toggle favorite for ${item.title}`}
+                                                            title={isInWishlist(item.id) ? t('cart.removeFromFavorites', 'Aus Favoriten entfernen') : t('cart.addToFavorites', 'Zu Favoriten hinzufügen')}
+                                                            aria-label={t('cart.toggleFavorite', 'Favorit umschalten für {{name}}', { name: item.title })}
                                                         >
                                                             <Heart className={`w-4 h-4 ${isInWishlist(item.id) ? 'fill-current' : ''}`} />
                                                         </button>
                                                         <button
                                                             onClick={() => removeFromCart(item.id)}
                                                             className="text-slate-500 hover:text-red-400 transition-colors md:hidden"
-                                                            title="Swipe to remove"
-                                                            aria-label={`Swipe to remove ${item.title}`}
+                                                            title={t('cart.swipeRemove', 'Zum Entfernen wischen')}
+                                                            aria-label={t('cart.removeItem', '{{name}} aus dem Warenkorb entfernen', { name: item.title })}
                                                         >
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
                                                         <button
                                                             onClick={() => removeFromCart(item.id)}
                                                             className="text-slate-500 hover:text-red-400 transition-colors hidden md:block"
-                                                            title="Remove"
-                                                            aria-label={`Remove ${item.title} from cart`}
+                                                            title={t('cart.remove', 'Entfernen')}
+                                                            aria-label={t('cart.removeItem', '{{name}} aus dem Warenkorb entfernen', { name: item.title })}
                                                         >
                                                             <X className="w-4 h-4" />
                                                         </button>
@@ -295,7 +295,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                         disabled={!couponCodeIn || couponLoading}
                                         className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white px-4 rounded-xl text-sm font-bold disabled:opacity-50 transition-colors border border-slate-800 dark:border-slate-700"
                                     >
-                                        {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('cart.apply', 'Apply')}
+                                        {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('cart.apply', 'Anwenden')}
                                     </button>
                                 </div>
                             )}
@@ -306,17 +306,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                     {/* Totals */}
                     <div className="space-y-2 pt-2">
                         <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                            <span>{t('cart.subtotal', 'Subtotal')}</span>
+                            <span>{t('cart.subtotal', 'Zwischensumme')}</span>
                             <span>{formatPrice(cartTotal)}</span>
                         </div>
                         {coupon && (
                             <div className="flex justify-between text-emerald-500 dark:text-emerald-400 text-sm">
-                                <span>{t('cart.discount', 'Discount')}</span>
+                                <span>{t('cart.discount', 'Rabatt')}</span>
                                 <span>-{formatPrice(coupon.discount)}</span>
                             </div>
                         )}
                         <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800">
-                            <span className="text-lg font-bold text-slate-900 dark:text-white">{t('cart.total', 'Total')}</span>
+                            <span className="text-lg font-bold text-slate-900 dark:text-white">{t('cart.total', 'Gesamt')}</span>
                             <span className="text-2xl font-bold text-brand-primary">{formatPrice(finalTotal)}</span>
                         </div>
                     </div>
@@ -326,7 +326,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                         disabled={cart.length === 0}
                         className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
-                        {t('cart.checkoutSecurely', 'Checkout Securely')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        {t('cart.checkoutSecurely', 'Sicher zur Kasse')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
             </div>
