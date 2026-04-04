@@ -15,7 +15,7 @@ const API_URL = ENV.API_URL;
 
 const SocialButton: React.FC<{ provider: 'google' | 'facebook' }> = ({ provider }) => {
     const isGoogle = provider === 'google';
-    const label = isGoogle ? 'Sign up with Google' : 'Sign up with Facebook';
+    const label = isGoogle ? 'Mit Google anmelden' : 'Mit Facebook anmelden';
     const bg = isGoogle
         ? 'bg-white hover:bg-gray-50 text-gray-800 border border-gray-300'
         : 'bg-[#1877F2] hover:bg-[#166FE5] text-white';
@@ -157,7 +157,7 @@ const Register: React.FC = () => {
         special: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
     };
     const passed = Object.values(checks).filter(Boolean).length;
-    const strengthLabel = passed <= 1 ? 'Weak' : passed === 2 ? 'Fair' : passed === 3 ? 'Good' : 'Strong';
+    const strengthLabel = passed <= 1 ? 'Schwach' : passed === 2 ? 'Ausreichend' : passed === 3 ? 'Gut' : 'Stark';
     const strengthColor = passed <= 1 ? 'bg-red-500' : passed === 2 ? 'bg-yellow-500' : passed === 3 ? 'bg-blue-500' : 'bg-emerald-500';
     const textColor = passed <= 1 ? 'text-red-400' : passed === 2 ? 'text-yellow-400' : passed === 3 ? 'text-blue-400' : 'text-emerald-400';
 
@@ -169,13 +169,13 @@ const Register: React.FC = () => {
                     <div className="inline-block p-4 bg-gradient-to-br from-green-600 to-cyan-500 rounded-2xl shadow-2xl shadow-green-900/50 mb-4">
                         <Shield className="w-12 h-12 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black text-white mb-2">Create Account</h1>
-                    <p className="text-slate-400 uppercase tracking-wider text-sm">Join HandyLand Today</p>
+                    <h1 className="text-4xl font-black text-white mb-2">Konto erstellen</h1>
+                    <p className="text-slate-400 uppercase tracking-wider text-sm">HEUTE BEI HANDYLAND ANMELDEN</p>
                 </div>
 
                 {/* Register Card */}
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl">
-                    <h2 className="text-2xl font-bold text-white mb-6">Register Your Account</h2>
+                    <h2 className="text-2xl font-bold text-white mb-6">Dein Konto registrieren</h2>
 
                     {/* Error */}
                     {error && (
@@ -189,18 +189,18 @@ const Register: React.FC = () => {
                         {/* Name + Phone */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Vollständiger Name</label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                     <input
                                         type="text" name="name" value={formData.name} onChange={handleChange}
-                                        placeholder="e.g. Mark Tech" required
+                                        placeholder="z.B. Max Mustermann" required
                                         className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Phone Number</label>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Telefonnummer</label>
                                 <div className="relative">
                                     <PhoneInput
                                         international
@@ -215,7 +215,7 @@ const Register: React.FC = () => {
 
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">E-Mail-Adresse</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                 <input
@@ -229,7 +229,7 @@ const Register: React.FC = () => {
                         {/* Password + Confirm */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Passwort</label>
                                 <PasswordInput
                                     name="password" value={formData.password} onChange={handleChange}
                                     required minLength={8} maxLength={20}
@@ -247,10 +247,10 @@ const Register: React.FC = () => {
                                         </div>
                                         <div className="grid grid-cols-2 gap-1">
                                             {[
-                                                { ok: checks.length, label: '8-20 characters' },
-                                                { ok: checks.upper, label: 'Uppercase' },
-                                                { ok: checks.number, label: 'Number' },
-                                                { ok: checks.special, label: 'Special char' },
+                                                { ok: checks.length, label: '8-20 Zeichen' },
+                                                { ok: checks.upper, label: 'Großbuchstabe' },
+                                                { ok: checks.number, label: 'Zahl' },
+                                                { ok: checks.special, label: 'Sonderzeichen' },
                                             ].map(req => (
                                                 <div key={req.label} className={`flex items-center gap-1.5 text-[10px] transition-colors ${req.ok ? 'text-emerald-400' : 'text-slate-500'}`}>
                                                     {req.ok ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
@@ -263,7 +263,7 @@ const Register: React.FC = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Confirm Password</label>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Passwort bestätigen</label>
                                 <PasswordInput
                                     name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
                                     required minLength={8} maxLength={20}
@@ -271,8 +271,8 @@ const Register: React.FC = () => {
                                 {formData.confirmPassword.length > 0 && (
                                     <div className={`flex items-center gap-1.5 mt-2 text-[10px] ${formData.password === formData.confirmPassword ? 'text-emerald-400' : 'text-red-400'}`}>
                                         {formData.password === formData.confirmPassword
-                                            ? <><CheckCircle className="w-3 h-3" />Passwords match</>
-                                            : <><XCircle className="w-3 h-3" />Passwords do not match</>}
+                                            ? <><CheckCircle className="w-3 h-3" />Passwörter stimmen überein</>
+                                            : <><XCircle className="w-3 h-3" />Passwörter stimmen nicht überein</>}
                                     </div>
                                 )}
                             </div>
@@ -283,7 +283,7 @@ const Register: React.FC = () => {
                             type="submit" disabled={loading}
                             className="w-full py-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-bold rounded-lg shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            {loading ? <><Loader className="w-5 h-5 animate-spin" />Creating Account...</> : 'Create Account →'}
+                            {loading ? <><Loader className="w-5 h-5 animate-spin" />Konto wird erstellt...</> : 'Konto erstellen →'}
                         </button>
                     </form>
 
@@ -292,7 +292,7 @@ const Register: React.FC = () => {
                         <>
                             <div className="my-6 flex items-center gap-3">
                                 <div className="flex-1 h-px bg-slate-700" />
-                                <span className="text-slate-500 text-xs uppercase tracking-wider">or sign up with</span>
+                                <span className="text-slate-500 text-xs uppercase tracking-wider">ODER ANMELDEN MIT</span>
                                 <div className="flex-1 h-px bg-slate-700" />
                             </div>
 
@@ -306,8 +306,8 @@ const Register: React.FC = () => {
                     {/* Login Link */}
                     <div className="mt-6 pt-6 border-t border-slate-800">
                         <p className="text-center text-slate-400 text-sm">
-                            Already have an account?{' '}
-                            <Link to="/login" className="text-green-400 font-semibold hover:text-green-300 transition-colors">Login Here</Link>
+                            Du hast bereits ein Konto?{' '}
+                            <Link to="/login" className="text-green-400 font-semibold hover:text-green-300 transition-colors">Hier anmelden</Link>
                         </p>
                     </div>
                 </div>

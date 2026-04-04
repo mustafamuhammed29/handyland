@@ -53,14 +53,14 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
             category: 'accessory',
             stock: item.stock ?? 0
         });
-        addToast(`${item.name} added to cart!`, 'success');
+        addToast(`${item.name} wurde zum Warenkorb hinzugefügt!`, 'success');
     };
 
     const categories = [
-        { id: 'all', label: 'ALL GEAR', icon: <Sparkles className="w-4 h-4" /> },
+        { id: 'all', label: t('accessories.catAll', 'ALLE PRODUKTE'), icon: <Sparkles className="w-4 h-4" /> },
         { id: 'audio', label: t('accessories.catAudio', 'Audio'), icon: <Headphones className="w-4 h-4" /> },
-        { id: 'power', label: t('accessories.catPower', 'Power'), icon: <Zap className="w-4 h-4" /> },
-        { id: 'protection', label: t('accessories.catProtection', 'Protection'), icon: <Shield className="w-4 h-4" /> },
+        { id: 'power', label: t('accessories.catPower', 'Energie'), icon: <Zap className="w-4 h-4" /> },
+        { id: 'protection', label: t('accessories.catProtection', 'Schutz'), icon: <Shield className="w-4 h-4" /> },
         { id: 'wearables', label: t('accessories.catWearables', 'Wearables'), icon: <Watch className="w-4 h-4" /> },
     ];
 
@@ -104,7 +104,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                             <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-purple-400 transition-colors" />
                             <input
                                 type="text"
-                                placeholder="Search Gear..."
+                                placeholder={t('accessories.search', 'Zubehör suchen...')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:border-purple-500 transition-all placeholder-slate-400 dark:placeholder-slate-600"
@@ -163,7 +163,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                 {/* Quick Inspect Overlay */}
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
                                     <span className="bg-purple-500/80 text-white px-2 py-1 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-bold flex items-center gap-1">
-                                        <Layers className="w-3 h-3" /> Inspect
+                                        <Layers className="w-3 h-3" /> {t('accessories.inspect', 'Ansehen')}
                                     </span>
                                 </div>
                             </div>
@@ -181,7 +181,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                             className={`flex-1 sm:flex-none flex items-center justify-center gap-1 px-2 py-1.5 md:px-3 md:py-1.5 rounded-lg transition-all text-[10px] md:text-xs font-bold uppercase disabled:opacity-50 disabled:cursor-not-allowed ${item.stock > 0 ? 'bg-slate-200 dark:bg-slate-800 hover:bg-purple-600 text-slate-600 dark:text-slate-300 hover:text-white' : 'bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-400 dark:text-slate-600'}`}
                                         >
                                             <ShoppingCart className="w-3 h-3" />
-                                            <span className="hidden min-[380px]:inline">{item.stock > 0 ? t('accessories.equip', 'Add to Cart') : 'Out'}</span>
+                                            <span className="hidden min-[380px]:inline">{item.stock > 0 ? t('accessories.equip', 'In den Warenkorb') : t('accessories.out', 'Ausverkauft')}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -198,7 +198,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                 onClick={() => setVisibleCount(prev => prev + 15)}
                                 className="px-8 py-3 bg-slate-200 dark:bg-slate-800 hover:bg-purple-600 text-slate-800 dark:text-white hover:text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-purple-500/20 border border-slate-300 dark:border-slate-700 hover:border-purple-400"
                             >
-                                Load More Gear
+                                {t('accessories.loadMore', 'Mehr Produkte laden')}
                             </button>
                         </div>
                     )

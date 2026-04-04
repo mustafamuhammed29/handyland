@@ -20,9 +20,9 @@ export const ConditionGuide: React.FC<ConditionGuideProps> = ({ isOpen, onClose,
             color: 'text-emerald-500',
             bg: 'bg-emerald-500/10',
             border: 'border-emerald-500/30',
-            description: "Like new condition. The screen and body are flawless with no visible scratches from 20cm away.",
+            description: t('condition.excellent.desc', 'Wie-neu-Zustand. Bildschirm und Gehäuse sind makellos, keine sichtbaren Kratzer aus 20 cm Entfernung.'),
             battery: "> 85%",
-            highlights: ['Flawless Screen', 'Pristine Body', 'Fully Tested']
+            highlights: [t('condition.excellent.h1', 'Makelloser Bildschirm'), t('condition.excellent.h2', 'Einwandfreies Gehäuse'), t('condition.excellent.h3', 'Vollständig geprüft')]
         },
         {
             id: 'good',
@@ -31,9 +31,9 @@ export const ConditionGuide: React.FC<ConditionGuideProps> = ({ isOpen, onClose,
             color: 'text-blue-500',
             bg: 'bg-blue-500/10',
             border: 'border-blue-500/30',
-            description: "Light signs of wear. May have micro-scratches on the body or screen, invisible when the screen is on.",
+            description: t('condition.good.desc', 'Leichte Gebrauchsspuren. Mögliche Mikrokratzer auf Gehäuse oder Bildschirm, unsichtbar bei eingeschaltetem Display.'),
             battery: "> 80%",
-            highlights: ['Micro-scratches only', 'Invisible when ON', 'Fully Tested']
+            highlights: [t('condition.good.h1', 'Nur Mikrokratzer'), t('condition.good.h2', 'Unsichtbar bei AN'), t('condition.good.h3', 'Vollständig geprüft')]
         },
         {
             id: 'fair',
@@ -42,9 +42,9 @@ export const ConditionGuide: React.FC<ConditionGuideProps> = ({ isOpen, onClose,
             color: 'text-purple-500',
             bg: 'bg-purple-500/10',
             border: 'border-purple-500/30',
-            description: "Visible signs of wear. Noticeable scratches or minor dents, but 100% fully functional.",
+            description: t('condition.fair.desc', 'Sichtbare Gebrauchsspuren. Erkennbare Kratzer oder kleine Dellen, aber 100% voll funktionsfähig.'),
             battery: "> 80%",
-            highlights: ['Visible cosmetic wear', 'Best Value', 'Fully Tested']
+            highlights: [t('condition.fair.h1', 'Sichtbare Gebrauchsspuren'), t('condition.fair.h2', 'Bestes Preis-Leistungs-Verhältnis'), t('condition.fair.h3', 'Vollständig geprüft')]
         }
     ];
 
@@ -74,8 +74,8 @@ export const ConditionGuide: React.FC<ConditionGuideProps> = ({ isOpen, onClose,
                                     <HelpCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Condition Guide</h2>
-                                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">What do our cosmetic grades mean?</p>
+                                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{t('condition.guideTitle', 'Zustandsübersicht')}</h2>
+                                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">{t('condition.guideSubtitle', 'Was bedeuten unsere Zustandsstufen?')}</p>
                                 </div>
                             </div>
                             <button
@@ -89,7 +89,7 @@ export const ConditionGuide: React.FC<ConditionGuideProps> = ({ isOpen, onClose,
 
                         <div className="p-6 md:p-8 overflow-y-auto max-h-[60vh] custom-scrollbar">
                             <p className="text-slate-600 dark:text-slate-400 mb-8 sm:mb-10 text-sm sm:text-base leading-relaxed">
-                                Every device we sell passes a strict 40+ point technical inspection. The conditions below refer <strong>only to the cosmetic appearance</strong> of the device. All devices are 100% fully functional.
+                                {t('condition.guideIntro', 'Jedes Gerät, das wir verkaufen, durchläuft eine strenge 40-Punkte-Inspektion. Die folgenden Zustandsstufen beziehen sich')} <strong>{t('condition.guideIntroStrong', 'ausschließlich auf das kosmetische Erscheinungsbild')}</strong>{t('condition.guideIntroEnd', ' des Geräts. Alle Geräte sind 100% voll funktionsfähig.')}
                             </p>
 
                             <div className="space-y-4 sm:space-y-6">
@@ -108,7 +108,7 @@ export const ConditionGuide: React.FC<ConditionGuideProps> = ({ isOpen, onClose,
                                         >
                                             {isCurrent && (
                                                 <div className={`absolute -top-3 sm:-top-4 right-4 sm:right-6 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wide bg-gradient-to-r ${cond.bg} border ${cond.border} ${cond.color} shadow-sm backdrop-blur-md`}>
-                                                    This Device
+                                                    {t('condition.thisDevice', 'Dieses Gerät')}
                                                 </div>
                                             )}
                                             
@@ -129,7 +129,7 @@ export const ConditionGuide: React.FC<ConditionGuideProps> = ({ isOpen, onClose,
                                                         ))}
                                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-slate-100 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                                                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                                                Battery: {cond.battery}
+                                                                {t('condition.battery', 'Akku')}: {cond.battery}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -144,7 +144,7 @@ export const ConditionGuide: React.FC<ConditionGuideProps> = ({ isOpen, onClose,
                                 onClick={onClose}
                                 className="w-full sm:w-auto px-6 py-2.5 sm:py-3 bg-brand-primary hover:bg-brand-secondary text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-brand-primary/25"
                             >
-                                Got it, thanks!
+                                {t('condition.gotIt', 'Verstanden, danke!')}
                             </button>
                         </div>
                     </motion.div>

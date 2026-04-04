@@ -174,7 +174,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 relative">
             <SEO
                 title={(product as any).seo?.metaTitle || `${product.model} - ${product.condition} | ${product.storage}`}
-                description={(product as any).seo?.metaDescription || `Buy used, refurbished ${product.brand} ${product.model} - ${product.storage} - ${product.color} in ${product.condition} condition. Certified quality, warranty included.`}
+                description={(product as any).seo?.metaDescription || `Gebrauchtes ${product.model} kaufen - ${product.storage} - ${product.color} im Zustand ${product.condition}. Zertifizierte Qualität, Garantie inklusive.`}
                 keywords={(product as any).seo?.keywords}
                 canonical={(product as any).seo?.canonicalUrl || window.location.href}
                 ogImage={(product as any).seo?.ogImage || getImageUrl(activeImage)}
@@ -184,7 +184,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                 <Breadcrumbs items={[
                     { label: t('product.breadcrumbHome', 'Startseite'), path: '/' },
                     { label: t('product.breadcrumbMarketplace', 'Marktplatz'), path: '/marketplace' },
-                    { label: `${product.brand} ${product.model}` }
+                    { label: product.model }
                 ]} />
             </div>
 
@@ -242,7 +242,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                                   <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
                                 </span>
-                                <span className="text-sm font-bold">🔥 High Demand: {Math.floor(Math.random() * 5) + 3} people are looking at this right now</span>
+                                <span className="text-sm font-bold">🔥 {t('product.highDemand', 'Hohe Nachfrage: {{count}} Personen sehen sich dieses Produkt gerade an', { count: Math.floor(Math.random() * 5) + 3 })}</span>
                             </div>
                         )}
 
@@ -322,7 +322,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                     <button
                                         onClick={() => {
                                             if (quantity >= (product.stock || 0)) {
-                                                addToast(`Maximum available stock: ${product.stock || 0}`, 'error');
+                                                addToast(`Maximal verfügbarer Bestand: ${product.stock || 0}`, 'error');
                                             } else {
                                                 setQuantity(q => q + 1);
                                             }
@@ -345,8 +345,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                         stock: product.stock
                                     })}
                                     disabled={wishlistLoadingId === String(product.id || (product as any)._id)}
-                                    title={isInWishlist(product.id || (product as any)._id) ? "Remove from wishlist" : "Add to wishlist"}
-                                    aria-label={isInWishlist(product.id || (product as any)._id) ? "Remove from wishlist" : "Add to wishlist"}
+                                    title={isInWishlist(product.id || (product as any)._id) ? t('product.removeWishlist', 'Von Wunschliste entfernen') : t('product.addWishlist', 'Zur Wunschliste')}
+                                    aria-label={isInWishlist(product.id || (product as any)._id) ? t('product.removeWishlist', 'Von Wunschliste entfernen') : t('product.addWishlist', 'Zur Wunschliste')}
                                     className={`p-4 rounded-xl border transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-wait ${isInWishlist(product.id || (product as any)._id)
                                         ? 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-500 border-red-500/30'
                                         : 'bg-slate-100 text-slate-500 border-slate-200 hover:text-slate-900 hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-white dark:hover:bg-slate-800'

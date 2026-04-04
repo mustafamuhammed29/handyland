@@ -119,7 +119,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
               className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-purple-500/50 text-purple-500 hover:bg-purple-500/10 transition-all duration-200 xl:mx-2"
             >
               <Layers className="w-3.5 h-3.5" />
-              Compare
+              {t('nav.compare', 'Vergleichen')}
             </Link>
           )}
           <Link
@@ -127,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
           >
             <ClipboardList className="w-3.5 h-3.5" />
-            Track Repair
+            {t('nav.trackRepair', 'Reparatur verfolgen')}
           </Link>
           </div>
         </div>
@@ -143,7 +143,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
              >
                <Search className="w-5 h-5 transition-transform group-hover:scale-110" />
                <span className="absolute -bottom-6 opacity-0 group-hover:opacity-100 transition-opacity text-[9px] font-bold text-slate-500 whitespace-nowrap bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 shadow-sm pointer-events-none">
-                 Cmd+K
+                 Strg+K
                </span>
              </button>
           </div>
@@ -214,9 +214,9 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
              >
                <div className="flex items-center gap-2">
                  <Search className="w-5 h-5" />
-                 <span className="font-medium text-sm">Search products...</span>
+                 <span className="font-medium text-sm">{t('nav.searchProducts', 'Produkte suchen...')}</span>
                </div>
-               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-400">Cmd+K</span>
+               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-400">Strg+K</span>
              </button>
           </div>
 
