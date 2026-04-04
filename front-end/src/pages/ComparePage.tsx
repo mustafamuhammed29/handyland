@@ -144,7 +144,7 @@ export const ComparePage: React.FC = () => {
                         {t('compare.title', 'Compare Devices')}
                     </h1>
                     <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-                        {t('compare.subtitle', 'Side-by-side technical specifications and pricing to help you make the perfect choice.')}
+                        {t('compare.subtitle', 'Technische Daten und Preise Seite an Seite vergleichen, um die perfekte Wahl zu treffen.')}
                     </p>
                 </div>
 
@@ -158,15 +158,15 @@ export const ComparePage: React.FC = () => {
                                 {isSearching?.slotIndex === slotIndex ? (
                                     <div className="absolute inset-0 bg-slate-900 z-20 flex flex-col p-4 animate-in fade-in zoom-in-95 duration-200">
                                         <div className="flex justify-between items-center mb-4">
-                                            <h3 className="font-bold text-slate-300">{t('compare.selectDevice', 'Select a device')}</h3>
-                                            <button onClick={() => setIsSearching(null)} title={t('common.close', 'Close')} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400"/></button>
+                                            <h3 className="font-bold text-slate-300">{t('compare.selectDevice', 'Gerät auswählen')}</h3>
+                                            <button onClick={() => setIsSearching(null)} title={t('common.close', 'Schließen')} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400"/></button>
                                         </div>
                                         <div className="relative mb-4">
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
                                             <input 
                                                 autoFocus
                                                 type="text" 
-                                                placeholder={t('compare.searchProducts', 'Search products...')}
+                                                placeholder={t('compare.searchProducts', 'Produkte suchen...')}
                                                 value={searchTerm}
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                                 className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-brand-primary transition-colors"
@@ -183,14 +183,14 @@ export const ComparePage: React.FC = () => {
                                                     <span className="font-bold text-sm truncate">{p.name || p.model}</span>
                                                 </button>
                                             ))}
-                                            {filteredSearch.length === 0 && <div className="text-center text-slate-500 mt-8 text-sm">{t('compare.noDevicesFound', 'No devices found.')}</div>}
+                                            {filteredSearch.length === 0 && <div className="text-center text-slate-500 mt-8 text-sm">{t('compare.noDevicesFound', 'Keine Geräte gefunden.')}</div>}
                                         </div>
                                     </div>
                                 ) : product ? (
                                     <>
                                         <button 
                                             onClick={() => handleRemoveProduct(slotIndex)}
-                                            title={t('common.remove', 'Remove')}
+                                            title={t('common.remove', 'Entfernen')}
                                             className="absolute top-4 right-4 p-2 bg-slate-950 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors z-10"
                                         >
                                             <X className="w-4 h-4" />
@@ -203,13 +203,13 @@ export const ComparePage: React.FC = () => {
                                         
                                         <div className="flex flex-col items-center justify-center gap-1 mb-4">
                                             {product.specs?.globalPrice && (
-                                                <div className="text-slate-400 text-sm line-through decoration-red-500/50">{t('compare.marketAverage', 'Market Ø')} €{product.specs.globalPrice}</div>
+                                                <div className="text-slate-400 text-sm line-through decoration-red-500/50">{t('compare.marketAverage', 'Markt Ø')} €{product.specs.globalPrice}</div>
                                             )}
                                             <div className="text-brand-primary font-black text-2xl flex items-center gap-2">
                                                 €{product.pricing?.basePrice || product.price}
                                                 {product.specs?.globalPrice && Number(product.specs.globalPrice) > Number(product.price) && (
                                                     <span className="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                        {t('compare.save', 'Save')} €{Number(product.specs.globalPrice) - Number(product.price)}
+                                                        {t('compare.save', 'Spare')} €{Number(product.specs.globalPrice) - Number(product.price)}
                                                     </span>
                                                 )}
                                             </div>
@@ -218,7 +218,7 @@ export const ComparePage: React.FC = () => {
                                             onClick={() => navigate(`/products/${product.id || product._id}`)}
                                             className="px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-full text-sm font-bold transition-colors"
                                         >
-                                            {t('compare.viewDetails', 'View Details')}
+                                            {t('compare.viewDetails', 'Details anzeigen')}
                                         </button>
                                     </>
                                 ) : (
@@ -229,7 +229,7 @@ export const ComparePage: React.FC = () => {
                                         <div className="w-20 h-20 rounded-full border-2 border-dashed border-slate-800 hover:border-brand-primary flex items-center justify-center transition-colors">
                                             <Plus className="w-8 h-8" />
                                         </div>
-                                        <span className="font-bold">{t('compare.addDevice', 'Add Device to Compare')}</span>
+                                        <span className="font-bold">{t('compare.addDevice', 'Gerät zum Vergleich hinzufügen')}</span>
                                     </button>
                                 )}
                             </div>
@@ -245,7 +245,7 @@ export const ComparePage: React.FC = () => {
                                 <tbody>
                                     <tr className="hover:bg-slate-800/20 transition-colors bg-slate-900/40">
                                         <td className="p-4 md:p-6 text-slate-300 font-bold border-b border-slate-800 flex items-center gap-2">
-                                            <Zap className="w-4 h-4 text-amber-500" /> {t('compare.benchmarkScore', 'Benchmark Score')}
+                                            <Zap className="w-4 h-4 text-amber-500" /> {t('compare.benchmarkScore', 'Benchmark-Ergebnis')}
                                         </td>
                                         {slots.map(i => (
                                             <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50 font-black text-amber-500 text-lg">

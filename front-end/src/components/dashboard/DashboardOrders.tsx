@@ -59,8 +59,8 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
             {/* Header & Filters */}
             <div className="flex flex-col md:flex-row gap-4 justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">{t('orders.title', 'My Orders')}</h2>
-                    <p className="text-slate-400 text-sm">{t('orders.count', { defaultValue: '{{count}} orders found', count: filteredOrders.length })}</p>
+                    <h2 className="text-2xl font-bold text-white">{t('orders.title', 'Meine Bestellungen')}</h2>
+                    <p className="text-slate-400 text-sm">{t('orders.count', { defaultValue: '{{count}} Bestellungen gefunden', count: filteredOrders.length })}</p>
                 </div>
 
                 <div className="flex gap-3">
@@ -68,7 +68,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                         <input
                             type="text"
-                            placeholder={t('orders.search.placeholder', 'Search orders...')}
+                            placeholder={t('orders.search.placeholder', 'Bestellungen suchen...')}
                             value={orderSearch}
                             onChange={(e) => setOrderSearch(e.target.value)}
                             className="pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
@@ -80,11 +80,11 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         onChange={(e) => setOrderFilter(e.target.value)}
                         className="px-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                     >
-                        <option value="all">{t('orders.filter.all', 'All Status')}</option>
-                        <option value="pending">{t('orders.status.pending', 'Pending')}</option>
-                        <option value="processing">{t('orders.status.processing', 'Processing')}</option>
-                        <option value="delivered">{t('orders.status.delivered', 'Delivered')}</option>
-                        <option value="cancelled">{t('orders.status.cancelled', 'Cancelled')}</option>
+                        <option value="all">{t('orders.filter.all', 'Alle Status')}</option>
+                        <option value="pending">{t('orders.status.pending', 'Ausstehend')}</option>
+                        <option value="processing">{t('orders.status.processing', 'In Bearbeitung')}</option>
+                        <option value="delivered">{t('orders.status.delivered', 'Zugestellt')}</option>
+                        <option value="cancelled">{t('orders.status.cancelled', 'Storniert')}</option>
                     </select>
                 </div>
             </div>
@@ -104,9 +104,9 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                         <Package className="w-6 h-6 text-blue-400" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-white">{t('orders.item.number', 'Order')} {order.orderNumber || `#${order._id?.slice(-8)}`}</h3>
+                                        <h3 className="font-bold text-white">{t('orders.orderLabel', 'Bestellung')} {order.orderNumber || `#${order._id?.slice(-8)}`}</h3>
                                         <p className="text-sm text-slate-400">
-                                            {new Date(order.createdAt).toLocaleDateString()} • {t('orders.item.count', { defaultValue: '{{count}} items', count: order.items?.length || 0 })}
+                                            {new Date(order.createdAt).toLocaleDateString()} • {t('orders.item.count', { defaultValue: '{{count}} Artikel', count: order.items?.length || 0 })}
                                         </p>
                                     </div>
                                 </div>
@@ -114,7 +114,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                     <div className="text-right">
                                         <p className="text-white font-bold text-lg">{formatPrice(order.totalAmount || 0)}</p>
                                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(order.status)}`}>
-                                            {order.status}
+                                            {t(`orders.status.${order.status}`, order.status)}
                                         </span>
                                     </div>
                                     <button
@@ -146,7 +146,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                             )}
                                             <div className="flex-1">
                                                 <p className="text-white font-medium">{item.name}</p>
-                                                <p className="text-sm text-slate-400">{t('orders.item.qty', 'Qty')}: {item.quantity} × {formatPrice(item.price || 0)}</p>
+                                                <p className="text-sm text-slate-400">{t('orders.item.qty', 'Menge')}: {item.quantity} × {formatPrice(item.price || 0)}</p>
                                             </div>
                                             <p className="text-white font-bold">{formatPrice((item.price || 0) * (item.quantity || 1))}</p>
                                         </div>
@@ -161,7 +161,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                             className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-xl text-sm font-bold transition-colors"
                                         >
                                             <Upload className="w-4 h-4" />
-                                            {t('orders.actions.uploadReceipt', 'Upload Receipt')}
+                                            {t('orders.actions.uploadReceipt', 'Beleg hochladen')}
                                         </button>
                                     )}
                                     <button
@@ -169,13 +169,13 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                         className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition-colors"
                                     >
                                         <Download className="w-4 h-4" />
-                                        {t('orders.actions.downloadInvoice', 'Download Invoice')}
+                                        {t('orders.actions.downloadInvoice', 'Rechnung herunterladen')}
                                     </button>
                                     <button
                                         onClick={() => navigate(`/orders/${order._id}`)}
                                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-colors"
                                     >
-                                        {t('orders.actions.viewDetails', 'View Details')}
+                                        {t('orders.actions.viewDetails', 'Details anzeigen')}
                                         <ChevronRight className="w-4 h-4" />
                                     </button>
                                 </div>
