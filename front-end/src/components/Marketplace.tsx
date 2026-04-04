@@ -12,6 +12,7 @@ import { FilterSidebar } from './marketplace/FilterSidebar';
 import { ProductGrid } from './marketplace/ProductGrid';
 import { LanguageCode, PhoneListing, CartItem } from '../types';
 import { getImageUrl } from '../utils/imageUrl';
+import { cleanProductName } from '../utils/cleanProductName';
 
 interface MarketplaceProps {
     lang: LanguageCode;
@@ -47,7 +48,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
     const handleAddToCart = React.useCallback((phone: PhoneListing) => {
         addToCart({
             id: phone.id,
-            title: phone.model || (phone as any).name || 'Unknown Product',
+            title: cleanProductName(phone.model || (phone as any).name || 'Unknown Product', phone.brand),
             subtitle: `${phone.storage || ''} • ${phone.color || ''}`.replace(/^ • | • $/g, '') || '',
             price: phone.price || 0,
             image: getImageUrl(phone.images?.[0] || phone.imageUrl || ''),
@@ -66,7 +67,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
         e.stopPropagation();
         toggleWishlist({
             id: product.id || String((product as any)._id),
-            title: product.model || (product as any).title || (product as any).name || 'Unknown',
+            title: cleanProductName(product.model || (product as any).title || (product as any).name || 'Unknown', product.brand),
             price: product.price || 0,
             image: getImageUrl(product.images?.[0] || product.imageUrl || ''),
             category: 'device',

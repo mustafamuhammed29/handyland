@@ -11,6 +11,7 @@ interface HeroSettings {
     // FIXED: Added Arabic subheadline field for admin control
     subheadlineAr?: string;
     accentColor: string;
+    tagline?: string;
     buttonMarket?: string;
     buttonValuation?: string;
     trustBadge1?: string;
@@ -248,17 +249,17 @@ const defaultSettings: Settings = {
             {
                 title: 'Shop',
                 links: [
-                    { label: 'Marketplace', url: '/marketplace' },
-                    { label: 'Accessories', url: '/accessories' },
-                    { label: 'Sell Device', url: '/valuation' }
+                    { label: 'MARKTPLATZ', url: '/marketplace' },
+                    { label: 'ZUBEHÖR', url: '/accessories' },
+                    { label: 'GERÄT VERKAUFEN', url: '/valuation' }
                 ]
             },
             {
                 title: 'Services',
                 links: [
-                    { label: 'Repair', url: '/repair' },
-                    { label: 'Track Repair', url: '/track-repair' },
-                    { label: 'Support', url: '/contact' }
+                    { label: 'REPARATUR', url: '/repair' },
+                    { label: 'REPARATUR VERFOLGEN', url: '/track-repair' },
+                    { label: 'SUPPORT', url: '/contact' }
                 ]
             }
         ],
