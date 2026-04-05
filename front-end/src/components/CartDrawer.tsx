@@ -11,6 +11,7 @@ import { formatPrice } from '../utils/formatPrice';
 import { getImageUrl } from '../utils/imageUrl';
 import { useTranslation } from 'react-i18next';
 import { FREE_SHIPPING_THRESHOLD } from '../utils/constants';
+import { cleanProductName } from '../utils/cleanProductName';
 
 interface CartDrawerProps {}
 
@@ -199,13 +200,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                                             <div>
                                                 <div className="flex justify-between items-start">
-                                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate pr-2">{item.title}</h4>
+                                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate pr-2">{cleanProductName(item.title, item.subtitle)}</h4>
                                                     <div className="flex gap-2">
                                                         <button
                                                             onClick={() => handleToggleWishlist(item)}
                                                             className={`${isInWishlist(item.id) ? 'text-pink-500' : 'text-slate-500 hover:text-pink-400'} transition-colors`}
                                                             title={isInWishlist(item.id) ? t('cart.removeFromFavorites', 'Aus Favoriten entfernen') : t('cart.addToFavorites', 'Zu Favoriten hinzufügen')}
-                                                            aria-label={t('cart.toggleFavorite', 'Favorit umschalten für {{name}}', { name: item.title })}
+                                                            aria-label={t('cart.toggleFavorite', 'Favorit umschalten for {{name}}', { name: item.title })}
                                                         >
                                                             <Heart className={`w-4 h-4 ${isInWishlist(item.id) ? 'fill-current' : ''}`} />
                                                         </button>

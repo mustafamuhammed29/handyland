@@ -156,29 +156,34 @@ async function seedMarketplace() {
         'Technisch einwandfrei. Sichtbare Abnutzungsspuren.',
     ];
 
-    const products = entries.map(([brand, model, storage, color, price, costPrice, cond, battery], i) => ({
-        id: `${brand.toLowerCase().replace(/ /g,'-')}-${model.toLowerCase().replace(/[ ()\.'"]/g,'-').replace(/-+/g,'-')}-${storage.toLowerCase().replace(/ /g,'')}-${color.toLowerCase().replace(/ /g,'')}-${uid()}`,
-        name: `${brand} ${model} ${storage} ${color}`,
-        brand, model, storage, color,
-        price, costPrice,
-        condition: cond,
-        battery,
-        stock: rand(1, 25),
-        sold: rand(0, 100),
-        rating: parseFloat((3.8 + Math.random() * 1.2).toFixed(1)),
-        numReviews: rand(0, 35),
-        isActive: true,
-        category: model.includes('Tab') || model.includes('iPad') || model.includes('Fold') ? 'tablets' :
-                  model.includes('MacBook') ? 'laptops' : 'smartphones',
-        description: `${pick(descs)} ${brand} ${model} ${storage}, Farbe: ${color}. Akku: ${battery}.`,
-        image: imgs[i % imgs.length],
-        images: [],
-        features: [`${storage} Speicher`, `Akku: ${battery}`, cond, 'Entsperrt', '30 Tage Rückgaberecht'],
-        seo: {
-            metaTitle: `${brand} ${model} ${storage} gebraucht kaufen`,
-            metaDescription: `${brand} ${model} ${storage} in ${cond} Zustand. Akku: ${battery}. Sofort verfügbar.`,
-        }
-    }));
+    const products = entries.map(([brand, model, storage, color, price, costPrice, cond, battery], i) => {
+        const processor = brand === 'Apple' ? 'A-Series Bionic' : brand === 'Samsung' ? 'Exynos/Snapdragon' : 'Octa-Core';
+        return {
+            id: `${brand.toLowerCase().replace(/ /g,'-')}-${model.toLowerCase().replace(/[ ()\.'"]/g,'-').replace(/-+/g,'-')}-${storage.toLowerCase().replace(/ /g,'')}-${color.toLowerCase().replace(/ /g,'')}-${uid()}`,
+            name: `${brand} ${model} ${storage} ${color}`,
+            brand, model, storage, color,
+            price, costPrice,
+            condition: cond,
+            battery,
+            stock: rand(1, 25),
+            sold: rand(0, 100),
+            rating: parseFloat((3.8 + Math.random() * 1.2).toFixed(1)),
+            numReviews: rand(0, 35),
+            isActive: true,
+            category: model.includes('Tab') || model.includes('iPad') || model.includes('Fold') ? 'tablets' :
+                      model.includes('MacBook') ? 'laptops' : 'smartphones',
+            description: `${pick(descs)} ${brand} ${model} ${storage}, Farbe: ${color}. Akku: ${battery}.`,
+            image: imgs[i % imgs.length],
+            images: [],
+            processor,
+            specs: { cpu: processor, battery },
+            features: [`${storage} Speicher`, `Akku: ${battery}`, cond, 'Entsperrt', '30 Tage Rückgaberecht'],
+            seo: {
+                metaTitle: `${brand} ${model} ${storage} gebraucht kaufen`,
+                metaDescription: `${brand} ${model} ${storage} in ${cond} Zustand. Akku: ${battery}. Sofort verfügbar.`,
+            }
+        };
+    });
 
     const created = await Product.insertMany(products, { ordered: false });
     console.log(`   ✅ ${created.length} Products eingefügt`);
@@ -324,6 +329,7 @@ async function seedPremiumAccessories() {
         isActive: true,
         description: desc,
         image: imgMap[cat] || imgMap.audio,
+        specs: { cpu: 'N/A' },
         tag: price > 300 ? 'Premium' : price < 30 ? 'Bestseller' : undefined,
     }));
 

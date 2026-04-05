@@ -126,13 +126,13 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                         <Wallet className="w-32 h-32" />
                     </div>
                     <div className="relative z-10">
-                        <div className="text-blue-100 mb-2 font-medium">{t('wallet.balance.label', 'Available Balance')}</div>
+                        <div className="text-blue-100 mb-2 font-medium">{t('wallet.balance', 'Available Balance')}</div>
                         <div className="text-4xl font-bold mb-8">€{balance?.toFixed(2) || '0.00'}</div>
                         <button
                             onClick={handleAddFundsClick}
                             className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors flex items-center gap-2"
                         >
-                            <Plus className="w-4 h-4" /> {t('wallet.balance.add', 'Add Funds')}
+                            <Plus className="w-4 h-4" /> {t('wallet.add_funds', 'Add Funds')}
                         </button>
                     </div>
                 </div>
@@ -141,11 +141,11 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                 <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 flex flex-col justify-center">
                     <div className="space-y-4 flex-1">
                         <div>
-                            <p className="text-slate-400 text-sm">{t('wallet.stats.total', 'Total Transactions')}</p>
+                            <p className="text-slate-400 text-sm">{t('wallet.total_tx', 'Total Transactions')}</p>
                             <p className="text-2xl font-bold text-white">{transactions.filter((t_any: any) => t_any.status === 'completed').length}</p>
                         </div>
                         <div>
-                            <p className="text-slate-400 text-sm">{t('wallet.stats.month', 'This Month')}</p>
+                            <p className="text-slate-400 text-sm">{t('wallet.this_month', 'This Month')}</p>
                             <p className="text-2xl font-bold text-emerald-400">
                                 +€{transactions
                                     .filter((t_any: any) => t_any.status === 'completed' && new Date(t_any.date || Date.now()).getMonth() === currentMonth)
@@ -186,7 +186,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
             {/* Transaction History */}
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-white">{t('wallet.list.title', 'Recent Transactions')}</h3>
+                    <h3 className="text-xl font-bold text-white">{t('wallet.recent_tx', 'Recent Transactions')}</h3>
                     <button
                         onClick={handleExportCSV}
                         disabled={transactions.length === 0}
@@ -194,7 +194,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                         className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         <Download className="w-4 h-4" />
-                        {t('common.export', 'Export')}
+                        {t('wallet.export', 'Export')}
                     </button>
                 </div>
 

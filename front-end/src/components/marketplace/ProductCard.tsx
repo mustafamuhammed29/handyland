@@ -121,7 +121,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100"
                     />
                     <div className="absolute top-2 left-2 flex gap-1">
-                        {product.condition && (
+                        {product.condition && product.condition.trim() !== '' && (
                         <span className={`text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur-md border ${product.condition === 'new' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'}`}>
                             {product.condition.toUpperCase()}
                         </span>

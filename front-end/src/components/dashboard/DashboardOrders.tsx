@@ -60,7 +60,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
             <div className="flex flex-col md:flex-row gap-4 justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-white">{t('orders.title', 'Meine Bestellungen')}</h2>
-                    <p className="text-slate-400 text-sm">{t('orders.count', { defaultValue: '{{count}} Bestellungen gefunden', count: filteredOrders.length })}</p>
+                    <p className="text-slate-400 text-sm">{t('orders.found', { count: filteredOrders.length })}</p>
                 </div>
 
                 <div className="flex gap-3">
@@ -68,7 +68,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                         <input
                             type="text"
-                            placeholder={t('orders.search.placeholder', 'Bestellungen suchen...')}
+                            placeholder={t('orders.search', 'Bestellungen suchen...')}
                             value={orderSearch}
                             onChange={(e) => setOrderSearch(e.target.value)}
                             className="pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
@@ -80,7 +80,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         onChange={(e) => setOrderFilter(e.target.value)}
                         className="px-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                     >
-                        <option value="all">{t('orders.filter.all', 'Alle Status')}</option>
+                        <option value="all">{t('orders.all_status', 'Alle Status')}</option>
                         <option value="pending">{t('orders.status.pending', 'Ausstehend')}</option>
                         <option value="processing">{t('orders.status.processing', 'In Bearbeitung')}</option>
                         <option value="delivered">{t('orders.status.delivered', 'Zugestellt')}</option>
@@ -106,7 +106,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                     <div>
                                         <h3 className="font-bold text-white">{t('orders.orderLabel', 'Bestellung')} {order.orderNumber || `#${order._id?.slice(-8)}`}</h3>
                                         <p className="text-sm text-slate-400">
-                                            {new Date(order.createdAt).toLocaleDateString()} • {t('orders.item.count', { defaultValue: '{{count}} Artikel', count: order.items?.length || 0 })}
+                                            {new Date(order.createdAt).toLocaleDateString()} • {t('orders.items', { count: order.items?.length || 0 })}
                                         </p>
                                     </div>
                                 </div>

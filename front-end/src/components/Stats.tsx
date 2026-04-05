@@ -15,14 +15,20 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number, d
           observer.disconnect();
         }
       },
-      { threshold: 0.01 }
+      { threshold: 0 }
     );
 
     if (countRef.current) {
       observer.observe(countRef.current);
     }
 
-    return () => observer.disconnect();
+    // Safety fallback: if observer doesn't trigger after 1.5s, just show it
+    const timer = setTimeout(() => setIsVisible(true), 1500);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timer);
+    };
   }, []);
 
   useEffect(() => {

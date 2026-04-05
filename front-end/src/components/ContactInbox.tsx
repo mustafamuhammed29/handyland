@@ -3,42 +3,45 @@ import { api } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Loader2, MessageSquare, Plus, ArrowLeft, CheckCircle2, Clock, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Message, ViewState } from './inbox/types';
 import { InboxListView } from './inbox/InboxListView';
 import { InboxThreadView } from './inbox/InboxThreadView';
 import { InboxNewTicketView } from './inbox/InboxNewTicketView';
 
-const STATUS_STYLES: Record<string, { bg: string; text: string; label: string; icon: React.ReactNode }> = {
+const getStatusStyles = (t: any): Record<string, { bg: string; text: string; label: string; icon: React.ReactNode }> => ({
     replied: {
         bg: 'bg-emerald-500/10 border-emerald-500/30',
         text: 'text-emerald-400',
-        label: 'Answered',
+        label: t('messages.status.replied', 'Beantwortet'),
         icon: <CheckCircle2 className="w-3 h-3" />
     },
     closed: {
         bg: 'bg-slate-700/40 border-slate-600/50',
         text: 'text-slate-400',
-        label: 'Closed',
+        label: t('messages.status.closed', 'Geschlossen'),
         icon: <Lock className="w-3 h-3" />
     },
     unread: {
         bg: 'bg-blue-500/10 border-blue-500/30',
         text: 'text-blue-400',
-        label: 'Pending',
+        label: t('messages.status.pending', 'Offen'),
         icon: <Clock className="w-3 h-3" />
     },
     read: {
         bg: 'bg-blue-500/10 border-blue-500/30',
         text: 'text-blue-400',
-        label: 'Pending',
+        label: t('messages.status.pending', 'Offen'),
         icon: <Clock className="w-3 h-3" />
     },
-};
+});
 
 export const ContactInbox = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { addToast } = useToast();
+    const STATUS_STYLES = getStatusStyles(t);
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -132,7 +135,7 @@ export const ContactInbox = () => {
         return (
             <div className="flex flex-col items-center justify-center h-64 gap-3">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                <p className="text-slate-400 text-sm">Loading your messages...</p>
+                <p className="text-slate-400 text-sm">{t('common.loading', 'Wird geladen...')}</p>
             </div>
         );
     }
@@ -152,7 +155,7 @@ export const ContactInbox = () => {
                             className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
                         >
                             <ArrowLeft className="w-4 h-4" />
-                            Back to Inbox
+                            {t('common.back', 'Zurück')}
                         </motion.button>
                     ) : (
                         <motion.div
@@ -163,7 +166,7 @@ export const ContactInbox = () => {
                             className="flex items-center gap-2"
                         >
                             <MessageSquare className="w-5 h-5 text-blue-400" />
-                            <h3 className="text-white font-bold text-base">Support Messages</h3>
+                            <h3 className="text-white font-bold text-base">{t('messages.title', 'Support-Nachrichten')}</h3>
                             {messages.length > 0 && (
                                 <span className="bg-blue-600/20 text-blue-400 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-500/30">
                                     {messages.length}
@@ -178,7 +181,7 @@ export const ContactInbox = () => {
                     hasActiveTicket ? (
                         <div className="flex items-center gap-2 text-yellow-400 text-xs font-bold bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-xl">
                             <Clock className="w-3 h-3" />
-                            Active ticket open
+                            {t('messages.active_ticket', 'Aktives Ticket offen')}
                         </div>
                     ) : (
                         <button
@@ -186,7 +189,7 @@ export const ContactInbox = () => {
                             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded-xl font-bold transition-all shadow-md shadow-blue-900/25"
                         >
                             <Plus className="w-4 h-4" />
-                            New Ticket
+                            {t('messages.new_ticket', 'Neues Ticket')}
                         </button>
                     )
                 )}

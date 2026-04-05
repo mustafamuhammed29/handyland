@@ -18,15 +18,49 @@ const SCREEN = { hervorragend: 1.0, sehr_gut: 0.88, gut: 0.72, beschadigt: 0.45 
 const BODY   = { hervorragend: 1.0, sehr_gut: 0.93, gut: 0.82, beschadigt: 0.55 };
 
 // Device helper
-const d = (brand, model, category, basePrice, validStorages, storagePrices, image) => ({
-    brand, model, category, basePrice, validStorages, storagePrices,
-    imageUrl: image,
-    screenModifiers: SCREEN,
-    bodyModifiers: BODY,
-    functionalMultiplier: 1.0,
-    nonFunctionalMultiplier: 0.35,
-    active: true
-});
+const d = (brand, model, category, basePrice, validStorages, storagePrices, image) => {
+    // Derived processor for technical spec fulfillment [BUG-05]
+    let processor = 'Octa-Core';
+    if (brand === 'Apple') {
+        if (model.includes('16')) processor = 'A18 Pro';
+        else if (model.includes('15')) processor = 'A17 Pro';
+        else if (model.includes('14')) processor = 'A16 Bionic';
+        else if (model.includes('13')) processor = 'A15 Bionic';
+        else if (model.includes('12')) processor = 'A14 Bionic';
+        else if (model.includes('11')) processor = 'A13 Bionic';
+        else if (model.includes('M4')) processor = 'Apple M4';
+        else if (model.includes('M3')) processor = 'Apple M3';
+        else if (model.includes('M2')) processor = 'Apple M2';
+        else if (model.includes('M1')) processor = 'Apple M1';
+        else processor = 'A-Series';
+    } else if (brand === 'Samsung') {
+        if (model.includes('S25')) processor = 'Snapdragon 8 Elite';
+        else if (model.includes('S24')) processor = 'Snapdragon 8 Gen 3';
+        else if (model.includes('S23')) processor = 'Snapdragon 8 Gen 2';
+        else if (model.includes('S22')) processor = 'Snapdragon 8 Gen 1';
+        else processor = 'Exynos/Snapdragon';
+    } else if (brand === 'Google') {
+        if (model.includes('9')) processor = 'Google Tensor G4';
+        else if (model.includes('8')) processor = 'Google Tensor G3';
+        else if (model.includes('7')) processor = 'Google Tensor G2';
+        else if (model.includes('6')) processor = 'Google Tensor';
+    } else if (brand === 'Xiaomi') {
+        if (model.includes('15')) processor = 'Snapdragon 8 Elite';
+        else if (model.includes('14')) processor = 'Snapdragon 8 Gen 3';
+        else if (model.includes('13')) processor = 'Snapdragon 8 Gen 2';
+    }
+
+    return {
+        brand, model, category, basePrice, validStorages, storagePrices,
+        imageUrl: image,
+        processor, // Technical spec [BUG-05]
+        screenModifiers: SCREEN,
+        bodyModifiers: BODY,
+        functionalMultiplier: 1.0,
+        nonFunctionalMultiplier: 0.35,
+        active: true
+    };
+};
 
 // ─── GSMArena Image Base ──────────────────────────────────────────────────────
 const G = 'https://fdn2.gsmarena.com/vv/pics';
