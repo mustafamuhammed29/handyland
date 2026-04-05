@@ -48,12 +48,15 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'ready': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+            case 'ready':
+            case 'completed': 
+                return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
             case 'repairing': return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
             case 'diagnosing': return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
             case 'testing': return 'bg-brand-primary/10 text-brand-primary border-brand-primary/30';
             case 'received': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30';
             case 'attention': return 'bg-red-500/10 text-red-400 border-red-500/30';
+            case 'part_ordered': return 'bg-orange-500/10 text-orange-400 border-orange-500/30';
             default: return 'bg-slate-500/10 text-slate-400 border-slate-500/30';
         }
     };
@@ -64,7 +67,8 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
             case 'diagnosing': return 2;
             case 'repairing': return 3;
             case 'testing': return 4;
-            case 'ready': return 5;
+            case 'ready': 
+            case 'completed': return 5;
             case 'attention': return 2; // Show as early stage needing attention
             default: return 1;
         }
@@ -84,7 +88,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">{t('repairs.title', 'Active Repairs')}</h2>
+            <h2 className="text-2xl font-bold text-white">{t('repairs.title', 'Aktive Reparaturen')}</h2>
 
             <div className="space-y-4">
                 {localRepairs.map((ticket) => (
@@ -124,11 +128,11 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
 
                                 <div className="relative z-10 flex justify-between">
                                     {[
-                                        { key: 'received', label: t('repairs.timeline.received', 'Received') },
-                                        { key: 'diagnosing', label: t('repairs.timeline.diag', 'Diag') },
-                                        { key: 'repairing', label: t('repairs.timeline.repair', 'Repair') },
-                                        { key: 'testing', label: t('repairs.timeline.test', 'Test') },
-                                        { key: 'ready', label: t('repairs.timeline.ready', 'Ready') }
+                                        { key: 'received', label: t('repairs.status.received', 'ERHALTEN') },
+                                        { key: 'diagnosing', label: t('repairs.status.diagnosing', 'DIAGNOSE') },
+                                        { key: 'repairing', label: t('repairs.status.repairing', 'REPARATUR') },
+                                        { key: 'testing', label: t('repairs.status.testing', 'TEST') },
+                                        { key: 'ready', label: t('repairs.status.ready', 'FERTIG') }
                                     ].map((step, idx) => {
                                         const currentStep = idx + 1;
                                         const active = currentStep <= getStatusStep(ticket.status);
@@ -159,7 +163,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                             </span>
                                         </div>
                                     ) : (
-                                        <div className="text-xs text-slate-600">{t('repairs.item.noEstCompletion', 'Completion: TBD')}</div>
+                                        <div className="text-xs text-slate-600">{t('repairs.completion_tbd', 'Fertigstellung: Ausstehend')}</div>
                                     )}
                                     {((ticket as any).estimatedCost !== undefined || ticket.cost !== undefined) && (
                                         <div className="text-xs text-slate-500">
@@ -266,15 +270,15 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                 {repairs.length === 0 && (
                     <div className="text-center py-16 border-2 border-dashed border-slate-800 rounded-2xl">
                         <Wrench className="w-16 h-16 mx-auto mb-4 text-slate-700" />
-                        <p className="text-lg font-bold text-white mb-1">{t('repairs.empty.title', 'No active repairs')}</p>
+                        <p className="text-lg font-bold text-white mb-1">{t('repairs.empty.title', 'Keine aktiven Reparaturen')}</p>
                         <p className="text-sm text-slate-500 mb-6">
-                            {t('repairs.empty.subtitle', 'Need a repair? Browse our service catalog and contact us to get started.')}
+                            {t('repairs.empty.subtitle', 'Benötigen Sie eine Reparatur? Durchsuchen Sie unseren Servicekatalog.')}
                         </p>
                         <a
                             href="/repair"
                             className="inline-block px-6 py-2.5 bg-brand-primary hover:bg-brand-primary text-white rounded-xl text-sm font-bold transition-colors"
                         >
-                            {t('repairs.empty.cta', 'View Repair Services')} →
+                            {t('repairs.empty.cta', 'Reparaturdienste anzeigen')} →
                         </a>
                     </div>
                 )}

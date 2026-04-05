@@ -50,8 +50,8 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">{t('wishlist.title', 'My Wishlist')}</h2>
-                    <p className="text-slate-400 text-sm">{t('wishlist.count', { defaultValue: '{{count}} items saved', count: wishlistItems.length })}</p>
+                    <h2 className="text-2xl font-bold text-white">{t('wishlist.title', 'Mein Wunschzettel')}</h2>
+                    <p className="text-slate-400 text-sm">{t('wishlist.saved', { count: wishlistItems.length })}</p>
                 </div>
             </div>
 
@@ -83,7 +83,7 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                         <div className="p-4">
                             <h3 className="font-bold text-white mb-1">{item.model}</h3>
                             <p className="text-sm text-slate-400 mb-3">
-                                {item.brand || (item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : 'Product')}
+                                {item.brand}
                                 {item.storage ? ` • ${item.storage}` : ''}
                             </p>
 
@@ -91,7 +91,7 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                                 <span className="text-xl font-bold text-white">{formatPrice(item.price)}</span>
                                 {item.stock > 0 ? (
                                     <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
-                                        {t('common.inStock', 'In Stock')}
+                                        {t('wishlist.in_stock', 'Auf Lager')}
                                     </span>
                                 ) : (
                                     <span className="text-xs text-red-400 bg-red-500/10 px-2 py-1 rounded">
@@ -107,7 +107,7 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                                     className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-xl font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     <ShoppingCart className="w-4 h-4" />
-                                    {t('common.addToCart', 'Add to Cart')}
+                                    {t('wishlist.add_to_cart', 'In den Warenkorb')}
                                 </button>
                                 <button
                                     onClick={() => navigate(`/product/${item.id}`)}

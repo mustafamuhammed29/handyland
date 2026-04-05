@@ -220,7 +220,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
             <div className="flex flex-col lg:flex-row gap-8">
 
                 {/* --- SIDEBAR --- */}
-                <div className="w-full lg:w-72 shrink-0">
+                <div className="w-full lg:w-80 shrink-0">
                     <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-3xl p-4 lg:p-6 lg:sticky lg:top-28 z-40">
                         {/* Profile Summary & VIP Tier */}
                         <div className="flex flex-col gap-5 mb-8">

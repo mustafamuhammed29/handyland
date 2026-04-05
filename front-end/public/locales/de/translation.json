@@ -111,6 +111,15 @@
     "activeRepairs": "Aktive Reparaturen",
     "thisMonth": "Dieser Monat",
     "walletBalance": "Guthaben",
+    "nav": {
+      "orders": "Meine Bestellungen",
+      "repairs": "Aktive Reparaturen",
+      "valuations": "Meine Bewertungen",
+      "wallet": "Digitale Brieftasche",
+      "wishlist": "Wunschliste",
+      "messages": "Nachrichten",
+      "settings": "Kontoeinstellungen"
+    },
     "noOrders": "Noch keine Bestellungen",
     "noRepairs": "Keine aktiven Reparaturen",
     "downloadInvoice": "Rechnung herunterladen",
@@ -132,13 +141,15 @@
   },
   "orders": {
     "title": "Meine Bestellungen",
-    "found": "{{count}} Bestellungen gefunden",
+    "found": "1 Bestellung gefunden",
+    "found_plural": "{{count}} Bestellungen gefunden",
     "search": "Bestellungen suchen...",
     "all_status": "Alle Status",
     "status_pending": "Ausstehend",
     "status_processing": "Verarbeitung",
     "status_shipped": "Versandt",
     "status_delivered": "Zugestellt",
+    "status_cancelled": "Storniert",
     "tracking_status": "Sendungsverfolgung",
     "order_placed": "Bestellung aufgegeben",
     "in_progress": "In Bearbeitung",
@@ -170,16 +181,67 @@
     "title": "Aktive Reparaturen",
     "none": "Keine aktiven Reparaturen",
     "none_desc": "Benötigen Sie eine Reparatur? Durchsuchen Sie unseren Katalog",
-    "view_services": "Reparaturdienste anzeigen"
+    "view_services": "Reparaturdienste anzeigen",
+    "status": {
+      "pending": "AUSSTEHEND",
+      "received": "ERHALTEN",
+      "diagnosing": "DIAGNOSE",
+      "repairing": "REPARATUR",
+      "ready": "FERTIG",
+      "completed": "FERTIGGESTELLT",
+      "cancelled": "STORNIERT",
+      "part_ordered": "ERSATZTEIL BESTELLT"
+    },
+    "completion_tbd": "Fertigstellung: Ausstehend"
+  },
+  "valuations": {
+    "title": "Meine Bewertungen",
+    "subtitle": "Verfolgen Sie Ihre Gerätebewertungen und den Verkaufsstatus.",
+    "newOffer": "Neues Angebot",
+    "status": {
+      "active": "Aktiv",
+      "pending_shipment": "Versand ausstehend",
+      "received": "Erhalten — Prüfung",
+      "paid": "Bezahlt",
+      "completed": "Abgeschlossen"
+    },
+    "item": {
+      "payoutAmount": "AUSZAHLUNGSBETRAG",
+      "sellNow": "Jetzt verkaufen",
+      "renew": "Erneuern"
+    },
+    "countdown": {
+      "expired": "Abgelaufen",
+      "remaining": "Endet in {{time}}"
+    },
+    "empty": {
+      "title": "Noch keine Angebote",
+      "subtitle": "Holen Sie sich jetzt eine kostenlose, unverbindliche Bewertung für Ihr Gerät.",
+      "cta": "Gerät jetzt bewerten"
+    },
+    "modal": {
+      "title": "Angebotsdetails",
+      "label": {
+        "display": "Displayzustand",
+        "body": "Gehäusezustand",
+        "function": "Funktionalität",
+        "basedOnPrice": "Basierend auf dem Angebotspreis"
+      }
+    }
   },
   "wallet": {
-    "title": "Meine Geldbörse",
+    "title": "Digitale Brieftasche",
     "balance": "Verfügbares Guthaben",
-    "add_funds": "Guthaben hinzufügen",
-    "total_tx": "Gesamttransaktionen",
-    "this_month": "Dieser Monat",
+    "add_funds": "Guthaben aufladen",
+    "total_tx": "Transaktionen gesamt",
+    "this_month": "Diesen Monat",
     "recent_tx": "Letzte Transaktionen",
-    "export": "Exportieren"
+    "export": "Exportieren",
+    "status": {
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "pending": "Ausstehend"
+    }
   },
   "wishlist": {
     "title": "Mein Wunschzettel",
@@ -195,37 +257,118 @@
     "none_desc": "Starten Sie eine Konversation mit unserem Support-Team",
     "create": "Support-Ticket erstellen"
   },
-  "settings": {
     "title": "Kontoeinstellungen",
     "subtitle": "Verwalten Sie Ihr Profil, Sicherheit und Präferenzen",
-    "profile": "Profil",
-    "security": "Sicherheit",
-    "notifications": "Benachrichtigungen",
-    "addresses": "Adressen",
-    "profile_info": "Profilinformationen",
-    "update_details": "Aktualisieren Sie Ihre persönlichen Daten",
-    "full_name": "Vollständiger Name",
-    "email": "E-Mail-Adresse",
-    "phone": "Telefonnummer",
-    "language": "Bevorzugte Sprache",
-    "edit": "Bearbeiten",
-    "save": "Änderungen speichern",
-    "change_password": "Passwort ändern",
-    "current_password": "Aktuelles Passwort",
-    "new_password": "Neues Passwort",
-    "confirm_password": "Neues Passwort bestätigen",
-    "update_password": "Passwort aktualisieren",
-    "notif_orders": "Bestell-Updates",
-    "notif_repairs": "Reparaturstatus",
-    "notif_promos": "Angebote & Aktionen",
-    "notif_newsletter": "Newsletter",
-    "saved_addresses": "Gespeicherte Adressen",
-    "add_address": "Adresse hinzufügen",
-    "default": "Standard",
-    "address_saved": "{{count}} Adresse gespeichert",
-    "remove_photo": "Foto entfernen",
-    "member_since": "Mitglied seit"
-  },
+    "tabs": {
+      "profile": "Profil",
+      "security": "Sicherheit",
+      "notifications": "Benachrichtigungen",
+      "addresses": "Adressen"
+    },
+    "profile": {
+      "title": "Profilinformationen",
+      "subtitle": "Aktualisieren Sie Ihre persönlichen Daten",
+      "fullName": "Vollständiger Name",
+      "email": "E-Mail-Adresse",
+      "phone": "Telefonnummer",
+      "memberSince": "Mitglied seit",
+      "success": "Profil erfolgreich aktualisiert!",
+      "error": "Fehler beim Aktualisieren des Profils.",
+      "avatar": {
+        "uploading": "Profilbild wird hochgeladen...",
+        "updated": "Profilbild erfolgreich aktualisiert!",
+        "uploadError": "Fehler beim Hochladen des Profilbilds.",
+        "removing": "Profilbild wird entfernt...",
+        "removed": "Profilbild erfolgreich entfernt!",
+        "removeError": "Fehler beim Entfernen des Profilbilds.",
+        "remove": "Foto entfernen",
+        "invalidType": "Bitte lade ein gültiges Bild hoch.",
+        "tooLarge": "Das Bild darf maximal 5MB groß sein."
+      },
+      "language": {
+        "title": "Bevorzugte Sprache",
+        "description": "Diese Sprache wird in der gesamten Benutzeroberfläche und für Ihre persönlichen Benachrichtigungen verwendet."
+      }
+    },
+    "security": {
+      "title": "Passwort ändern",
+      "subtitle": "Verwenden Sie ein starkes, eindeutiges Passwort für Ihr Konto",
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Neues Passwort bestätigen",
+      "newPasswordPlaceholder": "Mind. 8 Zeichen",
+      "submit": "Passwort aktualisieren",
+      "success": "Passwort erfolgreich aktualisiert!",
+      "error": {
+        "generic": "Fehler beim Aktualisieren des Passworts.",
+        "mismatch": "Die neuen Passwörter stimmen nicht überein.",
+        "length": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+        "match": "Passwörter stimmen nicht überein"
+      },
+      "successMatch": "Passwörter stimmen überein",
+      "strength": {
+        "weak": "Schwach",
+        "fair": "Mittel",
+        "good": "Gut",
+        "strong": "Stark"
+      },
+      "checks": {
+        "length": "8+ Zeichen",
+        "uppercase": "Großbuchstaben",
+        "number": "Zahl",
+        "symbol": "Sonderzeichen"
+      }
+    },
+    "notifications": {
+      "title": "Benachrichtigungseinstellungen",
+      "subtitle": "Wählen Sie aus, worüber Sie benachrichtigt werden möchten",
+      "saved": "In Ihrem Konto gespeichert",
+      "error": "Speichern fehlgeschlagen. Wird bei der nächsten Änderung erneut versucht.",
+      "footer": "Änderungen werden automatisch auf allen Ihren Geräten in Ihrem Konto gespeichert.",
+      "items": {
+        "orderUpdates": {
+          "label": "Bestell-Updates",
+          "desc": "Lassen Sie sich benachrichtigen, wenn sich Ihr Bestellstatus ändert"
+        },
+        "repairStatus": {
+          "label": "Reparaturstatus",
+          "desc": "Updates zu Ihren Reparatur- und Service-Tickets"
+        },
+        "promotions": {
+          "label": "Angebote & Aktionen",
+          "desc": "Sonderangebote und exklusive Rabatte"
+        },
+        "newsletter": {
+          "label": "Newsletter",
+          "desc": "Wöchentliche Produkt-Updates und Neuigkeiten"
+        }
+      }
+    },
+    "addresses": {
+      "title": "Gespeicherte Adressen",
+      "count": "1 Adresse gespeichert",
+      "count_plural": "{{count}} Adressen gespeichert",
+      "add": "Adresse hinzufügen",
+      "confirmDelete": "Diese Adresse löschen?",
+      "empty": {
+        "title": "Noch keine gespeicherten Adressen",
+        "subtitle": "Fügen Sie eine Versandadresse für einen schnelleren Checkout hinzu",
+        "cta": "Ihre erste Adresse hinzufügen"
+      },
+      "modal": {
+        "editTitle": "Adresse bearbeiten",
+        "addTitle": "Neue Adresse hinzufügen",
+        "recipientName": "Name des Empfängers",
+        "street": "Straße und Hausnummer",
+        "city": "Stadt",
+        "state": "Bundesland / Region",
+        "zipCode": "PLZ / Postleitzahl",
+        "country": "Land",
+        "setDefault": "Als Standardadresse festlegen",
+        "setDefaultDesc": "Wird automatisch an der Kasse verwendet"
+      }
+    }
+,
   "product": {
     "reviews": "Bewertungen",
     "processor": "Prozessor",
@@ -283,7 +426,16 @@
   },
   "compare": {
     "title": "Geräte vergleichen",
-    "add": "Gerät zum Vergleich hinzufügen"
+    "subtitle": "Technische Daten und Preise Seite an Seite vergleichen.",
+    "add": "Gerät zum Vergleich hinzufügen",
+    "addDevice": "Gerät zum Vergleich hinzufügen",
+    "save": "Spare",
+    "viewDetails": "Details anzeigen",
+    "benchmarkScore": "Benchmark-Ergebnis",
+    "marketAverage": "Markt Ø",
+    "selectDevice": "Gerät auswählen",
+    "searchProducts": "Produkte suchen...",
+    "noDevicesFound": "Keine Geräte gefunden."
   },
   "home": {
     "featured_device": "HIGHLIGHT GERÄT",

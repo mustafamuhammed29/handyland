@@ -4,6 +4,7 @@ import { CheckCircle, Tag, X, Loader2, ShieldCheck, Truck, Trophy, Zap } from 'l
 import { formatPrice } from '../../utils/formatPrice';
 import { getImageUrl } from '../../utils/imageUrl';
 import { FREE_SHIPPING_THRESHOLD } from '../../utils/constants';
+import { cleanProductName } from '../../utils/cleanProductName';
 import { TrustBadges } from '../../components/products/TrustBadges';
 
 // FIXED: Extracted from Checkout.tsx for better maintainability (FIX 5)
@@ -91,7 +92,9 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                             )}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="text-sm font-bold text-white line-clamp-1 group-hover:text-blue-400 transition-colors">{item.title}</div>
+                            <div className="text-sm font-bold text-white line-clamp-1 group-hover:text-blue-400 transition-colors">
+                                {cleanProductName(item.title, item.subtitle)}
+                            </div>
                             <div className="text-xs text-slate-500 line-clamp-1">{item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : ''}</div>
                             <div className="text-sm text-blue-400 font-bold mt-1">{formatPrice(item.price * (item.quantity || 1))}</div>
                         </div>
@@ -215,13 +218,13 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                             </div>
                             <div className={`flex justify-between text-sm ${shippingCost === 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
                                 <span>{t('checkout.shippingCost', 'Versand')}</span>
-                                <span>{shippingCost === 0 ? t('checkout.free', 'FREE') : formatPrice(shippingCost)}</span>
+                                <span>{shippingCost === 0 ? t('checkout.free', 'KOSTENLOS') : formatPrice(shippingCost)}</span>
                             </div>
                             <div className="flex justify-between text-white font-bold text-xl pt-4 border-t border-slate-800 mt-2">
-                                <span>{t('checkout.total', 'Total')}</span>
+                                <span>{t('checkout.total', 'Gesamtbetrag')}</span>
                                 <span>{formatPrice(getFinalTotal())}</span>
                             </div>
-                            <p className="text-[10px] text-slate-500 text-right">{t('checkout.inclVat', 'incl. {{rate}}% VAT', { rate: taxRate })}</p>
+                            <p className="text-[10px] text-slate-500 text-right">{t('checkout.inclVat', 'inkl. {{rate}}% MwSt.', { rate: taxRate })}</p>
                         </>
                     );
                 })()}
