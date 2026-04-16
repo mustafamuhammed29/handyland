@@ -71,8 +71,8 @@ export const TrustBadges: React.FC<TrustBadgesProps> = ({ className = '', varian
                         <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-2 md:mb-3 transition-transform hover:scale-110 ${badge.bg} ${badge.color} shrink-0`}>
                             <Icon className="w-5 h-5 md:w-6 md:h-6" />
                         </div>
-                        <h4 className="text-[11px] md:text-sm font-bold text-slate-900 dark:text-white mb-0.5 md:mb-1 w-full break-words hyphens-auto leading-tight">{badge.title}</h4>
-                        <p className="text-[9px] md:text-xs text-slate-500 w-full break-words hyphens-auto leading-tight">{badge.subtitle}</p>
+                        <h4 className="text-xs md:text-sm font-bold text-slate-900 dark:text-white mb-0.5 md:mb-1 w-full text-balance leading-tight">{badge.title}</h4>
+                        <p className="text-[10px] md:text-xs text-slate-500 w-full text-balance leading-tight">{badge.subtitle}</p>
                     </div>
                 );
             })}

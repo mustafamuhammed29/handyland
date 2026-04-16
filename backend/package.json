@@ -11,7 +11,8 @@
         "lint:fix": "eslint . --ext .js --fix",
         "format": "prettier --write \"**/*.js\" --ignore-path .gitignore",
         "seed:translations": "node scripts/seedTranslations.js",
-        "clean:translations": "node scripts/cleanPollutedTranslations.js"
+        "clean:translations": "node scripts/cleanPollutedTranslations.js",
+        "healthcheck": "node scripts/healthCheck.js"
     },
     "keywords": [],
     "author": "HandyLand Team",

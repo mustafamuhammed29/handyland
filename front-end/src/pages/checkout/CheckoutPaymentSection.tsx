@@ -1,9 +1,10 @@
 import React from 'react';
-import { CreditCard, ArrowLeft, ArrowRight, Loader2, Lock, Truck, ShieldCheck } from 'lucide-react';
+import { CreditCard, ArrowLeft, ArrowRight, Loader2, Lock, Truck, ShieldCheck, Wallet } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { api } from '../../utils/api';
 import { formatPrice } from '../../utils/formatPrice';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 
 // FIXED: Extracted from Checkout.tsx for better maintainability (FIX 5)
 
@@ -48,6 +49,10 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
     coupon,
 }) => {
     const { t } = useTranslation();
+    const { user } = useAuth();
+    const finalTotal = getFinalTotal();
+    const hasEnoughBalance = user && (user.balance || 0) >= finalTotal;
+
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 animate-in fade-in slide-in-from-right-4">
             <div className="flex items-center gap-4 mb-6">
@@ -60,6 +65,35 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
             </div>
             <h3 className="font-bold text-white mb-4">{t('checkout.paymentMethod', 'Payment Method')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {/* Wallet / Handyland Pay */}
+                {user && (
+                    <button
+                        onClick={() => hasEnoughBalance && setSelectedPaymentMethod('wallet')}
+                        disabled={!hasEnoughBalance}
+                        className={`p-6 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${selectedPaymentMethod === 'wallet'
+                            ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500 shadow-lg shadow-blue-900/20'
+                            : !hasEnoughBalance 
+                                ? 'bg-slate-900/50 border-slate-800 opacity-60 cursor-not-allowed'
+                                : 'bg-black/20 border-slate-700 hover:bg-slate-800/50'
+                            }`}
+                    >
+                        <div className={`w-12 h-12 flex items-center justify-center rounded-full ${selectedPaymentMethod === 'wallet' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-400'}`}>
+                            <Wallet className="w-6 h-6" />
+                        </div>
+                        <div className="text-center">
+                            <span className="font-bold text-white block">{t('checkout.wallet', 'Wallet Balance')}</span>
+                            <span className={`text-xs ${hasEnoughBalance ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {formatPrice(user.balance || 0)} {t('checkout.available', 'Available')}
+                            </span>
+                        </div>
+                        {!hasEnoughBalance && (
+                            <div className="text-[10px] text-red-400/80 mt-1 max-w-[120px] mx-auto leading-tight">
+                                {t('checkout.insufficient_balance', 'Insufficient balance for this order.')}
+                            </div>
+                        )}
+                    </button>
+                )}
+
                 {paymentConfig?.bankTransfer?.enabled !== false && (
                     <button
                         onClick={() => setSelectedPaymentMethod('bank_transfer')}
@@ -126,6 +160,7 @@ export const CheckoutPaymentSection: React.FC<CheckoutPaymentSectionProps> = ({
                     {selectedPaymentMethod === 'bank_transfer' && (paymentConfig?.bankTransfer?.instructions || t('checkout.bank_instructions', "You will receive our bank details (IBAN/BIC) via email after placing the order. Your order will be shipped once the payment is received."))}
                     {selectedPaymentMethod === 'cod' && t('checkout.cod_instructions', "You will pay for your order directly to the courier upon delivery. Please have the exact amount ready.")}
                     {selectedPaymentMethod === 'paypal' && t('checkout.paypal_instructions', "You will be securely redirected to PayPal to complete your purchase.")}
+                    {selectedPaymentMethod === 'wallet' && t('checkout.wallet_instructions', "The total amount will be directly deducted from your HandyLand Wallet.")}
                     {!selectedPaymentMethod && t('checkout.select_payment_prompt', "Please select a payment method to continue.")}
                 </p>
 

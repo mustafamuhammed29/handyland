@@ -182,7 +182,7 @@ export const AccessoryDetails: React.FC = () => {
 
                         {/* Trust Badges */}
                         <div className="mb-8 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800">
-                             <TrustBadges className="grid-cols-2 lg:grid-cols-4 gap-2" />
+                             <TrustBadges className="!grid-cols-2 gap-3" />
                         </div>
 
                         <div className="mt-auto space-y-4">

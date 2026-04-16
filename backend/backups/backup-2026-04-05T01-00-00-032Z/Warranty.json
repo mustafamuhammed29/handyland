@@ -1,0 +1,21 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e6a1d",
+    "customerName": "Anna Schmidt",
+    "customerPhone": "+4915323456781",
+    "customerEmail": "anna@test.de",
+    "itemType": "Product",
+    "itemName": "Xiaomi 14 256GB Schwarz",
+    "imeiOrSerial": "SN-570015",
+    "supplierName": "",
+    "startDate": "2026-01-06T21:37:27.189Z",
+    "durationDays": 180,
+    "endDate": "2026-07-05T21:37:27.189Z",
+    "status": "Active",
+    "notes": "Händlergarantie",
+    "warrantyCode": "WAR-04386728",
+    "createdAt": "2026-03-30T21:37:27.231Z",
+    "updatedAt": "2026-03-30T21:37:27.231Z",
+    "__v": 0
+  }
+]

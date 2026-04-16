@@ -1,0 +1,292 @@
+[
+  {
+    "_id": "69a776d617ef6af3953f393a",
+    "user": "69892a5338a65b195c05e9d8",
+    "message": "طلبك #HL-20260304-0001 — تم الشحن",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard?tab=orders",
+    "createdAt": "2026-03-04T00:03:34.426Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aa1535e0dcda8ebce79faa",
+    "user": "69892a5338a65b195c05e9d8",
+    "message": "طلبك #HL-20260304-0001 — تم الإلغاء ❌",
+    "type": "warning",
+    "read": true,
+    "link": "/dashboard?tab=orders",
+    "createdAt": "2026-03-05T23:43:49.562Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aa1535e0dcda8ebce79fac",
+    "user": "69892a5338a65b195c05e9d8",
+    "message": "طلبك #HL-20260301-0001 — تم الإلغاء ❌",
+    "type": "warning",
+    "read": true,
+    "link": "/dashboard?tab=orders",
+    "createdAt": "2026-03-05T23:43:49.563Z",
+    "__v": 0
+  },
+  {
+    "_id": "69aa1535e0dcda8ebce79fae",
+    "user": "69892a5338a65b195c05e9d8",
+    "message": "طلبك #HL-20260228-0001 — تم الإلغاء ❌",
+    "type": "warning",
+    "read": true,
+    "link": "/dashboard?tab=orders",
+    "createdAt": "2026-03-05T23:43:49.564Z",
+    "__v": 0
+  },
+  {
+    "_id": "69adfdd2c88956682d6320a1",
+    "user": "698cf2d7e12d1a857e67e067",
+    "message": "Support replied to your message: \"Your repair is currently in progress. We will update you soo…\"",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-03-08T22:53:06.743Z",
+    "__v": 0
+  },
+  {
+    "_id": "69adffe803c2f94b6fd6f1a3",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "Support replied to your message: \"Please provide us with your order number so we can investiga…\"",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-03-08T23:02:00.349Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ae00d45e3b3032afedd52c",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "Support replied to your message: \"Please provide us with your order number so we can investiga…\"",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-03-08T23:05:56.752Z",
+    "__v": 0
+  },
+  {
+    "_id": "69ae01805e3b3032afeddc60",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "Support replied to your message: \"Please provide us with your order number so we can investiga…\"",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-03-08T23:08:48.936Z",
+    "__v": 0
+  },
+  {
+    "_id": "69b4bdba4aeaf264ea20ae7b",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح iPhone 13: testing — التكلفة المتوقعة: €1000",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-14T01:45:30.821Z",
+    "__v": 0
+  },
+  {
+    "_id": "69b4bf3b4aeaf264ea20b20a",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح Samsung S24 Ultra: جاري إصلاح جهازك 🔧 — التكلفة المتوقعة: €300",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-14T01:51:55.755Z",
+    "__v": 0
+  },
+  {
+    "_id": "69b4c156a584cb5ee530d79d",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح Samsung S24 Ultra: تم استلام جهازك 📦 — التكلفة المتوقعة: €100",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-14T02:00:54.844Z",
+    "__v": 0
+  },
+  {
+    "_id": "69b4c15da584cb5ee530d7bb",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح Samsung S24 Ultra: جاري تشخيص الجهاز 🔍 — التكلفة المتوقعة: €100",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-14T02:01:01.889Z",
+    "__v": 0
+  },
+  {
+    "_id": "69b4c238a584cb5ee530da7f",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح Samsung S24 Ultra: تم إصلاح جهازك بنجاح ✅ — التكلفة المتوقعة: €100",
+    "type": "success",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-14T02:04:40.139Z",
+    "__v": 0
+  },
+  {
+    "_id": "69b4c257a584cb5ee530dbe2",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح Samsung S24 Ultra: ready — التكلفة المتوقعة: €100",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-14T02:05:11.938Z",
+    "__v": 0
+  },
+  {
+    "_id": "69b4c4e9210732042b5ae08b",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح Samsung S24 Ultra: ready — التكلفة المتوقعة: €100",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-14T02:16:09.917Z",
+    "__v": 0
+  },
+  {
+    "_id": "69b4c6ab2f80dbc5d3095163",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح Samsung S24 Ultra: ready — التكلفة المتوقعة: €100",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-14T02:23:39.199Z",
+    "__v": 0
+  },
+  {
+    "_id": "69bc7954e19f8169e7911b14",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "Your order #HL-20260319-0001 has been placed successfully! Total: €236.81",
+    "type": "success",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-03-19T22:31:48.658Z",
+    "__v": 0
+  },
+  {
+    "_id": "69be021396161d4b17e44174",
+    "user": "698cf2d7e12d1a857e67e067",
+    "message": "Your order #HL-20260321-0001 has been placed successfully! Total: €7266.14",
+    "type": "success",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-03-21T02:27:31.885Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c476804aed437aeff59f93",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "Your order #HL-20260326-0001 has been placed successfully! Total: €1426.81",
+    "type": "success",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-03-25T23:57:52.261Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c86ff0ff3466fa5739adbc",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "You have a new message from the Support Team.",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-03-29T00:18:56.394Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c87597ff3466fa5739affa",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح Samsung S24 Ultra: Gerät wurde übergeben ✅",
+    "type": "success",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-29T00:43:03.644Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c875b8ff3466fa5739b109",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "message": "إصلاح Samsung S24 Ultra: Gerät wurde übergeben ✅",
+    "type": "success",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-03-29T00:43:36.182Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd760fa428ed3504c76918",
+    "user": "69cb0c3496a43c9eb6d9807d",
+    "message": "Your order #HL-20260401-0001 has been placed successfully! Total: €950.81",
+    "type": "success",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-04-01T19:46:23.824Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd7d88ea77b0a26c617f54",
+    "user": "69cb0c3496a43c9eb6d9807d",
+    "message": "Your order #HL-20260401-0002 has been placed successfully! Total: €950.81",
+    "type": "success",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-04-01T20:18:16.662Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd8686f4dd232e1e468899",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "message": "Support replied to your message: \"ja \"",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-04-01T20:56:38.631Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd86b0f4dd232e1e46896a",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "message": "Your order #HL-20260401-0003 has been placed successfully! Total: €950.81",
+    "type": "success",
+    "read": false,
+    "link": "/dashboard",
+    "createdAt": "2026-04-01T20:57:20.795Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd894c63fced3af339aa16",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "message": "Your order #HL-20260401-0004 has been placed successfully! Total: €950.81",
+    "type": "success",
+    "read": true,
+    "link": "/dashboard",
+    "createdAt": "2026-04-01T21:08:28.974Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd8b2a63fced3af339b25a",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "message": "إصلاح يشر: Reparatur abgeschlossen, Gerät wird getestet 📱 — التكلفة المتوقعة: €25",
+    "type": "info",
+    "read": false,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-04-01T21:16:26.629Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd8b8463fced3af339bba7",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "message": "إصلاح يشر: Reparatur abgeschlossen, Gerät wird getestet 📱",
+    "type": "info",
+    "read": true,
+    "link": "/dashboard?tab=repairs",
+    "createdAt": "2026-04-01T21:17:56.271Z",
+    "__v": 0
+  }
+]

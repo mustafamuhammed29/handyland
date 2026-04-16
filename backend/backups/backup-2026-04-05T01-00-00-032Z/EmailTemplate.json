@@ -1,0 +1,47 @@
+[
+  {
+    "_id": "699b9620150e7d2fc76415c0",
+    "name": "verify_email",
+    "subject": "Verify Your Email - HandyLand",
+    "html": "<h1>Welcome to HandyLand!</h1><p>Hi {{userName}},</p><p>Please verify your email by clicking <a href=\"{{verificationUrl}}\">here</a>.</p>",
+    "description": "Sent to new users to verify their email address.",
+    "variables": [
+      "{{userName}}",
+      "{{verificationUrl}}"
+    ],
+    "isActive": true,
+    "createdAt": "2026-02-22T23:49:52.688Z",
+    "updatedAt": "2026-02-22T23:49:52.688Z",
+    "__v": 0
+  },
+  {
+    "_id": "699b9620150e7d2fc76415cb",
+    "name": "reset_password",
+    "subject": "Password Reset Request - HandyLand",
+    "html": "<h1>Password Reset Request</h1><p>Hi {{userName}},</p><p>You requested a password reset. Please click <a href=\"{{resetUrl}}\">here</a> to reset it. This link expires in 1 hour.</p>",
+    "description": "Sent when a user requests a password reset.",
+    "variables": [
+      "{{userName}}",
+      "{{resetUrl}}"
+    ],
+    "isActive": true,
+    "createdAt": "2026-02-22T23:49:52.720Z",
+    "updatedAt": "2026-02-22T23:49:52.720Z",
+    "__v": 0
+  },
+  {
+    "_id": "699b9620150e7d2fc76415ce",
+    "name": "order_confirmation",
+    "subject": "Order Confirmation - HandyLand",
+    "html": "<h1>Thank you for your order!</h1><p>Your Order ID is <strong>{{orderNumber}}</strong></p><p>Total: <strong>{{totalAmount}}€</strong></p><p>We will notify you when your order ships.</p>",
+    "description": "Sent after a user successfully places an order.",
+    "variables": [
+      "{{orderNumber}}",
+      "{{totalAmount}}"
+    ],
+    "isActive": true,
+    "createdAt": "2026-02-22T23:49:52.722Z",
+    "updatedAt": "2026-02-22T23:49:52.722Z",
+    "__v": 0
+  }
+]

@@ -140,9 +140,20 @@ const PaymentSuccess: React.FC = () => {
             setUploading(true);
             const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
 
+            // Ensure we have a CSRF token before uploading (multipart bypasses interceptor)
+            let csrfToken = document.cookie.split('; ').find(r => r.startsWith('XSRF-TOKEN='))?.split('=')[1];
+            if (!csrfToken) {
+                await fetch(`${baseUrl}/api/auth/csrf`, { credentials: 'include' });
+                csrfToken = document.cookie.split('; ').find(r => r.startsWith('XSRF-TOKEN='))?.split('=')[1];
+            }
+
+            const headers: Record<string, string> = {};
+            if (csrfToken) headers['X-XSRF-Token'] = csrfToken;
+
             const res = await fetch(`${baseUrl}/api/orders/${orderId}/receipt`, {
                 method: 'POST',
                 credentials: 'include',
+                headers,
                 body: formData
             });
             const data = await res.json();

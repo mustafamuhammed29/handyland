@@ -3,6 +3,8 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import viteCompression from 'vite-plugin-compression';
+import Sitemap from 'vite-plugin-sitemap';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
@@ -10,6 +12,15 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(), 
       tailwindcss(),
+      viteCompression({
+        algorithm: 'brotliCompress',
+        ext: '.br',
+        threshold: 1024,
+      }),
+      Sitemap({
+        hostname: env.VITE_URL || 'https://handyland.test',
+        dynamicRoutes: ['/marketplace', '/login', '/register', '/compare', '/repair', '/dashboard', '/checkout'],
+      }),
       VitePWA({
         registerType: 'autoUpdate',
         devOptions: {

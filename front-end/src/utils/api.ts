@@ -105,6 +105,14 @@ api.interceptors.response.use(
             }
         }
 
+        // Handle 503 Maintenance Mode
+        if (error.response?.status === 503 && error.response?.data?.maintenance) {
+            if (window.location.pathname !== '/maintenance') {
+                window.location.href = '/maintenance';
+            }
+            return Promise.reject(error);
+        }
+
         // Handle 403 Forbidden (Blocked account or Unverified Email)
         if (error.response?.status === 403) {
             const isAuthError = error.response.data?.accountDeactivated || error.response.data?.emailNotVerified;

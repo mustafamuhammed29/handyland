@@ -84,6 +84,36 @@ app.get('/health', async (req, res) => {
     }
 });
 
+// ── /api/health — used by healthCheck.js script ────────────────────────────────
+app.get('/api/health', async (req, res) => {
+    try {
+        if (mongoose.connection.readyState !== 1) {throw new Error('Database not connected');}
+        await mongoose.connection.db.admin().ping();
+        res.status(200).json({ status: 'ok', db: 'connected', timestamp: new Date().toISOString() });
+    } catch (error) {
+        res.status(503).json({ status: 'error', message: error.message });
+    }
+});
+
+// ── Maintenance Mode Middleware ─────────────────────────────────────────────────
+// If MAINTENANCE_MODE file exists (written by healthCheck.js on failure),
+// all non-admin API requests get a 503. Frontend reads this to redirect to /maintenance.
+const MAINTENANCE_FLAG = path.join(__dirname, 'MAINTENANCE_MODE');
+app.use('/api', (req, res, next) => {
+    // Skip: health check itself, auth endpoints, and admin status
+    const bypass = ['/health', '/auth/login', '/auth/csrf', '/status'];
+    if (bypass.some(p => req.path.startsWith(p))) return next();
+
+    if (fs.existsSync(MAINTENANCE_FLAG)) {
+        return res.status(503).json({
+            success: false,
+            maintenance: true,
+            message: 'The site is currently undergoing maintenance. Please check back soon.'
+        });
+    }
+    next();
+});
+
 const { protect, authorize } = require('./middleware/auth');
 app.get('/api/status', protect, authorize('admin'), (req, res) => {
     const dbStates = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };

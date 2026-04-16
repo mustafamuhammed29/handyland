@@ -1,0 +1,91 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e69e7",
+    "supplier": "69caed172f6d1a5fa80e69de",
+    "items": [
+      {
+        "productName": "Display iPhone 15 Pro",
+        "quantity": 10,
+        "unitPrice": 80,
+        "_id": "69caed172f6d1a5fa80e69e8",
+        "totalPrice": 800
+      }
+    ],
+    "totalAmount": 800,
+    "status": "Received",
+    "expectedDeliveryDate": "2026-03-10T21:37:27.220Z",
+    "notes": "Dringend benötigt",
+    "createdAt": "2026-03-30T21:37:27.221Z",
+    "updatedAt": "2026-03-30T21:37:27.221Z",
+    "poNumber": "PO-26-8704B1",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69e9",
+    "supplier": "69caed172f6d1a5fa80e69df",
+    "items": [
+      {
+        "productName": "Akku iPhone 13",
+        "quantity": 20,
+        "unitPrice": 18,
+        "_id": "69caed172f6d1a5fa80e69ea",
+        "totalPrice": 360
+      },
+      {
+        "productName": "Akku Samsung S23",
+        "quantity": 10,
+        "unitPrice": 16,
+        "_id": "69caed172f6d1a5fa80e69eb",
+        "totalPrice": 160
+      }
+    ],
+    "totalAmount": 520,
+    "status": "Sent",
+    "expectedDeliveryDate": "2026-04-09T21:37:27.220Z",
+    "notes": "",
+    "createdAt": "2026-03-30T21:37:27.221Z",
+    "updatedAt": "2026-03-30T21:37:27.221Z",
+    "poNumber": "PO-26-75EC81",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69ee",
+    "supplier": "69caed172f6d1a5fa80e69de",
+    "items": [
+      {
+        "productName": "Display Samsung S24",
+        "quantity": 5,
+        "unitPrice": 70,
+        "_id": "69caed172f6d1a5fa80e69ef",
+        "totalPrice": 350
+      }
+    ],
+    "totalAmount": 350,
+    "status": "Cancelled",
+    "notes": "Lieferant nicht verfügbar",
+    "createdAt": "2026-03-30T21:37:27.221Z",
+    "updatedAt": "2026-03-30T21:37:27.221Z",
+    "poNumber": "PO-26-6C0BE8",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69ec",
+    "supplier": "69caed172f6d1a5fa80e69e0",
+    "items": [
+      {
+        "productName": "Lightning Port iPhone 11",
+        "quantity": 30,
+        "unitPrice": 10,
+        "_id": "69caed172f6d1a5fa80e69ed",
+        "totalPrice": 300
+      }
+    ],
+    "totalAmount": 300,
+    "status": "Draft",
+    "notes": "Normaler Nachschub",
+    "createdAt": "2026-03-30T21:37:27.221Z",
+    "updatedAt": "2026-03-30T21:37:27.221Z",
+    "poNumber": "PO-26-8E3233",
+    "__v": 0
+  }
+]

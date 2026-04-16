@@ -1,0 +1,96 @@
+[
+  {
+    "_id": "699a5f6f7429fc50a4684666",
+    "user": "69892a5338a65b195c05e9d8",
+    "products": [
+      {
+        "product": "699a4d5db5cd3f064890aab5",
+        "productType": "Product",
+        "customId": "iphone-15-pro-max",
+        "name": "Apple iPhone 15 Pro Max",
+        "price": 1199,
+        "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=800&auto=format&fit=crop",
+        "_id": "69a0c2c3d960c69bcd6076d5",
+        "addedAt": "2026-02-26T22:01:39.595Z"
+      },
+      {
+        "product": "699a4d5db5cd3f064890aab6",
+        "productType": "Product",
+        "customId": "samsung-galaxy-s24-ultra",
+        "name": "Samsung Galaxy S24 Ultra",
+        "price": 1299,
+        "image": "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=800&auto=format&fit=crop",
+        "_id": "69a5fd61dd8fdd655ee446f7",
+        "addedAt": "2026-03-02T21:13:05.419Z"
+      }
+    ],
+    "createdAt": "2026-02-22T01:44:15.563Z",
+    "updatedAt": "2026-03-02T21:13:05.422Z",
+    "__v": 9
+  },
+  {
+    "_id": "69adf401d133bd103c54358f",
+    "user": "698cf2d7e12d1a857e67e067",
+    "products": [
+      {
+        "product": "699a4d5db5cd3f064890aab9",
+        "productType": "Product",
+        "customId": "iphone-13",
+        "name": "Apple iPhone 13",
+        "price": 599,
+        "image": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=800&auto=format&fit=crop",
+        "_id": "69c5a0d52b3a8591760c08bc",
+        "addedAt": "2026-03-26T21:10:45.255Z"
+      }
+    ],
+    "createdAt": "2026-03-08T22:11:13.518Z",
+    "updatedAt": "2026-03-26T21:10:45.256Z",
+    "__v": 2
+  },
+  {
+    "_id": "69af4fe51763641d7697197e",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "products": [],
+    "createdAt": "2026-03-09T22:55:33.435Z",
+    "updatedAt": "2026-03-16T01:22:46.931Z",
+    "__v": 3
+  },
+  {
+    "_id": "69cc282aeab6f665138019a0",
+    "user": "69cb0c3496a43c9eb6d9807d",
+    "products": [
+      {
+        "product": "69caf2fc7e16280dd11918dc",
+        "productType": "Product",
+        "customId": "xiaomi-xiaomi-14-pro-256gb-schwarz-u5e9r3",
+        "name": "Xiaomi Xiaomi 14 Pro 256GB Schwarz",
+        "price": 799,
+        "image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400",
+        "_id": "69cd71726f8a2e4dfa6b9a67",
+        "addedAt": "2026-04-01T19:26:42.507Z"
+      }
+    ],
+    "createdAt": "2026-03-31T20:01:46.566Z",
+    "updatedAt": "2026-04-05T00:55:43.682Z",
+    "__v": 8
+  },
+  {
+    "_id": "69cd8696f4dd232e1e4688ff",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "products": [
+      {
+        "product": "69caf2fc7e16280dd11918dc",
+        "productType": "Product",
+        "customId": "xiaomi-xiaomi-14-pro-256gb-schwarz-u5e9r3",
+        "name": "Xiaomi Xiaomi 14 Pro 256GB Schwarz",
+        "price": 799,
+        "image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400",
+        "_id": "69cd8696f4dd232e1e468900",
+        "addedAt": "2026-04-01T20:56:54.072Z"
+      }
+    ],
+    "createdAt": "2026-04-01T20:56:54.072Z",
+    "updatedAt": "2026-04-01T20:56:54.072Z",
+    "__v": 0
+  }
+]

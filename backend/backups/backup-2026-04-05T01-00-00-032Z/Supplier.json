@@ -1,0 +1,78 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e69de",
+    "name": "TechParts GmbH",
+    "contactPerson": "Klaus Weber",
+    "email": "k.weber@techparts.de",
+    "phone": "+4930123456789",
+    "address": {
+      "street": "Industriestraße 45",
+      "city": "Berlin",
+      "zipCode": "10317",
+      "country": "Germany"
+    },
+    "rating": 5,
+    "reliabilityScore": 98,
+    "isActive": true,
+    "createdAt": "2026-03-30T21:37:27.219Z",
+    "updatedAt": "2026-03-30T21:37:27.219Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69df",
+    "name": "BatteryWorld",
+    "contactPerson": "Sarah Miller",
+    "email": "sarah@batteryworld.com",
+    "phone": "+4989234567890",
+    "address": {
+      "street": "Maximilianstr. 12",
+      "city": "München",
+      "zipCode": "80333",
+      "country": "Germany"
+    },
+    "rating": 4,
+    "reliabilityScore": 92,
+    "isActive": true,
+    "createdAt": "2026-03-30T21:37:27.219Z",
+    "updatedAt": "2026-03-30T21:37:27.219Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69e0",
+    "name": "SpareHub",
+    "contactPerson": "Thomas König",
+    "email": "koenig@sparehub.de",
+    "phone": "+4940345678901",
+    "address": {
+      "street": "Hamburger Allee 7",
+      "city": "Hamburg",
+      "zipCode": "20354",
+      "country": "Germany"
+    },
+    "rating": 4,
+    "reliabilityScore": 88,
+    "isActive": true,
+    "createdAt": "2026-03-30T21:37:27.219Z",
+    "updatedAt": "2026-03-30T21:37:27.219Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69e1",
+    "name": "PhoneParts Express",
+    "contactPerson": "Maria Bauer",
+    "email": "bauer@phonepartsexpress.de",
+    "phone": "+4921156789012",
+    "address": {
+      "street": "Rheinstraße 89",
+      "city": "Düsseldorf",
+      "zipCode": "40213",
+      "country": "Germany"
+    },
+    "rating": 3,
+    "reliabilityScore": 75,
+    "isActive": false,
+    "createdAt": "2026-03-30T21:37:27.219Z",
+    "updatedAt": "2026-03-30T21:37:27.219Z",
+    "__v": 0
+  }
+]

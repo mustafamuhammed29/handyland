@@ -1,0 +1,68 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e6a0c",
+    "brand": "Apple",
+    "model": "iPhone 11",
+    "imei": "351234567890001",
+    "status": "Available",
+    "currentCustomer": {
+      "name": "",
+      "phone": "",
+      "email": ""
+    },
+    "notes": "Für Kunden während der Reparatur",
+    "createdAt": "2026-03-30T21:37:27.227Z",
+    "updatedAt": "2026-03-30T21:37:27.227Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6a0d",
+    "brand": "Samsung",
+    "model": "Galaxy A33",
+    "imei": "351234567890002",
+    "status": "Available",
+    "currentCustomer": {
+      "name": "",
+      "phone": "",
+      "email": ""
+    },
+    "notes": "Zweitgerät",
+    "createdAt": "2026-03-30T21:37:27.227Z",
+    "updatedAt": "2026-03-30T21:37:27.227Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6a0e",
+    "brand": "Apple",
+    "model": "iPhone XR",
+    "imei": "351234567890003",
+    "status": "Available",
+    "currentCustomer": {
+      "name": "",
+      "phone": "",
+      "email": ""
+    },
+    "lentDate": null,
+    "dueDate": null,
+    "notes": "Ausgeliehen an Ticket REP-99-GUEST01",
+    "createdAt": "2026-03-30T21:37:27.227Z",
+    "updatedAt": "2026-04-03T23:27:44.793Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6a0f",
+    "brand": "Xiaomi",
+    "model": "Redmi 9",
+    "imei": "351234567890004",
+    "status": "Maintenance",
+    "currentCustomer": {
+      "name": "",
+      "phone": "",
+      "email": ""
+    },
+    "notes": "Display-Reinigung",
+    "createdAt": "2026-03-30T21:37:27.227Z",
+    "updatedAt": "2026-03-30T21:37:27.227Z",
+    "__v": 0
+  }
+]

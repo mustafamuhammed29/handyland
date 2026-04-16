@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "69adef31fcb87a9c2b19fa3b",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "name": "House",
+    "type": "Home",
+    "street": "Walldorfer Straße 13",
+    "city": "Wiesloch",
+    "state": "Baden-Wuerttemberg",
+    "zipCode": "69168",
+    "country": "Germany",
+    "isDefault": true,
+    "createdAt": "2026-03-08T21:50:41.319Z",
+    "updatedAt": "2026-03-08T21:50:41.319Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd71ae6f8a2e4dfa6b9acb",
+    "user": "69cb0c3496a43c9eb6d9807d",
+    "name": "House",
+    "type": "Home",
+    "street": "Walldorfer Straße 13",
+    "city": "Wiesloch",
+    "state": "Baden-Wuerttemberg",
+    "zipCode": "69168",
+    "country": "Germany",
+    "isDefault": true,
+    "createdAt": "2026-04-01T19:27:42.352Z",
+    "updatedAt": "2026-04-01T19:27:42.352Z",
+    "__v": 0
+  }
+]
