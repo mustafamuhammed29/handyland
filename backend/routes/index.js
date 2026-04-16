@@ -17,7 +17,7 @@ const rawAuthLimiter = rateLimit({
 });
 
 const authLimiter = (req, res, next) => {
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV === 'development') {
         return next();
     }
     return rawAuthLimiter(req, res, next);

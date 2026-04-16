@@ -8,7 +8,7 @@ const validate = require('../middleware/validation');
 
 const rateLimit = require('express-rate-limit');
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 // FIXED: Rate limiting active in all environments (FIX 6)
 const emailLimiter = rateLimit({

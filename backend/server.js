@@ -52,7 +52,13 @@ app.use(passport.initialize());
 // ── Static uploads (dev only) ──────────────────────────────────────────────────
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {fs.mkdirSync(uploadDir, { recursive: true });}
-app.use('/uploads', express.static(uploadDir));
+
+if (process.env.NODE_ENV === 'development') {
+    app.use('/uploads', express.static(uploadDir));
+} else {
+    // In production, block direct access to local uploads directory (force Cloudinary)
+    app.use('/uploads', (req, res) => res.status(403).json({ success: false, message: 'Forbidden: Local uploads disabled in production.' }));
+}
 
 // ARCH-02 fix: Only expose Swagger docs in non-production environments.
 // In production, API documentation should be protected or disabled.

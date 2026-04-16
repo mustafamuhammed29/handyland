@@ -138,7 +138,18 @@ export const AppRouter = () => {
     // Document title is now purely handled by SEO.tsx and Helmet Provider
 
     if (settingsError) {
-        return <GlobalError onRetry={() => window.location.reload()} />;
+        const handleRetry = () => {
+            const retries = parseInt(sessionStorage.getItem('sys_retry_count') || '0');
+            if (retries >= 3) {
+                // Maximum retries reached. Force maintenance page or block reload.
+                window.location.href = '/maintenance';
+            } else {
+                sessionStorage.setItem('sys_retry_count', (retries + 1).toString());
+                window.location.reload();
+            }
+        };
+
+        return <GlobalError onRetry={handleRetry} />;
     }
 
     if (settingsLoading) {
