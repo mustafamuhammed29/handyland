@@ -336,7 +336,7 @@ export const Checkout: React.FC = () => {
         const commonOrderData = {
             items: cart.map(item => ({
                 product: item.id,
-                productType: item.category === 'device' ? 'Product' : 'Accessory',
+                productType: (item as any).productType || (item.category?.toLowerCase() === 'accessory' ? 'Accessory' : 'Product'),
                 name: item.title,
                 price: item.price,
                 image: item.image,
@@ -356,11 +356,11 @@ export const Checkout: React.FC = () => {
         };
 
         try {
-            if (selectedPaymentMethod === 'cod' || selectedPaymentMethod === 'bank_transfer') {
+            if (selectedPaymentMethod === 'cod' || selectedPaymentMethod === 'bank_transfer' || selectedPaymentMethod === 'wallet') {
                 const r = await orderService.createOrder({
                     ...commonOrderData,
-                    paymentMethod: selectedPaymentMethod === 'cod' ? 'cash' : 'bank_transfer',
-                    notes: `Checkout via Web. Method: ${selectedPaymentMethod === 'cod' ? 'COD' : 'Bank Transfer'}.`
+                    paymentMethod: selectedPaymentMethod === 'cod' ? 'cash' : selectedPaymentMethod,
+                    notes: `Checkout via Web. Method: ${selectedPaymentMethod.toUpperCase()}.`
                 });
 
                 if (r.success) {

@@ -42,7 +42,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
     // Static options (could be moved to a config file/service)
     const ramOptions = ['4GB', '6GB', '8GB', '12GB', '16GB'];
     const storageOptions = ['64GB', '128GB', '256GB', '512GB', '1TB'];
-    const conditions = ['New', 'Like New', 'Very Good', 'Good', 'Refurbished'];
+    const conditions = ['Neu', 'Wie neu', 'Sehr gut', 'Gut', 'Akzeptabel', 'Generalüberholt'];
     const brands = ['All', 'Apple', 'Samsung', 'Google', 'Huawei', 'Xiaomi']; // Simplified for now
 
     const handleAddToCart = React.useCallback((phone: PhoneListing) => {

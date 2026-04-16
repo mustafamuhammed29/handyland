@@ -77,7 +77,7 @@ const OrderSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['cash', 'card', 'paypal', 'stripe', 'klarna', 'giropay', 'sepa_debit', 'sofort', 'bank_transfer'],
+        enum: ['cash', 'card', 'paypal', 'stripe', 'klarna', 'giropay', 'sepa_debit', 'sofort', 'bank_transfer', 'wallet'],
         default: 'cash'
     },
     paymentStatus: {
@@ -127,6 +127,13 @@ const OrderSchema = new mongoose.Schema({
     },
     notes: String,
     trackingNumber: String,
+    invoiceGenerated: {
+        type: Boolean,
+        default: false
+    },
+    invoiceGeneratedAt: {
+        type: Date
+    },
     statusHistory: [{
         status: String,
         timestamp: {

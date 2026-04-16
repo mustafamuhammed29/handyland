@@ -5,6 +5,7 @@ import PageTransition from '../components/PageTransition';
 import { CartDrawer } from '../components/CartDrawer';
 import PaymentSuccess from '../PaymentSuccess';
 import NotFound from '../pages/NotFound';
+import MaintenancePage from '../pages/MaintenancePage';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import TermsAndConditions from '../pages/TermsAndConditions';
 import { ProtectedRoute } from '../components/ProtectedRoute';
@@ -203,6 +204,7 @@ export const AppRouter = () => {
                             <Route path="/seller" element={<PageTransition><Suspense fallback={<GlobalLoader />}><SellerStudio lang={lang} /></Suspense></PageTransition>} />
                         </Route>
 
+                        <Route path="/maintenance" element={<MaintenancePage />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </AnimatePresence>

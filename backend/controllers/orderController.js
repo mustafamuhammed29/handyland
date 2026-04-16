@@ -107,16 +107,18 @@ exports.createOrder = async (req, res) => {
         // decremented atomically. If stock is insufficient, returns null (no update).
         for (const item of items) {
             let product;
+            const quantityAmt = Number(item.quantity) || 1;
+            
             if (item.productType === 'Product') {
                 product = await Product.findOneAndUpdate(
-                    { _id: item.product, stock: { $gte: item.quantity } },
-                    { $inc: { stock: -item.quantity, sold: item.quantity } },
+                    { _id: item.product, stock: { $gte: quantityAmt } },
+                    { $inc: { stock: -quantityAmt, sold: quantityAmt } },
                     { new: true }
                 );
             } else if (item.productType === 'Accessory') {
                 product = await Accessory.findOneAndUpdate(
-                    { _id: item.product, stock: { $gte: item.quantity } },
-                    { $inc: { stock: -item.quantity, sold: item.quantity } },
+                    { _id: item.product, stock: { $gte: quantityAmt } },
+                    { $inc: { stock: -quantityAmt, sold: quantityAmt } },
                     { new: true }
                 );
             }
@@ -137,14 +139,14 @@ exports.createOrder = async (req, res) => {
                 });
             }
 
-            const itemTotal = product.price * item.quantity;
+            const itemTotal = product.price * quantityAmt;
             totalAmount += itemTotal;
 
             orderItems.push({
                 product: product._id,
                 productType: item.productType,
                 name: product.name || product.title,
-                quantity: item.quantity,
+                quantity: quantityAmt,
                 price: product.price,
                 image: product.image || product.images?.[0]
             });
@@ -158,6 +160,35 @@ exports.createOrder = async (req, res) => {
 
         const finalAmount = Math.max(0, totalAmount + shippingFee + taxAmount - appliedDiscount);
 
+        let statusToSet = 'pending';
+        let paymentStatusToSet = 'pending';
+
+        if (paymentMethod === 'wallet') {
+            if (!req.user) {
+                return res.status(401).json({ success: false, message: 'Must be logged in to pay with wallet.' });
+            }
+            const User = require('../models/User');
+            const currentUser = await User.findById(req.user._id);
+            if (!currentUser || currentUser.balance < finalAmount) {
+                // Rollback stock
+                for (const rolled of orderItems) {
+                    if (rolled.productType === 'Product') {
+                        await Product.findByIdAndUpdate(rolled.product, { $inc: { stock: rolled.quantity, sold: -rolled.quantity } });
+                    } else if (rolled.productType === 'Accessory') {
+                        await Accessory.findByIdAndUpdate(rolled.product, { $inc: { stock: rolled.quantity, sold: -rolled.quantity } });
+                    }
+                }
+                return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
+            }
+            
+            // Deduct balance
+            currentUser.balance -= finalAmount;
+            await currentUser.save();
+            
+            statusToSet = 'processing';
+            paymentStatusToSet = 'paid';
+        }
+
         // Create the order
         const order = await Order.create({
             user: req.user ? req.user._id : undefined,
@@ -165,6 +196,8 @@ exports.createOrder = async (req, res) => {
             shippingAddress,
             contactEmail: req.body.contactEmail || (req.user ? req.user.email : undefined), // Track guest email
             paymentMethod,
+            status: statusToSet,
+            paymentStatus: paymentStatusToSet,
             totalAmount: finalAmount, // Store the final calculated amount
             tax: taxAmount,
             shippingFee,
@@ -215,6 +248,18 @@ exports.createOrder = async (req, res) => {
             }
         }
         // NOTE: Stock was already decremented atomically in the loop above (Issue #2 fix).
+
+        if (paymentMethod === 'wallet') {
+            await Transaction.create({
+                user: req.user._id,
+                order: order._id,
+                amount: finalAmount,
+                type: 'purchase',
+                paymentMethod: 'wallet',
+                status: 'completed',
+                description: `Payment for order #${order.orderNumber}`
+            });
+        }
 
         // Record coupon usage (per-account tracking) — only for authenticated users
         if (couponCode && req.user) {
@@ -573,8 +618,26 @@ exports.getInvoice = async (req, res) => {
         }
 
         // Authorization
-        if (order.user._id.toString() !== req.user.id && req.user.role !== 'admin') {
+        const isAdmin = req.user && req.user.role === 'admin';
+        const isOwner = req.user && order.user && order.user._id.toString() === req.user.id;
+
+        if (!isAdmin && !isOwner) {
             return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        // Block non-admins from downloading until admin has generated/approved the invoice
+        if (!isAdmin && !order.invoiceGenerated) {
+            return res.status(403).json({
+                success: false,
+                message: 'Die Rechnung wurde noch nicht vom Administrator erstellt. Bitte warten Sie.'
+            });
+        }
+
+        // If admin is accessing for the first time, mark as generated
+        if (isAdmin && !order.invoiceGenerated) {
+            order.invoiceGenerated = true;
+            order.invoiceGeneratedAt = new Date();
+            await order.save();
         }
 
         // Fetch Dynamic Settings

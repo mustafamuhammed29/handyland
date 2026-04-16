@@ -232,7 +232,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
 
             {/* Trust Badges */}
             <div className="mt-6 pt-6 border-t border-slate-800">
-                <TrustBadges className="grid-cols-2" />
+                <TrustBadges className="!grid-cols-2 gap-3" />
             </div>
         </div>
     );

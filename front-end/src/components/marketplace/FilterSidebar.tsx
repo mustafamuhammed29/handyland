@@ -67,10 +67,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                             <option value="">{t('marketplace.allConditions', 'Alle Zustände')}</option>
                             {conditions.map(opt => {
                                 const conditionLabels: Record<string, string> = {
+                                    'neu': t('marketplace.cond.new', 'Neu'),
+                                    'wie neu': t('marketplace.cond.likeNew', 'Wie Neu'),
+                                    'sehr gut': t('marketplace.cond.veryGood', 'Sehr Gut'),
+                                    'gut': t('marketplace.cond.good', 'Gut'),
+                                    'akzeptabel': t('marketplace.cond.fair', 'Akzeptabel'),
+                                    'generalüberholt': t('marketplace.cond.refurbished', 'Generalüberholt'),
                                     'new': t('marketplace.cond.new', 'Neu'),
                                     'like new': t('marketplace.cond.likeNew', 'Wie Neu'),
                                     'very good': t('marketplace.cond.veryGood', 'Sehr Gut'),
-                                    'good': t('marketplace.cond.good', 'Gut'),
                                     'fair': t('marketplace.cond.fair', 'Akzeptabel'),
                                     'refurbished': t('marketplace.cond.refurbished', 'Generalüberholt'),
                                     'used': t('marketplace.cond.used', 'Gebraucht'),
