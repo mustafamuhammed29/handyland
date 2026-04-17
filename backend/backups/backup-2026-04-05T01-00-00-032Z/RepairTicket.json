@@ -1,0 +1,3817 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e69b8",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-25-935FD5",
+    "device": "iPad Air",
+    "issue": "Ladebuchse kaputt",
+    "status": "repairing",
+    "estimatedCost": 243,
+    "appointmentDate": "2026-04-06T21:37:27.212Z",
+    "serviceType": "In-Store",
+    "notes": "Bitte schnell reparieren, ich brauche das Gerät dringend.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Wann kann ich mit einer Reparatur rechnen?",
+        "timestamp": "2026-03-30T21:37:27.212Z",
+        "_id": "69caed172f6d1a5fa80e69b9"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-03-29T21:37:27.212Z",
+        "note": "Gerät empfangen",
+        "_id": "69caed172f6d1a5fa80e69ba"
+      }
+    ],
+    "createdAt": "2026-03-30T21:37:27.214Z",
+    "updatedAt": "2026-03-30T21:37:27.214Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69bb",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "ticketId": "REP-26-443DD5",
+    "device": "Samsung Galaxy S22",
+    "issue": "Display gebrochen",
+    "status": "completed",
+    "estimatedCost": 226,
+    "serviceType": "Mail-in",
+    "notes": "Bitte schnell reparieren, ich brauche das Gerät dringend.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Wann kann ich mit einer Reparatur rechnen?",
+        "timestamp": "2026-03-30T21:37:27.212Z",
+        "_id": "69caed172f6d1a5fa80e69bc"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-03-20T21:37:27.212Z",
+        "note": "Gerät empfangen",
+        "_id": "69caed172f6d1a5fa80e69bd"
+      }
+    ],
+    "createdAt": "2026-03-30T21:37:27.214Z",
+    "updatedAt": "2026-03-30T21:37:27.214Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69c4",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "ticketId": "REP-29-FC7AC0",
+    "device": "Xiaomi 13",
+    "issue": "Mikrofon defekt",
+    "status": "diagnosing",
+    "estimatedCost": 64,
+    "appointmentDate": "2026-04-02T21:37:27.212Z",
+    "serviceType": "In-Store",
+    "notes": "Bitte schnell reparieren, ich brauche das Gerät dringend.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Wann kann ich mit einer Reparatur rechnen?",
+        "timestamp": "2026-03-30T21:37:27.212Z",
+        "_id": "69caed172f6d1a5fa80e69c5"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-03-24T21:37:27.212Z",
+        "note": "Gerät empfangen",
+        "_id": "69caed172f6d1a5fa80e69c6"
+      }
+    ],
+    "createdAt": "2026-03-30T21:37:27.214Z",
+    "updatedAt": "2026-03-30T21:37:27.214Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69be",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "ticketId": "REP-27-85B7BA",
+    "device": "Samsung Galaxy S22",
+    "issue": "Akku defekt",
+    "status": "ready",
+    "estimatedCost": 39,
+    "appointmentDate": "2026-04-05T21:37:27.212Z",
+    "serviceType": "In-Store",
+    "notes": "Bitte schnell reparieren, ich brauche das Gerät dringend.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Wann kann ich mit einer Reparatur rechnen?",
+        "timestamp": "2026-03-30T21:37:27.212Z",
+        "_id": "69caed172f6d1a5fa80e69bf"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-03-20T21:37:27.212Z",
+        "note": "Gerät empfangen",
+        "_id": "69caed172f6d1a5fa80e69c0"
+      }
+    ],
+    "createdAt": "2026-03-30T21:37:27.214Z",
+    "updatedAt": "2026-03-30T21:37:27.214Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69c1",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "ticketId": "REP-28-35AE31",
+    "device": "Google Pixel 7",
+    "issue": "Gerät startet nicht",
+    "status": "testing",
+    "estimatedCost": 49,
+    "serviceType": "Mail-in",
+    "notes": "Bitte schnell reparieren, ich brauche das Gerät dringend.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Wann kann ich mit einer Reparatur rechnen?",
+        "timestamp": "2026-03-30T21:37:27.212Z",
+        "_id": "69caed172f6d1a5fa80e69c2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-03-22T21:37:27.212Z",
+        "note": "Gerät empfangen",
+        "_id": "69caed172f6d1a5fa80e69c3"
+      }
+    ],
+    "createdAt": "2026-03-30T21:37:27.214Z",
+    "updatedAt": "2026-03-30T21:37:27.214Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69c7",
+    "ticketId": "REP-99-GUEST01",
+    "device": "iPhone 11",
+    "issue": "Display gebrochen",
+    "status": "repairing",
+    "estimatedCost": 89,
+    "serviceType": "In-Store",
+    "messages": [
+      {
+        "role": "admin",
+        "text": "Wir haben das Ersatzteil bestellt, Dauer ca. 3 Tage.",
+        "timestamp": "2026-03-30T21:37:27.212Z",
+        "_id": "69caed172f6d1a5fa80e69c8"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-03-27T21:37:27.212Z",
+        "note": "Gerät empfangen",
+        "_id": "69caed172f6d1a5fa80e69c9"
+      }
+    ],
+    "guestContact": {
+      "name": "Jonas Becker",
+      "email": "jonas@guest.de",
+      "phone": "+4916623456789"
+    },
+    "createdAt": "2026-03-30T21:37:27.214Z",
+    "updatedAt": "2026-03-30T21:37:27.214Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191970",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-001-GAFRRZ",
+    "device": "Samsung Galaxy A54",
+    "issue": "Touch funktioniert nicht",
+    "status": "completed",
+    "estimatedCost": 114,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Display ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Touch funktioniert nicht. Bitte schnell reparieren.",
+        "timestamp": "2025-11-01T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191971"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €114. Gerät abholbereit.",
+        "timestamp": "2025-11-04T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191972"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-11-01T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191973"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-11-02T22:02:36.121Z",
+        "note": "Diagnose: Touch funktioniert nicht.",
+        "_id": "69caf2fc7e16280dd1191974"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-11-04T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191975"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-11-03T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191976"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-11-02T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191977"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.140Z",
+    "updatedAt": "2026-03-30T22:02:36.140Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191978",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "ticketId": "REP-ARCH-002-D8GIQG",
+    "device": "Sony Xperia 5 V",
+    "issue": "Akku defekt — hält keine Ladung mehr",
+    "status": "completed",
+    "estimatedCost": 238,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Akku defekt — hält keine Ladung mehr. Bitte schnell reparieren.",
+        "timestamp": "2025-06-04T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191979"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €238. Gerät abholbereit.",
+        "timestamp": "2025-06-09T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd119197a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-06-04T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd119197b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-06-05T22:02:36.121Z",
+        "note": "Diagnose: Akku defekt — hält keine Ladung mehr.",
+        "_id": "69caf2fc7e16280dd119197c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-06-09T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd119197d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-06-08T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd119197e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-06-07T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd119197f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.140Z",
+    "updatedAt": "2026-03-30T22:02:36.140Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191980",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "ticketId": "REP-ARCH-003-E7GLBQ",
+    "device": "Google Pixel 8 Pro",
+    "issue": "Gesichtserkennung defekt",
+    "status": "completed",
+    "estimatedCost": 254,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Akku getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Gesichtserkennung defekt. Bitte schnell reparieren.",
+        "timestamp": "2026-01-11T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191981"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €254. Gerät abholbereit.",
+        "timestamp": "2026-01-18T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191982"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-01-11T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191983"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-01-12T22:02:36.121Z",
+        "note": "Diagnose: Gesichtserkennung defekt.",
+        "_id": "69caf2fc7e16280dd1191984"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-01-18T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191985"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-01-17T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191986"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-01-16T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191987"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191988",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "ticketId": "REP-ARCH-004-QXZYCU",
+    "device": "POCO X5 Pro",
+    "issue": "Gesichtserkennung defekt",
+    "status": "completed",
+    "estimatedCost": 146,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Gesichtserkennung defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-04-06T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191989"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €146. Gerät abholbereit.",
+        "timestamp": "2025-04-19T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd119198a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-04-06T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd119198b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-04-07T22:02:36.121Z",
+        "note": "Diagnose: Gesichtserkennung defekt.",
+        "_id": "69caf2fc7e16280dd119198c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-04-19T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd119198d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-04-18T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd119198e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-04-17T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd119198f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191990",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-005-ER1SFC",
+    "device": "iPhone XS Max",
+    "issue": "Ladebuchse beschädigt",
+    "status": "completed",
+    "estimatedCost": 223,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Ladebuchse beschädigt. Bitte schnell reparieren.",
+        "timestamp": "2025-08-01T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191991"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €223. Gerät abholbereit.",
+        "timestamp": "2025-08-15T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191992"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-08-01T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191993"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-08-02T22:02:36.121Z",
+        "note": "Diagnose: Ladebuchse beschädigt.",
+        "_id": "69caf2fc7e16280dd1191994"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-08-15T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191995"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-08-14T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191996"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-08-13T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191997"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191998",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "ticketId": "REP-ARCH-006-8AYF6P",
+    "device": "iPhone XS Max",
+    "issue": "Display gebrochen — Glasbruch komplett",
+    "status": "completed",
+    "estimatedCost": 106,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Display gebrochen — Glasbruch komplett. Bitte schnell reparieren.",
+        "timestamp": "2025-12-07T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191999"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €106. Gerät abholbereit.",
+        "timestamp": "2025-12-08T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd119199a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-12-07T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd119199b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-12-08T22:02:36.121Z",
+        "note": "Diagnose: Display gebrochen — Glasbruch komplett.",
+        "_id": "69caf2fc7e16280dd119199c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-12-08T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd119199d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-12-07T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd119199e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-12-06T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd119199f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919a0",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-007-Y9Z3EI",
+    "device": "Samsung Galaxy S22 Ultra",
+    "issue": "Vibration defekt",
+    "status": "completed",
+    "estimatedCost": 214,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Vibration defekt. Bitte schnell reparieren.",
+        "timestamp": "2026-01-15T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919a1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €214. Gerät abholbereit.",
+        "timestamp": "2026-01-28T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919a2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-01-15T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919a3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-01-16T22:02:36.121Z",
+        "note": "Diagnose: Vibration defekt.",
+        "_id": "69caf2fc7e16280dd11919a4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-01-28T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919a5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-01-27T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919a6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-01-26T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919a7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919a8",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-008-RY22ST",
+    "device": "Samsung Galaxy Z Flip 4",
+    "issue": "Fingerabdrucksensor defekt",
+    "status": "completed",
+    "estimatedCost": 107,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Fingerabdrucksensor defekt. Bitte schnell reparieren.",
+        "timestamp": "2026-02-05T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919a9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €107. Gerät abholbereit.",
+        "timestamp": "2026-02-17T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919aa"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-05T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919ab"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-06T22:02:36.121Z",
+        "note": "Diagnose: Fingerabdrucksensor defekt.",
+        "_id": "69caf2fc7e16280dd11919ac"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-02-17T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919ad"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-02-16T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919ae"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-02-15T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919af"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919b0",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "ticketId": "REP-ARCH-009-02Q6BB",
+    "device": "Samsung Galaxy Z Flip 4",
+    "issue": "Display gebrochen — Glasbruch komplett",
+    "status": "completed",
+    "estimatedCost": 161,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Display gebrochen — Glasbruch komplett. Bitte schnell reparieren.",
+        "timestamp": "2025-11-03T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919b1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €161. Gerät abholbereit.",
+        "timestamp": "2025-11-11T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919b2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-11-03T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919b3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-11-04T22:02:36.121Z",
+        "note": "Diagnose: Display gebrochen — Glasbruch komplett.",
+        "_id": "69caf2fc7e16280dd11919b4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-11-11T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919b5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-11-10T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919b6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-11-09T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919b7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919b8",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "ticketId": "REP-ARCH-010-4UMYQS",
+    "device": "iPhone 8 Plus",
+    "issue": "Mikrofon defekt",
+    "status": "completed",
+    "estimatedCost": 261,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Mikrofon defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-06-20T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919b9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €261. Gerät abholbereit.",
+        "timestamp": "2025-06-24T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919ba"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-06-20T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919bb"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-06-21T22:02:36.121Z",
+        "note": "Diagnose: Mikrofon defekt.",
+        "_id": "69caf2fc7e16280dd11919bc"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-06-24T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919bd"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-06-23T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919be"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-06-22T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919bf"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919c0",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "ticketId": "REP-ARCH-011-0DK2BA",
+    "device": "iPhone 12",
+    "issue": "Bluetooth verbindet nicht",
+    "status": "completed",
+    "estimatedCost": 115,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Akku getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Bluetooth verbindet nicht. Bitte schnell reparieren.",
+        "timestamp": "2026-02-11T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919c1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €115. Gerät abholbereit.",
+        "timestamp": "2026-02-15T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919c2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-11T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919c3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-12T22:02:36.121Z",
+        "note": "Diagnose: Bluetooth verbindet nicht.",
+        "_id": "69caf2fc7e16280dd11919c4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-02-15T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919c5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-02-14T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919c6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-02-13T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919c7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919c8",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "ticketId": "REP-ARCH-012-B5AC4N",
+    "device": "Motorola Edge 40 Pro",
+    "issue": "Bluetooth verbindet nicht",
+    "status": "completed",
+    "estimatedCost": 184,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Bluetooth verbindet nicht. Bitte schnell reparieren.",
+        "timestamp": "2025-08-04T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919c9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €184. Gerät abholbereit.",
+        "timestamp": "2025-08-11T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919ca"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-08-04T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919cb"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-08-05T22:02:36.121Z",
+        "note": "Diagnose: Bluetooth verbindet nicht.",
+        "_id": "69caf2fc7e16280dd11919cc"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-08-11T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919cd"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-08-10T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919ce"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-08-09T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919cf"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919d0",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-013-8TYMS6",
+    "device": "Samsung Galaxy S23",
+    "issue": "Akku defekt — hält keine Ladung mehr",
+    "status": "completed",
+    "estimatedCost": 74,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Display ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Akku defekt — hält keine Ladung mehr. Bitte schnell reparieren.",
+        "timestamp": "2025-10-14T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919d1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €74. Gerät abholbereit.",
+        "timestamp": "2025-10-21T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919d2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-10-14T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919d3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-10-15T22:02:36.121Z",
+        "note": "Diagnose: Akku defekt — hält keine Ladung mehr.",
+        "_id": "69caf2fc7e16280dd11919d4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-10-21T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919d5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-10-20T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919d6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-10-19T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919d7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919d8",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "ticketId": "REP-ARCH-014-IC8WMY",
+    "device": "Samsung Galaxy S22 Ultra",
+    "issue": "Display gebrochen — Glasbruch komplett",
+    "status": "completed",
+    "estimatedCost": 228,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Display ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Display gebrochen — Glasbruch komplett. Bitte schnell reparieren.",
+        "timestamp": "2026-02-10T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919d9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €228. Gerät abholbereit.",
+        "timestamp": "2026-02-18T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919da"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-10T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919db"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-11T22:02:36.121Z",
+        "note": "Diagnose: Display gebrochen — Glasbruch komplett.",
+        "_id": "69caf2fc7e16280dd11919dc"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-02-18T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919dd"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-02-17T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919de"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-02-16T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919df"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919e0",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "ticketId": "REP-ARCH-015-7NOTVH",
+    "device": "iPhone XS Max",
+    "issue": "Gerät startet nicht — Softwarefehler",
+    "status": "completed",
+    "estimatedCost": 58,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Akku getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Gerät startet nicht — Softwarefehler. Bitte schnell reparieren.",
+        "timestamp": "2025-10-14T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919e1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €58. Gerät abholbereit.",
+        "timestamp": "2025-10-20T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919e2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-10-14T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919e3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-10-15T22:02:36.121Z",
+        "note": "Diagnose: Gerät startet nicht — Softwarefehler.",
+        "_id": "69caf2fc7e16280dd11919e4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-10-20T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919e5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-10-19T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919e6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-10-18T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919e7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919e8",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-016-0XWUO4",
+    "device": "iPhone 15 Pro",
+    "issue": "Hinteres Glas gebrochen",
+    "status": "completed",
+    "estimatedCost": 176,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Akku getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Hinteres Glas gebrochen. Bitte schnell reparieren.",
+        "timestamp": "2025-08-04T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919e9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €176. Gerät abholbereit.",
+        "timestamp": "2025-08-08T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919ea"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-08-04T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919eb"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-08-05T22:02:36.121Z",
+        "note": "Diagnose: Hinteres Glas gebrochen.",
+        "_id": "69caf2fc7e16280dd11919ec"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-08-08T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919ed"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-08-07T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919ee"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-08-06T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919ef"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919f0",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "ticketId": "REP-ARCH-017-JJZNIQ",
+    "device": "Samsung Galaxy S23",
+    "issue": "Vibration defekt",
+    "status": "completed",
+    "estimatedCost": 154,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Vibration defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-12-04T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919f1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €154. Gerät abholbereit.",
+        "timestamp": "2025-12-11T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919f2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-12-04T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919f3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-12-05T22:02:36.121Z",
+        "note": "Diagnose: Vibration defekt.",
+        "_id": "69caf2fc7e16280dd11919f4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-12-11T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919f5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-12-10T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919f6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-12-09T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919f7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd11919f8",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-018-17T84L",
+    "device": "iPhone 15 Pro",
+    "issue": "Gerät startet nicht — Softwarefehler",
+    "status": "completed",
+    "estimatedCost": 101,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Display ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Gerät startet nicht — Softwarefehler. Bitte schnell reparieren.",
+        "timestamp": "2025-12-02T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919f9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €101. Gerät abholbereit.",
+        "timestamp": "2025-12-07T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd11919fa"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-12-02T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd11919fb"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-12-03T22:02:36.121Z",
+        "note": "Diagnose: Gerät startet nicht — Softwarefehler.",
+        "_id": "69caf2fc7e16280dd11919fc"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-12-07T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd11919fd"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-12-06T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd11919fe"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-12-05T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd11919ff"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a00",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-019-WZDH9N",
+    "device": "iPhone 8 Plus",
+    "issue": "Kamera defekt — rückwärtige Kamera unscharf",
+    "status": "completed",
+    "estimatedCost": 139,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Kamera defekt — rückwärtige Kamera unscharf. Bitte schnell reparieren.",
+        "timestamp": "2026-02-14T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a01"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €139. Gerät abholbereit.",
+        "timestamp": "2026-02-18T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a02"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-14T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a03"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-15T22:02:36.121Z",
+        "note": "Diagnose: Kamera defekt — rückwärtige Kamera unscharf.",
+        "_id": "69caf2fc7e16280dd1191a04"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-02-18T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a05"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-02-17T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a06"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-02-16T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a07"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a08",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "ticketId": "REP-ARCH-020-9KCDQS",
+    "device": "iPhone 12",
+    "issue": "Akku defekt — hält keine Ladung mehr",
+    "status": "completed",
+    "estimatedCost": 246,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Akku defekt — hält keine Ladung mehr. Bitte schnell reparieren.",
+        "timestamp": "2025-04-22T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a09"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €246. Gerät abholbereit.",
+        "timestamp": "2025-05-05T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a0a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-04-22T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a0b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-04-23T22:02:36.121Z",
+        "note": "Diagnose: Akku defekt — hält keine Ladung mehr.",
+        "_id": "69caf2fc7e16280dd1191a0c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-05-05T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a0d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-05-04T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a0e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-05-03T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a0f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a10",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "ticketId": "REP-ARCH-021-6NUS5G",
+    "device": "iPad Pro 12.9\"",
+    "issue": "Hinteres Glas gebrochen",
+    "status": "completed",
+    "estimatedCost": 182,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Hinteres Glas gebrochen. Bitte schnell reparieren.",
+        "timestamp": "2025-07-14T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a11"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €182. Gerät abholbereit.",
+        "timestamp": "2025-07-26T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a12"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-07-14T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a13"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-07-15T22:02:36.121Z",
+        "note": "Diagnose: Hinteres Glas gebrochen.",
+        "_id": "69caf2fc7e16280dd1191a14"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-07-26T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a15"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-07-25T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a16"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-07-24T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a17"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a18",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "ticketId": "REP-ARCH-022-W2OA3Q",
+    "device": "iPad Pro 12.9\"",
+    "issue": "WLAN Antenne defekt",
+    "status": "completed",
+    "estimatedCost": 127,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: WLAN Antenne defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-09-24T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a19"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €127. Gerät abholbereit.",
+        "timestamp": "2025-10-06T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a1a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-09-24T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a1b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-09-25T22:02:36.121Z",
+        "note": "Diagnose: WLAN Antenne defekt.",
+        "_id": "69caf2fc7e16280dd1191a1c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-10-06T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a1d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-10-05T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a1e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-10-04T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a1f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a20",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-023-QJ6AC8",
+    "device": "Google Pixel 8 Pro",
+    "issue": "Lautsprecher defekt — kein Ton",
+    "status": "completed",
+    "estimatedCost": 66,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Lautsprecher defekt — kein Ton. Bitte schnell reparieren.",
+        "timestamp": "2025-04-19T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a21"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €66. Gerät abholbereit.",
+        "timestamp": "2025-05-01T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a22"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-04-19T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a23"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-04-20T22:02:36.121Z",
+        "note": "Diagnose: Lautsprecher defekt — kein Ton.",
+        "_id": "69caf2fc7e16280dd1191a24"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-05-01T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a25"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-04-30T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a26"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-04-29T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a27"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a28",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "ticketId": "REP-ARCH-024-8WAUIY",
+    "device": "iPhone SE (2. Gen)",
+    "issue": "Lautsprecher defekt — kein Ton",
+    "status": "completed",
+    "estimatedCost": 115,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Lautsprecher defekt — kein Ton. Bitte schnell reparieren.",
+        "timestamp": "2026-02-20T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a29"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €115. Gerät abholbereit.",
+        "timestamp": "2026-02-28T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a2a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-20T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a2b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-21T22:02:36.121Z",
+        "note": "Diagnose: Lautsprecher defekt — kein Ton.",
+        "_id": "69caf2fc7e16280dd1191a2c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-02-28T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a2d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-02-27T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a2e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-02-26T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a2f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a30",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-025-M2P5YM",
+    "device": "iPhone XR",
+    "issue": "Mikrofon defekt",
+    "status": "completed",
+    "estimatedCost": 151,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Display ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Mikrofon defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-06-17T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a31"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €151. Gerät abholbereit.",
+        "timestamp": "2025-06-20T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a32"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-06-17T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a33"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-06-18T22:02:36.121Z",
+        "note": "Diagnose: Mikrofon defekt.",
+        "_id": "69caf2fc7e16280dd1191a34"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-06-20T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a35"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-06-19T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a36"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-06-18T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a37"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a38",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "ticketId": "REP-ARCH-026-M6NIBS",
+    "device": "iPhone 13",
+    "issue": "WLAN Antenne defekt",
+    "status": "completed",
+    "estimatedCost": 44,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: WLAN Antenne defekt. Bitte schnell reparieren.",
+        "timestamp": "2026-02-16T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a39"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €44. Gerät abholbereit.",
+        "timestamp": "2026-02-26T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a3a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-16T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a3b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-17T22:02:36.121Z",
+        "note": "Diagnose: WLAN Antenne defekt.",
+        "_id": "69caf2fc7e16280dd1191a3c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-02-26T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a3d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-02-25T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a3e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-02-24T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a3f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a40",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-027-D44TPA",
+    "device": "iPad Pro 12.9\"",
+    "issue": "Touch funktioniert nicht",
+    "status": "completed",
+    "estimatedCost": 158,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Display ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Touch funktioniert nicht. Bitte schnell reparieren.",
+        "timestamp": "2025-06-06T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a41"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €158. Gerät abholbereit.",
+        "timestamp": "2025-06-10T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a42"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-06-06T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a43"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-06-07T22:02:36.121Z",
+        "note": "Diagnose: Touch funktioniert nicht.",
+        "_id": "69caf2fc7e16280dd1191a44"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-06-10T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a45"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-06-09T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a46"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-06-08T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a47"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a48",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-028-5U6YQT",
+    "device": "OnePlus 11",
+    "issue": "Display gebrochen — Glasbruch komplett",
+    "status": "completed",
+    "estimatedCost": 257,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Display gebrochen — Glasbruch komplett. Bitte schnell reparieren.",
+        "timestamp": "2026-01-01T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a49"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €257. Gerät abholbereit.",
+        "timestamp": "2026-01-07T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a4a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-01-01T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a4b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-01-02T22:02:36.121Z",
+        "note": "Diagnose: Display gebrochen — Glasbruch komplett.",
+        "_id": "69caf2fc7e16280dd1191a4c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-01-07T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a4d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-01-06T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a4e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-01-05T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a4f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a50",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "ticketId": "REP-ARCH-029-WHV1LO",
+    "device": "iPhone XR",
+    "issue": "WLAN Antenne defekt",
+    "status": "completed",
+    "estimatedCost": 32,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: WLAN Antenne defekt. Bitte schnell reparieren.",
+        "timestamp": "2026-02-09T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a51"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €32. Gerät abholbereit.",
+        "timestamp": "2026-02-22T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a52"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-09T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a53"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-10T22:02:36.121Z",
+        "note": "Diagnose: WLAN Antenne defekt.",
+        "_id": "69caf2fc7e16280dd1191a54"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-02-22T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a55"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-02-21T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a56"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-02-20T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a57"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a58",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-030-WFLLPS",
+    "device": "iPhone XR",
+    "issue": "Touch funktioniert nicht",
+    "status": "completed",
+    "estimatedCost": 246,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Touch funktioniert nicht. Bitte schnell reparieren.",
+        "timestamp": "2025-06-02T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a59"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €246. Gerät abholbereit.",
+        "timestamp": "2025-06-15T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a5a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-06-02T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a5b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-06-03T22:02:36.121Z",
+        "note": "Diagnose: Touch funktioniert nicht.",
+        "_id": "69caf2fc7e16280dd1191a5c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-06-15T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a5d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-06-14T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a5e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-06-13T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a5f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a60",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "ticketId": "REP-ARCH-031-ZC4917",
+    "device": "iPad Air 5",
+    "issue": "Power-Button klemmt",
+    "status": "completed",
+    "estimatedCost": 192,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Power-Button klemmt. Bitte schnell reparieren.",
+        "timestamp": "2025-04-11T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a61"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €192. Gerät abholbereit.",
+        "timestamp": "2025-04-21T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a62"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-04-11T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a63"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-04-12T22:02:36.121Z",
+        "note": "Diagnose: Power-Button klemmt.",
+        "_id": "69caf2fc7e16280dd1191a64"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-04-21T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a65"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-04-20T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a66"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-04-19T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a67"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a68",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-032-POAYFK",
+    "device": "iPhone SE (2. Gen)",
+    "issue": "Bluetooth verbindet nicht",
+    "status": "completed",
+    "estimatedCost": 273,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Bluetooth verbindet nicht. Bitte schnell reparieren.",
+        "timestamp": "2025-10-10T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a69"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €273. Gerät abholbereit.",
+        "timestamp": "2025-10-22T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a6a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-10-10T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a6b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-10-11T22:02:36.121Z",
+        "note": "Diagnose: Bluetooth verbindet nicht.",
+        "_id": "69caf2fc7e16280dd1191a6c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-10-22T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a6d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-10-21T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a6e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-10-20T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a6f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a70",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-033-0S19FI",
+    "device": "Huawei P50 Pro",
+    "issue": "Ladebuchse beschädigt",
+    "status": "completed",
+    "estimatedCost": 203,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Ladebuchse beschädigt. Bitte schnell reparieren.",
+        "timestamp": "2025-09-22T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a71"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €203. Gerät abholbereit.",
+        "timestamp": "2025-10-03T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a72"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-09-22T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a73"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-09-23T22:02:36.121Z",
+        "note": "Diagnose: Ladebuchse beschädigt.",
+        "_id": "69caf2fc7e16280dd1191a74"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-10-03T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a75"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-10-02T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a76"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-10-01T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a77"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a78",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-034-ZX8ET6",
+    "device": "Xiaomi 13 Pro",
+    "issue": "Bluetooth verbindet nicht",
+    "status": "completed",
+    "estimatedCost": 62,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Akku getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Bluetooth verbindet nicht. Bitte schnell reparieren.",
+        "timestamp": "2025-06-22T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a79"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €62. Gerät abholbereit.",
+        "timestamp": "2025-07-06T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a7a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-06-22T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a7b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-06-23T22:02:36.121Z",
+        "note": "Diagnose: Bluetooth verbindet nicht.",
+        "_id": "69caf2fc7e16280dd1191a7c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-07-06T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a7d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-07-05T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a7e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-07-04T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a7f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a80",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "ticketId": "REP-ARCH-035-H2LBRK",
+    "device": "POCO X5 Pro",
+    "issue": "Fingerabdrucksensor defekt",
+    "status": "completed",
+    "estimatedCost": 122,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Fingerabdrucksensor defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-08-16T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a81"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €122. Gerät abholbereit.",
+        "timestamp": "2025-08-18T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a82"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-08-16T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a83"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-08-17T22:02:36.121Z",
+        "note": "Diagnose: Fingerabdrucksensor defekt.",
+        "_id": "69caf2fc7e16280dd1191a84"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-08-18T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a85"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-08-17T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a86"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-08-16T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a87"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a88",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-036-9SS14N",
+    "device": "Samsung Galaxy S23",
+    "issue": "Akku defekt — hält keine Ladung mehr",
+    "status": "completed",
+    "estimatedCost": 130,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Akku defekt — hält keine Ladung mehr. Bitte schnell reparieren.",
+        "timestamp": "2025-11-14T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a89"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €130. Gerät abholbereit.",
+        "timestamp": "2025-11-20T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a8a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-11-14T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a8b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-11-15T22:02:36.121Z",
+        "note": "Diagnose: Akku defekt — hält keine Ladung mehr.",
+        "_id": "69caf2fc7e16280dd1191a8c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-11-20T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a8d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-11-19T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a8e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-11-18T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a8f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a90",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "ticketId": "REP-ARCH-037-74ZH3H",
+    "device": "iPhone 12",
+    "issue": "Fingerabdrucksensor defekt",
+    "status": "completed",
+    "estimatedCost": 227,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Display ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Fingerabdrucksensor defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-05-17T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a91"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €227. Gerät abholbereit.",
+        "timestamp": "2025-05-25T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a92"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-05-17T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a93"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-05-18T22:02:36.121Z",
+        "note": "Diagnose: Fingerabdrucksensor defekt.",
+        "_id": "69caf2fc7e16280dd1191a94"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-05-25T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a95"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-05-24T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a96"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-05-23T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a97"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191a98",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-038-1A8LP1",
+    "device": "iPhone 12",
+    "issue": "Kamera defekt — rückwärtige Kamera unscharf",
+    "status": "completed",
+    "estimatedCost": 138,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Kamera defekt — rückwärtige Kamera unscharf. Bitte schnell reparieren.",
+        "timestamp": "2025-11-17T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a99"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €138. Gerät abholbereit.",
+        "timestamp": "2025-11-20T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191a9a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-11-17T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191a9b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-11-18T22:02:36.121Z",
+        "note": "Diagnose: Kamera defekt — rückwärtige Kamera unscharf.",
+        "_id": "69caf2fc7e16280dd1191a9c"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-11-20T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191a9d"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-11-19T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191a9e"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-11-18T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191a9f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191aa0",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-039-OSE2H6",
+    "device": "OnePlus 11",
+    "issue": "Fingerabdrucksensor defekt",
+    "status": "completed",
+    "estimatedCost": 174,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Fingerabdrucksensor defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-10-07T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191aa1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €174. Gerät abholbereit.",
+        "timestamp": "2025-10-15T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191aa2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-10-07T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191aa3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-10-08T22:02:36.121Z",
+        "note": "Diagnose: Fingerabdrucksensor defekt.",
+        "_id": "69caf2fc7e16280dd1191aa4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-10-15T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191aa5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-10-14T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191aa6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-10-13T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191aa7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191aa8",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-040-S1RH37",
+    "device": "OnePlus 11",
+    "issue": "Lautsprecher defekt — kein Ton",
+    "status": "completed",
+    "estimatedCost": 129,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Display ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Lautsprecher defekt — kein Ton. Bitte schnell reparieren.",
+        "timestamp": "2025-12-06T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191aa9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €129. Gerät abholbereit.",
+        "timestamp": "2025-12-15T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191aaa"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-12-06T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191aab"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-12-07T22:02:36.121Z",
+        "note": "Diagnose: Lautsprecher defekt — kein Ton.",
+        "_id": "69caf2fc7e16280dd1191aac"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-12-15T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191aad"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-12-14T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191aae"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-12-13T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191aaf"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191ab0",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-041-QNL8D7",
+    "device": "Sony Xperia 5 V",
+    "issue": "Vibration defekt",
+    "status": "completed",
+    "estimatedCost": 223,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Vibration defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-09-21T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ab1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €223. Gerät abholbereit.",
+        "timestamp": "2025-09-24T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ab2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-09-21T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191ab3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-09-22T22:02:36.121Z",
+        "note": "Diagnose: Vibration defekt.",
+        "_id": "69caf2fc7e16280dd1191ab4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-09-24T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191ab5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-09-23T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191ab6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-09-22T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191ab7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191ab8",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "ticketId": "REP-ARCH-042-GQVX8A",
+    "device": "Xiaomi Redmi Note 12 Pro",
+    "issue": "Akku defekt — hält keine Ladung mehr",
+    "status": "completed",
+    "estimatedCost": 213,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Akku getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Akku defekt — hält keine Ladung mehr. Bitte schnell reparieren.",
+        "timestamp": "2025-07-31T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ab9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €213. Gerät abholbereit.",
+        "timestamp": "2025-08-05T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191aba"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-07-31T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191abb"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-08-01T22:02:36.121Z",
+        "note": "Diagnose: Akku defekt — hält keine Ladung mehr.",
+        "_id": "69caf2fc7e16280dd1191abc"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-08-05T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191abd"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-08-04T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191abe"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-08-03T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191abf"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191ac0",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "ticketId": "REP-ARCH-043-52VF4B",
+    "device": "iPhone 13",
+    "issue": "WLAN Antenne defekt",
+    "status": "completed",
+    "estimatedCost": 210,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: WLAN Antenne defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-06-05T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ac1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €210. Gerät abholbereit.",
+        "timestamp": "2025-06-14T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ac2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-06-05T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191ac3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-06-06T22:02:36.121Z",
+        "note": "Diagnose: WLAN Antenne defekt.",
+        "_id": "69caf2fc7e16280dd1191ac4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-06-14T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191ac5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-06-13T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191ac6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-06-12T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191ac7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191ac8",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-044-U4I8HE",
+    "device": "Samsung Galaxy A54",
+    "issue": "Hinteres Glas gebrochen",
+    "status": "completed",
+    "estimatedCost": 93,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Hinteres Glas gebrochen. Bitte schnell reparieren.",
+        "timestamp": "2025-09-24T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ac9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €93. Gerät abholbereit.",
+        "timestamp": "2025-10-07T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191aca"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-09-24T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191acb"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-09-25T22:02:36.121Z",
+        "note": "Diagnose: Hinteres Glas gebrochen.",
+        "_id": "69caf2fc7e16280dd1191acc"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-10-07T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191acd"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-10-06T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191ace"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-10-05T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191acf"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191ad0",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "ticketId": "REP-ARCH-045-XXO58K",
+    "device": "Samsung Galaxy S22 Ultra",
+    "issue": "Fingerabdrucksensor defekt",
+    "status": "completed",
+    "estimatedCost": 197,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Fingerabdrucksensor defekt. Bitte schnell reparieren.",
+        "timestamp": "2026-02-05T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ad1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €197. Gerät abholbereit.",
+        "timestamp": "2026-02-15T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ad2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-05T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191ad3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-06T22:02:36.121Z",
+        "note": "Diagnose: Fingerabdrucksensor defekt.",
+        "_id": "69caf2fc7e16280dd1191ad4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-02-15T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191ad5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-02-14T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191ad6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-02-13T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191ad7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191ad8",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "ticketId": "REP-ARCH-046-26MNR6",
+    "device": "iPhone 15 Pro",
+    "issue": "Vibration defekt",
+    "status": "completed",
+    "estimatedCost": 178,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Software-Reset durchgeführt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Vibration defekt. Bitte schnell reparieren.",
+        "timestamp": "2026-01-21T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ad9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €178. Gerät abholbereit.",
+        "timestamp": "2026-01-29T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ada"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-01-21T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191adb"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-01-22T22:02:36.121Z",
+        "note": "Diagnose: Vibration defekt.",
+        "_id": "69caf2fc7e16280dd1191adc"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-01-29T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191add"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-01-28T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191ade"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-01-27T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191adf"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191ae0",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-047-7GR6HW",
+    "device": "iPhone XS Max",
+    "issue": "Mikrofon defekt",
+    "status": "completed",
+    "estimatedCost": 247,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Ladebuchse ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Mikrofon defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-12-02T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ae1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €247. Gerät abholbereit.",
+        "timestamp": "2025-12-12T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ae2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-12-02T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191ae3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-12-03T22:02:36.121Z",
+        "note": "Diagnose: Mikrofon defekt.",
+        "_id": "69caf2fc7e16280dd1191ae4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-12-12T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191ae5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-12-11T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191ae6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-12-10T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191ae7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191ae8",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "ticketId": "REP-ARCH-048-R74VX8",
+    "device": "OnePlus 11",
+    "issue": "Akku defekt — hält keine Ladung mehr",
+    "status": "completed",
+    "estimatedCost": 272,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Akku getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Akku defekt — hält keine Ladung mehr. Bitte schnell reparieren.",
+        "timestamp": "2025-11-27T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191ae9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €272. Gerät abholbereit.",
+        "timestamp": "2025-11-28T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191aea"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-11-27T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191aeb"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-11-28T22:02:36.121Z",
+        "note": "Diagnose: Akku defekt — hält keine Ladung mehr.",
+        "_id": "69caf2fc7e16280dd1191aec"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-11-28T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191aed"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-11-27T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191aee"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-11-26T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191aef"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191af0",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "ticketId": "REP-ARCH-049-TVOUID",
+    "device": "Google Pixel 8 Pro",
+    "issue": "Vibration defekt",
+    "status": "completed",
+    "estimatedCost": 158,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Display ersetzt.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Vibration defekt. Bitte schnell reparieren.",
+        "timestamp": "2026-02-16T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191af1"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €158. Gerät abholbereit.",
+        "timestamp": "2026-02-25T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191af2"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-16T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191af3"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-17T22:02:36.121Z",
+        "note": "Diagnose: Vibration defekt.",
+        "_id": "69caf2fc7e16280dd1191af4"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2026-02-25T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191af5"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-02-24T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191af6"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-02-23T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191af7"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191af8",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "ticketId": "REP-ARCH-050-G57SC7",
+    "device": "iPhone X",
+    "issue": "Akku defekt — hält keine Ladung mehr",
+    "status": "completed",
+    "estimatedCost": 203,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät repariert und abgeholt.",
+    "technicianNotes": "Reparatur erfolgreich abgeschlossen. Kamera-Modul getauscht.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Akku defekt — hält keine Ladung mehr. Bitte schnell reparieren.",
+        "timestamp": "2025-08-01T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191af9"
+      },
+      {
+        "role": "admin",
+        "text": "Reparatur abgeschlossen. Kosten: €203. Gerät abholbereit.",
+        "timestamp": "2025-08-10T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191afa"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-08-01T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191afb"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-08-02T22:02:36.121Z",
+        "note": "Diagnose: Akku defekt — hält keine Ladung mehr.",
+        "_id": "69caf2fc7e16280dd1191afc"
+      },
+      {
+        "status": "repairing",
+        "timestamp": "2025-08-10T22:02:36.121Z",
+        "note": "Reparatur gestartet.",
+        "_id": "69caf2fc7e16280dd1191afd"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2025-08-09T22:02:36.121Z",
+        "note": "Gerät getestet — alle Funktionen OK.",
+        "_id": "69caf2fc7e16280dd1191afe"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2025-08-08T22:02:36.121Z",
+        "note": "Reparatur abgeschlossen. Gerät abgeholt.",
+        "_id": "69caf2fc7e16280dd1191aff"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.141Z",
+    "updatedAt": "2026-03-30T22:02:36.141Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b00",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "ticketId": "REP-ARCH-051-9IZQ7D",
+    "device": "iPhone 14 Pro Max",
+    "issue": "Gesichtserkennung defekt",
+    "status": "cancelled",
+    "estimatedCost": 274,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Gesichtserkennung defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-09-08T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b01"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2025-09-09T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b02"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-09-08T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b03"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-09-09T22:02:36.121Z",
+        "note": "Diagnose: Gesichtserkennung defekt.",
+        "_id": "69caf2fc7e16280dd1191b04"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2025-09-09T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b05"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b06",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "ticketId": "REP-ARCH-052-1NBUMI",
+    "device": "iPhone X",
+    "issue": "WLAN Antenne defekt",
+    "status": "cancelled",
+    "estimatedCost": 37,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: WLAN Antenne defekt. Bitte schnell reparieren.",
+        "timestamp": "2025-11-17T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b07"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2025-11-29T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b08"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-11-17T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b09"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-11-18T22:02:36.121Z",
+        "note": "Diagnose: WLAN Antenne defekt.",
+        "_id": "69caf2fc7e16280dd1191b0a"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2025-11-29T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b0b"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b0c",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-053-VYPEJA",
+    "device": "Samsung Galaxy A54",
+    "issue": "Hinteres Glas gebrochen",
+    "status": "cancelled",
+    "estimatedCost": 188,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Hinteres Glas gebrochen. Bitte schnell reparieren.",
+        "timestamp": "2025-12-13T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b0d"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2025-12-23T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b0e"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-12-13T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b0f"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-12-14T22:02:36.121Z",
+        "note": "Diagnose: Hinteres Glas gebrochen.",
+        "_id": "69caf2fc7e16280dd1191b10"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2025-12-23T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b11"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b12",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-054-SPASWO",
+    "device": "Samsung Galaxy S23",
+    "issue": "Power-Button klemmt",
+    "status": "cancelled",
+    "estimatedCost": 190,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Power-Button klemmt. Bitte schnell reparieren.",
+        "timestamp": "2025-05-01T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b13"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2025-05-04T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b14"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-05-01T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b15"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-05-02T22:02:36.121Z",
+        "note": "Diagnose: Power-Button klemmt.",
+        "_id": "69caf2fc7e16280dd1191b16"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2025-05-04T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b17"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b18",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-055-BZT5YV",
+    "device": "iPhone XR",
+    "issue": "Gerät startet nicht — Softwarefehler",
+    "status": "cancelled",
+    "estimatedCost": 220,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Gerät startet nicht — Softwarefehler. Bitte schnell reparieren.",
+        "timestamp": "2025-07-11T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b19"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2025-07-14T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b1a"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-07-11T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b1b"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-07-12T22:02:36.121Z",
+        "note": "Diagnose: Gerät startet nicht — Softwarefehler.",
+        "_id": "69caf2fc7e16280dd1191b1c"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2025-07-14T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b1d"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b1e",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "ticketId": "REP-ARCH-056-B9NQLW",
+    "device": "Samsung Tab S9",
+    "issue": "Bluetooth verbindet nicht",
+    "status": "cancelled",
+    "estimatedCost": 123,
+    "serviceType": "Mail-in",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Bluetooth verbindet nicht. Bitte schnell reparieren.",
+        "timestamp": "2025-09-01T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b1f"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2025-09-05T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b20"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-09-01T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b21"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-09-02T22:02:36.121Z",
+        "note": "Diagnose: Bluetooth verbindet nicht.",
+        "_id": "69caf2fc7e16280dd1191b22"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2025-09-05T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b23"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b24",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-057-SI3ZTV",
+    "device": "iPhone SE (2. Gen)",
+    "issue": "Touch funktioniert nicht",
+    "status": "cancelled",
+    "estimatedCost": 187,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Touch funktioniert nicht. Bitte schnell reparieren.",
+        "timestamp": "2025-07-25T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b25"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2025-07-26T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b26"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-07-25T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b27"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-07-26T22:02:36.121Z",
+        "note": "Diagnose: Touch funktioniert nicht.",
+        "_id": "69caf2fc7e16280dd1191b28"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2025-07-26T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b29"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b2a",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "ticketId": "REP-ARCH-058-M3APJX",
+    "device": "Samsung Galaxy S23",
+    "issue": "Ladebuchse beschädigt",
+    "status": "cancelled",
+    "estimatedCost": 264,
+    "serviceType": "In-Store",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Ladebuchse beschädigt. Bitte schnell reparieren.",
+        "timestamp": "2025-05-04T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b2b"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2025-05-06T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b2c"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-05-04T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b2d"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-05-05T22:02:36.121Z",
+        "note": "Diagnose: Ladebuchse beschädigt.",
+        "_id": "69caf2fc7e16280dd1191b2e"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2025-05-06T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b2f"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b30",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "ticketId": "REP-ARCH-059-PF2EIU",
+    "device": "iPad Air 5",
+    "issue": "WLAN Antenne defekt",
+    "status": "cancelled",
+    "estimatedCost": 224,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: WLAN Antenne defekt. Bitte schnell reparieren.",
+        "timestamp": "2026-02-26T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b31"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2026-03-11T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b32"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2026-02-26T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b33"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2026-02-27T22:02:36.121Z",
+        "note": "Diagnose: WLAN Antenne defekt.",
+        "_id": "69caf2fc7e16280dd1191b34"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2026-03-11T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b35"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69caf2fc7e16280dd1191b36",
+    "user": "69caed162f6d1a5fa80e68c5",
+    "ticketId": "REP-ARCH-060-NMC9B4",
+    "device": "iPhone 13",
+    "issue": "Lautsprecher defekt — kein Ton",
+    "status": "cancelled",
+    "estimatedCost": 214,
+    "serviceType": "On-Site",
+    "notes": "Kunde: Gerät Reparatur abgebrochen.",
+    "technicianNotes": "Kunde hat die Reparatur storniert.",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "Problem: Lautsprecher defekt — kein Ton. Bitte schnell reparieren.",
+        "timestamp": "2025-11-16T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b37"
+      },
+      {
+        "role": "admin",
+        "text": "Stornierung bestätigt.",
+        "timestamp": "2025-11-26T22:02:36.121Z",
+        "_id": "69caf2fc7e16280dd1191b38"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "received",
+        "timestamp": "2025-11-16T22:02:36.121Z",
+        "note": "Gerät empfangen und geprüft.",
+        "_id": "69caf2fc7e16280dd1191b39"
+      },
+      {
+        "status": "diagnosing",
+        "timestamp": "2025-11-17T22:02:36.121Z",
+        "note": "Diagnose: Lautsprecher defekt — kein Ton.",
+        "_id": "69caf2fc7e16280dd1191b3a"
+      },
+      {
+        "status": "cancelled",
+        "timestamp": "2025-11-26T22:02:36.121Z",
+        "note": "Storniert auf Kundenwunsch.",
+        "_id": "69caf2fc7e16280dd1191b3b"
+      }
+    ],
+    "__v": 0,
+    "createdAt": "2026-03-30T22:02:36.142Z",
+    "updatedAt": "2026-03-30T22:02:36.142Z"
+  },
+  {
+    "_id": "69cd8ae263fced3af339ab48",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "device": "يشر",
+    "issue": "Screen Repair",
+    "status": "testing",
+    "appointmentDate": "2026-04-19T00:00:00.000Z",
+    "serviceType": "In-Store",
+    "notes": "علهلهلعه",
+    "messages": [
+      {
+        "role": "customer",
+        "text": "علهلهلعه",
+        "timestamp": "2026-04-01T21:15:14.818Z",
+        "_id": "69cd8ae263fced3af339ab49"
+      }
+    ],
+    "timeline": [
+      {
+        "status": "pending",
+        "note": "Repair ticket created",
+        "_id": "69cd8ae263fced3af339ab4a",
+        "timestamp": "2026-04-01T21:15:14.819Z"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-04-01T21:16:26.624Z",
+        "note": "Status updated to testing",
+        "_id": "69cd8b2a63fced3af339b257"
+      }
+    ],
+    "createdAt": "2026-04-01T21:15:14.819Z",
+    "updatedAt": "2026-04-01T21:16:26.625Z",
+    "ticketId": "REP-26-A330DA",
+    "__v": 1,
+    "estimatedCost": 25
+  },
+  {
+    "_id": "69cd8b6a63fced3af339b4a2",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "device": "يشر",
+    "issue": "Screen Repair",
+    "status": "testing",
+    "appointmentDate": "2026-04-25T00:00:00.000Z",
+    "serviceType": "In-Store",
+    "notes": "",
+    "messages": [],
+    "timeline": [
+      {
+        "status": "pending",
+        "note": "Repair ticket created",
+        "_id": "69cd8b6a63fced3af339b4a3",
+        "timestamp": "2026-04-01T21:17:30.437Z"
+      },
+      {
+        "status": "testing",
+        "timestamp": "2026-04-01T21:17:56.268Z",
+        "note": "Status updated to testing",
+        "_id": "69cd8b8463fced3af339bba4"
+      }
+    ],
+    "createdAt": "2026-04-01T21:17:30.437Z",
+    "updatedAt": "2026-04-01T21:17:56.268Z",
+    "ticketId": "REP-26-010220",
+    "__v": 1
+  },
+  {
+    "_id": "69d03f09b00039b2155fa89c",
+    "user": "69cb0c3496a43c9eb6d9807d",
+    "device": "iPhone 15 Pro Max",
+    "issue": "Screen Replacement",
+    "status": "pending",
+    "appointmentDate": "2026-04-05T00:00:00.000Z",
+    "serviceType": "In-Store",
+    "notes": "",
+    "messages": [],
+    "timeline": [
+      {
+        "status": "pending",
+        "note": "Repair ticket created",
+        "_id": "69d03f09b00039b2155fa89d",
+        "timestamp": "2026-04-03T22:28:25.022Z"
+      }
+    ],
+    "createdAt": "2026-04-03T22:28:25.021Z",
+    "updatedAt": "2026-04-03T22:28:25.021Z",
+    "ticketId": "REP-26-8E7BE4",
+    "__v": 0
+  }
+]

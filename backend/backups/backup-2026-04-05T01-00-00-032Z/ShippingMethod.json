@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e6916",
+    "name": "Standard Versand",
+    "description": "DHL Paket — 3-5 Werktage",
+    "price": 5.99,
+    "duration": "3-5 Werktage",
+    "isActive": true,
+    "isExpress": false,
+    "createdAt": "2026-03-30T21:37:27.184Z",
+    "updatedAt": "2026-03-30T21:37:27.184Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6917",
+    "name": "Express Versand",
+    "description": "DHL Express — 1-2 Werktage",
+    "price": 12.99,
+    "duration": "1-2 Werktage",
+    "isActive": true,
+    "isExpress": true,
+    "createdAt": "2026-03-30T21:37:27.184Z",
+    "updatedAt": "2026-03-31T20:14:39.038Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6918",
+    "name": "Kostenloser Versand",
+    "description": "Kostenlos ab €100 — 3-5 Werktage",
+    "price": 0,
+    "duration": "3-5 Werktage",
+    "isActive": true,
+    "isExpress": false,
+    "createdAt": "2026-03-30T21:37:27.184Z",
+    "updatedAt": "2026-03-30T21:37:27.184Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6919",
+    "name": "Abholung im Laden",
+    "description": "Kostenlose Abholung in unserem Geschäft",
+    "price": 0,
+    "duration": "Sofort verfügbar",
+    "isActive": true,
+    "isExpress": false,
+    "createdAt": "2026-03-30T21:37:27.184Z",
+    "updatedAt": "2026-03-30T21:37:27.184Z",
+    "__v": 0
+  }
+]

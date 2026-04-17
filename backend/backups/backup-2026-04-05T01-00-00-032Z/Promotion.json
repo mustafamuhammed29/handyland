@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e6a15",
+    "title": "Frühlingsangebote",
+    "description": "10% auf alle Samsung Geräte",
+    "isActive": true,
+    "applicableProducts": [],
+    "createdAt": "2026-03-30T21:37:27.229Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6a17",
+    "title": "Abgelaufene Aktion",
+    "description": "Frühjahrsputz Aktion",
+    "isActive": false,
+    "applicableProducts": [],
+    "createdAt": "2026-03-30T21:37:27.229Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6a16",
+    "title": "Blitzangebot",
+    "description": "20% auf ausgewählte iPhones heute!",
+    "isActive": true,
+    "applicableProducts": [],
+    "createdAt": "2026-03-30T21:37:27.229Z",
+    "__v": 0
+  }
+]

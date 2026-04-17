@@ -1,0 +1,6542 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e69f5",
+    "model": "iPhone 15 Pro",
+    "brand": "Apple",
+    "basePrice": 560,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 55,
+      "512GB": 105,
+      "1TB": 180
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.758Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69f7",
+    "model": "iPhone 14 Pro",
+    "brand": "Apple",
+    "basePrice": 415,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 43,
+      "512GB": 85,
+      "1TB": 148
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.764Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69f6",
+    "model": "iPhone 15",
+    "brand": "Apple",
+    "basePrice": 370,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 38,
+      "512GB": 75
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.761Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69f9",
+    "model": "iPhone 13",
+    "brand": "Apple",
+    "basePrice": 220,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 27,
+      "512GB": 55
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.769Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69fa",
+    "model": "iPhone 12",
+    "brand": "Apple",
+    "basePrice": 160,
+    "validStorages": [
+      "64GB",
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": -15,
+      "128GB": 0,
+      "256GB": 22
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.773Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69f8",
+    "model": "iPhone 14",
+    "brand": "Apple",
+    "basePrice": 265,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 28,
+      "512GB": 58
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.766Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69fb",
+    "model": "Galaxy S24 Ultra",
+    "brand": "Samsung",
+    "basePrice": 670,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 68,
+      "1TB": 142
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.789Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69fc",
+    "model": "Galaxy S24",
+    "brand": "Samsung",
+    "basePrice": 380,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 42
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.791Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69fd",
+    "model": "Galaxy S23",
+    "brand": "Samsung",
+    "basePrice": 265,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 37
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.795Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69fe",
+    "model": "Xiaomi 14",
+    "brand": "Xiaomi",
+    "basePrice": 390,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 48
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.825Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e69ff",
+    "model": "Pixel 8 Pro",
+    "brand": "Google",
+    "basePrice": 400,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 42,
+      "512GB": 85,
+      "1TB": 142
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-30T21:37:27.224Z",
+    "updatedAt": "2026-04-04T20:34:46.815Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e665",
+    "model": "iPhone 16 Pro Max",
+    "brand": "Apple",
+    "basePrice": 800,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 70,
+      "1TB": 150
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.388Z",
+    "updatedAt": "2026-04-04T20:34:46.748Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e668",
+    "model": "iPhone 16 Pro",
+    "brand": "Apple",
+    "basePrice": 700,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 60,
+      "512GB": 115,
+      "1TB": 195
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.391Z",
+    "updatedAt": "2026-04-04T20:34:46.752Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e66b",
+    "model": "iPhone 16 Plus",
+    "brand": "Apple",
+    "basePrice": 560,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 50,
+      "512GB": 95
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.393Z",
+    "updatedAt": "2026-04-04T20:34:46.753Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e66e",
+    "model": "iPhone 16",
+    "brand": "Apple",
+    "basePrice": 480,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 45,
+      "512GB": 85
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.395Z",
+    "updatedAt": "2026-04-04T20:34:46.755Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e671",
+    "model": "iPhone 15 Pro Max",
+    "brand": "Apple",
+    "basePrice": 650,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 65,
+      "1TB": 135
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.396Z",
+    "updatedAt": "2026-04-04T20:34:46.756Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e676",
+    "model": "iPhone 15 Plus",
+    "brand": "Apple",
+    "basePrice": 420,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 42,
+      "512GB": 80
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.401Z",
+    "updatedAt": "2026-04-04T20:34:46.759Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e67b",
+    "model": "iPhone 14 Pro Max",
+    "brand": "Apple",
+    "basePrice": 490,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 48,
+      "512GB": 95,
+      "1TB": 165
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.405Z",
+    "updatedAt": "2026-04-04T20:34:46.762Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e680",
+    "model": "iPhone 14 Plus",
+    "brand": "Apple",
+    "basePrice": 305,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 33,
+      "512GB": 65
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.408Z",
+    "updatedAt": "2026-04-04T20:34:46.765Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e685",
+    "model": "iPhone 13 Pro Max",
+    "brand": "Apple",
+    "basePrice": 360,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 38,
+      "512GB": 75,
+      "1TB": 125
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.410Z",
+    "updatedAt": "2026-04-04T20:34:46.767Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e688",
+    "model": "iPhone 13 Pro",
+    "brand": "Apple",
+    "basePrice": 305,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 33,
+      "512GB": 65,
+      "1TB": 110
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.412Z",
+    "updatedAt": "2026-04-04T20:34:46.768Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e68d",
+    "model": "iPhone 13 mini",
+    "brand": "Apple",
+    "basePrice": 178,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 22,
+      "512GB": 45
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.415Z",
+    "updatedAt": "2026-04-04T20:34:46.770Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e690",
+    "model": "iPhone 12 Pro Max",
+    "brand": "Apple",
+    "basePrice": 248,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 28,
+      "512GB": 55
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.416Z",
+    "updatedAt": "2026-04-04T20:34:46.771Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e693",
+    "model": "iPhone 12 Pro",
+    "brand": "Apple",
+    "basePrice": 210,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 23,
+      "512GB": 48
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.417Z",
+    "updatedAt": "2026-04-04T20:34:46.772Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e698",
+    "model": "iPhone 12 mini",
+    "brand": "Apple",
+    "basePrice": 130,
+    "validStorages": [
+      "64GB",
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": -10,
+      "128GB": 0,
+      "256GB": 18
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.420Z",
+    "updatedAt": "2026-04-04T20:34:46.774Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e69b",
+    "model": "iPhone 11 Pro Max",
+    "brand": "Apple",
+    "basePrice": 165,
+    "validStorages": [
+      "64GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "64GB": -8,
+      "256GB": 18,
+      "512GB": 40
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.421Z",
+    "updatedAt": "2026-04-04T20:34:46.775Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e69e",
+    "model": "iPhone 11 Pro",
+    "brand": "Apple",
+    "basePrice": 140,
+    "validStorages": [
+      "64GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "64GB": -8,
+      "256GB": 15,
+      "512GB": 35
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.422Z",
+    "updatedAt": "2026-04-04T20:34:46.776Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6a1",
+    "model": "iPhone 11",
+    "brand": "Apple",
+    "basePrice": 105,
+    "validStorages": [
+      "64GB",
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": -7,
+      "128GB": 0,
+      "256GB": 12
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "lastUpdated": "2026-04-04T20:34:15.671Z",
+      "source": "eBay.de Completed Listings",
+      "marketAvg": 521,
+      "previousBasePrice": 105
+    },
+    "createdAt": "2026-03-31T20:15:18.424Z",
+    "updatedAt": "2026-04-04T20:34:46.777Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6a4",
+    "model": "iPhone XS Max",
+    "brand": "Apple",
+    "basePrice": 130,
+    "validStorages": [
+      "64GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "64GB": 0,
+      "256GB": 40,
+      "512GB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "lastUpdated": "2026-04-04T20:45:47.652Z",
+      "source": "eBay.de Completed Listings",
+      "marketAvg": 222,
+      "previousBasePrice": 110
+    },
+    "createdAt": "2026-03-31T20:15:18.425Z",
+    "updatedAt": "2026-04-04T20:45:47.652Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6a7",
+    "model": "iPhone XS",
+    "brand": "Apple",
+    "basePrice": 115,
+    "validStorages": [
+      "64GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "64GB": 0,
+      "256GB": 55,
+      "512GB": 10
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "lastUpdated": "2026-04-04T20:52:20.241Z",
+      "source": "eBay.de Completed Listings",
+      "marketAvg": 222,
+      "previousBasePrice": 160
+    },
+    "createdAt": "2026-03-31T20:15:18.427Z",
+    "updatedAt": "2026-04-04T20:52:20.241Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6aa",
+    "model": "iPhone XR",
+    "brand": "Apple",
+    "basePrice": 80,
+    "validStorages": [
+      "64GB",
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": -10,
+      "128GB": 0,
+      "256GB": 15
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.428Z",
+    "updatedAt": "2026-04-04T20:34:46.780Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6ad",
+    "model": "iPhone X",
+    "brand": "Apple",
+    "basePrice": 70,
+    "validStorages": [
+      "64GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": -10,
+      "256GB": 15
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.429Z",
+    "updatedAt": "2026-04-04T20:34:46.781Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6b0",
+    "model": "iPhone SE (2022)",
+    "brand": "Apple",
+    "basePrice": 120,
+    "validStorages": [
+      "64GB",
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": -15,
+      "128GB": 0,
+      "256GB": 20
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.430Z",
+    "updatedAt": "2026-04-04T20:34:46.782Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6b3",
+    "model": "iPhone SE (2020)",
+    "brand": "Apple",
+    "basePrice": 65,
+    "validStorages": [
+      "64GB",
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": -10,
+      "128GB": 0,
+      "256GB": 15
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.432Z",
+    "updatedAt": "2026-04-04T20:34:46.783Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6b6",
+    "model": "iPhone 8 Plus",
+    "brand": "Apple",
+    "basePrice": 55,
+    "validStorages": [
+      "64GB",
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": -5,
+      "128GB": 0,
+      "256GB": 12
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.433Z",
+    "updatedAt": "2026-04-04T20:34:46.784Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6b9",
+    "model": "iPhone 8",
+    "brand": "Apple",
+    "basePrice": 45,
+    "validStorages": [
+      "64GB",
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": -5,
+      "128GB": 0,
+      "256GB": 10
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.434Z",
+    "updatedAt": "2026-04-04T20:34:46.785Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6bc",
+    "model": "Galaxy S25 Ultra",
+    "brand": "Samsung",
+    "basePrice": 820,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 72,
+      "1TB": 155
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.435Z",
+    "updatedAt": "2026-04-04T20:34:46.786Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6bf",
+    "model": "Galaxy S25+",
+    "brand": "Samsung",
+    "basePrice": 620,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 60
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.436Z",
+    "updatedAt": "2026-04-04T20:34:46.787Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6c2",
+    "model": "Galaxy S25",
+    "brand": "Samsung",
+    "basePrice": 495,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 48
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.437Z",
+    "updatedAt": "2026-04-04T20:34:46.788Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6c7",
+    "model": "Galaxy S24+",
+    "brand": "Samsung",
+    "basePrice": 490,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 58
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.440Z",
+    "updatedAt": "2026-04-04T20:34:46.790Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6cc",
+    "model": "Galaxy S24 FE",
+    "brand": "Samsung",
+    "basePrice": 280,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 35
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.443Z",
+    "updatedAt": "2026-04-04T20:34:46.791Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6cf",
+    "model": "Galaxy S23 Ultra",
+    "brand": "Samsung",
+    "basePrice": 500,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 62,
+      "1TB": 128
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.444Z",
+    "updatedAt": "2026-04-04T20:34:46.792Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6d2",
+    "model": "Galaxy S23+",
+    "brand": "Samsung",
+    "basePrice": 340,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 52
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.446Z",
+    "updatedAt": "2026-04-04T20:34:46.794Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6d7",
+    "model": "Galaxy S23 FE",
+    "brand": "Samsung",
+    "basePrice": 198,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 30
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.448Z",
+    "updatedAt": "2026-04-04T20:34:46.795Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6da",
+    "model": "Galaxy S22 Ultra",
+    "brand": "Samsung",
+    "basePrice": 340,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 38,
+      "512GB": 75,
+      "1TB": 125
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.449Z",
+    "updatedAt": "2026-04-04T20:34:46.796Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6dd",
+    "model": "Galaxy S22+",
+    "brand": "Samsung",
+    "basePrice": 225,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 32
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.450Z",
+    "updatedAt": "2026-04-04T20:34:46.797Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6e0",
+    "model": "Galaxy S22",
+    "brand": "Samsung",
+    "basePrice": 180,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 27
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.451Z",
+    "updatedAt": "2026-04-04T20:34:46.798Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6e3",
+    "model": "Galaxy S21 Ultra",
+    "brand": "Samsung",
+    "basePrice": 240,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 30
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.453Z",
+    "updatedAt": "2026-04-04T20:34:46.799Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6e6",
+    "model": "Galaxy S21+",
+    "brand": "Samsung",
+    "basePrice": 175,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 25
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.454Z",
+    "updatedAt": "2026-04-04T20:34:46.799Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6e9",
+    "model": "Galaxy S21",
+    "brand": "Samsung",
+    "basePrice": 140,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 22
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.455Z",
+    "updatedAt": "2026-04-04T20:34:46.800Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6ec",
+    "model": "Galaxy Z Fold 6",
+    "brand": "Samsung",
+    "basePrice": 820,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 78,
+      "1TB": 158
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.456Z",
+    "updatedAt": "2026-04-04T20:34:46.801Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6ef",
+    "model": "Galaxy Z Flip 6",
+    "brand": "Samsung",
+    "basePrice": 480,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 57
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.457Z",
+    "updatedAt": "2026-04-04T20:34:46.802Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6f2",
+    "model": "Galaxy Z Fold 5",
+    "brand": "Samsung",
+    "basePrice": 650,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 68,
+      "1TB": 135
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.458Z",
+    "updatedAt": "2026-04-04T20:34:46.803Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6f5",
+    "model": "Galaxy Z Flip 5",
+    "brand": "Samsung",
+    "basePrice": 355,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 52
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.459Z",
+    "updatedAt": "2026-04-04T20:34:46.804Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6f8",
+    "model": "Galaxy Z Fold 4",
+    "brand": "Samsung",
+    "basePrice": 480,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 58,
+      "1TB": 115
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.461Z",
+    "updatedAt": "2026-04-04T20:34:46.805Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6fb",
+    "model": "Galaxy Z Flip 4",
+    "brand": "Samsung",
+    "basePrice": 240,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 40
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.462Z",
+    "updatedAt": "2026-04-04T20:34:46.806Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e6fe",
+    "model": "Galaxy A56",
+    "brand": "Samsung",
+    "basePrice": 195,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 30
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.463Z",
+    "updatedAt": "2026-04-04T20:34:46.807Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e701",
+    "model": "Galaxy A55",
+    "brand": "Samsung",
+    "basePrice": 168,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 28
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.464Z",
+    "updatedAt": "2026-04-04T20:34:46.808Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e704",
+    "model": "Galaxy A54",
+    "brand": "Samsung",
+    "basePrice": 135,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 25
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.465Z",
+    "updatedAt": "2026-04-04T20:34:46.809Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e707",
+    "model": "Galaxy A35",
+    "brand": "Samsung",
+    "basePrice": 118,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 22
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.466Z",
+    "updatedAt": "2026-04-04T20:34:46.810Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e70a",
+    "model": "Galaxy A15",
+    "brand": "Samsung",
+    "basePrice": 75,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 18
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.467Z",
+    "updatedAt": "2026-04-04T20:34:46.811Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e70d",
+    "model": "Pixel 9 Pro XL",
+    "brand": "Google",
+    "basePrice": 640,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 52,
+      "512GB": 105,
+      "1TB": 175
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.468Z",
+    "updatedAt": "2026-04-04T20:34:46.812Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e710",
+    "model": "Pixel 9 Pro Fold",
+    "brand": "Google",
+    "basePrice": 850,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 80
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.469Z",
+    "updatedAt": "2026-04-04T20:34:46.813Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e713",
+    "model": "Pixel 9 Pro",
+    "brand": "Google",
+    "basePrice": 548,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 48,
+      "512GB": 95
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.470Z",
+    "updatedAt": "2026-04-04T20:34:46.814Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e716",
+    "model": "Pixel 9",
+    "brand": "Google",
+    "basePrice": 415,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 43
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.472Z",
+    "updatedAt": "2026-04-04T20:34:46.815Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e71b",
+    "model": "Pixel 8",
+    "brand": "Google",
+    "basePrice": 295,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 37
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.475Z",
+    "updatedAt": "2026-04-04T20:34:46.816Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e71e",
+    "model": "Pixel 8a",
+    "brand": "Google",
+    "basePrice": 262,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 35
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.476Z",
+    "updatedAt": "2026-04-04T20:34:46.817Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e721",
+    "model": "Pixel 7 Pro",
+    "brand": "Google",
+    "basePrice": 255,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 33,
+      "512GB": 67
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.476Z",
+    "updatedAt": "2026-04-04T20:34:46.818Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e724",
+    "model": "Pixel 7",
+    "brand": "Google",
+    "basePrice": 188,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 27
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.478Z",
+    "updatedAt": "2026-04-04T20:34:46.819Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e727",
+    "model": "Pixel 7a",
+    "brand": "Google",
+    "basePrice": 162,
+    "validStorages": [
+      "128GB"
+    ],
+    "storagePrices": {
+      "128GB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.479Z",
+    "updatedAt": "2026-04-04T20:34:46.820Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e72a",
+    "model": "Pixel 6 Pro",
+    "brand": "Google",
+    "basePrice": 155,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 25,
+      "512GB": 48
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.481Z",
+    "updatedAt": "2026-04-04T20:34:46.820Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e72d",
+    "model": "Pixel 6",
+    "brand": "Google",
+    "basePrice": 120,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 22
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.482Z",
+    "updatedAt": "2026-04-04T20:34:46.821Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e730",
+    "model": "Pixel 6a",
+    "brand": "Google",
+    "basePrice": 110,
+    "validStorages": [
+      "128GB"
+    ],
+    "storagePrices": {
+      "128GB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.483Z",
+    "updatedAt": "2026-04-04T20:34:46.822Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e733",
+    "model": "Xiaomi 15 Ultra",
+    "brand": "Xiaomi",
+    "basePrice": 720,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 68
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.484Z",
+    "updatedAt": "2026-04-04T20:34:46.823Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e736",
+    "model": "Xiaomi 15",
+    "brand": "Xiaomi",
+    "basePrice": 520,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 55
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.485Z",
+    "updatedAt": "2026-04-04T20:34:46.824Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e739",
+    "model": "Xiaomi 14 Ultra",
+    "brand": "Xiaomi",
+    "basePrice": 540,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 58
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.487Z",
+    "updatedAt": "2026-04-04T20:34:46.824Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e73e",
+    "model": "Xiaomi 13 Ultra",
+    "brand": "Xiaomi",
+    "basePrice": 335,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 45
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.489Z",
+    "updatedAt": "2026-04-04T20:34:46.826Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e741",
+    "model": "Xiaomi 13",
+    "brand": "Xiaomi",
+    "basePrice": 248,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 32
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "lastUpdated": "2026-04-04T20:34:31.998Z",
+      "source": "eBay.de Completed Listings",
+      "marketAvg": 110,
+      "previousBasePrice": 248
+    },
+    "createdAt": "2026-03-31T20:15:18.490Z",
+    "updatedAt": "2026-04-04T20:34:46.827Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e744",
+    "model": "Xiaomi 13T Pro",
+    "brand": "Xiaomi",
+    "basePrice": 285,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 40
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.492Z",
+    "updatedAt": "2026-04-04T20:34:46.828Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e747",
+    "model": "Xiaomi 13T",
+    "brand": "Xiaomi",
+    "basePrice": 220,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 35
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.493Z",
+    "updatedAt": "2026-04-04T20:34:46.829Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e74a",
+    "model": "Xiaomi 12",
+    "brand": "Xiaomi",
+    "basePrice": 185,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 28
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.494Z",
+    "updatedAt": "2026-04-04T20:34:46.829Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e74d",
+    "model": "Redmi Note 13 Pro",
+    "brand": "Xiaomi",
+    "basePrice": 148,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 25
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.495Z",
+    "updatedAt": "2026-04-04T20:34:46.830Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e750",
+    "model": "Redmi Note 12 Pro",
+    "brand": "Xiaomi",
+    "basePrice": 118,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 22
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.496Z",
+    "updatedAt": "2026-04-04T20:34:46.831Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e753",
+    "model": "OnePlus 13",
+    "brand": "OnePlus",
+    "basePrice": 440,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 53
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.497Z",
+    "updatedAt": "2026-04-04T20:34:46.832Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e756",
+    "model": "OnePlus 12",
+    "brand": "OnePlus",
+    "basePrice": 335,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 48
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.498Z",
+    "updatedAt": "2026-04-04T20:34:46.833Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e759",
+    "model": "OnePlus 11",
+    "brand": "OnePlus",
+    "basePrice": 255,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 35
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.499Z",
+    "updatedAt": "2026-04-04T20:34:46.834Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e75c",
+    "model": "OnePlus 12R",
+    "brand": "OnePlus",
+    "basePrice": 210,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 30
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.501Z",
+    "updatedAt": "2026-04-04T20:34:46.835Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e75f",
+    "model": "Xperia 1 VI",
+    "brand": "Sony",
+    "basePrice": 580,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 65
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.502Z",
+    "updatedAt": "2026-04-04T20:34:46.836Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e762",
+    "model": "Xperia 5 VI",
+    "brand": "Sony",
+    "basePrice": 420,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 45
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.502Z",
+    "updatedAt": "2026-04-04T20:34:46.837Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e765",
+    "model": "Xperia 1 V",
+    "brand": "Sony",
+    "basePrice": 420,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 58
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.504Z",
+    "updatedAt": "2026-04-04T20:34:46.838Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e768",
+    "model": "Xperia 5 V",
+    "brand": "Sony",
+    "basePrice": 305,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 38
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.505Z",
+    "updatedAt": "2026-04-04T20:34:46.838Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e76b",
+    "model": "Find X8 Pro",
+    "brand": "OPPO",
+    "basePrice": 480,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 60
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.506Z",
+    "updatedAt": "2026-04-04T20:34:46.839Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e76e",
+    "model": "Find X7 Ultra",
+    "brand": "OPPO",
+    "basePrice": 380,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 55
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.508Z",
+    "updatedAt": "2026-04-04T20:34:46.840Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e771",
+    "model": "Reno 12 Pro",
+    "brand": "OPPO",
+    "basePrice": 195,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 35
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartphone",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.509Z",
+    "updatedAt": "2026-04-04T20:34:46.841Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e774",
+    "model": "iPad Pro 13 M4 (2024)",
+    "brand": "Apple",
+    "basePrice": 780,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 80,
+      "1TB": 170,
+      "2TB": 280
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.510Z",
+    "updatedAt": "2026-04-04T20:34:46.842Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e777",
+    "model": "iPad Pro 11 M4 (2024)",
+    "brand": "Apple",
+    "basePrice": 620,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 75,
+      "1TB": 155,
+      "2TB": 260
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.511Z",
+    "updatedAt": "2026-04-04T20:34:46.843Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e77a",
+    "model": "iPad Pro 12.9 M2 (2022)",
+    "brand": "Apple",
+    "basePrice": 550,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 65,
+      "512GB": 130,
+      "1TB": 215,
+      "2TB": 320
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.512Z",
+    "updatedAt": "2026-04-04T20:34:46.844Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e77d",
+    "model": "iPad Pro 11 M2 (2022)",
+    "brand": "Apple",
+    "basePrice": 420,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 60,
+      "512GB": 120,
+      "1TB": 200,
+      "2TB": 300
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.513Z",
+    "updatedAt": "2026-04-04T20:34:46.845Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e780",
+    "model": "iPad Air M2 (2024)",
+    "brand": "Apple",
+    "basePrice": 460,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 65,
+      "512GB": 130,
+      "1TB": 200
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.514Z",
+    "updatedAt": "2026-04-04T20:34:46.846Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e783",
+    "model": "iPad Air 5 (2022)",
+    "brand": "Apple",
+    "basePrice": 320,
+    "validStorages": [
+      "64GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": 0,
+      "256GB": 70
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.516Z",
+    "updatedAt": "2026-04-04T20:34:46.847Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e786",
+    "model": "iPad (10th gen, 2022)",
+    "brand": "Apple",
+    "basePrice": 240,
+    "validStorages": [
+      "64GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": 0,
+      "256GB": 60
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.517Z",
+    "updatedAt": "2026-04-04T20:34:46.848Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e789",
+    "model": "iPad (9th gen, 2021)",
+    "brand": "Apple",
+    "basePrice": 170,
+    "validStorages": [
+      "64GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": 0,
+      "256GB": 52
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.518Z",
+    "updatedAt": "2026-04-04T20:34:46.849Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e78c",
+    "model": "iPad mini 7 (2024)",
+    "brand": "Apple",
+    "basePrice": 360,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 60,
+      "512GB": 115
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.519Z",
+    "updatedAt": "2026-04-04T20:34:46.850Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e78f",
+    "model": "iPad mini 6 (2021)",
+    "brand": "Apple",
+    "basePrice": 280,
+    "validStorages": [
+      "64GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "64GB": 0,
+      "256GB": 65
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.520Z",
+    "updatedAt": "2026-04-04T20:34:46.851Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e792",
+    "model": "Galaxy Tab S10 Ultra",
+    "brand": "Samsung",
+    "basePrice": 580,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 75,
+      "1TB": 155
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.521Z",
+    "updatedAt": "2026-04-04T20:34:46.852Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e795",
+    "model": "Galaxy Tab S10+",
+    "brand": "Samsung",
+    "basePrice": 460,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 68
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.522Z",
+    "updatedAt": "2026-04-04T20:34:46.853Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e798",
+    "model": "Galaxy Tab S10",
+    "brand": "Samsung",
+    "basePrice": 365,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 60
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.523Z",
+    "updatedAt": "2026-04-04T20:34:46.854Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e79b",
+    "model": "Galaxy Tab S9 Ultra",
+    "brand": "Samsung",
+    "basePrice": 480,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 70,
+      "1TB": 142
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.524Z",
+    "updatedAt": "2026-04-04T20:34:46.855Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e79e",
+    "model": "Galaxy Tab S9+",
+    "brand": "Samsung",
+    "basePrice": 360,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 62
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.525Z",
+    "updatedAt": "2026-04-04T20:34:46.856Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7a1",
+    "model": "Galaxy Tab S9",
+    "brand": "Samsung",
+    "basePrice": 285,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 48
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.526Z",
+    "updatedAt": "2026-04-04T20:34:46.857Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7a4",
+    "model": "Galaxy Tab S9 FE",
+    "brand": "Samsung",
+    "basePrice": 210,
+    "validStorages": [
+      "128GB",
+      "256GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 38
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.526Z",
+    "updatedAt": "2026-04-04T20:34:46.857Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7a7",
+    "model": "Galaxy Tab S8 Ultra",
+    "brand": "Samsung",
+    "basePrice": 350,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 52,
+      "512GB": 105
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.527Z",
+    "updatedAt": "2026-04-04T20:34:46.859Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7aa",
+    "model": "Galaxy Tab A9+",
+    "brand": "Samsung",
+    "basePrice": 145,
+    "validStorages": [
+      "64GB",
+      "128GB"
+    ],
+    "storagePrices": {
+      "64GB": 0,
+      "128GB": 32
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.529Z",
+    "updatedAt": "2026-04-04T20:34:46.860Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7ad",
+    "model": "Surface Pro 11",
+    "brand": "Microsoft",
+    "basePrice": 680,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 120,
+      "1TB": 230
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.530Z",
+    "updatedAt": "2026-04-04T20:34:46.860Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7b0",
+    "model": "Surface Pro 9",
+    "brand": "Microsoft",
+    "basePrice": 480,
+    "validStorages": [
+      "128GB",
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "128GB": 0,
+      "256GB": 100,
+      "512GB": 195
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Tablet",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.530Z",
+    "updatedAt": "2026-04-04T20:34:46.861Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7b3",
+    "model": "MacBook Pro 16 M4 (2024)",
+    "brand": "Apple",
+    "basePrice": 1600,
+    "validStorages": [
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "512GB": 0,
+      "1TB": 180,
+      "2TB": 380
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.531Z",
+    "updatedAt": "2026-04-04T20:34:46.862Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7b6",
+    "model": "MacBook Pro 14 M4 (2024)",
+    "brand": "Apple",
+    "basePrice": 1200,
+    "validStorages": [
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "512GB": 0,
+      "1TB": 155,
+      "2TB": 320
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.533Z",
+    "updatedAt": "2026-04-04T20:34:46.863Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7b9",
+    "model": "MacBook Pro 16 M3 (2023)",
+    "brand": "Apple",
+    "basePrice": 1380,
+    "validStorages": [
+      "512GB",
+      "1TB",
+      "2TB",
+      "4TB"
+    ],
+    "storagePrices": {
+      "512GB": 0,
+      "1TB": 165,
+      "2TB": 340,
+      "4TB": 600
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.534Z",
+    "updatedAt": "2026-04-04T20:34:46.864Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7bc",
+    "model": "MacBook Pro 14 M3 (2023)",
+    "brand": "Apple",
+    "basePrice": 1050,
+    "validStorages": [
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "512GB": 0,
+      "1TB": 145,
+      "2TB": 295
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.535Z",
+    "updatedAt": "2026-04-04T20:34:46.865Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7bf",
+    "model": "MacBook Pro 16 M2 (2022)",
+    "brand": "Apple",
+    "basePrice": 1100,
+    "validStorages": [
+      "512GB",
+      "1TB",
+      "2TB",
+      "4TB"
+    ],
+    "storagePrices": {
+      "512GB": 0,
+      "1TB": 150,
+      "2TB": 305,
+      "4TB": 530
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.536Z",
+    "updatedAt": "2026-04-04T20:34:46.866Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7c2",
+    "model": "MacBook Pro 14 M2 (2022)",
+    "brand": "Apple",
+    "basePrice": 850,
+    "validStorages": [
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "512GB": 0,
+      "1TB": 130,
+      "2TB": 265
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.537Z",
+    "updatedAt": "2026-04-04T20:34:46.867Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7c5",
+    "model": "MacBook Air 15 M3 (2024)",
+    "brand": "Apple",
+    "basePrice": 860,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 90,
+      "1TB": 175,
+      "2TB": 310
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.538Z",
+    "updatedAt": "2026-04-04T20:34:46.868Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7c8",
+    "model": "MacBook Air 13 M3 (2024)",
+    "brand": "Apple",
+    "basePrice": 720,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 85,
+      "1TB": 165,
+      "2TB": 290
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.539Z",
+    "updatedAt": "2026-04-04T20:34:46.869Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7cb",
+    "model": "MacBook Air 15 M2 (2023)",
+    "brand": "Apple",
+    "basePrice": 720,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 80,
+      "1TB": 158
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.540Z",
+    "updatedAt": "2026-04-04T20:34:46.870Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7ce",
+    "model": "MacBook Air 13 M2 (2022)",
+    "brand": "Apple",
+    "basePrice": 580,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 75,
+      "1TB": 148
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.542Z",
+    "updatedAt": "2026-04-04T20:34:46.870Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7d1",
+    "model": "MacBook Air M1 (2020)",
+    "brand": "Apple",
+    "basePrice": 420,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 68,
+      "1TB": 135
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.543Z",
+    "updatedAt": "2026-04-04T20:34:46.872Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7d4",
+    "model": "XPS 15 (2024)",
+    "brand": "Dell",
+    "basePrice": 880,
+    "validStorages": [
+      "512GB",
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "512GB": 0,
+      "1TB": 145,
+      "2TB": 295
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.545Z",
+    "updatedAt": "2026-04-04T20:34:46.873Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7d7",
+    "model": "XPS 13 (2024)",
+    "brand": "Dell",
+    "basePrice": 620,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 90,
+      "1TB": 175
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.546Z",
+    "updatedAt": "2026-04-04T20:34:46.874Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7da",
+    "model": "Latitude 14",
+    "brand": "Dell",
+    "basePrice": 420,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 75
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.547Z",
+    "updatedAt": "2026-04-04T20:34:46.875Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7dd",
+    "model": "Inspiron 15",
+    "brand": "Dell",
+    "basePrice": 280,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 55
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.548Z",
+    "updatedAt": "2026-04-04T20:34:46.875Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7e0",
+    "model": "ThinkPad X1 Carbon",
+    "brand": "Lenovo",
+    "basePrice": 540,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 85,
+      "1TB": 168
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.549Z",
+    "updatedAt": "2026-04-04T20:34:46.876Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7e3",
+    "model": "ThinkPad T14",
+    "brand": "Lenovo",
+    "basePrice": 380,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 72
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.550Z",
+    "updatedAt": "2026-04-04T20:34:46.877Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7e6",
+    "model": "IdeaPad 5",
+    "brand": "Lenovo",
+    "basePrice": 260,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 52
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.551Z",
+    "updatedAt": "2026-04-04T20:34:46.878Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7e9",
+    "model": "Yoga 9i",
+    "brand": "Lenovo",
+    "basePrice": 580,
+    "validStorages": [
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "512GB": 0,
+      "1TB": 120
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.552Z",
+    "updatedAt": "2026-04-04T20:34:46.878Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7ec",
+    "model": "EliteBook 840",
+    "brand": "HP",
+    "basePrice": 380,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 70
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.553Z",
+    "updatedAt": "2026-04-04T20:34:46.879Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7ef",
+    "model": "Spectre x360",
+    "brand": "HP",
+    "basePrice": 620,
+    "validStorages": [
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "512GB": 0,
+      "1TB": 115
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.553Z",
+    "updatedAt": "2026-04-04T20:34:46.880Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7f2",
+    "model": "Pavilion 15",
+    "brand": "HP",
+    "basePrice": 230,
+    "validStorages": [
+      "256GB",
+      "512GB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 48
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.554Z",
+    "updatedAt": "2026-04-04T20:34:46.881Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7f5",
+    "model": "Surface Laptop 6",
+    "brand": "Microsoft",
+    "basePrice": 720,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 110,
+      "1TB": 210
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.556Z",
+    "updatedAt": "2026-04-04T20:34:46.882Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7f8",
+    "model": "Surface Laptop 5",
+    "brand": "Microsoft",
+    "basePrice": 520,
+    "validStorages": [
+      "256GB",
+      "512GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "256GB": 0,
+      "512GB": 95,
+      "1TB": 185
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Laptop",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.557Z",
+    "updatedAt": "2026-04-04T20:34:46.882Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7fb",
+    "model": "PlayStation 5 (Disc)",
+    "brand": "Sony",
+    "basePrice": 280,
+    "validStorages": [
+      "825GB"
+    ],
+    "storagePrices": {
+      "825GB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.558Z",
+    "updatedAt": "2026-04-04T20:34:46.883Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e7fe",
+    "model": "PlayStation 5 Slim",
+    "brand": "Sony",
+    "basePrice": 260,
+    "validStorages": [
+      "1TB"
+    ],
+    "storagePrices": {
+      "1TB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.559Z",
+    "updatedAt": "2026-04-04T20:34:46.884Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e801",
+    "model": "PlayStation 5 Digital",
+    "brand": "Sony",
+    "basePrice": 220,
+    "validStorages": [
+      "825GB"
+    ],
+    "storagePrices": {
+      "825GB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.560Z",
+    "updatedAt": "2026-04-04T20:34:46.885Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e804",
+    "model": "PlayStation 4 Pro",
+    "brand": "Sony",
+    "basePrice": 120,
+    "validStorages": [
+      "1TB",
+      "2TB"
+    ],
+    "storagePrices": {
+      "1TB": 0,
+      "2TB": 25
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.561Z",
+    "updatedAt": "2026-04-04T20:34:46.885Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e807",
+    "model": "PlayStation 4 Slim",
+    "brand": "Sony",
+    "basePrice": 80,
+    "validStorages": [
+      "500GB",
+      "1TB"
+    ],
+    "storagePrices": {
+      "500GB": 0,
+      "1TB": 18
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.562Z",
+    "updatedAt": "2026-04-04T20:34:46.886Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e80a",
+    "model": "Xbox Series X",
+    "brand": "Microsoft",
+    "basePrice": 220,
+    "validStorages": [
+      "1TB"
+    ],
+    "storagePrices": {
+      "1TB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.563Z",
+    "updatedAt": "2026-04-04T20:34:46.887Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e80d",
+    "model": "Xbox Series S",
+    "brand": "Microsoft",
+    "basePrice": 148,
+    "validStorages": [
+      "512GB"
+    ],
+    "storagePrices": {
+      "512GB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.564Z",
+    "updatedAt": "2026-04-04T20:34:46.888Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e810",
+    "model": "Xbox One X",
+    "brand": "Microsoft",
+    "basePrice": 88,
+    "validStorages": [
+      "1TB"
+    ],
+    "storagePrices": {
+      "1TB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.564Z",
+    "updatedAt": "2026-04-04T20:34:46.889Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e813",
+    "model": "Switch OLED",
+    "brand": "Nintendo",
+    "basePrice": 158,
+    "validStorages": [
+      "64GB"
+    ],
+    "storagePrices": {
+      "64GB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.566Z",
+    "updatedAt": "2026-04-04T20:34:46.890Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e816",
+    "model": "Switch V2",
+    "brand": "Nintendo",
+    "basePrice": 115,
+    "validStorages": [
+      "32GB"
+    ],
+    "storagePrices": {
+      "32GB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.567Z",
+    "updatedAt": "2026-04-04T20:34:46.891Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e819",
+    "model": "Switch Lite",
+    "brand": "Nintendo",
+    "basePrice": 88,
+    "validStorages": [
+      "32GB"
+    ],
+    "storagePrices": {
+      "32GB": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Gaming",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.568Z",
+    "updatedAt": "2026-04-04T20:34:46.891Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e81c",
+    "model": "Apple Watch Ultra 2",
+    "brand": "Apple",
+    "basePrice": 440,
+    "validStorages": [
+      "49mm"
+    ],
+    "storagePrices": {
+      "49mm": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.569Z",
+    "updatedAt": "2026-04-04T20:34:46.892Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e81f",
+    "model": "Apple Watch Ultra 1",
+    "brand": "Apple",
+    "basePrice": 340,
+    "validStorages": [
+      "49mm"
+    ],
+    "storagePrices": {
+      "49mm": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.570Z",
+    "updatedAt": "2026-04-04T20:34:46.893Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e822",
+    "model": "Apple Watch Series 10",
+    "brand": "Apple",
+    "basePrice": 280,
+    "validStorages": [
+      "42mm",
+      "46mm"
+    ],
+    "storagePrices": {
+      "42mm": 0,
+      "46mm": 30
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.571Z",
+    "updatedAt": "2026-04-04T20:34:46.894Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e825",
+    "model": "Apple Watch Series 9",
+    "brand": "Apple",
+    "basePrice": 230,
+    "validStorages": [
+      "41mm",
+      "45mm"
+    ],
+    "storagePrices": {
+      "41mm": 0,
+      "45mm": 28
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.573Z",
+    "updatedAt": "2026-04-04T20:34:46.895Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e828",
+    "model": "Apple Watch Series 8",
+    "brand": "Apple",
+    "basePrice": 175,
+    "validStorages": [
+      "41mm",
+      "45mm"
+    ],
+    "storagePrices": {
+      "41mm": 0,
+      "45mm": 25
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.574Z",
+    "updatedAt": "2026-04-04T20:34:46.896Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e82b",
+    "model": "Apple Watch Series 7",
+    "brand": "Apple",
+    "basePrice": 130,
+    "validStorages": [
+      "41mm",
+      "45mm"
+    ],
+    "storagePrices": {
+      "41mm": 0,
+      "45mm": 22
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.575Z",
+    "updatedAt": "2026-04-04T20:34:46.898Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e82e",
+    "model": "Apple Watch SE (2nd gen)",
+    "brand": "Apple",
+    "basePrice": 118,
+    "validStorages": [
+      "40mm",
+      "44mm"
+    ],
+    "storagePrices": {
+      "40mm": 0,
+      "44mm": 20
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.575Z",
+    "updatedAt": "2026-04-04T20:34:46.898Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e831",
+    "model": "Apple Watch SE (1st gen)",
+    "brand": "Apple",
+    "basePrice": 82,
+    "validStorages": [
+      "40mm",
+      "44mm"
+    ],
+    "storagePrices": {
+      "40mm": 0,
+      "44mm": 18
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.576Z",
+    "updatedAt": "2026-04-04T20:34:46.899Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e834",
+    "model": "Galaxy Watch 7",
+    "brand": "Samsung",
+    "basePrice": 175,
+    "validStorages": [
+      "40mm",
+      "44mm"
+    ],
+    "storagePrices": {
+      "40mm": 0,
+      "44mm": 25
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.577Z",
+    "updatedAt": "2026-04-04T20:34:46.900Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e837",
+    "model": "Galaxy Watch Ultra",
+    "brand": "Samsung",
+    "basePrice": 280,
+    "validStorages": [
+      "47mm"
+    ],
+    "storagePrices": {
+      "47mm": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.578Z",
+    "updatedAt": "2026-04-04T20:34:46.901Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e83a",
+    "model": "Galaxy Watch 6 Classic",
+    "brand": "Samsung",
+    "basePrice": 145,
+    "validStorages": [
+      "43mm",
+      "47mm"
+    ],
+    "storagePrices": {
+      "43mm": 0,
+      "47mm": 28
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.579Z",
+    "updatedAt": "2026-04-04T20:34:46.902Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e83d",
+    "model": "Galaxy Watch 6",
+    "brand": "Samsung",
+    "basePrice": 110,
+    "validStorages": [
+      "40mm",
+      "44mm"
+    ],
+    "storagePrices": {
+      "40mm": 0,
+      "44mm": 22
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.580Z",
+    "updatedAt": "2026-04-04T20:34:46.902Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e840",
+    "model": "Galaxy Watch 5 Pro",
+    "brand": "Samsung",
+    "basePrice": 95,
+    "validStorages": [
+      "45mm"
+    ],
+    "storagePrices": {
+      "45mm": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.581Z",
+    "updatedAt": "2026-04-04T20:34:46.903Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e843",
+    "model": "Fenix 8",
+    "brand": "Garmin",
+    "basePrice": 420,
+    "validStorages": [
+      "47mm",
+      "51mm"
+    ],
+    "storagePrices": {
+      "47mm": 0,
+      "51mm": 48
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.582Z",
+    "updatedAt": "2026-04-04T20:34:46.904Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e846",
+    "model": "Forerunner 965",
+    "brand": "Garmin",
+    "basePrice": 285,
+    "validStorages": [
+      "47mm"
+    ],
+    "storagePrices": {
+      "47mm": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Smartwatch",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.583Z",
+    "updatedAt": "2026-04-04T20:34:46.906Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e849",
+    "model": "AirPods Pro (2nd gen)",
+    "brand": "Apple",
+    "basePrice": 120,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.584Z",
+    "updatedAt": "2026-04-04T20:34:46.907Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e84c",
+    "model": "AirPods Pro (1st gen)",
+    "brand": "Apple",
+    "basePrice": 72,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.585Z",
+    "updatedAt": "2026-04-04T20:34:46.907Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e84f",
+    "model": "AirPods (4th gen)",
+    "brand": "Apple",
+    "basePrice": 85,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.586Z",
+    "updatedAt": "2026-04-04T20:34:46.908Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e852",
+    "model": "AirPods (3rd gen)",
+    "brand": "Apple",
+    "basePrice": 55,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.586Z",
+    "updatedAt": "2026-04-04T20:34:46.909Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e855",
+    "model": "AirPods Max",
+    "brand": "Apple",
+    "basePrice": 255,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.588Z",
+    "updatedAt": "2026-04-04T20:34:46.910Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e858",
+    "model": "WH-1000XM5",
+    "brand": "Sony",
+    "basePrice": 148,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.589Z",
+    "updatedAt": "2026-04-04T20:34:46.911Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e85b",
+    "model": "WH-1000XM4",
+    "brand": "Sony",
+    "basePrice": 95,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.590Z",
+    "updatedAt": "2026-04-04T20:34:46.912Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e85e",
+    "model": "WF-1000XM5",
+    "brand": "Sony",
+    "basePrice": 110,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.591Z",
+    "updatedAt": "2026-04-04T20:34:46.914Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e861",
+    "model": "QuietComfort 45",
+    "brand": "Bose",
+    "basePrice": 118,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.592Z",
+    "updatedAt": "2026-04-04T20:34:46.915Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e864",
+    "model": "QuietComfort Ultra",
+    "brand": "Bose",
+    "basePrice": 155,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.594Z",
+    "updatedAt": "2026-04-04T20:34:46.916Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e867",
+    "model": "QuietComfort Earbuds II",
+    "brand": "Bose",
+    "basePrice": 88,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.595Z",
+    "updatedAt": "2026-04-04T20:34:46.916Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e86a",
+    "model": "Galaxy Buds3 Pro",
+    "brand": "Samsung",
+    "basePrice": 85,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.596Z",
+    "updatedAt": "2026-04-04T20:34:46.917Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cc2b56351c715eeb56e86d",
+    "model": "Galaxy Buds2 Pro",
+    "brand": "Samsung",
+    "basePrice": 55,
+    "validStorages": [
+      "1 Pair"
+    ],
+    "storagePrices": {
+      "1 Pair": 0
+    },
+    "screenModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.88,
+      "gut": 0.72,
+      "beschadigt": 0.45
+    },
+    "bodyModifiers": {
+      "hervorragend": 1,
+      "sehr_gut": 0.93,
+      "gut": 0.82,
+      "beschadigt": 0.55
+    },
+    "functionalMultiplier": 1,
+    "nonFunctionalMultiplier": 0.35,
+    "category": "Audio",
+    "active": true,
+    "priceResearch": {
+      "source": "eBay.de Completed Listings"
+    },
+    "createdAt": "2026-03-31T20:15:18.597Z",
+    "updatedAt": "2026-04-04T20:34:46.918Z",
+    "__v": 0
+  }
+]

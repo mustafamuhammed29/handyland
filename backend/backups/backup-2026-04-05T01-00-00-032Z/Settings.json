@@ -1,0 +1,224 @@
+[
+  {
+    "_id": "69839e784e0cbaa2debd4bc6",
+    "__v": 0,
+    "content": {
+      "accessoriesTitle": "Premium Zubehör",
+      "accessoriesSubtitle": "Schütze dein Gerät mit Stil",
+      "repairTitle": "Service Terminal",
+      "repairSubtitle": "Wähle deine Reparatur"
+    },
+    "createdAt": "2026-02-04T19:31:04.693Z",
+    "hero": {
+      "headline": "Reparatur & Service",
+      "subheadline": "Professionell, Schnell & Zuverlässig",
+      "bgStart": "#0a0a0a",
+      "bgEnd": "#1a1a1a",
+      "accentColor": "#f73b61",
+      "buttonMarket": "Markt betreten",
+      "buttonValuation": "Gerät bewerten",
+      "trustBadge1": "Verifizierte Profis",
+      "trustBadge2": "24h Express",
+      "trustBadge3": "1 Jahr Garantie",
+      "productPrice": "€1199",
+      "productName": "Apple iPhone 15 Pro Max",
+      "heroImage": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=800&auto=format&fit=crop",
+      "productLabel": "FEATURED DEVICE"
+    },
+    "repairArchive": {
+      "title": "Reparatur Archiv",
+      "subtitle": "Unsere Erfolgsgeschichten",
+      "buttonText": "Mehr anzeigen",
+      "totalRepairs": 5000
+    },
+    "stats": {
+      "devicesRepaired": 3000,
+      "happyCustomers": 1200,
+      "averageRating": 4,
+      "marketExperience": 5
+    },
+    "updatedAt": "2026-04-05T00:53:57.923Z",
+    "valuation": {
+      "step1Title": "Wähle dein Gerät",
+      "step2Title": "Zustand beschreiben",
+      "step3Title": "Angebot erhalten"
+    },
+    "contactEmail": "mustafamohammad0545@gmail.com",
+    "contactSection": {
+      "socialLinks": {
+        "instagram": "https://www.instagram.com/handyland.hd?igshid=MzNlNGNkZWQ4Mg%3D%3D",
+        "youtube": "https://www.google.com/maps/place//data=!4m3!3m2!1s0x4797c13ff459f8b5:0x7e383811d13d7116!12e1?source=g.page.m.dd._&laa=lu-desktop-reviews-dialog-review-solicitation"
+      },
+      "address": "Walldorfer Straße 13",
+      "phone": "015752908921",
+      "email": "mustafamohammad0545@gmail.com",
+      "formTitle": "",
+      "formButton": "",
+      "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2598.220622980945!2d8.68824122322083!3d49.366898264786656!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4797c13ff459f8b5%3A0x7e383811d13d7116!2sHandyLand%20Heidelberg%20%E2%80%93%20Handy%20Reparatur%20%26%20Ankauf!5e0!3m2!1sar!2sde!4v1770844156036!5m2!1sar!2sde\" width=\"600\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade",
+      "whatsappPhone": "+905397200005"
+    },
+    "footerSection": {
+      "aboutText": "",
+      "tagline": "Wir arbeiten eng mit den besten Herstellern und Marken der Branche zusammen. Nur so können wir Ihre Zufriedenheit garantieren. Sagen Sie uns was Sie suchen, Wir helfen Ihnen gern. Schauen Sie sich unten einige unserer beliebtesten Marken an.",
+      "copyright": "",
+      "quickLinks": true,
+      "legalLinks": true,
+      "newsletter": true,
+      "socialLinks": true
+    },
+    "footerText": "",
+    "sections": {
+      "hero": true,
+      "stats": true,
+      "repairGallery": true,
+      "marketplace": true,
+      "accessories": true,
+      "contact": true
+    },
+    "siteName": "HANDY-LAND",
+    "navbar": {
+      "logoText": "",
+      "logoAccentText": "",
+      "showLanguageSwitcher": true
+    },
+    "freeShippingThreshold": 1497,
+    "payment": {
+      "stripe": {
+        "enabled": false,
+        "publicKey": ""
+      },
+      "paypal": {
+        "enabled": false,
+        "clientId": "admin@handyland.com",
+        "secretKey": "admin@123"
+      },
+      "klarna": {
+        "enabled": false,
+        "publicKey": "",
+        "secretKey": ""
+      },
+      "giropay": {
+        "enabled": false,
+        "publicKey": "",
+        "secretKey": ""
+      },
+      "sepa": {
+        "enabled": false,
+        "publicKey": "",
+        "secretKey": ""
+      },
+      "sofort": {
+        "enabled": false,
+        "publicKey": "admin@handyland.com",
+        "secretKey": "admin@123"
+      },
+      "bankTransfer": {
+        "enabled": true,
+        "instructions": "",
+        "bankName": "aa",
+        "accountHolder": "aaa",
+        "iban": "de111111111111111111",
+        "bic": "1111111111"
+      },
+      "cashOnDelivery": {
+        "enabled": true
+      }
+    },
+    "announcementBanner": {
+      "enabled": false,
+      "text": "514532",
+      "color": "blue",
+      "dismissible": true,
+      "link": "",
+      "linkText": "1212"
+    },
+    "socialAuth": {
+      "google": true,
+      "facebook": true
+    },
+    "promoPopup": {
+      "enabled": true,
+      "title": "",
+      "message": "",
+      "couponCode": "11111111111",
+      "delay": 5
+    },
+    "language": "de",
+    "invoice": {
+      "companyName": "HandyLand GmbH",
+      "companyAddress": "Tech Street 123 - 10115 Berlin - Germany",
+      "vatNumber": "DE123456789",
+      "footerText": "Thank you for your business!",
+      "prefix": "HL-",
+      "titleLabel": "Invoice",
+      "dateLabel": "Date:",
+      "numberLabel": "Invoice #:",
+      "vatIdLabel": "VAT ID:",
+      "subtotalLabel": "Subtotal:",
+      "taxLabel": "VAT",
+      "shippingLabel": "Shipping:",
+      "discountLabel": "Discount",
+      "totalLabel": "Total:",
+      "printBtnLabel": "Print Invoice",
+      "closeBtnLabel": "Close"
+    },
+    "ecoImpact": {
+      "enabled": true,
+      "co2PerDevice": 79,
+      "eWastePerDevice": 0.18
+    },
+    "quickReplies": [
+      "We have received your message and are looking into it.",
+      "Please provide us with your order number so we can investigate further.",
+      "Your repair is currently in progress. We will update you soon.",
+      "Thank you for reaching out. Your issue has been resolved."
+    ],
+    "seo": {
+      "defaultMetaTitle": "HandyLand - E-Commerce & Repair Services",
+      "defaultMetaDescription": "Your one-stop shop for electronics, mobile phones, and reliable repair services.",
+      "defaultKeywords": "handyland, electronics, mobile repair, buy phones, sell phones",
+      "defaultOgImage": "/uploads/compressed-1774483948381-111025735.webp",
+      "faviconUrl": "/uploads/compressed-1774483950591-837755497.webp",
+      "googleAnalyticsId": "",
+      "facebookPixelId": ""
+    },
+    "taxRate": 19,
+    "vipTiers": [
+      {
+        "id": "bronze",
+        "name": "Bronze",
+        "color": "from-[#cd7f32] to-[#8b5a2b]",
+        "minSpent": 0,
+        "maxSpent": 500
+      },
+      {
+        "id": "silver",
+        "name": "Silver",
+        "color": "from-slate-300 to-slate-500",
+        "minSpent": 500,
+        "maxSpent": 2000
+      },
+      {
+        "id": "gold",
+        "name": "Gold",
+        "color": "from-amber-400 to-yellow-600",
+        "minSpent": 2000,
+        "maxSpent": 5000
+      },
+      {
+        "id": "platinum",
+        "name": "Platinum",
+        "color": "from-slate-200 to-slate-400",
+        "minSpent": 5000,
+        "maxSpent": 10000
+      },
+      {
+        "id": "diamond",
+        "name": "Diamond",
+        "color": "from-cyan-300 to-blue-500",
+        "minSpent": 10000,
+        "maxSpent": 50000
+      }
+    ]
+  }
+]

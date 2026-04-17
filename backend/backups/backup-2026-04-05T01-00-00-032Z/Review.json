@@ -1,0 +1,292 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e697d",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "product": "69caed172f6d1a5fa80e68e4",
+    "rating": 3,
+    "comment": "Gutes Preis-Leistungs-Verhältnis, bin sehr zufrieden.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-15T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e697e",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "product": "69caed172f6d1a5fa80e68e4",
+    "rating": 3,
+    "comment": "Gutes Preis-Leistungs-Verhältnis, bin sehr zufrieden.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-02-09T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e697f",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "product": "69caed172f6d1a5fa80e68e4",
+    "rating": 4,
+    "comment": "Würde jederzeit wieder kaufen!",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-02-01T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6980",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "product": "69caed172f6d1a5fa80e68e5",
+    "rating": 4,
+    "comment": "Gutes Preis-Leistungs-Verhältnis, bin sehr zufrieden.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-12T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6981",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "product": "69caed172f6d1a5fa80e68e5",
+    "rating": 3,
+    "comment": "Gutes Preis-Leistungs-Verhältnis, bin sehr zufrieden.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-02-03T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6982",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "product": "69caed172f6d1a5fa80e68e5",
+    "rating": 3,
+    "comment": "Leichte Gebrauchsspuren, aber alles funktioniert einwandfrei.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-28T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6987",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "product": "69caed172f6d1a5fa80e68e7",
+    "rating": 4,
+    "comment": "Akku hält gut durch, Gerät läuft flüssig.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-02-21T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6983",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "product": "69caed172f6d1a5fa80e68e6",
+    "rating": 3,
+    "comment": "Toller Service, schnelle Antworten bei Fragen.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-01-20T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6984",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "product": "69caed172f6d1a5fa80e68e6",
+    "rating": 5,
+    "comment": "Würde jederzeit wieder kaufen!",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-01-23T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e698a",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "product": "69caed172f6d1a5fa80e68e7",
+    "rating": 4,
+    "comment": "Toller Service, schnelle Antworten bei Fragen.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-01-30T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6985",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "product": "69caed172f6d1a5fa80e68e6",
+    "rating": 4,
+    "comment": "Würde jederzeit wieder kaufen!",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-02-04T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6989",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "product": "69caed172f6d1a5fa80e68e7",
+    "rating": 3,
+    "comment": "Sehr schnelle Lieferung, Top-Qualität!",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-03T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6986",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "product": "69caed172f6d1a5fa80e68e6",
+    "rating": 4,
+    "comment": "Toller Service, schnelle Antworten bei Fragen.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-15T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6988",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "product": "69caed172f6d1a5fa80e68e7",
+    "rating": 5,
+    "comment": "Akku hält gut durch, Gerät läuft flüssig.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-07T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e698b",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "product": "69caed172f6d1a5fa80e68e7",
+    "rating": 3,
+    "comment": "Toller Service, schnelle Antworten bei Fragen.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-20T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e698e",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "product": "69caed172f6d1a5fa80e68e8",
+    "rating": 4,
+    "comment": "Leichte Gebrauchsspuren, aber alles funktioniert einwandfrei.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-01-29T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e698f",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "product": "69caed172f6d1a5fa80e68e8",
+    "rating": 3,
+    "comment": "Leichte Gebrauchsspuren, aber alles funktioniert einwandfrei.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-01-10T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6990",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "product": "69caed172f6d1a5fa80e68e9",
+    "rating": 3,
+    "comment": "Toller Service, schnelle Antworten bei Fragen.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-01-17T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6991",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "product": "69caed172f6d1a5fa80e68e9",
+    "rating": 4,
+    "comment": "Sehr schnelle Lieferung, Top-Qualität!",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-01-15T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6992",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "product": "69caed172f6d1a5fa80e68e9",
+    "rating": 5,
+    "comment": "Würde jederzeit wieder kaufen!",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-02-09T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6993",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "product": "69caed172f6d1a5fa80e68e9",
+    "rating": 5,
+    "comment": "Gutes Preis-Leistungs-Verhältnis, bin sehr zufrieden.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-02-11T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6994",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "product": "69caed172f6d1a5fa80e68e9",
+    "rating": 5,
+    "comment": "Etwas teurer als erwartet, aber gute Qualität.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-29T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6995",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "product": "69caed172f6d1a5fa80e68ea",
+    "rating": 5,
+    "comment": "Sehr schnelle Lieferung, Top-Qualität!",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-04T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6996",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "product": "69caed172f6d1a5fa80e68ea",
+    "rating": 5,
+    "comment": "Etwas teurer als erwartet, aber gute Qualität.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-12T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6997",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "product": "69caed172f6d1a5fa80e68ea",
+    "rating": 5,
+    "comment": "Etwas teurer als erwartet, aber gute Qualität.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-17T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6998",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "product": "69caed172f6d1a5fa80e68eb",
+    "rating": 3,
+    "comment": "Würde jederzeit wieder kaufen!",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-01-10T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6999",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "product": "69caed172f6d1a5fa80e68eb",
+    "rating": 3,
+    "comment": "Gutes Preis-Leistungs-Verhältnis, bin sehr zufrieden.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-21T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e698c",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "product": "69caed172f6d1a5fa80e68e8",
+    "rating": 4,
+    "comment": "Würde jederzeit wieder kaufen!",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-02-04T21:37:27.204Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e698d",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "product": "69caed172f6d1a5fa80e68e8",
+    "rating": 5,
+    "comment": "Gutes Preis-Leistungs-Verhältnis, bin sehr zufrieden.",
+    "isVerifiedPurchase": false,
+    "createdAt": "2026-03-19T21:37:27.204Z",
+    "__v": 0
+  }
+]

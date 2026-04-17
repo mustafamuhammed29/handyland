@@ -1,0 +1,1102 @@
+[
+  {
+    "_id": "69caed172f6d1a5fa80e692c",
+    "orderNumber": "HL-20260321-0001",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68ed",
+        "productType": "Product",
+        "name": "Xiaomi 14 256GB Schwarz",
+        "quantity": 3,
+        "price": 649,
+        "image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400",
+        "_id": "69caed172f6d1a5fa80e692d"
+      }
+    ],
+    "totalAmount": 2316.93,
+    "tax": 369.93,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "pending",
+    "paymentMethod": "paypal",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "Ahmed Hassan",
+      "email": "ahmed@test.de",
+      "phone": "+4915423456782",
+      "street": "Berliner Str. 12",
+      "city": "Hamburg",
+      "zipCode": "20095",
+      "country": "Germany"
+    },
+    "createdAt": "2026-03-21T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-03-30T21:37:27.197Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6954"
+      }
+    ],
+    "updatedAt": "2026-03-21T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e692e",
+    "orderNumber": "HL-20260213-0002",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68e6",
+        "productType": "Product",
+        "name": "iPhone 14 256GB Schwarz",
+        "quantity": 2,
+        "price": 549,
+        "image": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400",
+        "_id": "69caed172f6d1a5fa80e692f"
+      }
+    ],
+    "totalAmount": 1306.62,
+    "tax": 208.62,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "processing",
+    "paymentMethod": "paypal",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "Max Mustermann",
+      "email": "max@test.de",
+      "phone": "+4915223456780",
+      "street": "Musterstraße 1",
+      "city": "Berlin",
+      "zipCode": "10115",
+      "country": "Germany"
+    },
+    "createdAt": "2026-02-13T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "processing",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6955"
+      }
+    ],
+    "updatedAt": "2026-02-13T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6930",
+    "orderNumber": "HL-20260228-0003",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68ed",
+        "productType": "Product",
+        "name": "Xiaomi 14 256GB Schwarz",
+        "quantity": 2,
+        "price": 649,
+        "image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400",
+        "_id": "69caed172f6d1a5fa80e6931"
+      }
+    ],
+    "totalAmount": 1544.62,
+    "tax": 246.62,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "shipped",
+    "paymentMethod": "card",
+    "paymentStatus": "paid",
+    "shippingAddress": {
+      "fullName": "Anna Schmidt",
+      "email": "anna@test.de",
+      "phone": "+4915323456781",
+      "street": "Hauptstraße 42",
+      "city": "München",
+      "zipCode": "80331",
+      "country": "Germany"
+    },
+    "trackingNumber": "DHL944087655",
+    "createdAt": "2026-02-28T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "shipped",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6956"
+      }
+    ],
+    "updatedAt": "2026-02-28T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6932",
+    "orderNumber": "HL-20251204-0004",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68ec",
+        "productType": "Product",
+        "name": "Samsung Galaxy A54 128GB Blau",
+        "quantity": 2,
+        "price": 279,
+        "image": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400",
+        "_id": "69caed172f6d1a5fa80e6933"
+      }
+    ],
+    "totalAmount": 664.02,
+    "tax": 106.02,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "refunded",
+    "paymentMethod": "card",
+    "paymentStatus": "refunded",
+    "shippingAddress": {
+      "fullName": "Ahmed Hassan",
+      "email": "ahmed@test.de",
+      "phone": "+4915423456782",
+      "street": "Berliner Str. 12",
+      "city": "Hamburg",
+      "zipCode": "20095",
+      "country": "Germany"
+    },
+    "createdAt": "2025-12-04T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "refunded",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6957"
+      }
+    ],
+    "updatedAt": "2025-12-04T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6934",
+    "orderNumber": "HL-20260119-0005",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68ee",
+        "productType": "Product",
+        "name": "Redmi Note 13 Pro 256GB Grün",
+        "quantity": 3,
+        "price": 229,
+        "image": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400",
+        "_id": "69caed172f6d1a5fa80e6935"
+      }
+    ],
+    "totalAmount": 817.53,
+    "tax": 130.53,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "refunded",
+    "paymentMethod": "card",
+    "paymentStatus": "refunded",
+    "shippingAddress": {
+      "fullName": "Ahmed Hassan",
+      "email": "ahmed@test.de",
+      "phone": "+4915423456782",
+      "street": "Berliner Str. 12",
+      "city": "Hamburg",
+      "zipCode": "20095",
+      "country": "Germany"
+    },
+    "createdAt": "2026-01-19T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "refunded",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6958"
+      }
+    ],
+    "updatedAt": "2026-01-19T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e693a",
+    "orderNumber": "HL-20260318-0008",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68e4",
+        "productType": "Product",
+        "name": "iPhone 15 Pro 256GB Schwarz",
+        "quantity": 3,
+        "price": 849,
+        "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400",
+        "_id": "69caed172f6d1a5fa80e693b"
+      }
+    ],
+    "totalAmount": 3030.93,
+    "tax": 483.93,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "refunded",
+    "paymentMethod": "card",
+    "paymentStatus": "refunded",
+    "shippingAddress": {
+      "fullName": "Ahmed Hassan",
+      "email": "ahmed@test.de",
+      "phone": "+4915423456782",
+      "street": "Berliner Str. 12",
+      "city": "Hamburg",
+      "zipCode": "20095",
+      "country": "Germany"
+    },
+    "createdAt": "2026-03-18T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "refunded",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e695b"
+      }
+    ],
+    "updatedAt": "2026-03-18T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6938",
+    "orderNumber": "HL-20251205-0007",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68f0",
+        "productType": "Product",
+        "name": "iPhone 14 Pro 256GB Gold",
+        "quantity": 3,
+        "price": 749,
+        "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400",
+        "_id": "69caed172f6d1a5fa80e6939"
+      }
+    ],
+    "totalAmount": 2673.93,
+    "tax": 426.93,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "cancelled",
+    "paymentMethod": "cash",
+    "paymentStatus": "failed",
+    "shippingAddress": {
+      "fullName": "Ahmed Hassan",
+      "email": "ahmed@test.de",
+      "phone": "+4915423456782",
+      "street": "Berliner Str. 12",
+      "city": "Hamburg",
+      "zipCode": "20095",
+      "country": "Germany"
+    },
+    "createdAt": "2025-12-05T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "cancelled",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e695a"
+      }
+    ],
+    "updatedAt": "2025-12-05T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6936",
+    "orderNumber": "HL-20260312-0006",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68ea",
+        "productType": "Product",
+        "name": "Samsung Galaxy S24 Ultra 256GB Titanium",
+        "quantity": 2,
+        "price": 899,
+        "image": "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400",
+        "_id": "69caed172f6d1a5fa80e6937"
+      }
+    ],
+    "totalAmount": 2139.62,
+    "tax": 341.62,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "processing",
+    "paymentMethod": "cash",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "Max Mustermann",
+      "email": "max@test.de",
+      "phone": "+4915223456780",
+      "street": "Musterstraße 1",
+      "city": "Berlin",
+      "zipCode": "10115",
+      "country": "Germany"
+    },
+    "createdAt": "2026-03-12T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "processing",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6959"
+      }
+    ],
+    "updatedAt": "2026-03-12T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e693c",
+    "orderNumber": "HL-20260201-0009",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68eb",
+        "productType": "Product",
+        "name": "Samsung Galaxy S24 128GB Schwarz",
+        "quantity": 2,
+        "price": 599,
+        "image": "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400",
+        "_id": "69caed172f6d1a5fa80e693d"
+      }
+    ],
+    "totalAmount": 1425.62,
+    "tax": 227.62,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "shipped",
+    "paymentMethod": "paypal",
+    "paymentStatus": "paid",
+    "shippingAddress": {
+      "fullName": "Ahmed Hassan",
+      "email": "ahmed@test.de",
+      "phone": "+4915423456782",
+      "street": "Berliner Str. 12",
+      "city": "Hamburg",
+      "zipCode": "20095",
+      "country": "Germany"
+    },
+    "trackingNumber": "DHL132749708",
+    "createdAt": "2026-02-01T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "shipped",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e695c"
+      }
+    ],
+    "updatedAt": "2026-02-01T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6944",
+    "orderNumber": "HL-20251225-0013",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68f0",
+        "productType": "Product",
+        "name": "iPhone 14 Pro 256GB Gold",
+        "quantity": 1,
+        "price": 749,
+        "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400",
+        "_id": "69caed172f6d1a5fa80e6945"
+      }
+    ],
+    "totalAmount": 891.31,
+    "tax": 142.31,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "processing",
+    "paymentMethod": "bank_transfer",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "Anna Schmidt",
+      "email": "anna@test.de",
+      "phone": "+4915323456781",
+      "street": "Hauptstraße 42",
+      "city": "München",
+      "zipCode": "80331",
+      "country": "Germany"
+    },
+    "createdAt": "2025-12-25T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "processing",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6960"
+      }
+    ],
+    "updatedAt": "2025-12-25T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e693e",
+    "orderNumber": "HL-20251215-0010",
+    "user": "69caed162f6d1a5fa80e68c1",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68e6",
+        "productType": "Product",
+        "name": "iPhone 14 256GB Schwarz",
+        "quantity": 1,
+        "price": 549,
+        "image": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400",
+        "_id": "69caed172f6d1a5fa80e693f"
+      }
+    ],
+    "totalAmount": 653.31,
+    "tax": 104.31,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "processing",
+    "paymentMethod": "cash",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "Ahmed Hassan",
+      "email": "ahmed@test.de",
+      "phone": "+4915423456782",
+      "street": "Berliner Str. 12",
+      "city": "Hamburg",
+      "zipCode": "20095",
+      "country": "Germany"
+    },
+    "createdAt": "2025-12-15T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "processing",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e695d"
+      }
+    ],
+    "updatedAt": "2025-12-15T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6942",
+    "orderNumber": "HL-20260127-0012",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68ee",
+        "productType": "Product",
+        "name": "Redmi Note 13 Pro 256GB Grün",
+        "quantity": 3,
+        "price": 229,
+        "image": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400",
+        "_id": "69caed172f6d1a5fa80e6943"
+      }
+    ],
+    "totalAmount": 817.53,
+    "tax": 130.53,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "delivered",
+    "paymentMethod": "bank_transfer",
+    "paymentStatus": "paid",
+    "shippingAddress": {
+      "fullName": "Anna Schmidt",
+      "email": "anna@test.de",
+      "phone": "+4915323456781",
+      "street": "Hauptstraße 42",
+      "city": "München",
+      "zipCode": "80331",
+      "country": "Germany"
+    },
+    "trackingNumber": "DHL108380756",
+    "createdAt": "2026-01-27T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "delivered",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e695f"
+      }
+    ],
+    "updatedAt": "2026-01-27T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6940",
+    "orderNumber": "HL-20260311-0011",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68e6",
+        "productType": "Product",
+        "name": "iPhone 14 256GB Schwarz",
+        "quantity": 2,
+        "price": 549,
+        "image": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400",
+        "_id": "69caed172f6d1a5fa80e6941"
+      }
+    ],
+    "totalAmount": 1306.62,
+    "tax": 208.62,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "pending",
+    "paymentMethod": "bank_transfer",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "Ahmed Hassan",
+      "email": "ahmed@test.de",
+      "phone": "+4915423456782",
+      "street": "Berliner Str. 12",
+      "city": "Hamburg",
+      "zipCode": "20095",
+      "country": "Germany"
+    },
+    "createdAt": "2026-03-11T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e695e"
+      }
+    ],
+    "updatedAt": "2026-03-11T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e694a",
+    "orderNumber": "HL-20260222-0016",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68e8",
+        "productType": "Product",
+        "name": "iPhone 12 128GB Rot",
+        "quantity": 1,
+        "price": 299,
+        "image": "https://images.unsplash.com/photo-1603891128711-11b4b03bb138?w=400",
+        "_id": "69caed172f6d1a5fa80e694b"
+      }
+    ],
+    "totalAmount": 355.81,
+    "tax": 56.81,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "refunded",
+    "paymentMethod": "paypal",
+    "paymentStatus": "refunded",
+    "shippingAddress": {
+      "fullName": "Anna Schmidt",
+      "email": "anna@test.de",
+      "phone": "+4915323456781",
+      "street": "Hauptstraße 42",
+      "city": "München",
+      "zipCode": "80331",
+      "country": "Germany"
+    },
+    "createdAt": "2026-02-22T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "refunded",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6963"
+      }
+    ],
+    "updatedAt": "2026-02-22T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e694c",
+    "orderNumber": "HL-20260224-0017",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68e9",
+        "productType": "Product",
+        "name": "iPhone SE (3. Gen) 64GB Midnight",
+        "quantity": 1,
+        "price": 249,
+        "image": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
+        "_id": "69caed172f6d1a5fa80e694d"
+      }
+    ],
+    "totalAmount": 296.31,
+    "tax": 47.31,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "refunded",
+    "paymentMethod": "cash",
+    "paymentStatus": "refunded",
+    "shippingAddress": {
+      "fullName": "Anna Schmidt",
+      "email": "anna@test.de",
+      "phone": "+4915323456781",
+      "street": "Hauptstraße 42",
+      "city": "München",
+      "zipCode": "80331",
+      "country": "Germany"
+    },
+    "createdAt": "2026-02-24T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "refunded",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6964"
+      }
+    ],
+    "updatedAt": "2026-02-24T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e694e",
+    "orderNumber": "HL-20260323-0018",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68e5",
+        "productType": "Product",
+        "name": "iPhone 15 128GB Blau",
+        "quantity": 1,
+        "price": 649,
+        "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400",
+        "_id": "69caed172f6d1a5fa80e694f"
+      }
+    ],
+    "totalAmount": 772.31,
+    "tax": 123.31,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "pending",
+    "paymentMethod": "paypal",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "Anna Schmidt",
+      "email": "anna@test.de",
+      "phone": "+4915323456781",
+      "street": "Hauptstraße 42",
+      "city": "München",
+      "zipCode": "80331",
+      "country": "Germany"
+    },
+    "createdAt": "2026-03-23T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6965"
+      }
+    ],
+    "updatedAt": "2026-03-23T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6950",
+    "orderNumber": "HL-20251224-0019",
+    "user": "69caed162f6d1a5fa80e68c2",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68e8",
+        "productType": "Product",
+        "name": "iPhone 12 128GB Rot",
+        "quantity": 3,
+        "price": 299,
+        "image": "https://images.unsplash.com/photo-1603891128711-11b4b03bb138?w=400",
+        "_id": "69caed172f6d1a5fa80e6951"
+      }
+    ],
+    "totalAmount": 1067.43,
+    "tax": 170.43,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "pending",
+    "paymentMethod": "bank_transfer",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "Anna Schmidt",
+      "email": "anna@test.de",
+      "phone": "+4915323456781",
+      "street": "Hauptstraße 42",
+      "city": "München",
+      "zipCode": "80331",
+      "country": "Germany"
+    },
+    "createdAt": "2025-12-24T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6966"
+      }
+    ],
+    "updatedAt": "2025-12-24T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6952",
+    "orderNumber": "HL-20260124-0020",
+    "user": "69caed162f6d1a5fa80e68c4",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68e9",
+        "productType": "Product",
+        "name": "iPhone SE (3. Gen) 64GB Midnight",
+        "quantity": 1,
+        "price": 249,
+        "image": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
+        "_id": "69caed172f6d1a5fa80e6953"
+      }
+    ],
+    "totalAmount": 296.31,
+    "tax": 47.31,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "shipped",
+    "paymentMethod": "bank_transfer",
+    "paymentStatus": "paid",
+    "shippingAddress": {
+      "fullName": "Ahmed Hassan",
+      "email": "ahmed@test.de",
+      "phone": "+4915423456782",
+      "street": "Berliner Str. 12",
+      "city": "Hamburg",
+      "zipCode": "20095",
+      "country": "Germany"
+    },
+    "trackingNumber": "DHL372836157",
+    "createdAt": "2026-01-24T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "shipped",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6967"
+      }
+    ],
+    "updatedAt": "2026-01-24T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6946",
+    "orderNumber": "HL-20260302-0014",
+    "user": "69caed162f6d1a5fa80e68c3",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68ee",
+        "productType": "Product",
+        "name": "Redmi Note 13 Pro 256GB Grün",
+        "quantity": 3,
+        "price": 229,
+        "image": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400",
+        "_id": "69caed172f6d1a5fa80e6947"
+      }
+    ],
+    "totalAmount": 817.53,
+    "tax": 130.53,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "processing",
+    "paymentMethod": "card",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "Max Mustermann",
+      "email": "max@test.de",
+      "phone": "+4915223456780",
+      "street": "Musterstraße 1",
+      "city": "Berlin",
+      "zipCode": "10115",
+      "country": "Germany"
+    },
+    "createdAt": "2026-03-02T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "processing",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6961"
+      }
+    ],
+    "updatedAt": "2026-03-02T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69caed172f6d1a5fa80e6948",
+    "orderNumber": "HL-20260106-0015",
+    "user": "69caed162f6d1a5fa80e68c6",
+    "items": [
+      {
+        "product": "69caed172f6d1a5fa80e68ed",
+        "productType": "Product",
+        "name": "Xiaomi 14 256GB Schwarz",
+        "quantity": 1,
+        "price": 649,
+        "image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400",
+        "_id": "69caed172f6d1a5fa80e6949"
+      }
+    ],
+    "totalAmount": 772.31,
+    "tax": 123.31,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 0,
+    "status": "delivered",
+    "paymentMethod": "cash",
+    "paymentStatus": "paid",
+    "shippingAddress": {
+      "fullName": "Max Mustermann",
+      "email": "max@test.de",
+      "phone": "+4915223456780",
+      "street": "Musterstraße 1",
+      "city": "Berlin",
+      "zipCode": "10115",
+      "country": "Germany"
+    },
+    "trackingNumber": "DHL873935402",
+    "createdAt": "2026-01-06T21:37:27.189Z",
+    "statusHistory": [
+      {
+        "status": "delivered",
+        "timestamp": "2026-03-30T21:37:27.198Z",
+        "note": "Order created",
+        "_id": "69caed172f6d1a5fa80e6962"
+      }
+    ],
+    "updatedAt": "2026-01-06T21:37:27.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd760ea428ed3504c7690e",
+    "user": "69cb0c3496a43c9eb6d9807d",
+    "items": [
+      {
+        "product": "69caf2fc7e16280dd11918dc",
+        "productType": "Product",
+        "name": "Xiaomi Xiaomi 14 Pro 256GB Schwarz",
+        "quantity": 1,
+        "price": 799,
+        "image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400",
+        "_id": "69cd760ea428ed3504c7690f"
+      }
+    ],
+    "totalAmount": 950.81,
+    "tax": 151.81,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 7990,
+    "status": "pending",
+    "paymentMethod": "bank_transfer",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "House",
+      "email": "mustafamohammad0545@gmail.com",
+      "phone": "+4915752908921",
+      "street": "Walldorfer Straße 13",
+      "city": "Wiesloch",
+      "zipCode": "69168",
+      "country": "Germany"
+    },
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-04-01T19:46:22.068Z",
+        "note": "Order created",
+        "_id": "69cd760ea428ed3504c76911"
+      }
+    ],
+    "orderNumber": "HL-20260401-0001",
+    "createdAt": "2026-04-01T19:46:22.067Z",
+    "updatedAt": "2026-04-01T19:46:22.074Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd7d87ea77b0a26c617f48",
+    "user": "69cb0c3496a43c9eb6d9807d",
+    "items": [
+      {
+        "product": "69caf2fc7e16280dd11918dc",
+        "productType": "Product",
+        "name": "Xiaomi Xiaomi 14 Pro 256GB Schwarz",
+        "quantity": 1,
+        "price": 799,
+        "image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400",
+        "_id": "69cd7d87ea77b0a26c617f49"
+      }
+    ],
+    "totalAmount": 950.81,
+    "tax": 151.81,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 7990,
+    "status": "pending",
+    "paymentMethod": "bank_transfer",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "House",
+      "email": "mustafamohammad0545@gmail.com",
+      "phone": "+4915752908921",
+      "street": "Walldorfer Straße 13",
+      "city": "Wiesloch",
+      "zipCode": "69168",
+      "country": "Germany"
+    },
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-04-01T20:18:15.114Z",
+        "note": "Order created",
+        "_id": "69cd7d87ea77b0a26c617f4d"
+      },
+      {
+        "status": "pending",
+        "note": "Payment receipt uploaded by customer",
+        "_id": "69d1b2e3374b2708781292ad",
+        "timestamp": "2026-04-05T00:54:59.987Z"
+      }
+    ],
+    "orderNumber": "HL-20260401-0002",
+    "createdAt": "2026-04-01T20:18:15.114Z",
+    "updatedAt": "2026-04-05T00:54:59.988Z",
+    "__v": 1,
+    "paymentReceipt": "http://127.0.0.1:5000/uploads/compressed-1775350499924-991341069.webp",
+    "shippingMethod": "Standard"
+  },
+  {
+    "_id": "69cd86aff4dd232e1e46895e",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "items": [
+      {
+        "product": "69caf2fc7e16280dd11918dc",
+        "productType": "Product",
+        "name": "Xiaomi Xiaomi 14 Pro 256GB Schwarz",
+        "quantity": 1,
+        "price": 799,
+        "image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400",
+        "_id": "69cd86aff4dd232e1e46895f"
+      }
+    ],
+    "totalAmount": 950.81,
+    "tax": 151.81,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 7990,
+    "status": "pending",
+    "paymentMethod": "bank_transfer",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "jifesa7479",
+      "email": "jifesa7479@availors.com",
+      "phone": "+491575290892",
+      "street": "Walldorfer Straße 13",
+      "city": "Wiesloch",
+      "zipCode": "69168",
+      "country": "Germany"
+    },
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-04-01T20:57:19.594Z",
+        "note": "Order created",
+        "_id": "69cd86aff4dd232e1e468963"
+      }
+    ],
+    "orderNumber": "HL-20260401-0003",
+    "createdAt": "2026-04-01T20:57:19.594Z",
+    "updatedAt": "2026-04-01T20:57:19.598Z",
+    "__v": 0
+  },
+  {
+    "_id": "69cd894a63fced3af339aa0a",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "items": [
+      {
+        "product": "69caf2fc7e16280dd11918dc",
+        "productType": "Product",
+        "name": "Xiaomi Xiaomi 14 Pro 256GB Schwarz",
+        "quantity": 1,
+        "price": 799,
+        "image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400",
+        "_id": "69cd894a63fced3af339aa0b"
+      }
+    ],
+    "totalAmount": 950.81,
+    "tax": 151.81,
+    "shippingFee": 0,
+    "discountAmount": 0,
+    "appliedPoints": 0,
+    "pointsEarned": 7990,
+    "status": "pending",
+    "paymentMethod": "bank_transfer",
+    "paymentStatus": "pending",
+    "shippingAddress": {
+      "fullName": "jifesa7479",
+      "email": "jifesa7479@availors.com",
+      "phone": "+491575290892",
+      "street": "Walldorfer Str. 13",
+      "city": "Wiesloch",
+      "zipCode": "69168",
+      "country": "Germany"
+    },
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-04-01T21:08:26.420Z",
+        "note": "Order created",
+        "_id": "69cd894a63fced3af339aa0f"
+      },
+      {
+        "status": "pending",
+        "note": "Payment receipt uploaded by customer",
+        "_id": "69cd89ea63fced3af339aa7e",
+        "timestamp": "2026-04-01T21:11:06.293Z"
+      }
+    ],
+    "orderNumber": "HL-20260401-0004",
+    "createdAt": "2026-04-01T21:08:26.420Z",
+    "updatedAt": "2026-04-01T21:11:06.294Z",
+    "__v": 1,
+    "paymentReceipt": "http://127.0.0.1:5000/uploads/compressed-1775077866247-311318185.webp"
+  }
+]

@@ -1,0 +1,159 @@
+[
+  {
+    "_id": "69a766479993370400cba9ae",
+    "user": "69a388063718e2c21362f1e3",
+    "name": "FAWAZ MOHAMMAD",
+    "email": "kepego4741@hutudns.com",
+    "message": "2121",
+    "replies": [],
+    "status": "replied",
+    "isArchived": false,
+    "initiatedByAdmin": true,
+    "createdAt": "2026-03-03T22:52:55.408Z",
+    "updatedAt": "2026-03-03T22:52:55.408Z",
+    "__v": 0
+  },
+  {
+    "_id": "69a766479993370400cba9af",
+    "user": "69892a5338a65b195c05e9d8",
+    "name": "MUSTAFA MOHAMMAD",
+    "email": "mustafamohammad0545@gmail.com",
+    "message": "2121",
+    "replies": [],
+    "status": "closed",
+    "isArchived": false,
+    "initiatedByAdmin": true,
+    "createdAt": "2026-03-03T22:52:55.408Z",
+    "updatedAt": "2026-03-03T22:53:37.390Z",
+    "__v": 0
+  },
+  {
+    "_id": "69a766bb9993370400cbaa40",
+    "user": "69892a5338a65b195c05e9d8",
+    "name": "MUSTAFA MOHAMMAD",
+    "email": "mustafamohammad0545@gmail.com",
+    "message": "نحممننننننننننننننننن",
+    "status": "closed",
+    "isArchived": false,
+    "initiatedByAdmin": false,
+    "replies": [
+      {
+        "message": "Please provide us with your order number so we can investigate further.",
+        "isAdmin": true,
+        "createdAt": "2026-03-03T23:19:09.461Z",
+        "_id": "69a76c6dc93cf988301d4795"
+      },
+      {
+        "message": "Thank you for reaching out. Your issue has been resolved.",
+        "isAdmin": true,
+        "createdAt": "2026-03-08T22:52:30.331Z",
+        "_id": "69adfdaec88956682d631f4f"
+      }
+    ],
+    "createdAt": "2026-03-03T22:54:51.994Z",
+    "updatedAt": "2026-03-29T00:19:02.908Z",
+    "__v": 2
+  },
+  {
+    "_id": "69adfdc5c88956682d632035",
+    "user": "698cf2d7e12d1a857e67e067",
+    "name": "System Admin",
+    "email": "admin@handyland.com",
+    "message": "مرحبا،عندي طلبية ",
+    "status": "replied",
+    "isArchived": false,
+    "initiatedByAdmin": false,
+    "replies": [
+      {
+        "message": "Your repair is currently in progress. We will update you soon.",
+        "isAdmin": true,
+        "_id": "69adfdd2c88956682d63209e",
+        "createdAt": "2026-03-08T22:53:06.740Z"
+      }
+    ],
+    "createdAt": "2026-03-08T22:52:53.350Z",
+    "updatedAt": "2026-03-08T22:53:06.740Z",
+    "__v": 1
+  },
+  {
+    "_id": "69adffd603c2f94b6fd6f11e",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "name": "MUSTAFA MOHAMMAD",
+    "email": "mustafamohammad0545@gmail.com",
+    "message": "سؤسشسؤشؤؤشسؤ",
+    "status": "closed",
+    "isArchived": false,
+    "initiatedByAdmin": false,
+    "replies": [
+      {
+        "message": "Please provide us with your order number so we can investigate further.",
+        "isAdmin": true,
+        "createdAt": "2026-03-08T23:02:00.344Z",
+        "_id": "69adffe803c2f94b6fd6f1a0"
+      },
+      {
+        "message": "سؤ\\ؤ",
+        "isAdmin": false,
+        "createdAt": "2026-03-08T23:05:48.693Z",
+        "_id": "69ae00cc5e3b3032afedd509"
+      },
+      {
+        "message": "Please provide us with your order number so we can investigate further.",
+        "isAdmin": true,
+        "createdAt": "2026-03-08T23:05:56.748Z",
+        "_id": "69ae00d45e3b3032afedd529"
+      },
+      {
+        "message": "Please provide us with your order number so we can investigate further.",
+        "isAdmin": true,
+        "createdAt": "2026-03-08T23:08:48.933Z",
+        "_id": "69ae01805e3b3032afeddc5d"
+      }
+    ],
+    "createdAt": "2026-03-08T23:01:42.539Z",
+    "updatedAt": "2026-03-29T00:19:06.456Z",
+    "__v": 4
+  },
+  {
+    "_id": "69c86ff0ff3466fa5739adb8",
+    "user": "69adeedbfcb87a9c2b19f903",
+    "name": "MUSTAFA MOHAMMAD",
+    "email": "mustafamohammad0545@gmail.com",
+    "message": "رر",
+    "replies": [
+      {
+        "message": "  ببب",
+        "isAdmin": false,
+        "_id": "69c87006ff3466fa5739ae45",
+        "createdAt": "2026-03-29T00:19:18.606Z"
+      }
+    ],
+    "status": "replied",
+    "isArchived": false,
+    "initiatedByAdmin": true,
+    "createdAt": "2026-03-29T00:18:56.390Z",
+    "updatedAt": "2026-03-29T00:19:18.606Z",
+    "__v": 1
+  },
+  {
+    "_id": "69cd8674f4dd232e1e468521",
+    "user": "69cd863ef4dd232e1e4684ee",
+    "name": "jifesa7479",
+    "email": "jifesa7479@availors.com",
+    "message": "hallo ich habe eine frage \n\n",
+    "status": "replied",
+    "isArchived": false,
+    "initiatedByAdmin": false,
+    "replies": [
+      {
+        "message": "ja ",
+        "isAdmin": true,
+        "_id": "69cd8686f4dd232e1e468896",
+        "createdAt": "2026-04-01T20:56:38.628Z"
+      }
+    ],
+    "createdAt": "2026-04-01T20:56:20.239Z",
+    "updatedAt": "2026-04-01T20:56:38.629Z",
+    "__v": 1
+  }
+]
