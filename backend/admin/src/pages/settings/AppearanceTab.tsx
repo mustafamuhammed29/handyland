@@ -33,7 +33,6 @@ export const AppearanceTab = ({ settings, handleChange }: any) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input label="Site Name (Title)" value={settings.siteName} onChange={(v: string) => handleChange(null, 'siteName', v)} placeholder="HANDYLAND" />
                     <Input label="Contact Email" value={settings.contactEmail} onChange={(v: string) => handleChange(null, 'contactEmail', v)} placeholder="info@handyland.de" />
-                    <Input label="Free Shipping Threshold (€)" value={settings.freeShippingThreshold?.toString()} onChange={(v: string) => handleChange(null, 'freeShippingThreshold', Number(v))} type="number" />
                     <Input label="Global Footer Text" value={settings.footerText} onChange={(v: string) => handleChange(null, 'footerText', v)} placeholder="© 2026 HANDYLAND" />
                 </div>
             </div>

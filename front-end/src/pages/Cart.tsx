@@ -48,7 +48,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
     }, []);
 
     const isRtl = lang === 'ar';
-    const threshold = FREE_SHIPPING_THRESHOLD; 
+    const threshold = freeShippingThreshold; 
     const isFreeShipping = finalTotal >= threshold;
 
     if (cart.length === 0) {

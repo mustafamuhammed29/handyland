@@ -180,6 +180,15 @@ const settingsSchema = new mongoose.Schema({
             priceLabel: 'Price'
         }
     },
+    maintenanceMode: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            enabled: false,
+            title: 'Wartungsarbeiten',
+            message: 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!',
+            estimatedTime: 'wenige Minuten'
+        }
+    },
     accountSuspension: {
         type: mongoose.Schema.Types.Mixed,
         default: {

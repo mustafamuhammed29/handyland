@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, TrendingUp, RefreshCw, CheckCircle, AlertCircle, Loader2, ExternalLink, ChevronDown, ChevronUp, BarChart3, Zap, Target, Info } from 'lucide-react';
 import { api } from '../utils/api';
+import toast from 'react-hot-toast';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Blueprint {
@@ -40,20 +41,6 @@ const timeSince = (dateStr: string | null) => {
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-const PriceBadge = ({ label, price, color, onClick, active }: any) => (
-    <button
-        onClick={onClick}
-        className={`flex-1 p-3 rounded-xl border-2 text-center transition-all cursor-pointer ${
-            active
-                ? `border-${color}-500 bg-${color}-500/20 shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.3)]`
-                : `border-slate-700 bg-slate-900/50 hover:border-${color}-500/50`
-        }`}
-    >
-        <p className={`text-xs font-bold uppercase tracking-wider text-${color}-400 mb-1`}>{label}</p>
-        <p className="text-2xl font-black text-white">{price}€</p>
-    </button>
-);
-
 const SampleRow = ({ sample }: { sample: any }) => (
     <a
         href={sample.url}
@@ -86,10 +73,13 @@ const PriceResearchManager: React.FC = () => {
     const [researching, setResearching] = useState(false);
     const [applying, setApplying] = useState(false);
     const [appliedStorage, setAppliedStorage] = useState<string | null>(null);
-    const [chosenBuyback, setChosenBuyback] = useState<Record<string, 'conservative' | 'balanced' | 'aggressive'>>({});
     const [expandedStorage, setExpandedStorage] = useState<string | null>(null);
     const [ebayConfigured, setEbayConfigured] = useState(true);
     const [stats, setStats] = useState({ total: 0, researched: 0, needsUpdate: 0 });
+
+    // Custom Pricing Variables
+    const [globalMargin, setGlobalMargin] = useState<number>(55);
+    const [bulkPricingState, setBulkPricingState] = useState({ active: false, total: 0, current: 0, currentModel: '' });
 
     const fetchStatus = useCallback(async () => {
         setLoading(true);
@@ -111,7 +101,6 @@ const PriceResearchManager: React.FC = () => {
         setSelected(bp);
         setResearchData({});
         setAppliedStorage(null);
-        setChosenBuyback({});
         setExpandedStorage(null);
         setResearching(true);
 
@@ -120,10 +109,6 @@ const PriceResearchManager: React.FC = () => {
             const data = response.data;
             if (data.success) {
                 setResearchData(data.data.storages);
-                // default all storages to 'balanced'
-                const defaults: Record<string, any> = {};
-                bp.validStorages.forEach(s => { defaults[s] = 'balanced'; });
-                setChosenBuyback(defaults);
                 setExpandedStorage(bp.validStorages[0]);
             } else if (data.message?.includes('not configured')) {
                 setEbayConfigured(false);
@@ -151,8 +136,7 @@ const PriceResearchManager: React.FC = () => {
                 return;
             }
 
-            const tier = chosenBuyback[firstStorage] || 'balanced';
-            const newBasePrice = firstResult.suggestedBuyback[tier];
+            const newBasePrice = Math.round((firstResult.avg * (globalMargin / 100)) / 5) * 5;
 
             // Build storage addon prices relative to new base
             const storagePrices: Record<string, number> = {};
@@ -160,8 +144,7 @@ const PriceResearchManager: React.FC = () => {
                 if (idx === 0) { storagePrices[s] = 0; return; }
                 const sResult = researchData[s];
                 if (sResult?.avg) {
-                    const sTier = chosenBuyback[s] || 'balanced';
-                    const sPrice = sResult.suggestedBuyback[sTier];
+                    const sPrice = Math.round((sResult.avg * (globalMargin / 100)) / 5) * 5;
                     storagePrices[s] = Math.max(0, sPrice - newBasePrice);
                 }
             });
@@ -180,6 +163,60 @@ const PriceResearchManager: React.FC = () => {
         } finally {
             setApplying(false);
         }
+    };
+
+    const handleBulkPricing = async () => {
+        if (blueprints.length === 0) return toast.error('Keine Geräte gefunden');
+        const confirmMsg = `Möchtest du automatisiert ${blueprints.length} Geräte von eBay auf Basis von ${globalMargin}% Marge recherchieren und aktualisieren?\n\nDies dauert etwa ${blueprints.length * 2.5} Sekunden.`;
+        if (!confirm(confirmMsg)) return;
+
+        setBulkPricingState({ active: true, total: blueprints.length, current: 0, currentModel: '' });
+        let successCount = 0;
+
+        for (let i = 0; i < blueprints.length; i++) {
+            const bp = blueprints[i];
+            setBulkPricingState(prev => ({ ...prev, current: i + 1, currentModel: bp.model }));
+
+            try {
+                const res = await api.post(`/api/price-research/ebay/device/${bp._id}`, {});
+                if (res.data?.success && res.data.data?.storages) {
+                    const storagesData = res.data.data.storages;
+                    const firstStorage = bp.validStorages[0];
+                    const firstResult = storagesData[firstStorage];
+
+                    if (firstResult && firstResult.avg) {
+                        const newBasePrice = Math.round((firstResult.avg * (globalMargin / 100)) / 5) * 5;
+                        
+                        const storagePrices: Record<string, number> = {};
+                        bp.validStorages.forEach((s, idx) => {
+                            if (idx === 0) { storagePrices[s] = 0; return; }
+                            const sResult = storagesData[s];
+                            if (sResult && sResult.avg) {
+                                const sPrice = Math.round((sResult.avg * (globalMargin / 100)) / 5) * 5;
+                                storagePrices[s] = Math.max(0, sPrice - newBasePrice);
+                            }
+                        });
+
+                        await api.post(`/api/price-research/apply/${bp._id}`, {
+                            newBasePrice,
+                            storagePrices,
+                            marketAvg: firstResult.avg,
+                            ebaySource: 'Bulk Async Engine'
+                        });
+                        successCount++;
+                    }
+                }
+            } catch (err) {
+                console.warn(`Bulk pricing error for ${bp.model}`);
+            }
+
+            // Protect API limits (delay between entire multi-storage device fetch)
+            await new Promise(r => setTimeout(r, 2000));
+        }
+
+        toast.success(`Alle Geräte aktualisiert! ${successCount}/${blueprints.length} erfolgreich.`);
+        setBulkPricingState({ active: false, total: 0, current: 0, currentModel: '' });
+        fetchStatus();
     };
 
     const filtered = blueprints.filter(b => {
@@ -203,9 +240,55 @@ const PriceResearchManager: React.FC = () => {
                         <p className="text-slate-400 text-sm">Aktuelle Gebrauchtpreise von eBay.de · Abgeschlossene Verkäufe</p>
                     </div>
                 </div>
-                <button onClick={fetchStatus} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all" title="Refresh">
-                    <RefreshCw size={18} />
-                </button>
+                <div className="flex items-center gap-4">
+                    {/* Global Margin Input */}
+                    <div className="flex items-center bg-slate-900 border border-slate-700 rounded-xl overflow-hidden shadow-sm" title="Einkaufspreis in % vom eBay Ø">
+                        <span className="px-3 py-2 text-xs font-bold text-slate-400 bg-slate-950 border-r border-slate-700 uppercase tracking-wider">
+                            Margin
+                        </span>
+                        <input 
+                            title="Margin"
+                            aria-label="Margin"
+                            type="number" 
+                            min="1" max="100"
+                            value={globalMargin}
+                            onChange={(e) => setGlobalMargin(Number(e.target.value))}
+                            className="w-14 bg-transparent text-white font-bold text-center appearance-none focus:outline-none"
+                        />
+                        <span className="px-3 py-2 text-slate-400 border-l border-slate-700 bg-slate-900">%</span>
+                    </div>
+
+                    {/* Bulk Sync Button */}
+                    {bulkPricingState.active ? (
+                        <div className="flex items-center gap-3 bg-slate-900 border border-emerald-500/30 py-1.5 px-4 rounded-xl min-w-[200px]">
+                            <div className="flex flex-col w-full">
+                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5 truncate max-w-[120px]">
+                                    {bulkPricingState.currentModel}
+                                </span>
+                                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-emerald-500 transition-all duration-300"
+                                        style={{ width: `${(bulkPricingState.current / bulkPricingState.total) * 100}%` }}
+                                    />
+                                </div>
+                            </div>
+                            <span className="text-emerald-400 font-bold text-xs shrink-0 drop-shadow-md">
+                                {bulkPricingState.current} / {bulkPricingState.total}
+                            </span>
+                        </div>
+                    ) : (
+                        <button 
+                            onClick={handleBulkPricing}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-300 bg-slate-900 hover:bg-emerald-950/30 hover:border-emerald-500 hover:text-emerald-400 border border-slate-700 rounded-xl transition-all shadow-lg"
+                        >
+                            <Zap size={16} /> Auto-Price All
+                        </button>
+                    )}
+                    
+                    <button onClick={fetchStatus} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all" title="Refresh">
+                        <RefreshCw size={18} />
+                    </button>
+                </div>
             </div>
 
             {/* eBay not configured warning */}
@@ -372,7 +455,6 @@ const PriceResearchManager: React.FC = () => {
                             {selected.validStorages.map(storage => {
                                 const result = researchData[storage];
                                 const isExpanded = expandedStorage === storage;
-                                const tier = chosenBuyback[storage] || 'balanced';
 
                                 return (
                                     <div key={storage} className="border border-slate-700 rounded-2xl overflow-hidden">
@@ -403,19 +485,22 @@ const PriceResearchManager: React.FC = () => {
                                                     <span className="text-slate-500">Max: <strong className="text-white">{result.max}€</strong></span>
                                                 </div>
 
-                                                {/* Tier selector */}
+                                                {/* Dynamic Margin display */}
                                                 <div>
-                                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-3">Ankaufspreis wählen (% vom Marktpreis)</p>
-                                                    <div className="flex gap-3">
-                                                        <PriceBadge label="Sicher 52%" price={result.suggestedBuyback.conservative}
-                                                            color="slate" active={tier === 'conservative'}
-                                                            onClick={() => setChosenBuyback(p => ({ ...p, [storage]: 'conservative' }))} />
-                                                        <PriceBadge label="⚡ Optimal 58%" price={result.suggestedBuyback.balanced}
-                                                            color="blue" active={tier === 'balanced'}
-                                                            onClick={() => setChosenBuyback(p => ({ ...p, [storage]: 'balanced' }))} />
-                                                        <PriceBadge label="🏆 Aggressiv 65%" price={result.suggestedBuyback.aggressive}
-                                                            color="emerald" active={tier === 'aggressive'}
-                                                            onClick={() => setChosenBuyback(p => ({ ...p, [storage]: 'aggressive' }))} />
+                                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-3">
+                                                        Dynamischer Ankaufspreis ({globalMargin}% vom eBay Ø)
+                                                    </p>
+                                                    <div className="p-4 bg-slate-900 border border-blue-500/30 rounded-xl flex items-center justify-between">
+                                                        <div>
+                                                            <p className="text-xs text-slate-400 mb-1">Empfohlener Ankauf</p>
+                                                            <p className="text-3xl font-black text-blue-400">
+                                                                {Math.round((result.avg * (globalMargin / 100)) / 5) * 5}€
+                                                            </p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-xs text-slate-500 mb-1">Profit-Marge</p>
+                                                            <p className="text-sm font-bold text-emerald-400">+ {result.avg - (Math.round((result.avg * (globalMargin / 100)) / 5) * 5)}€</p>
+                                                        </div>
                                                     </div>
                                                 </div>
 

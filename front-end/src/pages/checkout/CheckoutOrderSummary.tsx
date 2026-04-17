@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle, Tag, X, Loader2, ShieldCheck, Truck, Trophy, Zap } from 'lucide-react';
 import { formatPrice } from '../../utils/formatPrice';
 import { getImageUrl } from '../../utils/imageUrl';
-import { FREE_SHIPPING_THRESHOLD } from '../../utils/constants';
+
 import { cleanProductName } from '../../utils/cleanProductName';
 import { TrustBadges } from '../../components/products/TrustBadges';
 
@@ -26,6 +26,7 @@ interface CheckoutOrderSummaryProps {
     getFinalTotal: () => number;
     freeShippingThreshold: number;
     taxRate: number;
+    shippingCost: number;
 }
 
 export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
@@ -45,6 +46,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
     getFinalTotal,
     freeShippingThreshold,
     taxRate,
+    shippingCost,
 }) => {
     const { t } = useTranslation();
 
@@ -57,16 +59,16 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
 
             <div className="space-y-4 max-h-80 overflow-y-auto pr-2 custom-scrollbar mb-6">
                 {/* Free Shipping Progress */}
-                {cartTotal < FREE_SHIPPING_THRESHOLD ? (
+                {cartTotal < freeShippingThreshold ? (
                     <div className="bg-slate-950/50 rounded-xl p-4 border border-blue-500/30 mb-4">
                         <div className="flex justify-between text-xs font-bold mb-2">
-                            <span className="text-blue-400">{t('checkout.addForFreeShipping', 'Add {{amount}} for Free Shipping', { amount: formatPrice(Math.max(0, FREE_SHIPPING_THRESHOLD - cartTotal)) })}</span>
-                            <span className="text-slate-500">{Math.round((cartTotal / FREE_SHIPPING_THRESHOLD) * 100)}%</span>
+                            <span className="text-blue-400">{t('checkout.addForFreeShipping', 'Add {{amount}} for Free Shipping', { amount: formatPrice(Math.max(0, freeShippingThreshold - cartTotal)) })}</span>
+                            <span className="text-slate-500">{Math.round((cartTotal / freeShippingThreshold) * 100)}%</span>
                         </div>
                         <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
                             <div
                                 className="bg-blue-500 h-full rounded-full transition-all duration-500"
-                                style={{ width: `${Math.min(100, (cartTotal / FREE_SHIPPING_THRESHOLD) * 100)}%` }}
+                                style={{ width: `${Math.min(100, (cartTotal / freeShippingThreshold) * 100)}%` }}
                             ></div>
                         </div>
                     </div>
@@ -201,21 +203,14 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                     const redeemRate = features?.loyalty?.redeemRate || 100;
                     const loyaltyDiscount = appliedPoints / redeemRate;
                     const discountedSubtotal = Math.max(0, cartTotal - loyaltyDiscount - couponDiscount);
-                    const taxAmount = Math.round(discountedSubtotal * 0.19 * 100) / 100;
                     
-                    const selectedMethod = (window as any).selectedShippingMethod; // We might need a better way if this isn't passed
-                    // Re-calculate shipping logic to match Checkout.tsx
-                    let shippingCost = 5.99;
-                    if (cartTotal >= freeShippingThreshold) {
-                        shippingCost = 0;
-                    }
+                    const total = discountedSubtotal + shippingCost;
+                    const taxFactor = taxRate / 100;
+                    // Formula to extract included VAT: Total - (Total / (1 + TaxRate))
+                    const taxAmountIncluded = total - (total / (1 + taxFactor));
 
                     return (
                         <>
-                            <div className="flex justify-between text-slate-400 text-sm">
-                                <span>{t('checkout.taxVAT', 'MwSt. (19%)')}</span>
-                                <span>{formatPrice(taxAmount)}</span>
-                            </div>
                             <div className={`flex justify-between text-sm ${shippingCost === 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
                                 <span>{t('checkout.shippingCost', 'Versand')}</span>
                                 <span>{shippingCost === 0 ? t('checkout.free', 'KOSTENLOS') : formatPrice(shippingCost)}</span>
@@ -224,7 +219,11 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                                 <span>{t('checkout.total', 'Gesamtbetrag')}</span>
                                 <span>{formatPrice(getFinalTotal())}</span>
                             </div>
-                            <p className="text-[10px] text-slate-500 text-right">{t('checkout.inclVat', 'inkl. {{rate}}% MwSt.', { rate: taxRate })}</p>
+                            <div className="flex justify-between text-[11px] text-slate-500 mt-1">
+                                <span>{t('checkout.taxVATIncluded', `enthält {{rate}}% MwSt.`, { rate: taxRate })}</span>
+                                <span>{formatPrice(taxAmountIncluded)}</span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 text-right mt-1">{t('checkout.inclVatText', 'Alle Preise inkl. gesetzl. Mehrwertsteuer')}</p>
                         </>
                     );
                 })()}

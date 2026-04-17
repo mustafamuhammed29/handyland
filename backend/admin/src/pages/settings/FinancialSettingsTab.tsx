@@ -9,25 +9,41 @@ interface FinancialSettingsTabProps {
 export const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({ settings, handleChange }) => {
     return (
         <div className="space-y-8 animate-fade-in">
-            {/* Tax Settings */}
+            {/* Tax & Shipping Settings */}
             <div>
-                <h3 className="text-xl font-bold text-white mb-2 text-glow">Tax Configuration</h3>
-                <p className="text-slate-400 text-sm mb-4">Set the global Value Added Tax (VAT) rate for all purchases and checkout totals.</p>
-                <div className="p-5 border border-slate-800 rounded-2xl bg-slate-950/50">
-                    <label className="block text-slate-400 text-sm font-bold mb-2">VAT Percentage (%)</label>
-                    <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        value={settings.taxRate ?? 19}
-                        onChange={(e) => handleChange(null, 'taxRate', Number(e.target.value))}
-                        title="VAT Percentage"
-                        aria-label="VAT Percentage"
-                        placeholder="19"
-                        className="w-full md:w-1/3 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-brand-primary outline-none focus:ring-1 focus:ring-brand-primary/50 transition-all font-bold"
-                    />
-                    <p className="text-xs text-slate-500 mt-2">Example: Enter 19 for 19% VAT.</p>
+                <h3 className="text-xl font-bold text-white mb-2 text-glow">Tax & Shipping Configuration</h3>
+                <p className="text-slate-400 text-sm mb-4">Set the global VAT rate and free shipping threshold.</p>
+                <div className="p-5 border border-slate-800 rounded-2xl bg-slate-950/50 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-slate-400 text-sm font-bold mb-2">VAT Percentage (%)</label>
+                        <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value={settings.taxRate ?? 19}
+                            onChange={(e) => handleChange(null, 'taxRate', Number(e.target.value))}
+                            title="VAT Percentage"
+                            aria-label="VAT Percentage"
+                            placeholder="19"
+                            className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-brand-primary outline-none focus:ring-1 focus:ring-brand-primary/50 transition-all font-bold"
+                        />
+                        <p className="text-xs text-slate-500 mt-2">Example: Enter 19 for 19% VAT.</p>
+                    </div>
+                    <div>
+                        <label className="block text-slate-400 text-sm font-bold mb-2">Free Shipping Threshold (€)</label>
+                        <input
+                            type="number"
+                            min="0"
+                            value={settings.freeShippingThreshold ?? 100}
+                            onChange={(e) => handleChange(null, 'freeShippingThreshold', Number(e.target.value))}
+                            title="Free Shipping Threshold"
+                            aria-label="Free Shipping Threshold"
+                            placeholder="100"
+                            className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-brand-primary outline-none focus:ring-1 focus:ring-brand-primary/50 transition-all font-bold"
+                        />
+                        <p className="text-xs text-slate-500 mt-2">Orders above this amount get free shipping.</p>
+                    </div>
                 </div>
             </div>
 

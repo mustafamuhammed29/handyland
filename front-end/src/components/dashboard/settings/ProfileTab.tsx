@@ -43,7 +43,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     setProfileMsg,
     onUpdateProfile,
 }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -167,7 +167,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                         <p className="text-white font-bold">{user.name}</p>
                         <p className="text-slate-400 text-sm">{user.email}</p>
                         <div className="flex items-center gap-3 mt-1.5">
-                            <p className="text-blue-400/70 text-xs">{t('settings.profile.memberSince', 'Member since')} {new Date((user as any).createdAt || Date.now()).toLocaleDateString(t('common.locale', 'en-US'), { month: 'long', year: 'numeric' })}</p>
+                            <p className="text-blue-400/70 text-xs">{t('settings.profile.memberSince', 'Member since')} {new Date((user as any).createdAt || Date.now()).toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' })}</p>
                             {user.avatar && (
                                 <button 
                                     onClick={handleRemoveAvatar}

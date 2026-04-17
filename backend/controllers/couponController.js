@@ -183,3 +183,36 @@ exports.recordCouponUsage = async (couponCode, userId, userEmail) => {
         console.error('Failed to record coupon usage:', err);
     }
 };
+
+// @desc    Get the latest active promo coupon for frontend popup
+// @route   GET /api/coupons/latest-promo
+// @access  Public
+exports.getLatestPromo = async (req, res) => {
+    try {
+        const now = new Date();
+        const coupon = await Coupon.findOne({
+            isActive: true,
+            validUntil: { $gt: now },
+            $or: [
+                { usageLimit: null },
+                { $expr: { $lt: ['$usedCount', '$usageLimit'] } }
+            ]
+        }).sort({ createdAt: -1 }); // newest first
+
+        if (!coupon) {
+            return res.json({ found: false });
+        }
+
+        res.json({
+            found: true,
+            code: coupon.code,
+            discountType: coupon.discountType,
+            discountValue: coupon.discountValue,
+            validUntil: coupon.validUntil,
+            usageLimit: coupon.usageLimit,
+            usedCount: coupon.usedCount
+        });
+    } catch (error) {
+        res.status(500).json({ found: false, message: error.message });
+    }
+};

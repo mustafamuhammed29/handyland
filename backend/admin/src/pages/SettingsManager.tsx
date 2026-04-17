@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, AlertCircle, Shield, Bell, Gift, Globe, FileText, Zap } from 'lucide-react';
+import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, AlertCircle, Shield, Bell, Gift, Globe, FileText, Zap, Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../utils/api';
@@ -14,6 +14,7 @@ import { AppearanceTab } from './settings/AppearanceTab';
 import { FinancialSettingsTab } from './settings/FinancialSettingsTab';
 import { InvoiceSettingsTab } from './settings/InvoiceSettingsTab';
 import { FeaturesTab } from './settings/FeaturesTab';
+import { MaintenanceSettingsTab } from './settings/MaintenanceTab';
 
 interface HeroSettings {
     headline: string;
@@ -467,6 +468,7 @@ export default function SettingsManager() {
         { id: 'general', label: 'General', icon: Layers },
         { id: 'financials', label: 'Financials & Loyalty', icon: Gift },
         { id: 'auth', label: 'Authentication', icon: Shield },
+        { id: 'maintenance', label: 'Maintenance Mode', icon: Wrench },
         { id: 'suspension', label: '🚫 Account Suspension', icon: AlertCircle },
         { id: 'hero', label: 'Hero Section', icon: MonitorPlay },
         { id: 'features', label: 'Feature Controls', icon: Zap },
@@ -523,6 +525,7 @@ export default function SettingsManager() {
                     {activeTab === 'features' && <FeaturesTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'financials' && <FinancialSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'auth' && <SocialAuthTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'maintenance' && <MaintenanceSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'hero' && <HeroSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'layout' && <SectionsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'invoice' && <InvoiceSettingsTab settings={settings} handleChange={handleChange} />}
@@ -1130,19 +1133,22 @@ export default function SettingsManager() {
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-bold text-white">Promo Popup</h3>
-                                    <p className="text-slate-400 text-sm">A timed popup shown to new visitors with a special offer or coupon code.</p>
+                                    <p className="text-slate-400 text-sm">Automatically shows your latest active coupon to new visitors.</p>
                                 </div>
                             </div>
 
                             <div className="p-5 border border-slate-700 rounded-xl space-y-5">
                                 {/* Enable Toggle */}
                                 <div className="flex items-center justify-between py-3 border border-slate-700 rounded-xl px-4">
-                                    <span className="text-white font-bold">Enable Promo Popup</span>
+                                    <div>
+                                        <span className="text-white font-bold block">Enable Promo Popup</span>
+                                        <span className="text-slate-500 text-xs">When enabled, the newest active coupon from Coupon Manager will be shown automatically.</span>
+                                    </div>
                                     <button
                                         type="button"
                                         aria-label={settings.promoPopup?.enabled ? 'Disable Popup' : 'Enable Popup'}
                                         onClick={() => handleChange('promoPopup', 'enabled', !settings.promoPopup?.enabled)}
-                                        className={`relative w-12 h-6 rounded-full transition-all ${settings.promoPopup?.enabled ? 'bg-pink-500' : 'bg-slate-700'
+                                        className={`relative w-12 h-6 rounded-full transition-all shrink-0 ml-4 ${settings.promoPopup?.enabled ? 'bg-pink-500' : 'bg-slate-700'
                                             }`}
                                     >
                                         <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${settings.promoPopup?.enabled ? 'translate-x-6' : 'translate-x-0'
@@ -1150,76 +1156,30 @@ export default function SettingsManager() {
                                     </button>
                                 </div>
 
+                                {/* Delay */}
                                 <div>
-                                    <label className="block text-slate-400 text-sm font-bold mb-2">Popup Title</label>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Delay (seconds)</label>
                                     <input
-                                        type="text"
-                                        value={settings.promoPopup?.title || ''}
-                                        onChange={e => handleChange('promoPopup', 'title', e.target.value)}
-                                        placeholder="🎁 Special Offer!"
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 outline-none"
+                                        type="number"
+                                        min={0}
+                                        max={120}
+                                        placeholder="5"
+                                        value={settings.promoPopup?.delay ?? 5}
+                                        onChange={e => handleChange('promoPopup', 'delay', Number(e.target.value))}
+                                        className="w-full max-w-xs bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 outline-none"
                                     />
+                                    <p className="text-xs text-slate-500 mt-1">How long to wait before showing the popup to a new visitor.</p>
                                 </div>
 
-                                <div>
-                                    <label className="block text-slate-400 text-sm font-bold mb-2">Popup Message</label>
-                                    <textarea
-                                        value={settings.promoPopup?.message || ''}
-                                        onChange={e => handleChange('promoPopup', 'message', e.target.value)}
-                                        placeholder="Get 10% off your first order! Use the code below at checkout."
-                                        rows={3}
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 outline-none resize-none"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
+                                {/* Info Box */}
+                                <div className="p-4 bg-emerald-900/20 border border-emerald-800 rounded-lg text-sm text-emerald-300 flex gap-3">
+                                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                                     <div>
-                                        <label className="block text-slate-400 text-sm font-bold mb-2">Coupon Code</label>
-                                        <input
-                                            type="text"
-                                            value={settings.promoPopup?.couponCode || ''}
-                                            onChange={e => handleChange('promoPopup', 'couponCode', e.target.value.toUpperCase())}
-                                            placeholder="WELCOME10"
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white font-mono tracking-wider focus:border-pink-500 outline-none"
-                                        />
+                                        <p className="font-bold mb-1">Linked to Coupon Manager</p>
+                                        <p className="text-emerald-400/80">The popup automatically displays the <strong>newest active coupon</strong> from <strong>Coupon Manager</strong>. Title, message, and discount details are generated automatically — no manual input needed!</p>
                                     </div>
-                                    <div>
-                                        <label className="block text-slate-400 text-sm font-bold mb-2">Delay (seconds)</label>
-                                        <input
-                                            type="number"
-                                            min={0}
-                                            max={120}
-                                            placeholder="5"
-                                            value={settings.promoPopup?.delay ?? 5}
-                                            onChange={e => handleChange('promoPopup', 'delay', Number(e.target.value))}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 outline-none"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="p-3 bg-blue-900/20 border border-blue-800 rounded-lg text-sm text-blue-300 flex gap-2">
-                                    <AlertCircle className="w-5 h-5 shrink-0" />
-                                    <p>Make sure the coupon code you enter matches an active coupon in <strong>Coupon Manager</strong>. The popup will show after the delay only to new visitors (tracked via localStorage).</p>
                                 </div>
                             </div>
-
-                            {/* Live Preview */}
-                            {settings.promoPopup?.title && (
-                                <div className="mt-4">
-                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Live Preview</p>
-                                    <div className="max-w-sm mx-auto bg-slate-900 border border-pink-500/30 rounded-2xl p-6 shadow-2xl text-center">
-                                        <div className="text-3xl mb-2">🎁</div>
-                                        <h4 className="text-white font-black text-lg mb-2">{settings.promoPopup.title}</h4>
-                                        <p className="text-slate-400 text-sm mb-4">{settings.promoPopup.message || 'Your message here...'}</p>
-                                        {settings.promoPopup.couponCode && (
-                                            <div className="px-4 py-2 bg-pink-500/10 border border-pink-500/40 rounded-xl font-mono text-pink-400 font-bold text-lg mb-4 tracking-widest">
-                                                {settings.promoPopup.couponCode}
-                                            </div>
-                                        )}
-                                        <button className="w-full py-2 bg-pink-500 text-white font-bold rounded-xl text-sm">Copy Code</button>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     )}
 

@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-04-17T20:23:22.709Z",
+  "healthy": true,
+  "checks": [
+    {
+      "name": "Required ENV Variables",
+      "ok": true,
+      "detail": "3 vars set"
+    },
+    {
+      "name": "Optional ENV Variables",
+      "ok": true,
+      "detail": "Advisory: missing EMAIL_USER, EMAIL_PASS"
+    },
+    {
+      "name": "MongoDB Connection",
+      "ok": true,
+      "detail": "ping ok"
+    },
+    {
+      "name": "Disk Write Access (uploads/)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Backend HTTP /api/health",
+      "ok": true,
+      "detail": "HTTP 200"
+    }
+  ]
+}

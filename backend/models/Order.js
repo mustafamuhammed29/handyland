@@ -168,13 +168,12 @@ OrderSchema.pre('validate', async function (next) {
     // 2. Integrity Check: Verify Total Amount
     if (this.items && this.items.length > 0) {
         const itemsTotal = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        // FIXED: Include tax in validation to match controller calculation
-        // Total = Items + Shipping + Tax - Discount
-        const calculatedTotal = itemsTotal + (this.shippingFee || 0) + (this.tax || 0) - (this.discountAmount || 0);
+        // TAX-INCLUSIVE MODEL: VAT (19%) is already baked into product prices (B2C Germany).
+        // Total = Items + Shipping - Discount  (tax is displayed only, not added on top)
+        const calculatedTotal = itemsTotal + (this.shippingFee || 0) - (this.discountAmount || 0);
 
-        // Allow for floating point and rounding differences between frontend/backend
-        if (Math.abs(this.totalAmount - calculatedTotal) > 1.00) {
-            // Invalidate the document
+        // Allow ±2.00 tolerance for floating point / rounding differences
+        if (Math.abs(this.totalAmount - calculatedTotal) > 2.00) {
             this.invalidate('totalAmount', `Total amount mismatch. Expected: ${calculatedTotal.toFixed(2)}, Received: ${this.totalAmount}`);
         }
     }

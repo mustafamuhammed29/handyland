@@ -150,4 +150,12 @@ router.put('/changepassword', protect, authController.changePassword);
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', protect, authController.logout);
 
+// Email availability check (used for live validation in Register form)
+const checkEmailLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDevelopment ? 100 : 20,
+    message: { success: false, message: 'Too many requests' }
+});
+router.post('/check-email', checkEmailLimiter, authController.checkEmailAvailability);
+
 module.exports = router;

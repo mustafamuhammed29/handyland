@@ -13,7 +13,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
     repairs,
     isLoading
 }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [expandedRepairId, setExpandedRepairId] = useState<string | null>(null);
     const [localRepairs, setLocalRepairs] = useState<RepairTicket[]>([]);
     const [newNoteText, setNewNoteText] = useState('');
@@ -157,7 +157,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                         <div className="text-xs text-slate-500">
                                             {t('repairs.item.estCompletion', 'Est. Completion')}:{' '}
                                             <span className="text-white font-bold">
-                                                {new Date(ticket.estimatedCompletion).toLocaleDateString(t('common.locale', 'en-US'), {
+                                                {new Date(ticket.estimatedCompletion).toLocaleDateString(i18n.language, {
                                                     weekday: 'short', day: '2-digit', month: 'short'
                                                 })}
                                             </span>
@@ -228,7 +228,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                                                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                                                                 </div>
                                                                 <span className={`text-[10px] text-slate-500 font-mono ${msg.role === 'customer' ? 'text-right pr-1' : 'text-left pl-1'} `}>
-                                                                    {new Date(msg.timestamp).toLocaleString(t('common.locale', 'en-US'), { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
+                                                                    {new Date(msg.timestamp).toLocaleString(i18n.language, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
                                                                 </span>
                                                             </div>
                                                         </div>

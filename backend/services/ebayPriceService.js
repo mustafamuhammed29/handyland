@@ -88,7 +88,7 @@ async function fetchEbayPrices(modelName, storage = '', appId) {
     // filter=buyingOptions:{FIXED_PRICE},conditionIds:{3000|2000|2500}
     const filter = encodeURIComponent('buyingOptions:{FIXED_PRICE},conditionIds:{3000|2000|2500}');
     
-    const searchPath = `/buy/browse/v1/item_summary/search?q=${encodedKeyword}&category_ids=${EBAY_CATEGORY_ID}&filter=${filter}&limit=50&sort=-price`;
+    const searchPath = `/buy/browse/v1/item_summary/search?q=${encodedKeyword}&category_ids=${EBAY_CATEGORY_ID}&filter=${filter}&limit=50&sort=newlyListed`;
 
     return new Promise((resolve, reject) => {
         const options = {
@@ -208,4 +208,117 @@ async function researchDevicePrices(modelName, storages, appId) {
     };
 }
 
-module.exports = { fetchEbayPrices, researchDevicePrices };
+/**
+ * Fetches deep technical specs (Item Aspects) from a top eBay listing.
+ */
+async function fetchEbayDeepSpecs(modelName, appId) {
+    const clientSecret = process.env.EBAY_CLIENT_SECRET;
+    
+    // 1. Authenticate
+    const token = await getOAuthToken(appId, clientSecret);
+
+    // 2. Fetch Item Summary to grab a valid Item ID
+    const encodedKeyword = encodeURIComponent(modelName);
+    const filter = encodeURIComponent('buyingOptions:{FIXED_PRICE},conditionIds:{3000|2000|2500|1000}');
+    const searchPath = `/buy/browse/v1/item_summary/search?q=${encodedKeyword}&category_ids=${EBAY_CATEGORY_ID}&filter=${filter}&limit=3`;
+
+    const getJSON = (path) => new Promise((resolve, reject) => {
+        const options = {
+            hostname: 'api.ebay.com',
+            path: path,
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'X-EBAY-C-MARKETPLACE-ID': EBAY_MARKETPLACE,
+                'Accept': 'application/json'
+            }
+        };
+
+        const req = https.request(options, (res) => {
+            let body = '';
+            res.on('data', chunk => { body += chunk; });
+            res.on('end', () => {
+                try {
+                    const json = JSON.parse(body);
+                    resolve({ status: res.statusCode, json });
+                } catch (e) {
+                    reject(new Error('Invalid JSON from eBay API'));
+                }
+            });
+        });
+        req.on('error', reject);
+        req.end();
+    });
+
+    const searchRes = await getJSON(searchPath);
+    if (searchRes.status !== 200 || !searchRes.json.itemSummaries || searchRes.json.itemSummaries.length === 0) {
+        throw new Error('No items found on eBay to extract specs from.');
+    }
+
+    const firstItem = searchRes.json.itemSummaries[0];
+    const itemId = firstItem.itemId;
+
+    // 3. Fetch Deep Item details
+    const itemPath = `/buy/browse/v1/item/${encodeURIComponent(itemId)}`;
+    const detailRes = await getJSON(itemPath);
+
+    if (detailRes.status !== 200) {
+        throw new Error('Failed to fetch deep item details from eBay.');
+    }
+
+    const aspects = detailRes.json.localizedAspects || [];
+    
+    // 4. Format into a raw JSON group (Technische Details)
+    const techDetails = {};
+    const rootSpecs = {};
+
+    aspects.forEach(aspect => {
+        if (!aspect.name || !aspect.value) return;
+
+        let name = aspect.name;
+        let val = aspect.value;
+
+        // Skip basic info that causes duplication with Stammdaten
+        const skipKeys = ['Marke', 'Modell', 'Farbe', 'Speicherkapazität', 'Zustand', 'Modellnummer', 'Herstellernummer', 'Herstellungsland und -region', 'EAN', 'Ohne Simlock', 'Vertrag'];
+        if (skipKeys.includes(name) || name.toLowerCase().includes('vertrag')) return;
+
+        // Map primary components to standard English keys so they populate the HAUPTMERKMALE in frontend
+        if (name === 'Prozessor') {
+            rootSpecs['Processor'] = val;
+            return;
+        }
+        if (name === 'Betriebssystem') {
+            rootSpecs['OS'] = val;
+            return;
+        }
+        if (name === 'RAM' || name === 'Arbeitsspeicher') {
+            rootSpecs['RAM'] = val;
+            return;
+        }
+        if (name === 'Bildschirmgröße') {
+            rootSpecs['Display'] = val;
+            return;
+        }
+        if (name === 'Kameraauflösung') {
+            rootSpecs['Camera'] = val;
+            return;
+        }
+
+        // Keep the rest in Technische Details
+        techDetails[name] = val;
+    });
+
+    if (Object.keys(techDetails).length === 0 && Object.keys(rootSpecs).length === 0) {
+        throw new Error('Listing found, but seller attached no technical specifications.');
+    }
+
+    return {
+        success: true,
+        data: {
+            ...rootSpecs,
+            ...(Object.keys(techDetails).length > 0 ? { "Technische Details": techDetails } : {})
+        }
+    };
+}
+
+module.exports = { fetchEbayPrices, researchDevicePrices, fetchEbayDeepSpecs };

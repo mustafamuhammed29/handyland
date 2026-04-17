@@ -30,6 +30,12 @@ export default function ProductsManager() {
             metaDescription: '',
             keywords: '',
             canonicalUrl: ''
+        },
+        specs: {
+            ram: '',
+            os: '',
+            camera: '',
+            benchmarkScore: ''
         }
     });
 
@@ -144,6 +150,12 @@ export default function ProductsManager() {
                 metaDescription: product.seo?.metaDescription || '',
                 keywords: product.seo?.keywords || '',
                 canonicalUrl: product.seo?.canonicalUrl || ''
+            },
+            specs: {
+                ram: product.specs?.ram || '',
+                os: product.specs?.os || '',
+                camera: product.specs?.camera || '',
+                benchmarkScore: product.specs?.benchmarkScore || ''
             }
         });
         setIsModalOpen(true);
@@ -204,6 +216,12 @@ export default function ProductsManager() {
                 metaDescription: '',
                 keywords: '',
                 canonicalUrl: ''
+            },
+            specs: {
+                ram: '',
+                os: '',
+                camera: '',
+                benchmarkScore: ''
             }
         });
     };
@@ -501,6 +519,43 @@ export default function ProductsManager() {
                                         placeholder="6.7 inch Super Retina XDR"
                                         value={formData.display}
                                         onChange={e => setFormData({ ...formData, display: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">RAM</label>
+                                    <input
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                        placeholder="8GB"
+                                        value={formData.specs.ram}
+                                        onChange={e => setFormData({ ...formData, specs: { ...formData.specs, ram: e.target.value } })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">OS (Operating System)</label>
+                                    <input
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                        placeholder="iOS 17"
+                                        value={formData.specs.os}
+                                        onChange={e => setFormData({ ...formData, specs: { ...formData.specs, os: e.target.value } })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Camera Specs</label>
+                                    <input
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                        placeholder="48 MP Main, 12 MP Ultra Wide"
+                                        value={formData.specs.camera}
+                                        onChange={e => setFormData({ ...formData, specs: { ...formData.specs, camera: e.target.value } })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Benchmark Score</label>
+                                    <input
+                                        type="number"
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+                                        placeholder="e.g. 1530000"
+                                        value={formData.specs.benchmarkScore}
+                                        onChange={e => setFormData({ ...formData, specs: { ...formData.specs, benchmarkScore: e.target.value } })}
                                     />
                                 </div>
                             </div>

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { User } from '../types';
-import i18n from '../i18n';
+import { useLang } from './LanguageContext';
 import { api } from '../utils/api';
 
 interface AuthContextType {
@@ -42,16 +42,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isVerified, setIsVerified] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    // Sync preferred language
+    const { setLang } = useLang();
+
+    // Sync preferred language from DB -> App State when user logs in or is fetched
     useEffect(() => {
-        if (user && user.preferredLanguage && i18n.language !== user.preferredLanguage) {
-            i18n.changeLanguage(user.preferredLanguage).then(() => {
-                localStorage.setItem('handyland_lang', user.preferredLanguage!);
-                document.documentElement.dir = (user.preferredLanguage === 'ar' || user.preferredLanguage === 'fa') ? 'rtl' : 'ltr';
-                document.documentElement.lang = user.preferredLanguage!;
-            });
+        if (user && user.preferredLanguage) {
+            setLang(user.preferredLanguage as any);
         }
-    }, [user?.preferredLanguage]);
+    }, [user?.preferredLanguage, setLang]);
 
     const refreshAccessToken = useCallback(async (): Promise<boolean> => {
         try {

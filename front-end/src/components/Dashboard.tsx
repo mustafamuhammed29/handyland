@@ -8,6 +8,8 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { User as UserType, PhoneListing } from '../types';
 import { useDashboardData } from '../hooks/useDashboardData';
+import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LanguageContext';
 import { ContactInbox } from './ContactInbox';
 import {
     DashboardOverview,
@@ -37,6 +39,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const { t, i18n } = useTranslation();
+    const { setUser } = useAuth();
+    const { setLang } = useLang();
 
     // Use the new data fetching hook
     const dashboardData = useDashboardData(activeTab);
@@ -99,12 +103,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
     const handleUpdateProfile = useCallback(async (data: Partial<UserType>) => {
         try {
-            await authService.updateProfile(data);
+            const res = await authService.updateProfile(data);
             user.refetch();
+            
+            // Sync AuthContext so navbar and global state updates
+            if (res && res.user) {
+                setUser((prev: any) => ({ ...prev, ...res.user }));
+            }
+            
+            // If they just changed language from Profile Config, force global update instantaneously
+            if (data.preferredLanguage) {
+                setLang(data.preferredLanguage as any);
+            }
         } catch (error) {
             console.error('Error updating profile:', error);
         }
-    }, [user]);
+    }, [user, setUser, setLang]);
 
     const handleUpdatePassword = useCallback(async (oldPass: string, newPass: string) => {
         try {

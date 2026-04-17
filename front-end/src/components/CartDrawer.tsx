@@ -10,7 +10,7 @@ import { api } from '../utils/api';
 import { formatPrice } from '../utils/formatPrice';
 import { getImageUrl } from '../utils/imageUrl';
 import { useTranslation } from 'react-i18next';
-import { FREE_SHIPPING_THRESHOLD } from '../utils/constants';
+
 import { cleanProductName } from '../utils/cleanProductName';
 
 interface CartDrawerProps {}
@@ -37,7 +37,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
 
-    const threshold = FREE_SHIPPING_THRESHOLD;
+    const threshold = freeShippingThreshold;
     const progress = Math.min((cartTotal / threshold) * 100, 100);
     const remainingForFreeShipping = Math.max(0, threshold - cartTotal);
 

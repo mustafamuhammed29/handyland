@@ -28,7 +28,7 @@ interface AppProvidersProps {
  * Compound provider that wraps the entire app.
  * All context providers are co-located here to keep App.tsx clean.
  * Order matters: QueryClientProvider → HelmetProvider → ThemeProvider
- *                → Toast → Language → Settings → Auth → Cart
+ *                → Toast → Settings → Language → Auth → Cart
  */
 export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
     return (
@@ -37,8 +37,8 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
                 <ThemeProvider>
                     <CookieProvider>
                         <ToastProvider>
-                            <LanguageProvider>
-                                <SettingsProvider>
+                            <SettingsProvider>
+                                <LanguageProvider>
                                     <AuthProvider>
                                         <WishlistProvider>
                                             <CartProvider>
@@ -46,8 +46,8 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
                                             </CartProvider>
                                         </WishlistProvider>
                                     </AuthProvider>
-                                </SettingsProvider>
-                            </LanguageProvider>
+                                </LanguageProvider>
+                            </SettingsProvider>
                         </ToastProvider>
                     </CookieProvider>
                 </ThemeProvider>

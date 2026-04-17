@@ -6,7 +6,7 @@
  * apply suggested buyback prices directly to DeviceBlueprints.
  */
 
-const { fetchEbayPrices, researchDevicePrices } = require('../services/ebayPriceService');
+const { fetchEbayPrices, researchDevicePrices, fetchEbayDeepSpecs } = require('../services/ebayPriceService');
 const DeviceBlueprint = require('../models/DeviceBlueprint');
 
 // Simple in-memory cache (15 min per device) to avoid hammering eBay API
@@ -56,6 +56,34 @@ exports.researchSingle = async (req, res) => {
         res.json({ success: true, cached: false, data });
     } catch (err) {
         console.error('[PriceResearch] Error:', err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+/**
+ * @desc    Fetch Deep Localized Aspects (Specs) from an eBay top item
+ * @route   GET /api/price-research/ebay-specs?model=iPhone 15 Pro
+ * @access  Admin
+ */
+exports.researchEbaySpecs = async (req, res) => {
+    try {
+        const { model } = req.query;
+        if (!model) {
+            return res.status(400).json({ success: false, message: 'model query param required' });
+        }
+
+        const appId = process.env.EBAY_APP_ID;
+        if (!appId || appId === 'YOUR_EBAY_APP_ID_HERE') {
+            return res.status(503).json({
+                success: false,
+                message: 'eBay API not configured. Add EBAY_APP_ID to .env'
+            });
+        }
+
+        const data = await fetchEbayDeepSpecs(model, appId);
+        res.json(data);
+    } catch (err) {
+        console.error('[PriceResearch] Specs fetch error:', err.message);
         res.status(500).json({ success: false, message: err.message });
     }
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Globe, TrendingUp, Save, Zap } from 'lucide-react';
+import { Search, Globe, TrendingUp, Save, Zap, Database } from 'lucide-react';
 import { api } from '../utils/api';
 import toast from 'react-hot-toast';
 
@@ -11,8 +11,19 @@ export default function CompareManager() {
     const [researching, setResearching] = useState(false);
     const [globalStats, setGlobalStats] = useState<any>(null);
     const [advancedSpecsJson, setAdvancedSpecsJson] = useState('');
+    const [fetchingSpecs, setFetchingSpecs] = useState(false);
+    
+    // Bulk Sync State
+    const [bulkSyncState, setBulkSyncState] = useState({
+        active: false,
+        total: 0,
+        current: 0,
+        currentModel: ''
+    });
 
     const [specsForm, setSpecsForm] = useState({
+        ram: '',
+        os: '',
         processor: '',
         display: '',
         camera: '',
@@ -41,6 +52,8 @@ export default function CompareManager() {
         setEditingProduct(product);
         setGlobalStats(null);
         setSpecsForm({
+            ram: product.specs?.ram || '',
+            os: product.specs?.os || '',
             processor: product.specs?.processor || product.processor || '',
             display: product.specs?.display || product.display || '',
             camera: product.specs?.camera || '',
@@ -50,6 +63,8 @@ export default function CompareManager() {
         });
 
         const deepSpecs = { ...product.specs };
+        delete deepSpecs.ram;
+        delete deepSpecs.os;
         delete deepSpecs.processor;
         delete deepSpecs.display;
         delete deepSpecs.camera;
@@ -72,17 +87,80 @@ export default function CompareManager() {
                 setGlobalStats(res.data.data);
                 if (avg) {
                     setSpecsForm(prev => ({ ...prev, globalPrice: String(avg) }));
-                    toast.success('Found Global Market Average: €' + avg);
+                    toast.success('Market Average Applied');
                 }
             } else {
-                toast.error('Could not find market data for this device.');
+                toast.error(res.data?.message || 'Failed to fetch eBay prices');
             }
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to contact global pricing engine.');
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || err.message || 'Error fetching eBay data');
         } finally {
             setResearching(false);
         }
+    };
+
+    const handleFetchEbaySpecs = async () => {
+        if (!editingProduct) return;
+        setFetchingSpecs(true);
+        try {
+            const model = editingProduct.name || editingProduct.model;
+            const res = await api.get(`/api/price-research/ebay-specs?model=${encodeURIComponent(model)}`);
+            if (res.data?.success && res.data.data) {
+                setAdvancedSpecsJson(JSON.stringify(res.data.data, null, 2));
+                toast.success('eBay Deep Specs Extracted & Injected!');
+            } else {
+                toast.error(res.data?.message || 'Failed to extract specs');
+            }
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || err.message || 'Error fetching specs. Make sure eBay App ID is set.');
+        } finally {
+            setFetchingSpecs(false);
+        }
+    };
+
+    const handleBulkSync = async () => {
+        // Find devices that lack technical details or root specifications
+        const targets = products.filter(p => !p.specs || (!p.specs.Processor && !p.specs['Technische Details']));
+        
+        if (targets.length === 0) {
+            return toast.success('All devices already have technical specifications!');
+        }
+
+        if (!confirm(`Found ${targets.length} devices missing technical specifications.\nDo you want to automatically fetch them from eBay?\nThis will take approximately ${targets.length * 1.5} seconds.`)) {
+            return;
+        }
+
+        setBulkSyncState({ active: true, total: targets.length, current: 0, currentModel: '' });
+        let successCount = 0;
+
+        for (let i = 0; i < targets.length; i++) {
+            const prod = targets[i];
+            const modelName = prod.name || prod.model;
+            setBulkSyncState(prev => ({ ...prev, current: i + 1, currentModel: modelName }));
+
+            try {
+                const res = await api.get(`/api/price-research/ebay-specs?model=${encodeURIComponent(modelName)}`);
+                if (res.data?.success && res.data.data) {
+                    const newSpecs = {
+                        ...(prod.specs || {}),
+                        ...res.data.data
+                    };
+                    
+                    // Update in database
+                    await api.put(`/api/products/${prod._id || prod.id}`, { specs: newSpecs });
+                    successCount++;
+                }
+            } catch (err) {
+                console.warn(`Skipped ${modelName} - not found or error.`);
+            }
+
+            // Respect API rate limits (1 second delay)
+            await new Promise(r => setTimeout(r, 1000));
+        }
+
+        toast.success(`Bulk Sync Complete! Successfully updated ${successCount} out of ${targets.length} devices.`);
+        setBulkSyncState({ active: false, total: 0, current: 0, currentModel: '' });
+        fetchProducts(); // Refresh the list
     };
 
     const handleSaveSpecs = async () => {
@@ -101,6 +179,8 @@ export default function CompareManager() {
                 ...editingProduct,
                 specs: {
                     ...parsedAdvanced,
+                    ram: specsForm.ram,
+                    os: specsForm.os,
                     processor: specsForm.processor,
                     display: specsForm.display,
                     camera: specsForm.camera,
@@ -131,6 +211,34 @@ export default function CompareManager() {
                         <Globe className="text-blue-400" /> Global Compare Manager
                     </h2>
                     <p className="text-slate-400">Curate "World-Class" comparison data & global market prices for your store</p>
+                </div>
+                
+                {/* Bulk Sync Section */}
+                <div className="flex items-center gap-4">
+                    {bulkSyncState.active ? (
+                        <div className="flex items-center gap-4 bg-slate-900 border border-brand-primary/30 py-2 px-4 rounded-xl">
+                            <div className="flex flex-col">
+                                <span className="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">Syncing: {bulkSyncState.currentModel}</span>
+                                <div className="h-2 w-48 bg-slate-800 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-brand-primary transition-all duration-300"
+                                        style={{ width: `${(bulkSyncState.current / bulkSyncState.total) * 100}%` }}
+                                    />
+                                </div>
+                            </div>
+                            <span className="text-brand-primary font-bold text-sm">
+                                {bulkSyncState.current} / {bulkSyncState.total}
+                            </span>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={handleBulkSync}
+                            className="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-700 hover:border-brand-primary hover:text-brand-primary text-slate-300 rounded-xl font-bold text-sm transition-all shadow-lg"
+                        >
+                            <Database className="w-4 h-4" />
+                            Bulk Sync Empty Devices
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -259,6 +367,27 @@ export default function CompareManager() {
                                         />
                                     </div>
 
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-medium text-slate-400">RAM</label>
+                                            <input
+                                                className="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-white text-sm focus:outline-none focus:border-blue-500"
+                                                placeholder="8GB"
+                                                value={specsForm.ram}
+                                                onChange={e => setSpecsForm({...specsForm, ram: e.target.value})}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-medium text-slate-400">OS</label>
+                                            <input
+                                                className="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-white text-sm focus:outline-none focus:border-blue-500"
+                                                placeholder="iOS 17"
+                                                value={specsForm.os}
+                                                onChange={e => setSpecsForm({...specsForm, os: e.target.value})}
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div className="space-y-1">
                                         <label className="text-xs font-medium text-slate-400">Display Tech</label>
                                         <input
@@ -304,9 +433,19 @@ export default function CompareManager() {
                                     </div>
                                     
                                     <div className="space-y-1 mt-4 pt-4 border-t border-slate-800">
-                                        <div className="flex justify-between items-center">
-                                            <label className="text-xs font-bold text-slate-400">Advanced: Raw Specs JSON (Grouped Data)</label>
-                                            <span className="text-[10px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded">Used for Dynamic Compare Page</span>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-400 block">Advanced: Raw Specs JSON (Grouped Data)</label>
+                                                <span className="text-[10px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded">Deep specifications injected here</span>
+                                            </div>
+                                            <button
+                                                onClick={handleFetchEbaySpecs}
+                                                disabled={fetchingSpecs || !editingProduct}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary text-[11px] font-bold rounded-lg transition-colors border border-brand-primary/30"
+                                            >
+                                                <Database className="w-3.5 h-3.5" />
+                                                {fetchingSpecs ? 'Extracting...' : 'Auto-Fetch from eBay'}
+                                            </button>
                                         </div>
                                         <textarea
                                             className="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-white text-[11px] font-mono focus:outline-none focus:border-blue-500 h-28 custom-scrollbar resize-none"

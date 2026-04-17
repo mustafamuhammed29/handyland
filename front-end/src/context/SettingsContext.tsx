@@ -351,16 +351,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
     }, [settings.theme]);
 
-    // Force application language to match global settings retrieved from the backend
-    useEffect(() => {
-        if (settings.language && i18n.language !== settings.language) {
-            i18n.changeLanguage(settings.language).then(() => {
-                localStorage.setItem('handyland_lang', settings.language!);
-                document.documentElement.dir = (settings.language === 'ar' || settings.language === 'fa') ? 'rtl' : 'ltr';
-                document.documentElement.lang = settings.language!;
-            });
-        }
-    }, [settings.language]);
+    // Removed forced language matching to allow users to preserve their language choice in localStorage
 
     useEffect(() => {
         const fetchSettings = async (isBackgroundPolling = false) => {
@@ -399,8 +390,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 if (merged.siteName) {
                     localStorage.setItem('handyland_sitename', merged.siteName);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Failed to load global settings", error);
+                
+                // Check if this is a maintenance mode response (503)
+                if (error?.response?.status === 503 && error?.response?.data?.maintenance) {
+                    // Redirect to maintenance page instead of showing error
+                    if (window.location.pathname !== '/maintenance') {
+                        window.location.href = '/maintenance';
+                    }
+                    return;
+                }
+                
                 if (!isBackgroundPolling) {
                     setError(true);
                     setLoading(false);

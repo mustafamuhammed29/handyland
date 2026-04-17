@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
     Mail, Lock, User, Phone, AlertCircle, Loader,
-    Shield, CheckCircle, XCircle, Eye, EyeOff
+    Shield, CheckCircle, XCircle, Eye, EyeOff, Loader2
 } from 'lucide-react';
 import { validateEmail, validatePassword, validatePhone, validateRequired } from '../validation';
 import { authService } from '../services/authService';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { useSettings } from '../context/SettingsContext';
+import { useAuth } from '../context/AuthContext';
 
 import { ENV } from '../config/env';
 const API_URL = ENV.API_URL;
@@ -81,6 +82,14 @@ const PasswordInput: React.FC<{
 
 const Register: React.FC = () => {
     const { settings } = useSettings();
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    React.useEffect(() => {
+        if (user) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [user, navigate]);
 
     // FIXED: [Added lang state and translations for error messages]
     const lang = localStorage.getItem('handyland_lang') || 'en';
@@ -103,7 +112,36 @@ const Register: React.FC = () => {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+
+    // Live email availability state
+    const [emailStatus, setEmailStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+    const emailDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+
+    // Debounced live email check
+    useEffect(() => {
+        const email = formData.email;
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setEmailStatus('idle');
+            return;
+        }
+        setEmailStatus('checking');
+        if (emailDebounceRef.current) clearTimeout(emailDebounceRef.current);
+        emailDebounceRef.current = setTimeout(async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/auth/check-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                setEmailStatus(data.available ? 'available' : 'taken');
+            } catch {
+                setEmailStatus('idle'); // silent fail, don't block user
+            }
+        }, 600);
+        return () => { if (emailDebounceRef.current) clearTimeout(emailDebounceRef.current); };
+    }, [formData.email]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -221,9 +259,32 @@ const Register: React.FC = () => {
                                 <input
                                     type="email" name="email" value={formData.email} onChange={handleChange}
                                     placeholder="secure@handyland.com" required
-                                    className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                    className={`w-full pl-11 pr-11 py-3 bg-slate-800/50 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                                        emailStatus === 'available' ? 'border-emerald-500/70 focus:ring-emerald-500'
+                                        : emailStatus === 'taken' ? 'border-red-500/70 focus:ring-red-500'
+                                        : 'border-slate-700 focus:ring-green-500'
+                                    }`}
                                 />
+                                {/* Live status icon */}
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    {emailStatus === 'checking' && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
+                                    {emailStatus === 'available' && <CheckCircle className="w-4 h-4 text-emerald-400" />}
+                                    {emailStatus === 'taken' && <XCircle className="w-4 h-4 text-red-400" />}
+                                </div>
                             </div>
+                            {/* Live feedback message */}
+                            {emailStatus === 'available' && (
+                                <p className="mt-1.5 text-xs text-emerald-400 flex items-center gap-1">
+                                    <CheckCircle className="w-3 h-3" /> E-Mail ist verfügbar
+                                </p>
+                            )}
+                            {emailStatus === 'taken' && (
+                                <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+                                    <XCircle className="w-3 h-3" />
+                                    Diese E-Mail ist bereits registriert.{' '}
+                                    <a href="/login" className="underline text-blue-400 hover:text-blue-300 font-semibold">Anmelden →</a>
+                                </p>
+                            )}
                         </div>
 
                         {/* Password + Confirm */}

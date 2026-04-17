@@ -1,20 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { X, Tag, Copy, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { X, Tag, Copy, CheckCircle2, Clock, AlertCircle, Sparkles } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
-import { useTranslation } from 'react-i18next';
+
+interface PromoCoupon {
+    found: boolean;
+    code: string;
+    discountType: 'percentage' | 'fixed';
+    discountValue: number;
+    validUntil: string;
+    usageLimit: number | null;
+    usedCount: number;
+}
 
 export const PromoModal = () => {
     const { settings } = useSettings();
-    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [copied, setCopied] = useState(false);
-    // Use a ref so close state persists across re-renders without triggering effects
+    const [coupon, setCoupon] = useState<PromoCoupon | null>(null);
     const hasDismissed = React.useRef(false);
 
     useEffect(() => {
+        // Master toggle from admin settings
         if (!settings?.promoPopup?.enabled) return;
 
-        // If already dismissed in this page session, do NOT show again
+        // If already dismissed in this page session, do NOT fetch
         if (hasDismissed.current) return;
 
         // Check if dismissed within the last 24 hours
@@ -22,17 +31,31 @@ export const PromoModal = () => {
         if (dismissedTimestamp) {
             const lastDismissedTime = parseInt(dismissedTimestamp, 10);
             const hoursSince = (Date.now() - lastDismissedTime) / (1000 * 60 * 60);
-            if (hoursSince < 24) return; // Still within 24 hours, don't show
+            if (hoursSince < 24) return;
         }
 
-        const timer = setTimeout(() => {
-            if (!hasDismissed.current) {
-                setIsOpen(true);
+        // Fetch latest active coupon from backend
+        const fetchPromo = async () => {
+            try {
+                const res = await fetch('/api/coupons/latest-promo');
+                const data: PromoCoupon = await res.json();
+                if (data.found && data.code) {
+                    setCoupon(data);
+                    // Use delay from settings (default 5 seconds)
+                    const delay = (settings.promoPopup?.delay ?? 5) * 1000;
+                    setTimeout(() => {
+                        if (!hasDismissed.current) {
+                            setIsOpen(true);
+                        }
+                    }, delay);
+                }
+            } catch {
+                // Silently fail — no promo to show
             }
-        }, (settings.promoPopup.delay || 5) * 1000);
+        };
 
-        return () => clearTimeout(timer);
-    }, [settings?.promoPopup?.enabled, settings?.promoPopup?.couponCode]);
+        fetchPromo();
+    }, [settings?.promoPopup?.enabled]);
 
     const handleClose = () => {
         hasDismissed.current = true;
@@ -41,14 +64,24 @@ export const PromoModal = () => {
     };
 
     const handleCopy = () => {
-        if (settings?.promoPopup?.couponCode) {
-            navigator.clipboard.writeText(settings.promoPopup.couponCode);
+        if (coupon?.code) {
+            navigator.clipboard.writeText(coupon.code);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         }
     };
 
-    if (!isOpen || !settings?.promoPopup?.enabled) return null;
+    if (!isOpen || !coupon) return null;
+
+    // Build dynamic title and message based on coupon data
+    const discountLabel = coupon.discountType === 'percentage'
+        ? `${coupon.discountValue}%`
+        : `${coupon.discountValue}€`;
+
+    const title = discountLabel + ' Rabatt sichern!';
+    const message = 'Nutze den Code unten beim Checkout und spare ' + discountLabel + ' auf deine Bestellung!';
+
+    const couponsLeft = coupon.usageLimit ? Math.max(0, coupon.usageLimit - coupon.usedCount) : null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -78,65 +111,70 @@ export const PromoModal = () => {
                     </div>
 
                     <div className="space-y-3">
+                        <div className="flex items-center justify-center gap-2">
+                            <Sparkles className="w-5 h-5 text-amber-400" />
+                            <span className="text-xs font-black uppercase tracking-widest text-amber-400">
+                                Exklusives Angebot
+                            </span>
+                            <Sparkles className="w-5 h-5 text-amber-400" />
+                        </div>
                         <h2 className="text-2xl sm:text-3xl font-black text-white px-4">
-                            {settings.promoPopup.title || t('promo.title', 'Sonderangebot!')}
+                            {title}
                         </h2>
                         <p className="text-slate-300 leading-relaxed max-w-[280px] mx-auto text-sm sm:text-base">
-                            {settings.promoPopup.message}
+                            {message}
                         </p>
                     </div>
 
-                    {settings.promoPopup.couponCode && (
-                        <div className="pt-2">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                                {t('promo.yourCode', 'DEIN EXKLUSIVER CODE')}
-                            </p>
-                            <div
-                                onClick={handleCopy}
-                                className="group relative bg-black/40 border border-slate-700 hover:border-blue-500 rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all overflow-hidden"
-                            >
-                                <span className="font-mono font-bold text-lg text-white tracking-widest pl-2">
-                                    {settings.promoPopup.couponCode}
-                                </span>
-                                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${copied
-                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                    : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50'
-                                    }`}>
-                                    {copied ? (
-                                        <>
-                                            <CheckCircle2 className="w-4 h-4" />
-                                            {t('promo.copied', 'Kopiert!')}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Copy className="w-4 h-4" />
-                                            {t('promo.copy', 'Kopieren')}
-                                        </>
-                                    )}
-                                </div>
+                    <div className="pt-2">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                            DEIN EXKLUSIVER CODE
+                        </p>
+                        <div
+                            onClick={handleCopy}
+                            className="group relative bg-black/40 border border-slate-700 hover:border-blue-500 rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all overflow-hidden"
+                        >
+                            <span className="font-mono font-bold text-lg text-white tracking-widest pl-2">
+                                {coupon.code}
+                            </span>
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${copied
+                                ? 'bg-emerald-500/20 text-emerald-400'
+                                : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50'
+                                }`}>
+                                {copied ? (
+                                    <>
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        Kopiert!
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="w-4 h-4" />
+                                        Kopieren
+                                    </>
+                                )}
                             </div>
-                            {settings.promoPopup.couponDetails && (
-                                <div className="mt-4 flex flex-col gap-2 text-sm text-slate-400 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                                    <div className="flex items-center justify-center gap-2">
-                                        <Clock className="w-4 h-4 text-blue-400" />
-                                        <span>{t('promo.validUntil', 'Gültig bis')}: <span className="text-white font-medium">{new Date(settings.promoPopup.couponDetails.validUntil).toLocaleDateString()}</span></span>
-                                    </div>
-                                    {settings.promoPopup.couponDetails.usageLimit && (
-                                        <div className="flex items-center justify-center gap-2">
-                                            <AlertCircle className="w-4 h-4 text-emerald-400" />
-                                            <span>{t('promo.couponsLeft', 'Gutscheine übrig')}: <span className="text-white font-medium">{Math.max(0, settings.promoPopup.couponDetails.usageLimit - settings.promoPopup.couponDetails.usedCount)}</span></span>
-                                        </div>
-                                    )}
+                        </div>
+
+                        {/* Coupon details */}
+                        <div className="mt-4 flex flex-col gap-2 text-sm text-slate-400 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                            <div className="flex items-center justify-center gap-2">
+                                <Clock className="w-4 h-4 text-blue-400" />
+                                <span>Gültig bis: <span className="text-white font-medium">{new Date(coupon.validUntil).toLocaleDateString('de-DE')}</span></span>
+                            </div>
+                            {couponsLeft !== null && (
+                                <div className="flex items-center justify-center gap-2">
+                                    <AlertCircle className="w-4 h-4 text-emerald-400" />
+                                    <span>Gutscheine übrig: <span className="text-white font-medium">{couponsLeft}</span></span>
                                 </div>
                             )}
                         </div>
-                    )}
+                    </div>
 
                     <button
                         onClick={handleClose}
                         className="text-xs font-medium text-slate-500 hover:text-slate-300 underline-offset-4 hover:underline transition-colors mt-4 block mx-auto"
                     >
-                        {t('promo.noThanks', 'Nein danke, weiter zur Seite')}
+                        Nein danke, weiter zur Seite
                     </button>
                 </div>
             </div>

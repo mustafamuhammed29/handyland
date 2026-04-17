@@ -21,7 +21,22 @@ const initSocket = (httpServer) => {
 
     // ── JWT Authentication Middleware ─────────────────────────────────────────
     io.use((socket, next) => {
-        const token = socket.handshake.auth?.token;
+        let token = socket.handshake.auth?.token;
+        
+        // Fallback: extract token from HTTP-only cookies if available
+        if (!token && socket.handshake.headers.cookie) {
+            try {
+                const cookies = socket.handshake.headers.cookie.split(';').reduce((res, c) => {
+                    const [key, val] = c.trim().split('=').map(decodeURIComponent);
+                    res[key] = val;
+                    return res;
+                }, {});
+                token = cookies['adminToken'] || cookies['accessToken'];
+            } catch (e) {
+                console.error('Socket cookie parsing error:', e);
+            }
+        }
+
         if (!token) {
             // Allow connection but socket will have no verified identity
             socket.verifiedUser = null;

@@ -1,401 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import { api } from '../utils/api';
-import { orderService } from '../services/orderService';
-import { productService } from '../services/productService';
+import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Truck, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Loader2, Tag, X, Lock, User, UserPlus, Phone } from 'lucide-react';
+import { ShieldCheck, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatPrice } from '../utils/formatPrice';
-import { z } from 'zod';
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-// FIXED: Import extracted sub-components (FIX 5)
+
+// Extracted sub-components
 import { CheckoutShippingForm } from './checkout/CheckoutShippingForm';
 import { CheckoutPaymentSection } from './checkout/CheckoutPaymentSection';
 import { CheckoutOrderSummary } from './checkout/CheckoutOrderSummary';
 
-// Initialize Stripe (Move to env var in production)
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-    console.error('VITE_STRIPE_PUBLIC_KEY is not configured. Stripe payments will not work.');
-}
-const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
-    ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY) 
-    : null;
-
-// Removed CheckoutProps
-
-// FIXED C-6: Strengthened Zod schema with proper regex validation
-const shippingSchema = z.object({
-    fullName: z.string().min(2, "Full name is required").max(100, "Name is too long"),
-    email: z.string().email("Invalid email address"),
-    phone: z.string().regex(/^(\+|00)?[1-9][0-9\s\-().]{6,20}$/, "Invalid phone number format"),
-    address: z.string().min(5, "Address is too short").max(200, "Address is too long"),
-    city: z.string().min(2, "City is required").max(100, "City name too long"),
-    state: z.string().min(2, "State/Region is required"),
-    zipCode: z.string().regex(/^[0-9]{4,10}$/, "Invalid Zip/Postal Code (4-10 digits)"),
-    country: z.string().min(2, "Country is required"),
-});
-
-type ShippingFormData = z.infer<typeof shippingSchema>;
-
-interface ShippingMethod {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    duration: string;
-    isExpress: boolean;
-}
+// The new custom hook for business logic
+import { useCheckoutLogic, ShippingMethod } from '../hooks/useCheckoutLogic';
 
 export const Checkout: React.FC = () => {
-    const { cart, cartTotal, coupon, applyCoupon, removeCoupon } = useCart();
-    const { user } = useAuth();
-    const navigate = useNavigate();
     const { t } = useTranslation();
-
-    // State
-    const [step, setStep] = useState(1); // 1: Auth Choice, 2: Shipping, 3: Payment
-    const [guestMode, setGuestMode] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [termsAccepted, setTermsAccepted] = useState(false);
-
-    // Form State
-    const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
-    const [selectedMethodId, setSelectedMethodId] = useState<string>('');
-    const [isLoadingMethods, setIsLoadingMethods] = useState(true);
-    const [features, setFeatures] = useState<any>(null);
-
-    // Points Redemption State
-    const [appliedPoints, setAppliedPoints] = useState(0);
-
-    // Payment Config State
-    const [paymentConfig, setPaymentConfig] = useState<any | null>(null);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>(''); // 'stripe', 'cod', 'paypal'
-
-
-    const [shippingDetails, setShippingDetails] = useState<ShippingFormData>({
-        fullName: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: 'Germany'
-    });
-    const [formErrors, setFormErrors] = useState<Partial<Record<keyof ShippingFormData, string>>>({});
-
-    // Coupon State (coupon itself lives in CartContext so it's shared with CartDrawer)
-    const [couponCode, setCouponCode] = useState('');
-    const [couponLoading, setCouponLoading] = useState(false);
-    const [couponError, setCouponError] = useState<string | null>(null);
-
-    // Initial Check & Load Data
-    const [freeShippingThreshold, setFreeShippingThreshold] = useState(100);
-    const [taxRate, setTaxRate] = useState(19);
-
-    useEffect(() => {
-        // Fetch Settings & Shipping Methods
-        const fetchData = async () => {
-            try {
-                setIsLoadingMethods(true);
-                const [settingsRes, methodsRes] = await Promise.all([
-                    api.get('/api/settings'),
-                    orderService.fetchShippingMethods()
-                ]);
-
-                // Settings endpoint returns the object directly (api interceptor unwraps response.data or it could be inside .data)
-                const settings = (settingsRes as any)?.data || settingsRes;
-                if (settings) {
-                    if (settings.freeShippingThreshold !== undefined) {
-                        setFreeShippingThreshold(settings.freeShippingThreshold);
-                    }
-                    if (settings.payment) {
-                        setPaymentConfig(settings.payment);
-                    }
-                    if (settings.taxRate !== undefined) {
-                        setTaxRate(settings.taxRate);
-                    }
-                    if (settings.features) {
-                        setFeatures(settings.features);
-                    }
-                }
-
-
-                if (Array.isArray(methodsRes)) {
-                    setShippingMethods(methodsRes);
-                    // Select default (lowest price or first)
-                    if (methodsRes.length > 0) {
-                        const defaultMethod = methodsRes.sort((a: any, b: any) => a.price - b.price)[0];
-                        setSelectedMethodId(defaultMethod._id);
-                    }
-                }
-            } catch (err) {
-            } finally {
-                setIsLoadingMethods(false);
-            }
-        };
-        fetchData();
-
-        if (cart.length === 0) {
-            navigate('/');
-            return;
-        }
-
-        // Determine initial step based on auth
-        if (user) {
-            setStep(2);
-            // FIXED C: Map address fields correctly (FIX C)
-            // Logically: user.addresses or user.address
-            const defaultAddr = user.addresses?.find((a: any) => a.isDefault) || user.addresses?.[0];
-            
-            setShippingDetails(prev => ({
-                ...prev,
-                fullName: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.name || prev.fullName,
-                email: user.email || prev.email,
-                phone: user.phone || prev.phone,
-                // FIXED C: Real mapping
-                address: defaultAddr?.street || user.address || prev.address,
-                city: defaultAddr?.city || prev.city,
-                zipCode: defaultAddr?.postalCode || defaultAddr?.zipCode || prev.zipCode,
-                country: defaultAddr?.country || prev.country || 'Germany'
-            }));
-        }
-
-        // Load saved shipping details from LocalStorage (overwrites user data if customized previously)
-        const saved = localStorage.getItem('checkout_shipping');
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                // Sanitize [object Object] bug
-                if (parsed.address === '[object Object]') {
-                    parsed.address = '';
-                }
-                // CRITICAL FIX: Never overwrite fullName from localStorage — it may contain an address label
-                // The user's real name was already set above from user.firstName + user.lastName
-                delete parsed.fullName;
-                setShippingDetails(prev => ({ ...prev, ...parsed }));
-            } catch (e) {
-            }
-        }
-    }, [cart, user, navigate]);
-
-    // Save to LocalStorage on change
-    useEffect(() => {
-        if (step >= 2) {
-            localStorage.setItem('checkout_shipping', JSON.stringify(shippingDetails));
-        }
-    }, [shippingDetails, step]);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setShippingDetails(prev => ({ ...prev, [name]: value }));
-        // Clear error for this field
-        if (formErrors[name as keyof ShippingFormData]) {
-            setFormErrors(prev => ({ ...prev, [name]: undefined }));
-        }
-    };
-
-    const handleShippingSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        // Zod Validation
-        const result = shippingSchema.safeParse(shippingDetails);
-        if (!result.success) {
-            const zodError = result.error;
-
-            const formattedErrors: any = {};
-
-            // Using logic that adheres to ZodError type
-            zodError.issues.forEach(issue => {
-                if (issue.path[0]) {
-                    formattedErrors[issue.path[0]] = issue.message;
-                }
-            });
-
-            setFormErrors(formattedErrors);
-
-            // Find first error field and scroll to it
-            const firstErrorField = zodError.issues[0]?.path[0];
-            if (firstErrorField) {
-                const element = document.getElementsByName(firstErrorField as string)[0];
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    element.focus();
-                } else {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            }
-            return;
-        }
-
-        if (!termsAccepted) {
-            setError("You must accept the Terms & Conditions to proceed.");
-            // Scroll to the bottom where terms are
-            const termsElement = document.querySelector('input[type="checkbox"]');
-            if (termsElement) {
-                termsElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            return;
-        }
-
-        setFormErrors({});
-        setError(null);
-        setStep(3); // Go to Payment
-        // Scroll to top for next step
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // ... (keep handleApplyCoupon, removeCoupon, getFinalTotal, handlePaymentSuccess) ...
-
-    const handleApplyCoupon = async () => {
-        if (!couponCode) return;
-        setCouponLoading(true);
-        setCouponError(null);
-        try {
-            const response = await orderService.applyCoupon(couponCode, cartTotal);
-
-            if (response.success) {
-                // Save to CartContext so CartDrawer also reflects the coupon
-                applyCoupon(response.couponCode, response.discount);
-                setCouponCode('');
-            } else {
-                setCouponError(response.message || 'Invalid coupon');
-            }
-        } catch (err: any) {
-            setCouponError(err.response?.data?.message || 'Failed to apply coupon');
-        } finally {
-            setCouponLoading(false);
-        }
-    };
-
-    const handleRemoveCoupon = () => {
-        removeCoupon(); // removes from CartContext (shared state)
-        setCouponCode('');
-    };
-
-    const getFinalTotal = () => {
-        const selectedMethod = shippingMethods.find(m => m._id === selectedMethodId);
-        let shippingCost = selectedMethod ? selectedMethod.price : 5.99;
-
-        if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) {
-            shippingCost = 0;
-        }
-
-        const discount = coupon ? coupon.discount : 0;
-        const redeemRate = features?.loyalty?.redeemRate || 100;
-        const pointsDiscount = appliedPoints / redeemRate;
-        const discountedSubtotal = Math.max(0, cartTotal - pointsDiscount - discount);
-        const taxAmount = Math.round(discountedSubtotal * 0.19 * 100) / 100;
-        return Math.max(0, discountedSubtotal + shippingCost + taxAmount);
-    };
+    
+    // Deconstruct all state and logic from the hook
+    const {
+        step, setStep,
+        guestMode, setGuestMode,
+        loading, setLoading,
+        error, setError,
+        termsAccepted, setTermsAccepted,
+        shippingMethods,
+        selectedMethodId, setSelectedMethodId,
+        isLoadingMethods,
+        features,
+        appliedPoints, setAppliedPoints,
+        paymentConfig,
+        selectedPaymentMethod, setSelectedPaymentMethod,
+        shippingDetails, setShippingDetails,
+        formErrors, setFormErrors,
+        couponCode, setCouponCode,
+        couponLoading,
+        couponError,
+        freeShippingThreshold,
+        taxRate,
+        user, cart, cartTotal, coupon,
+        handleInputChange,
+        handleShippingSubmit,
+        handleApplyCoupon,
+        handleRemoveCoupon,
+        getFinalTotal,
+        handlePaymentSuccess,
+        navigate
+    } = useCheckoutLogic();
 
     const getShippingCostDisplay = (method: ShippingMethod) => {
         if (cartTotal >= freeShippingThreshold && !method.isExpress) {
             return 'FREE';
         }
-        // FIXED: Use formatPrice for consistent currency display
         return `${formatPrice(method.price)}`;
     };
 
-    const handlePaymentSuccess = async () => {
-        if (loading) return; // Prevent double submission
+    // --- Render Views ---
 
-        if (!selectedPaymentMethod) {
-            setError("Please select a payment method.");
-            return;
-        }
-
-        // Token Validation for Logged In Users handled securely via HttpOnly cookies by the API endpoints.
-
-        setLoading(true);
-        setError(null);
-
-        // Validate Stock
-        try {
-            await productService.validateStock(
-                cart.map(item => ({ id: item.id, quantity: item.quantity || 1, name: item.title, category: item.category }))
-            );
-        } catch (err: any) {
-            setError(err.response?.data?.message || err.message || "Some items are out of stock.");
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            setLoading(false);
-            return;
-        }
-
-        const selectedMethod = shippingMethods.find(m => m._id === selectedMethodId);
-        let shippingCost = selectedMethod ? selectedMethod.price : 5.99;
-        if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) {
-            shippingCost = 0;
-        }
-
-        const commonOrderData = {
-            items: cart.map(item => ({
-                product: item.id,
-                productType: (item as any).productType || (item.category?.toLowerCase() === 'accessory' ? 'Accessory' : 'Product'),
-                name: item.title,
-                price: item.price,
-                image: item.image,
-                quantity: item.quantity || 1
-            })),
-            shippingAddress: {
-                ...shippingDetails,
-                street: shippingDetails.address // Fix 400 Bad Request error
-            },
-            // FIXED: Send shippingFee as a number, not a string
-            shippingFee: shippingCost,
-            shippingMethod: selectedMethod?.name || 'Standard',
-            couponCode: coupon?.code,
-            discountAmount: coupon?.discount,
-            appliedPoints: appliedPoints,
-            email: shippingDetails.email // Important for Guest Checkout
-        };
-
-        try {
-            if (selectedPaymentMethod === 'cod' || selectedPaymentMethod === 'bank_transfer' || selectedPaymentMethod === 'wallet') {
-                const r = await orderService.createOrder({
-                    ...commonOrderData,
-                    paymentMethod: selectedPaymentMethod === 'cod' ? 'cash' : selectedPaymentMethod,
-                    notes: `Checkout via Web. Method: ${selectedPaymentMethod.toUpperCase()}.`
-                });
-
-                if (r.success) {
-                    navigate(`/payment-success?order_id=${r.order._id}&method=${selectedPaymentMethod}`);
-                }
-
-            } else if (['stripe', 'paypal', 'klarna', 'giropay', 'sepa_debit', 'sofort'].includes(selectedPaymentMethod)) {
-                // Pass the specific provider down to backend to configure Stripe
-                const response = await orderService.createCheckoutSession({
-                    ...commonOrderData,
-                    paymentProvider: selectedPaymentMethod,
-                    termsAccepted: true
-                });
-
-                if (response.url) {
-                    window.location.href = response.url;
-                } else {
-                    throw new Error("Failed to retrieve payment URL");
-                }
-            } else {
-                setError("Selected payment method is not supported yet.");
-                setLoading(false);
-            }
-
-        } catch (err: any) {
-            setError(err.response?.data?.message || err.message || 'Payment initiation failed. Please try again.');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            setLoading(false); // Only stop loading on error, otherwise we are redirecting
-        }
-    };
-
-    // ... (Render Steps) ...
-    // Inside render, just ensuring the structure matches what we expect
-    // ...
-    // ... (Step 1 code) ...
     if (step === 1 && !user && !guestMode) {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
@@ -499,26 +158,35 @@ export const Checkout: React.FC = () => {
                         )}
                     </div>
 
-                    {/* FIXED: Extracted to CheckoutOrderSummary sub-component (FIX 5) */}
                     <div className="lg:col-span-1">
-                        <CheckoutOrderSummary
-                            user={user}
-                            features={features}
-                            appliedPoints={appliedPoints}
-                            setAppliedPoints={setAppliedPoints}
-                            cart={cart}
-                            cartTotal={cartTotal}
-                            coupon={coupon}
-                            couponCode={couponCode}
-                            setCouponCode={setCouponCode}
-                            couponLoading={couponLoading}
-                            couponError={couponError}
-                            handleApplyCoupon={handleApplyCoupon}
-                            handleRemoveCoupon={handleRemoveCoupon}
-                            getFinalTotal={getFinalTotal}
-                            freeShippingThreshold={freeShippingThreshold}
-                            taxRate={taxRate}
-                        />
+                        {(() => {
+                            const selectedMethod = shippingMethods.find(m => m._id === selectedMethodId);
+                            let currentShippingCost = selectedMethod ? selectedMethod.price : 5.99;
+                            if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) {
+                                currentShippingCost = 0;
+                            }
+                            return (
+                                <CheckoutOrderSummary
+                                    user={user}
+                                    features={features}
+                                    appliedPoints={appliedPoints}
+                                    setAppliedPoints={setAppliedPoints}
+                                    cart={cart}
+                                    cartTotal={cartTotal}
+                                    coupon={coupon}
+                                    couponCode={couponCode}
+                                    setCouponCode={setCouponCode}
+                                    couponLoading={couponLoading}
+                                    couponError={couponError}
+                                    handleApplyCoupon={handleApplyCoupon}
+                                    handleRemoveCoupon={handleRemoveCoupon}
+                                    getFinalTotal={getFinalTotal}
+                                    freeShippingThreshold={freeShippingThreshold}
+                                    taxRate={taxRate}
+                                    shippingCost={currentShippingCost}
+                                />
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

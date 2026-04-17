@@ -18,6 +18,10 @@ exports.updateUserProfile = async (req, res) => {
         user.phone = req.body.phone || user.phone;
         user.address = req.body.address || user.address;
 
+        if (req.body.preferredLanguage !== undefined) {
+            user.preferredLanguage = req.body.preferredLanguage;
+        }
+
         if (req.body.avatar !== undefined) {
             user.avatar = req.body.avatar;
         }
@@ -57,6 +61,7 @@ exports.updateUserProfile = async (req, res) => {
                 phone: updatedUser.phone,
                 address: updatedUser.address,
                 avatar: updatedUser.avatar,
+                preferredLanguage: updatedUser.preferredLanguage,
                 role: updatedUser.role
             }
         });

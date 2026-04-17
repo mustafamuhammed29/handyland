@@ -124,6 +124,33 @@ export const AppRouter = () => {
 
     const { settings, loading: settingsLoading, error: settingsError } = useSettings();
 
+    // ── Global Maintenance Gate ─────────────────────────────────────────────
+    // This runs INDEPENDENTLY of settings and checks the always-available
+    // /api/maintenance-info endpoint. If maintenance is active, ALL routes
+    // are blocked and MaintenancePage is shown regardless of URL.
+    const [isMaintenanceActive, setIsMaintenanceActive] = React.useState<boolean | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        const checkMaintenance = async () => {
+            try {
+                const res = await fetch('/api/maintenance-info');
+                const data = await res.json();
+                if (!cancelled) {
+                    setIsMaintenanceActive(data.maintenance === true);
+                }
+            } catch {
+                // If the endpoint itself fails, don't block the site
+                if (!cancelled) setIsMaintenanceActive(false);
+            }
+        };
+        checkMaintenance();
+
+        // Re-check every 15 seconds in case admin toggles maintenance
+        const interval = setInterval(checkMaintenance, 15000);
+        return () => { cancelled = true; clearInterval(interval); };
+    }, []);
+
     useEffect(() => {
         const handleNavigation = (e: Event) => {
             const customEvent = e as CustomEvent<string>;
@@ -137,11 +164,25 @@ export const AppRouter = () => {
 
     // Document title is now purely handled by SEO.tsx and Helmet Provider
 
+    // ── MAINTENANCE GATE: Block ALL routes if maintenance is active ──────
+    if (isMaintenanceActive === null) {
+        // Still checking maintenance status — show a brief loading state
+        return (
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    if (isMaintenanceActive) {
+        // Maintenance is ON — show maintenance page on EVERY route
+        return <MaintenancePage />;
+    }
+
     if (settingsError) {
         const handleRetry = () => {
             const retries = parseInt(sessionStorage.getItem('sys_retry_count') || '0');
             if (retries >= 3) {
-                // Maximum retries reached. Force maintenance page or block reload.
                 window.location.href = '/maintenance';
             } else {
                 sessionStorage.setItem('sys_retry_count', (retries + 1).toString());

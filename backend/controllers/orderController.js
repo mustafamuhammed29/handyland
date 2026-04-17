@@ -153,12 +153,17 @@ exports.createOrder = async (req, res) => {
         }
 
         // Calculate Tax and Shipping
-        const taxRate = 0.19; // 19% Tax
-        const shippingFee = totalAmount > 100 ? 0 : 5.99; // Free shipping over 100
-        const taxAmount = totalAmount * taxRate;
+        const taxRate = 0.19; // 19% VAT – included in product prices (B2C Germany)
+        // Use shippingFee from the frontend (calculated based on selected method);
+        // fall back to legacy logic only if not provided
+        const shippingFee = req.body.shippingFee !== undefined
+            ? parseFloat(req.body.shippingFee)
+            : (totalAmount > 100 ? 0 : 5.99);
+        // Tax is INCLUDED in product prices – do not add it on top
+        const taxAmount = totalAmount - (totalAmount / (1 + taxRate)); // extract for display only
         const appliedDiscount = discountAmount ? parseFloat(discountAmount) : 0;
 
-        const finalAmount = Math.max(0, totalAmount + shippingFee + taxAmount - appliedDiscount);
+        const finalAmount = Math.max(0, totalAmount + shippingFee - appliedDiscount);
 
         let statusToSet = 'pending';
         let paymentStatusToSet = 'pending';
@@ -269,27 +274,33 @@ exports.createOrder = async (req, res) => {
 
         // Send order confirmation email (non-critical)
         try {
-            await sendEmail({
-                email: req.user.email,
-                subject: 'Order Confirmation - HandyLand',
-                html: emailTemplates.orderConfirmation(req.user.name, order)
-            });
+            const recipientEmail = req.user?.email || req.body.email || order.contactEmail;
+            const recipientName = req.user?.name || req.body.fullName || 'Customer';
+            if (recipientEmail) {
+                await sendEmail({
+                    email: recipientEmail,
+                    subject: 'Order Confirmation - HandyLand',
+                    html: emailTemplates.orderConfirmation(recipientName, order)
+                });
+            }
         } catch (emailError) {
             console.error('Email sending failed:', emailError);
         }
 
-        // Send in-app notification
-        try {
-            await notify({
-                userId: req.user.id,
-                userEmail: req.user.email,
-                userName: req.user.name,
-                message: `Your order #${order.orderNumber} has been placed successfully! Total: €${order.totalAmount.toFixed(2)}`,
-                type: 'success',
-                link: `/dashboard`,
-                category: 'orderUpdates'
-            });
-        } catch (notifError) { /* non-fatal */ }
+        // Send in-app notification (only for logged-in users)
+        if (req.user) {
+            try {
+                await notify({
+                    userId: req.user.id,
+                    userEmail: req.user.email,
+                    userName: req.user.name,
+                    message: `Your order #${order.orderNumber} has been placed successfully! Total: \u20ac${order.totalAmount.toFixed(2)}`,
+                    type: 'success',
+                    link: `/dashboard`,
+                    category: 'orderUpdates'
+                });
+            } catch (notifError) { /* non-fatal */ }
+        }
 
         res.status(201).json({
             success: true,

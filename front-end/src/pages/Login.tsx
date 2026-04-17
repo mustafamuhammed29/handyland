@@ -41,7 +41,13 @@ const SocialButton: React.FC<{ provider: 'google' | 'facebook'; disabled?: boole
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, user } = useAuth();
+    
+    React.useEffect(() => {
+        if (user) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [user, navigate]);
     const { settings } = useSettings();
     const { t } = useTranslation();
     const [email, setEmail] = useState('');

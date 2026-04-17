@@ -5,6 +5,8 @@ const Review = require('../models/Review');
 const RepairTicket = require('../models/RepairTicket');
 const Order = require('../models/Order');
 const Coupon = require('../models/Coupon');
+const fs = require('fs');
+const path = require('path');
 
 // @desc    Get global settings
 // @route   GET /api/settings
@@ -65,7 +67,7 @@ exports.updateSettings = async (req, res) => {
             'hero', 'stats', 'valuation', 'content',
             'repairArchive', 'sections', 'contactSection', 'footerSection',
             'freeShippingThreshold', 'payment', 'announcementBanner', 'promoPopup', 'socialAuth',
-            'invoice', 'seo', 'taxRate', 'vipTiers', 'ecoImpact', 'quickReplies'
+            'invoice', 'seo', 'taxRate', 'vipTiers', 'ecoImpact', 'quickReplies', 'maintenanceMode'
         ];
 
         allowedFields.forEach(field => {
@@ -86,6 +88,26 @@ exports.updateSettings = async (req, res) => {
         }
 
         clearCache('/api/settings');
+
+        // Sync MAINTENANCE_MODE file for server.js middleware
+        if (req.body.maintenanceMode !== undefined) {
+            const MAINTENANCE_FLAG = path.join(__dirname, '../MAINTENANCE_MODE');
+            if (req.body.maintenanceMode.enabled) {
+                try {
+                    fs.writeFileSync(MAINTENANCE_FLAG, JSON.stringify({
+                        title: req.body.maintenanceMode.title,
+                        message: req.body.maintenanceMode.message,
+                        estimatedTime: req.body.maintenanceMode.estimatedTime
+                    }));
+                } catch(e) { console.error('Failed to create MAINTENANCE_MODE file', e); }
+            } else {
+                if (fs.existsSync(MAINTENANCE_FLAG)) {
+                    try {
+                        fs.unlinkSync(MAINTENANCE_FLAG);
+                    } catch(e) { console.error('Failed to remove MAINTENANCE_MODE file', e); }
+                }
+            }
+        }
 
         res.status(200).json(settings);
     } catch (error) {

@@ -63,6 +63,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(adminData);
             setIsAuthenticated(true);
             localStorage.setItem('adminUser', JSON.stringify(adminData));
+            // Store token for Socket.io auth (cross-origin — cookie not accessible)
+            const token = response.data?.token || (response as any).token;
+            if (token) sessionStorage.setItem('adminSocketToken', token);
             
         } catch (error: any) {
             // Ensure error message is shown to user
@@ -84,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(null);
             setIsAuthenticated(false);
             localStorage.removeItem('adminUser');
+            sessionStorage.removeItem('adminSocketToken');
         }
     };
 

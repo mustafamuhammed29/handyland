@@ -6,6 +6,7 @@ const {
     researchDevice,
     applyPrice,
     getResearchStatus,
+    researchEbaySpecs
 } = require('../controllers/priceResearchController');
 
 // All routes require admin authentication
@@ -13,6 +14,9 @@ router.use(protect, authorize('admin'));
 
 // GET  /api/price-research/ebay?model=iPhone+15+Pro&storage=128GB
 router.get('/ebay', researchSingle);
+
+// GET  /api/price-research/ebay-specs?model=iPhone+15+Pro
+router.get('/ebay-specs', researchEbaySpecs);
 
 // POST /api/price-research/ebay/device/:blueprintId  (research all storages)
 router.post('/ebay/device/:blueprintId', researchDevice);

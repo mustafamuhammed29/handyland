@@ -21,7 +21,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
     transactions,
     isLoading
 }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const currentMonth = new Date().getMonth();
     const { refetch } = useDashboardData().wallet;
     const { addToast } = useToast();
@@ -64,7 +64,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
         const rows = [
             [t('common.date', 'Date'), t('common.type', 'Type'), t('common.description', 'Description'), t('common.amount', 'Amount'), t('common.status', 'Status')],
             ...transactions.map(t_ => [
-                new Date(t_.date || (t_ as any).createdAt || Date.now()).toLocaleDateString(t('common.locale', 'en-US')),
+                new Date(t_.date || (t_ as any).createdAt || Date.now()).toLocaleDateString(i18n.language),
                 t_.type,
                 t_.description || '',
                 (t_.type === 'deposit' || t_.type === 'credit' || t_.type === 'refund' ? '+' : '-') + (t_.amount?.toFixed(2) ?? '0.00'),
@@ -239,7 +239,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                                             {transaction.description || (transaction.type === 'deposit' ? t('wallet.transaction.deposit', 'Wallet Deposit') : t('wallet.transaction.purchase', 'Purchase'))}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-0.5">
-                                            {new Date(transaction.date || (transaction as any).createdAt || Date.now()).toLocaleDateString(t('common.locale', 'en-US'), { day: '2-digit', month: 'short', year: 'numeric' })}
+                                            {new Date(transaction.date || (transaction as any).createdAt || Date.now()).toLocaleDateString(i18n.language, { day: '2-digit', month: 'short', year: 'numeric' })}
                                         </p>
                                     </div>
                                 </div>

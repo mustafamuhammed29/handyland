@@ -47,6 +47,11 @@ export const useAdminNotifications = (isAuthenticated: boolean) => {
         const socket = io(SOCKET_URL, {
             withCredentials: true,
             transports: ['websocket', 'polling'],
+            auth: {
+                // Send the admin JWT so the server can verify role === 'admin'
+                // and permit the socket to join the 'admin' notification room
+                token: sessionStorage.getItem('adminSocketToken') || undefined,
+            },
         });
 
         socketRef.current = socket;

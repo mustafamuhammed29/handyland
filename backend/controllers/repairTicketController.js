@@ -1,4 +1,5 @@
 const RepairTicket = require('../models/RepairTicket');
+const { emitAdminNotification } = require('../utils/socket');
 
 // @desc    Create new repair ticket
 // @route   POST /api/repairs/tickets
@@ -60,6 +61,17 @@ exports.createTicket = async (req, res) => {
             success: true,
             ticket
         });
+
+        // 🔔 Real-time notification to all admins
+        try {
+            const customerName = req.user?.name || guestContact?.name || guestContact?.email || 'Gast';
+            emitAdminNotification('new_repair', {
+                title: 'Neue Reparaturanfrage 🔧',
+                body: `${customerName} · ${device || 'Gerät'} · ${issue || ''}`.slice(0, 80),
+                icon: '🔧',
+                link: '/repairs',
+            });
+        } catch (e) { /* non-fatal */ }
     } catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({

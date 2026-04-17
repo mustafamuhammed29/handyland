@@ -52,6 +52,24 @@ exports.register = async (req, res) => {
     }
 };
 
+// @desc    Check if email is already registered (live validation)
+// @route   POST /api/auth/check-email
+// @access  Public
+exports.checkEmailAvailability = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ success: false, message: 'Invalid email' });
+        }
+        const existing = await User.findOne({ email: email.toLowerCase().trim() }).select('_id');
+        return res.json({ success: true, available: !existing });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
+
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
@@ -295,8 +313,8 @@ exports.adminLogin = async (req, res) => {
             });
         }
 
-        // Generate a 24-hour token for Admin to match the cookie lifetime
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        // Generate a 24-hour token for Admin — include role so Socket.io can verify without DB lookup
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
             expiresIn: '24h'
         });
 
@@ -310,6 +328,7 @@ exports.adminLogin = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Admin login successful',
+            token, // Needed for Socket.io auth (admin panel is cross-origin from backend)
             admin: {
                 id: user._id,
                 name: user.name,
