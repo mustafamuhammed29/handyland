@@ -37,8 +37,8 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
                 <ThemeProvider>
                     <CookieProvider>
                         <ToastProvider>
-                            <SettingsProvider>
-                                <LanguageProvider>
+                            <LanguageProvider>
+                                <SettingsProvider>
                                     <AuthProvider>
                                         <WishlistProvider>
                                             <CartProvider>
@@ -46,8 +46,8 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
                                             </CartProvider>
                                         </WishlistProvider>
                                     </AuthProvider>
-                                </LanguageProvider>
-                            </SettingsProvider>
+                                </SettingsProvider>
+                            </LanguageProvider>
                         </ToastProvider>
                     </CookieProvider>
                 </ThemeProvider>
