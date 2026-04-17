@@ -108,7 +108,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
             
             // Sync AuthContext so navbar and global state updates
             if (res && res.user) {
-                setUser((prev: any) => ({ ...prev, ...res.user }));
+                setUser({ ...currentUser, ...res.user } as UserType);
             }
             
             // If they just changed language from Profile Config, force global update instantaneously

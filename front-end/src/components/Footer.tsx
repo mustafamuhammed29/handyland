@@ -48,6 +48,26 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
     setLoading(false);
   }, []);
 
+    const finalColumns = settings.columns.map(col => {
+      let filteredLinks = col.links;
+
+      if (globalSettings?.sections?.marketplacePage === false) {
+          filteredLinks = filteredLinks.filter(l => !l.url.includes('/market'));
+      }
+      if (globalSettings?.sections?.valuationPage === false) {
+          filteredLinks = filteredLinks.filter(l => !l.url.includes('/valuation'));
+      }
+      if (globalSettings?.sections?.repairPage === false) {
+          filteredLinks = filteredLinks.filter(l => !l.url.includes('/repair'));
+      }
+      // Assuming track-repair is in services list too
+      if (globalSettings?.sections?.trackRepairPage === false) {
+          filteredLinks = filteredLinks.filter(l => !l.url.includes('/track-repair'));
+      }
+
+      return { ...col, links: filteredLinks };
+    });
+
   if (loading) {
     return (
       <footer className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 mt-auto relative z-10">
@@ -76,7 +96,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
           </div>
 
           {/* Dynamic Columns */}
-          {settings.columns.map((column, index) => (
+          {finalColumns.map((column, index) => (
             <div key={index}>
               <h4 className="text-slate-900 dark:text-white font-bold mb-6 uppercase text-xs tracking-[0.2em]">
                 {column.title}
@@ -103,7 +123,9 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
 
           {/* Legal Links (Dynamic) */}
           <div className="flex flex-wrap justify-center gap-6">
-            <Link to="/track-repair" className="hover:text-brand-primary uppercase transition-colors text-brand-primary font-bold">{t('hero.trackRepair')}</Link>
+            {globalSettings?.sections?.trackRepairPage !== false && (
+                <Link to="/track-repair" className="hover:text-brand-primary uppercase transition-colors text-brand-primary font-bold">{t('hero.trackRepair')}</Link>
+            )}
             <Link to="/agb" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">AGB</Link>
             <Link to="/datenschutz" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Datenschutz</Link>
             <Link to="/impressum" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Impressum</Link>

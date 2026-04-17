@@ -57,6 +57,11 @@ interface SectionSettings {
     marketplace: boolean;
     accessories: boolean;
     contact: boolean;
+    marketplacePage?: boolean;
+    valuationPage?: boolean;
+    repairPage?: boolean;
+    trackRepairPage?: boolean;
+    authSystem?: boolean;
 }
 
 interface FooterSettings {
@@ -235,7 +240,12 @@ const defaultSettings: Settings = {
         repairGallery: true,
         marketplace: true,
         accessories: true,
-        contact: true
+        contact: true,
+        marketplacePage: true,
+        valuationPage: true,
+        repairPage: true,
+        trackRepairPage: true,
+        authSystem: true
     },
     footerSection: {
         aboutText: '',

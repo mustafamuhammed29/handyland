@@ -213,9 +213,7 @@ export const SellDevice = () => {
             if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = t('common.required');
         }
         if (stepNumber === 2) {
-            if (!formData.address.trim()) newErrors.address = t('common.required');
-            if (!formData.city.trim()) newErrors.city = t('common.required');
-            if (!formData.postalCode.trim()) newErrors.postalCode = t('common.required');
+            // Validation removed. Shop address is displayed statically.
         }
         if (stepNumber === 3) {
             if (!formData.bankName.trim()) newErrors.bankName = t('common.required');
@@ -304,8 +302,8 @@ export const SellDevice = () => {
                                 <span className="text-white font-medium">{formData.fullName}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-500">{t('sellDevice.shippingAddress')}:</span>
-                                <span className="text-white text-right">{formData.address}, {formData.postalCode} {formData.city}</span>
+                                <span className="text-slate-500">Shop Adresse:</span>
+                                <span className="text-white text-right">Walldorfer Str. 13, 69168 Wiesloch</span>
                             </div>
                             <div className="h-px bg-slate-800 my-1"></div>
                             <div className="flex justify-between">
@@ -414,88 +412,31 @@ export const SellDevice = () => {
                                     <div className="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-purple-500/30">
                                         <MapPin className="w-7 h-7 text-purple-400" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white">{t('sellDevice.shippingAddress')}</h3>
+                                    <h3 className="text-2xl font-bold text-white">Versandadresse (HandyLand Shop)</h3>
                                 </div>
-
-                                {savedAddresses.length > 0 && (
-                                    <div className="mb-6">
-                                        <div className="grid gap-3 sm:grid-cols-2">
-                                            {savedAddresses.map((addr: any) => (
-                                                <button
-                                                    key={addr._id}
-                                                    type="button"
-                                                    onClick={() => handleSelectAddress(addr)}
-                                                    className={`text-left p-4 rounded-xl border transition-all ${selectedAddressId === addr._id && !useManual
-                                                        ? 'border-purple-500 bg-purple-500/10'
-                                                        : 'border-slate-700 bg-slate-950/50 hover:border-slate-600'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-start gap-3">
-                                                        <Home className={`w-5 h-5 mt-0.5 flex-shrink-0 ${selectedAddressId === addr._id && !useManual ? 'text-purple-400' : 'text-slate-500'}`} />
-                                                        <div className="min-w-0">
-                                                            {addr.name && <p className="text-white font-semibold text-sm truncate mb-0.5">{addr.name}</p>}
-                                                            <p className="text-slate-300 text-sm leading-snug">{addr.street}</p>
-                                                            <p className="text-slate-400 text-xs mt-1">{addr.postalCode || addr.zipCode} {addr.city}</p>
-                                                        </div>
-                                                        {selectedAddressId === addr._id && !useManual && <CheckCircle2 className="w-5 h-5 text-purple-400 ml-auto flex-shrink-0" />}
-                                                    </div>
-                                                </button>
-                                            ))}
-                                            <button
-                                                type="button"
-                                                onClick={handleManualMode}
-                                                className={`text-left p-4 rounded-xl border border-dashed transition-all ${useManual ? 'border-brand-primary bg-brand-primary/10' : 'border-slate-700 bg-slate-950/50 hover:border-slate-600'}`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`p-2 rounded-lg ${useManual ? 'bg-brand-primary/20 text-brand-primary' : 'bg-slate-800 text-slate-400'}`}>
-                                                        <Plus className="w-4 h-4" />
-                                                    </div>
-                                                    <span className={`text-sm font-bold ${useManual ? 'text-brand-primary' : 'text-slate-400'}`}>{t('sellDevice.manualEntry')}</span>
-                                                </div>
-                                            </button>
+                                <div className="bg-slate-950/50 border border-slate-700 rounded-xl p-6 text-center shadow-inner">
+                                    <p className="text-slate-300 mb-6">Bitte verpacken Sie Ihr Gerät sicher und senden Sie es direkt an unseren Shop. Wir bearbeiten es sofort nach Erhalt der Sendung.</p>
+                                    <div className="bg-slate-900 border border-brand-primary/30 p-6 rounded-xl inline-block text-left text-white shadow-lg relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-20 h-20 bg-brand-primary/5 blur-2xl rounded-full"></div>
+                                        <div className="flex items-center gap-3 mb-3 border-b border-slate-800 pb-3 relative z-10">
+                                            <div className="p-2 bg-brand-primary/20 rounded-lg">
+                                                <Home className="w-5 h-5 text-brand-primary" />
+                                            </div>
+                                            <p className="font-bold text-xl text-brand-primary tracking-wide">HandyLand</p>
+                                        </div>
+                                        <div className="space-y-1.5 text-slate-300 relative z-10">
+                                            <p className="font-medium text-white">z.H. Ankauf-Abteilung</p>
+                                            <p>Walldorfer Straße 13</p>
+                                            <p>69168 Wiesloch</p>
                                         </div>
                                     </div>
-                                )}
-
-                                {(savedAddresses.length === 0 || useManual) && (
-                                    <div className="space-y-4">
-                                        <input
-                                            name="address"
-                                            placeholder="Straße und Hausnummer"
-                                            value={formData.address}
-                                            className={`w-full bg-slate-950/50 border ${errors.address ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
-                                            onChange={handleChange}
-                                        />
-                                        {errors.address && <p className="text-red-400 text-xs">{errors.address}</p>}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <input
-                                                    name="city"
-                                                    placeholder="Stadt"
-                                                    value={formData.city}
-                                                    className={`w-full bg-slate-950/50 border ${errors.city ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
-                                                    onChange={handleChange}
-                                                />
-                                                {errors.city && <p className="text-red-400 text-xs">{errors.city}</p>}
-                                            </div>
-                                            <div>
-                                                <input
-                                                    name="postalCode"
-                                                    placeholder="PLZ"
-                                                    value={formData.postalCode}
-                                                    className={`w-full bg-slate-950/50 border ${errors.postalCode ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
-                                                    onChange={handleChange}
-                                                />
-                                                {errors.postalCode && <p className="text-red-400 text-xs">{errors.postalCode}</p>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                                    <p className="text-sm text-amber-500/80 font-medium mt-6">Tipp: Versenden Sie das Gerät zwingend als versichertes Paket (z.B. mit DHL), damit Sie eine Sendungsnummer erhalten.</p>
+                                </div>
                                 <div className="flex gap-4 mt-8">
                                     <button type="button" onClick={prevStep} title={t('sellDevice.backBtn', 'Zurück')} className="py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition-all">
                                         <ArrowLeft className="w-5 h-5" />
                                     </button>
-                                    <button type="button" onClick={nextStep} className="flex-1 py-4 rounded-xl bg-brand-primary hover:bg-brand-primary/90 text-slate-900 font-bold text-lg transition-all flex items-center justify-center gap-2">
+                                    <button type="button" onClick={() => { setFormStep(3); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex-1 py-4 rounded-xl bg-brand-primary hover:bg-brand-primary/90 text-slate-900 font-bold text-lg transition-all flex items-center justify-center gap-2">
                                         Weiter zur Auszahlung <ArrowRight className="w-5 h-5" />
                                     </button>
                                 </div>

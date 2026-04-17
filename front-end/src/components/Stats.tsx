@@ -69,7 +69,7 @@ export const Stats: React.FC = () => {
   const stats = [
     {
       icon: <Wrench className="w-6 h-6" />,
-      value: settings?.stats?.devicesRepaired || 250,
+      value: settings?.stats?.devicesRepaired ?? 3000,
       suffix: '+',
       label: t('stats.devicesRepaired', 'Geräte repariert'),
       color: 'text-brand-primary',
@@ -78,7 +78,7 @@ export const Stats: React.FC = () => {
     },
     {
       icon: <Users className="w-6 h-6" />,
-      value: settings?.stats?.happyCustomers || 180,
+      value: settings?.stats?.happyCustomers ?? 1200,
       suffix: '+',
       label: t('stats.happyCustomers', 'Zufriedene Kunden'),
       color: 'text-purple-400',
@@ -87,7 +87,7 @@ export const Stats: React.FC = () => {
     },
     {
       icon: <Trophy className="w-6 h-6" />,
-      value: settings?.stats?.yearsExperience || 2,
+      value: settings?.stats?.marketExperience ?? 2,
       suffix: '+',
       label: t('stats.yearsExperience', 'Jahre Erfahrung'),
       color: 'text-amber-400',
@@ -96,7 +96,7 @@ export const Stats: React.FC = () => {
     },
     {
       icon: <Star className="w-6 h-6" />,
-      value: settings?.stats?.averageRating || 4.9,
+      value: settings?.stats?.averageRating ?? 4.9,
       suffix: '/5',
       label: t('stats.averageRating', 'Durchschnittsbewertung'),
       color: 'text-yellow-400',

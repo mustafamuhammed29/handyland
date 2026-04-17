@@ -120,13 +120,18 @@ app.get('/api/maintenance-info', (req, res) => {
         let title = 'Wartungsarbeiten';
         let message = 'The site is currently undergoing maintenance. Please check back soon.';
         let estimatedTime = '';
+        let statusText1 = 'System wird diagnostiziert...';
+        let statusText2 = 'Neue Reparaturen werden angewendet...';
         try {
             const data = JSON.parse(fs.readFileSync(MAINTENANCE_FLAG, 'utf8'));
             if(data.title) title = data.title;
             if(data.message) message = data.message;
             if(data.estimatedTime) estimatedTime = data.estimatedTime;
+            if(data.statusText1) statusText1 = data.statusText1;
+            if(data.statusText2) statusText2 = data.statusText2;
         } catch(e) {}
-        return res.json({ maintenance: true, title, message, estimatedTime });
+
+        return res.json({ maintenance: true, title, message, estimatedTime, statusText1, statusText2 });
     }
     res.json({ maintenance: false });
 });

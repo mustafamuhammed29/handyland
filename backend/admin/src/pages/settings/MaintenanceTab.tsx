@@ -39,6 +39,8 @@ export const MaintenanceSettingsTab = ({ settings, handleChange }: any) => {
                     <label className="relative inline-flex items-center cursor-pointer">
                         <input
                             type="checkbox"
+                            title="Toggle Maintenance Mode"
+                            aria-label="Toggle Maintenance Mode"
                             className="sr-only peer"
                             checked={mode.enabled}
                             onChange={(e) => updateField('enabled', e.target.checked)}
@@ -98,6 +100,40 @@ export const MaintenanceSettingsTab = ({ settings, handleChange }: any) => {
                                 placeholder="e.g. wenige Minuten / 2 hours"
                             />
                             <p className="text-xs text-slate-500 mt-1">This gives customers an idea of when to check back.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700 shadow-sm space-y-6">
+                <div>
+                    <h4 className="font-semibold text-white mb-4">Status Indicators Text</h4>
+                    
+                    <div className="space-y-5">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400 mb-1">
+                                Status Indicator 1
+                            </label>
+                            <input
+                                type="text"
+                                value={mode.statusText1}
+                                onChange={(e) => updateField('statusText1', e.target.value)}
+                                className="w-full bg-slate-950 px-4 py-2 border border-slate-800 rounded-xl text-white focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                                placeholder="e.g. System wird diagnostiziert..."
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400 mb-1">
+                                Status Indicator 2
+                            </label>
+                            <input
+                                type="text"
+                                value={mode.statusText2}
+                                onChange={(e) => updateField('statusText2', e.target.value)}
+                                className="w-full bg-slate-950 px-4 py-2 border border-slate-800 rounded-xl text-white focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                                placeholder="e.g. Neue Reparaturen werden angewendet..."
+                            />
                         </div>
                     </div>
                 </div>

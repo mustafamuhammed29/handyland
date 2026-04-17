@@ -97,7 +97,9 @@ exports.updateSettings = async (req, res) => {
                     fs.writeFileSync(MAINTENANCE_FLAG, JSON.stringify({
                         title: req.body.maintenanceMode.title,
                         message: req.body.maintenanceMode.message,
-                        estimatedTime: req.body.maintenanceMode.estimatedTime
+                        estimatedTime: req.body.maintenanceMode.estimatedTime,
+                        statusText1: req.body.maintenanceMode.statusText1,
+                        statusText2: req.body.maintenanceMode.statusText2
                     }));
                 } catch(e) { console.error('Failed to create MAINTENANCE_MODE file', e); }
             } else {

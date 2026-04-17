@@ -408,10 +408,24 @@ exports.confirmQuote = async (req, res) => {
         await quote.save();
 
         try {
-            await sendEmail({
-                email: email,
-                subject: `Shipping Label for Sell Order ${quote.quoteReference}`,
-                html: `
+            const EmailTemplate = require('../models/EmailTemplate');
+            const template = await EmailTemplate.findOne({ name: 'sell_device_confirmation', isActive: true });
+            
+            let emailHtml = '';
+            let emailSubject = `Shipping Label for Sell Order ${quote.quoteReference}`;
+
+            if (template) {
+                emailSubject = template.subject.replace(/\{\{quoteRef\}\}/g, quote.quoteReference);
+                emailHtml = template.html
+                    .replace(/\{\{customerName\}\}/g, fullName)
+                    .replace(/\{\{device\}\}/g, quote.device)
+                    .replace(/\{\{price\}\}/g, quote.estimatedValue)
+                    .replace(/\{\{quoteRef\}\}/g, quote.quoteReference)
+                    .replace(/\{\{bankName\}\}/g, bankName)
+                    .replace(/\{\{ibanSnippet\}\}/g, iban.slice(-4));
+            } else {
+                // Fallback
+                emailHtml = `
                     <h1>Sales Confirmation</h1>
                     <p>Dear ${fullName},</p>
                     <p>Thank you for selling your <strong>${quote.device}</strong> to HandyLand for <strong>€${quote.estimatedValue}</strong>.</p>
@@ -426,7 +440,13 @@ exports.confirmQuote = async (req, res) => {
                         </ol>
                     </div>
                     <p>We will inspect the device upon arrival and process your payment to <strong>${bankName} (Ending in ${iban.slice(-4)})</strong>.</p>
-                `
+                `;
+            }
+
+            await sendEmail({
+                email: email,
+                subject: emailSubject,
+                html: emailHtml
             });
 
             await sendEmail({
@@ -437,6 +457,18 @@ exports.confirmQuote = async (req, res) => {
 
         } catch (emailErr) {
             console.error("Failed to send shipping email:", emailErr);
+        }
+
+        try {
+            const { emitAdminNotification } = require('../utils/socket');
+            emitAdminNotification('new_valuation', {
+                title: 'Neues Ankaufsangebot!',
+                body: `Der Kunde ${fullName} möchte sein ${quote.device} für €${quote.estimatedValue} verkaufen. (Ref: ${quote.quoteReference})`,
+                icon: '📱',
+                link: '/valuation'
+            });
+        } catch (socketErr) {
+            console.error('Socket emission failed:', socketErr);
         }
 
         res.json({ success: true, message: 'Sale confirmed' });

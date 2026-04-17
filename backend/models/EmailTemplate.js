@@ -5,8 +5,7 @@ const emailTemplateSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        trim: true,
-        enum: ['verify_email', 'reset_password', 'order_confirmation']
+        enum: ['verify_email', 'reset_password', 'order_confirmation', 'sell_device_confirmation']
     },
     subject: {
         type: String,
@@ -53,6 +52,13 @@ emailTemplateSchema.statics.seedDefaults = async function () {
             description: 'Sent after a user successfully places an order.',
             variables: ['{{orderNumber}}', '{{totalAmount}}'],
             html: `<h1>Thank you for your order!</h1><p>Your Order ID is <strong>{{orderNumber}}</strong></p><p>Total: <strong>{{totalAmount}}€</strong></p><p>We will notify you when your order ships.</p>`
+        },
+        {
+            name: 'sell_device_confirmation',
+            subject: 'Shipping Label for Sell Order {{quoteRef}}',
+            description: 'Sent to customers when they confirm a device sale.',
+            variables: ['{{customerName}}', '{{device}}', '{{price}}', '{{quoteRef}}', '{{bankName}}', '{{ibanSnippet}}'],
+            html: `<h1>Sales Confirmation</h1><p>Dear {{customerName}},</p><p>Thank you for selling your <strong>{{device}}</strong> to HandyLand for <strong>€{{price}}</strong>.</p><p>Please print the attached shipping label and send your device within 2 business days.</p><div style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-left: 4px solid #0ea5e9;"><strong>Next Steps:</strong><ol><li>Reset your device to factory settings and remove iCloud/Google Lock.</li><li>Pack the device securely.</li><li>Attach the label below to the box.</li><li>Drop it off at the nearest post office.</li></ol></div><p>We will inspect the device upon arrival and process your payment to <strong>{{bankName}} (Ending in {{ibanSnippet}})</strong>.</p>`
         }
     ];
 

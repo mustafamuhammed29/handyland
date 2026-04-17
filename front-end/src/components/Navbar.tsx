@@ -59,6 +59,13 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
     };
   });
 
+  const activeNavItems = navItems.filter(item => {
+    if ((item.path === '/marketplace' || item.path === '/market') && settings.sections?.marketplacePage === false) return false;
+    if (item.path === '/repair' && settings.sections?.repairPage === false) return false;
+    if (item.path === '/valuation' && settings.sections?.valuationPage === false) return false;
+    return true;
+  });
+
   const hasBanner = settings.announcementBanner?.enabled && settings.announcementBanner?.text;
 
   return (
@@ -80,7 +87,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
         {/* Center: Navigation Links */}
         <div className="hidden xl:flex flex-1 justify-center items-center px-2 xl:px-4">
           <div className="flex items-center justify-center gap-1 xl:gap-2">
-          {navItems.map((item) => {
+          {activeNavItems.map((item) => {
             const isActive = item.path === '/'
               ? location.pathname === '/'
               : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
@@ -113,7 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             );
           })}
           
-          {(!(settings as any).features || (settings as any).features.comparisonEngine !== false) && (
+          {(!(settings as any).features || (settings as any).features.comparisonEngine !== false) && settings.sections?.marketplacePage !== false && (
             <Link
               to="/compare"
               className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-purple-500/50 text-purple-500 hover:bg-purple-500/10 transition-all duration-200 xl:mx-2"
@@ -122,13 +129,15 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
               {t('nav.compare', 'Vergleichen')}
             </Link>
           )}
-          <Link
-            to="/track-repair"
-            className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
-          >
-            <ClipboardList className="w-3.5 h-3.5" />
-            {t('nav.trackRepair', 'Reparatur verfolgen')}
-          </Link>
+          {settings.sections?.trackRepairPage !== false && (
+            <Link
+              to="/track-repair"
+              className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
+            >
+              <ClipboardList className="w-3.5 h-3.5" />
+              {t('nav.trackRepair', 'Reparatur verfolgen')}
+            </Link>
+          )}
           </div>
         </div>
 
@@ -166,20 +175,22 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
               {cart.length > 0 && <span className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 min-w-[18px] h-[18px] flex items-center justify-center bg-brand-primary text-black text-[10px] font-black rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)] px-1">{cart.length}</span>}
             </button>
 
-            {user && (
+            {user && settings.sections?.authSystem !== false && (
               <Link to="/dashboard?tab=wishlist"
                 className="relative flex items-center justify-center w-10 h-10 rounded-full bg-transparent transition-all group hidden md:flex outline-none hover:bg-black/5 dark:hover:bg-white/5">
                 <Heart className="w-5 h-5 text-slate-600 dark:text-slate-400 transition-colors group-hover:text-pink-400 drop-shadow-none group-hover:drop-shadow-[0_0_8px_rgba(244,114,182,0.5)]" />
               </Link>
             )}
 
-            <Link
-              to={user ? '/dashboard' : '/login'}
-              aria-label={user ? 'Go to dashboard' : 'Log in'}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300 active:scale-95 group outline-none"
-            >
-              <UserIcon className={`w-5 h-5 transition-colors ${user ? 'text-emerald-500 dark:text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)] group-hover:text-emerald-600 dark:group-hover:text-emerald-300' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'}`} />
-            </Link>
+            {settings.sections?.authSystem !== false && (
+              <Link
+                to={user ? '/dashboard' : '/login'}
+                aria-label={user ? 'Go to dashboard' : 'Log in'}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300 active:scale-95 group outline-none"
+              >
+                <UserIcon className={`w-5 h-5 transition-colors ${user ? 'text-emerald-500 dark:text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)] group-hover:text-emerald-600 dark:group-hover:text-emerald-300' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'}`} />
+              </Link>
+            )}
 
 
             </div>
@@ -220,7 +231,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
              </button>
           </div>
 
-          {navItems.map((item) => {
+          {activeNavItems.map((item) => {
             const isMobileActive = item.path === '/'
               ? location.pathname === '/'
               : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
@@ -242,19 +253,21 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
 
           {/* Track Repair removed per user request */}
 
-          <div className="mt-auto pt-4 border-t border-white/[0.05]">
-            <Link
-              to={user ? '/dashboard' : '/login'}
-              onClick={() => setIsOpen(false)}
-              className={`flex w-full justify-center items-center px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-wider transition-all duration-300 ${user
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
-                : 'bg-brand-primary/20 text-brand-primary border border-brand-primary/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]'
-                }`}
-            >
-              <UserIcon className="w-5 h-5 me-3" />
-              {user ? t('admin.dashboard', 'Go to Dashboard') : t('common.signInRegister', 'Sign In / Register')}
-            </Link>
-          </div>
+          {settings.sections?.authSystem !== false && (
+            <div className="mt-auto pt-4 border-t border-white/[0.05]">
+              <Link
+                to={user ? '/dashboard' : '/login'}
+                onClick={() => setIsOpen(false)}
+                className={`flex w-full justify-center items-center px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-wider transition-all duration-300 ${user
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+                  : 'bg-brand-primary/20 text-brand-primary border border-brand-primary/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]'
+                  }`}
+              >
+                <UserIcon className="w-5 h-5 me-3" />
+                {user ? t('admin.dashboard', 'Go to Dashboard') : t('common.signInRegister', 'Sign In / Register')}
+              </Link>
+            </div>
+          )}
         </div>
       )}
 

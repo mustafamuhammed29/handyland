@@ -186,7 +186,9 @@ const settingsSchema = new mongoose.Schema({
             enabled: false,
             title: 'Wartungsarbeiten',
             message: 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!',
-            estimatedTime: 'wenige Minuten'
+            estimatedTime: 'wenige Minuten',
+            statusText1: 'System wird diagnostiziert...',
+            statusText2: 'Neue Reparaturen werden angewendet...'
         }
     },
     accountSuspension: {

@@ -81,6 +81,11 @@ interface SectionsSettings {
     marketplace: boolean;
     accessories: boolean;
     contact: boolean;
+    marketplacePage?: boolean;
+    valuationPage?: boolean;
+    repairPage?: boolean;
+    trackRepairPage?: boolean;
+    authSystem?: boolean;
 }
 
 interface ContactSettings {
@@ -266,7 +271,7 @@ export default function SettingsManager() {
         content: { accessoriesTitle: '', accessoriesSubtitle: '', repairTitle: '', repairSubtitle: '' },
         stats: { devicesRepaired: 0, happyCustomers: 0, averageRating: 0, marketExperience: 0 },
         repairArchive: { title: '', subtitle: '', buttonText: '', totalRepairs: 0 },
-        sections: { hero: true, stats: true, repairGallery: true, marketplace: true, accessories: true, contact: true },
+        sections: { hero: true, stats: true, repairGallery: true, marketplace: true, accessories: true, contact: true, marketplacePage: true, valuationPage: true, repairPage: true, trackRepairPage: true, authSystem: true },
         contactSection: {
             address: '', phone: '', email: '', formTitle: '', formButton: '', mapUrl: '',
             socialLinks: { facebook: '', instagram: '', twitter: '', linkedin: '', youtube: '' },

@@ -134,7 +134,10 @@ export const AppRouter = () => {
         let cancelled = false;
         const checkMaintenance = async () => {
             try {
-                const res = await fetch('/api/maintenance-info');
+                const res = await fetch('/api/maintenance-info', { 
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
                 const data = await res.json();
                 if (!cancelled) {
                     setIsMaintenanceActive(data.maintenance === true);
@@ -212,29 +215,36 @@ export const AppRouter = () => {
                     <Routes location={location} key={location.pathname}>
                         <Route path="/" element={<PublicLayout lang={lang} user={user} cartCount={cart.length} />}>
                             <Route path="/" element={<PageTransition><Home lang={lang} /></PageTransition>} />
-                            <Route path="/marketplace" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense></PageTransition>} />
-                            <Route path="/marketplace/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition>} />
+
+                            {/* Core Module Protection */}
+                            <Route path="/marketplace" element={settings.sections?.marketplacePage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/marketplace/:id" element={settings.sections?.marketplacePage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/products/:id" element={settings.sections?.marketplacePage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/products" element={<Navigate to="/marketplace" replace />} />
+
+                            <Route path="/repair" element={settings.sections?.repairPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Repair lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/track-repair" element={settings.sections?.trackRepairPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><GuestTicketTracking /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+
+                            <Route path="/valuation" element={settings.sections?.valuationPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Valuation lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/sell/:quoteRef" element={settings.sections?.valuationPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><SellDevice /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+
+                            <Route path="/login" element={settings.sections?.authSystem !== false ? <PageTransition><Login /></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/register" element={settings.sections?.authSystem !== false ? <PageTransition><Register /></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/reset-password" element={settings.sections?.authSystem !== false ? <PageTransition><ResetPassword /></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/forgot-password" element={settings.sections?.authSystem !== false ? <PageTransition><ForgotPassword /></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/verify-email" element={settings.sections?.authSystem !== false ? <PageTransition><VerifyEmail /></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/verify-email-notice" element={settings.sections?.authSystem !== false ? <PageTransition><VerifyEmailNotice /></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/auth/callback" element={settings.sections?.authSystem !== false ? <SocialAuthCallback /> : <Navigate to="/" replace />} />
+
+                            {/* Standard Pages */}
                             <Route path="/orders/:id" element={<ProtectedRoute><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
                             <Route path="/accessories" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Accessories lang={lang} /></Suspense></PageTransition>} />
-                            <Route path="/repair" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Repair lang={lang} /></Suspense></PageTransition>} />
-                            <Route path="/valuation" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Valuation lang={lang} /></Suspense></PageTransition>} />
-                            <Route path="/sell/:quoteRef" element={<PageTransition><Suspense fallback={<GlobalLoader />}><SellDevice /></Suspense></PageTransition>} />
-                            <Route path="/products/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition>} />
                             <Route path="/accessories/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><AccessoryDetails /></Suspense></PageTransition>} />
                             <Route path="/compare" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ComparePage /></Suspense></PageTransition>} />
                             <Route path="/contact" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Contact /></Suspense></PageTransition>} />
                             <Route path="/checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
                             <Route path="/payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
-                            <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-                            <Route path="/verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
-                            <Route path="/verify-email-notice" element={<PageTransition><VerifyEmailNotice /></PageTransition>} />
-                            <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
-                            <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
-                            <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
-                            <Route path="/auth/callback" element={<SocialAuthCallback />} />
-                            <Route path="/track-repair" element={<PageTransition><Suspense fallback={<GlobalLoader />}><GuestTicketTracking /></Suspense></PageTransition>} />
-
-                            <Route path="/products" element={<Navigate to="/marketplace" replace />} />
+                            
                             <Route path="/cart" element={<ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><CartPage lang={lang} /></Suspense></PageTransition></ErrorBoundary>} />
                             <Route path="/about" element={<Navigate to="/uber-uns" replace />} />
                             <Route path="/admin" element={<AdminRedirect />} />
