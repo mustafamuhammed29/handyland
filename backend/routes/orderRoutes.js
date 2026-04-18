@@ -48,8 +48,8 @@ router.post('/', protect, validate(createOrderRules), createOrder);
 router.post('/:id/receipt', protect, upload.single('receipt'), require('../controllers/orderController').uploadPaymentReceipt); // BUG-NEW-09 fix: require auth
 router.route('/:id/pay').put(protect, updateOrderToPaid);
 router.route('/:id/deliver').put(protect, authorize('admin', 'staff'), updateOrderToDelivered);
-router.route('/:id/refund').post(protect, requestRefund);
-router.route('/refund/:id').put(protect, authorize('admin'), processRefund);
+router.route('/:id/request-refund').post(protect, requestRefund);
+router.route('/:id/process-refund').put(protect, authorize('admin'), processRefund);
 router.route('/:id/cancel').put(protect, cancelOrder);
 
 module.exports = router;

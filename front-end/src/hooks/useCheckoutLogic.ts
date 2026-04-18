@@ -129,7 +129,7 @@ export const useCheckoutLogic = () => {
             }));
         }
 
-        const saved = localStorage.getItem('checkout_shipping');
+        const saved = sessionStorage.getItem('checkout_shipping');
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
@@ -144,7 +144,7 @@ export const useCheckoutLogic = () => {
 
     useEffect(() => {
         if (step >= 2) {
-            localStorage.setItem('checkout_shipping', JSON.stringify(shippingDetails));
+            sessionStorage.setItem('checkout_shipping', JSON.stringify(shippingDetails));
         }
     }, [shippingDetails, step]);
 
@@ -275,10 +275,8 @@ export const useCheckoutLogic = () => {
                 ...shippingDetails,
                 street: shippingDetails.address
             },
-            shippingFee: shippingCost,
             shippingMethod: selectedMethod?.name || 'Standard',
             couponCode: coupon?.code,
-            discountAmount: coupon?.discount,
             appliedPoints: appliedPoints,
             email: shippingDetails.email
         };
@@ -292,6 +290,7 @@ export const useCheckoutLogic = () => {
                 });
 
                 if (r.success) {
+                    sessionStorage.removeItem('checkout_shipping');
                     navigate(`/payment-success?order_id=${r.order._id}&method=${selectedPaymentMethod}`);
                 }
 
@@ -303,6 +302,7 @@ export const useCheckoutLogic = () => {
                 });
 
                 if (response.url) {
+                    sessionStorage.removeItem('checkout_shipping');
                     window.location.href = response.url;
                 } else {
                     throw new Error("Failed to retrieve payment URL");

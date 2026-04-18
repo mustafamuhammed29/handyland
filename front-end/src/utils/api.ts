@@ -59,7 +59,7 @@ api.interceptors.response.use(
         const originalRequest = error.config;
 
         if (error.config?.url?.includes('/auth/refresh')) {
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('user');
 
             // Only redirect if NOT already on login/public pages
             const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
@@ -90,7 +90,7 @@ api.interceptors.response.use(
                 return api.request(originalRequest);
             } catch (refreshError) {
                 // Clear authentication state
-                localStorage.removeItem('user');
+                sessionStorage.removeItem('user');
 
                 // Only redirect if NOT on public pages
                 const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
@@ -117,7 +117,7 @@ api.interceptors.response.use(
         if (error.response?.status === 403) {
             const isAuthError = error.response.data?.accountDeactivated || error.response.data?.emailNotVerified;
             if (isAuthError) {
-                localStorage.removeItem('user');
+                sessionStorage.removeItem('user');
                 // Only redirect if NOT on public pages
                 const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
                 const currentPath = window.location.pathname;

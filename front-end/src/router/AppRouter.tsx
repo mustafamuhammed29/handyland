@@ -69,13 +69,7 @@ const AdminRedirect = () => {
     }, [adminUrl, isProduction]);
 
     if (!adminUrl && isProduction) {
-        return (
-            <div className="min-h-screen flex items-center justify-center flex-col gap-4 p-8 text-center">
-                <div className="text-4xl">⚙️</div>
-                <h1 className="text-xl font-bold text-slate-800 dark:text-white">Admin panel not configured</h1>
-                <p className="text-slate-500 text-sm">Please set <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">VITE_ADMIN_URL</code> in your environment.</p>
-            </div>
-        );
+        return <Navigate to="/" replace />;
     }
 
     return null;

@@ -153,26 +153,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
         setIsCartOpen(true);
 
-        // Backend Update using Ref for fresh state (after optimistic update tick, hopefully, 
-        // or we calculate based on Ref?)
-        // Actually, since setCart is async, cartRef won't be updated yet.
-        // We must calculate newQty based on cartRef.current (which is "current rendered state")
-        // PLUS what we just did? No, that's complex.
-        // Best approach for "Add": just add 1 to whatever is in ref? 
-        // If user clicks fast: 
-        // 1. click: ref=1. calc=2. setCart. api(2).
-        // 2. click: ref=1 (still). calc=2. setCart. api(2).
-        // Still broken.
-        // Correct fix: Use functional update for setCart is good for UI. 
-        // For API, we need the result of the transition.
-        // Since we don't have that, we can assume the API should ideally take a delta.
-        // But we must stick to PUT absolute quantity.
-
-        // Let's rely on the fact that standard usage isn't usually 10 clicks/sec.
-        // But to be cleaner, we can try to guess or just use the simplest "render state" approach
-        // which I implemented before, but using Ref avoids *some* closure staleness if the function closes over old scope.
-        // Actually, cartRef.current will always be the latest committed state.
-
         if (user) {
             // Use current state map to find the item and determine new quantity
             const currentItem = cartRef.current.find(i => i.id === item.id);

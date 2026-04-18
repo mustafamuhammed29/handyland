@@ -94,7 +94,8 @@ const OrderSchema = new mongoose.Schema({
         },
         email: {
             type: String, // Critical for guest checkout
-            required: true
+            required: true,
+            match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Invalid email address']
         },
         phone: {
             type: String,

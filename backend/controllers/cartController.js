@@ -127,28 +127,30 @@ exports.syncCart = async (req, res) => {
                 if (serverMap.has(productId)) {
                     // Update quantity atomically
                     const existing = serverMap.get(productId);
-                    const newQuantity = local.quantity || existing.quantity;
+                    const parsedQty = local.quantity || existing.quantity;
+                    const newQuantity = Math.min(Number(parsedQty), 100);
                     await Cart.updateOne(
                         { user: req.user.id, "items.product": productId },
                         { $set: { "items.$.quantity": newQuantity } }
                     );
                 } else {
+                    const addQty = Math.min(Number(local.quantity || 1), 100);
                     // Atomic update to avoid race conditions pushing duplicates
                     const addResult = await Cart.updateOne(
                         { user: req.user.id, "items.product": { $ne: productId } },
-                        { $push: { items: { product: productId, productType, quantity: local.quantity || 1 } } }
+                        { $push: { items: { product: productId, productType, quantity: addQty } } }
                     );
 
                     if (addResult.modifiedCount === 0) {
                         // Product was added by a parallel request race condition just now
                         await Cart.updateOne(
                             { user: req.user.id, "items.product": productId },
-                            { $set: { "items.$.quantity": local.quantity || 1 } }
+                            { $set: { "items.$.quantity": addQty } }
                         );
                     }
 
                     // Add it to map so if localItems has duplicates itself, it hits the update block
-                    serverMap.set(productId, { quantity: local.quantity || 1 });
+                    serverMap.set(productId, { quantity: addQty });
                 }
             }
         }
@@ -233,31 +235,33 @@ exports.updateCart = async (req, res) => {
 
             if (existing) {
                 // Update quantity atomically
+                const cappedQty = Math.min(Number(quantity), 100);
                 await Cart.findOneAndUpdate(
                     { user: req.user.id, "items.product": realId },
-                    { $set: { "items.$.quantity": quantity } }
+                    { $set: { "items.$.quantity": cappedQty } }
                 );
             } else {
                 // FIXED: Validate stock before adding new item (FIX 9)
+                const cappedQty = Math.min(Number(quantity), 100);
                 const stockDoc = await Model.findById(realId).select('stock name');
                 if (!stockDoc) {
                     return res.status(404).json({ success: false, message: 'Product not found' });
                 }
-                if (stockDoc.stock < quantity) {
+                if (stockDoc.stock < cappedQty) {
                     return res.status(400).json({ success: false, message: `Only ${stockDoc.stock} units available for ${stockDoc.name}` });
                 }
 
                 // Add new item atomically using resilient atomic update pattern
                 const addResult = await Cart.updateOne(
                     { user: req.user.id, "items.product": { $ne: realId } },
-                    { $push: { items: { product: realId, productType: typeToSave, quantity } } }
+                    { $push: { items: { product: realId, productType: typeToSave, quantity: cappedQty } } }
                 );
 
                 if (addResult.modifiedCount === 0) {
                      // Parallel request already added it
                      await Cart.updateOne(
                          { user: req.user.id, "items.product": realId },
-                         { $set: { "items.$.quantity": quantity } }
+                         { $set: { "items.$.quantity": cappedQty } }
                      );
                 }
             }

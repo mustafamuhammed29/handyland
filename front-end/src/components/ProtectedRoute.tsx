@@ -10,10 +10,10 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
-    const { user, loading } = useAuth(); // removed isAuthenticated, checking user directly is fine or use isAuthenticated
+    const { user, loading, isVerified } = useAuth(); // removed isAuthenticated, checking user directly is fine or use isAuthenticated
     const location = useLocation();
 
-    if (loading) {
+    if (loading || (user && !isVerified)) {
         return <GlobalLoader />;
     }
 

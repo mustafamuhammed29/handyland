@@ -17,6 +17,9 @@ const Transaction = require('../models/Transaction');
 const RefundRequest = require('../models/RefundRequest'); // Added
 const Coupon = require('../models/Coupon');
 const Accessory = require('../models/Accessory');
+const User = require('../models/User');
+const Settings = require('../models/Settings');
+const ShippingMethod = require('../models/ShippingMethod');
 const { createNotification } = require('../controllers/notificationController');
 const { notify } = require('../utils/notificationService');
 let stripe;
@@ -88,14 +91,36 @@ exports.applyCoupon = async (req, res) => {
 // @route   POST /api/orders
 // @access  Private
 exports.createOrder = async (req, res) => {
+    const useTransactions = process.env.MONGO_USE_TRANSACTIONS === 'true';
+    const session = useTransactions ? await mongoose.startSession() : null;
+    if (session) session.startTransaction();
+
     try {
-        const { items, shippingAddress, paymentMethod, shippingMethod, notes, couponCode, discountAmount } = req.body;
+        const { items, shippingAddress, paymentMethod, shippingMethod, notes, couponCode } = req.body;
 
         if (!items || items.length === 0) {
+            if (session) await session.abortTransaction();
             return res.status(400).json({
                 success: false,
                 message: 'No items in order'
             });
+        }
+
+        let pointsToDeduct = req.body.appliedPoints ? parseFloat(req.body.appliedPoints) : 0;
+        if (pointsToDeduct < 0) pointsToDeduct = 0;
+        
+        let currentUser;
+        if (req.user) {
+            let userQ = User.findById(req.user._id);
+            if (session) userQ = userQ.session(session);
+            currentUser = await userQ;
+            
+            if (pointsToDeduct > 0 && (!currentUser || (currentUser.loyaltyPoints || 0) < pointsToDeduct)) {
+                if (session) await session.abortTransaction();
+                return res.status(400).json({ success: false, message: 'Insufficient loyalty points' });
+            }
+        } else {
+            pointsToDeduct = 0; // Guests cannot use points
         }
 
         // Calculate total amount
@@ -153,15 +178,31 @@ exports.createOrder = async (req, res) => {
         }
 
         // Calculate Tax and Shipping
-        const taxRate = 0.19; // 19% VAT – included in product prices (B2C Germany)
-        // Use shippingFee from the frontend (calculated based on selected method);
-        // fall back to legacy logic only if not provided
-        const shippingFee = req.body.shippingFee !== undefined
-            ? parseFloat(req.body.shippingFee)
-            : (totalAmount > 100 ? 0 : 5.99);
-        // Tax is INCLUDED in product prices – do not add it on top
-        const taxAmount = totalAmount - (totalAmount / (1 + taxRate)); // extract for display only
-        const appliedDiscount = discountAmount ? parseFloat(discountAmount) : 0;
+        const taxRate = 0.19;
+        
+        let shippingQ = ShippingMethod.findOne({ name: shippingMethod });
+        if (session) shippingQ = shippingQ.session(session);
+        const shippingMethodDoc = await shippingQ;
+        
+        const shippingFee = shippingMethodDoc ? shippingMethodDoc.price : (totalAmount > 100 ? 0 : 5.99);
+        
+        const taxAmount = totalAmount - (totalAmount / (1 + taxRate));
+        
+        let appliedDiscount = 0;
+        if (couponCode) {
+            let couponQ = Coupon.findOne({ code: couponCode.toUpperCase() });
+            if (session) couponQ = couponQ.session(session);
+            const coupon = await couponQ;
+            if (coupon && coupon.isActive && (!coupon.validUntil || new Date() <= new Date(coupon.validUntil))) {
+                if (coupon.discountType === 'percentage') {
+                    appliedDiscount = (totalAmount * coupon.discountValue) / 100;
+                    if (coupon.maxDiscount) appliedDiscount = Math.min(appliedDiscount, coupon.maxDiscount);
+                } else {
+                    appliedDiscount = coupon.discountValue;
+                }
+                appliedDiscount = Math.min(appliedDiscount, totalAmount);
+            }
+        }
 
         const finalAmount = Math.max(0, totalAmount + shippingFee - appliedDiscount);
 
@@ -170,25 +211,17 @@ exports.createOrder = async (req, res) => {
 
         if (paymentMethod === 'wallet') {
             if (!req.user) {
+                if (session) await session.abortTransaction();
                 return res.status(401).json({ success: false, message: 'Must be logged in to pay with wallet.' });
             }
-            const User = require('../models/User');
-            const currentUser = await User.findById(req.user._id);
             if (!currentUser || currentUser.balance < finalAmount) {
-                // Rollback stock
-                for (const rolled of orderItems) {
-                    if (rolled.productType === 'Product') {
-                        await Product.findByIdAndUpdate(rolled.product, { $inc: { stock: rolled.quantity, sold: -rolled.quantity } });
-                    } else if (rolled.productType === 'Accessory') {
-                        await Accessory.findByIdAndUpdate(rolled.product, { $inc: { stock: rolled.quantity, sold: -rolled.quantity } });
-                    }
-                }
+                if (session) await session.abortTransaction();
                 return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
             }
             
             // Deduct balance
             currentUser.balance -= finalAmount;
-            await currentUser.save();
+            await currentUser.save({ session: session || null });
             
             statusToSet = 'processing';
             paymentStatusToSet = 'paid';
@@ -274,17 +307,16 @@ exports.createOrder = async (req, res) => {
 
         // Send order confirmation email (non-critical)
         try {
-            const recipientEmail = req.user?.email || req.body.email || order.contactEmail;
+            const recipientEmail = req.user?.email || req.body.email || req.body.contactEmail || order.contactEmail;
             const recipientName = req.user?.name || req.body.fullName || 'Customer';
             if (recipientEmail) {
                 await sendEmail({
                     email: recipientEmail,
                     subject: 'Order Confirmation - HandyLand',
-                    html: emailTemplates.orderConfirmation(recipientName, order)
+                    message: `Thank you for your order! Your order number is ${order.orderNumber}.`
                 });
             }
         } catch (emailError) {
-            console.error('Email sending failed:', emailError);
         }
 
         // Send in-app notification (only for logged-in users)
@@ -386,6 +418,18 @@ exports.getOrder = async (req, res) => {
                     message: 'Not authorized to view this order'
                 });
             }
+        } else {
+            // Guest Order Check
+            const reqEmail = req.query.email ? req.query.email.toLowerCase() : null;
+            const orderEmail = order.contactEmail ? order.contactEmail.toLowerCase() : null;
+            if (!req.user || req.user.role !== 'admin') {
+                if (!reqEmail || reqEmail !== orderEmail) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Not authorized to view this guest order. Please provide matching email parameter.'
+                    });
+                }
+            }
         }
 
         res.status(200).json({
@@ -447,6 +491,22 @@ exports.cancelOrder = async (req, res) => {
                     await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
                 }
             }
+        }
+        
+        // Refund Wallet Balance
+        if (order.paymentMethod === 'wallet' && order.paymentStatus === 'paid') {
+            const User = require('../models/User');
+            await User.findByIdAndUpdate(order.user, { $inc: { balance: order.totalAmount } });
+            await Transaction.create({
+                user: order.user,
+                amount: order.totalAmount,
+                type: 'refund',
+                description: `Refund for cancelled order #${order.orderNumber}`,
+                status: 'completed',
+                order: order._id
+            });
+            order.paymentStatus = 'refunded';
+            await order.save();
         }
 
         // FIXED: Rollback coupon usage on cancellation (FIX 3)
@@ -544,6 +604,21 @@ exports.updateOrderStatus = async (req, res) => {
                         const Accessory = require('../models/Accessory');
                         await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
                     }
+                }
+                
+                // Refund Wallet Balance
+                if (order.paymentMethod === 'wallet' && order.paymentStatus === 'paid') {
+                    const User = require('../models/User');
+                    await User.findByIdAndUpdate(order.user, { $inc: { balance: order.totalAmount } });
+                    await Transaction.create({
+                        user: order.user,
+                        amount: order.totalAmount,
+                        type: 'refund',
+                        description: `Refund for admin-cancelled order #${order.orderNumber}`,
+                        status: 'completed',
+                        order: order._id
+                    });
+                    order.paymentStatus = 'refunded';
                 }
             }
         }
@@ -709,10 +784,10 @@ exports.getInvoice = async (req, res) => {
                         }
                     </div>
                     <div class="invoice-details">
-                        <div class="invoice-title" style="color: ${invoiceSettings.primaryColor || '#333'}">${invoiceSettings.titleLabel || 'Invoice'}</div>
-                        <div>${invoiceSettings.dateLabel || 'Date:'} ${date}</div>
-                        <div>${invoiceSettings.numberLabel || 'Invoice #:'} ${invoiceSettings.prefix || 'HL-'}${order.orderNumber}</div>
-                        ${invoiceSettings.vatNumber ? `<div>${invoiceSettings.vatIdLabel || 'VAT ID:'} ${invoiceSettings.vatNumber}</div>` : ''}
+                        <div class="invoice-title" style="color: ${escapeHtml(invoiceSettings.primaryColor) || '#333'}">${escapeHtml(invoiceSettings.titleLabel) || 'Invoice'}</div>
+                        <div>${escapeHtml(invoiceSettings.dateLabel) || 'Date:'} ${date}</div>
+                        <div>${escapeHtml(invoiceSettings.numberLabel) || 'Invoice #:'} ${escapeHtml(invoiceSettings.prefix) || 'HL-'}${order.orderNumber}</div>
+                        ${invoiceSettings.vatNumber ? `<div>${escapeHtml(invoiceSettings.vatIdLabel) || 'VAT ID:'} ${escapeHtml(invoiceSettings.vatNumber)}</div>` : ''}
                     </div>
                 </div>
 
@@ -784,13 +859,13 @@ exports.getInvoice = async (req, res) => {
                 </div>
 
                 <div class="footer">
-                    <p style="font-weight: bold; color: #555;">${invoiceSettings.footerText || 'Thank you for your business!'}</p>
-                    <p>${invoiceSettings.companyAddress || 'Tech Street 123 - 10115 Berlin - Germany'}</p>
+                    <p style="font-weight: bold; color: #555;">${escapeHtml(invoiceSettings.footerText) || 'Thank you for your business!'}</p>
+                    <p>${escapeHtml(invoiceSettings.companyAddress) || 'Tech Street 123 - 10115 Berlin - Germany'}</p>
                     ${(invoiceSettings.bankName || invoiceSettings.iban || invoiceSettings.bic) ? `
                     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: center; gap: 20px; font-size: 11px; color: #888;">
-                        ${invoiceSettings.bankName ? `<span>Bank: ${invoiceSettings.bankName}</span>` : ''}
-                        ${invoiceSettings.iban ? `<span>IBAN: ${invoiceSettings.iban}</span>` : ''}
-                        ${invoiceSettings.bic ? `<span>BIC: ${invoiceSettings.bic}</span>` : ''}
+                        ${invoiceSettings.bankName ? `<span>Bank: ${escapeHtml(invoiceSettings.bankName)}</span>` : ''}
+                        ${invoiceSettings.iban ? `<span>IBAN: ${escapeHtml(invoiceSettings.iban)}</span>` : ''}
+                        ${invoiceSettings.bic ? `<span>BIC: ${escapeHtml(invoiceSettings.bic)}</span>` : ''}
                     </div>
                     ` : ''}
                     <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: ${invoiceSettings.primaryColor || '#333'}; color: #fff; border: none; cursor: pointer; border-radius: 5px;">${invoiceSettings.printBtnLabel || 'Print Invoice'}</button>
@@ -959,7 +1034,10 @@ exports.generateInvoice = exports.getInvoice; // alias for backward compatibilit
 // @access  Private/Admin
 exports.processRefund = async (req, res) => {
     try {
-        const { status, adminComments } = req.body; // status: 'approved', 'rejected'
+        const { status, adminComments } = req.body;
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status value' });
+        }
         const refundRequest = await RefundRequest.findById(req.params.id).populate('order');
 
         if (!refundRequest) {return res.status(404).json({ message: 'Refund request not found' });}

@@ -572,8 +572,21 @@ exports.refreshToken = async (req, res) => {
 
         const user = await User.findById(refreshTokenDoc.user);
 
+        // Refresh Token Rotation
+        await RefreshToken.findByIdAndDelete(refreshTokenDoc._id);
+        const newRefreshTokenData = await authService.generateRefreshToken(user._id);
+
         // Generate new access token
         const newAccessToken = generateToken(user._id);
+
+        // Send new refresh token in HTTP-only cookie
+        res.cookie('refreshToken', newRefreshTokenData.token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: '/'
+        });
 
         // Send access token in HTTP-only cookie
         res.cookie('accessToken', newAccessToken, {

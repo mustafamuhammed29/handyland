@@ -1,13 +1,19 @@
 import { api } from '../utils/api';
 import { Order } from '../types';
 
+const devLog = (...args: any[]) => {
+    if (import.meta.env.DEV) {
+        console.error(...args);
+    }
+};
+
 export const orderService = {
     createOrder: async (orderData: any): Promise<{ success: boolean; order: Order }> => {
         try {
             const response = await api.post('/api/orders', orderData);
             return response as any;
         } catch (error) {
-            console.error('Order Service Create Error:', error);
+            devLog('Order Service Create Error:', error);
             throw error;
         }
     },
@@ -17,7 +23,7 @@ export const orderService = {
             const response = await api.get('/api/shipping-methods');
             return response as any;
         } catch (error) {
-            console.error('Order Service Fetch Shipping Methods Error:', error);
+            devLog('Order Service Fetch Shipping Methods Error:', error);
             // Return empty array instead of throwing to prevent crash if endpoint is missing momentarily
             return [];
         }
@@ -33,7 +39,7 @@ export const orderService = {
             const response = await api.get(`/api/orders?${queryParams.toString()}`);
             return response as any;
         } catch (error) {
-            console.error('Order Service Get My Orders Error:', error);
+            devLog('Order Service Get My Orders Error:', error);
             throw error;
         }
     },
@@ -43,7 +49,7 @@ export const orderService = {
             const response = await api.get(`/api/orders/${id}`);
             return response as any;
         } catch (error) {
-            console.error('Order Service Get Order By ID Error:', error);
+            devLog('Order Service Get Order By ID Error:', error);
             throw error;
         }
     },
@@ -53,7 +59,7 @@ export const orderService = {
             const response = await api.put(`/api/orders/${id}/cancel`, {});
             return response as any;
         } catch (error) {
-            console.error('Order Service Cancel Order Error:', error);
+            devLog('Order Service Cancel Order Error:', error);
             throw error;
         }
     },
@@ -63,26 +69,16 @@ export const orderService = {
             const response = await api.put(`/api/orders/admin/${id}/status`, { status, trackingNumber });
             return response as any;
         } catch (error) {
-            console.error('Order Service Update Status Error:', error);
+            devLog('Order Service Update Status Error:', error);
             throw error;
         }
     },
 
     downloadInvoice: async (id: string): Promise<void> => {
         try {
-            // Check if we need a blob response or just trigger download
-            // Since api.get returns JSON by default in our wrapper, we might need a custom request for blob
-            // But let's assume the backend returns HTML or PDF stream.
-            // If it returns HTML string (as seen in controller), we might just open it in new window
-            // implementing a direct fetch here to handle blob/html specifically if needed, 
-            // OR use the api wrapper if it supports it.
-            // efficient way for HTML invoice:
-            const response = await api.get(`/api/orders/${id}/invoice`);
-            const blob = new Blob([response as any], { type: 'text/html' });
-            const url = window.URL.createObjectURL(blob);
-            window.open(url, '_blank');
+            window.open(`/api/orders/${id}/invoice`, '_blank');
         } catch (error) {
-            console.error('Order Service Download Invoice Error:', error);
+            devLog('Order Service Download Invoice Error:', error);
             throw error;
         }
     },
@@ -102,7 +98,7 @@ export const orderService = {
             const response = await api.post('/api/payment/create-checkout-session', data);
             return response as any;
         } catch (error) {
-            console.error('Order Service Create Checkout Session Error:', error);
+            devLog('Order Service Create Checkout Session Error:', error);
             throw error;
         }
     }
