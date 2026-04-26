@@ -54,7 +54,7 @@ export const GuestTicketTracking: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 pt-32 pb-12 px-4 flex flex-col items-center">
+        <div className="min-h-[100dvh] bg-slate-950 pt-32 pb-12 px-4 flex flex-col items-center">
             <SEO
                 title="Track Repair Ticket"
                 description="Track the status of your device repair with HandyLand."

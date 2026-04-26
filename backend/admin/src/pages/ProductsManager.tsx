@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square, Star } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square, Star, QrCode, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
 import { api } from '../utils/api';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function ProductsManager() {
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+    const [qrProduct, setQrProduct] = useState<any>(null);
     const [formData, setFormData] = useState({
         id: '',
         model: '',
@@ -342,6 +344,13 @@ export default function ProductsManager() {
                                                     <Star size={18} />
                                                 </button>
                                                 <button
+                                                    onClick={() => setQrProduct(p)}
+                                                    className="p-2 hover:bg-emerald-500/10 text-emerald-400 rounded-lg transition-colors"
+                                                    title="Generate QR Code"
+                                                >
+                                                    <QrCode size={18} />
+                                                </button>
+                                                <button
                                                     onClick={() => handleEdit(p)}
                                                     className="p-2 hover:bg-blue-500/10 text-blue-400 rounded-lg transition-colors"
                                                     title="Edit Product"
@@ -645,6 +654,70 @@ export default function ProductsManager() {
                                 <Save size={18} /> {formData.id ? 'Save Changes' : 'Create Product'}
                             </button>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* QR Code Modal */}
+            {qrProduct && (
+                <div
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[60]"
+                    onClick={() => setQrProduct(null)}
+                >
+                    <div
+                        className="bg-white text-slate-900 w-full max-w-sm rounded-2xl p-8 relative shadow-2xl flex flex-col items-center"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setQrProduct(null)}
+                            aria-label="Close modal"
+                            className="absolute top-4 right-4 text-slate-400 hover:text-slate-900"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <div id="print-qr-section" className="flex flex-col items-center text-center space-y-4 w-full pt-4">
+                            <h3 className="text-xl font-bold">{qrProduct.name || qrProduct.model}</h3>
+                            <div className="text-sm text-slate-500 mb-2">
+                                {qrProduct.storage && `${qrProduct.storage} • `}{qrProduct.condition}
+                            </div>
+                            
+                            <div className="bg-white p-4 rounded-xl border-2 border-slate-100 shadow-sm">
+                                <QRCodeSVG
+                                    value={`${import.meta.env.VITE_FRONTEND_URL || `http://${window.location.hostname}:3000`}/products/${qrProduct._id || qrProduct.id}`}
+                                    size={200}
+                                    level={"H"}
+                                    includeMargin={true}
+                                />
+                            </div>
+                            
+                            <div className="text-3xl font-black mt-4">
+                                €{qrProduct.price}
+                            </div>
+                            <div className="text-xs text-slate-400 mt-2">
+                                Scan to view details & reserve
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                const printContent = document.getElementById('print-qr-section')?.innerHTML;
+                                const originalContent = document.body.innerHTML;
+                                if (printContent) {
+                                    document.body.innerHTML = `
+                                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
+                                            ${printContent}
+                                        </div>
+                                    `;
+                                    window.print();
+                                    document.body.innerHTML = originalContent;
+                                    window.location.reload(); // Reload to restore React state cleanly after innerHTML swap
+                                }
+                            }}
+                            className="w-full mt-8 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                        >
+                            <Printer size={18} /> Print Label
+                        </button>
                     </div>
                 </div>
             )}

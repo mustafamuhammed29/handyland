@@ -214,7 +214,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
 
       {/* Mobile Nav Menu Drawer */}
       {isOpen && (
-        <div id="mobile-menu" className="xl:hidden absolute top-[calc(100%+0.75rem)] left-0 right-0 w-full max-h-[85vh] bg-white/95 dark:bg-[#0b1121]/95 backdrop-blur-3xl border border-black/5 dark:border-white/[0.05] rounded-3xl flex flex-col px-6 py-6 gap-3 animate-in fade-in slide-in-from-top-4 duration-300 z-50 overflow-y-auto custom-scrollbar shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+        <div id="mobile-menu" className="xl:hidden absolute top-[calc(100%+0.75rem)] left-0 right-0 w-full max-h-[calc(100dvh-7rem)] bg-white/95 dark:bg-[#0b1121]/95 backdrop-blur-3xl border border-black/5 dark:border-white/[0.05] rounded-3xl flex flex-col px-6 py-6 gap-3 animate-in fade-in slide-in-from-top-4 duration-300 z-50 overflow-y-auto custom-scrollbar shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
           <div className="w-full mb-2">
             <button
                onClick={() => {
@@ -251,10 +251,32 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             );
           })}
 
-          {/* Track Repair removed per user request */}
+          <div className="flex flex-col gap-2 shrink-0">
+            {(!settings.features || settings.features.comparisonEngine !== false) && (
+              <Link
+                to="/compare"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center px-5 py-4 rounded-2xl text-base font-bold uppercase tracking-widest transition-all duration-300 shrink-0 bg-black/[0.02] dark:bg-white/[0.02] text-slate-600 dark:text-slate-300 border border-transparent hover:bg-black/[0.05] dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white"
+              >
+                <span className="me-4 scale-125 opacity-80"><Layers className="w-4 h-4" /></span>
+                {t('marketplace.compare', 'Vergleichen')}
+              </Link>
+            )}
+
+            {settings.sections?.trackRepairPage !== false && (
+              <Link
+                to="/track-repair"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center px-5 py-4 rounded-2xl text-base font-bold uppercase tracking-widest transition-all duration-300 shrink-0 bg-black/[0.02] dark:bg-white/[0.02] text-yellow-600 dark:text-yellow-400 border border-transparent hover:bg-yellow-500/10"
+              >
+                <span className="me-4 scale-125 opacity-80"><ClipboardList className="w-4 h-4" /></span>
+                {t('nav.trackRepair', 'Reparatur verfolgen')}
+              </Link>
+            )}
+          </div>
 
           {settings.sections?.authSystem !== false && (
-            <div className="mt-auto pt-4 border-t border-white/[0.05]">
+            <div className="mt-auto pt-4 border-t border-black/5 dark:border-white/[0.05] shrink-0 pb-2">
               <Link
                 to={user ? '/dashboard' : '/login'}
                 onClick={() => setIsOpen(false)}

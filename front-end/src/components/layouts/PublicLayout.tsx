@@ -19,13 +19,13 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
     const hasBanner = settings.announcementBanner?.enabled && settings.announcementBanner?.text;
 
     return (
-        <div className={`min-h-screen bg-transparent text-gray-100 font-sans flex flex-col transition-all duration-300 ${hasBanner ? 'pt-10' : ''} pb-16 md:pb-0`}>
+        <div className={`min-h-[100dvh] bg-transparent text-gray-100 font-sans flex flex-col transition-all duration-300 ${hasBanner ? 'pt-10' : ''} pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0`}>
             <Navbar
                 lang={lang}
                 cartCount={cartCount}
                 user={user}
             />
-            <main className="min-h-screen">
+            <main className="min-h-[100dvh]">
                 <Outlet />
             </main>
             <Footer lang={lang} />

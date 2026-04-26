@@ -65,7 +65,8 @@
     "checkout": "تسویه حساب",
     "quantity": "تعداد",
     "freeShipping": "ارسال رایگان!",
-    "freeShippingProgress": "اضافه کردن {{amount}} دیگر برای ارسال رایگان"
+    "freeShippingProgress": "اضافه کردن {{amount}} دیگر برای ارسال رایگان",
+    "reserveWhatsapp": "رزرو از طریق واتساپ"
   },
   "checkout": {
     "title": "تسویه حساب",
@@ -242,7 +243,9 @@
     "qa": "پرسش و پاسخ",
     "in_stock": "موجود در انبار",
     "out_of_stock": "ناموجود",
-    "months": "ماه"
+    "months": "ماه",
+    "reserveWhatsapp": "رزرو از طریق واتساپ",
+    "reserveWhatsappShort": "واتساپ"
   },
   "filter": {
     "title": "فیلترها",

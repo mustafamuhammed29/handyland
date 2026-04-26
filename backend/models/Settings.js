@@ -91,6 +91,11 @@ const settingsSchema = new mongoose.Schema({
         default: {
             comparisonEngine: true,
             cartUpselling: true,
+            whatsappOrders: {
+                enabled: false,
+                phoneNumber: '',
+                message: 'مرحباً، أود الاستفسار عن هذا الطلب/الخدمة:'
+            },
             loyalty: {
                 enabled: true,
                 earnRate: 10,
@@ -200,6 +205,27 @@ const settingsSchema = new mongoose.Schema({
             supportEmail: 'support@handyland.com',
             supportLabel: 'Contact Support'
         }
+    },
+    productFaqs: {
+        type: mongoose.Schema.Types.Mixed,
+        default: [
+            {
+                question: 'Ist das Gerät ohne Simlock?',
+                answer: 'Ja, alle unsere Geräte sind werksseitig entsperrt (ohne Simlock) und können mit jedem Netzbetreiber weltweit verwendet werden.'
+            },
+            {
+                question: 'Was ist im Lieferumfang enthalten?',
+                answer: 'Jedes Smartphone wird mit einem kompatiblen Ladekabel geliefert. Um Elektroschrott zu reduzieren, sind Netzteil und Kopfhörer nicht im Standard-Lieferumfang enthalten.'
+            },
+            {
+                question: 'Wie lange ist die Garantie?',
+                answer: 'Wir bieten standardmäßig 12 Monate Garantie auf alle unsere generalüberholten und neuen Geräte. Dies deckt alle technischen Defekte ab.'
+            },
+            {
+                question: 'Kann ich das Gerät zurückgeben?',
+                answer: 'Ja, Sie haben ein 14-tägiges Rückgaberecht ohne Angabe von Gründen, sofern sich das Gerät im gleichen Zustand wie bei der Lieferung befindet.'
+            }
+        ]
     }
 }, { timestamps: true });
 

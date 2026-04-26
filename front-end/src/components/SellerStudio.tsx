@@ -44,7 +44,7 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
     ];
 
     return (
-        <div className="min-h-screen pt-28 pb-12 px-4 max-w-4xl mx-auto">
+        <div className="min-h-[100dvh] pt-28 pb-12 px-4 max-w-4xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-900/20">
                     <Tag className="w-6 h-6" />

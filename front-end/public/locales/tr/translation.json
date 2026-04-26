@@ -65,7 +65,8 @@
     "checkout": "Ödemeye Geç",
     "quantity": "Miktar",
     "freeShipping": "Ücretsiz Kargo!",
-    "freeShippingProgress": "Ücretsiz kargo için {{amount}} daha ekleyin"
+    "freeShippingProgress": "Ücretsiz kargo için {{amount}} daha ekleyin",
+    "reserveWhatsapp": "WhatsApp ile Rezerve Et"
   },
   "checkout": {
     "title": "Ödeme",
@@ -242,7 +243,9 @@
     "qa": "Soru & Cevap",
     "in_stock": "Stokta Var",
     "out_of_stock": "Stokta Yok",
-    "months": "Ay"
+    "months": "Ay",
+    "reserveWhatsapp": "WhatsApp ile Rezerve Et",
+    "reserveWhatsappShort": "WhatsApp"
   },
   "filter": {
     "title": "Filtreler",

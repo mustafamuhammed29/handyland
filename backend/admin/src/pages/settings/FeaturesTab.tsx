@@ -24,6 +24,11 @@ export const FeaturesTab = ({ settings, handleChange }: any) => {
         handleChange('features', 'loyalty', { ...currentLoyalty, [key]: value });
     };
 
+    const updateWhatsapp = (key: string, value: any) => {
+        const currentWhatsapp = features.whatsappOrders || { enabled: false, phoneNumber: '', message: '' };
+        handleChange('features', 'whatsappOrders', { ...currentWhatsapp, [key]: value });
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in">
             <div>
@@ -52,6 +57,37 @@ export const FeaturesTab = ({ settings, handleChange }: any) => {
                         <p className="text-xs text-slate-500 ml-14 -mt-2">Display "Frequently Bought Together" accessory recommendations in the shopping cart.</p>
                     </div>
                 </div>
+            </div>
+
+            <div className="p-5 border border-emerald-900/40 rounded-xl bg-emerald-950/20 space-y-4">
+                <div className="flex justify-between items-center border-b border-emerald-900/50 pb-2">
+                    <h4 className="text-emerald-400 font-bold">WhatsApp & In-Store Only Mode</h4>
+                    <Toggle 
+                        label="" 
+                        value={features.whatsappOrders?.enabled ?? false} 
+                        onChange={(v: boolean) => updateWhatsapp('enabled', v)} 
+                    />
+                </div>
+                
+                {features.whatsappOrders?.enabled !== false && (
+                    <div className="space-y-4 pt-2 animate-in slide-in-from-top-2">
+                        <p className="text-xs text-emerald-500 mb-4 bg-emerald-900/20 p-3 rounded border border-emerald-900/50">
+                            When enabled, standard checkout and repair bookings will be disabled. Users will be redirected to WhatsApp to reserve products or book services in-store.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input 
+                                label="WhatsApp Number (e.g., +4915123456789)" 
+                                value={features.whatsappOrders?.phoneNumber || ''} 
+                                onChange={(v: string) => updateWhatsapp('phoneNumber', v)} 
+                            />
+                            <Input 
+                                label="Default Message Template" 
+                                value={features.whatsappOrders?.message || ''} 
+                                onChange={(v: string) => updateWhatsapp('message', v)} 
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="p-5 border border-purple-900/40 rounded-xl bg-purple-950/20 space-y-4">

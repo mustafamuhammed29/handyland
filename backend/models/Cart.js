@@ -34,6 +34,10 @@ const cartSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    lastReminderSentAt: {
+        type: Date,
+        default: null
     }
 }, { timestamps: true });
 

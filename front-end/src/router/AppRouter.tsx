@@ -165,7 +165,7 @@ export const AppRouter = () => {
     if (isMaintenanceActive === null) {
         // Still checking maintenance status — show a brief loading state
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+            <div className="min-h-[100dvh] bg-slate-950 flex items-center justify-center">
                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
@@ -192,14 +192,14 @@ export const AppRouter = () => {
 
     if (settingsLoading) {
         return (
-            <div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center">
+            <div className="min-h-[100dvh] bg-white dark:bg-slate-950 flex items-center justify-center">
                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className={`min-h-screen font-sans bg-transparent selection:bg-brand-primary/30 selection:text-brand-primary ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div className={`min-h-[100dvh] font-sans bg-transparent selection:bg-brand-primary/30 selection:text-brand-primary ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <SEO />
             <AnnouncementBanner />
             <OfflineBanner />

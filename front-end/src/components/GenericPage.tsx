@@ -39,7 +39,7 @@ export const GenericPage: React.FC = () => {
 
     if (loading) {
         return (
-            <section className="relative py-24 bg-black min-h-screen">
+            <section className="relative py-24 bg-black min-h-[100dvh]">
                 <div className="flex items-center justify-center h-96">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
                 </div>
@@ -49,7 +49,7 @@ export const GenericPage: React.FC = () => {
 
     if (notFound) {
         return (
-            <section className="relative py-24 bg-black min-h-screen">
+            <section className="relative py-24 bg-black min-h-[100dvh]">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_var(--tw-gradient-stops))] from-red-900/10 via-slate-950 to-black pointer-events-none"></div>
 
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
@@ -72,7 +72,7 @@ export const GenericPage: React.FC = () => {
     }
 
     return (
-        <section className="relative py-24 bg-black min-h-screen">
+        <section className="relative py-24 bg-black min-h-[100dvh]">
             {/* Background Effects */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_var(--tw-gradient-stops))] from-blue-900/10 via-slate-950 to-black pointer-events-none"></div>
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-primary/5 rounded-full blur-[100px] pointer-events-none"></div>

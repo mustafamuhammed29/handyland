@@ -6,7 +6,9 @@ export const MaintenanceSettingsTab = ({ settings, handleChange }: any) => {
         enabled: settings.maintenanceMode?.enabled || false,
         title: settings.maintenanceMode?.title || 'Wartungsarbeiten',
         message: settings.maintenanceMode?.message || 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!',
-        estimatedTime: settings.maintenanceMode?.estimatedTime || 'wenige Minuten'
+        estimatedTime: settings.maintenanceMode?.estimatedTime || 'wenige Minuten',
+        statusText1: settings.maintenanceMode?.statusText1 || 'System wird diagnostiziert...',
+        statusText2: settings.maintenanceMode?.statusText2 || 'Neue Reparaturen werden angewendet...'
     };
 
     const updateField = (key: string, value: any) => {

@@ -230,7 +230,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const ADMIN_PANEL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3001';
 
     return (
-        <div className="min-h-screen pt-28 pb-12 px-4 max-w-7xl mx-auto">
+        <div className="min-h-[100dvh] pt-28 pb-12 px-4 max-w-7xl mx-auto">
             <div className="flex flex-col lg:flex-row gap-8">
 
                 {/* --- SIDEBAR --- */}

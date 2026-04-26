@@ -200,7 +200,7 @@ const Register: React.FC = () => {
     const textColor = passed <= 1 ? 'text-red-400' : passed === 2 ? 'text-yellow-400' : passed === 3 ? 'text-blue-400' : 'text-emerald-400';
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center pt-32 p-4 pb-12">
+        <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center pt-32 p-4 pb-12">
             <div className="w-full max-w-2xl">
                 {/* Logo & Title */}
                 <div className="text-center mb-8">

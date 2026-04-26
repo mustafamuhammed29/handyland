@@ -19,19 +19,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [user, setUser] = useState<User | null>(() => {
+        const storedUser = localStorage.getItem('adminUser');
+        return storedUser ? JSON.parse(storedUser) : null;
+    });
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+        return !!localStorage.getItem('adminUser');
+    });
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        // Check for existing session user
-        const storedUser = localStorage.getItem('adminUser');
-
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-            setIsAuthenticated(true);
-        }
-
         // Listen for 401 Unauthorized events from api.ts
         const handleUnauthorized = () => {
             logout();

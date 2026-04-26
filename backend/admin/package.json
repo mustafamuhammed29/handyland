@@ -10,13 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.100.5",
     "axios": "^1.13.5",
     "cookie-parser": "^1.4.7",
     "framer-motion": "^12.34.5",
     "lucide-react": "^0.563.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hot-toast": "^2.6.0",
+    "react-quill-new": "^3.8.3",
     "react-router-dom": "^7.13.0",
     "recharts": "^3.7.0",
     "socket.io-client": "^4.8.3",

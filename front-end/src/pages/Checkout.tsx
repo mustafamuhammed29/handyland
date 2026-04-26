@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatPrice } from '../utils/formatPrice';
+import { useSettings } from '../context/SettingsContext';
+import { generateWhatsAppLink } from '../utils/whatsappHelper';
 
 // Extracted sub-components
 import { CheckoutShippingForm } from './checkout/CheckoutShippingForm';
@@ -53,11 +55,26 @@ export const Checkout: React.FC = () => {
         return `${formatPrice(method.price)}`;
     };
 
+    const { settings } = useSettings();
+
+    React.useEffect(() => {
+        const whatsappMode = settings?.features?.whatsappOrders;
+        if (whatsappMode?.enabled && whatsappMode?.phoneNumber && cart.length > 0) {
+            const url = generateWhatsAppLink({
+                phoneNumber: whatsappMode.phoneNumber,
+                messageTemplate: whatsappMode.message,
+                items: cart.map(i => ({ name: i.title, quantity: i.quantity || 1, price: i.price })),
+                totalAmount: cartTotal
+            });
+            window.location.href = url;
+        }
+    }, [settings, cart, cartTotal]);
+
     // --- Render Views ---
 
     if (step === 1 && !user && !guestMode) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+            <div className="min-h-[100dvh] bg-slate-950 flex items-center justify-center p-4">
                 <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-6">
                     <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto">
                         <User className="w-8 h-8 text-blue-500" />
@@ -83,7 +100,7 @@ export const Checkout: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 py-24 px-4">
+        <div className="min-h-[100dvh] bg-slate-950 py-24 px-4">
             <div className="max-w-6xl mx-auto">
 
                 {/* Progress Stepper */}

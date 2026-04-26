@@ -65,7 +65,8 @@
     "checkout": "الذهاب للدفع",
     "quantity": "الكمية",
     "freeShipping": "شحن مجاني!",
-    "freeShippingProgress": "أضف {{amount}} للحصول على شحن مجاني"
+    "freeShippingProgress": "أضف {{amount}} للحصول على شحن مجاني",
+    "reserveWhatsapp": "احجز عبر الواتساب"
   },
   "checkout": {
     "title": "الدفع",
@@ -242,7 +243,9 @@
     "qa": "الأسئلة والأجوبة",
     "in_stock": "في المخزن",
     "out_of_stock": "نفد من المخزن",
-    "months": "أشهر"
+    "months": "أشهر",
+    "reserveWhatsapp": "احجز عبر الواتساب",
+    "reserveWhatsappShort": "واتساب"
   },
   "filter": {
     "title": "الفلاتر",

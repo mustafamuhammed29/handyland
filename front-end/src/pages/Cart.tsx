@@ -53,7 +53,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
 
     if (cart.length === 0) {
         return (
-            <div className="min-h-screen bg-slate-950 pt-32 pb-20 flex flex-col items-center justify-center text-center px-4">
+            <div className="min-h-[100dvh] bg-slate-950 pt-32 pb-20 flex flex-col items-center justify-center text-center px-4">
                 <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center mb-6 border border-slate-800">
                     <ShoppingCart className="w-12 h-12 text-slate-500" />
                 </div>
@@ -73,7 +73,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 pt-24 pb-20">
+        <div className="min-h-[100dvh] bg-slate-950 pt-24 pb-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 {/* Header */}
@@ -104,7 +104,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                         src={getImageUrl(item.image)}
                                         alt={item.title || (item as any).name}
                                         className="w-full h-full object-contain"
-                                        onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }}
+                                        onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }}
                                     />
                                 </div>
 
@@ -172,7 +172,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 {upsellItems.map((item) => (
                                     <div key={item._id || item.id} className="bg-slate-950/80 backdrop-blur-sm rounded-xl p-4 border border-slate-800 hover:border-brand-primary/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all flex flex-col group/item relative overflow-hidden">
                                         <div className="h-28 bg-white/5 rounded-lg p-2 mb-4 flex items-center justify-center relative">
-                                            <img src={getImageUrl(item.image)} alt={item.name} className="max-h-full object-contain drop-shadow-lg group-hover/item:scale-110 transition-transform duration-500" onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }} />
+                                            <img src={getImageUrl(item.image)} alt={item.name} className="max-h-full object-contain drop-shadow-lg group-hover/item:scale-110 transition-transform duration-500" onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }} />
                                         </div>
                                         <h4 className="text-white font-bold text-sm mb-1 line-clamp-2 leading-tight flex-1" title={item.name}>{item.name}</h4>
                                         <div className="flex justify-between items-center mt-3">

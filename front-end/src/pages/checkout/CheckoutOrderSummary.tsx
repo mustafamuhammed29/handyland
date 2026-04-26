@@ -85,7 +85,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                                 src={getImageUrl(item.image)}
                                 alt={item.title}
                                 className="w-full h-full object-cover"
-                                onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }}
+                                onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }}
                             />
                             {item.quantity && item.quantity > 1 && (
                                 <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg">

@@ -4,7 +4,7 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 
 const PrivacyPolicy: React.FC = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-28 pb-12 px-4">
+        <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-28 pb-12 px-4">
             <div className="max-w-4xl mx-auto">
                 <Breadcrumbs items={[
                     { label: 'Home', path: '/' },

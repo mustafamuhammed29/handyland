@@ -52,15 +52,44 @@
 /* Glassmorphism utilities */
 .glass-panel {
   background: rgba(15, 23, 42, 0.4); /* slate-900 / 40% */
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-card {
   background: linear-gradient(145deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.8) 100%);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-left: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* =========================================
+   React Quill Custom Styling
+   ========================================= */
+.quill-container .ql-toolbar {
+  background: #f8fafc;
+  border: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-radius: 2rem 2rem 0 0;
+  padding: 12px 16px;
+}
+
+.quill-container .ql-container {
+  border: none !important;
+  font-family: inherit;
+  font-size: 15px;
+  background: white;
+}
+
+.quill-container .ql-editor {
+  min-height: 400px;
+  padding: 24px;
+  color: #1e293b;
+}
+
+.quill-container .ql-editor p {
+  margin-bottom: 0.75rem;
 }

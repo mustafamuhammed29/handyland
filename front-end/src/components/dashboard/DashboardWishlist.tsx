@@ -67,7 +67,7 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                                     src={getImageUrl(item.images[0])}
                                     alt={item.model}
                                     className="w-full h-48 object-cover"
-                                    onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }}
+                                    onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }}
                                 />
                             )}
                             <button

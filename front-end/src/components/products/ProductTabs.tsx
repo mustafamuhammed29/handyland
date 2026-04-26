@@ -1,6 +1,7 @@
 import React from 'react';
-import { Star, Check } from 'lucide-react';
+import { Star, Check, HelpCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useSettings } from '../../context/SettingsContext';
 
 interface ProductTabsProps {
     activeTab: 'overview' | 'specs' | 'reviews' | 'questions';
@@ -16,8 +17,10 @@ export const ProductTabs: React.FC<ProductTabsProps> = ({
     product,
     reviews,
     setShowReviewModal
-}) => {
+    }) => {
     const { t } = useTranslation();
+    const { settings } = useSettings();
+    const faqs = settings.productFaqs || [];
 
     const tabLabels: Record<string, string> = {
         overview: t('product.tabs.overview', 'Übersicht'),
@@ -139,6 +142,30 @@ export const ProductTabs: React.FC<ProductTabsProps> = ({
                                 {t('product.writeReview', 'Bewertung schreiben')}
                             </button>
                         </div>
+                    </div>
+                )}
+                {activeTab === 'questions' && (
+                    <div className="space-y-6">
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">{t('product.faq.title', 'Häufig gestellte Fragen')}</h3>
+                        
+                        {faqs.length > 0 ? (
+                            <div className="space-y-4">
+                                {faqs.map((faq, index) => (
+                                    <div key={index} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-100 dark:border-slate-800">
+                                        <h4 className="font-bold text-slate-900 dark:text-white mb-2">{faq.question}</h4>
+                                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed whitespace-pre-line">{faq.answer}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+                                    <HelpCircle className="w-8 h-8 text-slate-400" />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No FAQs Available</h3>
+                                <p className="text-slate-600 dark:text-slate-400">There are currently no frequently asked questions for this product.</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

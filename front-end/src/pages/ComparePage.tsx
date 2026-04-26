@@ -213,7 +213,7 @@ export const ComparePage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 pt-32 pb-24 text-white">
+        <div className="min-h-[100dvh] bg-slate-950 pt-32 pb-24 text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div className="mb-12 text-center">

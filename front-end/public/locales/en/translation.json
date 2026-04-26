@@ -65,7 +65,8 @@
     "checkout": "Proceed to Checkout",
     "quantity": "Quantity",
     "freeShipping": "Free Shipping!",
-    "freeShippingProgress": "Add {{amount}} more for free shipping"
+    "freeShippingProgress": "Add {{amount}} more for free shipping",
+    "reserveWhatsapp": "Reserve via WhatsApp"
   },
   "checkout": {
     "title": "Checkout",
@@ -242,7 +243,9 @@
     "qa": "Q&A",
     "in_stock": "In Stock",
     "out_of_stock": "Out of Stock",
-    "months": "Months"
+    "months": "Months",
+    "reserveWhatsapp": "Reserve via WhatsApp",
+    "reserveWhatsappShort": "WhatsApp"
   },
   "filter": {
     "title": "Filters",

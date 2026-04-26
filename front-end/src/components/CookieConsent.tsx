@@ -44,7 +44,7 @@ export const CookieConsent: React.FC = () => {
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 100, opacity: 0, transition: { duration: 0.3 } }}
-                    className="fixed bottom-0 left-0 right-0 z-[100] p-4 sm:p-6 pointer-events-none flex justify-center"
+                    className="fixed bottom-0 left-0 right-0 z-[150] p-4 sm:p-6 pointer-events-none flex justify-center"
                 >
                     <div className="bg-slate-900 border border-slate-700/50 shadow-2xl rounded-2xl w-full max-w-4xl p-5 sm:p-6 pointer-events-auto flex flex-col md:flex-row gap-6 items-center overflow-hidden relative backdrop-blur-xl">
                         {/* Ambient Glow */}

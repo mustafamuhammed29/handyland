@@ -332,12 +332,76 @@ exports.getAllCarts = async (req, res) => {
                 };
             });
 
-            return { _id: cart._id, user: cart.user, items: populatedItems, updatedAt: cart.updatedAt, createdAt: cart.createdAt };
+            return { _id: cart._id, user: cart.user, items: populatedItems, updatedAt: cart.updatedAt, createdAt: cart.createdAt, lastReminderSentAt: cart.lastReminderSentAt };
         }));
 
         res.json(populatedCarts);
     } catch (err) {
         console.error("GetAllCarts Error:", err);
         res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+// @desc    Send manual abandoned cart reminder
+// @route   POST /api/cart/admin/:id/remind
+// @access  Private/Admin
+exports.sendCartReminder = async (req, res) => {
+    try {
+        const cart = await Cart.findById(req.params.id).populate('user', 'name email');
+        if (!cart) {
+            return res.status(404).json({ success: false, message: 'Cart not found' });
+        }
+        if (!cart.user || !cart.user.email) {
+            return res.status(400).json({ success: false, message: 'Cart does not have a valid user email' });
+        }
+
+        const { sendEmail } = require('../utils/emailService');
+        const EmailTemplate = require('../models/EmailTemplate');
+
+        const template = await EmailTemplate.findOne({ name: 'abandoned_cart', isActive: true });
+        
+        if (!template) {
+            return res.status(400).json({ success: false, message: 'Abandoned cart email template is disabled or not found.' });
+        }
+
+        const cartUrl = `${process.env.FRONTEND_URL}/cart`;
+        const userName = cart.user.name.split(' ')[0];
+        
+        let html = template.html
+            .replace(/{{userName}}/g, userName)
+            .replace(/{{cartUrl}}/g, cartUrl);
+        
+        let subject = template.subject
+            .replace(/{{userName}}/g, userName);
+
+        await sendEmail({
+            email: cart.user.email,
+            subject: subject,
+            html: html
+        });
+
+        cart.lastReminderSentAt = new Date();
+        await cart.save();
+
+        res.json({ success: true, message: 'Reminder email sent successfully', lastReminderSentAt: cart.lastReminderSentAt });
+    } catch (err) {
+        console.error("sendCartReminder Error:", err);
+        res.status(500).json({ message: 'Failed to send reminder', error: err.message });
+    }
+};
+
+// @desc    Clear specific user cart by admin
+// @route   DELETE /api/cart/admin/:id/clear
+// @access  Private/Admin
+exports.adminClearCart = async (req, res) => {
+    try {
+        const cart = await Cart.findByIdAndDelete(req.params.id);
+        if (!cart) {
+            return res.status(404).json({ success: false, message: 'Cart not found' });
+        }
+        res.json({ success: true, message: 'Cart cleared successfully' });
+    } catch (err) {
+        console.error("adminClearCart Error:", err);
+        res.status(500).json({ message: 'Failed to clear cart', error: err.message });
     }
 };

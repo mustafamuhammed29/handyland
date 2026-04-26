@@ -54,7 +54,7 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen pt-32 flex justify-center">
+            <div className="min-h-[100dvh] pt-32 flex justify-center">
                 <div className="w-8 h-8 border-2 border-slate-800 border-t-cyan-500 rounded-full animate-spin"></div>
             </div>
         );
@@ -62,7 +62,7 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen pt-32 px-4 text-center">
+            <div className="min-h-[100dvh] pt-32 px-4 text-center">
                 <h1 className="text-4xl font-bold text-white mb-4">404</h1>
                 <p className="text-slate-500">Page not found or content unavailable.</p>
             </div>
@@ -70,7 +70,7 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
     }
 
     return (
-        <div className="min-h-screen pt-32 pb-20 bg-slate-950">
+        <div className="min-h-[100dvh] pt-32 pb-20 bg-slate-950">
             <SEO
                 title={seo?.metaTitle || title}
                 description={seo?.metaDescription}

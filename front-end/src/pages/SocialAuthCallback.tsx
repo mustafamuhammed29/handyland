@@ -62,7 +62,7 @@ const SocialAuthCallback: React.FC = () => {
     if (errorCode) {
         const info = ERROR_MESSAGES[errorCode] || ERROR_MESSAGES.social_auth_failed;
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4">
+            <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4">
                 <div className="max-w-md w-full bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 text-center shadow-2xl">
                     <div className="w-16 h-16 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-center justify-center mx-auto mb-5">
                         {errorCode === 'account_suspended' ? (
@@ -94,7 +94,7 @@ const SocialAuthCallback: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center">
+        <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center">
             <div className="text-center">
                 <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
                     <Loader className="w-8 h-8 text-blue-400 animate-spin" />

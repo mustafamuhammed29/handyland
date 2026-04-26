@@ -155,7 +155,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
     const displayAmount = amount === 'custom' ? (customAmount || '0') : amount;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 min-h-screen">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 min-h-[100dvh]">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"

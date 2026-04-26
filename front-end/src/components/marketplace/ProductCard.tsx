@@ -16,6 +16,7 @@ interface ProductCardProps {
     onToggleWishlist: (e: React.MouseEvent, product: PhoneListing) => void;
     onAddToCart: (product: PhoneListing) => void;
     onSelect: (product: PhoneListing) => void;
+    onQuickView?: (product: PhoneListing) => void;
 }
 
 const ProductCardComponent: React.FC<ProductCardProps> = ({
@@ -25,7 +26,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     loadingWishlist,
     onToggleWishlist,
     onAddToCart,
-    onSelect
+    onSelect,
+    onQuickView
 }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -33,7 +35,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     const getProductImage = (p: any) => {
         if (p.images && p.images.length > 0) return getImageUrl(p.images[0]);
         if (p.imageUrl) return getImageUrl(p.imageUrl);
-        return '/images/placeholder.png';
+        return '/placeholder-device.svg';
     };
 
     if (viewMode === 'list') {
@@ -49,7 +51,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     <img
                         src={getProductImage(product)}
                         alt={product.model}
-                        onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-phone.png'; }}
+                        onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                 </div>
@@ -116,7 +118,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         transition={{ duration: 0.4 }}
                         src={getImageUrl(product.images?.[0] || (product as any).image)}
                         alt={product.model || (product as any).name || 'Product'}
-                        onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-phone.png'; }}
+                        onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
                         loading="lazy"
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100"
                     />
@@ -128,7 +130,15 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         )}
                     </div>
 
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 dark:bg-black/40 backdrop-blur-[2px]">
+                    <div 
+                        className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 dark:bg-black/40 backdrop-blur-[2px]"
+                        onClick={(e) => {
+                            if (onQuickView) {
+                                e.stopPropagation();
+                                onQuickView(product);
+                            }
+                        }}
+                    >
                         <span className="bg-white/10 border border-white/20 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full font-bold text-xs md:text-sm backdrop-blur-md flex items-center gap-1.5 md:gap-2">
                             <Layers className="w-3 h-3 md:w-4 md:h-4" /> {t('common.quickView', 'Ansehen')}
                         </span>

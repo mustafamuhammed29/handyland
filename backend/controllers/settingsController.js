@@ -67,7 +67,7 @@ exports.updateSettings = async (req, res) => {
             'hero', 'stats', 'valuation', 'content',
             'repairArchive', 'sections', 'contactSection', 'footerSection',
             'freeShippingThreshold', 'payment', 'announcementBanner', 'promoPopup', 'socialAuth',
-            'invoice', 'seo', 'taxRate', 'vipTiers', 'ecoImpact', 'quickReplies', 'maintenanceMode'
+            'invoice', 'seo', 'taxRate', 'vipTiers', 'ecoImpact', 'quickReplies', 'maintenanceMode', 'features', 'accountSuspension', 'productFaqs'
         ];
 
         allowedFields.forEach(field => {

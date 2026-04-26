@@ -22,22 +22,31 @@ const startCartRecoveryJob = () => {
             for (const cart of abandonedCarts) {
                 if (cart.user && cart.user.email) {
                     try {
-                        const message = `
-                            <h2>مرحباً ${cart.user.name.split(' ')[0]}،</h2>
-                            <p>لاحظنا أنك تركت بعض العناصر الرائعة في سلة التسوق الخاصة بك في HandyLand!</p>
-                            <p>لا تفوت الفرصة، أكمل عملية الشراء الآن قبل نفاذ الكمية.</p>
-                            <a href="${process.env.FRONTEND_URL}/cart" style="display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px;">إكمال الشراء</a>
-                        `;
-
-                        // Checking if sendEmail exists, handling missing params
+                        // Check if sendEmail exists, handling missing params
                         if (typeof sendEmail === 'function') {
-                           await sendEmail({
-                               email: cart.user.email,
-                               subject: 'سلة تسوقك بانتظارك! 🛒',
-                               message: message, // Assuming sendEmail utility handles HTML or text
-                               html: message
-                           });
-                           emailsSent++;
+                            const EmailTemplate = require('../models/EmailTemplate');
+                            const template = await EmailTemplate.findOne({ name: 'abandoned_cart', isActive: true });
+                            
+                            if (template) {
+                                const cartUrl = `${process.env.FRONTEND_URL}/cart`;
+                                const userName = cart.user.name.split(' ')[0];
+                                
+                                let html = template.html
+                                    .replace(/{{userName}}/g, userName)
+                                    .replace(/{{cartUrl}}/g, cartUrl);
+                                
+                                let subject = template.subject
+                                    .replace(/{{userName}}/g, userName);
+
+                                await sendEmail({
+                                    email: cart.user.email,
+                                    subject: subject,
+                                    html: html
+                                });
+                                emailsSent++;
+                            } else {
+                                console.log('[CRON] Abandoned cart template is disabled or not found.');
+                            }
                         }
                     } catch (err) {
                         console.error(`Failed to send email to ${cart.user.email}:`, err);

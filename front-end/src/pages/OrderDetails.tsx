@@ -139,7 +139,7 @@ export const OrderDetails = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen pt-32 pb-12 flex justify-center">
+            <div className="min-h-[100dvh] pt-32 pb-12 flex justify-center">
                 <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
@@ -147,7 +147,7 @@ export const OrderDetails = () => {
 
     if (error || !order) {
         return (
-            <div className="min-h-screen pt-32 pb-12 px-4 max-w-3xl mx-auto text-center">
+            <div className="min-h-[100dvh] pt-32 pb-12 px-4 max-w-3xl mx-auto text-center">
                 <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-white mb-2">{t('orders.notFound')}</h2>
                 <p className="text-slate-400 mb-8">{error}</p>
@@ -161,7 +161,7 @@ export const OrderDetails = () => {
     const isCancelled = order.status === 'cancelled';
 
     return (
-        <div className="min-h-screen pt-28 pb-12 px-4 max-w-4xl mx-auto">
+        <div className="min-h-[100dvh] pt-28 pb-12 px-4 max-w-4xl mx-auto">
             {/* Cancel Confirmation Dialog */}
             {showCancelConfirm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">

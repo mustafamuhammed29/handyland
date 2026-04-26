@@ -21,6 +21,11 @@ import { ProductGallery } from './products/ProductGallery';
 import { ProductTabs } from './products/ProductTabs';
 import { ProductStickyBar } from './products/ProductStickyBar';
 import { ReviewModal } from './products/ReviewModal';
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
+import { RecentlyViewed } from './products/RecentlyViewed';
+
+import { useSettings } from '../context/SettingsContext';
+import { generateWhatsAppLink } from '../utils/whatsappHelper';
 
 interface ProductDetailsProps {}
 
@@ -46,6 +51,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
     const { addToast } = useToast();
     const { t } = useTranslation();
     const { user } = useAuth(); // Safe to access now if context provides it
+    const { settings } = useSettings();
+    const { recentlyViewed, addProduct: addRecentlyViewedProduct } = useRecentlyViewed();
 
     const { isInWishlist, toggleWishlist, loadingId: wishlistLoadingId } = useWishlist();
 
@@ -97,6 +104,15 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                 };
                 setProduct(formatted);
                 setActiveImage(formatted.images?.[0] || formatted.imageUrl || '');
+                
+                addRecentlyViewedProduct({
+                    id: formatted.id,
+                    model: formatted.model,
+                    brand: formatted.brand,
+                    price: formatted.price,
+                    imageUrl: formatted.images?.[0] || formatted.imageUrl || '',
+                    condition: formatted.condition || 'Used'
+                });
 
                 // Fetch Related
                 const relatedData = await productService.getRelatedProducts(productData.id || id);
@@ -155,6 +171,18 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
 
     const handleAddToCart = () => {
         if (!product) return;
+        const whatsappMode = settings?.features?.whatsappOrders;
+        if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+            const url = generateWhatsAppLink({
+                phoneNumber: whatsappMode.phoneNumber,
+                messageTemplate: whatsappMode.message,
+                items: [{ name: product.model, quantity: quantity, price: product.price }],
+                totalAmount: product.price * quantity
+            });
+            window.open(url, '_blank');
+            return;
+        }
+
         addToCart({
             id: product.id,
             title: cleanProductName(product.model, product.brand),
@@ -168,11 +196,11 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
         addToast(`${quantity}x ${product.model} added to cart`, 'success');
     };
 
-    if (loading) return <div className="min-h-screen pt-32 text-center text-slate-900 dark:text-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div></div>;
+    if (loading) return <div className="min-h-[100dvh] pt-32 text-center text-slate-900 dark:text-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div></div>;
     if (!product) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 relative">
+        <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 relative">
             <SEO
                 title={(product as any).seo?.metaTitle || `${cleanProductName(product.model, product.brand)} - ${product.condition} | ${product.storage}`}
                 description={(product as any).seo?.metaDescription || `Gebrauchtes ${cleanProductName(product.model, product.brand)} kaufen - ${product.storage} - ${product.color} im Zustand ${product.condition}. Zertifizierte Qualität, Garantie inklusive.`}
@@ -204,7 +232,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                         src={getImageUrl(activeImage)}
                         alt="Zoomed Product"
                         className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
-                        onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-phone.png'; }}
+                        onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
                         onClick={(e) => e.stopPropagation()}
                     />
                 </div>
@@ -357,14 +385,16 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                 </button>
                                 <button
                                     onClick={handleAddToCart}
-                                    disabled={!product.stock || product.stock <= 0}
+                                    disabled={!settings?.features?.whatsappOrders?.enabled && (!product.stock || product.stock <= 0)}
                                     className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 
-                                        ${(product.stock || 0) > 0
+                                        ${(product.stock || 0) > 0 || settings?.features?.whatsappOrders?.enabled
                                             ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]'
                                             : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
                                 >
                                     <ShoppingCart className="w-5 h-5" />
-                                    {((product.stock || 0) > 0) ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Nicht vorrätig')}
+                                    {settings?.features?.whatsappOrders?.enabled 
+                                        ? t('product.reserveWhatsapp', 'احجز عبر الواتساب') 
+                                        : (((product.stock || 0) > 0) ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Nicht vorrätig'))}
                                 </button>
                             </div>
                             <div className="flex justify-center gap-6 text-xs text-slate-500">
@@ -400,6 +430,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                         </div>
                     </div>
                 )}
+                
+                <RecentlyViewed products={recentlyViewed} currentProductId={id} />
             </div>
 
             <ProductStickyBar product={product} handleAddToCart={handleAddToCart} />

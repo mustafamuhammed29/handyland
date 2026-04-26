@@ -5,7 +5,7 @@ const emailTemplateSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        enum: ['verify_email', 'reset_password', 'order_confirmation', 'sell_device_confirmation']
+        enum: ['verify_email', 'reset_password', 'order_confirmation', 'sell_device_confirmation', 'abandoned_cart']
     },
     subject: {
         type: String,
@@ -34,31 +34,38 @@ emailTemplateSchema.statics.seedDefaults = async function () {
     const templates = [
         {
             name: 'verify_email',
-            subject: 'Verify Your Email - HandyLand',
-            description: 'Sent to new users to verify their email address.',
+            subject: 'Bestätige deine E-Mail-Adresse - HandyLand',
+            description: 'Gesendet an neue Benutzer zur Bestätigung der E-Mail-Adresse.',
             variables: ['{{userName}}', '{{verificationUrl}}'],
-            html: `<h1>Welcome to HandyLand!</h1><p>Hi {{userName}},</p><p>Please verify your email by clicking <a href="{{verificationUrl}}">here</a>.</p>`
+            html: `<h1>Willkommen bei HandyLand!</h1><p>Hallo {{userName}},</p><p>Bitte bestätige deine E-Mail-Adresse, indem du <a href="{{verificationUrl}}">hier klickst</a>.</p>`
         },
         {
             name: 'reset_password',
-            subject: 'Password Reset Request - HandyLand',
-            description: 'Sent when a user requests a password reset.',
+            subject: 'Anfrage zum Zurücksetzen des Passworts - HandyLand',
+            description: 'Gesendet, wenn ein Benutzer ein Passwort zurücksetzen möchte.',
             variables: ['{{userName}}', '{{resetUrl}}'],
-            html: `<h1>Password Reset Request</h1><p>Hi {{userName}},</p><p>You requested a password reset. Please click <a href="{{resetUrl}}">here</a> to reset it. This link expires in 1 hour.</p>`
+            html: `<h1>Passwort zurücksetzen</h1><p>Hallo {{userName}},</p><p>Du hast das Zurücksetzen deines Passworts angefordert. Bitte klicke <a href="{{resetUrl}}">hier</a>, um es zurückzusetzen. Dieser Link läuft in 1 Stunde ab.</p>`
         },
         {
             name: 'order_confirmation',
-            subject: 'Order Confirmation - HandyLand',
-            description: 'Sent after a user successfully places an order.',
+            subject: 'Bestellbestätigung - HandyLand',
+            description: 'Gesendet, nachdem ein Benutzer erfolgreich eine Bestellung aufgegeben hat.',
             variables: ['{{orderNumber}}', '{{totalAmount}}'],
-            html: `<h1>Thank you for your order!</h1><p>Your Order ID is <strong>{{orderNumber}}</strong></p><p>Total: <strong>{{totalAmount}}€</strong></p><p>We will notify you when your order ships.</p>`
+            html: `<h1>Vielen Dank für deine Bestellung!</h1><p>Deine Bestellnummer ist <strong>{{orderNumber}}</strong></p><p>Gesamtbetrag: <strong>{{totalAmount}}€</strong></p><p>Wir benachrichtigen dich, sobald deine Bestellung versandt wurde.</p>`
         },
         {
             name: 'sell_device_confirmation',
-            subject: 'Shipping Label for Sell Order {{quoteRef}}',
-            description: 'Sent to customers when they confirm a device sale.',
+            subject: 'Versandetikett für Verkauf {{quoteRef}}',
+            description: 'Gesendet an Kunden, wenn sie den Verkauf eines Geräts bestätigen.',
             variables: ['{{customerName}}', '{{device}}', '{{price}}', '{{quoteRef}}', '{{bankName}}', '{{ibanSnippet}}'],
-            html: `<h1>Sales Confirmation</h1><p>Dear {{customerName}},</p><p>Thank you for selling your <strong>{{device}}</strong> to HandyLand for <strong>€{{price}}</strong>.</p><p>Please print the attached shipping label and send your device within 2 business days.</p><div style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-left: 4px solid #0ea5e9;"><strong>Next Steps:</strong><ol><li>Reset your device to factory settings and remove iCloud/Google Lock.</li><li>Pack the device securely.</li><li>Attach the label below to the box.</li><li>Drop it off at the nearest post office.</li></ol></div><p>We will inspect the device upon arrival and process your payment to <strong>{{bankName}} (Ending in {{ibanSnippet}})</strong>.</p>`
+            html: `<h1>Verkaufsbestätigung</h1><p>Liebe/r {{customerName}},</p><p>vielen Dank, dass du dein <strong>{{device}}</strong> für <strong>{{price}}€</strong> an HandyLand verkaufst.</p><p>Bitte drucke das beigefügte Versandetikett aus und sende dein Gerät innerhalb von 2 Werktagen ein.</p><div style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-left: 4px solid #0ea5e9;"><strong>Nächste Schritte:</strong><ol><li>Setze dein Gerät auf die Werkseinstellungen zurück und entferne die iCloud/Google-Sperre.</li><li>Verpacke das Gerät sicher.</li><li>Klebe das untenstehende Etikett auf den Karton.</li><li>Gib es bei der nächsten Postfiliale ab.</li></ol></div><p>Wir werden das Gerät nach Erhalt prüfen und deine Zahlung an <strong>{{bankName}} (Endet auf {{ibanSnippet}})</strong> überweisen.</p>`
+        },
+        {
+            name: 'abandoned_cart',
+            subject: 'Dein Warenkorb wartet auf dich! 🛒',
+            description: 'Gesendet an Kunden, die Artikel im Warenkorb lassen, ohne zur Kasse zu gehen.',
+            variables: ['{{userName}}', '{{cartUrl}}'],
+            html: `<h2>Hallo {{userName}},</h2><p>wir haben bemerkt, dass du einige tolle Artikel in deinem Warenkorb bei HandyLand gelassen hast!</p><p>Verpasse nicht die Chance und schließe deinen Kauf jetzt ab, bevor der Vorrat aufgebraucht ist.</p><br><a href="{{cartUrl}}" style="display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px;font-weight:bold;">Jetzt Kauf abschließen</a>`
         }
     ];
 

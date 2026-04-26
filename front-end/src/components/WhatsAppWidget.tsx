@@ -16,7 +16,7 @@ export const WhatsAppWidget = () => {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-6 right-6 lg:bottom-10 lg:right-10 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 hover:scale-110 hover:bg-green-400 transition-all z-50 group cursor-pointer"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 lg:bottom-10 lg:right-10 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 hover:scale-110 hover:bg-green-400 transition-all z-50 group cursor-pointer"
             aria-label="Chat on WhatsApp"
         >
             <div className="absolute right-16 px-4 py-2 bg-slate-900 border border-slate-700 text-white text-sm font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">

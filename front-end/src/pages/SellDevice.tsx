@@ -270,7 +270,7 @@ export const SellDevice = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen pt-32 flex items-center justify-center text-white">
+            <div className="min-h-[100dvh] pt-32 flex items-center justify-center text-white">
                 <div className="text-center">
                     <Loader2 className="w-10 h-10 animate-spin text-brand-primary mx-auto mb-3" />
                     <p className="text-slate-400">Angebot wird geladen...</p>
@@ -280,7 +280,7 @@ export const SellDevice = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 pt-24 pb-12 px-4">
+        <div className="min-h-[100dvh] bg-slate-950 pt-24 pb-12 px-4">
             {showConfirm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
                     <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">

@@ -65,7 +65,8 @@
     "checkout": "Оформить заказ",
     "quantity": "Количество",
     "freeShipping": "Бесплатная доставка!",
-    "freeShippingProgress": "Добавьте еще {{amount}} для бесплатной доставки"
+    "freeShippingProgress": "Добавьте еще {{amount}} для бесплатной доставки",
+    "reserveWhatsapp": "Забронировать через WhatsApp"
   },
   "checkout": {
     "title": "Оформление заказа",
@@ -242,7 +243,9 @@
     "qa": "Вопросы и ответы",
     "in_stock": "В наличии",
     "out_of_stock": "Нет в наличии",
-    "months": "Месяцев"
+    "months": "Месяцев",
+    "reserveWhatsapp": "Забронировать через WhatsApp",
+    "reserveWhatsappShort": "WhatsApp"
   },
   "filter": {
     "title": "Фильтры",

@@ -13,6 +13,7 @@ import { ProductGrid } from './marketplace/ProductGrid';
 import { LanguageCode, PhoneListing, CartItem } from '../types';
 import { getImageUrl } from '../utils/imageUrl';
 import { cleanProductName } from '../utils/cleanProductName';
+import { QuickViewModal } from './products/QuickViewModal';
 
 interface MarketplaceProps {
     lang: LanguageCode;
@@ -31,6 +32,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
 
     const [showFilters, setShowFilters] = useState(false);
     const [features, setFeatures] = useState<any>(null);
+    const [quickViewProduct, setQuickViewProduct] = useState<PhoneListing | null>(null);
 
     React.useEffect(() => {
         api.get('/api/settings').then((res: any) => {
@@ -86,7 +88,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
 
     return (
         <div 
-            className="relative z-10 pt-[120px] pb-16 min-h-screen" 
+            className="relative z-10 pt-[120px] pb-16 min-h-[100dvh]" 
             onMouseMove={handleMouseMove}
         >
             {!hideSEO && (
@@ -194,6 +196,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
                         onToggleWishlist={handleToggleWishlist}
                         onAddToCart={handleAddToCart}
                         onSelect={(product) => navigate(`/marketplace/${product.id || (product as any)._id}`)}
+                        onQuickView={setQuickViewProduct}
                         onClearFilters={() => {
                             mp.setSearchTerm('');
                             mp.setFilterBrand('All');
@@ -225,6 +228,12 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
                     </div>
                 </div>
             </div>
+
+            <QuickViewModal 
+                product={quickViewProduct} 
+                isOpen={!!quickViewProduct} 
+                onClose={() => setQuickViewProduct(null)} 
+            />
         </div>
     );
 };

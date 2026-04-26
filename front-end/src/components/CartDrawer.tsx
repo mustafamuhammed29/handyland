@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { ShoppingCart, X, Trash2, ArrowRight, Zap, Heart, Tag, Truck, Check, Loader2 } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
+import { generateWhatsAppLink } from '../utils/whatsappHelper';
 import { LanguageCode } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -31,6 +33,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
     } = useCart();
     
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+    const { settings } = useSettings();
 
     const { t } = useTranslation();
     const [couponCodeIn, setCouponCodeIn] = useState('');
@@ -43,7 +46,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
 
     const handleCheckout = () => {
         setIsCartOpen(false);
-        navigate('/checkout');
+        const whatsappMode = settings?.features?.whatsappOrders;
+        if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+            const url = generateWhatsAppLink({
+                phoneNumber: whatsappMode.phoneNumber,
+                messageTemplate: whatsappMode.message,
+                items: cart.map(i => ({ name: i.title, quantity: i.quantity || 1, price: i.price })),
+                totalAmount: finalTotal
+            });
+            window.open(url, '_blank');
+        } else {
+            navigate('/checkout');
+        }
     };
 
     const handleApplyCoupon = async () => {
@@ -89,13 +103,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
             {/* Backdrop */}
             {isCartOpen && (
                 <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110]"
                     onClick={() => setIsCartOpen(false)}
                 />
             )}
 
             {/* Drawer */}
-            <div className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-700 transform transition-transform duration-500 z-[70] flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-700 transform transition-transform duration-500 z-[120] flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 
                 {/* Header */}
                 <div
@@ -193,7 +207,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                                 src={getImageUrl(item.image)}
                                                 className="w-full h-full object-cover"
                                                 alt=""
-                                                onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-phone.png'; }}
+                                                onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }}
                                             />
                                         </div>
 
@@ -264,7 +278,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-black/40 space-y-4">
+                <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-black/40 space-y-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
 
                     {/* Coupon Input */}
                     {cart.length > 0 && (
@@ -327,7 +341,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                         disabled={cart.length === 0}
                         className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
-                        {t('cart.checkoutSecurely', 'Sicher zur Kasse')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        {settings?.features?.whatsappOrders?.enabled ? t('cart.reserveWhatsapp', 'احجز عبر الواتساب') : t('cart.checkoutSecurely', 'Sicher zur Kasse')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
             </div>

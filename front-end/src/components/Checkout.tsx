@@ -125,7 +125,7 @@ export const Checkout: React.FC = () => {
 
     if (isSuccess) {
         return (
-            <div className="min-h-screen pt-24 pb-12 flex items-center justify-center">
+            <div className="min-h-[100dvh] pt-24 pb-12 flex items-center justify-center">
                 <div className="text-center space-y-6 animate-in zoom-in duration-500">
                     <div className="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)]">
                         <CheckCircle className="w-12 h-12 text-emerald-400" />
@@ -140,7 +140,7 @@ export const Checkout: React.FC = () => {
 
     if (cart.length === 0) {
         return (
-            <div className="min-h-screen pt-32 text-center">
+            <div className="min-h-[100dvh] pt-32 text-center">
                 <h2 className="text-2xl text-slate-500">Your cart is empty.</h2>
                 <button onClick={() => navigate('/marketplace')} className="mt-4 text-brand-primary hover:underline">Return to Market</button>
             </div>
@@ -148,7 +148,7 @@ export const Checkout: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen pt-28 pb-12 px-4 max-w-7xl mx-auto">
+        <div className="min-h-[100dvh] pt-28 pb-12 px-4 max-w-7xl mx-auto">
             <h1 className="text-4xl font-black text-white mb-8 flex items-center gap-3">
                 <Lock className="w-8 h-8 text-brand-primary" />
                 SECURE CHECKOUT

@@ -41,7 +41,7 @@ export const MarketPrices: React.FC = () => {
     });
 
     return (
-        <div className="min-h-screen bg-slate-950 pt-32 pb-24 text-white font-sans">
+        <div className="min-h-[100dvh] bg-slate-950 pt-32 pb-24 text-white font-sans">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 {/* Header Section */}

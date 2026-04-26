@@ -72,6 +72,19 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     const filteredDevices = repairCatalog;
 
     const handleOpenTicketModal = (deviceModel: string, serviceLabel?: string) => {
+        const whatsappMode = settings?.features?.whatsappOrders;
+        if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+            import('../utils/whatsappHelper').then(({ generateWhatsAppLink }) => {
+                const url = generateWhatsAppLink({
+                    phoneNumber: whatsappMode.phoneNumber,
+                    messageTemplate: whatsappMode.message,
+                    serviceName: `${serviceLabel || 'General Diagnostic'} - ${deviceModel}`
+                });
+                window.open(url, '_blank');
+            });
+            return;
+        }
+
         setSelectedServiceForTicket({ device: deviceModel, service: serviceLabel || 'General Diagnostic' });
         setShowTicketModal(true);
     };
@@ -124,7 +137,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     };
 
     return (
-        <div className="relative min-h-screen py-20 overflow-hidden bg-slate-900">
+        <div className="relative min-h-[100dvh] py-20 overflow-hidden bg-slate-900">
 
             {/* Abstract Background Tech Lines */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none"></div>

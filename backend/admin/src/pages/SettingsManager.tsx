@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, AlertCircle, Shield, Bell, Gift, Globe, FileText, Zap, Wrench } from 'lucide-react';
+import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, AlertCircle, Shield, Bell, Gift, Globe, FileText, Zap, Wrench, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../utils/api';
@@ -15,6 +15,7 @@ import { FinancialSettingsTab } from './settings/FinancialSettingsTab';
 import { InvoiceSettingsTab } from './settings/InvoiceSettingsTab';
 import { FeaturesTab } from './settings/FeaturesTab';
 import { MaintenanceSettingsTab } from './settings/MaintenanceTab';
+import { ProductFaqsTab } from './settings/ProductFaqsTab';
 
 interface HeroSettings {
     headline: string;
@@ -223,6 +224,10 @@ interface Settings {
         supportEmail: string;
         supportLabel: string;
     };
+    productFaqs?: {
+        question: string;
+        answer: string;
+    }[];
 }
 
 interface EmailTemplateData {
@@ -236,9 +241,9 @@ interface EmailTemplateData {
 }
 
 const EMAIL_TEMPLATE_LABELS: Record<string, string> = {
-    verify_email: '✉️ تأكيد البريد الإلكتروني',
-    reset_password: '🔑 إعادة تعيين كلمة المرور',
-    order_confirmation: '🛒 تأكيد الطلب',
+    verify_email: '✉️ Email Verification',
+    reset_password: '🔑 Password Reset',
+    order_confirmation: '🛒 Order Confirmation',
 };
 
 const EMAIL_TEMPLATE_ICONS: Record<string, string> = {
@@ -353,7 +358,25 @@ export default function SettingsManager() {
             message: 'Your account has been suspended. Please contact support for assistance.',
             supportEmail: 'support@handyland.com',
             supportLabel: 'Contact Support'
-        }
+        },
+        productFaqs: [
+            {
+                question: 'Ist das Gerät ohne Simlock?',
+                answer: 'Ja, alle unsere Geräte sind werksseitig entsperrt (ohne Simlock) und können mit jedem Netzbetreiber weltweit verwendet werden.'
+            },
+            {
+                question: 'Was ist im Lieferumfang enthalten?',
+                answer: 'Jedes Smartphone wird mit einem kompatiblen Ladekabel geliefert. Um Elektroschrott zu reduzieren, sind Netzteil und Kopfhörer nicht im Standard-Lieferumfang enthalten.'
+            },
+            {
+                question: 'Wie lange ist die Garantie?',
+                answer: 'Wir bieten standardmäßig 12 Monate Garantie auf alle unsere generalüberholten und neuen Geräte. Dies deckt alle technischen Defekte ab.'
+            },
+            {
+                question: 'Kann ich das Gerät zurückgeben?',
+                answer: 'Ja, Sie haben ein 14-tägiges Rückgaberecht ohne Angabe von Gründen, sofern sich das Gerät im gleichen Zustand wie bei der Lieferung befindet.'
+            }
+        ]
     });
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
@@ -479,6 +502,7 @@ export default function SettingsManager() {
         { id: 'features', label: 'Feature Controls', icon: Zap },
         { id: 'stats', label: 'Live Stats', icon: BarChart },
         { id: 'archive', label: 'Repair Archive', icon: ScanLine },
+        { id: 'faqs', label: 'Product FAQs', icon: HelpCircle },
         { id: 'content', label: 'Content', icon: MessageSquare },
         { id: 'contact', label: 'Contact Info', icon: MessageSquare },
         { id: 'layout', label: 'Layout Control', icon: LayoutTemplate },
@@ -531,9 +555,10 @@ export default function SettingsManager() {
                     {activeTab === 'financials' && <FinancialSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'auth' && <SocialAuthTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'maintenance' && <MaintenanceSettingsTab settings={settings} handleChange={handleChange} />}
-                    {activeTab === 'hero' && <HeroSettingsTab settings={settings} handleChange={handleChange} />}
-                    {activeTab === 'layout' && <SectionsTab settings={settings} handleChange={handleChange} />}
-                    {activeTab === 'invoice' && <InvoiceSettingsTab settings={settings} handleChange={handleChange} />}
+                    { activeTab === 'hero' && <HeroSettingsTab settings={settings} handleChange={handleChange} /> }
+                    { activeTab === 'layout' && <SectionsTab settings={settings} handleChange={handleChange} /> }
+                    { activeTab === 'invoice' && <InvoiceSettingsTab settings={settings} handleChange={handleChange} /> }
+                    { activeTab === 'faqs' && <ProductFaqsTab settings={settings} handleChange={handleChange} /> }
 
                     {activeTab === 'suspension' && (
                         <div className="space-y-6">

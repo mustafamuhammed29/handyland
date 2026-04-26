@@ -224,6 +224,75 @@ export default function TranslationManager() {
         setBulkTranslating(false);
     };
 
+    const handleGlobalBulkAutoTranslate = async () => {
+        // Rows that have at least ONE missing language field across ALL tabs
+        const missingRows = translations.filter(t =>
+            SUPPORTED_LANGUAGES.some(l => !t.values?.[l.code])
+        );
+
+        if (missingRows.length === 0) {
+            alert('✅ All translations across all tabs are already complete!');
+            return;
+        }
+
+        if (!window.confirm(`This will auto-translate ${missingRows.length} incomplete keys across ALL tabs using MyMemory (free API, ~500 words/day limit).\n\nContinue?`)) return;
+
+        setBulkTranslating(true);
+        setBulkProgress({ done: 0, total: missingRows.length });
+        setBulkResult(null);
+
+        let updated = 0;
+        let errors = 0;
+
+        for (let i = 0; i < missingRows.length; i++) {
+            const row = missingRows[i];
+            setBulkProgress({ done: i, total: missingRows.length });
+
+            // Prefer EN as source, fallback to DE
+            const sourceText = row.values?.en || row.values?.de;
+            const sourceLang = row.values?.en ? 'en' : 'de';
+
+            if (!sourceText) {
+                errors++;
+                continue; // nothing to translate from
+            }
+
+            // Only translate into languages that are actually missing
+            const toLangs = SUPPORTED_LANGUAGES
+                .map(l => l.code)
+                .filter(c => c !== sourceLang && !row.values?.[c as keyof typeof row.values]);
+
+            if (toLangs.length === 0) continue; // already complete
+
+            try {
+                const res = await api.post('/api/translations/auto-translate', {
+                    text: sourceText,
+                    from: sourceLang,
+                    toLangs
+                });
+
+                if (res.data.success) {
+                    const mergedValues = { ...row.values, ...res.data.translated };
+                    await api.put(`/api/translations/${row._id}`, { values: mergedValues });
+                    // Update local state so the table reflects changes immediately
+                    setTranslations(prev =>
+                        prev.map(t => t._id === row._id ? { ...t, values: mergedValues as any } : t)
+                    );
+                    updated++;
+                }
+            } catch {
+                errors++;
+            }
+
+            // Small delay to respect MyMemory rate limits
+            await new Promise(r => setTimeout(r, 400));
+        }
+
+        setBulkProgress({ done: missingRows.length, total: missingRows.length });
+        setBulkResult({ updated, errors });
+        setBulkTranslating(false);
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center flex-wrap gap-4">
@@ -235,12 +304,25 @@ export default function TranslationManager() {
                     <p className="text-slate-400 mt-1">Manage static texts and localizations dynamically.</p>
                 </div>
                 
-                <button 
-                    onClick={openNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors"
-                >
-                    <Plus className="w-4 h-4" /> Add Key
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleGlobalBulkAutoTranslate}
+                        disabled={bulkTranslating}
+                        className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors shadow-lg shadow-violet-900/20 disabled:opacity-50 disabled:cursor-wait"
+                        title="Auto-translate all missing translations across all tabs"
+                    >
+                        {bulkTranslating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                        {bulkTranslating && bulkProgress
+                            ? `Translating... ${bulkProgress.done}/${bulkProgress.total}`
+                            : 'Translate All Pages'}
+                    </button>
+                    <button 
+                        onClick={openNew}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors shadow-lg shadow-blue-900/20"
+                    >
+                        <Plus className="w-4 h-4" /> Add Key
+                    </button>
+                </div>
             </div>
 
             <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">

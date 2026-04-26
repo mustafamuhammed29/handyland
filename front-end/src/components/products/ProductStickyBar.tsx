@@ -3,6 +3,8 @@ import { ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getImageUrl } from '../../utils/imageUrl';
 import { formatPrice } from '../../utils/formatPrice';
+import { useSettings } from '../../context/SettingsContext';
+import { useTranslation } from 'react-i18next';
 
 interface ProductStickyBarProps {
     product: any;
@@ -10,6 +12,10 @@ interface ProductStickyBarProps {
 }
 
 export const ProductStickyBar: React.FC<ProductStickyBarProps> = ({ product, handleAddToCart }) => {
+    const { t } = useTranslation();
+    const { settings } = useSettings();
+    const isWhatsapp = settings?.features?.whatsappOrders?.enabled;
+
     return (
         <AnimatePresence>
             {product && (
@@ -32,15 +38,19 @@ export const ProductStickyBar: React.FC<ProductStickyBarProps> = ({ product, han
                         </div>
                         <button
                             onClick={handleAddToCart}
-                            disabled={product.stock === 0}
+                            disabled={!isWhatsapp && product.stock === 0}
                             className={`px-6 md:px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 whitespace-nowrap
-                                ${product.stock > 0
+                                ${product.stock > 0 || isWhatsapp
                                     ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]'
                                     : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
                         >
                             <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
-                            <span className="hidden sm:inline">{product.stock > 0 ? 'In den Warenkorb' : 'Nicht vorrätig'}</span>
-                            <span className="sm:hidden">{product.stock > 0 ? 'Kaufen' : 'Aus'}</span>
+                            <span className="hidden sm:inline">
+                                {isWhatsapp ? t('product.reserveWhatsapp', 'احجز عبر الواتساب') : (product.stock > 0 ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Nicht vorrätig'))}
+                            </span>
+                            <span className="sm:hidden">
+                                {isWhatsapp ? t('product.reserveWhatsappShort', 'واتساب') : (product.stock > 0 ? t('product.addToCartShort', 'Kaufen') : t('product.outOfStockShort', 'Aus'))}
+                            </span>
                         </button>
                     </div>
                 </motion.div>

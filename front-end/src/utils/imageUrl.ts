@@ -1,7 +1,7 @@
 export const getImageUrl = (path: string | undefined | null): string => {
   // 1. Check if path is empty/invalid
   if (!path || (typeof path === 'string' && path.trim() === '')) {
-    return '/placeholder-phone.png';
+    return '/placeholder-device.svg';
   }
   
   // 2. If it's already a full URL, return it

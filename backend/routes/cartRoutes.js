@@ -10,5 +10,7 @@ router.delete('/', protect, cartController.clearCart);
 
 // Admin Routes
 router.get('/all', protect, authorize('admin'), cartController.getAllCarts);
+router.post('/admin/:id/remind', protect, authorize('admin'), cartController.sendCartReminder);
+router.delete('/admin/:id/clear', protect, authorize('admin'), cartController.adminClearCart);
 
 module.exports = router;

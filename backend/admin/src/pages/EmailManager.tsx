@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Save, X, CheckCircle, AlertCircle, Code, Smartphone, Mail, Settings, LayoutTemplate } from 'lucide-react';
+import { Save, X, CheckCircle, AlertCircle, Smartphone, Mail, Settings, LayoutTemplate } from 'lucide-react';
 import { api } from '../utils/api';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 interface EmailTemplate {
     _id: string;
@@ -13,10 +15,11 @@ interface EmailTemplate {
 }
 
 const TEMPLATE_LABELS: Record<string, string> = {
-    verify_email: 'تأكيد البريد الإلكتروني',
-    reset_password: 'إعادة تعيين كلمة المرور',
-    order_confirmation: 'تأكيد الطلب',
-    sell_device_confirmation: 'تأكيد عملية بيع جهاز'
+    verify_email: 'Email Verification',
+    reset_password: 'Password Reset',
+    order_confirmation: 'Order Confirmation',
+    sell_device_confirmation: 'Device Sale Confirmation',
+    abandoned_cart: 'Abandoned Cart Recovery'
 };
 
 // Smart Variable Mock Data
@@ -39,6 +42,7 @@ const MOCK_DATA: Record<string, string> = {
     '{{order_id}}': '#HL-849201',
     '{{orderNumber}}': '#HL-849201',
     '{{date}}': new Date().toLocaleDateString('ar-EG'),
+    '{{cartUrl}}': 'https://handyland.com/cart',
 };
 
 const renderWithMockData = (html: string) => {
@@ -225,7 +229,7 @@ const EmailManager: React.FC = () => {
                             {/* Editor Header */}
                             <div className="px-6 py-4 bg-[#1a1d27] border-b border-[#2d313f] flex items-center justify-between">
                                 <span className="text-slate-300 text-sm font-black tracking-wider uppercase flex items-center gap-3">
-                                    <div className="p-1.5 bg-[#2d313f] rounded-lg"><Code size={18} className="text-blue-400" /></div> HTML Source / Template
+                                    <div className="p-1.5 bg-[#2d313f] rounded-lg"><LayoutTemplate size={18} className="text-blue-400" /></div> Visual Editor
                                 </span>
                                 <div className="flex gap-2">
                                     <span className="w-3 h-3 rounded-full bg-red-500"></span>
@@ -235,19 +239,24 @@ const EmailManager: React.FC = () => {
                             </div>
                             {/* Editor Body */}
                             <div className="flex-1 relative group">
-                                {/* Line numbers */}
-                                <div className="absolute left-0 top-0 bottom-0 w-14 bg-[#13151f] border-r border-[#2d313f] text-[#4b5563] text-xs font-mono text-right pr-3 pt-6 select-none opacity-50 hidden sm:block pointer-events-none">
-                                    {Array.from({ length: 60 }).map((_, i) => <div key={i} className="leading-7">{i + 1}</div>)}
-                                </div>
-                                <textarea
-                                    value={editHtml}
-                                    onChange={e => setEditHtml(e.target.value)}
-                                    spellCheck={false}
-                                    className="w-full h-full bg-transparent text-[#e0e7ff] p-6 sm:pl-20 font-mono text-sm leading-7 focus:outline-none resize-none custom-scrollbar-light selection:bg-blue-500/30"
-                                    placeholder="Write your HTML here..."
-                                />
-                                <div className="absolute bottom-4 right-4 bg-blue-500/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-wider shadow-lg opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none">
-                                    Live Sync Active
+                                <div className="absolute inset-0 bg-white rounded-b-[2rem] overflow-hidden quill-container">
+                                    <ReactQuill 
+                                        theme="snow" 
+                                        value={editHtml} 
+                                        onChange={setEditHtml} 
+                                        className="h-full"
+                                        modules={{
+                                            toolbar: [
+                                                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                                ['bold', 'italic', 'underline', 'strike'],
+                                                [{ 'color': [] }, { 'background': [] }],
+                                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                                [{ 'align': [] }],
+                                                ['link', 'image'],
+                                                ['clean']
+                                            ]
+                                        }}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -319,7 +328,7 @@ const EmailManager: React.FC = () => {
                             
                             <div className="flex items-start justify-between mb-8 relative z-10">
                                 <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-slate-700/80 flex items-center justify-center text-3xl shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] group-hover:bg-gradient-to-br group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:border-transparent transition-all duration-500 group-hover:shadow-[0_10px_30px_rgba(59,130,246,0.4)] group-hover:text-white">
-                                    {template.name === 'verify_email' ? <Mail size={30} /> : template.name === 'reset_password' ? '🔐' : template.name === 'sell_device_confirmation' ? '📦' : '🛍️'}
+                                    {template.name === 'verify_email' ? <Mail size={30} /> : template.name === 'reset_password' ? '🔐' : template.name === 'sell_device_confirmation' ? '📦' : template.name === 'abandoned_cart' ? '🛒' : '🛍️'}
                                 </div>
                                 <span className={`text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-inner ${template.isActive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}>
                                     {template.isActive ? 'Active Mode' : 'Disabled'}

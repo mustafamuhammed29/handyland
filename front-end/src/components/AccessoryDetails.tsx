@@ -81,11 +81,11 @@ export const AccessoryDetails: React.FC = () => {
         addToast(`${quantity}x ${accessory.name} added to cart`, 'success');
     };
 
-    if (loading) return <div className="min-h-screen pt-32 text-center text-slate-900 dark:text-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div></div>;
+    if (loading) return <div className="min-h-[100dvh] pt-32 text-center text-slate-900 dark:text-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div></div>;
     if (!accessory) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 relative">
+        <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 relative">
             <SEO
                 title={`${accessory.name} | Accessories`}
                 description={accessory.description || `Buy ${accessory.name} accessory.`}

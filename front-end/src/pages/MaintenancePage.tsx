@@ -80,7 +80,7 @@ const MaintenancePage: React.FC = () => {
     const handleRefresh = () => window.location.reload();
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-colors duration-700">
+        <div className="min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-colors duration-700">
             {/* Background blobs */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
                 <div className="absolute w-[40rem] h-[40rem] bg-blue-600/5 rounded-full blur-3xl animate-pulse" />
