@@ -40,9 +40,10 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
         try {
             const res = await fetch('/api/repair-archive');
             const data = await res.json();
-            setComparisons(data);
-            if (data.length > 0) {
-                setSelectedId(data[0]._id);
+            const casesArray = Array.isArray(data) ? data : (data.cases || []);
+            setComparisons(casesArray);
+            if (casesArray.length > 0) {
+                setSelectedId(casesArray[0]._id);
             }
             setLoading(false);
         } catch (error) {

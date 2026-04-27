@@ -2,9 +2,39 @@ const Promotion = require('../models/Promotion');
 
 exports.getPromotions = async (req, res) => {
     try {
-        // If admin, they might want all. Otherwise active only. For now just return active.
-        const promotions = await Promotion.find({ isActive: true });
-        res.json({ success: true, count: promotions.length, promotions, data: promotions });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+        const search = req.query.search || '';
+        
+        let query = {};
+        
+        // Admins can see all, public API only sees active
+        if (!req.user || req.user.role !== 'admin') {
+            query.isActive = true;
+        }
+
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { code: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const count = await Promotion.countDocuments(query);
+        const promotions = await Promotion.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.json({ 
+            success: true, 
+            count, 
+            promotions, 
+            data: promotions,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server Error' });
     }

@@ -27,6 +27,7 @@ const { protect, authorize } = require('../middleware/auth');
  *         description: List of products with pagination info
  */
 router.get('/', productController.getAllProducts);
+router.get('/admin/stats', protect, authorize('admin'), productController.getProductStats);
 router.get('/:id', productController.getProductById);
 router.post('/', protect, authorize('admin'), productController.createProduct);
 router.put('/:id', protect, authorize('admin'), productController.updateProduct);

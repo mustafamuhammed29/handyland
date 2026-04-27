@@ -96,7 +96,32 @@ exports.calculateValuation = async (req, res) => {
 // @access  Private/Admin
 exports.getBlueprints = async (req, res) => {
     try {
-        const blueprints = await DeviceBlueprint.find().sort({ brand: 1, model: 1 });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const search = req.query.search || '';
+        const brand = req.query.brand || 'All';
+        const skip = (page - 1) * limit;
+
+        const query = {};
+        if (brand !== 'All') {
+            query.brand = brand;
+        }
+
+        if (search) {
+            query.$or = [
+                { model: { $regex: search, $options: 'i' } },
+                { brand: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const [blueprints, total] = await Promise.all([
+            DeviceBlueprint.find(query)
+                .sort({ brand: 1, model: 1 })
+                .skip(skip)
+                .limit(limit),
+            DeviceBlueprint.countDocuments(query)
+        ]);
+
         const mappedBlueprints = blueprints.map(bp => ({
             _id: bp._id,
             brand: bp.brand,
@@ -105,16 +130,23 @@ exports.getBlueprints = async (req, res) => {
             basePrice: bp.basePrice,
             category: bp.category || 'Smartphone',
             validStorages: bp.validStorages,
-            storagePrices: bp.storagePrices ? Object.fromEntries(bp.storagePrices) : {},
+            storagePrices: bp.storagePrices ? (bp.storagePrices instanceof Map ? Object.fromEntries(bp.storagePrices) : bp.storagePrices) : {},
             screenModifiers: bp.screenModifiers,
             bodyModifiers: bp.bodyModifiers,
             functionalMultiplier: bp.functionalMultiplier,
             nonFunctionalMultiplier: bp.nonFunctionalMultiplier,
             priceResearch: bp.priceResearch
         }));
-        res.json(mappedBlueprints);
+
+        res.json({
+            success: true,
+            blueprints: mappedBlueprints,
+            page,
+            totalPages: Math.ceil(total / limit),
+            total
+        });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -478,21 +510,46 @@ exports.confirmQuote = async (req, res) => {
     }
 };
 
-// FIXED: Added pagination + aggregation (FIX 6)
+// FIXED: Added pagination + aggregation + search
 exports.getAdminQuotes = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
+        const search = req.query.search || '';
         const skip = (page - 1) * limit;
+        
         const query = { isQuote: true };
-        if (req.query.status) {query.status = req.query.status;}
+        if (req.query.status && req.query.status !== 'All') {
+            query.status = req.query.status;
+        }
+
+        if (search) {
+            // Optional: If searching by name, we might want to find matching Users first
+            const userMatches = await User.find({
+                $or: [
+                    { name: { $regex: search, $options: 'i' } },
+                    { firstName: { $regex: search, $options: 'i' } },
+                    { lastName: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } }
+                ]
+            }).select('_id');
+            const userIds = userMatches.map(u => u._id);
+
+            query.$or = [
+                { quoteReference: { $regex: search, $options: 'i' } },
+                { device: { $regex: search, $options: 'i' } },
+                { 'contact.name': { $regex: search, $options: 'i' } },
+                { 'contact.email': { $regex: search, $options: 'i' } },
+                { user: { $in: userIds } }
+            ];
+        }
 
         const [quotes, total] = await Promise.all([
             SavedValuation.find(query)
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .populate('user', 'name email phone')
+                .populate('user', 'name firstName lastName email phone')
                 .lean(),
             SavedValuation.countDocuments(query)
         ]);
@@ -519,6 +576,7 @@ exports.getAdminQuotes = async (req, res) => {
             quotes,
             page,
             pages: Math.ceil(total / limit),
+            totalPages: Math.ceil(total / limit),
             total
         });
     } catch (error) {

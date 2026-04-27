@@ -1,14 +1,83 @@
 const LoanerPhone = require('../models/LoanerPhone');
 
+// @desc    Get loaner stats
+// @route   GET /api/loaners/stats
+// @access  Private/Admin
+exports.getLoanerStats = async (req, res) => {
+    try {
+        const stats = await LoanerPhone.aggregate([
+            {
+                $group: {
+                    _id: "$status",
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        const formattedStats = {
+            Total: 0,
+            Available: 0,
+            Lent: 0,
+            Maintenance: 0
+        };
+
+        stats.forEach(stat => {
+            if (formattedStats[stat._id] !== undefined) {
+                formattedStats[stat._id] = stat.count;
+            }
+            formattedStats.Total += stat.count;
+        });
+
+        res.json({ success: true, stats: formattedStats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // @desc    Get all loaner phones
 // @route   GET /api/loaners
 // @access  Private/Admin
 exports.getLoaners = async (req, res) => {
     try {
-        const loaners = await LoanerPhone.find().sort({ createdAt: -1 });
-        res.json(loaners);
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 15;
+        const search = req.query.search || '';
+        const statusFilter = req.query.status || '';
+        const startIndex = (page - 1) * limit;
+
+        const query = {};
+        if (search) {
+            query.$or = [
+                { brand: { $regex: search, $options: 'i' } },
+                { model: { $regex: search, $options: 'i' } },
+                { imei: { $regex: search, $options: 'i' } },
+                { 'currentCustomer.name': { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        if (statusFilter && statusFilter !== 'All') {
+            query.status = statusFilter;
+        }
+
+        const [count, loaners] = await Promise.all([
+            LoanerPhone.countDocuments(query),
+            LoanerPhone.find(query)
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+        ]);
+
+        const totalPages = Math.ceil(count / limit);
+
+        res.status(200).json({
+            success: true,
+            loaners,
+            count,
+            totalPages,
+            currentPage: page
+        });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 

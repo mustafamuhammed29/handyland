@@ -2,7 +2,10 @@ const RepairDevice = require('../models/RepairDevice');
 
 exports.getRepairCatalog = async (req, res) => {
     try {
-        const { search } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000;
+        const skip = (page - 1) * limit;
+        const search = req.query.search;
         let query = {};
         
         if (search) {
@@ -15,10 +18,53 @@ exports.getRepairCatalog = async (req, res) => {
             };
         }
         
-        const devices = await RepairDevice.find(query);
-        res.json(devices);
+        const [devices, total] = await Promise.all([
+            RepairDevice.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+            RepairDevice.countDocuments(query)
+        ]);
+
+        res.json({
+            devices,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalDevices: total
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getRepairCatalogStats = async (req, res) => {
+    try {
+        const devices = await RepairDevice.find({}, 'services isVisible');
+        
+        let totalServices = 0;
+        let totalCost = 0;
+        let hiddenDevices = 0;
+
+        devices.forEach(device => {
+            if (!device.isVisible) hiddenDevices++;
+            if (device.services && device.services.length > 0) {
+                totalServices += device.services.length;
+                device.services.forEach(srv => {
+                    totalCost += (srv.price || 0);
+                });
+            }
+        });
+
+        const averageRepairPrice = totalServices > 0 ? (totalCost / totalServices) : 0;
+
+        res.json({
+            success: true,
+            stats: {
+                totalDevices: devices.length,
+                totalServices,
+                averageRepairPrice,
+                hiddenDevices
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error fetching stats', error: error.message });
     }
 };
 

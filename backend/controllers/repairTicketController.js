@@ -219,8 +219,7 @@ exports.updateTicketStatus = async (req, res) => {
 
             notify({
                 userId: ticket.user._id.toString(),
-                message: `إصلاح ${ticket.device}: ${label}${estimatedCost ? ` — التكلفة المتوقعة: €${estimatedCost}` : ''
-                    }`,
+                message: `Reparatur ${ticket.device}: ${label}${estimatedCost ? ` — Geschätzte Kosten: €${estimatedCost}` : ''}`,
                 type: status === 'completed' ? 'success' : status === 'cancelled' ? 'warning' : 'info',
                 link: `/dashboard?tab=repairs`
             }).catch(console.error);
@@ -360,16 +359,114 @@ exports.getTicket = async (req, res) => {
 // @access  Private/Admin
 exports.getAllTickets = async (req, res) => {
     try {
-        const tickets = await RepairTicket.find().populate('user', 'name email');
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 15;
+        const startIndex = (page - 1) * limit;
+        const search = req.query.search || '';
+        const status = req.query.status || '';
+
+        const query = {};
+
+        if (status) {
+            query.status = status;
+        }
+
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            
+            const searchConditions = [
+                { ticketId: searchRegex },
+                { device: searchRegex },
+                { 'guestContact.name': searchRegex },
+                { 'guestContact.email': searchRegex }
+            ];
+            
+            // Search populated users
+            const User = require('../models/User');
+            const matchedUsers = await User.find({
+                $or: [{ name: searchRegex }, { email: searchRegex }]
+            }).select('_id');
+            const userIds = matchedUsers.map(u => u._id);
+
+            if (userIds.length > 0) {
+                searchConditions.push({ user: { $in: userIds } });
+            }
+
+            query.$or = searchConditions;
+        }
+
+        const [totalTickets, tickets] = await Promise.all([
+            RepairTicket.countDocuments(query),
+            RepairTicket.find(query)
+                .populate('user', 'name email')
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+        ]);
+
+        const totalPages = Math.ceil(totalTickets / limit);
+
         res.status(200).json({
             success: true,
             count: tickets.length,
+            totalTickets,
+            totalPages,
+            currentPage: page,
             tickets
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Error retrieving tickets',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Get stats for repair tickets (Admin)
+// @route   GET /api/repairs/tickets/admin/stats
+// @access  Private/Admin
+exports.getTicketStats = async (req, res) => {
+    try {
+        const stats = await RepairTicket.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalTickets: { $sum: 1 },
+                    pendingTickets: { 
+                        $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] } 
+                    },
+                    inProgressTickets: { 
+                        $sum: { $cond: [{ $in: ["$status", ["received", "diagnosing", "waiting_parts", "repairing", "testing", "ready"]] }, 1, 0] } 
+                    },
+                    completedTickets: { 
+                        $sum: { $cond: [{ $in: ["$status", ["completed", "cancelled"]] }, 1, 0] } 
+                    },
+                    totalEstimatedRevenue: { 
+                        $sum: { $ifNull: ["$estimatedCost", 0] } 
+                    }
+                }
+            }
+        ]);
+
+        const finalStats = stats[0] || {
+            totalTickets: 0,
+            pendingTickets: 0,
+            inProgressTickets: 0,
+            completedTickets: 0,
+            totalEstimatedRevenue: 0
+        };
+
+        delete finalStats._id;
+
+        res.status(200).json({
+            success: true,
+            stats: finalStats
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching ticket stats',
             error: error.message
         });
     }

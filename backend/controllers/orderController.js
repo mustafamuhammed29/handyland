@@ -326,7 +326,7 @@ exports.createOrder = async (req, res) => {
                     userId: req.user.id,
                     userEmail: req.user.email,
                     userName: req.user.name,
-                    message: `Your order #${order.orderNumber} has been placed successfully! Total: \u20ac${order.totalAmount.toFixed(2)}`,
+                    message: `Ihre Bestellung #${order.orderNumber} wurde erfolgreich aufgegeben! Gesamt: €${order.totalAmount.toFixed(2)}`,
                     type: 'success',
                     link: `/dashboard`,
                     category: 'orderUpdates'
@@ -540,11 +540,37 @@ exports.cancelOrder = async (req, res) => {
 // @access  Private/Admin
 exports.getAllOrders = async (req, res) => {
     try {
-        const { status, page = 1, limit = 20 } = req.query;
+        const { status, page = 1, limit = 20, search, startDate, endDate } = req.query;
 
         const query = {};
         if (status) {
             query.status = status;
+        }
+
+        if (startDate || endDate) {
+            query.createdAt = {};
+            if (startDate) query.createdAt.$gte = new Date(startDate);
+            if (endDate) query.createdAt.$lte = new Date(endDate);
+        }
+
+        if (search) {
+            // Need to search across orderNumber, or user's email/name.
+            // Since user is a referenced field, we first need to find matching users if the search might be a user field.
+            // A simple approach is to use regex on orderNumber. For populated fields, it's more complex.
+            // Let's do a robust search:
+            const User = require('../models/User');
+            const matchingUsers = await User.find({
+                $or: [
+                    { name: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } }
+                ]
+            }).select('_id');
+            const userIds = matchingUsers.map(u => u._id);
+
+            query.$or = [
+                { orderNumber: { $regex: search, $options: 'i' } },
+                { user: { $in: userIds } }
+            ];
         }
 
         const orders = await Order.find(query)
@@ -659,20 +685,19 @@ exports.updateOrderStatus = async (req, res) => {
             emitOrderUpdate(order.user?._id?.toString(), order);
 
             const statusLabels = {
-                processing: 'قيد المعالجة',
-                shipped: 'تم الشحن',
-                delivered: 'تم التسليم ✅',
-                cancelled: 'تم الإلغاء ❌',
-                return_requested: 'طلب إرجاع',
-                refunded: 'تم الاسترداد'
+                processing: 'wird bearbeitet 🔄',
+                shipped: 'wurde versandt 📦',
+                delivered: 'wurde geliefert ✅',
+                cancelled: 'wurde storniert ❌',
+                return_requested: 'Rückgabe beantragt',
+                refunded: 'wurde erstattet'
             };
             const label = statusLabels[status] || status;
 
             // Fire-and-forget — don't await so it never blocks the response
             notify({
                 userId: order.user._id.toString(),
-                message: `طلبك #${order.orderNumber} — ${label}${trackingNumber ? ` · رقم التتبع: ${trackingNumber}` : ''
-                    }`,
+                message: `Ihre Bestellung #${order.orderNumber} ${label}${trackingNumber ? ` · Sendungsnummer: ${trackingNumber}` : ''}`,
                 type: status === 'cancelled' ? 'warning' : status === 'delivered' ? 'success' : 'info',
                 link: `/dashboard?tab=orders`
             }).catch(console.error);
@@ -1110,7 +1135,7 @@ exports.updateOrderToPaid = async (req, res) => {
         try {
             await notify({
                 userId: order.user.toString(),
-                message: `Payment confirmed for order #${order.orderNumber}. Your order is now being processed!`,
+                message: `Zahlung für Bestellung #${order.orderNumber} bestätigt. Ihre Bestellung wird jetzt bearbeitet!`,
                 type: 'success',
                 link: `/dashboard`,
                 category: 'orderUpdates'
@@ -1148,7 +1173,7 @@ exports.updateOrderToDelivered = async (req, res) => {
         try {
             await notify({
                 userId: order.user.toString(),
-                message: `Your order #${order.orderNumber} has been delivered! Enjoy your purchase 🎉`,
+                message: `Ihre Bestellung #${order.orderNumber} wurde geliefert! Viel Freude mit Ihrem Kauf 🎉`,
                 type: 'success',
                 link: `/dashboard`,
                 category: 'orderUpdates'

@@ -2,6 +2,10 @@ const Accessory = require('../models/Accessory');
 
 exports.getAccessories = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000;
+        const skip = (page - 1) * limit;
+
         const query = req.query.includeOutOfStock === 'true' ? {} : { stock: { $gt: 0 } };
 
         if (req.query.search) {
@@ -9,15 +13,54 @@ exports.getAccessories = async (req, res) => {
             query.$or = [
                 { name: { $regex: escapedSearch, $options: 'i' } },
                 { description: { $regex: escapedSearch, $options: 'i' } },
-                { type: { $regex: escapedSearch, $options: 'i' } }
+                { category: { $regex: escapedSearch, $options: 'i' } },
+                { brand: { $regex: escapedSearch, $options: 'i' } }
             ];
         }
 
-        const accessories = await Accessory.find(query);
-        res.json(accessories);
+        if (req.query.category && req.query.category !== '') {
+            query.category = req.query.category;
+        }
+
+        const [accessories, total] = await Promise.all([
+            Accessory.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+            Accessory.countDocuments(query)
+        ]);
+
+        res.json({
+            accessories,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalAccessories: total
+        });
     } catch (error) {
         console.error("Get Accessories Error:", error);
         res.status(500).json({ message: "Error reading data: " + error.message });
+    }
+};
+
+exports.getAccessoryStats = async (req, res) => {
+    try {
+        const [totalAccessories, outOfStock, lowStock, accessories] = await Promise.all([
+            Accessory.countDocuments(),
+            Accessory.countDocuments({ stock: 0 }),
+            Accessory.countDocuments({ stock: { $gt: 0, $lt: 5 } }),
+            Accessory.find({}, 'price stock')
+        ]);
+
+        const totalInventoryValue = accessories.reduce((sum, item) => sum + (item.price * (item.stock || 0)), 0);
+
+        res.json({
+            success: true,
+            stats: {
+                totalAccessories,
+                outOfStock,
+                lowStock,
+                totalInventoryValue
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error fetching stats', error: error.message });
     }
 };
 

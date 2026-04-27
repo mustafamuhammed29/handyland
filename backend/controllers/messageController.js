@@ -108,11 +108,11 @@ exports.adminSendMessage = async (req, res) => {
                     userId: customer._id,
                     userEmail: customer.email,
                     userName: customer.name,
-                    message: 'You have a new message from the Support Team.',
+                    message: 'Sie haben eine neue Nachricht vom Support-Team erhalten.',
                     type: 'info',
                     link: '/dashboard',
                     category: 'orderUpdates',
-                    subject: 'New message from HandyLand Support',
+                    subject: 'Neue Nachricht vom HandyLand Support',
                     prefs: customer.notificationPrefs
                 });
             }).catch(() => { });
@@ -229,14 +229,25 @@ exports.replyMessage = async (req, res) => {
                     userId: customer._id,
                     userEmail: customer.email,
                     userName: customer.name,
-                    message: `Support replied to your message: "${req.body.message.substring(0, 60)}${req.body.message.length > 60 ? '…' : ''}"`,
+                    message: `Support hat auf Ihre Nachricht geantwortet: "${req.body.message.substring(0, 60)}${req.body.message.length > 60 ? '…' : ''}"`,
                     type: 'info',
                     link: '/dashboard',
                     category: 'orderUpdates',
-                    subject: 'Support Team replied to your message',
+                    subject: 'Support-Team hat auf Ihre Nachricht geantwortet',
                     prefs: customer.notificationPrefs
                 });
             }).catch(() => { });
+        } else if (!isAdmin) {
+            // Notify admins when customer replies
+            emitAdminNotification('new_message', {
+                title: 'New Reply',
+                body: `${message.name}: "${req.body.message.substring(0, 80)}${req.body.message.length > 80 ? '…' : ''}"`,
+                icon: '💬',
+                link: '/messages',
+                senderName: message.name,
+                senderEmail: message.email,
+                threadId: message._id
+            });
         }
 
         res.json({ success: true, data: message });

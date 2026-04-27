@@ -18,12 +18,14 @@ router.get('/tickets/:id', optionalProtect, repairTicketController.getTicket);
 router.put('/tickets/:id/notes', optionalProtect, repairTicketController.updateCustomerNotes);
 
 // Admin routes (Catalog Management & Ticket Status)
+router.get('/admin/stats', protect, authorize('admin'), repairController.getRepairCatalogStats);
 router.post('/devices', protect, authorize('admin'), repairController.createDevice);
 router.put('/devices/:id', protect, authorize('admin'), repairController.updateDevice);
 router.delete('/devices/:id', protect, authorize('admin'), repairController.deleteDevice);
 router.put('/devices/:id/services', protect, authorize('admin'), repairController.updateDeviceServices);
 
 // Admin Ticket Management
+router.get('/tickets/admin/stats', protect, authorize('admin'), repairTicketController.getTicketStats);
 router.put('/tickets/:id/status', protect, authorize('admin'), repairTicketController.updateTicketStatus);
 router.delete('/tickets/:id', protect, authorize('admin'), repairTicketController.deleteTicket);
 router.get('/admin/all', protect, authorize('admin'), repairTicketController.getAllTickets);

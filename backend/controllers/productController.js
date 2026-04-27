@@ -28,6 +28,15 @@ exports.getAllProducts = async (req, res) => {
     }
 };
 
+exports.getProductStats = async (req, res) => {
+    try {
+        const stats = await productService.getProductStats();
+        res.json({ success: true, stats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error fetching stats', error: error.message });
+    }
+};
+
 exports.getProductById = async (req, res) => {
     try {
         const product = await productService.getProductById(req.params.id);

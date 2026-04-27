@@ -6,11 +6,36 @@ const { clearCache } = require('../middleware/cache');
 // @access  Private/Admin
 exports.getAllTranslations = async (req, res) => {
     try {
-        const translations = await Translation.find().sort({ namespace: 1, key: 1 });
+        const page = parseInt(req.query.page) || 1;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 0; // 0 means no limit
+        const skip = (page - 1) * (limit || 0);
+        const search = req.query.search || '';
+
+        let query = {};
+        if (search) {
+            query.$or = [
+                { key: { $regex: search, $options: 'i' } },
+                { namespace: { $regex: search, $options: 'i' } },
+                { 'values.en': { $regex: search, $options: 'i' } },
+                { 'values.de': { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const count = await Translation.countDocuments(query);
+        const translationsQuery = Translation.find(query).sort({ namespace: 1, key: 1 });
+        
+        if (limit > 0) {
+            translationsQuery.skip(skip).limit(limit);
+        }
+
+        const translations = await translationsQuery;
+
         res.status(200).json({
             success: true,
-            count: translations.length,
-            data: translations
+            count,
+            data: translations,
+            totalPages: limit > 0 ? Math.ceil(count / limit) : 1,
+            currentPage: page
         });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Server Error' });

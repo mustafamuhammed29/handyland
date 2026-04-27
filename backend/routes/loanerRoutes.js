@@ -11,6 +11,8 @@ router.route('/')
     .get(loanerController.getLoaners)
     .post(loanerController.addLoaner);
 
+router.get('/stats', loanerController.getLoanerStats);
+
 router.route('/:id')
     .put(loanerController.updateLoaner)
     .delete(loanerController.deleteLoaner);

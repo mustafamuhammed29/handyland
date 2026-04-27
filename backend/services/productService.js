@@ -92,6 +92,24 @@ class ProductService {
         };
     }
 
+    async getProductStats() {
+        const [totalProducts, outOfStock, lowStock, products] = await Promise.all([
+            Product.countDocuments(),
+            Product.countDocuments({ stock: 0 }),
+            Product.countDocuments({ stock: { $gt: 0, $lt: 5 } }),
+            Product.find({}, 'price stock')
+        ]);
+
+        const totalInventoryValue = products.reduce((sum, p) => sum + (p.price * (p.stock || 0)), 0);
+
+        return {
+            totalProducts,
+            outOfStock,
+            lowStock,
+            totalInventoryValue
+        };
+    }
+
     async getProductById(id) {
         const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
         if (isValidObjectId) {

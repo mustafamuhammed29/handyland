@@ -202,7 +202,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                         className="relative z-10 flex gap-4 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 group hover:border-slate-300 dark:hover:border-slate-600 transition-colors shadow-sm dark:shadow-none"
                                         whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" }}
                                     >
-                                        <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden flex-shrink-0 pointer-events-none">
+                                        <div 
+                                            className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer"
+                                            onClick={() => { setIsCartOpen(false); navigate(`/marketplace/${item.id}`); }}
+                                        >
                                             <img
                                                 src={getImageUrl(item.image)}
                                                 className="w-full h-full object-cover"
@@ -214,7 +217,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                                             <div>
                                                 <div className="flex justify-between items-start">
-                                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate pr-2">{cleanProductName(item.title, item.subtitle)}</h4>
+                                                    <h4 
+                                                        className="font-bold text-slate-900 dark:text-white text-sm truncate pr-2 cursor-pointer hover:text-brand-primary transition-colors"
+                                                        onClick={() => { setIsCartOpen(false); navigate(`/marketplace/${item.id}`); }}
+                                                    >
+                                                        {cleanProductName(item.title, item.subtitle)}
+                                                    </h4>
                                                     <div className="flex gap-2">
                                                         <button
                                                             onClick={() => handleToggleWishlist(item)}

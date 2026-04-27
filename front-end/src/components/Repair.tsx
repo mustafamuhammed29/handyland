@@ -46,15 +46,20 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 setLoading(true);
                 const response = await api.get<RepairDevice[]>(`/api/repairs?search=${searchTerm}`);
 
-                // Axios returns the data in the .data property, but interceptor already unwraps it
-                // So 'response' IS the data (RepairDevice[])
-                const repairsData = (Array.isArray(response) ? response : response['data']) || [];
-
-                if (Array.isArray(repairsData)) {
-                    setRepairCatalog(repairsData);
-                } else {
-                    setRepairCatalog([]);
+                // Axios returns the data in the .data property, but interceptor already unwraps it.
+                // The new backend returns { devices, currentPage, totalPages, totalDevices }
+                const responseData: any = response;
+                let repairsData = [];
+                
+                if (Array.isArray(responseData)) {
+                    repairsData = responseData; // old backend
+                } else if (responseData && Array.isArray(responseData.devices)) {
+                    repairsData = responseData.devices; // new paginated backend
+                } else if (responseData && responseData.data && Array.isArray(responseData.data.devices)) {
+                    repairsData = responseData.data.devices; // fallback
                 }
+
+                setRepairCatalog(repairsData);
             } catch (err) {
                 addToast('Failed to load repair catalog. Check console.', 'error');
             } finally {

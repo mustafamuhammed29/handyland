@@ -2,10 +2,35 @@ const RepairCase = require('../models/RepairCase');
 
 exports.getAllCases = async (req, res) => {
     try {
-        const cases = await RepairCase.find().sort({ createdAt: -1 });
-        res.json(cases);
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 15;
+        const search = req.query.search || '';
+        const startIndex = (page - 1) * limit;
+
+        const query = {};
+        if (search) {
+            query.title = { $regex: search, $options: 'i' };
+        }
+
+        const [count, cases] = await Promise.all([
+            RepairCase.countDocuments(query),
+            RepairCase.find(query)
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+        ]);
+
+        const totalPages = Math.ceil(count / limit);
+
+        res.status(200).json({
+            success: true,
+            cases,
+            count,
+            totalPages,
+            currentPage: page
+        });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Trash2, CheckCircle, AlertCircle, Lock, Unlock, Users, Shield, UserCheck, UserX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../utils/api';
+import toast from 'react-hot-toast';
+import useDebounce from '../hooks/useDebounce';
 
 interface User {
     _id: string;
@@ -78,7 +80,7 @@ const UsersManager: React.FC = () => {
     
     // Pagination & Search States
     const [search, setSearch] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const debouncedSearch = useDebounce(search, 500);
     const [roleFilter, setRoleFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [page, setPage] = useState(1);
@@ -87,16 +89,10 @@ const UsersManager: React.FC = () => {
     const [totalUsersCount, setTotalUsersCount] = useState(0);
 
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-    // Debounce search input
     useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearch(search);
-            setPage(1); // Reset to page 1 on new search
-        }, 500);
-        return () => clearTimeout(handler);
-    }, [search]);
+        setPage(1);
+    }, [debouncedSearch]);
 
     // Fetch Stats once
     useEffect(() => {
@@ -116,11 +112,6 @@ const UsersManager: React.FC = () => {
     useEffect(() => {
         fetchUsers();
     }, [page, limit, roleFilter, statusFilter, debouncedSearch]);
-
-    const showToast = (type: 'success' | 'error', text: string) => {
-        setToast({ type, text });
-        setTimeout(() => setToast(null), 3500);
-    };
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -154,10 +145,10 @@ const UsersManager: React.FC = () => {
             const data = (response as any)?.data || response;
             if (data.success) { 
                 setUsers(users.map(u => u._id === userId ? { ...u, isActive: !currentStatus } : u));
-                showToast('success', `User account ${!currentStatus ? 'activated' : 'deactivated'}`); 
+                toast.success(`User account ${!currentStatus ? 'activated' : 'deactivated'}`); 
             }
         } catch (error) {
-            showToast('error', 'Failed to update user status');
+            toast.error('Failed to update user status');
         }
     };
 
@@ -167,10 +158,10 @@ const UsersManager: React.FC = () => {
             const data = (response as any)?.data || response;
             if (data.success) { 
                 setUsers(users.map(u => u._id === userId ? { ...u, role: newRole } : u));
-                showToast('success', `User role upgraded to ${newRole}`); 
+                toast.success(`User role upgraded to ${newRole}`); 
             }
         } catch (error: any) {
-            showToast('error', error.response?.data?.message || 'Failed to update role');
+            toast.error(error.response?.data?.message || 'Failed to update role');
         }
     };
 
@@ -180,9 +171,9 @@ const UsersManager: React.FC = () => {
             await api.delete(`/api/users/admin/${userId}`);
             fetchUsers();
             setSelectedUsers(selectedUsers.filter(id => id !== userId));
-            showToast('success', 'User account permanently deleted.');
+            toast.success('User account permanently deleted.');
         } catch (error: any) {
-            showToast('error', error.response?.data?.message || 'Failed to delete user');
+            toast.error(error.response?.data?.message || 'Failed to delete user');
         }
     };
 
@@ -192,10 +183,10 @@ const UsersManager: React.FC = () => {
             const data = (response as any)?.data || response;
             if (data.success) { 
                 setUsers(users.map(u => u._id === userId ? { ...u, lockUntil: null, loginAttempts: 0 } : u));
-                showToast('success', 'Security lock removed successfully.'); 
+                toast.success('Security lock removed successfully.'); 
             }
         } catch (error) {
-            showToast('error', 'Failed to unlock account');
+            toast.error('Failed to unlock account');
         }
     };
 
@@ -206,9 +197,9 @@ const UsersManager: React.FC = () => {
             await Promise.all(selectedUsers.map(userId => api.delete(`/api/users/admin/${userId}`)));
             fetchUsers();
             setSelectedUsers([]);
-            showToast('success', `${selectedUsers.length} users successfully deleted`);
+            toast.success(`${selectedUsers.length} users successfully deleted`);
         } catch (error) {
-            showToast('error', 'Bulk delete failed for some users');
+            toast.error('Bulk delete failed for some users');
         }
     };
 
@@ -219,9 +210,9 @@ const UsersManager: React.FC = () => {
             await Promise.all(selectedUsers.map(userId => api.put(`/api/users/admin/${userId}/role`, { role: newRole })));
             fetchUsers();
             setSelectedUsers([]);
-            showToast('success', `Roles changed successfully`);
+            toast.success(`Roles changed successfully`);
         } catch (error) {
-            showToast('error', 'Bulk role change failed');
+            toast.error('Bulk role change failed');
         }
     };
 
@@ -237,16 +228,6 @@ const UsersManager: React.FC = () => {
 
     return (
         <div className="p-8 pb-20">
-            {/* Elegant Toast */}
-            {toast && (
-                <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl border text-sm font-bold transition-all animate-in slide-in-from-top-6 ${toast.type === 'success'
-                    ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-300 backdrop-blur-md'
-                    : 'bg-red-900/90 border-red-500/50 text-red-300 backdrop-blur-md'
-                    }`}>
-                    {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                    {toast.text}
-                </div>
-            )}
 
             {/* Header */}
             <div className="mb-8">

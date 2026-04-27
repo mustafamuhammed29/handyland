@@ -32,10 +32,29 @@ exports.createCoupon = async (req, res) => {
 // @access  Private/Admin
 exports.getCoupons = async (req, res) => {
     try {
-        const coupons = await Coupon.find({})
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+        const search = req.query.search || '';
+        
+        let query = {};
+        if (search) {
+            query.code = { $regex: search, $options: 'i' };
+        }
+
+        const count = await Coupon.countDocuments(query);
+        const coupons = await Coupon.find(query)
             .populate('usedBy.user', 'name email')
-            .sort({ createdAt: -1 });
-        res.json(coupons);
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.json({
+            coupons,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            count
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
