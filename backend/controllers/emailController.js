@@ -105,6 +105,41 @@ exports.sendTestEmail = async (req, res) => {
                 subject = 'Order Update (TEST)';
                 break;
             }
+            case 'order_status_update':
+            case 'repair_status_update':
+            case 'valuation_quote':
+            case 'valuation_device_received':
+            case 'valuation_payment_sent':
+            case 'refund_status_update': {
+                // For DB-managed templates, use sendTemplateEmail directly
+                const { sendTemplateEmail } = require('../utils/emailService');
+                const testVars = {
+                    customerName: 'Test User',
+                    orderNumber: 'HL-TEST-1234',
+                    status: 'shipped',
+                    trackingNumber: 'DHL-TEST-999',
+                    adminNote: 'This is a test note from the admin.',
+                    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+                    device: 'iPhone 15 Pro',
+                    quoteRef: 'HV-TEST-ABCD',
+                    price: '450',
+                    quoteUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/sell/HV-TEST-ABCD`,
+                    adminComments: 'This is a test admin comment.'
+                };
+
+                const sent = await sendTemplateEmail(email, templateId, testVars);
+                if (sent) {
+                    return res.status(200).json({
+                        success: true,
+                        message: `Test email sent to ${email}`
+                    });
+                } else {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Template not found or inactive in database'
+                    });
+                }
+            }
             default:
                 return res.status(400).json({
                     success: false,

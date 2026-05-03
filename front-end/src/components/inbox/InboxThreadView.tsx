@@ -5,7 +5,7 @@ import { Message } from './types';
 
 interface InboxThreadViewProps {
     selectedMessage: Message;
-    messagesEndRef: React.RefObject<HTMLDivElement | null>;
+    messagesEndRef: React.RefObject<HTMLDivElement>;
     replyText: string;
     setReplyText: (text: string) => void;
     handleReply: (e: React.FormEvent) => void;

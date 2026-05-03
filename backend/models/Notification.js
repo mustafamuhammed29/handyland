@@ -28,4 +28,10 @@ const notificationSchema = new mongoose.Schema({
     }
 });
 
+// Fast lookup: user's unread notifications sorted by newest first
+notificationSchema.index({ user: 1, read: 1, createdAt: -1 });
+
+// Auto-delete notifications older than 90 days (TTL index)
+notificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
+
 module.exports = mongoose.model('Notification', notificationSchema);

@@ -88,7 +88,7 @@ exports.createTicket = async (req, res) => {
     }
 };
 
-const { sendEmail, emailTemplates } = require('../utils/emailService');
+const { sendEmail, sendTemplateEmail, emailTemplates } = require('../utils/emailService');
 const { notify } = require('../utils/notificationService');
 
 // Added required import for Settings model
@@ -106,8 +106,8 @@ exports.updateTicketStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Ticket not found' });
         }
 
-        if (status) {ticket.status = status;}
-        if (estimatedCost) {ticket.estimatedCost = estimatedCost;}
+        if (status) { ticket.status = status; }
+        if (estimatedCost) { ticket.estimatedCost = estimatedCost; }
 
         // Admin updates either send 'notes' or 'technicianNotes' payload.
         // We'll map both to technicianNotes so customer notes aren't overwritten.
@@ -137,11 +137,25 @@ exports.updateTicketStatus = async (req, res) => {
         // Send Email Notification
         if (status && ticket.user) {
             try {
-                await sendEmail({
-                    email: ticket.user.email,
-                    subject: `Repair Update: ${ticket.device}`,
-                    html: emailTemplates.repairStatusUpdate(ticket.user.name, ticket, status)
-                });
+                const repairVars = {
+                    customerName: ticket.user.name || 'Customer',
+                    device: ticket.device || 'Ihr Gerät',
+                    status: status,
+                    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
+                };
+
+                const sent = await sendTemplateEmail(ticket.user.email, 'repair_status_update', repairVars);
+
+                if (!sent) {
+                    // Fallback: use hardcoded template if DB template is missing/inactive
+                    await sendEmail({
+                        email: ticket.user.email,
+                        subject: `Repair Update: ${ticket.device}`,
+                        html: emailTemplates.repairStatusUpdate
+                            ? emailTemplates.repairStatusUpdate(ticket.user.name, ticket, status)
+                            : `<p>Status update for ${ticket.device}: ${status}</p>`
+                    });
+                }
             } catch (emailError) {
                 console.error('Email sending failed:', emailError);
             }
@@ -373,14 +387,14 @@ exports.getAllTickets = async (req, res) => {
 
         if (search) {
             const searchRegex = new RegExp(search, 'i');
-            
+
             const searchConditions = [
                 { ticketId: searchRegex },
                 { device: searchRegex },
                 { 'guestContact.name': searchRegex },
                 { 'guestContact.email': searchRegex }
             ];
-            
+
             // Search populated users
             const User = require('../models/User');
             const matchedUsers = await User.find({
@@ -433,17 +447,17 @@ exports.getTicketStats = async (req, res) => {
                 $group: {
                     _id: null,
                     totalTickets: { $sum: 1 },
-                    pendingTickets: { 
-                        $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] } 
+                    pendingTickets: {
+                        $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] }
                     },
-                    inProgressTickets: { 
-                        $sum: { $cond: [{ $in: ["$status", ["received", "diagnosing", "waiting_parts", "repairing", "testing", "ready"]] }, 1, 0] } 
+                    inProgressTickets: {
+                        $sum: { $cond: [{ $in: ["$status", ["received", "diagnosing", "waiting_parts", "repairing", "testing", "ready"]] }, 1, 0] }
                     },
-                    completedTickets: { 
-                        $sum: { $cond: [{ $in: ["$status", ["completed", "cancelled"]] }, 1, 0] } 
+                    completedTickets: {
+                        $sum: { $cond: [{ $in: ["$status", ["completed", "cancelled"]] }, 1, 0] }
                     },
-                    totalEstimatedRevenue: { 
-                        $sum: { $ifNull: ["$estimatedCost", 0] } 
+                    totalEstimatedRevenue: {
+                        $sum: { $ifNull: ["$estimatedCost", 0] }
                     }
                 }
             }

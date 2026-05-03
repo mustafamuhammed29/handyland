@@ -57,8 +57,8 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                 <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center mb-6 border border-slate-800">
                     <ShoppingCart className="w-12 h-12 text-slate-500" />
                 </div>
-                <h1 className="text-3xl font-bold text-white mb-4">{t('cart.emptyTitle', 'Your Cart is Empty')}</h1>
-                <p className="text-slate-400 mb-8 max-w-md">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">{t('cart.emptyTitle', 'Your Cart is Empty')}</h1>
+                <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-md">
                     {t('cart.emptyText', 'Looks like you haven\'t added anything to your cart yet. Discover our premium refurbished devices and accessories.')}
                 </p>
                 <button
@@ -78,7 +78,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-800">
-                    <h1 className="text-3xl sm:text-4xl font-black text-white flex items-center gap-3">
+                    <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                         <ShoppingCart className="w-8 h-8 text-blue-500" />
                         {t('cart.title', 'Shopping Cart')}
                         <span className="text-xl font-medium text-slate-500">({cart.length} {cart.length === 1 ? t('cart.item', 'item') : t('cart.items', 'items')})</span>
@@ -112,15 +112,15 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 <div className="flex-1 flex flex-col justify-between items-start w-full">
                                     <div className="w-full flex justify-between items-start gap-4 mb-4">
                                         <div>
-                                            <h3 className="text-lg sm:text-xl font-bold text-white line-clamp-2 leading-snug">
+                                            <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">
                                                 {item.title || (item as any).name}
                                             </h3>
-                                            <p className="text-slate-400 text-sm mt-1">
+                                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                                                 {(item.category as any)?.name || (typeof item.category === 'string' && item.category !== 'device' ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : 'Smartphone')}
                                             </p>
                                         </div>
                                         <div className="text-right flex-shrink-0">
-                                            <div className="text-xl font-bold text-white">€{item.price.toFixed(2)}</div>
+                                            <div className="text-xl font-bold text-slate-900 dark:text-white">€{item.price.toFixed(2)}</div>
                                         </div>
                                     </div>
 
@@ -130,16 +130,16 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                         <div className="flex items-center bg-slate-950 rounded-lg p-1 border border-slate-700">
                                             <button
                                                 onClick={() => updateQuantity(item.id, -1)}
-                                                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
+                                                className="w-8 h-8 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white hover:bg-slate-800 rounded-md transition-colors"
                                                 title="Decrease quantity"
                                             >
                                                 <Minus className="w-4 h-4" />
                                             </button>
-                                            <span className="w-10 text-center text-white font-bold">{item.quantity}</span>
+                                            <span className="w-10 text-center text-slate-900 dark:text-white font-bold">{item.quantity}</span>
                                             <button
                                                 onClick={() => updateQuantity(item.id, 1)}
                                                 disabled={(item.quantity || 1) >= (item.stock || Infinity)}
-                                                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                                                className="w-8 h-8 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white hover:bg-slate-800 rounded-md transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
                                                 title="Increase quantity"
                                             >
                                                 <Plus className="w-4 h-4" />
@@ -166,7 +166,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                             <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl -z-10 group-hover:bg-brand-primary/10 transition-colors"></div>
                             <div className="flex items-center gap-2 mb-6 text-brand-primary">
                                 <Sparkles className="w-6 h-6 animate-pulse" />
-                                <h3 className="text-xl font-bold text-white">{t('cart.frequentlyBought', 'Complete Your Setup')}</h3>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t('cart.frequentlyBought', 'Complete Your Setup')}</h3>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
                                 {upsellItems.map((item) => (
@@ -174,7 +174,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                         <div className="h-28 bg-white/5 rounded-lg p-2 mb-4 flex items-center justify-center relative">
                                             <img src={getImageUrl(item.image)} alt={item.name} className="max-h-full object-contain drop-shadow-lg group-hover/item:scale-110 transition-transform duration-500" onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }} />
                                         </div>
-                                        <h4 className="text-white font-bold text-sm mb-1 line-clamp-2 leading-tight flex-1" title={item.name}>{item.name}</h4>
+                                        <h4 className="text-slate-900 dark:text-white font-bold text-sm mb-1 line-clamp-2 leading-tight flex-1" title={item.name}>{item.name}</h4>
                                         <div className="flex justify-between items-center mt-3">
                                             <div className="text-brand-primary font-bold text-base">€{item.price.toFixed(2)}</div>
                                             <button 
@@ -188,7 +188,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                                         category: 'accessory'
                                                     });
                                                 }}
-                                                className="px-3 py-1.5 bg-slate-800 hover:bg-brand-primary hover:text-black text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1 active:scale-95"
+                                                className="px-3 py-1.5 bg-slate-800 hover:bg-brand-primary hover:text-black text-slate-900 dark:text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1 active:scale-95"
                                             >
                                                 <Plus className="w-3 h-3" /> {t('common.add', 'Add')}
                                             </button>
@@ -203,27 +203,27 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                     {/* Order Summary */}
                     <div className="lg:col-span-4 lg:sticky lg:top-28 self-start mt-8 lg:mt-0">
                         <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/60 shadow-2xl rounded-2xl p-6 sm:p-8">
-                            <h2 className="text-2xl font-bold text-white mb-6 border-b border-slate-800 pb-4">
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-800 pb-4">
                                 {t('cart.summary', 'Order Summary')}
                             </h2>
 
-                            <div className="space-y-4 mb-6 text-slate-300">
+                            <div className="space-y-4 mb-6 text-slate-700 dark:text-slate-300">
                                 <div className="flex justify-between items-center">
                                     <span>{t('cart.subtotal', 'Subtotal')}</span>
-                                    <span className="text-white font-medium">€{cartTotal.toFixed(2)}</span>
+                                    <span className="text-slate-900 dark:text-white font-medium">€{cartTotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span>{t('cart.shipping', 'Shipping')}</span>
                                     {isFreeShipping ? (
                                         <span className="text-emerald-400 font-medium tracking-wide text-sm bg-emerald-400/10 px-2 py-0.5 rounded-md border border-emerald-400/20">{t('cart.free', 'FREE')}</span>
                                     ) : (
-                                        <span className="text-slate-400">{t('cart.calculatedAtCheckout', 'Calculated at checkout')}</span>
+                                        <span className="text-slate-500 dark:text-slate-400">{t('cart.calculatedAtCheckout', 'Calculated at checkout')}</span>
                                     )}
                                 </div>
                                 {/* Free Shipping Progress */}
                                 {freeShippingThreshold > 0 && (
                                     <div className="mt-4 pt-4 border-t border-slate-800">
-                                        <div className="flex justify-between text-xs text-slate-400 mb-2">
+                                        <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
                                             {Math.max(0, threshold - cartTotal) > 0 ? (
                                                 <span>{t('cart.addForFreeShipping', 'Add €{{amount}} for Free Shipping', { amount: Math.max(0, threshold - cartTotal).toFixed(2) })}</span>
                                             ) : (
@@ -243,7 +243,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
 
                             <div className="border-t border-slate-700 pt-6 mb-8">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-lg font-bold text-white">{t('cart.total', 'Total')}</span>
+                                    <span className="text-lg font-bold text-slate-900 dark:text-white">{t('cart.total', 'Total')}</span>
                                     <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
                                         €{finalTotal.toFixed(2)}
                                     </span>

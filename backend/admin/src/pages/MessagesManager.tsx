@@ -310,14 +310,14 @@ export default function MessagesManager() {
                                 </button>
                             )}
                         </div>
-                        <div className="flex gap-1.5 p-1 bg-slate-900/50 rounded-xl border border-slate-700/30">
+                        <div className="flex gap-2 p-1.5 bg-[#0B1120]/60 rounded-xl border border-slate-700/50 shadow-inner">
                             {[{ id: 'all', label: 'All' }, { id: 'unread', label: 'Unread' }, { id: 'closed', label: 'Closed' }].map(f => (
                                 <button key={f.id} onClick={() => setFilter(f.id)}
-                                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 ${filter === f.id
-                                        ? f.id === 'all' ? 'bg-blue-600/30 text-blue-300 shadow-sm'
-                                            : f.id === 'unread' ? 'bg-rose-500/30 text-rose-300 shadow-sm'
-                                                : 'bg-slate-700/60 text-slate-200 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'}`}>
+                                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-95 ${filter === f.id
+                                        ? f.id === 'all' ? 'bg-gradient-to-r from-blue-600/40 to-indigo-600/40 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.2)] border border-blue-500/30'
+                                            : f.id === 'unread' ? 'bg-gradient-to-r from-rose-500/40 to-pink-500/40 text-rose-300 shadow-[0_0_10px_rgba(244,63,94,0.2)] border border-rose-500/30'
+                                                : 'bg-gradient-to-r from-slate-600/40 to-slate-700/40 text-slate-200 shadow-sm border border-slate-500/30'
+                                        : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/60 border border-transparent'}`}>
                                     {f.label}
                                 </button>
                             ))}
@@ -347,9 +347,9 @@ export default function MessagesManager() {
                                             {group.hasUnread && <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-rose-500 border-2 border-[#0B1120] shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse" />}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-center mb-0.5">
-                                                <div className="font-bold text-slate-200 text-sm truncate pr-2">{group.name}</div>
-                                                <div className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <div className="font-bold text-slate-200 text-sm truncate pr-2 group-hover:text-blue-400 transition-colors">{group.name}</div>
+                                                <div className="text-[10px] text-slate-500 font-medium whitespace-nowrap bg-slate-900/50 px-1.5 py-0.5 rounded border border-slate-800">
                                                     {new Date(group.lastActivity).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                 </div>
                                             </div>

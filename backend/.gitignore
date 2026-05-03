@@ -2,7 +2,13 @@ node_modules/
 .env
 .env.*
 *.log
-*.txt
+lint-output.txt
+test-output.txt
+seed_bulk.log
+seed_output.log
+audit_backend.json
+healthStatus.json
+MAINTENANCE_MODE
 cookies.txt
 uploads/*
 !uploads/.gitkeep

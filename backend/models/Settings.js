@@ -33,6 +33,19 @@ const settingsSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Mixed,
         default: {}
     },
+    smtp: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            host: '',
+            port: 587,
+            secure: false,
+            user: '',
+            pass: '',        // AES-256 encrypted
+            fromEmail: '',
+            fromName: 'HandyLand',
+            isConfigured: false
+        }
+    },
     payment: {
         type: mongoose.Schema.Types.Mixed,
         default: {
@@ -109,8 +122,8 @@ const settingsSchema = new mongoose.Schema({
     socialAuth: {
         type: mongoose.Schema.Types.Mixed,
         default: {
-            google: false,
-            facebook: false
+            google: { enabled: false, clientId: '', clientSecret: '', isConfigured: false },
+            facebook: { enabled: false, appId: '', appSecret: '', isConfigured: false }
         }
     },
     quickReplies: {
@@ -226,6 +239,52 @@ const settingsSchema = new mongoose.Schema({
                 answer: 'Ja, Sie haben ein 14-tägiges Rückgaberecht ohne Angabe von Gründen, sofern sich das Gerät im gleichen Zustand wie bei der Lieferung befindet.'
             }
         ]
+    },
+    accessoryFaqs: {
+        type: mongoose.Schema.Types.Mixed,
+        default: [
+            {
+                question: 'Sind Ladekabel im Lieferumfang enthalten?',
+                answer: 'Ja, unsere Ladegeräte und Kabel werden in der Originalverpackung oder als hochwertiges Zubehör geliefert.'
+            },
+            {
+                question: 'Passen die Hüllen für alle Modelle?',
+                answer: 'Bitte überprüfen Sie die Kompatibilitätsliste auf der Produktseite. Jede Hülle ist passgenau für spezifische Modelle gefertigt.'
+            },
+            {
+                question: 'Wie lange ist die Garantie auf Zubehör?',
+                answer: 'Wir bieten standardmäßig 6 Monate Garantie auf unser gesamtes Zubehör. Dies deckt Herstellungsfehler ab.'
+            }
+        ]
+    },
+    accessoryCategories: {
+        type: mongoose.Schema.Types.Mixed,
+        default: [
+            { id: 'audio', label: 'Audio', icon: 'Headphones' },
+            { id: 'power', label: 'Energie', icon: 'Zap' },
+            { id: 'protection', label: 'Schutz', icon: 'Shield' },
+            { id: 'wearables', label: 'Wearables', icon: 'Watch' }
+        ]
+    },
+    cookieConsent: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            enabled: true,
+            title: 'Ihre Privatsphäre ist uns wichtig',
+            message: 'Wir verwenden Cookies für eine Reihe von Auswertungen, um damit Ihren Besuch auf unserer Website kontinuierlich verbessern zu können (z. B. damit Ihnen Ihre Login-Daten erhalten bleiben).\n\nSie können Ihre Einstellungen ändern und verschiedenen Arten von Cookies erlauben, auf Ihrem Rechner gespeichert zu werden, während Sie unsere Webseite besuchen. Sie können auf Ihrem Rechner gespeicherte Cookies ebenso weitgehend wieder entfernen. Bitte bedenken Sie aber, dass dadurch Teile unserer Website möglicherweise nicht mehr in der gedachten Art und Weise nutzbar sind.',
+            acceptAllBtn: 'Alle akzeptieren',
+            rejectAllBtn: 'Ich lehne ab',
+            manageBtn: 'Einstellungen ändern',
+            saveBtn: 'Einstellungen speichern',
+            strictlyNecessaryTitle: 'Technisch notwendige Cookies',
+            strictlyNecessaryDesc: 'Erforderlich für die sichere Funktion der Website. Kann nicht deaktiviert werden.',
+            functionalTitle: 'Funktions Cookies',
+            functionalDesc: 'Ermöglicht der Website, erweiterte Funktionalität und Personalisierung bereitzustellen.',
+            analyticsTitle: 'Tracking und Performance Cookies',
+            analyticsDesc: 'Helfen uns zu verstehen, wie Besucher mit unserer Website interagieren, um die Benutzererfahrung zu verbessern.',
+            marketingTitle: 'Targeting und Werbung Cookies',
+            marketingDesc: 'Wird verwendet, um Werbung zu liefern, die relevanter für Sie und Ihre Interessen ist.'
+        }
     }
 }, { timestamps: true });
 

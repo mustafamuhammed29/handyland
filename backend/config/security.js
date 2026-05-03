@@ -43,10 +43,12 @@ const helmetMiddleware = helmet({
 const defaultOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
+    'http://localhost:3002',
     'http://localhost:5173',
     'http://localhost:5174',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
+    'http://127.0.0.1:3002',
     'http://127.0.0.1:5173',
     'http://127.0.0.1:5174',
 ];
@@ -84,7 +86,7 @@ const generalLimiter = rateLimit({
     legacyHeaders: false,
     // BUG-NEW-02 fix: never skip rate limiting based on NODE_ENV.
     // High dev limit (3000) makes it non-intrusive while still active.
-    skip: (req) => req.method === 'OPTIONS',
+    skip: (req) => req.method === 'OPTIONS' || (isDevelopment && (req.ip.includes('127.0.0.1') || req.ip.includes('::1') || req.ip === '::ffff:127.0.0.1')),
 });
 
 // ── XSS sanitization ────────────────────────────────────────────────────────

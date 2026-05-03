@@ -144,7 +144,6 @@ body {
 
 /* Spotlight Effect */
 .spotlight-card {
-  background-color: rgba(20, 20, 25, 0.8);
   position: relative;
   overflow: hidden;
 }

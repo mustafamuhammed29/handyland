@@ -1,65 +1,78 @@
 const cron = require('node-cron');
 const Cart = require('../models/Cart');
-const User = require('../models/User');
 const { sendEmail } = require('./emailService');
+const logger = require('./logger');
 
 const startCartRecoveryJob = () => {
     // Run daily at 10:00 AM
     cron.schedule('0 10 * * *', async () => {
-        console.log('[CRON] Starting Abandoned Cart Recovery Job...');
+        logger.info('[CRON] Starting Abandoned Cart Recovery Job...');
         try {
-            // Find carts updated between 24 and 48 hours ago that are not empty
-            const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            const oneDayAgo  = new Date(Date.now() - 24 * 60 * 60 * 1000);
             const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
 
+            // Find carts:
+            // 1. Updated between 24–48 hours ago (truly abandoned window)
+            // 2. Not empty
+            // 3. Haven't already received a recovery email (lastReminderSentAt is null)
+            //    OR the last reminder was sent > 7 days ago (avoid spam)
+            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
             const abandonedCarts = await Cart.find({
-                'items.0': { $exists: true }, // Has at least one item
-                updatedAt: { $lt: oneDayAgo, $gte: twoDaysAgo }
-            }).populate('user', 'name email');
+                'items.0': { $exists: true },
+                updatedAt: { $lt: oneDayAgo, $gte: twoDaysAgo },
+                $or: [
+                    { lastReminderSentAt: null },
+                    { lastReminderSentAt: { $lt: sevenDaysAgo } }
+                ]
+            }).populate('user', 'name email notificationPrefs');
 
             let emailsSent = 0;
 
-            for (const cart of abandonedCarts) {
-                if (cart.user && cart.user.email) {
-                    try {
-                        // Check if sendEmail exists, handling missing params
-                        if (typeof sendEmail === 'function') {
-                            const EmailTemplate = require('../models/EmailTemplate');
-                            const template = await EmailTemplate.findOne({ name: 'abandoned_cart', isActive: true });
-                            
-                            if (template) {
-                                const cartUrl = `${process.env.FRONTEND_URL}/cart`;
-                                const userName = cart.user.name.split(' ')[0];
-                                
-                                let html = template.html
-                                    .replace(/{{userName}}/g, userName)
-                                    .replace(/{{cartUrl}}/g, cartUrl);
-                                
-                                let subject = template.subject
-                                    .replace(/{{userName}}/g, userName);
+            const EmailTemplate = require('../models/EmailTemplate');
+            const template = await EmailTemplate.findOne({ name: 'abandoned_cart', isActive: true });
 
-                                await sendEmail({
-                                    email: cart.user.email,
-                                    subject: subject,
-                                    html: html
-                                });
-                                emailsSent++;
-                            } else {
-                                console.log('[CRON] Abandoned cart template is disabled or not found.');
-                            }
-                        }
-                    } catch (err) {
-                        console.error(`Failed to send email to ${cart.user.email}:`, err);
-                    }
+            if (!template) {
+                logger.info('[CRON] Abandoned cart template is disabled or not found — skipping.');
+                return;
+            }
+
+            for (const cart of abandonedCarts) {
+                if (!cart.user?.email) {continue;}
+
+                // Respect user email preferences
+                const prefs = cart.user.notificationPrefs;
+                if (prefs && prefs.promotions === false) {continue;}
+
+                try {
+                    const cartUrl  = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/cart`;
+                    const userName = cart.user.name?.split(' ')[0] || 'there';
+
+                    const html = template.html
+                        .replace(/{{userName}}/g, userName)
+                        .replace(/{{cartUrl}}/g, cartUrl);
+
+                    const subject = template.subject
+                        .replace(/{{userName}}/g, userName);
+
+                    await sendEmail({ email: cart.user.email, subject, html });
+
+                    // Mark that we sent a reminder — prevents duplicate emails
+                    await Cart.findByIdAndUpdate(cart._id, { lastReminderSentAt: new Date() });
+
+                    emailsSent++;
+                } catch (err) {
+                    logger.error(`[CRON] Failed to send cart recovery email to ${cart.user.email}: ${err.message}`);
                 }
             }
 
-            console.log(`[CRON] Abandoned Cart Job finished. Sent ${emailsSent} emails.`);
+            logger.info(`[CRON] Abandoned Cart Job done. Sent ${emailsSent} recovery emails.`);
         } catch (error) {
-            console.error('[CRON] Abandoned Cart Job failed:', error);
+            logger.error(`[CRON] Abandoned Cart Job failed: ${error.message}`);
         }
     });
-    console.log('CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)');
+
+    logger.info('CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)');
 };
 
 module.exports = startCartRecoveryJob;

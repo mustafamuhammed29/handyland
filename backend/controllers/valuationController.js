@@ -1,7 +1,7 @@
 const SavedValuation = require('../models/SavedValuation');
 const DeviceBlueprint = require('../models/DeviceBlueprint');
 const crypto = require('crypto');
-const { sendEmail, emailTemplates } = require('../utils/emailService');
+const { sendEmail, sendTemplateEmail, emailTemplates } = require('../utils/emailService');
 const User = require('../models/User');
 
 // Helper: Calculate Price (BackMarket Style)
@@ -265,19 +265,29 @@ exports.createQuote = async (req, res) => {
 
         if (emailTo) {
             try {
-                const emailHtml = emailTemplates.quote(
-                    name,
-                    quote.quoteReference,
-                    model,
-                    price,
-                    `${process.env.FRONTEND_URL || 'http://localhost:3000'}/sell/${quote.quoteReference}`
-                );
+                const quoteUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/sell/${quote.quoteReference}`;
+                const quoteVars = {
+                    customerName: name,
+                    quoteRef: quote.quoteReference,
+                    device: model,
+                    price: String(price),
+                    quoteUrl: quoteUrl
+                };
 
-                await sendEmail({
-                    email: emailTo,
-                    subject: `Your HandyLand Quote: ${quote.quoteReference} - €${price}`,
-                    html: emailHtml
-                });
+                const sent = await sendTemplateEmail(emailTo, 'valuation_quote', quoteVars);
+
+                if (!sent) {
+                    // Fallback: use hardcoded template
+                    const emailHtml = emailTemplates.quote
+                        ? emailTemplates.quote(name, quote.quoteReference, model, price, quoteUrl)
+                        : `<h1>Your Quote</h1><p>Device: ${model} — Price: €${price}</p><p>Ref: ${quote.quoteReference}</p><p><a href="${quoteUrl}">View Quote</a></p>`;
+
+                    await sendEmail({
+                        email: emailTo,
+                        subject: `Your HandyLand Quote: ${quote.quoteReference} - €${price}`,
+                        html: emailHtml
+                    });
+                }
 
                 await sendEmail({
                     email: process.env.SMTP_EMAIL,
@@ -442,7 +452,7 @@ exports.confirmQuote = async (req, res) => {
         try {
             const EmailTemplate = require('../models/EmailTemplate');
             const template = await EmailTemplate.findOne({ name: 'sell_device_confirmation', isActive: true });
-            
+
             let emailHtml = '';
             let emailSubject = `Shipping Label for Sell Order ${quote.quoteReference}`;
 
@@ -517,7 +527,7 @@ exports.getAdminQuotes = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const search = req.query.search || '';
         const skip = (page - 1) * limit;
-        
+
         const query = { isQuote: true };
         if (req.query.status && req.query.status !== 'All') {
             query.status = req.query.status;
@@ -677,12 +687,25 @@ exports.updateQuoteStatus = async (req, res) => {
                 console.error('Failed to send admin message email:', emailErr);
             }
         } else if (emailTo && statusMessages[status]) {
-            // No custom message – use default template
+            // No custom message – try DB template first, then fall back to hardcoded
             try {
-                await sendEmail({
-                    email: emailTo,
-                    ...statusMessages[status]
-                });
+                const templateName = status === 'received' ? 'valuation_device_received' : 'valuation_payment_sent';
+                const templateVars = {
+                    customerName: customerName,
+                    device: quote.device,
+                    quoteRef: quote.quoteReference,
+                    price: String(quote.estimatedValue)
+                };
+
+                const sent = await sendTemplateEmail(emailTo, templateName, templateVars);
+
+                if (!sent) {
+                    // Fallback: use hardcoded template
+                    await sendEmail({
+                        email: emailTo,
+                        ...statusMessages[status]
+                    });
+                }
             } catch (emailErr) {
                 console.error('Failed to send status email:', emailErr);
             }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square, Search, Filter, FileSpreadsheet, Box, AlertTriangle, CheckCircle, Package, Headphones, Zap, Shield, Watch, ChevronLeft, ChevronRight, Tags, Briefcase } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square, Search, Filter, FileSpreadsheet, Box, AlertTriangle, CheckCircle, Package, Headphones, Zap, Shield, Watch, ChevronLeft, ChevronRight, Tags, Briefcase, Battery, Cable, Smartphone, Monitor, Bluetooth, Speaker, Layers, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
 import { api } from '../utils/api';
@@ -15,6 +15,7 @@ interface AccessoryStats {
 export default function AccessoriesManager() {
     const [accessories, setAccessories] = useState<any[]>([]);
     const [stats, setStats] = useState<AccessoryStats | null>(null);
+    const [settings, setSettings] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
@@ -45,7 +46,8 @@ export default function AccessoriesManager() {
         costPrice: 0,
         image: '',
         description: '',
-        tag: ''
+        tag: '',
+        specsList: [] as {key: string, value: string}[]
     });
 
     const fetchAccessories = useCallback(async () => {
@@ -93,9 +95,20 @@ export default function AccessoriesManager() {
         }
     };
 
+    const fetchSettings = async () => {
+        try {
+            const res = await api.get('/api/settings');
+            const data = (res as any)?.data || res;
+            setSettings(data);
+        } catch (error) {
+            console.error('Error fetching settings', error);
+        }
+    };
+
     useEffect(() => {
         fetchAccessories();
         fetchStats();
+        fetchSettings();
     }, [fetchAccessories]);
 
     const handleDelete = async (id: string) => {
@@ -160,7 +173,8 @@ export default function AccessoriesManager() {
             costPrice: item.costPrice || 0,
             image: item.image || '',
             description: item.description || '',
-            tag: item.tag || ''
+            tag: item.tag || '',
+            specsList: item.specs ? Object.entries(item.specs).map(([k, v]) => ({ key: k, value: String(v) })) : []
         });
         setIsModalOpen(true);
     };
@@ -169,7 +183,15 @@ export default function AccessoriesManager() {
         e.preventDefault();
         try {
             const url = formData.id ? `/api/accessories/${formData.id}` : '/api/accessories';
-            const payload = { ...formData };
+            
+            const specsObj: Record<string, string> = {};
+            formData.specsList.forEach(spec => {
+                if (spec.key.trim()) specsObj[spec.key.trim()] = spec.value;
+            });
+
+            const payload = { ...formData, specs: specsObj };
+            // Remove specsList from payload to avoid saving it in DB
+            delete (payload as any).specsList;
 
             if (formData.id) {
                 await api.put(url, payload);
@@ -215,18 +237,43 @@ export default function AccessoriesManager() {
         setFormData({
             id: '', name: '', category: 'audio', subCategory: '', price: '', stock: 0, minStock: 5,
             isActive: true, barcode: '', brand: '', model: '', supplierName: '', supplierContact: '',
-            costPrice: 0, image: '', description: '', tag: ''
+            costPrice: 0, image: '', description: '', tag: '', specsList: []
         });
     };
 
-    const getCategoryIcon = (cat: string) => {
-        switch (cat) {
+    const getCategoryIcon = (catId: string) => {
+        const cat = settings?.accessoryCategories?.find((c: any) => c.id === catId);
+        if (cat) {
+            switch (cat.icon) {
+                case 'Headphones': return <Headphones className="w-4 h-4" />;
+                case 'Zap': return <Zap className="w-4 h-4" />;
+                case 'Shield': return <Shield className="w-4 h-4" />;
+                case 'Watch': return <Watch className="w-4 h-4" />;
+                case 'Battery': return <Battery className="w-4 h-4" />;
+                case 'Cable': return <Cable className="w-4 h-4" />;
+                case 'Smartphone': return <Smartphone className="w-4 h-4" />;
+                case 'Monitor': return <Monitor className="w-4 h-4" />;
+                case 'Bluetooth': return <Bluetooth className="w-4 h-4" />;
+                case 'Speaker': return <Speaker className="w-4 h-4" />;
+                case 'Layers': return <Layers className="w-4 h-4" />;
+                case 'Sparkles': return <Sparkles className="w-4 h-4" />;
+                default: return <Package className="w-4 h-4" />;
+            }
+        }
+
+        // Fallback for hardcoded categories if settings are not loaded or category is old
+        switch (catId) {
             case 'audio': return <Headphones className="w-4 h-4" />;
             case 'power': return <Zap className="w-4 h-4" />;
             case 'protection': return <Shield className="w-4 h-4" />;
             case 'wearables': return <Watch className="w-4 h-4" />;
             default: return <Package className="w-4 h-4" />;
         }
+    };
+
+    const getCategoryLabel = (catId: string) => {
+        const cat = settings?.accessoryCategories?.find((c: any) => c.id === catId);
+        return cat ? cat.label : catId;
     };
 
     return (
@@ -337,13 +384,17 @@ export default function AccessoriesManager() {
                                 aria-label="Filter by Category"
                             />
                             <datalist id="filter-category-options">
-                                <option value="audio" />
-                                <option value="power" />
-                                <option value="protection" />
-                                <option value="wearables" />
-                                <option value="chargers" />
-                                <option value="cables" />
-                                <option value="cases" />
+                                {settings?.accessoryCategories?.map((cat: any) => (
+                                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                                ))}
+                                {!settings?.accessoryCategories && (
+                                    <>
+                                        <option value="audio" />
+                                        <option value="power" />
+                                        <option value="protection" />
+                                        <option value="wearables" />
+                                    </>
+                                )}
                             </datalist>
                         </div>
                         <div className="flex items-center gap-2 relative">
@@ -454,7 +505,7 @@ export default function AccessoriesManager() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/50 text-slate-300 text-xs font-medium border border-slate-700/50 capitalize">
-                                                    {getCategoryIcon(p.category)} {p.category}
+                                                    {getCategoryIcon(p.category)} {getCategoryLabel(p.category)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-purple-400 font-bold text-lg">€{p.price}</td>
@@ -586,13 +637,17 @@ export default function AccessoriesManager() {
                                                 required
                                             />
                                             <datalist id="category-options">
-                                                <option value="audio" />
-                                                <option value="power" />
-                                                <option value="protection" />
-                                                <option value="wearables" />
-                                                <option value="chargers" />
-                                                <option value="cables" />
-                                                <option value="cases" />
+                                                {settings?.accessoryCategories?.map((cat: any) => (
+                                                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                                                ))}
+                                                {!settings?.accessoryCategories && (
+                                                    <>
+                                                        <option value="audio" />
+                                                        <option value="power" />
+                                                        <option value="protection" />
+                                                        <option value="wearables" />
+                                                    </>
+                                                )}
                                             </datalist>
                                         </div>
                                         <div>
@@ -723,6 +778,63 @@ export default function AccessoriesManager() {
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 />
+                            </div>
+
+                            {/* Technical Specifications */}
+                            <div className="space-y-4 border-t border-slate-800 pt-6">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h4 className="text-cyan-400 font-bold uppercase text-xs tracking-wider">Technical Specifications</h4>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, specsList: [...prev.specsList, { key: '', value: '' }] }))}
+                                        className="text-cyan-400 hover:text-cyan-300 text-xs font-bold flex items-center gap-1 bg-cyan-500/10 hover:bg-cyan-500/20 px-2 py-1 rounded-lg transition-colors"
+                                    >
+                                        <Plus size={14} /> Add Spec
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {formData.specsList.map((spec, index) => (
+                                        <div key={index} className="flex items-center gap-3">
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. Material"
+                                                className="w-1/3 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 outline-none"
+                                                value={spec.key}
+                                                onChange={(e) => {
+                                                    const newList = [...formData.specsList];
+                                                    newList[index].key = e.target.value;
+                                                    setFormData({ ...formData, specsList: newList });
+                                                }}
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. Silicone"
+                                                className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 outline-none"
+                                                value={spec.value}
+                                                onChange={(e) => {
+                                                    const newList = [...formData.specsList];
+                                                    newList[index].value = e.target.value;
+                                                    setFormData({ ...formData, specsList: newList });
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newList = formData.specsList.filter((_, i) => i !== index);
+                                                    setFormData({ ...formData, specsList: newList });
+                                                }}
+                                                className="p-2 text-slate-500 hover:text-red-400 bg-slate-900 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {formData.specsList.length === 0 && (
+                                        <div className="text-sm text-slate-500 text-center py-4 bg-slate-900/50 rounded-xl border border-dashed border-slate-800">
+                                            No specifications added. Click "Add Spec" to define custom specifications.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="border-t border-slate-800 pt-6">

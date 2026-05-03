@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Save, CreditCard, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { api } from '../utils/api';
+import toast from 'react-hot-toast';
 
 export default function PaymentManager() {
     const [loading, setLoading] = useState(true);
@@ -53,10 +54,10 @@ export default function PaymentManager() {
         setSaving(true);
         try {
             await api.put('/api/settings', { payment: config });
-            alert('Payment settings updated successfully!');
+            toast.success('Payment settings saved successfully!');
         } catch (err) {
             console.error("Failed to save settings:", err);
-            alert('Failed to save settings.');
+            toast.error('Failed to save payment settings. Please try again.');
         } finally {
             setSaving(false);
         }

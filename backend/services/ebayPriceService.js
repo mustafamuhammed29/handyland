@@ -77,17 +77,17 @@ function getOAuthToken(appId, clientSecret) {
  */
 async function fetchEbayPrices(modelName, storage = '', appId) {
     const clientSecret = process.env.EBAY_CLIENT_SECRET;
-    
+
     // 1. Authenticate
     const token = await getOAuthToken(appId, clientSecret);
 
     // 2. Build Query
     const keyword = storage ? `${modelName} ${storage}` : `${modelName}`;
     const encodedKeyword = encodeURIComponent(keyword);
-    
+
     // filter=buyingOptions:{FIXED_PRICE},conditionIds:{3000|2000|2500}
     const filter = encodeURIComponent('buyingOptions:{FIXED_PRICE},conditionIds:{3000|2000|2500}');
-    
+
     const searchPath = `/buy/browse/v1/item_summary/search?q=${encodedKeyword}&category_ids=${EBAY_CATEGORY_ID}&filter=${filter}&limit=50&sort=newlyListed`;
 
     return new Promise((resolve, reject) => {
@@ -108,7 +108,7 @@ async function fetchEbayPrices(modelName, storage = '', appId) {
             res.on('end', () => {
                 try {
                     const json = JSON.parse(body);
-                    
+
                     if (res.statusCode !== 200) {
                         const errMsg = json.errors?.[0]?.message || `HTTP ${res.statusCode}`;
                         return reject(new Error(`eBay Browse API Error: ${errMsg}`));
@@ -151,7 +151,7 @@ async function fetchEbayPrices(modelName, storage = '', appId) {
                     const filtered = prices.filter(p => Math.abs(p.price - mean) <= 1.5 * stdDev);
 
                     const filteredValues = filtered.map(p => p.price);
-                    const filteredAvg = filteredValues.length > 0 
+                    const filteredAvg = filteredValues.length > 0
                         ? Math.round(filteredValues.reduce((a, b) => a + b, 0) / filteredValues.length)
                         : rawAvg;
 
@@ -166,9 +166,9 @@ async function fetchEbayPrices(modelName, storage = '', appId) {
                         keyword,
                         // Suggested buyback price calculation logic based on current market value
                         suggestedBuyback: {
-                            conservative: Math.round((filteredAvg * 0.52) / 5) * 5, 
-                            balanced:     Math.round((filteredAvg * 0.58) / 5) * 5, 
-                            aggressive:   Math.round((filteredAvg * 0.65) / 5) * 5, 
+                            conservative: Math.round((filteredAvg * 0.52) / 5) * 5,
+                            balanced:     Math.round((filteredAvg * 0.58) / 5) * 5,
+                            aggressive:   Math.round((filteredAvg * 0.65) / 5) * 5,
                         }
                     });
 
@@ -213,7 +213,7 @@ async function researchDevicePrices(modelName, storages, appId) {
  */
 async function fetchEbayDeepSpecs(modelName, appId) {
     const clientSecret = process.env.EBAY_CLIENT_SECRET;
-    
+
     // 1. Authenticate
     const token = await getOAuthToken(appId, clientSecret);
 
@@ -267,20 +267,20 @@ async function fetchEbayDeepSpecs(modelName, appId) {
     }
 
     const aspects = detailRes.json.localizedAspects || [];
-    
+
     // 4. Format into a raw JSON group (Technische Details)
     const techDetails = {};
     const rootSpecs = {};
 
     aspects.forEach(aspect => {
-        if (!aspect.name || !aspect.value) return;
+        if (!aspect.name || !aspect.value) {return;}
 
-        let name = aspect.name;
-        let val = aspect.value;
+        const name = aspect.name;
+        const val = aspect.value;
 
         // Skip basic info that causes duplication with Stammdaten
         const skipKeys = ['Marke', 'Modell', 'Farbe', 'Speicherkapazität', 'Zustand', 'Modellnummer', 'Herstellernummer', 'Herstellungsland und -region', 'EAN', 'Ohne Simlock', 'Vertrag'];
-        if (skipKeys.includes(name) || name.toLowerCase().includes('vertrag')) return;
+        if (skipKeys.includes(name) || name.toLowerCase().includes('vertrag')) {return;}
 
         // Map primary components to standard English keys so they populate the HAUPTMERKMALE in frontend
         if (name === 'Prozessor') {

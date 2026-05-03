@@ -19,7 +19,13 @@ const TEMPLATE_LABELS: Record<string, string> = {
     reset_password: 'Password Reset',
     order_confirmation: 'Order Confirmation',
     sell_device_confirmation: 'Device Sale Confirmation',
-    abandoned_cart: 'Abandoned Cart Recovery'
+    abandoned_cart: 'Abandoned Cart Recovery',
+    order_status_update: 'Order Status Update',
+    repair_status_update: 'Repair Status Update',
+    valuation_quote: 'Valuation Quote',
+    valuation_device_received: 'Device Received',
+    valuation_payment_sent: 'Payment Sent',
+    refund_status_update: 'Refund Status Update'
 };
 
 // Smart Variable Mock Data
@@ -43,6 +49,12 @@ const MOCK_DATA: Record<string, string> = {
     '{{orderNumber}}': '#HL-849201',
     '{{date}}': new Date().toLocaleDateString('ar-EG'),
     '{{cartUrl}}': 'https://handyland.com/cart',
+    '{{status}}': 'Shipped 🚚',
+    '{{trackingNumber}}': 'DHL-123456789',
+    '{{adminNote}}': 'Ihre Bestellung wurde versandt und sollte in 2-3 Werktagen ankommen.',
+    '{{frontendUrl}}': 'https://handyland.com',
+    '{{quoteUrl}}': 'https://handyland.com/sell/HV-170123-ABCD',
+    '{{adminComments}}': 'Ihre Rückerstattung wurde auf Ihr Bankkonto überwiesen.',
 };
 
 const renderWithMockData = (html: string) => {
@@ -328,7 +340,7 @@ const EmailManager: React.FC = () => {
                             
                             <div className="flex items-start justify-between mb-8 relative z-10">
                                 <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-slate-700/80 flex items-center justify-center text-3xl shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] group-hover:bg-gradient-to-br group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:border-transparent transition-all duration-500 group-hover:shadow-[0_10px_30px_rgba(59,130,246,0.4)] group-hover:text-white">
-                                    {template.name === 'verify_email' ? <Mail size={30} /> : template.name === 'reset_password' ? '🔐' : template.name === 'sell_device_confirmation' ? '📦' : template.name === 'abandoned_cart' ? '🛒' : '🛍️'}
+                                    {template.name === 'verify_email' ? <Mail size={30} /> : template.name === 'reset_password' ? '🔐' : template.name === 'sell_device_confirmation' ? '📦' : template.name === 'abandoned_cart' ? '🛒' : template.name === 'order_status_update' ? '📋' : template.name === 'repair_status_update' ? '🔧' : template.name === 'valuation_quote' ? '💰' : template.name === 'valuation_device_received' ? '📥' : template.name === 'valuation_payment_sent' ? '💸' : template.name === 'refund_status_update' ? '↩️' : '🛍️'}
                                 </div>
                                 <span className={`text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-inner ${template.isActive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}>
                                     {template.isActive ? 'Active Mode' : 'Disabled'}

@@ -270,10 +270,10 @@ export const SellDevice = () => {
 
     if (loading) {
         return (
-            <div className="min-h-[100dvh] pt-32 flex items-center justify-center text-white">
+            <div className="min-h-[100dvh] pt-32 flex items-center justify-center text-slate-900 dark:text-white">
                 <div className="text-center">
                     <Loader2 className="w-10 h-10 animate-spin text-brand-primary mx-auto mb-3" />
-                    <p className="text-slate-400">Angebot wird geladen...</p>
+                    <p className="text-slate-500 dark:text-slate-400">Angebot wird geladen...</p>
                 </div>
             </div>
         );
@@ -289,30 +289,30 @@ export const SellDevice = () => {
                                 <AlertTriangle className="w-5 h-5" />
                                 <h3 className="text-lg font-bold">{t('sellDevice.checkBankDetails')}</h3>
                             </div>
-                            <button onClick={() => setShowConfirm(false)} title={t('common.close')} className="text-slate-500 hover:text-white">
+                            <button onClick={() => setShowConfirm(false)} title={t('common.close')} className="text-slate-500 hover:text-slate-900 dark:text-white">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <p className="text-slate-400 text-sm mb-4">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
                             {t('sellDevice.verifyBankWarning')}
                         </p>
                         <div className="bg-slate-950 rounded-xl p-4 mb-4 space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-slate-500">{t('sellDevice.fullName')}:</span>
-                                <span className="text-white font-medium">{formData.fullName}</span>
+                                <span className="text-slate-900 dark:text-white font-medium">{formData.fullName}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Shop Adresse:</span>
-                                <span className="text-white text-right">Walldorfer Str. 13, 69168 Wiesloch</span>
+                                <span className="text-slate-900 dark:text-white text-right">Walldorfer Str. 13, 69168 Wiesloch</span>
                             </div>
                             <div className="h-px bg-slate-800 my-1"></div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">{t('sellDevice.bankName')}:</span>
-                                <span className="text-white font-medium">{formData.bankName}</span>
+                                <span className="text-slate-900 dark:text-white font-medium">{formData.bankName}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">{t('sellDevice.ibanLabel')}:</span>
-                                <span className="text-white font-mono text-xs">{maskIban(formData.iban)}</span>
+                                <span className="text-slate-900 dark:text-white font-mono text-xs">{maskIban(formData.iban)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Auszahlung:</span>
@@ -322,7 +322,7 @@ export const SellDevice = () => {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowConfirm(false)}
-                                className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors font-medium"
+                                className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-700 transition-colors font-medium"
                             >
                                 {t('sellDevice.backBtn')}
                             </button>
@@ -341,8 +341,8 @@ export const SellDevice = () => {
 
             <div className="max-w-3xl mx-auto">
                 <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-bold text-white mb-2">{t('sellDevice.completeOrder')}</h1>
-                    <p className="text-slate-400 mb-6">
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('sellDevice.completeOrder')}</h1>
+                    <p className="text-slate-500 dark:text-slate-400 mb-6">
                         Reference: <span className="text-brand-primary font-mono mr-4">{quoteRef}</span>
                         {quote && <span className="text-emerald-400 font-bold">Angebot: €{quote.price}</span>}
                     </p>
@@ -371,30 +371,30 @@ export const SellDevice = () => {
                                     <div className="w-14 h-14 bg-brand-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-brand-primary/30">
                                         <User className="w-7 h-7 text-brand-primary" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white">{t('sellDevice.contactInfo')}</h3>
+                                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{t('sellDevice.contactInfo')}</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-300">Vollständiger Name</label>
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Vollständiger Name</label>
                                         <input
                                             name="fullName"
                                             required
                                             placeholder="Vor- und Nachname"
                                             value={formData.fullName}
-                                            className={`w-full bg-slate-950/50 border ${errors.fullName ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
+                                            className={`w-full bg-slate-950/50 border ${errors.fullName ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
                                             onChange={handleChange}
                                         />
                                         {errors.fullName && <p className="text-red-400 text-xs">{errors.fullName}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-300">E-Mail</label>
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">E-Mail</label>
                                         <input
                                             name="email"
                                             required
                                             type="email"
                                             placeholder="ihre@email.de"
                                             value={formData.email}
-                                            className={`w-full bg-slate-950/50 border ${errors.email ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
+                                            className={`w-full bg-slate-950/50 border ${errors.email ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
                                             onChange={handleChange}
                                         />
                                         {errors.email && <p className="text-red-400 text-xs">{errors.email}</p>}
@@ -412,11 +412,11 @@ export const SellDevice = () => {
                                     <div className="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-purple-500/30">
                                         <MapPin className="w-7 h-7 text-purple-400" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white">Versandadresse (HandyLand Shop)</h3>
+                                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Versandadresse (HandyLand Shop)</h3>
                                 </div>
                                 <div className="bg-slate-950/50 border border-slate-700 rounded-xl p-6 text-center shadow-inner">
-                                    <p className="text-slate-300 mb-6">Bitte verpacken Sie Ihr Gerät sicher und senden Sie es direkt an unseren Shop. Wir bearbeiten es sofort nach Erhalt der Sendung.</p>
-                                    <div className="bg-slate-900 border border-brand-primary/30 p-6 rounded-xl inline-block text-left text-white shadow-lg relative overflow-hidden">
+                                    <p className="text-slate-700 dark:text-slate-300 mb-6">Bitte verpacken Sie Ihr Gerät sicher und senden Sie es direkt an unseren Shop. Wir bearbeiten es sofort nach Erhalt der Sendung.</p>
+                                    <div className="bg-slate-900 border border-brand-primary/30 p-6 rounded-xl inline-block text-left text-slate-900 dark:text-white shadow-lg relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-20 h-20 bg-brand-primary/5 blur-2xl rounded-full"></div>
                                         <div className="flex items-center gap-3 mb-3 border-b border-slate-800 pb-3 relative z-10">
                                             <div className="p-2 bg-brand-primary/20 rounded-lg">
@@ -424,8 +424,8 @@ export const SellDevice = () => {
                                             </div>
                                             <p className="font-bold text-xl text-brand-primary tracking-wide">HandyLand</p>
                                         </div>
-                                        <div className="space-y-1.5 text-slate-300 relative z-10">
-                                            <p className="font-medium text-white">z.H. Ankauf-Abteilung</p>
+                                        <div className="space-y-1.5 text-slate-700 dark:text-slate-300 relative z-10">
+                                            <p className="font-medium text-slate-900 dark:text-white">z.H. Ankauf-Abteilung</p>
                                             <p>Walldorfer Straße 13</p>
                                             <p>69168 Wiesloch</p>
                                         </div>
@@ -433,7 +433,7 @@ export const SellDevice = () => {
                                     <p className="text-sm text-amber-500/80 font-medium mt-6">Tipp: Versenden Sie das Gerät zwingend als versichertes Paket (z.B. mit DHL), damit Sie eine Sendungsnummer erhalten.</p>
                                 </div>
                                 <div className="flex gap-4 mt-8">
-                                    <button type="button" onClick={prevStep} title={t('sellDevice.backBtn', 'Zurück')} className="py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition-all">
+                                    <button type="button" onClick={prevStep} title={t('sellDevice.backBtn', 'Zurück')} className="py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white font-bold transition-all">
                                         <ArrowLeft className="w-5 h-5" />
                                     </button>
                                     <button type="button" onClick={() => { setFormStep(3); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex-1 py-4 rounded-xl bg-brand-primary hover:bg-brand-primary/90 text-slate-900 font-bold text-lg transition-all flex items-center justify-center gap-2">
@@ -449,28 +449,28 @@ export const SellDevice = () => {
                                     <div className="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
                                         <CreditCard className="w-7 h-7 text-emerald-400" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white">Payout Details</h3>
+                                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Payout Details</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="text-sm font-medium text-slate-300 mb-1.5 block">Bank Name</label>
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">Bank Name</label>
                                         <input
                                             name="bankName"
                                             placeholder="e.g. Sparkasse, Deutsche Bank"
                                             value={formData.bankName}
-                                            className={`w-full bg-slate-950/50 border ${errors.bankName ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
+                                            className={`w-full bg-slate-950/50 border ${errors.bankName ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
                                             onChange={handleChange}
                                         />
                                         {errors.bankName && <p className="text-red-400 text-xs mt-1">{errors.bankName}</p>}
                                     </div>
                                     <div>
-                                        <label className="text-sm font-medium text-slate-300 mb-1.5 block">IBAN</label>
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">IBAN</label>
                                         <div className="relative">
                                             <input
                                                 name="iban"
                                                 placeholder="DEXX XXXX XXXX XXXX XXXX XX"
                                                 value={formData.iban}
-                                                className={`w-full bg-slate-950/50 border ${errors.iban ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-white font-mono text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all uppercase`}
+                                                className={`w-full bg-slate-950/50 border ${errors.iban ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-slate-900 dark:text-white font-mono text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all uppercase`}
                                                 onChange={handleChange}
                                             />
                                             {formData.iban && !errors.iban && validateIban(formData.iban, t).valid && (
@@ -487,14 +487,14 @@ export const SellDevice = () => {
                                     <div className="p-2 bg-brand-primary/10 rounded-lg shrink-0">
                                         <Truck className="w-5 h-5 text-brand-primary" />
                                     </div>
-                                    <div className="text-sm text-slate-400">
-                                        <p className="text-white font-bold mb-0.5">{t('sellDevice.freeShipping')}</p>
+                                    <div className="text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="text-slate-900 dark:text-white font-bold mb-0.5">{t('sellDevice.freeShipping')}</p>
                                         {t('sellDevice.freeShippingDesc', { hours: 48 })}
                                     </div>
                                 </div>
 
                                 <div className="flex gap-4 mt-6">
-                                    <button type="button" onClick={prevStep} title={t('sellDevice.backBtn', 'Zurück')} className="py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition-all">
+                                    <button type="button" onClick={prevStep} title={t('sellDevice.backBtn', 'Zurück')} className="py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white font-bold transition-all">
                                         <ArrowLeft className="w-5 h-5" />
                                     </button>
                                     <button type="submit" className="flex-1 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-emerald-950 font-bold text-lg shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2">

@@ -62,33 +62,33 @@ export const GuestTicketTracking: React.FC = () => {
 
             <div className="max-w-md w-full text-center mb-8">
                 <Wrench className="w-12 h-12 text-brand-primary mx-auto mb-4" />
-                <h1 className="text-3xl font-black text-white mb-2 tracking-tight">{t('trackRepair.title', 'Reparatur verfolgen')}</h1>
-                <p className="text-slate-400">{t('trackRepair.subtitle', 'Gib deine Ticket-ID und E-Mail ein, um den Status deiner Reparatur zu prüfen.')}</p>
+                <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">{t('trackRepair.title', 'Reparatur verfolgen')}</h1>
+                <p className="text-slate-500 dark:text-slate-400">{t('trackRepair.subtitle', 'Gib deine Ticket-ID und E-Mail ein, um den Status deiner Reparatur zu prüfen.')}</p>
             </div>
 
             <div className="w-full max-w-md">
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl mb-8">
                     <form onSubmit={handleTrack} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-2">{t('trackRepair.ticketId', 'Ticket-ID')}</label>
+                            <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">{t('trackRepair.ticketId', 'Ticket-ID')}</label>
                             <input
                                 type="text"
                                 required
                                 value={ticketId}
                                 onChange={e => setTicketId(e.target.value)}
                                 placeholder={t('trackRepair.ticketPlaceholder', 'z.B. 5f8d04f2b5...')}
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-brand-primary outline-none transition-colors"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-colors"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-2">{t('trackRepair.emailAddress', 'E-Mail-Adresse')}</label>
+                            <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">{t('trackRepair.emailAddress', 'E-Mail-Adresse')}</label>
                             <input
                                 type="email"
                                 required
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 placeholder={t('trackRepair.emailPlaceholder', 'E-Mail, die für die Reparatur verwendet wurde')}
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-brand-primary outline-none transition-colors"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-colors"
                             />
                         </div>
 
@@ -101,7 +101,7 @@ export const GuestTicketTracking: React.FC = () => {
                         <button
                             type="submit"
                             disabled={loading || !ticketId || !email}
-                            className="w-full py-4 bg-brand-primary hover:bg-brand-primary text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-brand-primary hover:bg-brand-primary text-slate-900 dark:text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Search className="w-5 h-5" /> {t('trackRepair.trackButton', 'Ticket verfolgen')}</>}
                         </button>
@@ -114,14 +114,14 @@ export const GuestTicketTracking: React.FC = () => {
 
                         <div className="flex justify-between items-start mb-6 border-b border-slate-800 pb-6">
                             <div>
-                                <h3 className="text-xl font-bold text-white mb-2">{ticket.device}</h3>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{ticket.device}</h3>
                                 <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${getStatusConfig(ticket.status).bg}`}>
                                     {getStatusConfig(ticket.status).icon}
-                                    <span className="font-bold text-sm text-white capitalize">{getStatusConfig(ticket.status).text}</span>
+                                    <span className="font-bold text-sm text-slate-900 dark:text-white capitalize">{getStatusConfig(ticket.status).text}</span>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-slate-400 text-sm font-mono mt-1">Ticket #{ticket._id.substring(0, 8)}</p>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm font-mono mt-1">Ticket #{ticket._id.substring(0, 8)}</p>
                             </div>
                         </div>
 
@@ -137,13 +137,13 @@ export const GuestTicketTracking: React.FC = () => {
                         <div className="space-y-6 relative z-10">
                             <div>
                                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('trackRepair.issueDescription', 'Problembeschreibung')}</label>
-                                <p className="text-slate-300 mt-1">{ticket.issue}</p>
+                                <p className="text-slate-700 dark:text-slate-300 mt-1">{ticket.issue}</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('trackRepair.dateCreated', 'Erstellt am')}</label>
-                                    <p className="text-slate-300 mt-1">{new Date(ticket.createdAt).toLocaleDateString()}</p>
+                                    <p className="text-slate-700 dark:text-slate-300 mt-1">{new Date(ticket.createdAt).toLocaleDateString()}</p>
                                 </div>
                                 {ticket.estimatedCost && (
                                     <div>
@@ -156,7 +156,7 @@ export const GuestTicketTracking: React.FC = () => {
                             {ticket.notes && (
                                 <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">{t('trackRepair.latestNotes', 'Neueste Notizen')}</label>
-                                    <p className="text-slate-300 text-sm whitespace-pre-wrap">{ticket.notes}</p>
+                                    <p className="text-slate-700 dark:text-slate-300 text-sm whitespace-pre-wrap">{ticket.notes}</p>
                                 </div>
                             )}
                         </div>

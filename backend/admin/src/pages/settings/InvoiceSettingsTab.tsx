@@ -34,69 +34,102 @@ export const InvoiceSettingsTab: React.FC<InvoiceSettingsTabProps> = ({ settings
     // Usually it resolves if proxy is set or we prepend baseUrl, but for preview we can just render the direct path
     // if it's external, or rely on normal browser resolution.
     const renderLogo = invoice.logoUrl 
-        ? <img src={invoice.logoUrl.startsWith('http') ? invoice.logoUrl : `http://localhost:5000${invoice.logoUrl}`} alt="Logo" className="max-h-10 object-contain" />
-        : <div className="text-xl font-bold" style={{ color: '#000' }}>{invoice.companyName.replace('Land', '')}<span style={{ color: invoice.primaryColor || '#00bcd4' }}>Land</span></div>;
+        ? <img src={invoice.logoUrl.startsWith('http') ? invoice.logoUrl : `http://localhost:5000${invoice.logoUrl}`} alt="Logo" style={{ maxHeight: `${invoice.logoHeight || 40}px` }} className="object-contain" />
+        : <div className="text-xl font-bold" style={{ color: '#000' }}>{(invoice.companyName || 'HandyLand').replace('Land', '')}<span style={{ color: invoice.primaryColor || '#00bcd4' }}>Land</span></div>;
 
     return (
         <div className="flex flex-col xl:flex-row gap-8">
             {/* Left Column: Settings Form */}
             <div className="flex-1 space-y-6">
-                <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-3 mb-2">
                     <div className="p-3 bg-indigo-500/10 rounded-xl">
                         <FileText className="text-indigo-400" size={24} />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-white">Invoice Settings</h3>
-                        <p className="text-slate-400 text-sm">Configure the look and details of the HTML invoices generated for customer orders.</p>
+                        <h3 className="text-xl font-bold text-white">Rechnungs-Einstellungen</h3>
+                        <p className="text-slate-400 text-sm">Konfigurieren Sie das Aussehen und die Details der generierten Rechnungen für Kundenbestellungen.</p>
+                    </div>
+                </div>
+
+                {/* German Legal Compliance Notice */}
+                <div className="p-4 bg-emerald-900/20 border border-emerald-800 rounded-xl text-sm flex gap-3 items-start">
+                    <span className="text-2xl mt-0.5">🇩🇪</span>
+                    <div>
+                        <p className="text-emerald-400 font-bold mb-1">Finanzamt-konforme Rechnungen</p>
+                        <p className="text-emerald-300/80 mb-2">Damit Ihre Rechnungen in Deutschland rechtlich gültig sind, stellen Sie sicher, dass Sie Ihren vollständigen Firmennamen, die Adresse und die <strong className="text-emerald-300">USt-IdNr. (VAT ID)</strong> angeben. Wenn Sie Kleinunternehmer sind, setzen Sie die Steuer auf 0% und fügen Sie den Hinweis gemäß §19 UStG in die Fußzeile ein.</p>
                     </div>
                 </div>
 
                 {/* Brand & Identity */}
                 <div className="p-5 border border-slate-700 rounded-xl space-y-5 bg-slate-900/50">
-                    <h4 className="text-blue-400 font-bold mb-2 text-lg">Brand & Identity</h4>
+                    <h4 className="text-blue-400 font-bold mb-2 text-lg">Marke & Identität</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <ImageUpload 
-                                label="Invoice Logo (Optional)" 
+                                label="Rechnungslogo (Optional)" 
                                 value={invoice.logoUrl || ''} 
                                 onChange={(url) => handleChange('invoice', 'logoUrl', url)} 
                             />
-                            <p className="text-xs text-slate-500 mt-1">If empty, Company Name is used.</p>
+                            <p className="text-xs text-slate-500 mt-1">Falls leer, wird der Firmenname verwendet.</p>
+                            
+                            <div className="mt-4">
+                                <label className="block text-slate-400 text-sm font-bold mb-2">Logogröße (Höhe in px)</label>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="range"
+                                        min="20"
+                                        max="150"
+                                        title="Logogröße"
+                                        aria-label="Logogröße"
+                                        value={invoice.logoHeight || 40}
+                                        onChange={(e) => handleChange('invoice', 'logoHeight', parseInt(e.target.value))}
+                                        className="w-full cursor-pointer accent-blue-500"
+                                    />
+                                    <span className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-sm text-white min-w-[50px] text-center">
+                                        {invoice.logoHeight || 40}px
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                         <div>
-                            <label className="block text-slate-400 text-sm font-bold mb-2">Primary Color</label>
+                            <label className="block text-slate-400 text-sm font-bold mb-2">Primärfarbe (Akzentfarbe)</label>
                             <div className="flex items-center gap-3">
                                 <input
                                     type="color"
+                                    title="Farbauswahl"
+                                    aria-label="Farbauswahl"
                                     value={invoice.primaryColor || '#00bcd4'}
                                     onChange={(e) => handleChange('invoice', 'primaryColor', e.target.value)}
                                     className="w-12 h-12 rounded cursor-pointer bg-transparent border-none appearance-none p-0"
                                 />
                                 <input
                                     type="text"
+                                    title="Farbcode"
+                                    aria-label="Farbcode"
+                                    placeholder="#00bcd4"
                                     value={invoice.primaryColor || '#00bcd4'}
                                     onChange={(e) => handleChange('invoice', 'primaryColor', e.target.value)}
-                                    className="bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition-colors w-full"
+                                    className="bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition-colors w-full uppercase font-mono text-sm"
                                 />
                             </div>
-                            <p className="text-xs text-slate-500 mt-1">Used for accents and titles.</p>
+                            <p className="text-xs text-slate-500 mt-1">Wird für Titel und Hervorhebungen verwendet.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Company Information */}
                 <div className="p-5 border border-slate-700 rounded-xl space-y-5 bg-slate-900/50">
-                    <h4 className="text-blue-400 font-bold mb-2 text-lg">Company Information</h4>
+                    <h4 className="text-blue-400 font-bold mb-2 text-lg">Unternehmensdaten</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input label="Company Name" value={invoice.companyName} onChange={(v) => handleChange('invoice', 'companyName', v)} placeholder="HandyLand GmbH" />
-                        <Input label="VAT / Tax ID" value={invoice.vatNumber} onChange={(v) => handleChange('invoice', 'vatNumber', v)} placeholder="DE123456789" />
+                        <Input label="Offizieller Firmenname" value={invoice.companyName} onChange={(v) => handleChange('invoice', 'companyName', v)} placeholder="Musterfirma GmbH" />
+                        <Input label="USt-IdNr. (VAT ID)" value={invoice.vatNumber} onChange={(v) => handleChange('invoice', 'vatNumber', v)} placeholder="DE123456789" />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-slate-400 text-sm font-bold mb-2">Company Full Address</label>
+                        <label className="block text-slate-400 text-sm font-bold mb-2">Vollständige Adresse</label>
                         <textarea
                             value={invoice.companyAddress || ''}
                             onChange={(e) => handleChange('invoice', 'companyAddress', e.target.value)}
-                            placeholder="Tech Street 123 - 10115 Berlin - Germany"
+                            placeholder="Musterstraße 1 - 10115 Berlin - Deutschland"
                             rows={2}
                             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none resize-none transition-colors"
                         />
@@ -105,29 +138,29 @@ export const InvoiceSettingsTab: React.FC<InvoiceSettingsTabProps> = ({ settings
 
                 {/* Bank Information */}
                 <div className="p-5 border border-slate-700 rounded-xl space-y-5 bg-slate-900/50">
-                    <h4 className="text-blue-400 font-bold mb-2 text-lg">Bank Details (Footer)</h4>
-                    <p className="text-sm text-slate-400 mb-4">Displayed at the bottom of the invoice for bank transfer payments.</p>
+                    <h4 className="text-blue-400 font-bold mb-2 text-lg">Bankverbindung (Für Fußzeile)</h4>
+                    <p className="text-sm text-slate-400 mb-4">Erforderlich für Kunden, die per Vorkasse/Überweisung bezahlen.</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Input label="Bank Name" value={invoice.bankName} onChange={(v) => handleChange('invoice', 'bankName', v)} placeholder="Deutsche Bank" />
+                        <Input label="Name der Bank" value={invoice.bankName} onChange={(v) => handleChange('invoice', 'bankName', v)} placeholder="Sparkasse Berlin" />
                         <Input label="IBAN" value={invoice.iban} onChange={(v) => handleChange('invoice', 'iban', v)} placeholder="DE12 3456 ..." />
-                        <Input label="BIC / SWIFT" value={invoice.bic} onChange={(v) => handleChange('invoice', 'bic', v)} placeholder="DEUTDED..." />
+                        <Input label="BIC / SWIFT" value={invoice.bic} onChange={(v) => handleChange('invoice', 'bic', v)} placeholder="WELADED..." />
                     </div>
                 </div>
 
                 {/* Formatting & Text */}
                 <div className="p-5 border border-slate-700 rounded-xl space-y-5 bg-slate-900/50">
-                    <h4 className="text-blue-400 font-bold mb-2 text-lg">Formatting & Text</h4>
+                    <h4 className="text-blue-400 font-bold mb-2 text-lg">Formatierung & Fußzeile</h4>
                     <div className="mb-4 w-full md:w-1/2 pr-0 md:pr-2">
-                        <Input label="Invoice Number Prefix" value={invoice.prefix} onChange={(v) => handleChange('invoice', 'prefix', v)} placeholder="HL-" />
-                        <p className="text-xs text-slate-500 mt-1">Example: HL-[OrderNumber]</p>
+                        <Input label="Präfix der Rechnungsnummer" value={invoice.prefix} onChange={(v) => handleChange('invoice', 'prefix', v)} placeholder="RE-" />
+                        <p className="text-xs text-slate-500 mt-1">Beispiel: RE-[Bestellnummer]</p>
                     </div>
                     <div className="mb-4">
-                        <label className="block text-slate-400 text-sm font-bold mb-2">Footer Message / Thank You Note</label>
+                        <label className="block text-slate-400 text-sm font-bold mb-2">Fußzeilen-Text / Rechtlicher Hinweis</label>
                         <textarea
                             value={invoice.footerText || ''}
                             onChange={(e) => handleChange('invoice', 'footerText', e.target.value)}
-                            placeholder="Thank you for your business!"
-                            rows={2}
+                            placeholder="Vielen Dank für Ihren Einkauf! / Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."
+                            rows={3}
                             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none resize-none transition-colors"
                         />
                     </div>
@@ -135,23 +168,42 @@ export const InvoiceSettingsTab: React.FC<InvoiceSettingsTabProps> = ({ settings
 
                 {/* Translations */}
                 <div className="p-5 border border-slate-700 rounded-xl space-y-5 bg-slate-900/50">
-                    <h4 className="text-blue-400 font-bold mb-2 text-lg">Translations & Labels</h4>
-                    <p className="text-slate-400 text-sm mb-4">Rename standard labels for localization.</p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Input label="Invoice Title" value={invoice.titleLabel} onChange={(v) => handleChange('invoice', 'titleLabel', v)} placeholder="Invoice" />
-                        <Input label="Date Label" value={invoice.dateLabel} onChange={(v) => handleChange('invoice', 'dateLabel', v)} placeholder="Date:" />
-                        <Input label="Invoice Number Label" value={invoice.numberLabel} onChange={(v) => handleChange('invoice', 'numberLabel', v)} placeholder="Invoice #:" />
-                        <Input label="VAT ID Label" value={invoice.vatIdLabel} onChange={(v) => handleChange('invoice', 'vatIdLabel', v)} placeholder="VAT ID:" />
-                        <Input label="Subtotal Label" value={invoice.subtotalLabel} onChange={(v) => handleChange('invoice', 'subtotalLabel', v)} placeholder="Subtotal:" />
-                        <Input label="Tax Label" value={invoice.taxLabel} onChange={(v) => handleChange('invoice', 'taxLabel', v)} placeholder="VAT" />
-                        <Input label="Shipping Label" value={invoice.shippingLabel} onChange={(v) => handleChange('invoice', 'shippingLabel', v)} placeholder="Shipping:" />
-                        <Input label="Discount Label" value={invoice.discountLabel} onChange={(v) => handleChange('invoice', 'discountLabel', v)} placeholder="Discount" />
-                        <Input label="Total Label" value={invoice.totalLabel} onChange={(v) => handleChange('invoice', 'totalLabel', v)} placeholder="Total:" />
-                        <Input label="Table Header: Item" value={invoice.itemLabel} onChange={(v) => handleChange('invoice', 'itemLabel', v)} placeholder="Item" />
-                        <Input label="Table Header: Quantity" value={invoice.quantityLabel} onChange={(v) => handleChange('invoice', 'quantityLabel', v)} placeholder="Quantity" />
-                        <Input label="Table Header: Price" value={invoice.priceLabel} onChange={(v) => handleChange('invoice', 'priceLabel', v)} placeholder="Price" />
-                        <Input label="Print Button" value={invoice.printBtnLabel} onChange={(v) => handleChange('invoice', 'printBtnLabel', v)} placeholder="Print" />
-                        <Input label="Close Button" value={invoice.closeBtnLabel} onChange={(v) => handleChange('invoice', 'closeBtnLabel', v)} placeholder="Close" />
+                    <div className="flex justify-between items-end mb-4">
+                        <div>
+                            <h4 className="text-blue-400 font-bold mb-2 text-lg">Bezeichnungen & Übersetzungen</h4>
+                            <p className="text-slate-400 text-sm">Passen Sie die Standardbegriffe der Rechnung an Ihre Sprache an.</p>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-0">
+                        {/* Column 1: Header */}
+                        <div>
+                            <h5 className="text-xs font-bold text-slate-500 uppercase mb-3 pb-1 border-b border-slate-800">Kopfbereich</h5>
+                            <Input label="Rechnungstitel" value={invoice.titleLabel} onChange={(v) => handleChange('invoice', 'titleLabel', v)} placeholder="Rechnung" />
+                            <Input label="Datum Label" value={invoice.dateLabel} onChange={(v) => handleChange('invoice', 'dateLabel', v)} placeholder="Datum:" />
+                            <Input label="Rechnungsnummer" value={invoice.numberLabel} onChange={(v) => handleChange('invoice', 'numberLabel', v)} placeholder="Rechnungsnr.:" />
+                            <Input label="USt-IdNr. Label" value={invoice.vatIdLabel} onChange={(v) => handleChange('invoice', 'vatIdLabel', v)} placeholder="USt-IdNr.:" />
+                        </div>
+                        
+                        {/* Column 2: Table */}
+                        <div>
+                            <h5 className="text-xs font-bold text-slate-500 uppercase mb-3 pb-1 border-b border-slate-800">Tabellenspalten</h5>
+                            <Input label="Artikel Label" value={invoice.itemLabel} onChange={(v) => handleChange('invoice', 'itemLabel', v)} placeholder="Artikel" />
+                            <Input label="Menge Label" value={invoice.quantityLabel} onChange={(v) => handleChange('invoice', 'quantityLabel', v)} placeholder="Menge" />
+                            <Input label="Preis Label" value={invoice.priceLabel} onChange={(v) => handleChange('invoice', 'priceLabel', v)} placeholder="Preis" />
+                        </div>
+                        
+                        {/* Column 3: Totals & Buttons */}
+                        <div>
+                            <h5 className="text-xs font-bold text-slate-500 uppercase mb-3 pb-1 border-b border-slate-800">Summen & Aktionen</h5>
+                            <Input label="Zwischensumme" value={invoice.subtotalLabel} onChange={(v) => handleChange('invoice', 'subtotalLabel', v)} placeholder="Zwischensumme:" />
+                            <Input label="Steuer Label" value={invoice.taxLabel} onChange={(v) => handleChange('invoice', 'taxLabel', v)} placeholder="MwSt" />
+                            <Input label="Versand" value={invoice.shippingLabel} onChange={(v) => handleChange('invoice', 'shippingLabel', v)} placeholder="Versand:" />
+                            <Input label="Rabatt" value={invoice.discountLabel} onChange={(v) => handleChange('invoice', 'discountLabel', v)} placeholder="Rabatt" />
+                            <Input label="Gesamtbetrag" value={invoice.totalLabel} onChange={(v) => handleChange('invoice', 'totalLabel', v)} placeholder="Gesamtbetrag:" />
+                            <Input label="Drucken Button" value={invoice.printBtnLabel} onChange={(v) => handleChange('invoice', 'printBtnLabel', v)} placeholder="Drucken" />
+                            <Input label="Schließen Button" value={invoice.closeBtnLabel} onChange={(v) => handleChange('invoice', 'closeBtnLabel', v)} placeholder="Schließen" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -161,9 +213,9 @@ export const InvoiceSettingsTab: React.FC<InvoiceSettingsTabProps> = ({ settings
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
                         <Eye className="text-blue-400" size={20} />
-                        Live Preview
+                        Live Vorschau
                     </h3>
-                    <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Updates instantly</span>
+                    <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Aktualisiert sofort</span>
                 </div>
                 
                 {/* The Invoice Paper A4 Mock */}
@@ -186,18 +238,18 @@ export const InvoiceSettingsTab: React.FC<InvoiceSettingsTabProps> = ({ settings
                     {/* Bill To */}
                     <div className="flex justify-between mb-6 text-xs">
                         <div className="w-1/2">
-                            <h3 className="text-xs uppercase font-bold text-slate-400 border-b border-slate-200 pb-1 mb-2">Bill To:</h3>
+                            <h3 className="text-xs uppercase font-bold text-slate-400 border-b border-slate-200 pb-1 mb-2">Rechnungsadresse:</h3>
                             <div>Jane Doe</div>
                             <div>Main Street 42</div>
                             <div>10115 Berlin</div>
-                            <div>Germany</div>
+                            <div>Deutschland</div>
                         </div>
                         <div className="w-1/2 ml-4">
-                            <h3 className="text-xs uppercase font-bold text-slate-400 border-b border-slate-200 pb-1 mb-2">Ship To:</h3>
+                            <h3 className="text-xs uppercase font-bold text-slate-400 border-b border-slate-200 pb-1 mb-2">Lieferadresse:</h3>
                             <div>Jane Doe</div>
                             <div>Main Street 42</div>
                             <div>10115 Berlin</div>
-                            <div>Germany</div>
+                            <div>Deutschland</div>
                         </div>
                     </div>
 

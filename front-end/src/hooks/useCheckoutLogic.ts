@@ -80,18 +80,23 @@ export const useCheckoutLogic = () => {
         const fetchData = async () => {
             try {
                 setIsLoadingMethods(true);
-                const [settingsRes, methodsRes] = await Promise.all([
+                const [settingsRes, methodsRes, paymentRes] = await Promise.all([
                     api.get('/api/settings'),
-                    orderService.fetchShippingMethods()
+                    orderService.fetchShippingMethods(),
+                    api.get('/api/settings/payment-config'),
                 ]);
 
                 const settings = (settingsRes as any)?.data || settingsRes;
                 if (settings) {
                     if (settings.freeShippingThreshold !== undefined) setFreeShippingThreshold(settings.freeShippingThreshold);
-                    if (settings.payment) setPaymentConfig(settings.payment);
                     if (settings.taxRate !== undefined) setTaxRate(settings.taxRate);
                     if (settings.features) setFeatures(settings.features);
                 }
+
+                // Payment config from dedicated safe endpoint
+                const pc = (paymentRes as any)?.data || paymentRes;
+                if (pc) setPaymentConfig(pc);
+
 
                 if (Array.isArray(methodsRes)) {
                     setShippingMethods(methodsRes);

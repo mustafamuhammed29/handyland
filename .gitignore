@@ -6,17 +6,22 @@ node_modules/
 # Testing
 coverage/
 
-# Production
+# Production builds
 build/
 dist/
 
-# Misc
+# Environment files
 .DS_Store
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+**/.env
+backend/.env
+backend/.env.production
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -31,13 +36,22 @@ yarn-error.log*
 # Project specific
 backend/uploads/
 backend/backups/
-backend/.env
-backend/.env.production
-**/.env
-*.txt
+backend/healthStatus.json
+backend/MAINTENANCE_MODE
+backend/lint-output.txt
+backend/test-output.txt
+backend/seed_bulk.log
+backend/seed_output.log
+backend/audit_backend.json
+
+# Temporary dev/debug scripts
 make_admin.js
 unlock_admin.js
 test_*.js
-check_headers.js
-query
-node_modules/
+check_*.js
+fix_*.js
+clear_cache.js
+resetAdmin.js
+
+# OS files
+Thumbs.db

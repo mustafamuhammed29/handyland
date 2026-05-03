@@ -359,19 +359,19 @@ exports.sendCartReminder = async (req, res) => {
         const EmailTemplate = require('../models/EmailTemplate');
 
         const template = await EmailTemplate.findOne({ name: 'abandoned_cart', isActive: true });
-        
+
         if (!template) {
             return res.status(400).json({ success: false, message: 'Abandoned cart email template is disabled or not found.' });
         }
 
         const cartUrl = `${process.env.FRONTEND_URL}/cart`;
         const userName = cart.user.name.split(' ')[0];
-        
-        let html = template.html
+
+        const html = template.html
             .replace(/{{userName}}/g, userName)
             .replace(/{{cartUrl}}/g, cartUrl);
-        
-        let subject = template.subject
+
+        const subject = template.subject
             .replace(/{{userName}}/g, userName);
 
         await sendEmail({

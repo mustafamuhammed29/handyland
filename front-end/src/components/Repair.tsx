@@ -142,7 +142,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     };
 
     return (
-        <div className="relative min-h-[100dvh] py-20 overflow-hidden bg-slate-900">
+        <div className="relative min-h-[100dvh] pt-32 pb-20 overflow-hidden bg-slate-50 dark:bg-[#0a0f1c]">
 
             {/* Abstract Background Tech Lines */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none"></div>
@@ -165,10 +165,10 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                             <Wrench className="w-6 h-6 text-blue-500" />
                             <span className="text-blue-500 font-mono text-sm tracking-widest uppercase">{t('repair.title')}</span>
                         </div>
-                        <h2 className="text-4xl lg:text-5xl font-black text-white">
+                        <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white">
                             {settings?.content?.repairTitle || t('repair.title')}
                         </h2>
-                        <p className="text-slate-400 mt-2 font-light border-l-2 border-blue-900 pl-4">
+                        <p className="text-slate-600 dark:text-slate-400 mt-2 font-light border-l-2 border-blue-900 pl-4">
                             {settings?.content?.repairSubtitle || t('repair.subtitle')}
                         </p>
                     </div>
@@ -177,12 +177,12 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 </div>
 
                 {/* Search & Interface Panel */}
-                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-700 rounded-3xl p-1 mb-10 shadow-[0_0_50px_rgba(37,99,235,0.1)]">
+                <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-3xl p-1 mb-10 shadow-[0_0_50px_rgba(37,99,235,0.1)]">
                     <div className="relative">
                         <input
                             type="text"
                             placeholder={t('repair.searchPlaceholder', 'GERÄTEMODELL SUCHEN (z.B. iPhone 15, S24)...')}
-                            className="w-full pl-14 pr-6 py-5 bg-black/50 border border-transparent rounded-2xl text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-lg font-mono placeholder:text-slate-600 transition-all"
+                            className="w-full pl-14 pr-6 py-3 md:py-5 bg-slate-100/50 dark:bg-black/50 border border-slate-200 dark:border-transparent rounded-2xl text-slate-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-lg font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />

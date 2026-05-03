@@ -16,9 +16,10 @@ export const SkeletonProductCard = React.memo(() => {
                     <div className="h-8 skeleton-loader rounded-lg border border-slate-200 dark:border-slate-800"></div>
                     <div className="h-8 skeleton-loader rounded-lg border border-slate-200 dark:border-slate-800"></div>
                 </div>
-                <div className="mt-auto pt-4 flex justify-between gap-2">
+                <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800/50 flex justify-between items-center gap-2">
                     <div className="h-10 w-24 skeleton-loader font-bold border border-slate-200 dark:border-slate-800"></div>
                     <div className="flex gap-2">
+                        <div className="h-10 w-10 skeleton-loader rounded-xl border border-slate-200 dark:border-slate-800"></div>
                         <div className="h-10 w-10 skeleton-loader rounded-xl border border-slate-200 dark:border-slate-800"></div>
                         <div className="h-10 w-10 skeleton-loader rounded-xl border border-slate-200 dark:border-slate-800"></div>
                     </div>

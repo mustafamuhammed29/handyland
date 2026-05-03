@@ -44,7 +44,16 @@ export const DashboardMessages: React.FC = () => {
 
     useEffect(() => {
         fetchMessages();
+        // Auto-refresh every 30 seconds for real-time feel
+        const interval = setInterval(fetchMessages, 30000);
+        return () => clearInterval(interval);
     }, []);
+
+    // Derived unread count: replied messages not yet opened
+    const unreadRepliedCount = messages.filter(m =>
+        m.status === 'replied' && m.replies && m.replies.length > 0 &&
+        m.replies[m.replies.length - 1].isAdmin
+    ).length;
 
     const fetchMessages = async () => {
         try {
@@ -132,8 +141,19 @@ export const DashboardMessages: React.FC = () => {
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-2">
                         <Mail className="w-6 h-6 text-blue-400" />
                         {t('messages.title', 'Support Messages')}
+                        {unreadRepliedCount > 0 && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-black rounded-full animate-pulse">
+                                {unreadRepliedCount} {t('messages.unread', 'Neue Antwort')}
+                            </span>
+                        )}
                     </h2>
-                    <p className="text-slate-400">{t('messages.subtitle', 'View and respond to your support tickets.')}</p>
+                    <p className="text-slate-400 flex items-center gap-2">
+                        {t('messages.subtitle', 'View and respond to your support tickets.')}
+                        <span className="flex items-center gap-1 text-xs text-emerald-500 font-bold">
+                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                            {t('messages.live', 'Live')}
+                        </span>
+                    </p>
                 </div>
                 {messages.some(m => m.status !== 'closed') ? (
                     <div className="bg-yellow-500/10 border border-yellow-500/50 text-yellow-400 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2">
@@ -165,7 +185,11 @@ export const DashboardMessages: React.FC = () => {
                                 <p className="text-sm">{t('messages.list.empty', 'No support tickets found.')}</p>
                             </div>
                         ) : (
-                            messages.map((msg, idx) => (
+                            messages.map((msg, idx) => {
+                                const hasUnreadReply = msg.status === 'replied' &&
+                                    msg.replies && msg.replies.length > 0 &&
+                                    msg.replies[msg.replies.length - 1].isAdmin;
+                                return (
                                 <motion.button
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
@@ -178,7 +202,12 @@ export const DashboardMessages: React.FC = () => {
                                         }`}
                                 >
                                     <div className="flex justify-between items-start mb-1">
-                                        <div className="font-bold text-white truncate pr-2">{t('messages.list.ticketNumber', 'Ticket')} #{msg._id.slice(-6).toUpperCase()}</div>
+                                        <div className="font-bold text-white truncate pr-2 flex items-center gap-2">
+                                            {t('messages.list.ticketNumber', 'Ticket')} #{msg._id.slice(-6).toUpperCase()}
+                                            {hasUnreadReply && selectedMessage?._id !== msg._id && (
+                                                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse flex-shrink-0" />
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="text-sm text-slate-400 line-clamp-2 mb-2">{msg.message}</div>
                                     <div className="text-[10px] text-slate-500 flex justify-between items-center">
@@ -193,8 +222,10 @@ export const DashboardMessages: React.FC = () => {
                                         </div>
                                     </div>
                                 </motion.button>
-                            ))
+                                );
+                            })
                         )}
+
                     </div>
                 </div>
 

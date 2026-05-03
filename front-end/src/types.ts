@@ -142,7 +142,7 @@ export interface Order {
   paymentMethod?: string;
   paymentStatus?: string;
   amount?: number; // Legacy or alternative
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'return_requested' | 'returned';
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'return_requested' | 'returned' | 'refunded';
   createdAt: string;
   updatedAt?: string;
   date?: string; // Legacy or alternative

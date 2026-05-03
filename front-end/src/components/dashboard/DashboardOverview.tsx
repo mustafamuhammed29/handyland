@@ -79,10 +79,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     if (isLoading) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-6 xl:grid-cols-12 gap-6">
-                <div className="md:col-span-6 xl:col-span-8 h-48 bg-slate-900/40 rounded-3xl animate-pulse"></div>
-                <div className="md:col-span-6 xl:col-span-4 h-48 bg-slate-900/40 rounded-3xl animate-pulse"></div>
-                <div className="md:col-span-6 xl:col-span-8 h-80 bg-slate-900/40 rounded-3xl animate-pulse"></div>
-                <div className="md:col-span-6 xl:col-span-4 h-80 bg-slate-900/40 rounded-3xl animate-pulse"></div>
+                <div className="md:col-span-6 xl:col-span-8 h-48 bg-white/80 dark:bg-slate-900/40 rounded-3xl animate-pulse"></div>
+                <div className="md:col-span-6 xl:col-span-4 h-48 bg-white/80 dark:bg-slate-900/40 rounded-3xl animate-pulse"></div>
+                <div className="md:col-span-6 xl:col-span-8 h-80 bg-white/80 dark:bg-slate-900/40 rounded-3xl animate-pulse"></div>
+                <div className="md:col-span-6 xl:col-span-4 h-80 bg-white/80 dark:bg-slate-900/40 rounded-3xl animate-pulse"></div>
             </div>
         );
     }
@@ -92,18 +92,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-6 xl:grid-cols-12 gap-6 auto-rows-min">
                 
                 {/* 1. Hero Welcome Card (Span 8) */}
-                <div className="md:col-span-6 xl:col-span-8 relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/5 p-6 sm:p-8 rounded-3xl group shadow-lg hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] transition-all duration-500">
+                <div className="md:col-span-6 xl:col-span-8 relative overflow-hidden bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 p-6 sm:p-8 rounded-3xl group shadow-lg hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] transition-all duration-500">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-[80px] group-hover:bg-brand-primary/20 transition-all duration-700 -z-10 translate-x-1/2 -translate-y-1/2"></div>
                     
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 z-10 relative h-full">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
                                 {greeting.icon}
-                                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                                     {greeting.text}, {userName?.split(' ')[0] || t('common.member', 'Member')}!
                                 </h2>
                             </div>
-                            <p className="text-slate-400 text-sm max-w-md leading-relaxed">
+                            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md leading-relaxed">
                                 {pendingOrders > 0 || activeRepairs > 0 
                                     ? t('dashboard.hero.statusUpdate', { defaultValue: `Hier ist dein Status-Update: Du hast {{pendingOrders}} aktive Bestellungen und {{activeRepairs}} Geräte in Reparatur.`, pendingOrders, activeRepairs })
                                     : t('dashboard.hero.allClear', 'Alles ist auf dem neuesten Stand. Entdecke unsere neuesten Angebote im Marktplatz oder nutze unsere Reparatur-Services.')}
@@ -113,20 +113,20 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                 <button onClick={() => navigate('/marketplace')} className="px-5 py-2.5 bg-white text-slate-900 rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                                     {t('dashboard.hero.marketplace', 'Marktplatz')}
                                 </button>
-                                <button onClick={() => navigate('/repair')} className="px-5 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-700 border border-white/5 transition-all">
+                                <button onClick={() => navigate('/repair')} className="px-5 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-700 border border-slate-200 dark:border-white/5 transition-all">
                                     {t('dashboard.hero.newRepair', 'Neuer Reparaturauftrag')}
                                 </button>
                             </div>
                         </div>
                         
                         <div className="flex gap-4 sm:flex-col sm:w-auto w-full">
-                            <div className="bg-black/20 border border-white/5 rounded-2xl p-4 flex-1 sm:w-48 backdrop-blur-md">
+                            <div className="bg-slate-100 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex-1 sm:w-48 backdrop-blur-md">
                                 <div className="flex items-center gap-2 text-brand-primary mb-1">
                                     <Clock className="w-4 h-4" />
                                     <span className="text-xs font-bold font-mono">{t('dashboard.hero.active', 'AKTIV')}</span>
                                 </div>
-                                <p className="text-2xl font-black text-white">{pendingOrders + activeRepairs + pendingValuations}</p>
-                                <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-1">{t('dashboard.hero.ongoing', 'Laufende Vorgänge')}</p>
+                                <p className="text-2xl font-black text-slate-900 dark:text-white">{pendingOrders + activeRepairs + pendingValuations}</p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">{t('dashboard.hero.ongoing', 'Laufende Vorgänge')}</p>
                             </div>
                         </div>
                     </div>
@@ -157,7 +157,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                     <span className="text-4xl sm:text-5xl font-black text-white drop-shadow-md tracking-tighter">{user?.loyaltyPoints || 0} <span className="text-sm font-bold text-white/50 tracking-normal">{t('dashboard.rewards.pts', 'PTS')}</span></span>
                                 </div>
                                 
-                                <div className="w-full bg-black/40 rounded-full h-2.5 mb-2 overflow-hidden border border-white/5 relative">
+                                <div className="w-full bg-black/40 rounded-full h-2.5 mb-2 overflow-hidden border border-slate-200 dark:border-white/5 relative">
                                     <div className="absolute inset-0 bg-white/5"></div>
                                     {user?.membershipLevel === 4 ? (
                                         <div className="bg-gradient-to-r from-brand-primary to-purple-500 h-full rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" style={{ width: '100%' }}></div>
@@ -232,7 +232,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     if (currentStepIndex === -1) currentStepIndex = 0; // fallback
 
                     return (
-                        <div className="md:col-span-6 xl:col-span-12 bg-slate-900/60 backdrop-blur-xl border border-brand-primary/30 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-[0_0_30px_rgba(6,182,212,0.1)]">
+                        <div className="md:col-span-6 xl:col-span-12 bg-white/90 dark:bg-slate-900/60 backdrop-blur-xl border border-brand-primary/30 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-[0_0_30px_rgba(6,182,212,0.1)]">
                             <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
                             
                             <div className="flex items-center gap-3 mb-8">
@@ -240,7 +240,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                     {icon}
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-white tracking-tight">{title}</h3>
+                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{title}</h3>
                                     <p className="text-brand-primary text-sm font-bold flex items-center gap-2 mt-1">
                                         <Activity className="w-4 h-4 animate-pulse" /> {t('dashboard.tracking.live', 'LIVE TRACKING')}
                                     </p>
@@ -250,7 +250,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             {/* Stepper */}
                             <div className="relative flex justify-between items-center max-w-4xl mx-auto mt-10 mb-4 px-4 sm:px-10">
                                 {/* Base Progress Line */}
-                                <div className="absolute top-4 left-10 right-10 h-1.5 bg-slate-800 rounded-full"></div>
+                                <div className="absolute top-4 left-10 right-10 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
                                 {/* Active Progress Line */}
                                 <div 
                                     className="absolute top-4 left-10 h-1.5 bg-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.5)] rounded-full transition-all duration-1000 ease-out"
@@ -267,8 +267,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                             {/* Step Circle */}
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 relative z-10 transition-all duration-500
                                                 ${isCompleted ? 'bg-brand-primary border-brand-primary text-slate-900 shadow-[0_0_20px_rgba(6,182,212,0.4)]' : 
-                                                  isActive ? 'bg-slate-900 border-brand-primary border-dashed animate-[spin_4s_linear_infinite] shadow-[0_0_20px_rgba(6,182,212,0.6)]' : 
-                                                  'bg-slate-900 border-slate-700 text-slate-500'}`}
+                                                  isActive ? 'bg-white dark:bg-slate-900 border-brand-primary border-dashed animate-[spin_4s_linear_infinite] shadow-[0_0_20px_rgba(6,182,212,0.6)]' : 
+                                                  'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-400 dark:text-slate-500'}`}
                                             >
                                                 {/* Inner indicator for active state to not spin the icon */}
                                                 <div className={`w-full h-full rounded-full flex items-center justify-center absolute top-0 left-0 ${isActive && 'animate-[spin_4s_linear_infinite_reverse]'}`}>
@@ -279,7 +279,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                             
                                             {/* Label */}
                                             <span className={`absolute top-14 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors duration-300
-                                                ${isCompleted || isActive ? 'text-white drop-shadow-md' : 'text-slate-500'}`}>
+                                                ${isCompleted || isActive ? \'text-slate-900 dark:text-white drop-shadow-md\' : \'text-slate-400 dark:text-slate-500\'}`}>
                                                 {step.label}
                                             </span>
                                         </div>
@@ -319,14 +319,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 )}
 
                 {/* 3. Spending Analytics Chart (Span 8 or full depending on EcoImpact) */}
-                <div className={`md:col-span-6 ${ecoSettings.enabled !== false ? 'xl:col-span-8' : 'xl:col-span-12'} bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 relative overflow-hidden group shadow-lg`}>
+                <div className={`md:col-span-6 ${ecoSettings.enabled !== false ? 'xl:col-span-8' : 'xl:col-span-12'} bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-3xl p-6 sm:p-8 relative overflow-hidden group shadow-lg`}>
                     <div className="flex items-center justify-between mb-8 relative z-10">
                         <div>
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <BarChart3 className="w-5 h-5 text-brand-secondary drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
                                 {t('dashboard.spending.title', 'Ausgaben Übersicht')}
                             </h3>
-                            <p className="text-sm text-slate-400 mt-1">{t('dashboard.spending.desc', 'Deine gesamten Käufe der letzten 6 Monate')}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('dashboard.spending.desc', 'Deine gesamten Käufe der letzten 6 Monate')}</p>
                         </div>
                     </div>
                     
@@ -365,9 +365,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
 
                 {/* 4. Unified Timeline (Span 4) */}
-                <div className="md:col-span-6 xl:col-span-4 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col relative overflow-hidden group shadow-lg">
+                <div className="md:col-span-6 xl:col-span-4 bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col relative overflow-hidden group shadow-lg">
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                             <Zap className="w-5 h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
                             {t('dashboard.activities.title', 'Aktivitäten')}
                         </h3>
@@ -419,7 +419,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                         )}
                                     </div>
                                     <div className="pb-4 pt-1">
-                                        <p className="text-white text-sm font-medium group-hover/item:text-brand-primary transition-colors">{item.title}</p>
+                                        <p className="text-slate-900 dark:text-white text-sm font-medium group-hover/item:text-brand-primary transition-colors">{item.title}</p>
                                         <p className="text-xs text-slate-500 mt-1 font-mono">
                                             {item.date ? new Date(item.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
                                         </p>
@@ -432,26 +432,26 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 {/* 5. Mini Stats Row (Span 12, auto-fit) */}
                 <div className="md:col-span-6 xl:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-                    <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-4 sm:p-5 hover:bg-slate-800/50 transition-colors group">
+                    <div className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl p-4 sm:p-5 hover:bg-slate-800/50 transition-colors group">
                         <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <ShoppingCart className="w-5 h-5" />
                         </div>
-                        <p className="text-2xl font-black text-white">{totalOrders}</p>
-                        <p className="text-xs text-slate-400 mt-1">{t('dashboard.stats.orders', 'Gesamtbestellungen')}</p>
+                        <p className="text-2xl font-black text-slate-900 dark:text-white">{totalOrders}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('dashboard.stats.orders', 'Gesamtbestellungen')}</p>
                     </div>
-                    <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-4 sm:p-5 hover:bg-slate-800/50 transition-colors group">
+                    <div className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl p-4 sm:p-5 hover:bg-slate-800/50 transition-colors group">
                         <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <Wrench className="w-5 h-5" />
                         </div>
-                        <p className="text-2xl font-black text-white">{repairs.length}</p>
-                        <p className="text-xs text-slate-400 mt-1">{t('dashboard.stats.repairs', 'Reparatur-Historie')}</p>
+                        <p className="text-2xl font-black text-slate-900 dark:text-white">{repairs.length}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('dashboard.stats.repairs', 'Reparatur-Historie')}</p>
                     </div>
-                    <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-4 sm:p-5 hover:bg-slate-800/50 transition-colors group">
+                    <div className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl p-4 sm:p-5 hover:bg-slate-800/50 transition-colors group">
                         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <TrendingUp className="w-5 h-5" />
                         </div>
-                        <p className="text-2xl font-black text-white">{valuations.length}</p>
-                        <p className="text-xs text-slate-400 mt-1">{t('dashboard.stats.valuations', 'Geräte verkauft')}</p>
+                        <p className="text-2xl font-black text-slate-900 dark:text-white">{valuations.length}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('dashboard.stats.valuations', 'Geräte verkauft')}</p>
                     </div>
                     {promotions.length > 0 ? (
                         <div className="bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 backdrop-blur-xl border border-brand-primary/30 rounded-2xl p-4 sm:p-5 hover:border-brand-primary/50 transition-colors relative overflow-hidden group hover:cursor-pointer" onClick={() => navigate('/marketplace')}>
@@ -461,10 +461,58 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             <p className="text-[10px] text-brand-primary/80 mt-2 flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">{t('dashboard.promotions.cta', 'Jetzt entdecken')} <ArrowRight className="w-3 h-3" /></p>
                         </div>
                     ) : (
-                         <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-4 sm:p-5 flex flex-col justify-center">
-                            <p className="text-sm text-slate-400 text-center">{t('dashboard.stats.comingSoon', 'Weitere Features bald verfügbar')}</p>
+                         <div className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl p-4 sm:p-5 flex flex-col justify-center">
+                            <p className="text-sm text-slate-500 dark:text-slate-400 text-center">{t('dashboard.stats.comingSoon', 'Weitere Features bald verfügbar')}</p>
                         </div>
                     )}
+                </div>
+
+                {/* 6. Quick Actions Banner */}
+                <div className="md:col-span-6 xl:col-span-12">
+                    <div className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-3xl p-5 sm:p-6 relative overflow-hidden group shadow-lg">
+                        <div className="absolute inset-0 bg-gradient-to-r from-brand-primary/5 via-transparent to-purple-500/5 pointer-events-none" />
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 relative z-10">
+                            <div className="flex items-center gap-3 shrink-0">
+                                <div className="w-10 h-10 rounded-xl bg-brand-primary/20 flex items-center justify-center">
+                                    <Zap className="w-5 h-5 text-brand-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-slate-900 dark:text-white font-bold text-sm">{t('dashboard.quickActions.title', 'Schnellzugriff')}</p>
+                                    <p className="text-slate-500 text-xs">{t('dashboard.quickActions.subtitle', 'Direkt zu deinen wichtigsten Bereichen')}</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-3 sm:ml-auto">
+                                <button
+                                    onClick={() => navigate('/marketplace')}
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/50 text-blue-400 text-sm font-bold rounded-xl transition-all hover:scale-105 active:scale-95 group/btn"
+                                >
+                                    <Package className="w-4 h-4 group-hover/btn:drop-shadow-[0_0_6px_rgba(59,130,246,1)]" />
+                                    {t('dashboard.hero.marketplace', 'Marktplatz')}
+                                </button>
+                                <button
+                                    onClick={() => navigate('/repair')}
+                                    className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/50 text-purple-400 text-sm font-bold rounded-xl transition-all hover:scale-105 active:scale-95 group/btn"
+                                >
+                                    <Wrench className="w-4 h-4 group-hover/btn:drop-shadow-[0_0_6px_rgba(168,85,247,1)]" />
+                                    {t('dashboard.hero.newRepair', 'Reparatur buchen')}
+                                </button>
+                                <button
+                                    onClick={() => navigate('/valuation')}
+                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/50 text-emerald-400 text-sm font-bold rounded-xl transition-all hover:scale-105 active:scale-95 group/btn"
+                                >
+                                    <TrendingUp className="w-4 h-4 group-hover/btn:drop-shadow-[0_0_6px_rgba(16,185,129,1)]" />
+                                    {t('dashboard.quickActions.sell', 'Gerät verkaufen')}
+                                </button>
+                                <button
+                                    onClick={() => navigate('/marketplace?section=accessories')}
+                                    className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/50 text-amber-400 text-sm font-bold rounded-xl transition-all hover:scale-105 active:scale-95 group/btn"
+                                >
+                                    <ShoppingCart className="w-4 h-4 group-hover/btn:drop-shadow-[0_0_6px_rgba(245,158,11,1)]" />
+                                    {t('dashboard.quickActions.accessories', 'Zubehör')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>

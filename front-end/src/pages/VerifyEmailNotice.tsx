@@ -7,24 +7,24 @@ const VerifyEmailNotice: React.FC = () => {
     const email = location.state?.email || 'your email';
 
     return (
-        <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4">
-            <div className="w-full max-w-lg bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl text-center">
+        <div className="min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center p-4">
+            <div className="w-full max-w-lg bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl text-center">
                 <div className="mx-auto w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-6 border border-green-500/30">
                     <Mail className="w-10 h-10 text-green-400" />
                 </div>
 
-                <h1 className="text-3xl font-black text-white mb-4">Verify Your Email</h1>
+                <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-4">Verify Your Email</h1>
 
-                <p className="text-slate-400 text-lg mb-6 leading-relaxed">
+                <p className="text-slate-500 dark:text-slate-400 text-lg mb-6 leading-relaxed">
                     We've sent a verification link to <br />
-                    <span className="text-white font-bold bg-slate-800 px-3 py-1 rounded-lg mt-2 inline-block">{email}</span>
+                    <span className="text-slate-900 dark:text-white font-bold bg-slate-800 px-3 py-1 rounded-lg mt-2 inline-block">{email}</span>
                 </p>
 
                 <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-8 text-left">
                     <h3 className="text-blue-400 font-bold mb-2 flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" /> Next Steps:
                     </h3>
-                    <ul className="text-slate-400 text-sm space-y-2 list-disc list-inside">
+                    <ul className="text-slate-500 dark:text-slate-400 text-sm space-y-2 list-disc list-inside">
                         <li>Check your inbox for an email from HandyLand.</li>
                         <li>Click the verification link in the email.</li>
                         <li>Return here to log in to your account.</li>
@@ -41,7 +41,7 @@ const VerifyEmailNotice: React.FC = () => {
 
                     <Link
                         to="/"
-                        className="block text-slate-500 hover:text-slate-300 text-sm transition-colors"
+                        className="block text-slate-500 hover:text-slate-700 dark:text-slate-300 text-sm transition-colors"
                     >
                         Return to Home
                     </Link>

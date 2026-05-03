@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Trash2, CheckCircle, AlertCircle, Lock, Unlock, Users, Shield, UserCheck, UserX, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Trash2, Lock, Unlock, Users, Shield, UserCheck, UserX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../utils/api';
 import toast from 'react-hot-toast';
 import useDebounce from '../hooks/useDebounce';

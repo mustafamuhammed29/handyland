@@ -75,7 +75,7 @@ const MAINTENANCE_FLAG = path.join(__dirname, 'MAINTENANCE_MODE');
 app.use('/api', async (req, res, next) => {
     // Skip: health, auth (all endpoints), admin status, maintenance info, translations, and public promo
     const bypass = ['/health', '/auth', '/status', '/maintenance-info', '/translations', '/coupons/latest-promo'];
-    if (bypass.some(p => req.path.startsWith(p))) return next();
+    if (bypass.some(p => req.path.startsWith(p))) {return next();}
 
     if (fs.existsSync(MAINTENANCE_FLAG)) {
         // Admins bypass maintenance mode
@@ -99,10 +99,10 @@ app.use('/api', async (req, res, next) => {
         let estimatedTime = '';
         try {
             const data = JSON.parse(fs.readFileSync(MAINTENANCE_FLAG, 'utf8'));
-            if(data.title) title = data.title;
-            if(data.message) message = data.message;
-            if(data.estimatedTime) estimatedTime = data.estimatedTime;
-        } catch(e) {}
+            if(data.title) {title = data.title;}
+            if(data.message) {message = data.message;}
+            if(data.estimatedTime) {estimatedTime = data.estimatedTime;}
+        } catch(e) { /* ignore parse error */ }
 
         return res.status(503).json({
             success: false,
@@ -124,12 +124,12 @@ app.get('/api/maintenance-info', (req, res) => {
         let statusText2 = 'Neue Reparaturen werden angewendet...';
         try {
             const data = JSON.parse(fs.readFileSync(MAINTENANCE_FLAG, 'utf8'));
-            if(data.title) title = data.title;
-            if(data.message) message = data.message;
-            if(data.estimatedTime) estimatedTime = data.estimatedTime;
-            if(data.statusText1) statusText1 = data.statusText1;
-            if(data.statusText2) statusText2 = data.statusText2;
-        } catch(e) {}
+            if(data.title) {title = data.title;}
+            if(data.message) {message = data.message;}
+            if(data.estimatedTime) {estimatedTime = data.estimatedTime;}
+            if(data.statusText1) {statusText1 = data.statusText1;}
+            if(data.statusText2) {statusText2 = data.statusText2;}
+        } catch(e) { /* ignore parse error */ }
 
         return res.json({ maintenance: true, title, message, estimatedTime, statusText1, statusText2 });
     }
@@ -170,7 +170,6 @@ app.get('/api/health', async (req, res) => {
 });
 
 
-
 const { protect, authorize } = require('./middleware/auth');
 app.get('/api/status', protect, authorize('admin'), (req, res) => {
     const dbStates = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
@@ -209,8 +208,45 @@ setInterval(cleanupExpiredTokens, 6 * 60 * 60 * 1000);
 const startBackupJob = require('./utils/backupJob');
 const startCartRecoveryJob = require('./utils/cartRecoveryJob');
 
+// ── Graceful Shutdown ─────────────────────────────────────────────────────────
+const gracefulShutdown = (signal) => {
+    logger.info(`\n⚡ ${signal} received — shutting down gracefully...`);
+    server.close(async () => {
+        logger.info('✅ HTTP server closed — no new connections accepted.');
+        try {
+            await mongoose.connection.close(false);
+            logger.info('✅ MongoDB connection closed cleanly.');
+        } catch (err) {
+            logger.error('❌ Error closing MongoDB connection:', err.message);
+        }
+        process.exit(0);
+    });
+
+    // Force-kill if graceful close takes too long (10 seconds)
+    setTimeout(() => {
+        logger.error('❌ Forced shutdown after 10s timeout.');
+        process.exit(1);
+    }, 10_000);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM')); // Docker / Render / PM2
+process.on('SIGINT',  () => gracefulShutdown('SIGINT'));  // Ctrl+C
+
+// Catch unhandled promise rejections to prevent silent failures
+process.on('unhandledRejection', (reason, promise) => {
+    logger.error('⚠️ Unhandled Promise Rejection:', { reason: reason?.message || reason });
+    // Don't crash in development — just log it
+    if (process.env.NODE_ENV === 'production') {
+        gracefulShutdown('unhandledRejection');
+    }
+});
+
 // ── Boot ───────────────────────────────────────────────────────────────────────
-connectDB().then(() => {
+connectDB().then(async () => {
+    // Initialize dynamic social strategies
+    const { initSocialStrategies } = require('./config/passport');
+    await initSocialStrategies();
+
     cleanupExpiredTokens();
     startBackupJob();
     startCartRecoveryJob();

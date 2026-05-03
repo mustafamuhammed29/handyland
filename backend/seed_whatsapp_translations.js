@@ -58,7 +58,7 @@ async function seed() {
                 await Translation.create(item);
             }
         }
-        
+
         console.log('Done.');
     } catch (err) {
         console.error('Error:', err);

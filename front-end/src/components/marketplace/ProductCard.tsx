@@ -160,9 +160,11 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         <span className="text-[9px] md:text-xs text-slate-600 dark:text-slate-300">5G</span>
                     </div>
                 </div>
-                <div className="mt-auto flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-3">
-                    <div className="text-base md:text-xl font-bold text-slate-900 dark:text-white mb-2 md:mb-0">{formatPrice(product.price)}</div>
-                    <div className="flex items-center gap-1.5 md:gap-2 w-full md:w-auto">
+                <div className="mt-auto flex flex-row items-center justify-between gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-slate-800/50">
+                    <div className="text-base md:text-lg lg:text-xl font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                        {formatPrice(product.price)}
+                    </div>
+                    <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0 ml-auto">
                         <motion.button
                             whileTap={{ scale: 0.9 }}
                             onClick={(e) => onToggleWishlist(e, product)}

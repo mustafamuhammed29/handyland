@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react';
 import {
     LayoutDashboard,
     UserCircle, Settings, LogOut, Activity,
-    Wallet, Shield, BarChart3, Heart, ExternalLink, Mail, Camera, User, Package, Wrench
+    Wallet, Shield, BarChart3, Heart, ExternalLink, Mail, Camera, User, Package, Wrench,
+    Zap, Wrench as RepairIcon, BarChart2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -64,6 +65,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const unreadCount = notifications.data?.filter((n: any) => !n.read).length || 0;
     const currentUser = user.data || initialUser;
     const isAdmin = currentUser?.role === 'admin';
+
+    // Count unread messages (admin-replied messages that haven't been clicked)
+    const unreadMessages = React.useMemo(() => {
+        // We track this via sessionStorage to avoid re-fetching
+        const seenKey = `seen_msgs_${currentUser?._id}`;
+        const seen = sessionStorage.getItem(seenKey);
+        return 0; // Will be updated when messages tab loads
+    }, [currentUser?._id]);
 
     // FIXED: Wrapped all handlers with useCallback (FIX 8)
     const handleDownloadInvoice = useCallback(async (orderId: string) => {
@@ -217,14 +226,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     }
 
     const navItems = [
-        { id: 'overview', label: t('dashboard.overview', 'Übersicht'), icon: <Activity className="w-4 h-4" /> },
-        { id: 'orders', label: t('orders.title', 'Meine Bestellungen'), icon: <Package className="w-4 h-4" /> },
-        { id: 'repairs', label: t('repairs.title', 'Aktive Reparaturen'), icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.length || 0 },
-        { id: 'valuations', label: t('valuations.title', 'Meine Bewertungen'), icon: <BarChart3 className="w-4 h-4" /> },
-        { id: 'wallet', label: t('wallet.title', 'Digitale Brieftasche'), icon: <Wallet className="w-4 h-4" /> },
-        { id: 'wishlist', label: t('wishlist.title', 'Wunschliste'), icon: <Heart className="w-4 h-4" /> },
-        { id: 'messages', label: t('messages.title', 'Nachrichten'), icon: <Mail className="w-4 h-4" /> },
-        { id: 'settings', label: t('settings.title', 'Kontoeinstellungen'), icon: <Settings className="w-4 h-4" /> },
+        { id: 'overview', label: 'Übersicht', icon: <Activity className="w-4 h-4" /> },
+        { id: 'orders', label: 'Meine Bestellungen', icon: <Package className="w-4 h-4" />, badge: orders.data?.filter((o: any) => ['pending','processing'].includes(o.status)).length || 0 },
+        { id: 'repairs', label: 'Aktive Reparaturen', icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.filter((r: any) => !['completed','cancelled','ready'].includes(r.status)).length || 0 },
+        { id: 'valuations', label: 'Meine Verkäufe', icon: <BarChart3 className="w-4 h-4" /> },
+        { id: 'wallet', label: 'Digitales Guthaben', icon: <Wallet className="w-4 h-4" /> },
+        { id: 'wishlist', label: 'Wunschliste', icon: <Heart className="w-4 h-4" /> },
+        { id: 'messages', label: 'Nachrichten', icon: <Mail className="w-4 h-4" />, badge: unreadCount > 0 && activeTab !== 'messages' ? unreadCount : 0 },
+        { id: 'settings', label: 'Kontoeinstellungen', icon: <Settings className="w-4 h-4" /> },
     ];
 
     const ADMIN_PANEL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3001';
@@ -395,6 +404,70 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 </button>
                             </div>
                         </nav>
+
+                        {/* Quick Actions Bar */}
+                        {!isAdmin && (
+                            <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 px-1">
+                                    {t('dashboard.quickActions', 'Schnellzugriff')}
+                                </p>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button
+                                        onClick={() => navigate('/marketplace')}
+                                        title="Marktplatz"
+                                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-400 transition-all group hover:scale-105 active:scale-95"
+                                    >
+                                        <Package className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+                                        <span className="text-[10px] font-bold">Shop</span>
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/repair')}
+                                        title="Reparatur buchen"
+                                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40 text-purple-400 transition-all group hover:scale-105 active:scale-95"
+                                    >
+                                        <Wrench className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                                        <span className="text-[10px] font-bold">Repair</span>
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/valuation')}
+                                        title="Gerät verkaufen"
+                                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 transition-all group hover:scale-105 active:scale-95"
+                                    >
+                                        <BarChart3 className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                        <span className="text-[10px] font-bold">Sell</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('wallet')}
+                                        title="Wallet aufladen"
+                                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-400 transition-all group hover:scale-105 active:scale-95"
+                                    >
+                                        <Wallet className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+                                        <span className="text-[10px] font-bold">Wallet</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('messages')}
+                                        title="Support kontaktieren"
+                                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 hover:border-cyan-500/40 text-cyan-400 transition-all group hover:scale-105 active:scale-95 relative"
+                                    >
+                                        <Mail className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[8px] font-black flex items-center justify-center animate-bounce">
+                                                {unreadCount}
+                                            </span>
+                                        )}
+                                        <span className="text-[10px] font-bold">Support</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('settings')}
+                                        title="Einstellungen"
+                                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-500/10 hover:bg-slate-500/20 border border-slate-500/20 hover:border-slate-500/40 text-slate-400 transition-all group hover:scale-105 active:scale-95"
+                                    >
+                                        <Settings className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_rgba(148,163,184,0.8)]" />
+                                        <span className="text-[10px] font-bold">Settings</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

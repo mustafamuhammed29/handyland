@@ -6,9 +6,9 @@ exports.getPromotions = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
         const search = req.query.search || '';
-        
-        let query = {};
-        
+
+        const query = {};
+
         // Admins can see all, public API only sees active
         if (!req.user || req.user.role !== 'admin') {
             query.isActive = true;
@@ -27,10 +27,10 @@ exports.getPromotions = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
-        res.json({ 
-            success: true, 
-            count, 
-            promotions, 
+        res.json({
+            success: true,
+            count,
+            promotions,
             data: promotions,
             totalPages: Math.ceil(count / limit),
             currentPage: page

@@ -82,4 +82,9 @@ RepairTicketSchema.pre('save', function () {
     }
 });
 
+// Indexes for common queries
+RepairTicketSchema.index({ status: 1, createdAt: -1 }); // Admin dashboard: filter by status
+RepairTicketSchema.index({ user: 1, createdAt: -1 });   // Customer portal: my tickets
+// ticketId index is auto-created by unique:true in the schema field definition
+
 module.exports = mongoose.model('RepairTicket', RepairTicketSchema);

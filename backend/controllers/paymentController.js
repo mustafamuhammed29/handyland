@@ -72,8 +72,111 @@ const getStripe = async () => {
     }
 };
 
+// @desc    Create Stripe PaymentIntent (for embedded Stripe Elements form)
+// @route   POST /api/payment/create-payment-intent
+// @access  Public (optionalProtect)
+// Germany/EU: SCA/3DS handled automatically by Stripe, EUR, 19% MwSt
+exports.createPaymentIntent = async (req, res) => {
+    try {
+        const { items, shippingAddress, shippingFee, couponCode, discountAmount, termsAccepted } = req.body;
 
-// @desc    Create Stripe checkout session
+        if (!termsAccepted) {
+            return res.status(400).json({ success: false, message: 'You must accept the terms and conditions.' });
+        }
+
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ success: false, message: 'No items provided.' });
+        }
+
+        // Sanitize inputs
+        const sanitizeStr = (s) => String(s || '').replace(/<[^>]*>/g, '').trim().slice(0, 200);
+        const sanitizedItems = items.map(item => ({
+            ...item,
+            name: sanitizeStr(item.name),
+            price: Math.max(0, parseFloat(item.price) || 0),
+            quantity: Math.max(1, Math.min(100, parseInt(item.quantity) || 1)),
+        }));
+
+        // Validate stock
+        const orderItems = [];
+        for (const item of sanitizedItems) {
+            let doc;
+            if (item.productType === 'Product') {
+                doc = await Product.findById(item.product) || await Product.findOne({ id: item.product });
+            } else {
+                doc = await Accessory.findById(item.product) || await Accessory.findOne({ id: item.product });
+            }
+            if (!doc) {return res.status(404).json({ success: false, message: `Product not found: ${item.name}` });}
+            if (doc.stock < item.quantity) {return res.status(400).json({ success: false, message: `Insufficient stock for ${item.name}` });}
+            orderItems.push({
+                product: doc._id, productType: item.productType || 'Product',
+                name: item.name, quantity: item.quantity, price: item.price, image: item.image
+            });
+        }
+
+        // Totals (19% MwSt as required by German law)
+        const subtotal = sanitizedItems.reduce((acc, i) => acc + i.price * i.quantity, 0);
+        const shipping = shippingFee !== undefined ? parseFloat(shippingFee) : (subtotal >= 100 ? 0 : 5.99);
+        const discount = discountAmount ? parseFloat(discountAmount) : 0;
+        const tax = subtotal * 0.19;
+        const totalAmount = Math.max(0, subtotal + shipping + tax - discount);
+        const amountInCents = Math.round(totalAmount * 100);
+
+        if (amountInCents < 50) {
+            return res.status(400).json({ success: false, message: 'Order total is too low (min €0.50).' });
+        }
+
+        const stripe = await getStripe();
+
+        // Create PaymentIntent — Stripe handles SCA/3DS automatically (EU PSD2)
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amountInCents,
+            currency: 'eur',
+            automatic_payment_methods: { enabled: true }, // supports cards, SEPA, SOFORT, etc.
+            metadata: {
+                userId: req.user ? req.user.id : 'guest',
+                customerEmail: shippingAddress?.email || '',
+            },
+            receipt_email: shippingAddress?.email || undefined,
+            description: `HandyLand Order — ${sanitizedItems.map(i => i.name).join(', ').slice(0, 200)}`,
+        });
+
+        // Create pending Order (matched in webhook via paymentIntentId)
+        const order = await Order.create({
+            user: req.user ? req.user.id : undefined,
+            items: orderItems,
+            totalAmount,
+            tax,
+            shippingFee: shipping,
+            discountAmount: discount,
+            couponCode: couponCode || undefined,
+            status: 'pending',
+            paymentStatus: 'pending',
+            paymentMethod: 'card',
+            paymentId: paymentIntent.id,
+            shippingAddress: {
+                fullName: shippingAddress.fullName,
+                email: shippingAddress.email,
+                phone: shippingAddress.phone,
+                street: shippingAddress.street || shippingAddress.address,
+                city: shippingAddress.city,
+                zipCode: shippingAddress.zipCode,
+                country: shippingAddress.country || 'Germany',
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            clientSecret: paymentIntent.client_secret,
+            orderId: order._id,
+        });
+    } catch (error) {
+        console.error('createPaymentIntent error:', error);
+        res.status(500).json({ success: false, message: 'Error creating payment intent.', error: error.message });
+    }
+};
+
+
 // @route   POST /api/payment/create-checkout-session
 // @access  Private
 exports.createCheckoutSession = async (req, res) => {

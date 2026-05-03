@@ -19,7 +19,7 @@ const SocialButton: React.FC<{ provider: 'google' | 'facebook' }> = ({ provider 
     const label = isGoogle ? 'Mit Google anmelden' : 'Mit Facebook anmelden';
     const bg = isGoogle
         ? 'bg-white hover:bg-gray-50 text-gray-800 border border-gray-300'
-        : 'bg-[#1877F2] hover:bg-[#166FE5] text-white';
+        : 'bg-[#1877F2] hover:bg-[#166FE5] text-slate-900 dark:text-white';
 
     return (
         <a
@@ -66,13 +66,13 @@ const PasswordInput: React.FC<{
                 required={required}
                 minLength={minLength}
                 maxLength={maxLength}
-                className="w-full pl-11 pr-11 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                className="w-full pl-11 pr-11 py-3 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
             />
             <button
                 type="button"
                 onClick={() => setShow(v => !v)}
                 aria-label={show ? 'Hide password' : 'Show password'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-200 transition-colors"
             >
                 {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -200,20 +200,20 @@ const Register: React.FC = () => {
     const textColor = passed <= 1 ? 'text-red-400' : passed === 2 ? 'text-yellow-400' : passed === 3 ? 'text-blue-400' : 'text-emerald-400';
 
     return (
-        <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center pt-32 p-4 pb-12">
+        <div className="min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center pt-32 p-4 pb-12">
             <div className="w-full max-w-2xl">
                 {/* Logo & Title */}
                 <div className="text-center mb-8">
                     <div className="inline-block p-4 bg-gradient-to-br from-green-600 to-cyan-500 rounded-2xl shadow-2xl shadow-green-900/50 mb-4">
                         <Shield className="w-12 h-12 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black text-white mb-2">Konto erstellen</h1>
-                    <p className="text-slate-400 uppercase tracking-wider text-sm">HEUTE BEI HANDYLAND ANMELDEN</p>
+                    <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-2">Konto erstellen</h1>
+                    <p className="text-slate-500 dark:text-slate-400 uppercase tracking-wider text-sm">HEUTE BEI HANDYLAND ANMELDEN</p>
                 </div>
 
                 {/* Register Card */}
-                <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl">
-                    <h2 className="text-2xl font-bold text-white mb-6">Dein Konto registrieren</h2>
+                <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Dein Konto registrieren</h2>
 
                     {/* Error */}
                     {error && (
@@ -227,25 +227,25 @@ const Register: React.FC = () => {
                         {/* Name + Phone */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Vollständiger Name</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Vollständiger Name</label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                     <input
                                         type="text" name="name" value={formData.name} onChange={handleChange}
                                         placeholder="z.B. Max Mustermann" required
-                                        className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                        className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Telefonnummer</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Telefonnummer</label>
                                 <div className="relative">
                                     <PhoneInput
                                         international
                                         defaultCountry="DE"
                                         value={formData.phone}
                                         onChange={handlePhoneChange}
-                                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg text-white transition-all [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:text-white [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:p-3 [&_.PhoneInputCountryIcon]:ml-3"
+                                        className="w-full bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white transition-all [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:text-slate-900 dark:text-white [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:p-3 [&_.PhoneInputCountryIcon]:ml-3"
                                     />
                                 </div>
                             </div>
@@ -253,13 +253,13 @@ const Register: React.FC = () => {
 
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">E-Mail-Adresse</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">E-Mail-Adresse</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                 <input
                                     type="email" name="email" value={formData.email} onChange={handleChange}
                                     placeholder="secure@handyland.com" required
-                                    className={`w-full pl-11 pr-11 py-3 bg-slate-800/50 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                                    className={`w-full pl-11 pr-11 py-3 bg-slate-800/50 border rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
                                         emailStatus === 'available' ? 'border-emerald-500/70 focus:ring-emerald-500'
                                         : emailStatus === 'taken' ? 'border-red-500/70 focus:ring-red-500'
                                         : 'border-slate-700 focus:ring-green-500'
@@ -267,7 +267,7 @@ const Register: React.FC = () => {
                                 />
                                 {/* Live status icon */}
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                    {emailStatus === 'checking' && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
+                                    {emailStatus === 'checking' && <Loader2 className="w-4 h-4 text-slate-500 dark:text-slate-400 animate-spin" />}
                                     {emailStatus === 'available' && <CheckCircle className="w-4 h-4 text-emerald-400" />}
                                     {emailStatus === 'taken' && <XCircle className="w-4 h-4 text-red-400" />}
                                 </div>
@@ -290,7 +290,7 @@ const Register: React.FC = () => {
                         {/* Password + Confirm */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Passwort</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Passwort</label>
                                 <PasswordInput
                                     name="password" value={formData.password} onChange={handleChange}
                                     required minLength={8} maxLength={20}
@@ -324,7 +324,7 @@ const Register: React.FC = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Passwort bestätigen</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Passwort bestätigen</label>
                                 <PasswordInput
                                     name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
                                     required minLength={8} maxLength={20}
@@ -366,7 +366,7 @@ const Register: React.FC = () => {
 
                     {/* Login Link */}
                     <div className="mt-6 pt-6 border-t border-slate-800">
-                        <p className="text-center text-slate-400 text-sm">
+                        <p className="text-center text-slate-500 dark:text-slate-400 text-sm">
                             Du hast bereits ein Konto?{' '}
                             <Link to="/login" className="text-green-400 font-semibold hover:text-green-300 transition-colors">Hier anmelden</Link>
                         </p>

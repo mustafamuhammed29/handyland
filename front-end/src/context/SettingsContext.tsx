@@ -138,6 +138,8 @@ interface Settings {
             usedCount: number;
         };
     };
+    accessoryCategories?: any[];
+    accessoryFaqs?: { question: string; answer: string; }[];
     features?: {
         comparisonEngine?: boolean;
         cartUpselling?: boolean;
@@ -171,6 +173,23 @@ interface Settings {
         faviconUrl?: string;
         googleAnalyticsId?: string;
         facebookPixelId?: string;
+    };
+    cookieConsent?: {
+        enabled?: boolean;
+        title?: string;
+        message?: string;
+        acceptAllBtn?: string;
+        rejectAllBtn?: string;
+        manageBtn?: string;
+        saveBtn?: string;
+        strictlyNecessaryTitle?: string;
+        strictlyNecessaryDesc?: string;
+        functionalTitle?: string;
+        functionalDesc?: string;
+        analyticsTitle?: string;
+        analyticsDesc?: string;
+        marketingTitle?: string;
+        marketingDesc?: string;
     };
     theme?: {
         primaryColor?: string;
@@ -329,6 +348,23 @@ const defaultSettings: Settings = {
         google: false,
         facebook: false
     },
+    cookieConsent: {
+        enabled: true,
+        title: 'Ihre Privatsphäre ist uns wichtig',
+        message: 'Wir verwenden Cookies für eine Reihe von Auswertungen, um damit Ihren Besuch auf unserer Website kontinuierlich verbessern zu können (z. B. damit Ihnen Ihre Login-Daten erhalten bleiben).\n\nSie können Ihre Einstellungen ändern und verschiedenen Arten von Cookies erlauben, auf Ihrem Rechner gespeichert zu werden, während Sie unsere Webseite besuchen. Sie können auf Ihrem Rechner gespeicherte Cookies ebenso weitgehend wieder entfernen. Bitte bedenken Sie aber, dass dadurch Teile unserer Website möglicherweise nicht mehr in der gedachten Art und Weise nutzbar sind.',
+        acceptAllBtn: 'Alle akzeptieren',
+        rejectAllBtn: 'Ich lehne ab',
+        manageBtn: 'Einstellungen ändern',
+        saveBtn: 'Einstellungen speichern',
+        strictlyNecessaryTitle: 'Technisch notwendige Cookies',
+        strictlyNecessaryDesc: 'Erforderlich für die sichere Funktion der Website. Kann nicht deaktiviert werden.',
+        functionalTitle: 'Funktions Cookies',
+        functionalDesc: 'Ermöglicht der Website, erweiterte Funktionalität und Personalisierung bereitzustellen.',
+        analyticsTitle: 'Tracking und Performance Cookies',
+        analyticsDesc: 'Helfen uns zu verstehen, wie Besucher mit unserer Website interagieren, um die Benutzererfahrung zu verbessern.',
+        marketingTitle: 'Targeting und Werbung Cookies',
+        marketingDesc: 'Wird verwendet, um Werbung zu liefern, die relevanter für Sie und Ihre Interessen ist.'
+    },
     theme: {
         primaryColor: '#06b6d4', // cyan-500
         secondaryColor: '#3b82f6' // blue-500
@@ -365,6 +401,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     theme: { ...defaultSettings.theme, ...(parsed.theme || {}) },
                     announcementBanner: { ...defaultSettings.announcementBanner, ...(parsed.announcementBanner || {}) },
                     promoPopup: { ...defaultSettings.promoPopup, ...(parsed.promoPopup || {}) },
+                    cookieConsent: { ...defaultSettings.cookieConsent, ...(parsed.cookieConsent || {}) },
                     seo: { ...(parsed.seo || {}) },
                 };
             }
@@ -425,6 +462,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     theme: { ...defaultSettings.theme, ...(safeData.theme || {}) },
                     announcementBanner: { ...defaultSettings.announcementBanner, ...(safeData.announcementBanner || {}) },
                     promoPopup: { ...defaultSettings.promoPopup, ...(safeData.promoPopup || {}) },
+                    cookieConsent: { ...defaultSettings.cookieConsent, ...(safeData.cookieConsent || {}) },
                     seo: { ...(safeData.seo || {}) },
                 };
 
@@ -495,6 +533,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 navbar: { ...prev.navbar, ...(freshData.navbar || {}) },
                 socialAuth: { ...prev.socialAuth, ...(freshData.socialAuth || {}) },
                 theme: { ...prev.theme, ...(freshData.theme || {}) },
+                cookieConsent: { ...prev.cookieConsent, ...(freshData.cookieConsent || {}) },
                 seo: { ...(freshData.seo || {}) },
             }));
 

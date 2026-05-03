@@ -36,8 +36,8 @@ exports.getCoupons = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
         const search = req.query.search || '';
-        
-        let query = {};
+
+        const query = {};
         if (search) {
             query.code = { $regex: search, $options: 'i' };
         }

@@ -176,7 +176,28 @@
     "buyAgain": "Erneut kaufen",
     "cancelling": "Wird storniert...",
     "keepOrder": "Bestellung behalten",
-    "confirmCancel": "Ja, stornieren"
+    "confirmCancel": "Ja, stornieren",
+    "refundStatus": "Rückgabe-Status",
+    "refundSubmitSuccess": "Rückgabeanfrage erfolgreich eingereicht!",
+    "refundSubmitFailed": "Fehler beim Einreichen der Rückgabeanfrage.",
+    "refundPending": "Rückgabeanfrage wird geprüft",
+    "refundApproved": "Rückerstattung genehmigt ✅",
+    "refundRejected": "Rückgabeanfrage abgelehnt",
+    "refundRejectedNote": "Ihre Rückgabeanfrage wurde leider abgelehnt.",
+    "refundCancelSuccess": "Rückgabeanfrage wurde storniert.",
+    "confirmCancelRefund": "Möchten Sie diese Rückgabeanfrage wirklich stornieren?",
+    "cancelRefundRequest": "Anfrage stornieren",
+    "loadingRefundStatus": "Rückgabe-Status wird geladen...",
+    "status": {
+      "pending": "Ausstehend",
+      "processing": "In Bearbeitung",
+      "shipped": "Versandt",
+      "delivered": "Zugestellt",
+      "cancelled": "Storniert",
+      "return_requested": "Rückgabe beantragt",
+      "refunded": "Rückerstattet"
+    },
+    "downloadInvoice": "Rechnung herunterladen"
   },
   "repairs": {
     "title": "Aktive Reparaturen",

@@ -44,4 +44,9 @@ const messageSchema = new mongoose.Schema({
     timestamps: true
 });
 
+// Indexes for inbox queries
+messageSchema.index({ status: 1, isArchived: 1, createdAt: -1 }); // Admin inbox filtering
+messageSchema.index({ user: 1, createdAt: -1 });                   // Customer message history
+messageSchema.index({ email: 1 });                                  // Guest user lookups
+
 module.exports = mongoose.model('Message', messageSchema);

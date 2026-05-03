@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, Download, ChevronRight, Search, Filter, Upload } from 'lucide-react';
+import { Package, Download, ChevronRight, Search, Filter, Upload, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Order } from '../../types';
@@ -38,6 +38,9 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
             case 'processing': return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
             case 'pending': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30';
             case 'cancelled': return 'bg-red-500/10 text-red-400 border-red-500/30';
+            case 'shipped': return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30';
+            case 'return_requested': return 'bg-orange-500/10 text-orange-400 border-orange-500/30';
+            case 'refunded': return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
             default: return 'bg-slate-500/10 text-slate-400 border-slate-500/30';
         }
     };
@@ -83,7 +86,10 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         <option value="all">{t('orders.all_status', 'Alle Status')}</option>
                         <option value="pending">{t('orders.status.pending', 'Ausstehend')}</option>
                         <option value="processing">{t('orders.status.processing', 'In Bearbeitung')}</option>
+                        <option value="shipped">{t('orders.status.shipped', 'Versandt')}</option>
                         <option value="delivered">{t('orders.status.delivered', 'Zugestellt')}</option>
+                        <option value="return_requested">{t('orders.status.return_requested', 'Rückgabe beantragt')}</option>
+                        <option value="refunded">{t('orders.status.refunded', 'Rückerstattet')}</option>
                         <option value="cancelled">{t('orders.status.cancelled', 'Storniert')}</option>
                     </select>
                 </div>
@@ -114,6 +120,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                     <div className="text-right">
                                         <p className="text-white font-bold text-lg">{formatPrice(order.totalAmount || 0)}</p>
                                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(order.status)}`}>
+                                            {order.status === 'return_requested' && <RotateCcw className="w-3 h-3 inline mr-1" />}
                                             {t(`orders.status.${order.status}`, order.status)}
                                         </span>
                                     </div>

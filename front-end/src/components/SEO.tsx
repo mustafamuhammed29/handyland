@@ -40,6 +40,14 @@ export const SEO: React.FC<SEOProps> = ({
     const rawOg = ogImage || seoSettings.defaultOgImage || '/og-image.jpg';
     const finalOgImage = rawOg.startsWith('http') ? rawOg : getImageUrl(rawOg);
 
+    React.useEffect(() => {
+        const link = document.getElementById('app-favicon') as HTMLLinkElement;
+        if (link) {
+            link.href = seoSettings.faviconUrl ? getImageUrl(seoSettings.faviconUrl) : '/favicon.ico?v=4';
+            link.removeAttribute('type');
+        }
+    }, [seoSettings.faviconUrl]);
+
     return (
         <Helmet>
             {/* Standard metadata tags */}
@@ -50,6 +58,9 @@ export const SEO: React.FC<SEOProps> = ({
             {canonical && <link rel="canonical" href={canonical} />}
 
             {/* Open Graph tags */}
+            {seoSettings.googleSiteVerificationId && (
+                <meta name="google-site-verification" content={seoSettings.googleSiteVerificationId} />
+            )}
             <meta property="og:title" content={finalTitle} />
             <meta property="og:description" content={finalDescription} />
             <meta property="og:type" content={ogType} />
@@ -63,10 +74,7 @@ export const SEO: React.FC<SEOProps> = ({
             <meta name="twitter:description" content={finalDescription} />
             <meta name="twitter:image" content={finalOgImage} />
 
-            {/* Dynamic Favicon */}
-            {seoSettings.faviconUrl && (
-                <link rel="icon" href={getImageUrl(seoSettings.faviconUrl)} />
-            )}
+            {/* Dynamic Favicon is handled via useEffect below to prevent duplicates */}
 
             {/* Google Analytics */}
             {seoSettings.googleAnalyticsId && (
@@ -100,6 +108,31 @@ export const SEO: React.FC<SEOProps> = ({
                     `
                 }} />
             )}
+
+            {/* Advanced SEO Structured Data (JSON-LD) for Google */}
+            <script type="application/ld+json">
+                {JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "WebSite",
+                    "name": siteTitle,
+                    "url": canonical || (typeof window !== 'undefined' ? window.location.origin : 'https://handyland.com'),
+                    "description": finalDescription
+                })}
+            </script>
+            <script type="application/ld+json">
+                {JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": ["LocalBusiness", "MobilePhoneStore", "ElectronicsStore"],
+                    "name": siteTitle,
+                    "image": finalOgImage,
+                    "description": finalDescription,
+                    "priceRange": "€€",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "DE"
+                    }
+                })}
+            </script>
         </Helmet>
     );
 };

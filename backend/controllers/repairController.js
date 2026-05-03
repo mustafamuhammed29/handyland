@@ -7,7 +7,7 @@ exports.getRepairCatalog = async (req, res) => {
         const skip = (page - 1) * limit;
         const search = req.query.search;
         let query = {};
-        
+
         if (search) {
             query = {
                 $or: [
@@ -17,7 +17,7 @@ exports.getRepairCatalog = async (req, res) => {
                 ]
             };
         }
-        
+
         const [devices, total] = await Promise.all([
             RepairDevice.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
             RepairDevice.countDocuments(query)
@@ -37,13 +37,13 @@ exports.getRepairCatalog = async (req, res) => {
 exports.getRepairCatalogStats = async (req, res) => {
     try {
         const devices = await RepairDevice.find({}, 'services isVisible');
-        
+
         let totalServices = 0;
         let totalCost = 0;
         let hiddenDevices = 0;
 
         devices.forEach(device => {
-            if (!device.isVisible) hiddenDevices++;
+            if (!device.isVisible) {hiddenDevices++;}
             if (device.services && device.services.length > 0) {
                 totalServices += device.services.length;
                 device.services.forEach(srv => {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cookie, X, Check, Target, BarChart2 } from 'lucide-react';
+import { Cookie, X, Check, Target, BarChart2, Settings2 } from 'lucide-react';
 import { useCookieConsent } from '../context/CookieContext';
+import { useSettings } from '../context/SettingsContext';
 
 // Simple Toggle Component
 const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; label?: string }> = ({ checked, onChange, disabled, label }) => (
@@ -16,24 +17,33 @@ const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void; disab
 
 export const CookieConsent: React.FC = () => {
     const { hasConsented, acceptAll, rejectAll, savePreferences } = useCookieConsent();
+    const { settings } = useSettings();
     const [isVisible, setIsVisible] = useState(false);
     const [showDetails, setShowDetails] = useState(false);
     
     // Manage local toggle state before saving
+    const [functional, setFunctional] = useState(false);
     const [analytics, setAnalytics] = useState(false);
     const [marketing, setMarketing] = useState(false);
 
+    const ccSettings = settings.cookieConsent;
+
     useEffect(() => {
+        if (ccSettings?.enabled === false) {
+            setIsVisible(false);
+            return;
+        }
+
         if (!hasConsented) {
             const timer = setTimeout(() => setIsVisible(true), 1500);
             return () => clearTimeout(timer);
         } else {
             setIsVisible(false);
         }
-    }, [hasConsented]);
+    }, [hasConsented, ccSettings?.enabled]);
 
     const handleSave = () => {
-        savePreferences({ analytics, marketing });
+        savePreferences({ functional, analytics, marketing });
         setIsVisible(false); // Context handles saving & hiding
     };
 
@@ -57,11 +67,11 @@ export const CookieConsent: React.FC = () => {
                             <div className="w-full">
                                 <div className="flex items-center gap-2 mb-2 sm:hidden">
                                     <Cookie className="w-5 h-5 text-blue-400" />
-                                    <h3 className="text-lg font-bold text-white">We value your privacy</h3>
+                                    <h3 className="text-lg font-bold text-white">{ccSettings?.title || 'Ihre Privatsphäre ist uns wichtig'}</h3>
                                 </div>
-                                <h3 className="text-lg font-bold text-white mb-2 hidden sm:block">We value your privacy</h3>
-                                <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
-                                    We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept All", you consent to our use of cookies.
+                                <h3 className="text-lg font-bold text-white mb-2 hidden sm:block">{ccSettings?.title || 'Ihre Privatsphäre ist uns wichtig'}</h3>
+                                <p className="text-sm text-slate-300 leading-relaxed max-w-2xl whitespace-pre-line">
+                                    {ccSettings?.message || 'Wir verwenden Cookies für eine Reihe von Auswertungen...'}
                                 </p>
                                 
                                 {showDetails && (
@@ -74,19 +84,30 @@ export const CookieConsent: React.FC = () => {
                                             <div className="flex items-start gap-3">
                                                 <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                                                 <div>
-                                                    <p className="font-semibold text-white">Strictly Necessary</p>
-                                                    <p className="text-xs text-slate-400 mt-1">Required for the website to function securely. Cannot be disabled.</p>
+                                                    <p className="font-semibold text-white">{ccSettings?.strictlyNecessaryTitle || 'Technisch notwendige Cookies'}</p>
+                                                    <p className="text-xs text-slate-400 mt-1">{ccSettings?.strictlyNecessaryDesc || 'Erforderlich für die sichere Funktion...'}</p>
                                                 </div>
                                             </div>
                                             <Toggle checked={true} onChange={() => {}} disabled={true} />
+                                        </div>
+
+                                        <div className="flex items-center justify-between p-3 bg-slate-950/50 rounded-lg border border-slate-800">
+                                            <div className="flex items-start gap-3">
+                                                <Settings2 className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+                                                <div>
+                                                    <p className="font-semibold text-white">{ccSettings?.functionalTitle || 'Funktions Cookies'}</p>
+                                                    <p className="text-xs text-slate-400 mt-1">{ccSettings?.functionalDesc || 'Ermöglicht der Website, erweiterte Funktionalität...'}</p>
+                                                </div>
+                                            </div>
+                                            <Toggle checked={functional} onChange={setFunctional} />
                                         </div>
                                         
                                         <div className="flex items-center justify-between p-3 bg-slate-950/50 rounded-lg border border-slate-800">
                                             <div className="flex items-start gap-3">
                                                 <BarChart2 className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
                                                 <div>
-                                                    <p className="font-semibold text-white">Analytics & Performance</p>
-                                                    <p className="text-xs text-slate-400 mt-1">Help us understand how visitors interact with our website to improve UX.</p>
+                                                    <p className="font-semibold text-white">{ccSettings?.analyticsTitle || 'Tracking und Performance Cookies'}</p>
+                                                    <p className="text-xs text-slate-400 mt-1">{ccSettings?.analyticsDesc || 'Helfen uns zu verstehen...'}</p>
                                                 </div>
                                             </div>
                                             <Toggle checked={analytics} onChange={setAnalytics} />
@@ -96,8 +117,8 @@ export const CookieConsent: React.FC = () => {
                                             <div className="flex items-start gap-3">
                                                 <Target className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
                                                 <div>
-                                                    <p className="font-semibold text-white">Marketing & Tracking</p>
-                                                    <p className="text-xs text-slate-400 mt-1">Used to deliver advertisements more relevant to you and your interests.</p>
+                                                    <p className="font-semibold text-white">{ccSettings?.marketingTitle || 'Targeting und Werbung Cookies'}</p>
+                                                    <p className="text-xs text-slate-400 mt-1">{ccSettings?.marketingDesc || 'Wird verwendet, um Werbung zu liefern...'}</p>
                                                 </div>
                                             </div>
                                             <Toggle checked={marketing} onChange={setMarketing} />
@@ -114,7 +135,7 @@ export const CookieConsent: React.FC = () => {
                                     onClick={handleSave}
                                     className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-600/20 w-full whitespace-nowrap"
                                 >
-                                    Save Preferences
+                                    {ccSettings?.saveBtn || 'Einstellungen speichern'}
                                 </button>
                             ) : (
                                 <>
@@ -122,13 +143,13 @@ export const CookieConsent: React.FC = () => {
                                         onClick={acceptAll}
                                         className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-600/20 w-full whitespace-nowrap"
                                     >
-                                        Accept All
+                                        {ccSettings?.acceptAllBtn || 'Alle akzeptieren'}
                                     </button>
                                     <button 
                                         onClick={rejectAll}
                                         className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-all w-full whitespace-nowrap"
                                     >
-                                        Reject Non-Essential
+                                        {ccSettings?.rejectAllBtn || 'Ich lehne ab'}
                                     </button>
                                 </>
                             )}
@@ -136,7 +157,7 @@ export const CookieConsent: React.FC = () => {
                                 onClick={() => setShowDetails(!showDetails)}
                                 className="px-6 py-2.5 bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-white font-medium rounded-xl transition-all w-full text-sm underline-offset-4 hover:underline"
                             >
-                                {showDetails ? 'Hide Preferences' : 'Manage Preferences'}
+                                {showDetails ? (ccSettings?.saveBtn || 'Einstellungen speichern') : (ccSettings?.manageBtn || 'Einstellungen ändern')}
                             </button>
                         </div>
                         

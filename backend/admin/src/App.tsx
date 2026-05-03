@@ -1,35 +1,55 @@
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star, Box, PhoneForwarded, ShieldCheck, Languages } from 'lucide-react';
-import Dashboard from './pages/Dashboard';
-import InventoryManager from './pages/InventoryManager';
-import { ActiveCarts } from './components/ActiveCarts';
-import ProductsManager from './pages/ProductsManager';
-import RepairManager from './pages/RepairManager';
-import SettingsManager from './pages/SettingsManager';
-import AccessoriesManager from './pages/AccessoriesManager';
-import ArchiveManager from './pages/ArchiveManager';
-import RepairTicketManager from './pages/RepairTicketManager';
-import PageManager from './pages/PageManager';
-import ValuationManager from './pages/ValuationManager';
-import CompareManager from './pages/CompareManager';
-import OrdersManager from './pages/OrdersManager';
-import UsersManager from './pages/UsersManager';
-import EmailManager from './pages/EmailManager';
-import PaymentManager from './pages/PaymentManager';
-import ShippingManager from './pages/ShippingManager';
-import MessagesManager from './pages/MessagesManager';
-import CouponManager from './pages/CouponManager';
-import ReviewsManager from './pages/ReviewsManager';
+import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star, Box, PhoneForwarded, ShieldCheck, Languages, TrendingUp, BarChart3, RotateCcw, Menu, X } from 'lucide-react';
+
+// Eagerly loaded (always needed)
 import Login from './pages/Login';
-import WalletManager from './pages/WalletManager';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import LoanerManager from './pages/LoanerManager';
-import WarrantyManager from './pages/WarrantyManager';
-import TranslationManager from './pages/TranslationManager';
 import { NotificationBell } from './components/NotificationBell';
 import { useAdminNotifications } from './hooks/useAdminNotifications';
+import { AdminErrorBoundary } from './components/AdminErrorBoundary';
+
+// Lazy-loaded pages (loaded on-demand for faster initial load)
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const InventoryManager = React.lazy(() => import('./pages/InventoryManager'));
+const ActiveCarts = React.lazy(() => import('./components/ActiveCarts').then(m => ({ default: m.ActiveCarts })));
+const ProductsManager = React.lazy(() => import('./pages/ProductsManager'));
+const RepairManager = React.lazy(() => import('./pages/RepairManager'));
+const SettingsManager = React.lazy(() => import('./pages/SettingsManager'));
+const AccessoriesManager = React.lazy(() => import('./pages/AccessoriesManager'));
+const ArchiveManager = React.lazy(() => import('./pages/ArchiveManager'));
+const RepairTicketManager = React.lazy(() => import('./pages/RepairTicketManager'));
+const PageManager = React.lazy(() => import('./pages/PageManager'));
+const ValuationManager = React.lazy(() => import('./pages/ValuationManager'));
+const CompareManager = React.lazy(() => import('./pages/CompareManager'));
+const OrdersManager = React.lazy(() => import('./pages/OrdersManager'));
+const UsersManager = React.lazy(() => import('./pages/UsersManager'));
+const EmailManager = React.lazy(() => import('./pages/EmailManager'));
+const PaymentManager = React.lazy(() => import('./pages/PaymentManager'));
+const ShippingManager = React.lazy(() => import('./pages/ShippingManager'));
+const MessagesManager = React.lazy(() => import('./pages/MessagesManager'));
+const CouponManager = React.lazy(() => import('./pages/CouponManager'));
+const ReviewsManager = React.lazy(() => import('./pages/ReviewsManager'));
+const WalletManager = React.lazy(() => import('./pages/WalletManager'));
+const LoanerManager = React.lazy(() => import('./pages/LoanerManager'));
+const WarrantyManager = React.lazy(() => import('./pages/WarrantyManager'));
+const TranslationManager = React.lazy(() => import('./pages/TranslationManager'));
+const PriceResearchManager = React.lazy(() => import('./pages/PriceResearchManager'));
+const RefundManager = React.lazy(() => import('./pages/RefundManager'));
+
+const NotFound = React.lazy(() => import('./pages/NotFound'));
+
+// Premium loading spinner shown while lazy chunks load
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-[60vh]">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+      <span className="text-blue-400 font-bold tracking-widest uppercase text-xs animate-pulse">Loading Module...</span>
+    </div>
+  </div>
+);
 
 const SidebarLink = ({ to, icon: Icon, label }: { to: string, icon: React.ElementType, label: string }) => {
   const location = useLocation();
@@ -60,6 +80,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { notifications, unreadCount, isConnected, markAllRead, markOneRead, clearAll } = useAdminNotifications(isAuthenticated);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -72,18 +93,36 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     // Minimalist deep modern background
     <div className="flex min-h-screen bg-[#060B19] text-white font-sans selection:bg-blue-500/30 overflow-x-hidden">
       
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar - Glassmorphism */}
-      <aside className="w-[280px] border-r border-slate-800/60 p-5 flex flex-col fixed h-full bg-[#0B1120]/95 backdrop-blur-3xl z-40">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[280px] flex flex-col bg-[#0B1120]/95 backdrop-blur-3xl border-r border-slate-800/60 p-5 transition-transform duration-300 ease-in-out md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
         {/* Logo Area */}
-        <div className="flex items-center gap-3 mb-8 px-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)]">
-            <Settings className="text-white" size={22} />
+        <div className="flex items-center justify-between mb-8 px-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)]">
+              <Settings className="text-white" size={22} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">HandyLand</h1>
+              <p className="text-[10px] text-blue-400 font-mono tracking-widest uppercase mt-0.5">Admin_Console</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">HandyLand</h1>
-            <p className="text-[10px] text-blue-400 font-mono tracking-widest uppercase mt-0.5">Admin_Console</p>
-          </div>
+          <button 
+            className="md:hidden p-2 text-slate-400 hover:text-white"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close mobile menu"
+            title="Close mobile menu"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* User Profile Glass Card */}
@@ -100,7 +139,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         )}
 
         {/* Organized Navigation */}
-        <nav className="flex-1 space-y-1 overflow-y-auto pr-2 custom-scrollbar pb-6">
+        <nav className="flex-1 space-y-1 overflow-y-auto pr-2 custom-scrollbar pb-6" onClick={(e) => {
+          // If they clicked a link, close the menu
+          if ((e.target as HTMLElement).closest('a')) {
+            setIsMobileMenuOpen(false);
+          }
+        }}>
           <SidebarSectionHeader title="Overview" />
           <SidebarLink to="/" icon={LayoutDashboard} label="Dashboard" />
           <SidebarLink to="/messages" icon={MessageSquare} label="Inbox" />
@@ -108,12 +152,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarSectionHeader title="Shop & Orders" />
           <SidebarLink to="/carts" icon={ShoppingCart} label="Active Carts" />
           <SidebarLink to="/orders" icon={Package} label="Orders" />
+          <SidebarLink to="/refunds" icon={RotateCcw} label="Refunds" />
           <SidebarLink to="/products" icon={Smartphone} label="Products" />
           <SidebarLink to="/accessories" icon={Headphones} label="Accessories" />
 
           <SidebarSectionHeader title="Repairs & Services" />
           <SidebarLink to="/repairs" icon={Wrench} label="Repairs Catalog" />
           <SidebarLink to="/repair-tickets" icon={FileText} label="Repair Tickets" />
+
           <SidebarLink to="/archive" icon={ScanLine} label="Repair Archive" />
           <SidebarLink to="/loaners" icon={PhoneForwarded} label="Loaner Phones" />
           <SidebarLink to="/valuation" icon={FileText} label="Valuation Tool" />
@@ -128,7 +174,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarSectionHeader title="System Configuration" />
           <SidebarLink to="/wallet" icon={CreditCard} label="Wallet Manager" />
           <SidebarLink to="/inventory" icon={Box} label="Inventory & Sales" />
-          <SidebarLink to="/compare-manager" icon={Smartphone} label="Global Compare" />
+          <SidebarLink to="/price-research" icon={TrendingUp} label="Price Research" />
+          <SidebarLink to="/compare-manager" icon={BarChart3} label="Global Compare" />
           <SidebarLink to="/payment" icon={CreditCard} label="Payments" />
           <SidebarLink to="/shipping" icon={Truck} label="Shipping" />
           <SidebarLink to="/pages" icon={FileText} label="Content Pages" />
@@ -149,11 +196,21 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 ml-[280px] flex flex-col relative min-h-screen">
+      <main className="flex-1 md:ml-[280px] flex flex-col relative min-h-screen w-full">
         {/* Top Bar */}
-        <div className="sticky top-0 z-30 flex items-center justify-between px-8 py-3 bg-[#060B19]/90 backdrop-blur-xl border-b border-slate-800/60">
-          <div className="text-sm text-slate-500 font-medium">
-            HandyLand Admin Console
+        <div className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 py-3 bg-[#060B19]/90 backdrop-blur-xl border-b border-slate-800/60">
+          <div className="flex items-center gap-3">
+            <button 
+              className="md:hidden p-2 text-slate-400 hover:text-white"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open mobile menu"
+              title="Open mobile menu"
+            >
+              <Menu size={24} />
+            </button>
+            <div className="text-sm text-slate-500 font-medium hidden sm:block">
+              HandyLand Admin Console
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <NotificationBell
@@ -210,6 +267,7 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Layout>
+                <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/carts" element={<ActiveCarts />} />
@@ -236,7 +294,12 @@ function AppContent() {
                   <Route path="/emails" element={<EmailManager />} />
                   <Route path="/settings" element={<SettingsManager />} />
                   <Route path="/translations" element={<TranslationManager />} />
+                  <Route path="/price-research" element={<PriceResearchManager />} />
+                  <Route path="/refunds" element={<RefundManager />} />
+
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
+                </Suspense>
               </Layout>
             </ProtectedRoute>
           }
@@ -248,16 +311,18 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Toaster 
-        position="top-right" 
-        toastOptions={{ 
-            style: { background: '#0f172a', color: '#fff', border: '1px solid #1e293b' },
-            success: { iconTheme: { primary: '#10b981', secondary: '#fff' } }
-        }} 
-      />
-      <AppContent />
-    </AuthProvider>
+    <AdminErrorBoundary>
+      <AuthProvider>
+        <Toaster 
+          position="top-right" 
+          toastOptions={{ 
+              style: { background: '#0f172a', color: '#fff', border: '1px solid #1e293b' },
+              success: { iconTheme: { primary: '#10b981', secondary: '#fff' } }
+          }} 
+        />
+        <AppContent />
+      </AuthProvider>
+    </AdminErrorBoundary>
   );
 }
 

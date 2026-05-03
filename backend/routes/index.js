@@ -78,5 +78,6 @@ router.use('/warranties', require('./warrantyRoutes'));
 router.use('/price-research', require('./priceResearchRoutes'));
 router.use('/suppliers', require('./supplierRoutes'));
 router.use('/purchase-orders', require('./purchaseOrderRoutes'));
+router.use('/refunds', require('./refundRoutes'));
 
 module.exports = router;

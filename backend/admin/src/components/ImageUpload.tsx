@@ -48,16 +48,20 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label = "Pro
             <label className="block text-sm font-bold text-slate-400">{label}</label>
 
             {value ? (
-                <div className="relative rounded-xl overflow-hidden border border-slate-700 group h-48 bg-black flex justify-center items-center">
-                    <img src={value} alt="Uploaded" className="h-full object-contain" />
+                <div className="relative rounded-xl border border-slate-700 group bg-slate-900 p-6 flex justify-center items-center overflow-hidden">
+                    {/* Subtle dot pattern for transparent images */}
+                    <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#475569 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
+                    
+                    <img src={value} alt="Uploaded" className="max-h-[200px] max-w-full object-contain relative z-10 drop-shadow-2xl rounded" />
+                    
                     <button
                         type="button"
                         title="Remove image"
                         aria-label="Remove image"
                         onClick={() => onChange('')}
-                        className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-3 right-3 z-20 bg-red-600 hover:bg-red-500 text-white p-2 rounded-full shadow-lg shadow-red-900/50 opacity-0 group-hover:opacity-100 transition-all scale-90 hover:scale-100"
                     >
-                        <X size={16} />
+                        <X size={16} strokeWidth={3} />
                     </button>
                 </div>
             ) : (

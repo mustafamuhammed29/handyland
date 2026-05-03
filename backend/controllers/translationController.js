@@ -11,7 +11,7 @@ exports.getAllTranslations = async (req, res) => {
         const skip = (page - 1) * (limit || 0);
         const search = req.query.search || '';
 
-        let query = {};
+        const query = {};
         if (search) {
             query.$or = [
                 { key: { $regex: search, $options: 'i' } },
@@ -23,7 +23,7 @@ exports.getAllTranslations = async (req, res) => {
 
         const count = await Translation.countDocuments(query);
         const translationsQuery = Translation.find(query).sort({ namespace: 1, key: 1 });
-        
+
         if (limit > 0) {
             translationsQuery.skip(skip).limit(limit);
         }

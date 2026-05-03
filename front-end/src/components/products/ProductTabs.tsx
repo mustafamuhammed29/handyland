@@ -9,6 +9,7 @@ interface ProductTabsProps {
     product: any;
     reviews: any[];
     setShowReviewModal: (show: boolean) => void;
+    isAccessory?: boolean;
 }
 
 export const ProductTabs: React.FC<ProductTabsProps> = ({
@@ -16,11 +17,13 @@ export const ProductTabs: React.FC<ProductTabsProps> = ({
     setActiveTab,
     product,
     reviews,
-    setShowReviewModal
+    setShowReviewModal,
+    isAccessory
     }) => {
     const { t } = useTranslation();
     const { settings } = useSettings();
-    const faqs = settings.productFaqs || [];
+    const isProductAccessory = isAccessory !== undefined ? isAccessory : (product?.category?.toLowerCase() === 'accessory' || product?.category?.toLowerCase() === 'accessories' || product?.type?.toLowerCase() === 'accessory');
+    const faqs = isProductAccessory ? (settings.accessoryFaqs || []) : (settings.productFaqs || []);
 
     const tabLabels: Record<string, string> = {
         overview: t('product.tabs.overview', 'Übersicht'),
@@ -76,32 +79,49 @@ export const ProductTabs: React.FC<ProductTabsProps> = ({
                 )}
                 {activeTab === 'specs' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">{t('product.specs.performance', 'Leistung')}</h3>
-                            <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                <span className="text-slate-500">{t('product.specs.processor', 'Prozessor')}</span>
-                                <span className="text-slate-900 dark:text-slate-200">{product.specs?.cpu}</span>
+                        {isProductAccessory ? (
+                            <div className="col-span-1 md:col-span-2 space-y-4">
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">{t('product.specs.details', 'Produktdetails')}</h3>
+                                {Object.entries(product.specs || {}).map(([key, value]) => (
+                                    <div key={key} className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
+                                        <span className="text-slate-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                        <span className="text-slate-900 dark:text-slate-200">{value as React.ReactNode}</span>
+                                    </div>
+                                ))}
+                                {(!product.specs || Object.keys(product.specs).length === 0) && (
+                                    <p className="text-slate-500 py-4">Keine spezifischen technischen Daten verfügbar.</p>
+                                )}
                             </div>
-                            <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                <span className="text-slate-500">{t('product.specs.ram', 'RAM')}</span>
-                                <span className="text-slate-900 dark:text-slate-200">{product.specs?.ram}</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                <span className="text-slate-500">{t('product.specs.storage', 'Speicher')}</span>
-                                <span className="text-slate-900 dark:text-slate-200">{product.storage}</span>
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">{t('product.specs.displayBattery', 'Display & Akku')}</h3>
-                            <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                <span className="text-slate-500">{t('product.specs.screenSize', 'Bildschirmgröße')}</span>
-                                <span className="text-slate-900 dark:text-slate-200">{product.specs?.screen}</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
-                                <span className="text-slate-500">{t('product.specs.batteryCapacity', 'Akkukapazität')}</span>
-                                <span className="text-slate-900 dark:text-slate-200">{product.specs?.battery}</span>
-                            </div>
-                        </div>
+                        ) : (
+                            <>
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">{t('product.specs.performance', 'Leistung')}</h3>
+                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
+                                        <span className="text-slate-500">{t('product.specs.processor', 'Prozessor')}</span>
+                                        <span className="text-slate-900 dark:text-slate-200">{product.specs?.cpu || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
+                                        <span className="text-slate-500">{t('product.specs.ram', 'RAM')}</span>
+                                        <span className="text-slate-900 dark:text-slate-200">{product.specs?.ram || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
+                                        <span className="text-slate-500">{t('product.specs.storage', 'Speicher')}</span>
+                                        <span className="text-slate-900 dark:text-slate-200">{product.storage || 'N/A'}</span>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">{t('product.specs.displayBattery', 'Display & Akku')}</h3>
+                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
+                                        <span className="text-slate-500">{t('product.specs.screenSize', 'Bildschirmgröße')}</span>
+                                        <span className="text-slate-900 dark:text-slate-200">{product.specs?.screen || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-800/50">
+                                        <span className="text-slate-500">{t('product.specs.batteryCapacity', 'Akkukapazität')}</span>
+                                        <span className="text-slate-900 dark:text-slate-200">{product.specs?.battery || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 )}
                 {activeTab === 'reviews' && (
@@ -150,7 +170,7 @@ export const ProductTabs: React.FC<ProductTabsProps> = ({
                         
                         {faqs.length > 0 ? (
                             <div className="space-y-4">
-                                {faqs.map((faq, index) => (
+                                {faqs.map((faq: any, index: number) => (
                                     <div key={index} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-100 dark:border-slate-800">
                                         <h4 className="font-bold text-slate-900 dark:text-white mb-2">{faq.question}</h4>
                                         <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed whitespace-pre-line">{faq.answer}</p>

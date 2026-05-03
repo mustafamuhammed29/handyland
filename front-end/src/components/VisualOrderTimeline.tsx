@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, Truck, CheckCircle2, Clock, Wrench, Search, ShieldCheck, Inbox, XCircle } from 'lucide-react';
+import { Package, Truck, CheckCircle2, Clock, Wrench, Search, ShieldCheck, Inbox, XCircle, RotateCcw, BadgeCheck } from 'lucide-react';
 
 interface TimelineStep {
     id: string;
@@ -58,6 +58,8 @@ export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ curren
     }
 
     const isCancelled = normalizedStatus === 'cancelled' || normalizedStatus === 'failed';
+    const isReturnRequested = normalizedStatus === 'return_requested';
+    const isRefunded = normalizedStatus === 'refunded';
 
     return (
         <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl">
@@ -67,8 +69,24 @@ export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ curren
                 <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500">
                     <XCircle className="w-6 h-6 shrink-0" />
                     <div>
-                        <p className="font-bold">Order Cancelled</p>
-                        <p className="text-sm opacity-80">This transaction has been cancelled and will not proceed.</p>
+                        <p className="font-bold">Bestellung storniert</p>
+                        <p className="text-sm opacity-80">Diese Bestellung wurde storniert und wird nicht weiter bearbeitet.</p>
+                    </div>
+                </div>
+            ) : isReturnRequested ? (
+                <div className="flex items-center gap-3 p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-orange-400">
+                    <RotateCcw className="w-6 h-6 shrink-0" />
+                    <div>
+                        <p className="font-bold">Rückgabe beantragt</p>
+                        <p className="text-sm opacity-80">Eine Rückgabe-/Erstattungsanfrage wurde eingereicht und wird geprüft.</p>
+                    </div>
+                </div>
+            ) : isRefunded ? (
+                <div className="flex items-center gap-3 p-4 bg-purple-500/10 border border-purple-500/20 rounded-2xl text-purple-400">
+                    <BadgeCheck className="w-6 h-6 shrink-0" />
+                    <div>
+                        <p className="font-bold">Rückerstattet</p>
+                        <p className="text-sm opacity-80">Die Bestellung wurde erstattet. Der Betrag wird innerhalb von 5–10 Werktagen gutgeschrieben.</p>
                     </div>
                 </div>
             ) : (

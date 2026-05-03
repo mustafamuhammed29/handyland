@@ -75,13 +75,13 @@ const ResetPassword: React.FC = () => {
 
     if (!tokenValid) {
         return (
-            <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4">
+            <div className="min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center p-4">
                 <div className="w-full max-w-md">
-                    <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl text-center">
+                    <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl text-center">
                         <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                        <h2 className="text-2xl font-bold text-white mb-2">Invalid Link</h2>
-                        <p className="text-slate-400 mb-6">{message}</p>
-                        <Link to="/forgot-password" className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-colors">
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Invalid Link</h2>
+                        <p className="text-slate-500 dark:text-slate-400 mb-6">{message}</p>
+                        <Link to="/forgot-password" className="inline-block px-6 py-3 bg-blue-600 text-slate-900 dark:text-white font-semibold rounded-lg hover:bg-blue-500 transition-colors">
                             Request New Link
                         </Link>
                     </div>
@@ -91,22 +91,22 @@ const ResetPassword: React.FC = () => {
     }
 
     return (
-        <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4">
+        <div className="min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <div className="inline-block p-4 bg-gradient-to-br from-purple-600 to-pink-500 rounded-2xl shadow-2xl shadow-purple-900/50 mb-4">
                         <Lock className="w-12 h-12 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black text-white mb-2">Reset Password</h1>
-                    <p className="text-slate-400">Enter your new password</p>
+                    <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-2">Reset Password</h1>
+                    <p className="text-slate-500 dark:text-slate-400">Enter your new password</p>
                 </div>
 
-                <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl">
+                <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
                     {status === 'success' ? (
                         <div className="text-center">
                             <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                            <h2 className="text-xl font-bold text-white mb-2">Password Reset!</h2>
-                            <p className="text-slate-400 mb-4">{message}</p>
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Password Reset!</h2>
+                            <p className="text-slate-500 dark:text-slate-400 mb-4">{message}</p>
                             {/* Countdown visual */}
                             <div className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
                                 <Loader className="w-4 h-4 animate-spin" />
@@ -125,7 +125,7 @@ const ResetPassword: React.FC = () => {
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 {/* New Password */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">New Password</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">New Password</label>
                                     <div className="relative">
                                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                         <input
@@ -134,10 +134,10 @@ const ResetPassword: React.FC = () => {
                                             onChange={(e) => setPassword(e.target.value)}
                                             placeholder="••••••••"
                                             required minLength={12}
-                                            className="w-full pl-11 pr-11 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                            className="w-full pl-11 pr-11 py-3 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                                         />
                                         <button type="button" onClick={() => setShowPassword(v => !v)} aria-label="Toggle password"
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors">
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-200 transition-colors">
                                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                         </button>
                                     </div>
@@ -172,7 +172,7 @@ const ResetPassword: React.FC = () => {
 
                                 {/* Confirm Password */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">Confirm New Password</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Confirm New Password</label>
                                     <div className="relative">
                                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                         <input
@@ -181,10 +181,10 @@ const ResetPassword: React.FC = () => {
                                             onChange={(e) => setConfirmPassword(e.target.value)}
                                             placeholder="••••••••"
                                             required
-                                            className="w-full pl-11 pr-11 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                            className="w-full pl-11 pr-11 py-3 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                                         />
                                         <button type="button" onClick={() => setShowConfirmPassword(v => !v)} aria-label="Toggle confirm password"
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors">
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-200 transition-colors">
                                             {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                         </button>
                                     </div>
@@ -199,7 +199,7 @@ const ResetPassword: React.FC = () => {
 
                                 <button
                                     type="submit" disabled={status === 'loading'}
-                                    className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold rounded-lg shadow-lg hover:from-purple-500 hover:to-pink-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-slate-900 dark:text-white font-bold rounded-lg shadow-lg hover:from-purple-500 hover:to-pink-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {status === 'loading'
                                         ? <><Loader className="w-5 h-5 animate-spin" />Resetting...</>

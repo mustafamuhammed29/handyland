@@ -15,100 +15,117 @@ const issueSocialTokens = async (userId) => {
     return { accessToken, refreshToken };
 };
 
-// ─── Google Strategy ─────────────────────────────────────────────────────────
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    passport.use(new GoogleStrategy({
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/google/callback`,
-        scope: ['profile', 'email']
-    }, async (accessToken, refreshToken, profile, done) => {
-        try {
-            const email = profile.emails?.[0]?.value;
-            if (!email) {return done(new Error('No email from Google account'), null);}
+const { decrypt } = require('../utils/encryption');
 
-            // Find existing user by googleId or email
-            let user = await User.findOne({ googleId: profile.id });
-            if (!user && email) {
-                user = await User.findOne({ email });
-            }
+// ─── Initialize Social Strategies (Dynamic DB Fallback) ────────────────────────
+const initSocialStrategies = async () => {
+    try {
+        const Settings = require('../models/Settings');
+        const settings = await Settings.findOne().lean();
+        const dbSocial = settings?.socialAuth || {};
 
-            if (user) {
-                // Link Google account if not already linked
-                if (!user.googleId) {
-                    user.googleId = profile.id;
-                    user.provider = 'google';
-                    if (!user.avatar && profile.photos?.[0]?.value) {
-                        user.avatar = profile.photos[0].value;
+        // 1. Google Setup
+        const googleClientId = (dbSocial.google?.isConfigured && dbSocial.google.clientId) ? dbSocial.google.clientId : process.env.GOOGLE_CLIENT_ID;
+        const googleClientSecret = (dbSocial.google?.isConfigured && dbSocial.google.clientSecret) ? decrypt(dbSocial.google.clientSecret) : process.env.GOOGLE_CLIENT_SECRET;
+
+        passport.unuse('google'); // Remove old strategy if exists
+        
+        // Only initialize if enabled AND credentials exist
+        const isGoogleEnabled = dbSocial.google?.enabled !== undefined ? dbSocial.google.enabled : true;
+
+        if (isGoogleEnabled && googleClientId && googleClientSecret) {
+            passport.use(new GoogleStrategy({
+                clientID: googleClientId,
+                clientSecret: googleClientSecret,
+                callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/google/callback`,
+                scope: ['profile', 'email']
+            }, async (accessToken, refreshToken, profile, done) => {
+                try {
+                    const email = profile.emails?.[0]?.value;
+                    if (!email) return done(new Error('No email from Google account'), null);
+
+                    let user = await User.findOne({ googleId: profile.id });
+                    if (!user && email) user = await User.findOne({ email });
+
+                    if (user) {
+                        if (!user.googleId) {
+                            user.googleId = profile.id;
+                            user.provider = 'google';
+                            if (!user.avatar && profile.photos?.[0]?.value) user.avatar = profile.photos[0].value;
+                            user.isVerified = true;
+                            await user.save();
+                        }
+                    } else {
+                        user = await User.create({
+                            name: profile.displayName || `${profile.name?.givenName || ''} ${profile.name?.familyName || ''}`.trim(),
+                            email,
+                            googleId: profile.id,
+                            provider: 'google',
+                            avatar: profile.photos?.[0]?.value || null,
+                            isVerified: true
+                        });
                     }
-                    user.isVerified = true;
-                    await user.save();
+                    return done(null, user);
+                } catch (err) {
+                    return done(err, null);
                 }
-            } else {
-                // Create new user
-                user = await User.create({
-                    name: profile.displayName || `${profile.name?.givenName || ''} ${profile.name?.familyName || ''}`.trim(),
-                    email,
-                    googleId: profile.id,
-                    provider: 'google',
-                    avatar: profile.photos?.[0]?.value || null,
-                    isVerified: true // Social users skip email verification
-                });
-            }
-
-            return done(null, user);
-        } catch (err) {
-            return done(err, null);
+            }));
+            console.log('✅ Google OAuth Strategy Initialized');
+        } else {
+            console.warn('⚠️  Google OAuth Disabled or Not Configured');
         }
-    }));
-} else {
-    console.warn('⚠️  Google OAuth not configured — add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env');
-}
 
-// ─── Facebook Strategy ───────────────────────────────────────────────────────
-if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-    passport.use(new FacebookStrategy({
-        clientID: process.env.FACEBOOK_APP_ID,
-        clientSecret: process.env.FACEBOOK_APP_SECRET,
-        callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/facebook/callback`,
-        profileFields: ['id', 'emails', 'name', 'picture.type(large)']
-    }, async (accessToken, refreshToken, profile, done) => {
-        try {
-            const email = profile.emails?.[0]?.value;
+        // 2. Facebook Setup
+        const facebookAppId = (dbSocial.facebook?.isConfigured && dbSocial.facebook.appId) ? dbSocial.facebook.appId : process.env.FACEBOOK_APP_ID;
+        const facebookAppSecret = (dbSocial.facebook?.isConfigured && dbSocial.facebook.appSecret) ? decrypt(dbSocial.facebook.appSecret) : process.env.FACEBOOK_APP_SECRET;
 
-            let user = await User.findOne({ facebookId: profile.id });
-            if (!user && email) {
-                user = await User.findOne({ email });
-            }
+        passport.unuse('facebook'); // Remove old strategy if exists
 
-            if (user) {
-                if (!user.facebookId) {
-                    user.facebookId = profile.id;
-                    if (!user.avatar && profile.photos?.[0]?.value) {
-                        user.avatar = profile.photos[0].value;
+        const isFacebookEnabled = dbSocial.facebook?.enabled !== undefined ? dbSocial.facebook.enabled : true;
+
+        if (isFacebookEnabled && facebookAppId && facebookAppSecret) {
+            passport.use(new FacebookStrategy({
+                clientID: facebookAppId,
+                clientSecret: facebookAppSecret,
+                callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/facebook/callback`,
+                profileFields: ['id', 'emails', 'name', 'picture.type(large)']
+            }, async (accessToken, refreshToken, profile, done) => {
+                try {
+                    const email = profile.emails?.[0]?.value;
+
+                    let user = await User.findOne({ facebookId: profile.id });
+                    if (!user && email) user = await User.findOne({ email });
+
+                    if (user) {
+                        if (!user.facebookId) {
+                            user.facebookId = profile.id;
+                            if (!user.avatar && profile.photos?.[0]?.value) user.avatar = profile.photos[0].value;
+                            user.isVerified = true;
+                            await user.save();
+                        }
+                    } else {
+                        user = await User.create({
+                            name: `${profile.name?.givenName || ''} ${profile.name?.familyName || ''}`.trim() || profile.displayName,
+                            email: email || `fb_${profile.id}@handyland.local`,
+                            facebookId: profile.id,
+                            provider: 'facebook',
+                            avatar: profile.photos?.[0]?.value || null,
+                            isVerified: true
+                        });
                     }
-                    user.isVerified = true;
-                    await user.save();
+                    return done(null, user);
+                } catch (err) {
+                    return done(err, null);
                 }
-            } else {
-                user = await User.create({
-                    name: `${profile.name?.givenName || ''} ${profile.name?.familyName || ''}`.trim() || profile.displayName,
-                    email: email || `fb_${profile.id}@handyland.local`,
-                    facebookId: profile.id,
-                    provider: 'facebook',
-                    avatar: profile.photos?.[0]?.value || null,
-                    isVerified: true
-                });
-            }
-
-            return done(null, user);
-        } catch (err) {
-            return done(err, null);
+            }));
+            console.log('✅ Facebook OAuth Strategy Initialized');
+        } else {
+            console.warn('⚠️  Facebook OAuth Disabled or Not Configured');
         }
-    }));
-} else {
-    console.warn('⚠️  Facebook OAuth not configured — add FACEBOOK_APP_ID and FACEBOOK_APP_SECRET to .env');
-}
+    } catch (err) {
+        console.error('❌ Failed to initialize social strategies:', err);
+    }
+};
 
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser(async (id, done) => {
@@ -120,4 +137,4 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
-module.exports = { passport, issueSocialTokens };
+module.exports = { passport, issueSocialTokens, initSocialStrategies };

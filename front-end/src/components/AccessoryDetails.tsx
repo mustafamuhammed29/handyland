@@ -257,16 +257,16 @@ export const AccessoryDetails: React.FC = () => {
                         ...accessory,
                         description: accessory.description || 'High quality accessory designed for maximum compatibility and durability.',
                         features: ['Premium Quality', 'Durable Materials', 'Guaranteed Compatibility', 'Fast Shipping'],
-                        specs: {
-                            cpu: 'N/A',
-                            battery: accessory.battery || 'N/A',
-                            screen: accessory.display || 'N/A',
-                            ram: 'N/A',
-                            camera: 'N/A'
+                        specs: accessory.specs || {
+                            material: accessory.material || 'Premium',
+                            compatibility: accessory.compatibility || 'Universell',
+                            color: accessory.color || 'Standard',
+                            weight: accessory.weight || 'Standard'
                         }
                     }}
                     reviews={reviews}
                     setShowReviewModal={setShowReviewModal}
+                    isAccessory={true}
                 />
             </div>
 

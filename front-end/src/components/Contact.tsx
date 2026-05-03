@@ -55,10 +55,17 @@ export const Contact: React.FC<ContactProps> = () => {
             addToast('Nachricht erfolgreich gesendet!', 'success');
             form.reset();
             setTimeout(() => setFormState('idle'), 3000);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Message sending failed:", error);
             setFormState('idle');
-            addToast('Fehler beim Senden der Nachricht. Bitte versuche es später noch einmal.', 'error');
+            
+            // Comprehensive error message extraction
+            const errorMessage = 
+                error.response?.data?.message || 
+                error.response?.data?.error?.message || 
+                'Fehler beim Senden der Nachricht. Bitte versuche es später noch einmal.';
+                
+            addToast(errorMessage, 'error');
         }
     };
 

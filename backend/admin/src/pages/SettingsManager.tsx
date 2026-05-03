@@ -16,6 +16,9 @@ import { InvoiceSettingsTab } from './settings/InvoiceSettingsTab';
 import { FeaturesTab } from './settings/FeaturesTab';
 import { MaintenanceSettingsTab } from './settings/MaintenanceTab';
 import { ProductFaqsTab } from './settings/ProductFaqsTab';
+import { AccessoryCategoriesTab } from './settings/AccessoryCategoriesTab';
+import { EmailSettingsTab } from './settings/EmailSettingsTab';
+import { CookieSettingsTab } from './settings/CookieSettingsTab';
 
 interface HeroSettings {
     headline: string;
@@ -176,6 +179,7 @@ interface Settings {
         faviconUrl: string;
         googleAnalyticsId: string;
         facebookPixelId: string;
+        googleSiteVerificationId?: string;
     };
     taxRate: number;
     vipTiers: {
@@ -228,6 +232,28 @@ interface Settings {
         question: string;
         answer: string;
     }[];
+    accessoryCategories?: {
+        id: string;
+        label: string;
+        icon: string;
+    }[];
+    cookieConsent?: {
+        enabled: boolean;
+        title: string;
+        message: string;
+        acceptAllBtn: string;
+        rejectAllBtn: string;
+        manageBtn: string;
+        saveBtn: string;
+        strictlyNecessaryTitle: string;
+        strictlyNecessaryDesc: string;
+        functionalTitle: string;
+        functionalDesc: string;
+        analyticsTitle: string;
+        analyticsDesc: string;
+        marketingTitle: string;
+        marketingDesc: string;
+    };
 }
 
 interface EmailTemplateData {
@@ -376,7 +402,30 @@ export default function SettingsManager() {
                 question: 'Kann ich das Gerät zurückgeben?',
                 answer: 'Ja, Sie haben ein 14-tägiges Rückgaberecht ohne Angabe von Gründen, sofern sich das Gerät im gleichen Zustand wie bei der Lieferung befindet.'
             }
-        ]
+        ],
+        accessoryCategories: [
+            { id: 'audio', label: 'Audio', icon: 'Headphones' },
+            { id: 'power', label: 'Energie', icon: 'Zap' },
+            { id: 'protection', label: 'Schutz', icon: 'Shield' },
+            { id: 'wearables', label: 'Wearables', icon: 'Watch' }
+        ],
+        cookieConsent: {
+            enabled: true,
+            title: 'Ihre Privatsphäre ist uns wichtig',
+            message: 'Wir verwenden Cookies für eine Reihe von Auswertungen, um damit Ihren Besuch auf unserer Website kontinuierlich verbessern zu können (z. B. damit Ihnen Ihre Login-Daten erhalten bleiben).\n\nSie können Ihre Einstellungen ändern und verschiedenen Arten von Cookies erlauben, auf Ihrem Rechner gespeichert zu werden, während Sie unsere Webseite besuchen. Sie können auf Ihrem Rechner gespeicherte Cookies ebenso weitgehend wieder entfernen. Bitte bedenken Sie aber, dass dadurch Teile unserer Website möglicherweise nicht mehr in der gedachten Art und Weise nutzbar sind.',
+            acceptAllBtn: 'Alle akzeptieren',
+            rejectAllBtn: 'Ich lehne ab',
+            manageBtn: 'Einstellungen ändern',
+            saveBtn: 'Einstellungen speichern',
+            strictlyNecessaryTitle: 'Technisch notwendige Cookies',
+            strictlyNecessaryDesc: 'Erforderlich für die sichere Funktion der Website. Kann nicht deaktiviert werden.',
+            functionalTitle: 'Funktions Cookies',
+            functionalDesc: 'Ermöglicht der Website, erweiterte Funktionalität und Personalisierung bereitzustellen.',
+            analyticsTitle: 'Tracking und Performance Cookies',
+            analyticsDesc: 'Helfen uns zu verstehen, wie Besucher mit unserer Website interagieren, um die Benutzererfahrung zu verbessern.',
+            marketingTitle: 'Targeting und Werbung Cookies',
+            marketingDesc: 'Wird verwendet, um Werbung zu liefern, die relevanter für Sie und Ihre Interessen ist.'
+        }
     });
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
@@ -503,62 +552,68 @@ export default function SettingsManager() {
         { id: 'stats', label: 'Live Stats', icon: BarChart },
         { id: 'archive', label: 'Repair Archive', icon: ScanLine },
         { id: 'faqs', label: 'Product FAQs', icon: HelpCircle },
+        { id: 'categories', label: 'Accessory Categories', icon: Layers },
         { id: 'content', label: 'Content', icon: MessageSquare },
         { id: 'contact', label: 'Contact Info', icon: MessageSquare },
         { id: 'layout', label: 'Layout Control', icon: LayoutTemplate },
         { id: 'banner', label: '📢 Announcement', icon: Layers },
         { id: 'promo', label: '🎁 Promo Popup', icon: Layers },
         { id: 'invoice', label: '🧾 Invoice Settings', icon: FileText },
+        { id: 'cookie', label: '🍪 Cookie Consent', icon: Layers },
         { id: 'seo', label: 'SEO & Meta', icon: Globe },
         { id: 'scripts', label: '💬 Support Scripts', icon: MessageSquare },
+        { id: 'email-server', label: '📧 E-Mail Server', icon: Layers },
     ];
 
     if (loading) return <div className="text-white">Loading...</div>;
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <h2 className="text-3xl font-black text-white">Global Settings</h2>
                     <p className="text-slate-400 mt-1">Configure your application appearance and text</p>
                 </div>
                 <button
                     onClick={handleSave}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20"
+                    className="flex w-full md:w-auto justify-center items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20"
                 >
                     <Save size={20} /> Save Changes
                 </button>
             </div>
 
-            <div className="flex gap-8">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
                 {/* Tabs */}
-                <div className="w-64 shrink-0 space-y-2">
+                <div className="w-full lg:w-64 shrink-0 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 custom-scrollbar snap-x">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === tab.id
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all shrink-0 snap-start lg:w-full ${activeTab === tab.id
                                 ? 'bg-blue-600/20 text-blue-400 border border-blue-500/50'
                                 : 'text-slate-400 hover:bg-slate-800'
                                 }`}
                         >
-                            <tab.icon size={18} />
-                            <span className="font-bold">{tab.label}</span>
+                            <tab.icon size={18} className="shrink-0" />
+                            <span className="font-bold whitespace-nowrap">{tab.label}</span>
                         </button>
                     ))}
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-8">
+                <div className="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-8">
                     {activeTab === 'general' && <AppearanceTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'features' && <FeaturesTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'financials' && <FinancialSettingsTab settings={settings} handleChange={handleChange} />}
-                    {activeTab === 'auth' && <SocialAuthTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'auth' && <SocialAuthTab />}
                     {activeTab === 'maintenance' && <MaintenanceSettingsTab settings={settings} handleChange={handleChange} />}
                     { activeTab === 'hero' && <HeroSettingsTab settings={settings} handleChange={handleChange} /> }
                     { activeTab === 'layout' && <SectionsTab settings={settings} handleChange={handleChange} /> }
                     { activeTab === 'invoice' && <InvoiceSettingsTab settings={settings} handleChange={handleChange} /> }
                     { activeTab === 'faqs' && <ProductFaqsTab settings={settings} handleChange={handleChange} /> }
+                    { activeTab === 'categories' && <AccessoryCategoriesTab settings={settings} handleChange={handleChange} /> }
+                    { activeTab === 'cookie' && <CookieSettingsTab settings={settings} handleChange={handleChange} /> }
+                    {activeTab === 'email-server' && <EmailSettingsTab />}
 
                     {activeTab === 'suspension' && (
                         <div className="space-y-6">
@@ -947,7 +1002,7 @@ export default function SettingsManager() {
                             </div>
 
                             <div className="p-5 border border-slate-700 rounded-xl space-y-5">
-                                <h4 className="text-blue-400 font-bold mb-2">Analytics & Tracking</h4>
+                                <h4 className="text-blue-400 font-bold mb-2">Analytics, Tracking & Verification</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-slate-400 text-sm font-bold mb-2">Google Analytics ID (G-XXXX)</label>
@@ -969,6 +1024,17 @@ export default function SettingsManager() {
                                             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
                                         />
                                     </div>
+                                </div>
+                                <div>
+                                    <label className="block text-slate-400 text-sm font-bold mb-2">Google Search Console Verification ID</label>
+                                    <input
+                                        type="text"
+                                        value={settings.seo?.googleSiteVerificationId || ''}
+                                        onChange={e => handleChange('seo', 'googleSiteVerificationId', e.target.value)}
+                                        placeholder="e.g. jxX1_example_ID_here"
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                                    />
+                                    <p className="text-xs text-slate-500 mt-1">Paste the code given by Google to verify site ownership.</p>
                                 </div>
                             </div>
                         </div>

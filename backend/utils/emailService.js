@@ -1,29 +1,93 @@
 const nodemailer = require('nodemailer');
 
-const sendEmail = async (options) => {
-    // Check if we have credentials (optional for now)
+// Cache DB config to avoid querying on every email
+let _dbSmtpConfig = null;
+let _dbSmtpLastFetch = 0;
+const DB_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Get SMTP config: DB first → .env fallback
+ */
+const getSmtpConfig = async () => {
+    // Try DB config (cached)
+    const now = Date.now();
+    if (!_dbSmtpConfig || (now - _dbSmtpLastFetch) > DB_CACHE_TTL) {
+        try {
+            const Settings = require('../models/Settings');
+            const settings = await Settings.findOne().lean();
+            if (settings?.smtp?.isConfigured && settings.smtp.host && settings.smtp.user && settings.smtp.pass) {
+                const { decrypt } = require('./encryption');
+                _dbSmtpConfig = {
+                    host: settings.smtp.host,
+                    port: settings.smtp.port || 587,
+                    secure: settings.smtp.secure || false,
+                    user: settings.smtp.user,
+                    pass: decrypt(settings.smtp.pass),
+                    fromEmail: settings.smtp.fromEmail || settings.smtp.user,
+                    fromName: settings.smtp.fromName || 'HandyLand',
+                    source: 'database'
+                };
+            } else {
+                _dbSmtpConfig = null;
+            }
+            _dbSmtpLastFetch = now;
+        } catch (e) {
+            // Silently fall through to .env
+            _dbSmtpConfig = null;
+        }
+    }
+
+    if (_dbSmtpConfig) return _dbSmtpConfig;
+
+    // Fallback to .env
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+        return {
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT || 587,
+            secure: false,
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+            fromEmail: process.env.FROM_EMAIL || process.env.SMTP_USER,
+            fromName: process.env.FROM_NAME || 'HandyLand',
+            source: 'env'
+        };
+    }
+
+    return null;
+};
+
+/** Clear cached SMTP config (call after admin updates settings) */
+const clearSmtpCache = () => {
+    _dbSmtpConfig = null;
+    _dbSmtpLastFetch = 0;
+};
+
+const sendEmail = async (options) => {
+    const config = await getSmtpConfig();
+
+    if (config) {
         try {
             const transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: process.env.SMTP_PORT || 587,
-                secure: false, // true for 465, false for other ports
+                host: config.host,
+                port: config.port,
+                secure: config.secure,
                 auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS
+                    user: config.user,
+                    pass: config.pass
                 }
             });
 
             const message = {
-                from: `${process.env.FROM_NAME || 'HandyLand'} <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
+                from: `${config.fromName} <${config.fromEmail}>`,
                 to: options.email,
+                replyTo: options.replyTo, // Add replyTo support
                 subject: options.subject,
                 text: options.message, // Plain text body
                 html: options.html // HTML body
             };
 
             const info = await transporter.sendMail(message);
-            console.log('📧 Email sent successfully: %s', info.messageId);
+            console.log('📧 Email sent successfully: %s (via %s)', info.messageId, config.source);
         } catch (error) {
             console.error('❌ Error sending email via SMTP:', error.message);
             console.log('⚠️ Overriding to mock email since real email failed.');
@@ -39,7 +103,7 @@ const sendEmail = async (options) => {
         }
     } else {
         console.log('----------------------------------------------------');
-        console.log('📧 Mock Email Service (No SMTP Configured in .env)');
+        console.log('📧 Mock Email Service (No SMTP Configured)');
         console.log(`To: ${options.email}`);
         console.log(`Subject: ${options.subject}`);
         console.log(`Body: ${options.html || options.message}`);
@@ -202,5 +266,6 @@ module.exports = {
     sendEmail,
     sendOrderConfirmation,
     sendTemplateEmail,
-    emailTemplates
+    emailTemplates,
+    clearSmtpCache
 };

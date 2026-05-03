@@ -69,6 +69,11 @@ export default defineConfig(({ mode }) => {
         }
       },
       chunkSizeWarningLimit: 1000,
+      // Strip console.log and debugger from production builds
+      minify: 'esbuild',
+    },
+    esbuild: {
+      drop: mode === 'production' ? ['console', 'debugger'] : [],
     },
     server: {
       port: 3000,

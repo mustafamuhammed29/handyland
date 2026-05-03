@@ -213,7 +213,7 @@ export const ComparePage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-[100dvh] bg-slate-950 pt-32 pb-24 text-white">
+        <div className="min-h-[100dvh] bg-slate-950 pt-32 pb-24 text-slate-900 dark:text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div className="mb-12 text-center">
@@ -224,7 +224,7 @@ export const ComparePage: React.FC = () => {
                     <div className="flex flex-wrap items-center justify-center gap-4 mb-4">
                         <button 
                             onClick={handleShare}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 border border-slate-700 hover:border-brand-primary/50 text-slate-300 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-brand-primary/20"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 border border-slate-700 hover:border-brand-primary/50 text-slate-700 dark:text-slate-300 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-brand-primary/20"
                         >
                             {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />} 
                             {copied ? 'Link Copied!' : 'Share Compare'}
@@ -233,7 +233,7 @@ export const ComparePage: React.FC = () => {
                         {activeProducts.length > 1 && (
                             <button
                                 onClick={() => setShowDifferencesOnly(!showDifferencesOnly)}
-                                className={`flex items-center gap-2 px-5 py-2.5 border rounded-full font-bold text-sm transition-all shadow-lg ${showDifferencesOnly ? 'bg-brand-primary border-brand-primary text-black' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-brand-primary/50 hover:shadow-brand-primary/20'}`}
+                                className={`flex items-center gap-2 px-5 py-2.5 border rounded-full font-bold text-sm transition-all shadow-lg ${showDifferencesOnly ? 'bg-brand-primary border-brand-primary text-black' : 'bg-slate-900 border-slate-700 text-slate-700 dark:text-slate-300 hover:border-brand-primary/50 hover:shadow-brand-primary/20'}`}
                             >
                                 <Zap className="w-4 h-4" /> 
                                 {showDifferencesOnly ? 'Showing Differences' : 'Show Differences Only'}
@@ -252,14 +252,14 @@ export const ComparePage: React.FC = () => {
                                 {isSearching?.slotIndex === slotIndex ? (
                                     <div className="absolute inset-0 bg-slate-900 z-20 flex flex-col p-4 animate-in fade-in zoom-in-95 duration-200">
                                         <div className="flex justify-between items-center mb-4">
-                                            <h3 className="font-bold text-slate-300">{t('compare.selectDevice', 'Gerät auswählen')}</h3>
-                                            <button onClick={() => setIsSearching(null)} title={t('common.close', 'Schließen')} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400"/></button>
+                                            <h3 className="font-bold text-slate-700 dark:text-slate-300">{t('compare.selectDevice', 'Gerät auswählen')}</h3>
+                                            <button onClick={() => setIsSearching(null)} title={t('common.close', 'Schließen')} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X className="w-5 h-5 text-slate-500 dark:text-slate-400"/></button>
                                         </div>
                                         <div className="flex gap-2 mb-3">
                                             <select 
                                                 title="Brand Filter"
                                                 aria-label="Filter by Brand"
-                                                className="bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-xs text-white focus:outline-none focus:border-brand-primary"
+                                                className="bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-primary"
                                                 value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)}
                                             >
                                                 <option value="">All Brands</option>
@@ -277,7 +277,7 @@ export const ComparePage: React.FC = () => {
                                                     placeholder="Search..."
                                                     value={searchTerm}
                                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-brand-primary transition-colors"
+                                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-primary transition-colors"
                                                 />
                                             </div>
                                         </div>
@@ -291,7 +291,7 @@ export const ComparePage: React.FC = () => {
                                                     <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-10 h-10 object-contain bg-white rounded-md p-1" />
                                                     <div className="min-w-0">
                                                         <div className="font-bold text-sm truncate">{p.name || p.model}</div>
-                                                        <div className="text-xs text-slate-400">{p.price} €</div>
+                                                        <div className="text-xs text-slate-500 dark:text-slate-400">{p.price} €</div>
                                                     </div>
                                                 </button>
                                             ))}
@@ -303,7 +303,7 @@ export const ComparePage: React.FC = () => {
                                         <button 
                                             onClick={() => handleRemoveProduct(slotIndex)}
                                             title={t('common.remove', 'Entfernen')}
-                                            className="absolute top-4 right-4 p-2 bg-slate-950 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors z-10"
+                                            className="absolute top-4 right-4 p-2 bg-slate-950 hover:bg-red-500/20 text-slate-500 dark:text-slate-400 hover:text-red-400 rounded-full transition-colors z-10"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
@@ -315,7 +315,7 @@ export const ComparePage: React.FC = () => {
                                         
                                         <div className="flex flex-col items-center justify-center gap-1 mb-4">
                                             {product.specs?.globalPrice && (
-                                                <div className="text-slate-400 text-sm line-through decoration-red-500/50">{t('compare.marketAverage', 'Markt Ø')} €{product.specs.globalPrice}</div>
+                                                <div className="text-slate-500 dark:text-slate-400 text-sm line-through decoration-red-500/50">{t('compare.marketAverage', 'Markt Ø')} €{product.specs.globalPrice}</div>
                                             )}
                                             <div className="text-brand-primary font-black text-2xl flex items-center gap-2">
                                                 €{product.pricing?.basePrice || product.price}
@@ -361,7 +361,7 @@ export const ComparePage: React.FC = () => {
                 {/* Suggestions for Empty Slots */}
                 {activeProducts.length === 0 && (
                     <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-                        <h3 className="text-xl font-bold text-slate-300 text-center mb-6">Popular Devices to Compare</h3>
+                        <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 text-center mb-6">Popular Devices to Compare</h3>
                         <div className="flex flex-wrap justify-center gap-4">
                             {suggestedProducts.map(p => (
                                 <button
@@ -370,7 +370,7 @@ export const ComparePage: React.FC = () => {
                                     className="flex items-center gap-3 bg-slate-900 border border-slate-800 hover:border-brand-primary/50 px-4 py-2 rounded-2xl transition-colors"
                                 >
                                     <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-8 h-8 object-contain bg-white rounded-md p-1" />
-                                    <span className="font-bold text-sm text-slate-300">{p.name || p.model}</span>
+                                    <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{p.name || p.model}</span>
                                 </button>
                             ))}
                         </div>
@@ -388,7 +388,7 @@ export const ComparePage: React.FC = () => {
                                         {slots.map(i => (
                                             <th key={i} className="w-1/4 p-4 text-center">
                                                 {selectedProducts[i] && (
-                                                    <span className="text-sm font-bold text-slate-300 bg-slate-800 px-3 py-1 rounded-full">
+                                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-800 px-3 py-1 rounded-full">
                                                         {selectedProducts[i].name || selectedProducts[i].model}
                                                     </span>
                                                 )}
@@ -414,11 +414,11 @@ export const ComparePage: React.FC = () => {
 
                                         return (
                                             <tr className="hover:bg-slate-800/20 transition-colors bg-slate-900/20">
-                                                <td className="p-4 md:p-5 text-slate-400 font-medium border-b border-slate-800 pl-8">Antutu / Geekbench</td>
+                                                <td className="p-4 md:p-5 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-800 pl-8">Antutu / Geekbench</td>
                                                 {slots.map(i => {
                                                     const isWinner = winners.includes(i);
                                                     return (
-                                                        <td key={i} className={`p-4 md:p-5 border-b border-slate-800 border-l border-slate-800/50 font-black text-lg transition-colors ${isWinner ? 'text-emerald-400 bg-emerald-500/10 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]' : 'text-slate-300'}`}>
+                                                        <td key={i} className={`p-4 md:p-5 border-b border-slate-800 border-l border-slate-800/50 font-black text-lg transition-colors ${isWinner ? 'text-emerald-400 bg-emerald-500/10 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]' : 'text-slate-700 dark:text-slate-300'}`}>
                                                             {values[i]}
                                                         </td>
                                                     );
@@ -476,11 +476,11 @@ export const ComparePage: React.FC = () => {
 
                                                 return (
                                                     <tr key={specKey} className="hover:bg-slate-800/20 transition-colors group">
-                                                        <td className="p-4 md:p-5 text-slate-400 font-medium border-b border-slate-800 pl-8 group-hover:text-slate-300 transition-colors">{specKey}</td>
+                                                        <td className="p-4 md:p-5 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-800 pl-8 group-hover:text-slate-700 dark:text-slate-300 transition-colors">{specKey}</td>
                                                         {slots.map(i => {
                                                             const isWinner = winners.includes(i) && renderedValues[i] !== '-';
                                                             return (
-                                                                <td key={i} className={`p-4 md:p-5 border-b border-slate-800 border-l border-slate-800/50 text-sm leading-relaxed transition-colors ${isWinner ? 'text-emerald-400 font-bold bg-emerald-500/10 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]' : 'text-slate-300 font-medium'}`}>
+                                                                <td key={i} className={`p-4 md:p-5 border-b border-slate-800 border-l border-slate-800/50 text-sm leading-relaxed transition-colors ${isWinner ? 'text-emerald-400 font-bold bg-emerald-500/10 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]' : 'text-slate-700 dark:text-slate-300 font-medium'}`}>
                                                                     {renderedValues[i]}
                                                                 </td>
                                                             );

@@ -69,7 +69,6 @@ exports.checkEmailAvailability = async (req, res) => {
 };
 
 
-
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public

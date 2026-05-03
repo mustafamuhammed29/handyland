@@ -62,7 +62,7 @@ const SocialAuthCallback: React.FC = () => {
     if (errorCode) {
         const info = ERROR_MESSAGES[errorCode] || ERROR_MESSAGES.social_auth_failed;
         return (
-            <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-4">
+            <div className="min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center p-4">
                 <div className="max-w-md w-full bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 text-center shadow-2xl">
                     <div className="w-16 h-16 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-center justify-center mx-auto mb-5">
                         {errorCode === 'account_suspended' ? (
@@ -73,18 +73,18 @@ const SocialAuthCallback: React.FC = () => {
                             <AlertTriangle className="w-8 h-8 text-red-400" />
                         )}
                     </div>
-                    <h2 className="text-xl font-black text-white mb-3 tracking-tight">{info.title}</h2>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-6">{info.description}</p>
+                    <h2 className="text-xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">{info.title}</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6">{info.description}</p>
                     {info.action && (
                         <a
                             href={info.action.href}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all text-sm"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white font-bold rounded-xl transition-all text-sm"
                         >
                             {info.action.label}
                         </a>
                     )}
                     <div className="mt-4">
-                        <Link to="/" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
+                        <Link to="/" className="text-slate-500 hover:text-slate-700 dark:text-slate-300 text-xs transition-colors">
                             Zur Startseite →
                         </Link>
                     </div>
@@ -94,13 +94,13 @@ const SocialAuthCallback: React.FC = () => {
     }
 
     return (
-        <div className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center">
+        <div className="min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center">
             <div className="text-center">
                 <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
                     <Loader className="w-8 h-8 text-blue-400 animate-spin" />
                 </div>
-                <p className="text-white text-lg font-semibold">Anmeldung wird abgeschlossen...</p>
-                <p className="text-slate-400 text-sm mt-2">Bitte einen Moment warten</p>
+                <p className="text-slate-900 dark:text-white text-lg font-semibold">Anmeldung wird abgeschlossen...</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Bitte einen Moment warten</p>
             </div>
         </div>
     );

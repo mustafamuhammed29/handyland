@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LanguageCode } from '../types';
 import { useTranslation } from 'react-i18next';
-import { Headphones, Zap, Shield, Watch, Plus, Sparkles, X, Layers, ShoppingCart, Search } from 'lucide-react';
+import { Headphones, Zap, Shield, Watch, Plus, Sparkles, X, Layers, ShoppingCart, Search, Battery, Cable, Smartphone, Monitor, Bluetooth, Speaker } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { useSettings } from '../context/SettingsContext';
@@ -56,12 +56,37 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
         addToast(`${item.name} wurde zum Warenkorb hinzugefügt!`, 'success');
     };
 
-    const categories = [
-        { id: 'all', label: t('accessories.catAll', 'ALLE PRODUKTE'), icon: <Sparkles className="w-4 h-4" /> },
+    const getCategoryIcon = (iconName: string) => {
+        switch (iconName) {
+            case 'Headphones': return <Headphones className="w-4 h-4" />;
+            case 'Zap': return <Zap className="w-4 h-4" />;
+            case 'Shield': return <Shield className="w-4 h-4" />;
+            case 'Watch': return <Watch className="w-4 h-4" />;
+            case 'Battery': return <Battery className="w-4 h-4" />;
+            case 'Cable': return <Cable className="w-4 h-4" />;
+            case 'Smartphone': return <Smartphone className="w-4 h-4" />;
+            case 'Monitor': return <Monitor className="w-4 h-4" />;
+            case 'Bluetooth': return <Bluetooth className="w-4 h-4" />;
+            case 'Speaker': return <Speaker className="w-4 h-4" />;
+            case 'Layers': return <Layers className="w-4 h-4" />;
+            default: return <Sparkles className="w-4 h-4" />;
+        }
+    };
+
+    const dynamicCategories = settings?.accessoryCategories ? settings.accessoryCategories.map((cat: any) => ({
+        id: cat.id,
+        label: cat.label,
+        icon: getCategoryIcon(cat.icon)
+    })) : [
         { id: 'audio', label: t('accessories.catAudio', 'Audio'), icon: <Headphones className="w-4 h-4" /> },
         { id: 'power', label: t('accessories.catPower', 'Energie'), icon: <Zap className="w-4 h-4" /> },
         { id: 'protection', label: t('accessories.catProtection', 'Schutz'), icon: <Shield className="w-4 h-4" /> },
         { id: 'wearables', label: t('accessories.catWearables', 'Wearables'), icon: <Watch className="w-4 h-4" /> },
+    ];
+
+    const categories = [
+        { id: 'all', label: t('accessories.catAll', 'ALLE PRODUKTE'), icon: <Sparkles className="w-4 h-4" /> },
+        ...dynamicCategories
     ];
 
     const filteredItems = accessories.filter(item => {

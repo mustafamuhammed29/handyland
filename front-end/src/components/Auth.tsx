@@ -134,27 +134,27 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-[100dvh] px-4 pt-24 pb-12 overflow-hidden bg-slate-900">
+        <div className="flex items-center justify-center min-h-[100dvh] px-4 pt-24 pb-12 overflow-hidden bg-slate-50 dark:bg-[#0a0f1c]">
             {/* Animated Binary Code Background */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10"></div>
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
             <div className="w-full max-w-lg perspective-container z-10">
-                <div className="glass-modern rounded-[2.5rem] p-8 md:p-10 border border-slate-700/50 shadow-2xl relative overflow-hidden bg-slate-900/40 backdrop-blur-2xl">
+                <div className="glass-modern rounded-[2.5rem] p-8 md:p-10 border border-slate-200 dark:border-slate-200 dark:border-slate-700/50 shadow-2xl relative overflow-hidden bg-white/80 dark:bg-slate-900/40 backdrop-blur-2xl">
 
                     {/* Scanner Effect */}
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-40 animate-[scan_3s_linear_infinite]"></div>
 
                     {/* Header */}
                     <div className="text-center mb-8">
-                        <div className="w-20 h-20 bg-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-slate-700 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] group">
+                        <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-slate-200 dark:border-slate-700 shadow-[inset_0_0_10px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] group">
                             {mode === 'login' && <UserIcon className="w-10 h-10 text-brand-primary group-hover:scale-110 transition-transform" />}
                             {mode === 'register' && <ShieldCheck className="w-10 h-10 text-emerald-400 group-hover:scale-110 transition-transform" />}
                             {mode === 'forgot' && <KeyRound className="w-10 h-10 text-yellow-400 group-hover:rotate-12 transition-transform" />}
                             {(mode === 'verify' || mode === 'reset-verify') && <Lock className="w-10 h-10 text-brand-primary group-hover:scale-110 transition-transform" />}
                             {mode === 'reset-password' && <ShieldCheck className="w-10 h-10 text-emerald-400 group-hover:scale-110 transition-transform" />}
                         </div>
-                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
+                        <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
                             {mode === 'login' ? t('login', 'Login') :
                                 mode === 'register' ? t('register', 'Register') :
                                     mode === 'verify' ? 'Verification' :
@@ -162,7 +162,7 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                                             mode === 'reset-password' ? (currentLang === 'ar' ? 'كلمة سر جديدة' : 'New Password') :
                                                 (currentLang === 'ar' ? 'استعادة الرمز' : 'Recovery')}
                         </h2>
-                        <p className="text-slate-500 text-xs mt-2 font-mono tracking-widest uppercase">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs mt-2 font-mono tracking-widest uppercase">
                             {(mode === 'verify' || mode === 'reset-verify') ? 'Enter Security Code' :
                                 mode === 'reset-password' ? 'Create New Password' :
                                     'System Access Protocol'}
@@ -176,24 +176,24 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                             {mode === 'register' && (
                                 <div className="grid md:grid-cols-2 gap-4 animate-in slide-in-from-top-4">
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{t('fullName', 'Full Name')}</label>
+                                        <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{t('fullName', 'Full Name')}</label>
                                         <div className="relative group">
-                                            <UserIcon className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                            <input type="text" name="name" required value={formData.name} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="e.g. Mark Tech" />
+                                            <UserIcon className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
+                                            <input type="text" name="name" required value={formData.name} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="e.g. Mark Tech" />
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{currentLang === 'ar' ? 'الهاتف' : 'Phone'}</label>
+                                        <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{currentLang === 'ar' ? 'الهاتف' : 'Phone'}</label>
                                         <div className="relative group">
-                                            <Phone className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                            <input type="tel" name="phone" required value={formData.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="+49..." />
+                                            <Phone className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
+                                            <input type="tel" name="phone" required value={formData.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="+49..." />
                                         </div>
                                     </div>
                                     <div className="md:col-span-2 space-y-1">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{currentLang === 'ar' ? 'العنوان' : 'Location'}</label>
+                                        <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{currentLang === 'ar' ? 'العنوان' : 'Location'}</label>
                                         <div className="relative group">
-                                            <MapPin className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                            <input type="text" name="address" required value={formData.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="Berlin, Germany" />
+                                            <MapPin className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
+                                            <input type="text" name="address" required value={formData.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="Berlin, Germany" />
                                         </div>
                                     </div>
                                 </div>
@@ -203,28 +203,28 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                             {mode !== 'verify' && (
                                 <>
                                     <div className="space-y-1 animate-in slide-in-from-top-4">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{t('email', 'Email Address')}</label>
+                                        <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{t('email', 'Email Address')}</label>
                                         <div className="relative group">
-                                            <Mail className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                            <input type="email" name="email" required value={formData.email} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="secure@handyland.com" />
+                                            <Mail className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
+                                            <input type="email" name="email" required value={formData.email} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="secure@handyland.com" />
                                         </div>
                                     </div>
 
                                     {(mode === 'login' || mode === 'register' || mode === 'reset-password') && (
                                         <div className={`grid ${mode === 'register' || mode === 'reset-password' ? 'md:grid-cols-2' : 'grid-cols-1'} gap-4 animate-in slide-in-from-top-4`}>
                                             <div className="space-y-1">
-                                                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{mode === 'reset-password' ? 'New Password' : t('password', 'Password')}</label>
+                                                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{mode === 'reset-password' ? 'New Password' : t('password', 'Password')}</label>
                                                 <div className="relative group">
-                                                    <Lock className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                                    <input type="password" name="password" required value={formData.password} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="••••••••" />
+                                                    <Lock className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
+                                                    <input type="password" name="password" required value={formData.password} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="••••••••" />
                                                 </div>
                                             </div>
                                             {(mode === 'register' || mode === 'reset-password') && (
                                                 <div className="space-y-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{currentLang === 'ar' || currentLang === 'fa' ? 'تأكيد الرمز' : 'Confirm'}</label>
+                                                    <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{currentLang === 'ar' || currentLang === 'fa' ? 'تأكيد الرمز' : 'Confirm'}</label>
                                                     <div className="relative group">
-                                                        <Lock className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                                        <input type="password" name="confirmPassword" required value={formData.confirmPassword} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-black/40 border border-slate-800 rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="••••••••" />
+                                                        <Lock className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
+                                                        <input type="password" name="confirmPassword" required value={formData.confirmPassword} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="••••••••" />
                                                     </div>
                                                 </div>
                                             )}
@@ -237,7 +237,7 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                             {(mode === 'verify' || mode === 'reset-verify') && (
                                 <div className="space-y-6 animate-in zoom-in">
                                     <div className="text-center text-sm text-slate-400">
-                                        {mode === 'verify' ? 'We sent a code to' : 'Reset code sent to'} <span className="text-white font-bold">{formData.email}</span>
+                                        {mode === 'verify' ? 'We sent a code to' : 'Reset code sent to'} <span className="text-slate-900 dark:text-white font-bold">{formData.email}</span>
                                     </div>
                                     <div className="flex justify-center gap-2">
                                         {otp.map((digit, i) => (
@@ -248,7 +248,7 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                                                 maxLength={1}
                                                 value={digit}
                                                 onChange={(e) => handleOtpChange(i, e.target.value)}
-                                                className="w-12 h-14 bg-black/50 border border-slate-700 rounded-xl text-center text-2xl font-bold text-white focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all"
+                                                className="w-12 h-14 bg-slate-100 dark:bg-black/50 border border-slate-300 dark:border-slate-700 rounded-xl text-center text-2xl font-bold text-slate-900 dark:text-white focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all"
                                                 aria-label={`Digit ${i + 1} of verification code`}
                                             />
                                         ))}
@@ -257,7 +257,7 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                                         <button
                                             type="button"
                                             onClick={handleResend}
-                                            className="text-xs text-slate-500 hover:text-brand-primary flex items-center justify-center gap-2 mx-auto transition-colors"
+                                            className="text-xs text-slate-500 dark:text-slate-400 hover:text-brand-primary flex items-center justify-center gap-2 mx-auto transition-colors"
                                         >
                                             <RefreshCw className="w-3 h-3" /> Resend Code
                                         </button>
@@ -267,7 +267,7 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
 
                             {mode === 'login' && (
                                 <div className="flex justify-end">
-                                    <button type="button" onClick={() => setMode('forgot')} className="text-[10px] font-black text-slate-500 hover:text-brand-primary uppercase tracking-widest transition-colors">
+                                    <button type="button" onClick={() => setMode('forgot')} className="text-[10px] font-black text-slate-500 dark:text-slate-400 hover:text-brand-primary uppercase tracking-widest transition-colors">
                                         {currentLang === 'ar' ? 'فقدت الرمز؟' : 'Lost Key?'}
                                     </button>
                                 </div>
@@ -293,9 +293,9 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                         </form>
                     )}
 
-                    <div className="mt-8 pt-6 border-t border-slate-800/50 text-center space-y-4">
+                    <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800/50 text-center space-y-4">
                         {mode !== 'login' && (
-                            <button onClick={() => setMode('login')} className="text-slate-500 hover:text-white text-[10px] font-black flex items-center justify-center gap-2 mx-auto transition-colors uppercase tracking-widest">
+                            <button onClick={() => setMode('login')} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white text-[10px] font-black flex items-center justify-center gap-2 mx-auto transition-colors uppercase tracking-widest">
                                 <ChevronLeft className="w-4 h-4" /> {currentLang === 'ar' ? 'العودة' : 'Return to Core'}
                             </button>
                         )}
@@ -309,7 +309,7 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                                         Resend Verification Email
                                     </button>
                                 )}
-                                <p className="text-slate-500 text-xs font-medium">
+                                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
                                     {t('noAccount', "Don't have an account?")} {' '}
                                     <button onClick={() => setMode('register')} className="text-brand-primary hover:text-brand-primary font-black ml-1 uppercase">
                                         {t('register', 'Register')}

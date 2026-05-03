@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 // ── XSS Protection ────────────────────────────────────────────────────────────
 // Escapes HTML special characters to prevent XSS injection in server-rendered HTML
 const escapeHtml = (str) => {
-    if (str === null || str === undefined) return '';
+    if (str === null || str === undefined) {return '';}
     return String(str)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -31,7 +31,7 @@ if (process.env.STRIPE_SECRET_KEY) {
         refunds: { create: async () => ({ id: 'mock_refund_id' }) }
     };
 }
-const { sendEmail, emailTemplates } = require('../utils/emailService');
+const { sendEmail, sendTemplateEmail, emailTemplates } = require('../utils/emailService');
 const { emitOrderUpdate, emitNewOrder, emitAdminNotification } = require('../utils/socket');
 
 // @desc    Apply Coupon
@@ -93,13 +93,13 @@ exports.applyCoupon = async (req, res) => {
 exports.createOrder = async (req, res) => {
     const useTransactions = process.env.MONGO_USE_TRANSACTIONS === 'true';
     const session = useTransactions ? await mongoose.startSession() : null;
-    if (session) session.startTransaction();
+    if (session) {session.startTransaction();}
 
     try {
         const { items, shippingAddress, paymentMethod, shippingMethod, notes, couponCode } = req.body;
 
         if (!items || items.length === 0) {
-            if (session) await session.abortTransaction();
+            if (session) {await session.abortTransaction();}
             return res.status(400).json({
                 success: false,
                 message: 'No items in order'
@@ -107,16 +107,16 @@ exports.createOrder = async (req, res) => {
         }
 
         let pointsToDeduct = req.body.appliedPoints ? parseFloat(req.body.appliedPoints) : 0;
-        if (pointsToDeduct < 0) pointsToDeduct = 0;
-        
+        if (pointsToDeduct < 0) {pointsToDeduct = 0;}
+
         let currentUser;
         if (req.user) {
             let userQ = User.findById(req.user._id);
-            if (session) userQ = userQ.session(session);
+            if (session) {userQ = userQ.session(session);}
             currentUser = await userQ;
-            
+
             if (pointsToDeduct > 0 && (!currentUser || (currentUser.loyaltyPoints || 0) < pointsToDeduct)) {
-                if (session) await session.abortTransaction();
+                if (session) {await session.abortTransaction();}
                 return res.status(400).json({ success: false, message: 'Insufficient loyalty points' });
             }
         } else {
@@ -133,7 +133,7 @@ exports.createOrder = async (req, res) => {
         for (const item of items) {
             let product;
             const quantityAmt = Number(item.quantity) || 1;
-            
+
             if (item.productType === 'Product') {
                 product = await Product.findOneAndUpdate(
                     { _id: item.product, stock: { $gte: quantityAmt } },
@@ -179,24 +179,24 @@ exports.createOrder = async (req, res) => {
 
         // Calculate Tax and Shipping
         const taxRate = 0.19;
-        
+
         let shippingQ = ShippingMethod.findOne({ name: shippingMethod });
-        if (session) shippingQ = shippingQ.session(session);
+        if (session) {shippingQ = shippingQ.session(session);}
         const shippingMethodDoc = await shippingQ;
-        
+
         const shippingFee = shippingMethodDoc ? shippingMethodDoc.price : (totalAmount > 100 ? 0 : 5.99);
-        
+
         const taxAmount = totalAmount - (totalAmount / (1 + taxRate));
-        
+
         let appliedDiscount = 0;
         if (couponCode) {
             let couponQ = Coupon.findOne({ code: couponCode.toUpperCase() });
-            if (session) couponQ = couponQ.session(session);
+            if (session) {couponQ = couponQ.session(session);}
             const coupon = await couponQ;
             if (coupon && coupon.isActive && (!coupon.validUntil || new Date() <= new Date(coupon.validUntil))) {
                 if (coupon.discountType === 'percentage') {
                     appliedDiscount = (totalAmount * coupon.discountValue) / 100;
-                    if (coupon.maxDiscount) appliedDiscount = Math.min(appliedDiscount, coupon.maxDiscount);
+                    if (coupon.maxDiscount) {appliedDiscount = Math.min(appliedDiscount, coupon.maxDiscount);}
                 } else {
                     appliedDiscount = coupon.discountValue;
                 }
@@ -211,18 +211,18 @@ exports.createOrder = async (req, res) => {
 
         if (paymentMethod === 'wallet') {
             if (!req.user) {
-                if (session) await session.abortTransaction();
+                if (session) {await session.abortTransaction();}
                 return res.status(401).json({ success: false, message: 'Must be logged in to pay with wallet.' });
             }
             if (!currentUser || currentUser.balance < finalAmount) {
-                if (session) await session.abortTransaction();
+                if (session) {await session.abortTransaction();}
                 return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
             }
-            
+
             // Deduct balance
             currentUser.balance -= finalAmount;
             await currentUser.save({ session: session || null });
-            
+
             statusToSet = 'processing';
             paymentStatusToSet = 'paid';
         }
@@ -492,7 +492,7 @@ exports.cancelOrder = async (req, res) => {
                 }
             }
         }
-        
+
         // Refund Wallet Balance
         if (order.paymentMethod === 'wallet' && order.paymentStatus === 'paid') {
             const User = require('../models/User');
@@ -549,8 +549,8 @@ exports.getAllOrders = async (req, res) => {
 
         if (startDate || endDate) {
             query.createdAt = {};
-            if (startDate) query.createdAt.$gte = new Date(startDate);
-            if (endDate) query.createdAt.$lte = new Date(endDate);
+            if (startDate) {query.createdAt.$gte = new Date(startDate);}
+            if (endDate) {query.createdAt.$lte = new Date(endDate);}
         }
 
         if (search) {
@@ -631,7 +631,7 @@ exports.updateOrderStatus = async (req, res) => {
                         await Accessory.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity, sold: -item.quantity } });
                     }
                 }
-                
+
                 // Refund Wallet Balance
                 if (order.paymentMethod === 'wallet' && order.paymentStatus === 'paid') {
                     const User = require('../models/User');
@@ -670,11 +670,24 @@ exports.updateOrderStatus = async (req, res) => {
         // Send status update email if status changed
         if (status && status !== oldStatus) {
             try {
-                await sendEmail({
-                    email: order.user.email,
-                    subject: `Order Update: ${order.orderNumber}`,
-                    html: emailTemplates.orderStatusUpdate(order.user.name, order, status, adminNote)
-                });
+                const variablesContext = {
+                    customerName: order.user.name || 'Customer',
+                    orderNumber: order.orderNumber,
+                    status: status,
+                    trackingNumber: order.trackingNumber || '',
+                    adminNote: adminNote || '',
+                    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
+                };
+
+                const sent = await sendTemplateEmail(order.user.email, 'order_status_update', variablesContext);
+
+                if (!sent) {
+                    await sendEmail({
+                        email: order.user.email,
+                        subject: `Order Update: ${order.orderNumber}`,
+                        html: emailTemplates.orderStatusUpdate(order.user.name, order, status, adminNote)
+                    });
+                }
             } catch (emailError) {
                 console.error('Email sending failed:', emailError);
             }
@@ -768,138 +781,264 @@ exports.getInvoice = async (req, res) => {
             year: 'numeric', month: 'long', day: 'numeric'
         });
 
-        // HTML Template
-        const html = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Invoice #${order.orderNumber}</title>
-                <style>
-                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
-                    .invoice-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
-                    .logo { font-size: 24px; font-weight: bold; color: #000; }
-                    .logo span { color: #00bcd4; }
-                    .invoice-details { text-align: right; }
-                    .invoice-title { font-size: 32px; font-weight: bold; color: #333; text-transform: uppercase; margin: 0; }
-                    .bill-to { margin-bottom: 30px; display: flex; justify-content: space-between; }
-                    .bill-to-section { width: 48%; }
-                    h3 { font-size: 14px; text-transform: uppercase; color: #777; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
-                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                    th { text-align: left; padding: 10px; background: #f9f9f9; border-bottom: 2px solid #ddd; text-transform: uppercase; font-size: 12px; }
-                    td { padding: 10px; border-bottom: 1px solid #eee; }
-                    .text-right { text-align: right; }
-                    .totals { width: 300px; margin-left: auto; }
-                    .totals-row { display: flex; justify-content: space-between; padding: 5px 0; }
-                    .totals-row.grand-total { font-weight: bold; font-size: 18px; border-top: 2px solid ${invoiceSettings.primaryColor || '#333'}; margin-top: 10px; padding-top: 10px; color: ${invoiceSettings.primaryColor || '#000'} }
-                    .footer { text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #777; }
-                    @media print {
-                        body { padding: 0; }
-                        .no-print { display: none; }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="invoice-header">
-                    <div class="logo">
-                        ${invoiceSettings.logoUrl
-                            ? `<img src="${invoiceSettings.logoUrl.startsWith('http') ? invoiceSettings.logoUrl : `${req.protocol}://${req.get('host')}${invoiceSettings.logoUrl}`}" alt="Logo" style="max-height: 40px; object-fit: contain;" />`
-                            : `<span style="color: #000">${(invoiceSettings.companyName || 'HandyLand').replace('Land', '')}</span><span style="color: ${invoiceSettings.primaryColor || '#00bcd4'}">Land</span>`
-                        }
-                    </div>
-                    <div class="invoice-details">
-                        <div class="invoice-title" style="color: ${escapeHtml(invoiceSettings.primaryColor) || '#333'}">${escapeHtml(invoiceSettings.titleLabel) || 'Invoice'}</div>
-                        <div>${escapeHtml(invoiceSettings.dateLabel) || 'Date:'} ${date}</div>
-                        <div>${escapeHtml(invoiceSettings.numberLabel) || 'Invoice #:'} ${escapeHtml(invoiceSettings.prefix) || 'HL-'}${order.orderNumber}</div>
-                        ${invoiceSettings.vatNumber ? `<div>${escapeHtml(invoiceSettings.vatIdLabel) || 'VAT ID:'} ${escapeHtml(invoiceSettings.vatNumber)}</div>` : ''}
-                    </div>
-                </div>
+        const isRefunded = order.status === 'refunded' || order.paymentStatus === 'refunded';
+        const titleLabel = isRefunded ? 'GUTSCHRIFT' : (invoiceSettings.titleLabel || 'RECHNUNG');
+        const primaryColor = invoiceSettings.primaryColor || '#00bcd4';
 
-                <div class="bill-to">
-                    <div class="bill-to-section">
-                        <h3 style="border-bottom-color: ${invoiceSettings.primaryColor || '#eee'}; color: ${invoiceSettings.primaryColor || '#777'}">Bill To:</h3>
-                        <div>${escapeHtml(order.shippingAddress.fullName)}</div>
-                        <div>${escapeHtml(order.shippingAddress.street)}</div>
-                        <div>${escapeHtml(order.shippingAddress.zipCode)} ${escapeHtml(order.shippingAddress.city)}</div>
-                        <div>${escapeHtml(order.shippingAddress.country)}</div>
-                        <div>${escapeHtml(order.shippingAddress.phone)}</div>
-                    </div>
-                    <div class="bill-to-section">
-                        <h3 style="border-bottom-color: ${invoiceSettings.primaryColor || '#eee'}; color: ${invoiceSettings.primaryColor || '#777'}">Ship To:</h3>
-                        <div>${escapeHtml(order.shippingAddress.fullName)}</div>
-                        <div>${escapeHtml(order.shippingAddress.street)}</div>
-                        <div>${escapeHtml(order.shippingAddress.zipCode)} ${escapeHtml(order.shippingAddress.city)}</div>
-                        <div>${escapeHtml(order.shippingAddress.country)}</div>
-                    </div>
-                </div>
+        // HTML Template — Premium Branded Design
+        const html = `<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${titleLabel} #${order.orderNumber}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            color: #1e293b; 
+            line-height: 1.5; 
+            max-width: 850px; 
+            margin: 0 auto; 
+            padding: 40px;
+            background: #fff;
+        }
+        
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 60px;
+        }
+        
+        .brand-logo { 
+            font-size: 28px; 
+            font-weight: 800; 
+            letter-spacing: -1px;
+            color: #000;
+        }
+        .brand-logo span { color: ${primaryColor}; }
+        
+        .invoice-info { text-align: right; }
+        .invoice-title { 
+            font-size: 42px; 
+            font-weight: 800; 
+            color: ${isRefunded ? '#ef4444' : '#0f172a'}; 
+            margin: 0;
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+        
+        .address-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 40px; 
+            margin-bottom: 50px;
+        }
+        
+        .address-box h3 { 
+            font-size: 11px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            color: #64748b; 
+            margin-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+        
+        .address-content { font-size: 14px; color: #334155; }
+        .address-content strong { color: #0f172a; display: block; margin-bottom: 2px; }
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>${invoiceSettings.itemLabel || 'Item'}</th>
-                            <th>${invoiceSettings.quantityLabel || 'Quantity'}</th>
-                            <th>${invoiceSettings.priceLabel || 'Price'}</th>
-                            <th>${invoiceSettings.totalLabel || 'Total'}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${order.items.map(item => `
-                        <tr>
-                            <td>
-                                <div><strong>${escapeHtml(item.name)}</strong></div>
-                                <div style="font-size: 12px; color: #777;">${escapeHtml(item.productType)}</div>
-                            </td>
-                            <td class="text-right">${item.price.toFixed(2)}€</td>
-                            <td class="text-right">${item.quantity}</td>
-                            <td class="text-right">${(item.price * item.quantity).toFixed(2)}€</td>
-                        </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+        .meta-data {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+        .meta-item b { display: block; color: #64748b; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { 
+            text-align: left; 
+            padding: 14px; 
+            background: #0f172a; 
+            color: #fff;
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        th:first-child { border-radius: 8px 0 0 0; }
+        th:last-child { border-radius: 0 8px 0 0; text-align: right; }
+        
+        td { padding: 16px 14px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .item-name { font-weight: 600; color: #0f172a; }
+        .item-type { font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-top: 4px; font-weight: 600; }
+        
+        .totals-container { 
+            width: 320px; 
+            margin-left: auto; 
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 16px;
+        }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: #475569; }
+        .total-row.grand { 
+            margin-top: 16px; 
+            padding-top: 16px; 
+            border-top: 2px dashed #cbd5e1; 
+            font-weight: 800; 
+            font-size: 20px; 
+            color: #0f172a; 
+        }
+        
+        .footer { 
+            margin-top: 80px; 
+            padding-top: 30px; 
+            border-top: 1px solid #e2e8f0; 
+            font-size: 11px; 
+            color: #94a3b8; 
+            text-align: center;
+        }
+        .footer strong { color: #475569; }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .badge-paid { background: #dcfce7; color: #166534; }
+        .badge-refund { background: #fee2e2; color: #991b1b; }
 
-                <div class="totals">
-                    <div class="totals-row">
-                        <span>${invoiceSettings.subtotalLabel || 'Subtotal:'}</span>
-                        <span>${(order.totalAmount - order.shippingFee - order.tax + order.discountAmount).toFixed(2)}€</span>
-                    </div>
-                    <div class="totals-row">
-                        <span>${invoiceSettings.taxLabel || 'VAT'} (${taxRate}%):</span>
-                        <span>${order.tax.toFixed(2)}€</span>
-                    </div>
-                    <div class="totals-row">
-                        <span>${invoiceSettings.shippingLabel || 'Shipping:'}</span>
-                        <span>${order.shippingFee.toFixed(2)}€</span>
-                    </div>
-                    ${order.discountAmount > 0 ? `
-                    <div class="totals-row" style="color: green;">
-                        <span>${invoiceSettings.discountLabel || 'Discount'} (${order.couponCode || 'Promo'}):</span>
-                        <span>-${order.discountAmount.toFixed(2)}€</span>
-                    </div>
-                    ` : ''}
-                    <div class="totals-row grand-total">
-                        <span>${invoiceSettings.totalLabel || 'Total:'}</span>
-                        <span>${order.totalAmount.toFixed(2)}€</span>
-                    </div>
-                </div>
+        @media print {
+            body { padding: 0; }
+            .no-print { display: none !important; }
+            .totals-container { background: transparent; border: 1px solid #f1f5f9; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand-logo">
+            ${invoiceSettings.logoUrl
+                ? `<img src="${invoiceSettings.logoUrl.startsWith('http') ? invoiceSettings.logoUrl : `${req.protocol}://${req.get('host')}${invoiceSettings.logoUrl}`}" alt="Logo" style="max-height: 50px;" />`
+                : `HANDY<span>LAND</span>`
+            }
+        </div>
+        <div class="invoice-info">
+            <h1 class="invoice-title">${titleLabel}</h1>
+            <div style="font-weight: 600; margin-top: 5px;">#${invoiceSettings.prefix || 'HL-'}${order.orderNumber}</div>
+        </div>
+    </div>
 
-                <div class="footer">
-                    <p style="font-weight: bold; color: #555;">${escapeHtml(invoiceSettings.footerText) || 'Thank you for your business!'}</p>
-                    <p>${escapeHtml(invoiceSettings.companyAddress) || 'Tech Street 123 - 10115 Berlin - Germany'}</p>
-                    ${(invoiceSettings.bankName || invoiceSettings.iban || invoiceSettings.bic) ? `
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: center; gap: 20px; font-size: 11px; color: #888;">
-                        ${invoiceSettings.bankName ? `<span>Bank: ${escapeHtml(invoiceSettings.bankName)}</span>` : ''}
-                        ${invoiceSettings.iban ? `<span>IBAN: ${escapeHtml(invoiceSettings.iban)}</span>` : ''}
-                        ${invoiceSettings.bic ? `<span>BIC: ${escapeHtml(invoiceSettings.bic)}</span>` : ''}
-                    </div>
-                    ` : ''}
-                    <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: ${invoiceSettings.primaryColor || '#333'}; color: #fff; border: none; cursor: pointer; border-radius: 5px;">${invoiceSettings.printBtnLabel || 'Print Invoice'}</button>
-                    <button class="no-print" onclick="window.close()" style="margin-top: 20px; padding: 10px 20px; background: #ccc; color: #333; border: none; cursor: pointer; border-radius: 5px; margin-left: 10px;">${invoiceSettings.closeBtnLabel || 'Close'}</button>
-                </div>
-            </body>
-            </html>
-        `;
+    <div class="address-grid">
+        <div class="address-box">
+            <h3>Rechnungsempfänger</h3>
+            <div class="address-content">
+                <strong>${escapeHtml(order.shippingAddress.fullName)}</strong>
+                ${escapeHtml(order.shippingAddress.street)}<br>
+                ${escapeHtml(order.shippingAddress.zipCode)} ${escapeHtml(order.shippingAddress.city)}<br>
+                ${escapeHtml(order.shippingAddress.country)}<br>
+                ${order.user?.phone ? `T: ${escapeHtml(order.user.phone)}` : ''}
+            </div>
+        </div>
+        <div class="address-box">
+            <h3>Lieferadresse</h3>
+            <div class="address-content">
+                <strong>${escapeHtml(order.shippingAddress.fullName)}</strong>
+                ${escapeHtml(order.shippingAddress.street)}<br>
+                ${escapeHtml(order.shippingAddress.zipCode)} ${escapeHtml(order.shippingAddress.city)}<br>
+                ${escapeHtml(order.shippingAddress.country)}
+            </div>
+        </div>
+    </div>
 
+    <div class="meta-data">
+        <div class="meta-item"><b>Belegdatum</b>${date}</div>
+        <div class="meta-item"><b>Zahlungsart</b>${escapeHtml(order.paymentMethod).toUpperCase()}</div>
+        <div class="meta-item"><b>Status</b>
+            <span class="badge ${isRefunded ? 'badge-refund' : 'badge-paid'}">
+                ${isRefunded ? 'Rückerstattet' : 'Bezahlt'}
+            </span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Artikelbeschreibung</th>
+                <th style="text-align: right">Menge</th>
+                <th style="text-align: right">Einzelpreis</th>
+                <th style="text-align: right">Gesamt</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${order.items.map(item => `
+            <tr>
+                <td>
+                    <div class="item-name">${escapeHtml(item.name)}</div>
+                    <div class="item-type">${item.productType === 'Product' ? 'Mobilgerät' : 'Zubehör'}</div>
+                </td>
+                <td style="text-align: right">${item.quantity}</td>
+                <td style="text-align: right">${item.price.toFixed(2)}€</td>
+                <td style="text-align: right; font-weight: 600;">${(item.price * item.quantity).toFixed(2)}€</td>
+            </tr>
+            `).join('')}
+        </tbody>
+    </table>
+
+    <div class="totals-container">
+        <div class="total-row">
+            <span>Netto Zwischensumme</span>
+            <span>${(order.totalAmount - order.shippingFee - order.tax + order.discountAmount).toFixed(2)}€</span>
+        </div>
+        <div class="total-row">
+            <span>MwSt. (${taxRate}%)</span>
+            <span>${order.tax.toFixed(2)}€</span>
+        </div>
+        <div class="total-row">
+            <span>Versandkosten</span>
+            <span>${order.shippingFee.toFixed(2)}€</span>
+        </div>
+        ${order.discountAmount > 0 ? `
+        <div class="total-row" style="color: #059669; font-weight: 600;">
+            <span>Rabatt (${order.couponCode || 'PROMO'})</span>
+            <span>-${order.discountAmount.toFixed(2)}€</span>
+        </div>
+        ` : ''}
+        <div class="total-row grand">
+            <span>${isRefunded ? 'Gutschrift' : 'Gesamtbetrag'}</span>
+            <span>${order.totalAmount.toFixed(2)}€</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>${escapeHtml(invoiceSettings.companyName || 'HandyLand GmbH')}</strong></p>
+        <p>${escapeHtml(invoiceSettings.companyAddress || 'Tech Street 1 - 10115 Berlin')}</p>
+        <div style="margin-top: 10px;">
+            ${invoiceSettings.vatNumber ? `USt-IdNr.: ${escapeHtml(invoiceSettings.vatNumber)} | ` : ''}
+            Steuernummer: 112/5730/2344
+        </div>
+        <p style="margin-top: 20px; color: #475569; font-weight: 600;">${escapeHtml(invoiceSettings.footerText || 'Vielen Dank für Ihr Vertrauen in HandyLand!')}</p>
+        
+        <div class="no-print" style="margin-top: 40px;">
+            <button onclick="window.print()" style="background: ${primaryColor}; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: opacity 0.2s;">Rechnung Drucken</button>
+            <button onclick="window.close()" style="background: #f1f5f9; color: #475569; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-left: 10px;">Schließen</button>
+        </div>
+    </div>
+</body>
+</html>`;
+
+        res.set('Content-Type', 'text/html; charset=utf-8');
         res.send(html);
 
     } catch (error) {
@@ -1087,17 +1226,29 @@ exports.processRefund = async (req, res) => {
             const User = require('../models/User');
             const refundUser = await User.findById(refundRequest.user);
             if (refundUser) {
-                await sendEmail({
-                    email: refundUser.email,
-                    subject: status === 'approved' ? 'Refund Approved - HandyLand' : 'Refund Request Update - HandyLand',
-                    html: `
-                        <h2>Hello ${refundUser.name},</h2>
-                        <p>Your refund request for Order <strong>#${refundRequest.order.orderNumber || refundRequest.order._id}</strong> has been <strong>${status.toUpperCase()}</strong>.</p>
-                        ${adminComments ? `<p><strong>Note from our team:</strong> ${adminComments}</p>` : ''}
-                        <p>If you have questions, please contact our support team.</p>
-                        <p>HandyLand Team</p>
-                    `
-                });
+                const refundVars = {
+                    customerName: refundUser.name || 'Customer',
+                    orderNumber: refundRequest.order.orderNumber || refundRequest.order._id,
+                    status: status === 'approved' ? 'genehmigt ✅' : 'abgelehnt ❌',
+                    adminComments: adminComments ? `<strong>Hinweis vom Team:</strong> ${adminComments}` : ''
+                };
+
+                const sent = await sendTemplateEmail(refundUser.email, 'refund_status_update', refundVars);
+
+                if (!sent) {
+                    // Fallback: use hardcoded template
+                    await sendEmail({
+                        email: refundUser.email,
+                        subject: status === 'approved' ? 'Refund Approved - HandyLand' : 'Refund Request Update - HandyLand',
+                        html: `
+                            <h2>Hello ${refundUser.name},</h2>
+                            <p>Your refund request for Order <strong>#${refundRequest.order.orderNumber || refundRequest.order._id}</strong> has been <strong>${status.toUpperCase()}</strong>.</p>
+                            ${adminComments ? `<p><strong>Note from our team:</strong> ${adminComments}</p>` : ''}
+                            <p>If you have questions, please contact our support team.</p>
+                            <p>HandyLand Team</p>
+                        `
+                    });
+                }
             }
         } catch (emailError) {
             console.error('Refund email failed:', emailError);

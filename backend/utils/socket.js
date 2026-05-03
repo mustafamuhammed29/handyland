@@ -8,9 +8,13 @@ const initSocket = (httpServer) => {
         cors: {
             origin: [
                 'http://localhost:3000',
+                'http://localhost:3001',
+                'http://localhost:3002',
                 'http://localhost:5173',
                 'http://localhost:5174',
                 'http://127.0.0.1:3000',
+                'http://127.0.0.1:3001',
+                'http://127.0.0.1:3002',
                 'http://127.0.0.1:5173',
                 'http://127.0.0.1:5174'
             ],
@@ -22,7 +26,7 @@ const initSocket = (httpServer) => {
     // ── JWT Authentication Middleware ─────────────────────────────────────────
     io.use((socket, next) => {
         let token = socket.handshake.auth?.token;
-        
+
         // Fallback: extract token from HTTP-only cookies if available
         if (!token && socket.handshake.headers.cookie) {
             try {

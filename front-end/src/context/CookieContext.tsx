@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface CookiePreferences {
     necessary: boolean;
+    functional: boolean;
     analytics: boolean;
     marketing: boolean;
     timestamp?: string;
@@ -17,6 +18,7 @@ interface CookieContextType {
 
 const defaultPreferences: CookiePreferences = {
     necessary: true,
+    functional: false,
     analytics: false,
     marketing: false,
 };
@@ -72,12 +74,12 @@ export const CookieProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     const acceptAll = () => {
-        saveAndApply({ necessary: true, analytics: true, marketing: true });
+        saveAndApply({ necessary: true, functional: true, analytics: true, marketing: true });
     };
 
     const rejectAll = () => {
         // We MUST save the rejection choice, otherwise the banner shows on every page load
-        saveAndApply({ necessary: true, analytics: false, marketing: false });
+        saveAndApply({ necessary: true, functional: false, analytics: false, marketing: false });
     };
 
     const savePreferences = (customPrefs: Partial<CookiePreferences>) => {

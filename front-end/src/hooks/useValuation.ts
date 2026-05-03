@@ -42,10 +42,11 @@ export const useValuation = () => {
     useEffect(() => {
         const fetchDevices = async () => {
             try {
-                const data = await api.get('/api/valuation/devices');
+                const data: any = await api.get('/api/valuation/devices?limit=1000');
                 let devices: DeviceBlueprint[] = [];
                 if (Array.isArray(data)) devices = data;
                 else if (data.data && Array.isArray(data.data)) devices = data.data;
+                else if (data.blueprints && Array.isArray(data.blueprints)) devices = data.blueprints;
 
                 const cleaned = devices.map(d => ({
                     ...d,

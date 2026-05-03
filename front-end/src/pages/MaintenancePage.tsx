@@ -110,13 +110,13 @@ const MaintenancePage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="absolute -top-4 -right-4 bg-amber-500 p-3 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.5)] animate-bounce text-white transform rotate-12 z-20">
+                    <div className="absolute -top-4 -right-4 bg-amber-500 p-3 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.5)] animate-bounce text-slate-900 dark:text-white transform rotate-12 z-20">
                         <Settings className="w-8 h-8 animate-spin-slow" />
                     </div>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
+                <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
                     HANDY<span className="text-blue-500">LAND</span>
                 </h1>
                 <div className="h-1.5 w-20 bg-gradient-to-r from-blue-600 to-amber-400 rounded-full mx-auto mb-10" />
@@ -125,7 +125,7 @@ const MaintenancePage: React.FC = () => {
                     {isLoading ? (safeT('maintenance.loading', 'Wird geladen') + dots) : content.title}
                 </h2>
                 
-                <p className="text-slate-400 text-lg leading-relaxed mb-10 max-w-md mx-auto whitespace-pre-wrap">
+                <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed mb-10 max-w-md mx-auto whitespace-pre-wrap">
                     {content.message}
                 </p>
 
@@ -133,13 +133,13 @@ const MaintenancePage: React.FC = () => {
                 <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-6 mb-8 space-y-4 w-full shadow-2xl">
                     <div className="flex items-center gap-4 group/item">
                         <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping shrink-0" />
-                        <span className="text-slate-300 font-semibold group-hover/item:text-blue-400 transition-colors">
+                        <span className="text-slate-700 dark:text-slate-300 font-semibold group-hover/item:text-blue-400 transition-colors">
                             {content.statusText1 || safeT('maintenance.diagnosing', 'System wird diagnostiziert...')}
                         </span>
                     </div>
                     <div className="flex items-center gap-4 group/item">
                         <div className="w-3 h-3 bg-amber-400 rounded-full animate-pulse shrink-0" style={{ animationDelay: '200ms' }} />
-                        <span className="text-slate-300 font-semibold group-hover/item:text-amber-400 transition-colors">
+                        <span className="text-slate-700 dark:text-slate-300 font-semibold group-hover/item:text-amber-400 transition-colors">
                             {content.statusText2 || safeT('maintenance.repairing', 'Neue Reparaturen werden angewendet...')}
                         </span>
                     </div>
@@ -156,7 +156,7 @@ const MaintenancePage: React.FC = () => {
                 {/* Refresh Button */}
                 <button
                     onClick={handleRefresh}
-                    className="inline-flex items-center gap-3 px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-xl shadow-blue-900/20 text-lg group active:scale-95"
+                    className="inline-flex items-center gap-3 px-10 py-4 bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white font-black rounded-2xl transition-all shadow-xl shadow-blue-900/20 text-lg group active:scale-95"
                 >
                     <RefreshCw className="w-6 h-6 group-hover:rotate-180 transition-transform duration-700" />
                     {safeT('common.refresh', 'Status aktualisieren')}
