@@ -279,7 +279,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                             
                                             {/* Label */}
                                             <span className={`absolute top-14 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors duration-300
-                                                ${isCompleted || isActive ? \'text-slate-900 dark:text-white drop-shadow-md\' : \'text-slate-400 dark:text-slate-500\'}`}>
+                                                ${isCompleted || isActive ? 'text-slate-900 dark:text-white drop-shadow-md' : 'text-slate-400 dark:text-slate-500'}`}>
                                                 {step.label}
                                             </span>
                                         </div>
