@@ -8038,3 +8038,129 @@
 {"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-03T22:00:10.520Z"}
 {"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-03T22:00:10.520Z"}
 {"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-03T22:00:10.520Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-03T22:37:48.186Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-03T22:37:48.599Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-03T22:37:48.649Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-03T22:37:48.651Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-03T22:37:48.651Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-03T22:37:48.651Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-03T22:37:48.651Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T19:52:01.898Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T19:52:02.744Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T19:52:02.822Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T19:52:02.824Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T19:52:02.824Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T19:52:02.824Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T19:52:02.824Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T19:52:16.241Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T19:52:16.595Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T19:52:16.642Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T19:52:16.644Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T19:52:16.644Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T19:52:16.644Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T19:52:16.645Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T19:52:31.063Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T19:52:31.415Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T19:52:31.462Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T19:52:31.464Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T19:52:31.464Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T19:52:31.465Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T19:52:31.465Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:05:09.694Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:05:10.057Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:05:10.110Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:05:10.112Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:05:10.112Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:05:10.112Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:05:10.112Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:05:19.481Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:05:19.845Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:05:19.896Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:05:19.898Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:05:19.898Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:05:19.898Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:05:19.898Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:05:31.605Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:05:31.968Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:05:32.023Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:05:32.025Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:05:32.025Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:05:32.025Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:05:32.025Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:36:32.037Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:36:32.400Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:36:32.451Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:36:32.453Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:36:32.454Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:36:32.454Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:36:32.454Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:36:42.071Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:36:42.408Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:36:42.454Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:36:42.456Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:36:42.456Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:36:42.456Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:36:42.456Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:36:58.380Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:36:58.736Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:36:58.781Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:36:58.783Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:36:58.783Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:36:58.783Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:36:58.783Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:38:59.074Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:38:59.425Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:38:59.474Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:38:59.476Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:38:59.476Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:38:59.476Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:38:59.477Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:39:56.215Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:39:56.575Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:39:56.625Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:39:56.627Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:39:56.627Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:39:56.627Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:39:56.628Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:41:38.422Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:41:38.769Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:41:38.821Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:41:38.823Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:41:38.823Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:41:38.823Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:41:38.823Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:42:15.051Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:42:15.410Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:42:15.461Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:42:15.463Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:42:15.463Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:42:15.463Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:42:15.463Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:45:23.414Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:45:23.779Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:45:23.834Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:45:23.836Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:45:23.837Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:45:23.837Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:45:23.837Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:45:36.406Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:45:36.748Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:45:36.794Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:45:36.796Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:45:36.796Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:45:36.796Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:45:36.796Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T20:46:03.983Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T20:46:04.339Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T20:46:04.392Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T20:46:04.394Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T20:46:04.394Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T20:46:04.394Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T20:46:04.394Z"}
+{"level":"info","message":"✅ Environment variables validated successfully.","service":"handyland-backend","timestamp":"2026-05-05T21:07:19.729Z"}
+{"level":"info","message":"✅ MongoDB Connected","service":"handyland-backend","timestamp":"2026-05-05T21:07:20.098Z"}
+{"level":"info","message":"CRON: Cart Recovery job scheduled (Runs daily at 10:00 AM)","service":"handyland-backend","timestamp":"2026-05-05T21:07:20.148Z"}
+{"level":"info","message":"🚀 Server running on http://localhost:5000","service":"handyland-backend","timestamp":"2026-05-05T21:07:20.150Z"}
+{"level":"info","message":"📊 Admin Panel:  http://localhost:3001","service":"handyland-backend","timestamp":"2026-05-05T21:07:20.151Z"}
+{"level":"info","message":"🌐 Frontend:     http://localhost:3000","service":"handyland-backend","timestamp":"2026-05-05T21:07:20.151Z"}
+{"level":"info","message":"🔐 Environment:  development","service":"handyland-backend","timestamp":"2026-05-05T21:07:20.151Z"}

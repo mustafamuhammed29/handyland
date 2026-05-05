@@ -6,6 +6,8 @@ export function useInventoryActions(refreshData: () => void) {
     const [editingItem, setEditingItem] = useState<any>(null);
 
     const [isAddPartModalOpen, setIsAddPartModalOpen] = useState(false);
+    const [isAddDeviceModalOpen, setIsAddDeviceModalOpen] = useState(false);
+    const [isAddAccessoryModalOpen, setIsAddAccessoryModalOpen] = useState(false);
 
     const handleEditClick = (item: any) => {
         setEditingItem(item);
@@ -15,13 +17,29 @@ export function useInventoryActions(refreshData: () => void) {
     const handleUpdateItem = async (editForm: any) => {
         try {
             const endpoint = `/api/inventory/${editingItem.itemType}/${editingItem._id}/stock`;
-            await api.put(endpoint, {
+            const payload: any = {
                 stock: editForm.stock,
                 price: editForm.price,
                 costPrice: editForm.costPrice,
                 reason: editForm.reason,
                 notes: editForm.notes
-            });
+            };
+
+            if (editingItem.itemType === 'Product') {
+                payload.isMarginScheme = editForm.isMarginScheme;
+                if (editForm.imeis !== undefined) {
+                    const parsedImeis = editForm.imeis
+                        .split('\n')
+                        .map((code: string) => code.trim())
+                        .filter((code: string) => code.length > 0)
+                        .map((code: string) => ({ code, status: 'available' }));
+                        
+                    const existingNonAvailable = (editingItem.imeis || []).filter((i: any) => i.status !== 'available');
+                    payload.imeis = [...existingNonAvailable, ...parsedImeis];
+                }
+            }
+
+            await api.put(endpoint, payload);
 
             setIsEditModalOpen(false);
             setEditingItem(null);
@@ -60,9 +78,35 @@ export function useInventoryActions(refreshData: () => void) {
         }
     };
 
+    const handleAddDeviceSave = async (addForm: any) => {
+        try {
+            await api.post('/api/products', addForm);
+            setIsAddDeviceModalOpen(false);
+            refreshData();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Error saving device:", error);
+            return { success: false, error: error.response?.data?.message || "Error saving device. Check barcode uniqueness." };
+        }
+    };
+
+    const handleAddAccessorySave = async (addForm: any) => {
+        try {
+            await api.post('/api/accessories', addForm);
+            setIsAddAccessoryModalOpen(false);
+            refreshData();
+            return { success: true };
+        } catch (error: any) {
+            console.error("Error saving accessory:", error);
+            return { success: false, error: error.response?.data?.message || "Error saving accessory. Check barcode uniqueness." };
+        }
+    };
+
     return {
         isEditModalOpen, setIsEditModalOpen,
         editingItem, handleEditClick, handleUpdateItem, handleInlineUpdate,
-        isAddPartModalOpen, setIsAddPartModalOpen, handleAddPartSave
+        isAddPartModalOpen, setIsAddPartModalOpen, handleAddPartSave,
+        isAddDeviceModalOpen, setIsAddDeviceModalOpen, handleAddDeviceSave,
+        isAddAccessoryModalOpen, setIsAddAccessoryModalOpen, handleAddAccessorySave
     };
 }

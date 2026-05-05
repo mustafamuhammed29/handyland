@@ -93,7 +93,8 @@ exports.getInventoryItems = async (req, res) => {
         const projectStage = {
             name: 1, category: 1, subCategory: 1, brand: 1, model: 1, barcode: 1,
             stock: 1, minStock: 1, sold: 1, price: 1, costPrice: 1,
-            supplierName: 1, supplierContact: 1, image: 1, isActive: 1, itemType: 1
+            supplierName: 1, supplierContact: 1, image: 1, isActive: 1, itemType: 1,
+            isMarginScheme: 1, imeis: 1
         };
 
         // Aggregation pipeline starting with Products
@@ -222,7 +223,7 @@ const StockHistory = require('../models/StockHistory');
 exports.updateStock = async (req, res) => {
     try {
         const { type, id } = req.params;
-        const { stock, price, costPrice, reason, notes } = req.body;
+        const { stock, price, costPrice, reason, notes, imeis, isMarginScheme } = req.body;
 
         let Model;
         let itemModelName;
@@ -245,7 +246,7 @@ exports.updateStock = async (req, res) => {
         }
 
         const previousStock = item.stock;
-        const newStock = stock !== undefined ? Number(stock) : previousStock;
+        let newStock = stock !== undefined ? Number(stock) : previousStock;
 
         let shouldLog = false;
 
@@ -260,6 +261,19 @@ exports.updateStock = async (req, res) => {
 
         if (costPrice !== undefined) {
             item.costPrice = Number(costPrice);
+        }
+
+        if (type === 'Product') {
+            if (imeis !== undefined) {
+                item.imeis = imeis;
+                // If imeis are provided, auto-calculate stock based on available items
+                const availableCount = imeis.filter(i => i.status === 'available').length;
+                item.stock = availableCount;
+                newStock = availableCount;
+            }
+            if (isMarginScheme !== undefined) {
+                item.isMarginScheme = Boolean(isMarginScheme);
+            }
         }
 
         await item.save();

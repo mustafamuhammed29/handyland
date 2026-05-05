@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 import { useTranslation } from 'react-i18next';
 import { ShoppingCart, ArrowRight, Minus, Plus, Trash2, ArrowLeft, Sparkles } from 'lucide-react';
 import { LanguageCode } from '../types';
@@ -15,6 +16,7 @@ interface CartProps {
 export const Cart: React.FC<CartProps> = ({ lang }) => {
     const { cart, updateQuantity, removeFromCart, cartTotal, finalTotal, freeShippingThreshold, addToCart } = useCart();
     const { t } = useTranslation();
+    const { addToast } = useToast();
     const navigate = useNavigate();
     const [upsellItems, setUpsellItems] = useState<any[]>([]);
     const [features, setFeatures] = useState<any>(null);
@@ -41,6 +43,9 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                 }
             } catch (err) {
                 console.error('Failed to fetch cart data:', err);
+                if (!ignore) {
+                    addToast(t('cart.fetchError', 'Failed to load some cart features. Please refresh the page.'), 'error');
+                }
             }
         };
         fetchData();

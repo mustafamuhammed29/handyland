@@ -240,6 +240,43 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         Math.max(0, cartTotal - (coupon?.discount || 0)),
     [cartTotal, coupon]);
 
+    // Re-validate coupon when cart changes
+    useEffect(() => {
+        const validateCurrentCoupon = async () => {
+            if (coupon && cartTotal > 0) {
+                try {
+                    const response = await api.post('/api/coupons/validate', { 
+                        code: coupon.code,
+                        cartValue: cartTotal 
+                    });
+                    
+                    if (response.data?.success && response.data?.coupon) {
+                        // Keep it, but update discount if the logic returned a different value
+                        // (Optional: handle percentage vs fixed logic if backend sends it)
+                        const newDiscount = response.data.discount || response.data.coupon.discountValue || coupon.discount;
+                        if (newDiscount !== coupon.discount) {
+                            setCoupon({ code: coupon.code, discount: newDiscount });
+                        }
+                    }
+                } catch (error) {
+                    // Validation failed (e.g., minimum value not met, or expired)
+                    console.warn("Applied coupon is no longer valid for this cart, removing it.");
+                    setCoupon(null);
+                }
+            } else if (cartTotal === 0 && coupon) {
+                // Auto-remove coupon if cart is empty
+                setCoupon(null);
+            }
+        };
+
+        // Debounce slightly to prevent rapid validation calls when rapidly changing quantities
+        const timeoutId = setTimeout(() => {
+            validateCurrentCoupon();
+        }, 1000);
+
+        return () => clearTimeout(timeoutId);
+    }, [cartTotal, coupon?.code]);
+
     return (
         <CartContext.Provider value={{
             cart, addToCart, removeFromCart, updateQuantity, clearCart,

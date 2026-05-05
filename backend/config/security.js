@@ -26,8 +26,7 @@ const helmetMiddleware = helmet({
                 "'self'",
                 "api.stripe.com",
                 // ARCH-01 fix: include ws/wss for Socket.io WebSocket connections
-                "ws://localhost:*",
-                "wss://localhost:*",
+                ...(process.env.NODE_ENV !== 'production' ? ["ws://localhost:*", "wss://localhost:*"] : []),
                 ...(process.env.FRONTEND_URL ? [`wss://${new URL(process.env.FRONTEND_URL).host}`] : [])
             ],
             frameSrc: ["'self'", "js.stripe.com", "hooks.stripe.com"],

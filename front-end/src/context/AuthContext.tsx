@@ -123,7 +123,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
 
-    // FIXED: Added error handling to loginWithToken (FIX 11)
     const loginWithToken = useCallback(async (token: string) => {
         try {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -135,8 +134,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(null);
             setIsVerified(false);
             sessionStorage.removeItem('user');
-            delete api.defaults.headers.common['Authorization'];
             throw new Error('Social login failed. Please try again.');
+        } finally {
+            delete api.defaults.headers.common['Authorization'];
         }
     }, []);
 

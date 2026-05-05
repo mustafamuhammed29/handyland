@@ -43,6 +43,14 @@ const productSchema = new mongoose.Schema({
     specs: Object, // Flexible specs object
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },
+    isMarginScheme: { type: Boolean, default: false },
+    imeis: [{
+        code: { type: String, required: true },
+        status: { type: String, enum: ['available', 'sold', 'reserved', 'returned'], default: 'available' },
+        costPrice: { type: Number }, // To track specific cost if bought via trade-in
+        dateAdded: { type: Date, default: Date.now },
+        orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' } // To track which order this was sold in
+    }],
     seo: {
         metaTitle: String,
         metaDescription: String,

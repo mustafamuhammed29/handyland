@@ -8,6 +8,8 @@ import { SalesTable } from '../components/InventoryManager/components/SalesTable
 import { HistoryTable } from '../components/InventoryManager/components/HistoryTable';
 import { QuickEditModal } from '../components/InventoryManager/components/QuickEditModal';
 import { AddRepairPartModal } from '../components/InventoryManager/components/AddRepairPartModal';
+import { AddDeviceModal } from '../components/InventoryManager/components/AddDeviceModal';
+import { AddAccessoryModal } from '../components/InventoryManager/components/AddAccessoryModal';
 import { useBarcodeScanner } from '../components/InventoryManager/hooks/useBarcodeScanner';
 
 export default function InventoryManager() {
@@ -36,7 +38,9 @@ export default function InventoryManager() {
     const {
         isEditModalOpen, setIsEditModalOpen,
         editingItem, handleEditClick, handleUpdateItem, handleInlineUpdate,
-        isAddPartModalOpen, setIsAddPartModalOpen, handleAddPartSave
+        isAddPartModalOpen, setIsAddPartModalOpen, handleAddPartSave,
+        isAddDeviceModalOpen, setIsAddDeviceModalOpen, handleAddDeviceSave,
+        isAddAccessoryModalOpen, setIsAddAccessoryModalOpen, handleAddAccessorySave
     } = useInventoryActions(fetchInventoryData);
 
     useBarcodeScanner((barcode) => {
@@ -44,7 +48,7 @@ export default function InventoryManager() {
         setItemsPage(1);
     });
 
-    const [editForm, setEditForm] = React.useState({ price: 0, costPrice: 0, stock: 0, reason: 'Manual Correction', notes: '' });
+    const [editForm, setEditForm] = React.useState({ price: 0, costPrice: 0, stock: 0, reason: 'Manual Correction', notes: '', isMarginScheme: false, imeis: '' });
 
     React.useEffect(() => {
         if (editingItem) {
@@ -53,7 +57,9 @@ export default function InventoryManager() {
                 costPrice: editingItem.costPrice || 0,
                 stock: editingItem.stock || 0,
                 reason: 'Manual Correction',
-                notes: ''
+                notes: '',
+                isMarginScheme: editingItem.isMarginScheme || false,
+                imeis: editingItem.imeis ? editingItem.imeis.filter((i: any) => i.status === 'available').map((i: any) => i.code).join('\n') : ''
             });
         }
     }, [editingItem]);
@@ -71,12 +77,26 @@ export default function InventoryManager() {
                     <p className="text-slate-400">Manage your entire stock and view sales history</p>
                 </div>
                 {activeTab === 'items' && (
-                    <button
-                        onClick={() => setIsAddPartModalOpen(true)}
-                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center gap-2 shrink-0 md:ml-auto"
-                    >
-                        + Add Repair Part
-                    </button>
+                    <div className="flex gap-2 shrink-0 md:ml-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+                        <button
+                            onClick={() => setIsAddDeviceModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_20px_rgba(37,99,235,0.5)] flex items-center gap-2 whitespace-nowrap"
+                        >
+                            + Device
+                        </button>
+                        <button
+                            onClick={() => setIsAddAccessoryModalOpen(true)}
+                            className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)] hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] flex items-center gap-2 whitespace-nowrap"
+                        >
+                            + Accessory
+                        </button>
+                        <button
+                            onClick={() => setIsAddPartModalOpen(true)}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center gap-2 whitespace-nowrap"
+                        >
+                            + Part
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -198,6 +218,18 @@ export default function InventoryManager() {
                 isOpen={isAddPartModalOpen}
                 onClose={() => setIsAddPartModalOpen(false)}
                 handleAddPartSave={handleAddPartSave}
+            />
+
+            <AddDeviceModal
+                isOpen={isAddDeviceModalOpen}
+                onClose={() => setIsAddDeviceModalOpen(false)}
+                handleAddDeviceSave={handleAddDeviceSave}
+            />
+
+            <AddAccessoryModal
+                isOpen={isAddAccessoryModalOpen}
+                onClose={() => setIsAddAccessoryModalOpen(false)}
+                handleAddAccessorySave={handleAddAccessorySave}
             />
         </div>
     );

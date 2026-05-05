@@ -5,7 +5,7 @@ interface QuickEditModalProps {
     isOpen: boolean;
     onClose: () => void;
     editingItem: any;
-    editForm: { price: number; costPrice: number; stock: number; reason: string; notes: string };
+    editForm: { price: number; costPrice: number; stock: number; reason: string; notes: string; isMarginScheme?: boolean; imeis?: string };
     setEditForm: (form: any) => void;
     handleUpdateItem: (e: React.FormEvent) => void;
 }
@@ -63,18 +63,48 @@ export function QuickEditModal({
                             />
                         </div>
                     </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-400 block mb-1">Stock Quantity</label>
-                        <input
-                            type="number" min="0" required
-                            className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-                            value={editForm.stock}
-                            onChange={(e) => setEditForm({ ...editForm, stock: parseInt(e.target.value) || 0 })}
-                            title="Stock Quantity"
-                            aria-label="Stock Quantity"
-                            placeholder="Stock Quantity"
-                        />
-                    </div>
+                    {editingItem.itemType === 'Product' ? (
+                        <>
+                            <div>
+                                <label className="flex items-center gap-2 cursor-pointer mb-2">
+                                    <input 
+                                        type="checkbox" 
+                                        className="w-5 h-5 rounded border-slate-600 text-blue-600 focus:ring-blue-500 bg-slate-900/50"
+                                        checked={editForm.isMarginScheme || false}
+                                        onChange={(e) => setEditForm({ ...editForm, isMarginScheme: e.target.checked })}
+                                    />
+                                    <span className="text-sm font-medium text-slate-300">Margin Scheme (§25a UStG)</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-slate-400 flex justify-between items-center mb-1">
+                                    <span>Available IMEIs / Serial Numbers</span>
+                                    <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">Auto-Stock</span>
+                                </label>
+                                <textarea
+                                    className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all font-mono text-sm"
+                                    rows={4}
+                                    placeholder="Enter one IMEI per line..."
+                                    value={editForm.imeis || ''}
+                                    onChange={(e) => setEditForm({ ...editForm, imeis: e.target.value })}
+                                />
+                                <p className="text-xs text-slate-500 mt-1">Enter each IMEI on a new line. Stock quantity will be calculated automatically.</p>
+                            </div>
+                        </>
+                    ) : (
+                        <div>
+                            <label className="text-sm font-medium text-slate-400 block mb-1">Stock Quantity</label>
+                            <input
+                                type="number" min="0" required
+                                className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                                value={editForm.stock}
+                                onChange={(e) => setEditForm({ ...editForm, stock: parseInt(e.target.value) || 0 })}
+                                title="Stock Quantity"
+                                aria-label="Stock Quantity"
+                                placeholder="Stock Quantity"
+                            />
+                        </div>
+                    )}
                     <div>
                         <label className="text-sm font-medium text-slate-400 block mb-1">Reason for change</label>
                         <select

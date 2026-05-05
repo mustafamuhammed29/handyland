@@ -12,7 +12,9 @@
         "format": "prettier --write \"**/*.js\" --ignore-path .gitignore",
         "seed:translations": "node scripts/seedTranslations.js",
         "clean:translations": "node scripts/cleanPollutedTranslations.js",
-        "healthcheck": "node scripts/healthCheck.js"
+        "healthcheck": "node scripts/healthCheck.js",
+        "test:e2e": "node scripts/test_e2e_flow.js",
+        "test:admin-ui": "node scripts/test_admin_ui.js"
     },
     "keywords": [],
     "author": "HandyLand Team",
