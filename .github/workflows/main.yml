@@ -27,7 +27,7 @@ jobs:
       working-directory: ./backend
 
     - name: Install Frontend Dependencies
-      run: npm install
+      run: npm install --legacy-peer-deps
       working-directory: ./front-end
 
     - name: Install Admin Panel Dependencies
