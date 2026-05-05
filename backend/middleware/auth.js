@@ -113,7 +113,7 @@ exports.protect = async (req, res, next) => {
 // Grant access to specific roles
 exports.authorize = (...roles) => {
     return (req, res, next) => {
-        if (!req.user) {
+        if (!req.user || !req.user.role) {
             return res.status(401).json({
                 success: false,
                 message: 'Please login to access this resource'
