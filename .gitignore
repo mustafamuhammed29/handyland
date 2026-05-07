@@ -43,6 +43,12 @@ backend/test-output.txt
 backend/seed_bulk.log
 backend/seed_output.log
 backend/audit_backend.json
+front-end/audit_frontend.json
+backend/tests/screenshots/
+backend/scripts/err.txt
+backend/scripts/out.txt
+backend/scripts/test_output.json
+backend/scripts/test_output.txt
 
 # Temporary dev/debug scripts
 make_admin.js
