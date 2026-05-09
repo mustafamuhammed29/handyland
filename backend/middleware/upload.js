@@ -1,55 +1,131 @@
-const path = require('path');
-
-const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-
 /**
- * Advanced File Upload Validation Middlewares
+ * backend/middleware/upload.js
+ * Supabase Storage upload middleware with sharp compression
+ * Replaces: Cloudinary + multer-storage-cloudinary
  */
-const validateUpload = (req, res, next) => {
-    if (!req.file) {return next();}
+'use strict';
 
-    // 1. Size check (already handled by multer, but double check here if needed)
-    if (req.file.size > 5 * 1024 * 1024) {
-        return res.status(400).json({ success: false, message: 'File too large (Max 5MB)' });
+const multer = require('multer');
+const sharp = require('sharp');
+const path = require('path');
+const { uploadImage } = require('../config/supabase');
+
+// Use memory storage — we process with sharp before uploading
+const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (allowed.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only image files are allowed (JPEG, PNG, WebP)'), false);
     }
-
-    // 2. Mime type check
-    if (!allowedMimeTypes.includes(req.file.mimetype)) {
-        return res.status(400).json({
-            success: false,
-            message: `Invalid file type. Allowed: ${allowedMimeTypes.join(', ')}`
-        });
-    }
-
-    // 3. Extension check
-    const ext = path.extname(req.file.originalname).toLowerCase();
-    const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
-    if (!allowedExts.includes(ext)) {
-        return res.status(400).json({ success: false, message: 'Invalid file extension' });
-    }
-
-    // 4. Content checking (Magic numbers/signatures)
-    // For a more advanced setup, we could use the 'file-type' library
-    // but here we do a basic buffer check for common headers if buffer is available
-    if (req.file.buffer) {
-        const header = req.file.buffer.toString('hex', 0, 4);
-        let isValidHeader = false;
-
-        // JPEG: ffd8ffe0, ffd8ffe1, ffd8ffe2
-        if (header.startsWith('ffd8ff')) {isValidHeader = true;}
-        // PNG: 89504e47
-        else if (header === '89504e47') {isValidHeader = true;}
-        // PDF: 25504446
-        else if (header === '25504446') {isValidHeader = true;}
-        // WEBP: 52494646 (RIFF header)
-        else if (header === '52494646') {isValidHeader = true;}
-
-        if (!isValidHeader) {
-            return res.status(400).json({ success: false, message: 'File content does not match extension (Malware protection)' });
-        }
-    }
-
-    next();
 };
 
-module.exports = { validateUpload };
+const upload = multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB max raw upload (we compress to <2MB)
+});
+
+/**
+ * Compress image with sharp and upload to Supabase Storage.
+ * Output is always WebP for smallest file size.
+ * @param {Buffer} buffer - Raw image buffer
+ * @param {string} bucket - Supabase bucket name
+ * @param {string} folder - Folder inside bucket (e.g., 'products')
+ * @param {string} filename - Base filename without extension
+ * @param {object} opts - Options: { width, height, quality }
+ * @returns {string} Public URL
+ */
+const processAndUpload = async (buffer, bucket, folder, filename, opts = {}) => {
+    const {
+        width = 800,
+        height = null,
+        quality = 80
+    } = opts;
+
+    // Compress with sharp → WebP
+    const compressed = await sharp(buffer)
+        .resize(width, height, { withoutEnlargement: true, fit: 'inside' })
+        .webp({ quality })
+        .toBuffer();
+
+    const timestamp = Date.now();
+    const storagePath = `${folder}/${filename}-${timestamp}.webp`;
+
+    const publicUrl = await uploadImage(bucket, storagePath, compressed, 'image/webp');
+    return publicUrl;
+};
+
+/**
+ * Middleware factory: upload single image to specified bucket.
+ * Attaches result URL to req.fileUrl
+ *
+ * Usage: router.post('/products', uploadSingle('products', 'image'), controller)
+ */
+const uploadSingle = (bucket, fieldName = 'image', folder = '') => {
+    return [
+        upload.single(fieldName),
+        async (req, res, next) => {
+            try {
+                if (!req.file) return next();
+
+                const filename = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                const bucketFolder = folder || bucket;
+
+                // Choose compression settings by bucket
+                const opts = bucket === 'avatars'
+                    ? { width: 300, height: 300, quality: 85 }
+                    : { width: 800, quality: 80 };
+
+                req.fileUrl = await processAndUpload(
+                    req.file.buffer,
+                    bucket,
+                    bucketFolder,
+                    filename,
+                    opts
+                );
+
+                next();
+            } catch (err) {
+                next(err);
+            }
+        }
+    ];
+};
+
+/**
+ * Middleware factory: upload multiple images.
+ * Attaches array of URLs to req.fileUrls
+ */
+const uploadMultiple = (bucket, fieldName = 'images', maxCount = 5, folder = '') => {
+    return [
+        upload.array(fieldName, maxCount),
+        async (req, res, next) => {
+            try {
+                if (!req.files || req.files.length === 0) return next();
+
+                const bucketFolder = folder || bucket;
+
+                req.fileUrls = await Promise.all(
+                    req.files.map(async (file, i) => {
+                        const filename = `${Date.now()}-${i}-${Math.random().toString(36).substr(2, 9)}`;
+                        return processAndUpload(file.buffer, bucket, bucketFolder, filename, { width: 800, quality: 80 });
+                    })
+                );
+
+                next();
+            } catch (err) {
+                next(err);
+            }
+        }
+    ];
+};
+
+module.exports = {
+    upload,
+    uploadSingle,
+    uploadMultiple,
+    processAndUpload
+};
