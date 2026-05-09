@@ -1,182 +1,258 @@
-const productService = require('../services/productService');
-const Question = require('../models/Question'); // Still needed for Question queries in controller for now
-const Review = require('../models/Review'); // Still needed for Review queries in controller for now
-
 /**
- * Controller for handling product-related API requests.
- * Delegates business logic to ProductService.
+ * backend/controllers/productController.js
+ * Products CRUD using Supabase
  */
+'use strict';
 
-exports.getAllProducts = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+const { deleteImage } = require('../config/supabase');
+
+// ── @route GET /api/products ──────────────────────────────────
+exports.getProducts = async (req, res, next) => {
     try {
-        const result = await productService.getProducts({
-            page: parseInt(req.query.page),
-            limit: parseInt(req.query.limit),
-            search: req.query.search,
-            brand: req.query.brand,
-            condition: req.query.condition,
-            storage: req.query.storage,
-            ram: req.query.ram,
-            minPrice: req.query.minPrice,
-            maxPrice: req.query.maxPrice,
-            sort: req.query.sort,
-            includeOutOfStock: req.query.includeOutOfStock === 'true'
+        const {
+            page = 1, limit = 20,
+            category, brand, condition,
+            minPrice, maxPrice,
+            search, sort = 'created_at',
+            order = 'desc', isActive
+        } = req.query;
+
+        const offset = (Number(page) - 1) * Number(limit);
+
+        let query = supabaseAdmin
+            .from('products')
+            .select('*', { count: 'exact' });
+
+        // Filters
+        if (isActive !== undefined) query = query.eq('is_active', isActive === 'true');
+        else query = query.eq('is_active', true); // default: active only
+
+        if (category) query = query.eq('category', category);
+        if (brand) query = query.eq('brand', brand);
+        if (condition) query = query.eq('condition', condition);
+        if (minPrice) query = query.gte('price', Number(minPrice));
+        if (maxPrice) query = query.lte('price', Number(maxPrice));
+
+        // Full-text search
+        if (search) {
+            query = query.or(`name.ilike.%${search}%,brand.ilike.%${search}%,model.ilike.%${search}%`);
+        }
+
+        // Sort & pagination
+        query = query
+            .order(sort, { ascending: order === 'asc' })
+            .range(offset, offset + Number(limit) - 1);
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+
+        return res.status(200).json({
+            success: true,
+            count,
+            pagination: {
+                page: Number(page),
+                limit: Number(limit),
+                total: count,
+                pages: Math.ceil(count / Number(limit))
+            },
+            data
         });
-        res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error fetching products', error: error.message });
+        next(error);
     }
 };
 
-exports.getProductStats = async (req, res) => {
+// ── @route GET /api/products/:id ──────────────────────────────
+exports.getProduct = async (req, res, next) => {
     try {
-        const stats = await productService.getProductStats();
-        res.json({ success: true, stats });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error fetching stats', error: error.message });
-    }
-};
+        const { id } = req.params;
 
-exports.getProductById = async (req, res) => {
-    try {
-        const product = await productService.getProductById(req.params.id);
-        if (product) {
-            res.json(product);
+        // Support both UUID and legacy string ID
+        let query = supabaseAdmin.from('products').select('*, product_imeis(*)');
+
+        if (id.includes('-') && id.length === 36) {
+            query = query.eq('id', id);
         } else {
-            res.status(404).json({ message: "Product not found" });
+            query = query.eq('legacy_id', id);
         }
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
-    }
-};
 
-exports.createProduct = async (req, res) => {
-    try {
-        const { name, price, category } = req.body;
-        if (!name || !price || !category) {
-            return res.status(400).json({ message: "Name, price, and category are required" });
+        const { data, error } = await query.single();
+        if (error || !data) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
         }
-        const newProduct = await productService.createProduct(req.body);
-        res.status(201).json(newProduct);
+
+        return res.status(200).json({ success: true, data });
     } catch (error) {
-        res.status(400).json({ success: false, message: 'Error creating product', error: error.message });
+        next(error);
     }
 };
 
-exports.updateProduct = async (req, res) => {
+// ── @route POST /api/products ─────────────────────────────────
+exports.createProduct = async (req, res, next) => {
     try {
-        const product = await productService.updateProduct(req.params.id, req.body);
-        if (product) {
-            res.json(product);
-        } else {
-            res.status(404).json({ message: "Product not found" });
+        const productData = {
+            legacy_id: req.body.id || null,
+            name: req.body.name,
+            price: req.body.price,
+            stock: req.body.stock || 0,
+            min_stock: req.body.minStock || 2,
+            is_active: req.body.isActive !== false,
+            barcode: req.body.barcode || null,
+            description: req.body.description || null,
+            features: req.body.features || [],
+            image: req.fileUrl || req.body.image || null,
+            images: req.fileUrls || req.body.images || [],
+            category: req.body.category || null,
+            sub_category: req.body.subCategory || null,
+            brand: req.body.brand || null,
+            model: req.body.model || null,
+            supplier_name: req.body.supplierName || null,
+            supplier_contact: req.body.supplierContact || null,
+            cost_price: req.body.costPrice || 0,
+            condition: req.body.condition || null,
+            seller: req.body.seller || null,
+            battery: req.body.battery || null,
+            processor: req.body.processor || null,
+            color: req.body.color || null,
+            display: req.body.display || null,
+            storage: req.body.storage || null,
+            specs: req.body.specs || {},
+            is_margin_scheme: req.body.isMarginScheme || false,
+            seo_meta_title: req.body.seo?.metaTitle || null,
+            seo_meta_description: req.body.seo?.metaDescription || null,
+            seo_keywords: req.body.seo?.keywords || null,
+            seo_canonical_url: req.body.seo?.canonicalUrl || null
+        };
+
+        const { data, error } = await supabaseAdmin
+            .from('products')
+            .insert(productData)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Insert IMEIs if provided
+        if (req.body.imeis && req.body.imeis.length > 0) {
+            const imeis = req.body.imeis.map(imei => ({
+                product_id: data.id,
+                code: imei.code,
+                status: imei.status || 'available',
+                cost_price: imei.costPrice || null
+            }));
+            await supabaseAdmin.from('product_imeis').insert(imeis);
         }
+
+        return res.status(201).json({ success: true, data });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+        next(error);
     }
 };
 
-exports.deleteProduct = async (req, res) => {
+// ── @route PUT /api/products/:id ──────────────────────────────
+exports.updateProduct = async (req, res, next) => {
     try {
-        const result = await productService.deleteProduct(req.params.id);
-        if (result) {
-            res.json({ message: "Product deleted" });
-        } else {
-            res.status(404).json({ message: "Product not found" });
-        }
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
-    }
-};
+        const { id } = req.params;
 
-exports.getRelatedProducts = async (req, res) => {
-    try {
-        const related = await productService.getRelatedProducts(req.params.id);
-        res.json(related);
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
-    }
-};
+        const updateData = {};
+        const fieldMap = {
+            name: 'name', price: 'price', stock: 'stock', minStock: 'min_stock',
+            isActive: 'is_active', barcode: 'barcode', description: 'description',
+            features: 'features', category: 'category', subCategory: 'sub_category',
+            brand: 'brand', model: 'model', supplierName: 'supplier_name',
+            supplierContact: 'supplier_contact', costPrice: 'cost_price',
+            condition: 'condition', seller: 'seller', battery: 'battery',
+            processor: 'processor', color: 'color', display: 'display',
+            storage: 'storage', specs: 'specs', isMarginScheme: 'is_margin_scheme'
+        };
 
-exports.createProductReview = async (req, res) => {
-    try {
-        const review = await productService.addReview(req.params.id, req.user.id, req.body);
-        res.status(201).json({ message: 'Review added', review });
-    } catch (error) {
-        const status = error.message === 'Product not found' ? 404 : 400;
-        res.status(status).json({ success: false, message: error.message });
-    }
-};
-
-exports.getProductReviews = async (req, res) => {
-    try {
-        const product = await productService.getProductById(req.params.id);
-        if (!product) {return res.status(404).json({ message: 'Product not found' });}
-        const reviews = await Review.find({ product: product._id }).populate('user', 'name');
-        res.json(reviews);
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
-    }
-};
-
-exports.getProductQuestions = async (req, res) => {
-    try {
-        const product = await productService.getProductById(req.params.id);
-        if (!product) {return res.status(404).json({ message: 'Product not found' });}
-        const questions = await Question.find({ product: product._id })
-            .populate('user', 'name')
-            .sort({ createdAt: -1 });
-        res.json(questions);
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
-    }
-};
-
-exports.askQuestion = async (req, res) => {
-    try {
-        const { question } = req.body;
-        const product = await productService.getProductById(req.params.id);
-        if (!product) {return res.status(404).json({ message: 'Product not found' });}
-        const newQuestion = await Question.create({
-            user: req.user._id,
-            product: product._id,
-            question
+        Object.keys(fieldMap).forEach(key => {
+            if (req.body[key] !== undefined) updateData[fieldMap[key]] = req.body[key];
         });
-        res.status(201).json(newQuestion);
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
-    }
-};
 
-exports.answerQuestion = async (req, res) => {
-    try {
-        const { answer } = req.body;
-        const question = await Question.findById(req.params.id);
-        if (!question) {return res.status(404).json({ message: 'Question not found' });}
-        question.answer = answer;
-        question.isAnswered = true;
-        question.answeredBy = req.user._id;
-        await question.save();
-        res.json(question);
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
-    }
-};
-
-exports.validateStock = async (req, res) => {
-    try {
-        const { items } = req.body;
-        const validation = await productService.validateStock(items);
-
-        if (!validation.isValid) {
-            return res.status(400).json({
-                success: false,
-                errors: validation.errors,
-                message: validation.errors.map(e => e.message).join(', ')
-            });
+        if (req.fileUrl) updateData.image = req.fileUrl;
+        if (req.fileUrls) updateData.images = req.fileUrls;
+        if (req.body.seo) {
+            updateData.seo_meta_title = req.body.seo.metaTitle;
+            updateData.seo_meta_description = req.body.seo.metaDescription;
+            updateData.seo_keywords = req.body.seo.keywords;
+            updateData.seo_canonical_url = req.body.seo.canonicalUrl;
         }
-        res.json({ success: true });
+
+        const { data, error } = await supabaseAdmin
+            .from('products')
+            .update(updateData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        if (!data) return res.status(404).json({ success: false, message: 'Product not found' });
+
+        return res.status(200).json({ success: true, data });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+        next(error);
+    }
+};
+
+// ── @route DELETE /api/products/:id ──────────────────────────
+exports.deleteProduct = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        // Get product first to delete image
+        const { data: product } = await supabaseAdmin
+            .from('products')
+            .select('image, images')
+            .eq('id', id)
+            .single();
+
+        const { error } = await supabaseAdmin
+            .from('products')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        return res.status(200).json({ success: true, message: 'Product deleted' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route GET /api/products/categories ───────────────────────
+exports.getCategories = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('products')
+            .select('category')
+            .eq('is_active', true)
+            .not('category', 'is', null);
+
+        if (error) throw error;
+
+        const categories = [...new Set(data.map(p => p.category).filter(Boolean))];
+        return res.status(200).json({ success: true, data: categories });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route GET /api/products/featured ─────────────────────────
+exports.getFeaturedProducts = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('products')
+            .select('*')
+            .eq('is_active', true)
+            .gt('stock', 0)
+            .order('sold', { ascending: false })
+            .limit(8);
+
+        if (error) throw error;
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
     }
 };

@@ -1,667 +1,364 @@
-const User = require('../models/User');
-const RefreshToken = require('../models/RefreshToken');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const { validationResult } = require('express-validator');
-const { sendEmail, sendTemplateEmail } = require('../utils/emailService');
-const authService = require('../services/authService');
+/**
+ * backend/controllers/authController.js
+ * Authentication controller using Supabase Auth
+ * Replaces: bcryptjs, JWT manual, RefreshToken model
+ */
+'use strict';
 
-// Generate Access Token
-const generateToken = (id) => {
-    if (!process.env.JWT_SECRET) {
-        throw new Error('JWT_SECRET is not defined');
-    }
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '15m' // Short lived
+const { supabaseAdmin } = require('../config/supabase');
+const nodemailer = require('nodemailer');
+
+// ── Cookie helper ─────────────────────────────────────────────
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+};
+
+const sendTokenResponse = (res, session, user, appType = 'frontend') => {
+    const cookieName = appType === 'admin' ? 'adminToken' : 'accessToken';
+    const refreshName = appType === 'admin' ? 'adminRefreshToken' : 'refreshToken';
+
+    res.cookie(cookieName, session.access_token, cookieOptions);
+    res.cookie(refreshName, session.refresh_token, {
+        ...cookieOptions,
+        maxAge: 90 * 24 * 60 * 60 * 1000 // 90 days
     });
+
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.is_verified,
+        avatar: user.avatar,
+        preferredLanguage: user.preferred_language,
+        balance: user.balance,
+        loyaltyPoints: user.loyalty_points,
+        membershipLevel: user.membership_level,
+        twoFactorEnabled: user.two_factor_enabled
+    };
 };
 
-// Generate Refresh Token
-const generateRefreshToken = (id) => {
-    if (!process.env.REFRESH_TOKEN_SECRET) {
-        throw new Error('REFRESH_TOKEN_SECRET is not defined');
-    }
-    return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET, {
-        expiresIn: '7d'
-    });
-};
-
-// @desc    Register user
-// @route   POST /api/auth/register
-// @access  Public
-exports.register = async (req, res) => {
+// ── @route POST /api/auth/register ────────────────────────────
+exports.register = async (req, res, next) => {
     try {
-        const user = await authService.registerUser(req.body);
+        const { name, email, password } = req.body;
 
-        res.status(201).json({
-            success: true,
-            message: 'Registration successful! Please check your email to verify your account.',
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                isVerified: user.isVerified
-            }
-        });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
-
-// @desc    Check if email is already registered (live validation)
-// @route   POST /api/auth/check-email
-// @access  Public
-exports.checkEmailAvailability = async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return res.status(400).json({ success: false, message: 'Invalid email' });
+        if (!name || !email || !password) {
+            return res.status(400).json({ success: false, message: 'Name, email and password are required' });
         }
-        const existing = await User.findOne({ email: email.toLowerCase().trim() }).select('_id');
-        return res.json({ success: true, available: !existing });
+
+        // Create user in Supabase Auth
+        const { data, error } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: process.env.REQUIRE_EMAIL_VERIFICATION !== 'true',
+            user_metadata: { name }
+        });
+
+        if (error) {
+            if (error.message.includes('already registered')) {
+                return res.status(400).json({ success: false, message: 'Email already in use' });
+            }
+            throw error;
+        }
+
+        // Update name in our users table (trigger creates the row)
+        await supabaseAdmin
+            .from('users')
+            .update({ name })
+            .eq('id', data.user.id);
+
+        // If email verification required, don't sign in yet
+        if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
+            // Send verification email via Supabase (built-in)
+            await supabaseAdmin.auth.admin.generateLink({
+                type: 'signup',
+                email,
+                options: { redirectTo: `${process.env.FRONTEND_URL}/verify-email` }
+            });
+
+            return res.status(201).json({
+                success: true,
+                message: 'Registration successful. Please check your email to verify your account.'
+            });
+        }
+
+        // Auto sign in
+        const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+
+        const { data: userProfile } = await supabaseAdmin
+            .from('users')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+        const userData = sendTokenResponse(res, signInData.session, userProfile);
+
+        return res.status(201).json({ success: true, data: userData });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Server error' });
+        next(error);
     }
 };
 
-
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
-exports.login = async (req, res) => {
+// ── @route POST /api/auth/login ───────────────────────────────
+exports.login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const user = await authService.loginUser(email, password);
 
-        const token = authService.generateAccessToken(user._id);
-        const refreshTokenData = await authService.generateRefreshToken(user._id);
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Please provide email and password' });
+        }
 
-        const isProduction = process.env.NODE_ENV === 'production';
+        // Sign in with Supabase
+        const { data, error } = await supabaseAdmin.auth.signInWithPassword({ email, password });
 
-        res.cookie('accessToken', token, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: 'lax',
-            maxAge: 15 * 60 * 1000,
-            path: '/'
-        });
+        if (error) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials',
+                invalidCredentials: true
+            });
+        }
 
-        res.cookie('refreshToken', refreshTokenData.token, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            path: '/'
-        });
+        // Fetch profile
+        const { data: userProfile, error: profileError } = await supabaseAdmin
+            .from('users')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
 
-        const addresses = await require('../models/Address').find({ user: user._id });
+        if (profileError || !userProfile) {
+            return res.status(401).json({ success: false, message: 'User profile not found' });
+        }
 
-        res.status(200).json({
-            success: true,
-            token: token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                isVerified: user.isVerified,
-                phone: user.phone,
-                addresses: addresses,
-                address: user.address,
-                avatar: user.avatar
-            }
-        });
+        if (!userProfile.is_active) {
+            return res.status(403).json({ success: false, message: 'Account is deactivated', accountDeactivated: true });
+        }
+
+        // 2FA check
+        if (userProfile.two_factor_enabled) {
+            // Return partial success — frontend will prompt for OTP
+            return res.status(200).json({
+                success: true,
+                twoFactorRequired: true,
+                tempToken: data.session.access_token,
+                userId: data.user.id
+            });
+        }
+
+        const appType = req.headers['x-app-type'] || 'frontend';
+        const userData = sendTokenResponse(res, data.session, userProfile, appType);
+
+        // Reset login attempts (Supabase handles lockout natively)
+        await supabaseAdmin
+            .from('users')
+            .update({ login_attempts: 0, lock_until: null })
+            .eq('id', data.user.id);
+
+        return res.status(200).json({ success: true, data: userData });
     } catch (error) {
-        let status = 400;
-        if (error.isBlocked) {status = 403;}
-        else if (error.message.includes('locked')) {status = 423;}
-        else if (error.message.includes('verify') || error.isVerified === false) {status = 401;}
-
-        res.status(status).json({
-            success: false,
-            message: error.message,
-            isVerified: error.isVerified !== undefined ? error.isVerified : true,
-            isBlocked: error.isBlocked === true
-        });
+        next(error);
     }
 };
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
-// @access  Private
-exports.getMe = async (req, res) => {
+// ── @route POST /api/auth/logout ──────────────────────────────
+exports.logout = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user.id);
-        const addresses = await require('../models/Address').find({ user: req.user.id });
+        if (req.supabaseToken) {
+            await supabaseAdmin.auth.admin.signOut(req.supabaseToken);
+        }
 
-        const userObj = user.toObject();
-        userObj.addresses = addresses;
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
+        res.clearCookie('adminToken');
+        res.clearCookie('adminRefreshToken');
 
-        res.status(200).json({
-            success: true,
-            user: userObj
-        });
+        return res.status(200).json({ success: true, message: 'Logged out successfully' });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message
-        });
+        next(error);
     }
 };
 
-// @desc    Update user profile
-// @route   PUT /api/auth/updateprofile
-// @access  Private
-exports.updateProfile = async (req, res) => {
+// ── @route POST /api/auth/refresh-token ──────────────────────
+exports.refreshToken = async (req, res, next) => {
     try {
-        const fieldsToUpdate = {
-            name: req.body.name,
-            phone: req.body.phone,
-            address: req.body.address,
-            preferredLanguage: req.body.preferredLanguage
-        };
+        const refreshToken = req.cookies?.refreshToken || req.cookies?.adminRefreshToken;
 
-        if (req.body.avatar !== undefined) {
-            fieldsToUpdate.avatar = req.body.avatar;
+        if (!refreshToken) {
+            return res.status(401).json({ success: false, message: 'No refresh token', requireAuth: true });
         }
 
-        // FIXED: Check phone uniqueness before updating (FIX 4)
-        if (req.body.phone) {
-            const phoneExists = await User.findOne({ phone: req.body.phone, _id: { $ne: req.user.id } });
-            if (phoneExists) {
-                return res.status(400).json({ success: false, message: 'This phone number is already in use by another account.' });
-            }
+        const { data, error } = await supabaseAdmin.auth.refreshSession({ refresh_token: refreshToken });
+
+        if (error || !data.session) {
+            res.clearCookie('accessToken');
+            res.clearCookie('refreshToken');
+            return res.status(401).json({ success: false, message: 'Refresh token expired', requireAuth: true });
         }
 
-        const user = await User.findByIdAndUpdate(
-            req.user.id,
-            fieldsToUpdate,
-            {
-                new: true,
-                runValidators: true
-            }
+        const appType = req.headers['x-app-type'] || 'frontend';
+        const cookieName = appType === 'admin' ? 'adminToken' : 'accessToken';
+        res.cookie(cookieName, data.session.access_token, cookieOptions);
+
+        return res.status(200).json({
+            success: true,
+            accessToken: data.session.access_token
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route GET /api/auth/me ───────────────────────────────────
+exports.getMe = async (req, res, next) => {
+    try {
+        const { data: userProfile, error } = await supabaseAdmin
+            .from('users')
+            .select('id, name, email, role, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at')
+            .eq('id', req.user.id)
+            .single();
+
+        if (error || !userProfile) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        return res.status(200).json({ success: true, data: userProfile });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route POST /api/auth/forgot-password ─────────────────────
+exports.forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        // Supabase handles the reset email natively
+        const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
+            redirectTo: `${process.env.FRONTEND_URL}/reset-password`
+        });
+
+        // Always return success (don't leak if email exists)
+        return res.status(200).json({
+            success: true,
+            message: 'If an account with that email exists, a password reset link has been sent.'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route PUT /api/auth/reset-password ──────────────────────
+exports.resetPassword = async (req, res, next) => {
+    try {
+        const { token, password } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({ success: false, message: 'Token and new password are required' });
+        }
+
+        // Exchange the recovery token for a session
+        const { data, error } = await supabaseAdmin.auth.exchangeCodeForSession(token);
+
+        if (error) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+        }
+
+        // Update password
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+            data.user.id,
+            { password }
         );
 
-        res.status(200).json({
-            success: true,
-            message: 'Profile updated successfully',
-            user
-        });
+        if (updateError) throw updateError;
+
+        return res.status(200).json({ success: true, message: 'Password reset successful' });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error updating profile',
-            error: error.message
-        });
+        next(error);
     }
 };
 
-// @desc    Change password
-// @route   PUT /api/auth/changepassword
-// @access  Private
-exports.changePassword = async (req, res) => {
+// ── @route PUT /api/auth/update-password ─────────────────────
+exports.updatePassword = async (req, res, next) => {
     try {
         const { currentPassword, newPassword } = req.body;
 
-        if (!currentPassword || !newPassword) {
-            return res.status(400).json({
-                success: false,
-                message: 'Please provide current and new password'
-            });
+        // Verify current password first
+        const { data: userData } = await supabaseAdmin.auth.admin.getUserById(req.user.id);
+        const { error: verifyError } = await supabaseAdmin.auth.signInWithPassword({
+            email: userData.user.email,
+            password: currentPassword
+        });
+
+        if (verifyError) {
+            return res.status(400).json({ success: false, message: 'Current password is incorrect' });
         }
 
-        const user = await User.findById(req.user.id).select('+password');
+        // Update to new password
+        const { error } = await supabaseAdmin.auth.admin.updateUserById(req.user.id, { password: newPassword });
+        if (error) throw error;
 
-        // Check current password
-        const isMatch = await user.matchPassword(currentPassword);
-        if (!isMatch) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid current password'
-            });
-        }
+        return res.status(200).json({ success: true, message: 'Password updated successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
 
-        // FIXED: Validate password strength before saving (FIX 2)
-        const hasLetter = /[A-Za-z]/.test(newPassword);
-        const hasNumber = /\d/.test(newPassword);
-        const hasSpecial = /[@$!%*#?&]/.test(newPassword);
-        if (newPassword.length < 8 || newPassword.length > 20 || !hasLetter || !hasNumber || !hasSpecial) {
-            return res.status(400).json({
-                success: false,
-                message: 'New password must be 8-20 characters with at least one letter, number, and special character.'
-            });
-        }
+// ── @route GET /api/auth/verify-email ────────────────────────
+// Supabase handles email verification automatically.
+// This endpoint is for backward-compat with the old frontend flow.
+exports.verifyEmail = async (req, res, next) => {
+    try {
+        // Supabase email links redirect with token_hash & type params
+        // The frontend handles the actual verification via supabase-js
+        // This backend endpoint just confirms the user is now verified
+        const { data: userProfile } = await supabaseAdmin
+            .from('users')
+            .select('is_verified')
+            .eq('id', req.user.id)
+            .single();
 
-        user.password = newPassword;
-        await user.save();
-
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            message: 'Password updated successfully'
+            isVerified: userProfile?.is_verified || false,
+            message: 'Email verification status checked'
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error updating password',
-            error: error.message
-        });
+        next(error);
     }
 };
 
-// @desc    Admin Login
-// @route   POST /api/auth/admin/login
-// @access  Public
-exports.adminLogin = async (req, res) => {
+// ── @route PUT /api/auth/update-profile ──────────────────────
+exports.updateProfile = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { name, phone, preferredLanguage, notificationPrefs } = req.body;
 
-        if (process.env.NODE_ENV !== 'production') { console.log('🔐 Admin login attempt for:', email); } // FIXED: [Removed debug console.log in production]
-
-        // Validation
-        if (!email || !password) {
-            if (process.env.NODE_ENV !== 'production') { console.log('❌ Missing credentials'); } // FIXED: [Removed debug console.log in production]
-            return res.status(400).json({
-                success: false,
-                message: 'Please provide email and password'
-            });
+        const updateData = {};
+        if (name) updateData.name = name;
+        if (phone) updateData.phone = phone;
+        if (preferredLanguage) updateData.preferred_language = preferredLanguage;
+        if (notificationPrefs) {
+            if (notificationPrefs.orderUpdates !== undefined) updateData.notif_order_updates = notificationPrefs.orderUpdates;
+            if (notificationPrefs.repairStatus !== undefined) updateData.notif_repair_status = notificationPrefs.repairStatus;
+            if (notificationPrefs.promotions !== undefined) updateData.notif_promotions = notificationPrefs.promotions;
+            if (notificationPrefs.newsletter !== undefined) updateData.notif_newsletter = notificationPrefs.newsletter;
         }
 
-        // Check for user email
-        const user = await User.findOne({ email }).select('+password');
+        const { data, error } = await supabaseAdmin
+            .from('users')
+            .update(updateData)
+            .eq('id', req.user.id)
+            .select()
+            .single();
 
-        if (!user) {
-            if (process.env.NODE_ENV !== 'production') { console.log('❌ User not found:', email); } // FIXED: [Removed debug console.log in production]
-            return res.status(400).json({ // Changed to 400 as requested or kept 401? User asked for 400 in "Invalid credentials" block below, keeping consistent
-                success: false,
-                message: 'Invalid credentials'
-            });
-        }
+        if (error) throw error;
 
-        // Check if user is admin
-        if (user.role !== 'admin') {
-            if (process.env.NODE_ENV !== 'production') { console.log('❌ Access denied - User is not admin. Role:', user.role); } // FIXED: [Removed debug console.log in production]
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied. Admin privileges required.',
-                userRole: user.role
-            });
-        }
-
-        // Check if account is active
-        if (user.isActive === false) {
-            if (process.env.NODE_ENV !== 'production') { console.log('❌ Account deactivated'); } // FIXED: [Removed debug console.log in production]
-            return res.status(403).json({
-                success: false,
-                message: 'Your account has been deactivated. Please contact support.'
-            });
-        }
-
-        // Check password
-        const isMatch = await user.matchPassword(password);
-
-        if (!isMatch) {
-            if (process.env.NODE_ENV !== 'production') { console.log('❌ Invalid password'); } // FIXED: [Removed debug console.log in production]
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid credentials'
-            });
-        }
-
-        // Generate a 24-hour token for Admin — include role so Socket.io can verify without DB lookup
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-            expiresIn: '24h'
-        });
-
-        res.cookie('adminToken', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 24 * 60 * 60 * 1000 // 24 hours
-        });
-
-        res.status(200).json({
-            success: true,
-            message: 'Admin login successful',
-            token, // Needed for Socket.io auth (admin panel is cross-origin from backend)
-            admin: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                avatar: user.avatar
-            }
-        });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
-        console.error('Admin Login error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error during admin login',
-            error: error.message
-        });
+        next(error);
     }
 };
-
-// @desc    Verify Email
-// @route   GET /api/auth/verify-email/:token
-// @access  Public
-exports.verifyEmail = async (req, res) => {
-    try {
-        await authService.verifyEmail(req.params.token);
-        res.status(200).json({
-            success: true,
-            message: 'Email verified successfully! You can now login.'
-        });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
-
-// @desc    Forgot Password - Send reset email
-// @route   POST /api/auth/forgot-password
-// @access  Public
-exports.forgotPassword = async (req, res) => {
-    try {
-        const { email } = req.body;
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            // Prevent user enumeration by returning a generic success message
-            // Optionally wait to mimic bcrypt timing if this was login, but here it's fine
-            return res.status(200).json({
-                success: true,
-                message: 'Password reset email sent! Please check your email.'
-            });
-        }
-
-        // Generate reset token
-        const resetToken = crypto.randomBytes(32).toString('hex');
-
-        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        user.resetPasswordExpire = Date.now() + 3600000; // 1 hour
-        await user.save();
-
-        // Send email
-        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-
-        try {
-            await sendTemplateEmail(user.email, 'reset_password', {
-                userName: user.name,
-                resetUrl: resetUrl
-            });
-
-            res.status(200).json({
-                success: true,
-                message: 'Password reset email sent! Please check your email.'
-            });
-        } catch (emailError) {
-            console.error('Detailed Email Error:', emailError);
-            user.resetPasswordToken = undefined;
-            user.resetPasswordExpire = undefined;
-            await user.save();
-
-            return res.status(500).json({
-                success: false,
-                message: 'Error sending email. Please try again later.'
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message
-        });
-    }
-};
-
-// @desc    Reset Password
-// @route   POST /api/auth/reset-password/:token
-// @access  Public
-exports.resetPassword = async (req, res) => {
-    try {
-        const { token } = req.params;
-        const { password } = req.body;
-
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Please provide a new password'
-            });
-        }
-
-        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-        const user = await User.findOne({
-            resetPasswordToken: hashedToken,
-            resetPasswordExpire: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid or expired reset token'
-            });
-        }
-
-        // FIXED: Validate password strength before saving (FIX 3)
-        const hasLetter = /[A-Za-z]/.test(password);
-        const hasNumber = /\d/.test(password);
-        const hasSpecial = /[@$!%*#?&]/.test(password);
-        if (password.length < 8 || password.length > 20 || !hasLetter || !hasNumber || !hasSpecial) {
-            return res.status(400).json({
-                success: false,
-                message: 'Password must be 8-20 characters with at least one letter, number, and special character.'
-            });
-        }
-
-        // Set new password
-        user.password = password;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-        await user.save();
-
-        res.status(200).json({
-            success: true,
-            message: 'Password reset successful! You can now login with your new password.'
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error resetting password',
-            error: error.message
-        });
-    }
-};
-
-// @desc    Resend Verification Email
-// @route   POST /api/auth/resend-verification
-// @access  Public
-exports.resendVerification = async (req, res) => {
-    try {
-        const { email } = req.body;
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'No user found with this email'
-            });
-        }
-
-        if (user.isVerified) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email is already verified'
-            });
-        }
-
-        // Generate new verification token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-        const hashedVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
-
-        user.verificationToken = hashedVerificationToken;
-        user.verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-        await user.save();
-
-        // Send verification email
-        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-
-        try {
-            await sendTemplateEmail(user.email, 'verify_email', {
-                userName: user.name,
-                verificationUrl: verificationUrl
-            });
-
-            res.status(200).json({
-                success: true,
-                message: 'Verification email sent! Please check your email.'
-            });
-        } catch (emailError) {
-            console.error('Detailed Verification Email Error:', emailError);
-            return res.status(500).json({
-                success: false,
-                message: 'Error sending email. Please try again later.'
-                // NOTE: emailError.message intentionally omitted — never leak internal details
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message
-        });
-    }
-};
-
-// FIXED: Removed duplicate module.exports here (FIX 1) — kept only the final one at end of file
-
-// @desc    Refresh Access Token
-// @route   GET /api/auth/refresh
-// @access  Public (with cookie)
-exports.refreshToken = async (req, res) => {
-    try {
-        const requestToken = req.cookies.refreshToken;
-
-        if (!requestToken) {
-            return res.status(401).json({ message: 'No refresh token found' });
-        }
-
-        // Find token in DB
-        const refreshTokenDoc = await RefreshToken.findOne({ token: requestToken });
-
-        if (!refreshTokenDoc) {
-            return res.status(403).json({ message: 'Refresh token is not in database!' });
-        }
-
-        // Verify expiration
-        if (RefreshToken.verifyExpiration(refreshTokenDoc)) {
-            await RefreshToken.findByIdAndDelete(refreshTokenDoc._id); // FIXED: [Deprecated findByIdAndRemove replaced with findByIdAndDelete]
-            return res.status(403).json({
-                message: 'Refresh token was expired. Please make a new signin request'
-            });
-        }
-
-        const user = await User.findById(refreshTokenDoc.user);
-
-        // Refresh Token Rotation
-        await RefreshToken.findByIdAndDelete(refreshTokenDoc._id);
-        const newRefreshTokenData = await authService.generateRefreshToken(user._id);
-
-        // Generate new access token
-        const newAccessToken = generateToken(user._id);
-
-        // Send new refresh token in HTTP-only cookie
-        res.cookie('refreshToken', newRefreshTokenData.token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            path: '/'
-        });
-
-        // Send access token in HTTP-only cookie
-        res.cookie('accessToken', newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // FIXED: [Do not hardcode secure: false in production]
-            sameSite: 'lax',
-            maxAge: 15 * 60 * 1000, // 15 minutes
-            path: '/'
-        });
-
-        res.json({ success: true, token: newAccessToken });
-    } catch (error) {
-        console.error("Refresh Token Error:", error);
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
-};
-
-// @desc    Get all users (Admin)
-// @route   GET /api/auth/admin/users
-// @access  Private/Admin
-exports.getAllUsers = async (req, res) => {
-    try {
-        // FIXED: Add pagination to prevent loading all users at once (FIX 5)
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
-        const skip = (page - 1) * limit;
-        const total = await User.countDocuments();
-        const users = await User.find().skip(skip).limit(limit).sort({ createdAt: -1 });
-        res.status(200).json({ success: true, users, total, page, pages: Math.ceil(total / limit) });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error retrieving users',
-            error: error.message
-        });
-    }
-};
-
-// @desc    Logout user
-// @route   POST /api/auth/logout
-// @access  Private
-exports.logout = async (req, res) => {
-    try {
-        const appType = req.headers['x-app-type'];
-
-        if (appType === 'admin') {
-            // Only log out from Admin Panel
-            res.clearCookie('adminToken', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
-            });
-        } else {
-            // Log out from Customer Portal
-            if (req.cookies.refreshToken) {
-                await RefreshToken.deleteOne({ token: req.cookies.refreshToken });
-            }
-
-            res.clearCookie('accessToken', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax'
-            });
-
-            res.clearCookie('refreshToken', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax'
-            });
-        }
-
-        res.status(200).json({ message: 'Logged out successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-// FIXED: [Moved module.exports to the end]
-module.exports = exports;

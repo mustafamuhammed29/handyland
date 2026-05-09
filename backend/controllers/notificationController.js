@@ -1,90 +1,93 @@
-const Notification = require('../models/Notification');
+/**
+ * backend/controllers/notificationController.js
+ * Notifications using Supabase (with Realtime capability)
+ */
+'use strict';
 
-// @desc    Get user notifications
-// @route   GET /api/notifications
-// @access  Private
-exports.getNotifications = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// ── @route GET /api/notifications ────────────────────────────
+exports.getNotifications = async (req, res, next) => {
     try {
-        const notifications = await Notification.find({ user: req.user._id })
-            .sort({ createdAt: -1 })
-            .limit(20);
+        const { limit = 20, unreadOnly } = req.query;
 
-        res.json({
-            success: true,
-            notifications
-        });
+        let query = supabaseAdmin
+            .from('notifications')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .order('created_at', { ascending: false })
+            .limit(Number(limit));
+
+        if (unreadOnly === 'true') query = query.eq('read', false);
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        const { count: unreadCount } = await supabaseAdmin
+            .from('notifications')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', req.user.id)
+            .eq('read', false);
+
+        return res.status(200).json({ success: true, data, unreadCount });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        next(error);
     }
 };
 
-// @desc    Mark notification as read
-// @route   PUT /api/notifications/:id/read
-// @access  Private
-exports.markAsRead = async (req, res) => {
+// ── @route PUT /api/notifications/:id/read ───────────────────
+exports.markAsRead = async (req, res, next) => {
     try {
-        const notification = await Notification.findById(req.params.id);
+        const { error } = await supabaseAdmin
+            .from('notifications')
+            .update({ read: true })
+            .eq('id', req.params.id)
+            .eq('user_id', req.user.id);
 
-        if (!notification) {
-            return res.status(404).json({ success: false, message: 'Notification not found' });
-        }
-
-        // Check user ownership
-        if (notification.user.toString() !== req.user._id.toString()) {
-            return res.status(401).json({ success: false, message: 'Not authorized' });
-        }
-
-        notification.read = true;
-        await notification.save();
-
-        res.json({ success: true, message: 'Notification marked as read' });
+        if (error) throw error;
+        return res.status(200).json({ success: true });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        next(error);
     }
 };
 
-// @desc    Mark all notifications as read
-// @route   PUT /api/notifications/read-all
-// @access  Private
-exports.markAllAsRead = async (req, res) => {
+// ── @route PUT /api/notifications/mark-all-read ───────────────
+exports.markAllAsRead = async (req, res, next) => {
     try {
-        await Notification.updateMany(
-            { user: req.user._id, read: false },
-            { $set: { read: true } }
-        );
+        const { error } = await supabaseAdmin
+            .from('notifications')
+            .update({ read: true })
+            .eq('user_id', req.user.id)
+            .eq('read', false);
 
-        res.json({ success: true, message: 'All notifications marked as read' });
+        if (error) throw error;
+        return res.status(200).json({ success: true });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        next(error);
     }
 };
 
-// @desc    Get unread notification count
-// @route   GET /api/notifications/unread-count
-// @access  Private
-exports.getUnreadCount = async (req, res) => {
+// ── @route DELETE /api/notifications/:id ─────────────────────
+exports.deleteNotification = async (req, res, next) => {
     try {
-        const count = await Notification.countDocuments({ user: req.user._id, read: false });
-        res.json({ success: true, count });
+        const { error } = await supabaseAdmin
+            .from('notifications')
+            .delete()
+            .eq('id', req.params.id)
+            .eq('user_id', req.user.id);
+
+        if (error) throw error;
+        return res.status(200).json({ success: true });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        next(error);
     }
 };
 
-// Helper to create notification (internal use)
+// Internal helper — used by other controllers to create notifications
 exports.createNotification = async (userId, message, type = 'info', link = null) => {
     try {
-        await Notification.create({
-            user: userId,
-            message,
-            type,
-            link
-        });
-    } catch (error) {
-        console.error('Error creating notification:', error);
+        await supabaseAdmin.from('notifications').insert({ user_id: userId, message, type, link });
+    } catch (err) {
+        console.error('Notification error:', err.message);
     }
 };
