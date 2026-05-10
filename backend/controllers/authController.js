@@ -11,7 +11,7 @@ const nodemailer = require('nodemailer');
 // ── Cookie helper ─────────────────────────────────────────────
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production', // Must be true for sameSite 'none'
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
 };

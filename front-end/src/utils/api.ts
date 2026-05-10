@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { ENV } from '../config/env';
 
-// Force empty baseURL to rely on Vite proxy for all API calls
-const API_BASE_URL = '';
+// Dynamically set baseURL from environment or fallback to empty for Vite proxy in development
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
