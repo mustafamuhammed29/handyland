@@ -7,11 +7,11 @@ const { protect, authorize } = require('../middleware/auth');
 router.use(protect);
 router.use(authorize('admin'));
 
-router.get('/search', warrantyController.searchWarranty);
+// router.get('/search', warrantyController.searchWarranty);
 
 router.route('/')
     .get(warrantyController.getWarranties)
-    .post(warrantyController.addWarranty);
+    .post(warrantyController.createWarranty);
 
 router.route('/:id')
     .put(warrantyController.updateWarranty)

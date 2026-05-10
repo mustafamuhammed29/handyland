@@ -28,6 +28,7 @@ const sendTokenResponse = (res, session, user, appType = 'frontend') => {
 
     return {
         id: user.id,
+        _id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -98,7 +99,7 @@ exports.register = async (req, res, next) => {
 
         const userData = sendTokenResponse(res, signInData.session, userProfile);
 
-        return res.status(201).json({ success: true, data: userData });
+        return res.status(201).json({ success: true, user: userData, data: userData });
     } catch (error) {
         next(error);
     }
@@ -159,7 +160,7 @@ exports.login = async (req, res, next) => {
             .update({ login_attempts: 0, lock_until: null })
             .eq('id', data.user.id);
 
-        return res.status(200).json({ success: true, data: userData });
+        return res.status(200).json({ success: true, user: userData, data: userData });
     } catch (error) {
         next(error);
     }
@@ -226,7 +227,8 @@ exports.getMe = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        return res.status(200).json({ success: true, data: userProfile });
+        const userWithId = { ...userProfile, _id: userProfile.id };
+        return res.status(200).json({ success: true, user: userWithId, data: userWithId });
     } catch (error) {
         next(error);
     }
@@ -357,8 +359,50 @@ exports.updateProfile = async (req, res, next) => {
 
         if (error) throw error;
 
-        return res.status(200).json({ success: true, data });
+        const userWithId = { ...data, _id: data.id };
+        return res.status(200).json({ success: true, user: userWithId, data: userWithId });
     } catch (error) {
         next(error);
     }
+};
+
+exports.adminLogin = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        const { data, error } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+        if (error) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+
+        const { data: userProfile } = await supabaseAdmin.from('users').select('*').eq('id', data.user.id).single();
+        if (!userProfile || userProfile.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Access denied' });
+        }
+        
+        const userData = sendTokenResponse(res, data.session, userProfile, 'admin');
+        return res.status(200).json({ success: true, user: userData, data: userData });
+    } catch (error) { next(error); }
+};
+
+exports.getAllUsers = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin.from('users').select('*');
+        if (error) throw error;
+        res.status(200).json({ success: true, count: data.length, data });
+    } catch (error) { next(error); }
+};
+
+exports.resendVerification = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const { error } = await supabaseAdmin.auth.resend({ type: 'signup', email });
+        if (error) throw error;
+        res.status(200).json({ success: true, message: 'Verification email sent!' });
+    } catch (error) { next(error); }
+};
+
+exports.checkEmailAvailability = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const { data } = await supabaseAdmin.from('users').select('id').eq('email', email).maybeSingle();
+        res.status(200).json({ success: true, available: !data });
+    } catch (error) { next(error); }
 };

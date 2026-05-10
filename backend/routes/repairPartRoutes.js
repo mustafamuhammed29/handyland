@@ -9,12 +9,12 @@ router.use(authorize('admin'));
 
 // Admin routes
 router.route('/')
-    .get(repairPartController.getRepairParts)
-    .post(repairPartController.createRepairPart);
+    .get(repairPartController.getParts)
+    .post(repairPartController.createPart);
 
 router.route('/:id')
-    .get(repairPartController.getRepairPartById)
-    .put(repairPartController.updateRepairPart)
-    .delete(repairPartController.deleteRepairPart);
+    // .get(repairPartController.getRepairPartById)
+    .put(repairPartController.updatePart)
+    .delete(repairPartController.deletePart);
 
 module.exports = router;

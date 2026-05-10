@@ -1,69 +1,83 @@
-const ShippingMethod = require('../models/ShippingMethod');
+/**
+ * backend/controllers/shippingController.js
+ * Shipping methods management using Supabase
+ */
+'use strict';
 
-// @desc    Get all shipping methods
-// @route   GET /api/shipping-methods
-// @access  Public
-exports.getShippingMethods = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/shipping
+exports.getShippingMethods = async (req, res, next) => {
     try {
-        const methods = await ShippingMethod.find({ isActive: true });
-        res.json(methods);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const isAdmin = req.user?.role === 'admin';
+        const { isActive } = req.query;
+
+        let query = supabaseAdmin.from('shipping_methods').select('*').order('price', { ascending: true });
+
+        if (!isAdmin) {
+            query = query.eq('is_active', true);
+        } else if (isActive !== undefined) {
+            query = query.eq('is_active', isActive === 'true');
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        
+        const methodsWithId = (data || []).map(m => ({ ...m, _id: m.id }));
+        return res.status(200).json({ success: true, count: data.length, shippingMethods: methodsWithId, data: methodsWithId });
+    } catch (error) { next(error); }
 };
 
-// @desc    Get all shipping methods (Admin)
-// @route   GET /api/shipping-methods/admin/all
-// @access  Private/Admin
-exports.getAllShippingMethodsAdmin = async (req, res) => {
+// @route GET /api/shipping/:id
+exports.getShippingMethod = async (req, res, next) => {
     try {
-        const methods = await ShippingMethod.find({});
-        res.json(methods);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const { data, error } = await supabaseAdmin.from('shipping_methods').select('*').eq('id', req.params.id).single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Shipping method not found' });
+        const methodWithId = { ...data, _id: data.id };
+        return res.status(200).json({ success: true, shippingMethod: methodWithId, data: methodWithId });
+    } catch (error) { next(error); }
 };
 
-// @desc    Create shipping method
-// @route   POST /api/shipping-methods
-// @access  Private/Admin
-exports.createShippingMethod = async (req, res) => {
+// @route POST /api/shipping (Admin)
+exports.createShippingMethod = async (req, res, next) => {
     try {
-        const method = await ShippingMethod.create(req.body);
-        res.status(201).json(method);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+        const { name, description, price, estimatedDays, isActive } = req.body;
+        if (!name || price === undefined) return res.status(400).json({ success: false, message: 'Name and price are required' });
+
+        const { data, error } = await supabaseAdmin
+            .from('shipping_methods')
+            .insert({ name, description, price, estimated_days: estimatedDays, is_active: isActive !== false })
+            .select().single();
+
+        if (error) throw error;
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Update shipping method
-// @route   PUT /api/shipping-methods/:id
-// @access  Private/Admin
-exports.updateShippingMethod = async (req, res) => {
+// @route PUT /api/shipping/:id (Admin)
+exports.updateShippingMethod = async (req, res, next) => {
     try {
-        const method = await ShippingMethod.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(method);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+        const { name, description, price, estimatedDays, isActive } = req.body;
+        const updateData = {};
+        
+        if (name) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+        if (price !== undefined) updateData.price = price;
+        if (estimatedDays !== undefined) updateData.estimated_days = estimatedDays;
+        if (isActive !== undefined) updateData.is_active = isActive;
+
+        const { data, error } = await supabaseAdmin.from('shipping_methods').update(updateData).eq('id', req.params.id).select().single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Shipping method not found' });
+        
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Delete shipping method
-// @route   DELETE /api/shipping-methods/:id
-// @access  Private/Admin
-exports.deleteShippingMethod = async (req, res) => {
+// @route DELETE /api/shipping/:id (Admin)
+exports.deleteShippingMethod = async (req, res, next) => {
     try {
-        await ShippingMethod.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Shipping method deleted' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-exports.deleteShippingMethod = async (req, res) => {
-    try {
-        await ShippingMethod.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Shipping method deleted' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const { error } = await supabaseAdmin.from('shipping_methods').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Shipping method deleted' });
+    } catch (error) { next(error); }
 };

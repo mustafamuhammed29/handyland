@@ -1,79 +1,78 @@
-const EmailTemplate = require('../models/EmailTemplate');
+/**
+ * backend/controllers/emailTemplateController.js
+ * Email Templates management using Supabase
+ */
+'use strict';
 
-// @desc    Get all email templates
-// @route   GET /api/email-templates
-// @access  Private/Admin
-exports.getEmailTemplates = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/email-templates
+exports.getTemplates = async (req, res, next) => {
     try {
-        const templates = await EmailTemplate.find().sort({ name: 1 });
-        res.status(200).json({
-            success: true,
-            data: templates
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching email templates',
-            error: error.message
-        });
-    }
+        const { data, error } = await supabaseAdmin.from('email_templates').select('*').order('name', { ascending: true });
+        if (error) throw error;
+        return res.status(200).json({ success: true, count: data.length, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Get single email template
-// @route   GET /api/email-templates/:id
-// @access  Private/Admin
-exports.getEmailTemplate = async (req, res) => {
+// @route GET /api/email-templates/:id
+exports.getTemplate = async (req, res, next) => {
     try {
-        const template = await EmailTemplate.findById(req.params.id);
-        if (!template) {
-            return res.status(404).json({
-                success: false,
-                message: 'Template not found'
-            });
-        }
-        res.status(200).json({
-            success: true,
-            data: template
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching email template',
-            error: error.message
-        });
-    }
+        const { data, error } = await supabaseAdmin.from('email_templates').select('*').eq('id', req.params.id).single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Template not found' });
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Update an email template
-// @route   PUT /api/email-templates/:id
-// @access  Private/Admin
-exports.updateEmailTemplate = async (req, res) => {
+// @route POST /api/email-templates
+exports.createTemplate = async (req, res, next) => {
     try {
-        const { subject, html, isActive } = req.body;
+        const { name, subject, bodyHtml, bodyText, variables, isActive } = req.body;
+        if (!name || !subject) return res.status(400).json({ success: false, message: 'Name and subject are required' });
 
-        const template = await EmailTemplate.findByIdAndUpdate(
-            req.params.id,
-            { subject, html, isActive },
-            { new: true, runValidators: true }
-        );
+        const { data, error } = await supabaseAdmin
+            .from('email_templates')
+            .insert({ name, subject, body_html: bodyHtml, body_text: bodyText, variables: variables || [], is_active: isActive !== false })
+            .select().single();
 
-        if (!template) {
-            return res.status(404).json({
-                success: false,
-                message: 'Template not found'
-            });
+        if (error) {
+            if (error.code === '23505') return res.status(400).json({ success: false, message: 'Template name already exists' });
+            throw error;
         }
 
-        res.status(200).json({
-            success: true,
-            message: 'Email template updated successfully',
-            data: template
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error updating email template',
-            error: error.message
-        });
-    }
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route PUT /api/email-templates/:id
+exports.updateTemplate = async (req, res, next) => {
+    try {
+        const { name, subject, bodyHtml, bodyText, variables, isActive } = req.body;
+        const updateData = {};
+        
+        if (name) updateData.name = name;
+        if (subject) updateData.subject = subject;
+        if (bodyHtml !== undefined) updateData.body_html = bodyHtml;
+        if (bodyText !== undefined) updateData.body_text = bodyText;
+        if (variables) updateData.variables = variables;
+        if (isActive !== undefined) updateData.is_active = isActive;
+
+        const { data, error } = await supabaseAdmin.from('email_templates').update(updateData).eq('id', req.params.id).select().single();
+        if (error) {
+            if (error.code === '23505') return res.status(400).json({ success: false, message: 'Template name already exists' });
+            throw error;
+        }
+        if (!data) return res.status(404).json({ success: false, message: 'Template not found' });
+
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route DELETE /api/email-templates/:id
+exports.deleteTemplate = async (req, res, next) => {
+    try {
+        const { error } = await supabaseAdmin.from('email_templates').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Template deleted' });
+    } catch (error) { next(error); }
 };

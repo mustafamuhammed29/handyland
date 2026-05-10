@@ -15,10 +15,25 @@ exports.getProducts = async (req, res, next) => {
             category, brand, condition,
             minPrice, maxPrice,
             search, sort = 'created_at',
-            order = 'desc', isActive
+            order = 'desc', isActive, featured
         } = req.query;
 
         const offset = (Number(page) - 1) * Number(limit);
+
+        // Map frontend sort aliases to valid DB columns
+        const sortAliasMap = {
+            newest: 'created_at',
+            oldest: 'created_at',
+            'price-asc': 'price',
+            'price-desc': 'price',
+            name: 'name',
+            rating: 'rating'
+        };
+        const dbSort = sortAliasMap[sort] || sort;
+        const dbOrder = sort === 'oldest' ? 'asc'
+            : sort === 'price-asc' ? 'asc'
+                : sort === 'price-desc' ? 'desc'
+                    : order;
 
         let query = supabaseAdmin
             .from('products')
@@ -28,9 +43,14 @@ exports.getProducts = async (req, res, next) => {
         if (isActive !== undefined) query = query.eq('is_active', isActive === 'true');
         else query = query.eq('is_active', true); // default: active only
 
-        if (category) query = query.eq('category', category);
-        if (brand) query = query.eq('brand', brand);
-        if (condition) query = query.eq('condition', condition);
+        if (featured === 'true') {
+            query = query.gt('stock', 0).order('sold', { ascending: false });
+        }
+
+        // Ignore placeholder 'All' value sent by frontend dropdowns
+        if (category && category !== 'All') query = query.ilike('category', category);
+        if (brand && brand !== 'All') query = query.ilike('brand', brand);
+        if (condition && condition !== 'All') query = query.ilike('condition', condition);
         if (minPrice) query = query.gte('price', Number(minPrice));
         if (maxPrice) query = query.lte('price', Number(maxPrice));
 
@@ -41,7 +61,7 @@ exports.getProducts = async (req, res, next) => {
 
         // Sort & pagination
         query = query
-            .order(sort, { ascending: order === 'asc' })
+            .order(dbSort, { ascending: dbOrder === 'asc' })
             .range(offset, offset + Number(limit) - 1);
 
         const { data, error, count } = await query;
@@ -56,7 +76,8 @@ exports.getProducts = async (req, res, next) => {
                 total: count,
                 pages: Math.ceil(count / Number(limit))
             },
-            data
+            products: data,
+            data: data
         });
     } catch (error) {
         next(error);
@@ -82,7 +103,11 @@ exports.getProduct = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
-        return res.status(200).json({ success: true, data });
+        return res.status(200).json({ 
+            success: true, 
+            product: data,
+            data: data 
+        });
     } catch (error) {
         next(error);
     }
@@ -233,7 +258,7 @@ exports.getCategories = async (req, res, next) => {
         if (error) throw error;
 
         const categories = [...new Set(data.map(p => p.category).filter(Boolean))];
-        return res.status(200).json({ success: true, data: categories });
+        return res.status(200).json({ success: true, categories, data: categories });
     } catch (error) {
         next(error);
     }
@@ -251,8 +276,44 @@ exports.getFeaturedProducts = async (req, res, next) => {
             .limit(8);
 
         if (error) throw error;
-        return res.status(200).json({ success: true, data });
+        return res.status(200).json({ success: true, products: data, data });
     } catch (error) {
         next(error);
     }
 };
+
+// ── @route POST /api/products/validate-stock ──────────────────
+exports.validateStock = async (req, res, next) => {
+    try {
+        const { items } = req.body;
+        if (!items || !Array.isArray(items)) {
+            return res.status(400).json({ success: false, message: 'Items array is required' });
+        }
+
+        const results = [];
+        let allAvailable = true;
+
+        for (const item of items) {
+            const { data: product } = await supabaseAdmin
+                .from('products')
+                .select('id, name, stock')
+                .eq('id', item.id)
+                .single();
+
+            if (!product) {
+                results.push({ id: item.id, name: item.name, available: false, reason: 'Product not found' });
+                allAvailable = false;
+            } else if (product.stock < item.quantity) {
+                results.push({ id: item.id, name: product.name, available: false, currentStock: product.stock, requested: item.quantity });
+                allAvailable = false;
+            } else {
+                results.push({ id: item.id, name: product.name, available: true });
+            }
+        }
+
+        return res.status(200).json({ success: allAvailable, results });
+    } catch (error) {
+        next(error);
+    }
+};
+

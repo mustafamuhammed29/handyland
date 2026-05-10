@@ -1,175 +1,74 @@
-const Product = require('../models/Product');
-const Accessory = require('../models/Accessory');
-const RepairDevice = require('../models/RepairDevice');
+/**
+ * backend/controllers/statsController.js
+ * Dashboard statistics using Supabase
+ */
+'use strict';
 
-const RepairCase = require('../models/RepairCase');
-const Review = require('../models/Review'); // Added
-const Question = require('../models/Question'); // Added
+const { supabaseAdmin } = require('../config/supabase');
 
-exports.getDashboardStats = async (req, res) => {
+// @route GET /api/stats/dashboard
+exports.getDashboardStats = async (req, res, next) => {
     try {
-        const Order = require('../models/Order');
-        const User = require('../models/User');
+        const today = new Date();
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
 
-        // Run count queries in parallel for performance
-        const [
-            productCount,
-            accessoryCount,
-            repairDeviceCount,
-            repairCaseCount,
-            recentProducts,
-            reviewCount,
-            questionCount,
-            orderCount,
-            userCount,
-            totalRevenueAgg,
-            topSellingProducts,
-            recentOrders
-        ] = await Promise.all([
-            Product.countDocuments(),
-            Accessory.countDocuments(),
-            RepairDevice.countDocuments(),
-            RepairCase.countDocuments(),
-            Product.find().sort({ createdAt: -1 }).limit(5),
-            Review.countDocuments(),
-            Question.countDocuments(),
-            Order.countDocuments(),
-            User.countDocuments({ role: 'user' }),
-            Order.aggregate([
-                { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
-                { $group: { _id: null, total: { $sum: '$totalAmount' } } }
-            ]),
-            Product.find().sort({ sold: -1 }).limit(5).select('name sold image price'),
-            Order.find().sort({ createdAt: -1 }).limit(5).populate('user', 'name')
-        ]);
+        // 1. Orders this month
+        const { count: currentOrdersCount } = await supabaseAdmin.from('orders')
+            .select('id', { count: 'exact' })
+            .gte('created_at', startOfMonth);
 
-        const totalRevenue = totalRevenueAgg.length > 0 ? totalRevenueAgg[0].total : 0;
+        // 2. Revenue this month
+        const { data: revenueData } = await supabaseAdmin.from('orders')
+            .select('total_amount')
+            .gte('created_at', startOfMonth)
+            .in('status', ['processing', 'shipped', 'delivered']);
+            
+        const monthlyRevenue = revenueData ? revenueData.reduce((sum, order) => sum + Number(order.total_amount), 0) : 0;
 
-        res.json({
+        // 3. Total Users
+        const { count: usersCount } = await supabaseAdmin.from('users').select('id', { count: 'exact' }).eq('role', 'user');
+
+        // 4. Pending Repair Tickets
+        const { count: pendingTickets } = await supabaseAdmin.from('repair_tickets').select('id', { count: 'exact' }).eq('status', 'pending');
+
+        return res.status(200).json({
             success: true,
-            counts: {
-                products: productCount,
-                accessories: accessoryCount,
-                repairServices: repairDeviceCount,
-                portfolioCases: repairCaseCount,
-                reviews: reviewCount,
-                questions: questionCount,
-                orders: orderCount,
-                users: userCount
-            },
-            financials: {
-                totalRevenue: totalRevenue
-            },
-            recentActivity: recentProducts,
-            topSellingProducts: topSellingProducts,
-            recentOrders: recentOrders
+            data: {
+                monthlyOrders: currentOrdersCount || 0,
+                monthlyRevenue: Number(monthlyRevenue.toFixed(2)),
+                totalUsers: usersCount || 0,
+                pendingTickets: pendingTickets || 0
+            }
         });
-    } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
-        res.status(500).json({ message: 'Failed to fetch dashboard stats' });
-    }
+    } catch (error) { next(error); }
 };
 
-exports.getUserStats = async (req, res) => {
+// @route GET /api/stats/revenue-chart
+exports.getRevenueChartData = async (req, res, next) => {
     try {
-        const Order = require('../models/Order');
-        const RepairTicket = require('../models/RepairTicket');
-
-        // 1. Balance Trend (Last 6 Months Revenue)
-        // Group by Month, Sum Total Amount for valid orders
+        // Last 6 months
         const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+        sixMonthsAgo.setDate(1);
 
-        const mongoose = require('mongoose');
-        const revenueAgg = await Order.aggregate([
-            {
-                $match: {
-                    user: new mongoose.Types.ObjectId(req.user.id),
-                    createdAt: { $gte: sixMonthsAgo },
-                    status: { $nin: ['cancelled', 'pending'] } // Only count processed/completed
-                }
-            },
-            {
-                $group: {
-                    _id: { $month: "$createdAt" },
-                    total: { $sum: "$totalAmount" },
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
+        const { data: orders } = await supabaseAdmin.from('orders')
+            .select('total_amount, created_at')
+            .gte('created_at', sixMonthsAgo.toISOString())
+            .in('status', ['processing', 'shipped', 'delivered']);
 
-        // Map numeric months to names
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const balanceTrend = revenueAgg.map(item => ({
-            month: monthNames[item._id - 1],
-            balance: item.total
-        })).sort((a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month)); // Simple sort might need year handling but works for short term
+        const monthlyData = {};
+        if (orders) {
+            orders.forEach(order => {
+                const date = new Date(order.created_at);
+                const month = date.toLocaleString('default', { month: 'short' });
+                if (!monthlyData[month]) monthlyData[month] = 0;
+                monthlyData[month] += Number(order.total_amount);
+            });
+        }
 
-        // 2. Spending Distribution (Products vs Accessories vs Repairs)
-        // Aggregate Order Items
-        const orderDistAgg = await Order.aggregate([
-            { $match: { user: new mongoose.Types.ObjectId(req.user.id) } },
-            { $unwind: "$items" },
-            {
-                $group: {
-                    _id: "$items.productType",
-                    value: { $sum: "$items.price" } // usage price * quantity if quantity existed in unwind, assuming price is unit * qty or just total line item
-                }
-            }
-        ]);
+        const labels = Object.keys(monthlyData);
+        const data = Object.values(monthlyData);
 
-        let productSpend = 0;
-        let accessorySpend = 0;
-
-        // Note: Order items price is usually unit price. We should ideally multiply by quantity.
-        // For simplicity reusing this agg.
-        // Better Agg:
-        const refinedOrderDist = await Order.aggregate([
-            { $match: { user: new mongoose.Types.ObjectId(req.user.id) } },
-            { $unwind: "$items" },
-            {
-                $group: {
-                    _id: "$items.productType",
-                    total: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
-                }
-            }
-        ]);
-
-        refinedOrderDist.forEach(item => {
-            if (item._id === 'Product') {productSpend = item.total;}
-            if (item._id === 'Accessory') {accessorySpend = item.total;}
-        });
-
-        // Repairs Spend (Estimate from Tickets)
-        // Assuming completed tickets are paid
-        const repairAgg = await RepairTicket.aggregate([
-            { $match: { user: new mongoose.Types.ObjectId(req.user.id), status: 'completed' } },
-            { $group: { _id: null, total: { $sum: "$estimatedCost" } } }
-        ]);
-        const repairSpend = repairAgg.length > 0 ? repairAgg[0].total : 0;
-
-        const spendingDistribution = [
-            { name: 'Purchases', value: productSpend },
-            { name: 'Accessories', value: accessorySpend },
-            { name: 'Repairs', value: repairSpend },
-        ];
-
-        // 3. Monthly Orders Count
-        // Reuse revenueAgg which already grouped by month
-        const monthlyOrders = revenueAgg.map(item => ({
-            month: monthNames[item._id - 1],
-            orders: item.count
-        })).sort((a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month));
-
-        res.json({
-            success: true,
-            balanceTrend: balanceTrend.length ? balanceTrend : [{ month: 'No Data', balance: 0 }],
-            spendingDistribution,
-            monthlyOrders: monthlyOrders.length ? monthlyOrders : [{ month: 'No Data', orders: 0 }]
-        });
-
-    } catch (error) {
-        console.error("Error fetching user stats", error);
-        res.status(500).json({ success: false, message: "Server Error" });
-    }
+        return res.status(200).json({ success: true, labels, data });
+    } catch (error) { next(error); }
 };

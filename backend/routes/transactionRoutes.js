@@ -1,15 +1,6 @@
 const express = require('express');
 const {
-    getTransactions,
-    createTopUpSession,
-    confirmTopUp,
-    createPayPalTopUp,
-    capturePayPalTopUp,
-    createBankTransferTopUp,
-    uploadTransactionReceipt,
-    receiptUpload,
-    getAllTransactions,
-    updateTransactionStatus
+    getTransactions
 } = require('../controllers/transactionController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -19,16 +10,16 @@ router.use(protect);
 
 // User Routes
 router.get('/', getTransactions);
-router.post('/create-topup-session', createTopUpSession);
-router.post('/confirm-topup', confirmTopUp);
+// router.post('/create-topup-session', createTopUpSession);
+// router.post('/confirm-topup', confirmTopUp);
 
-router.post('/paypal/create-topup', createPayPalTopUp);
-router.post('/paypal/capture-topup', capturePayPalTopUp);
-router.post('/bank-transfer', createBankTransferTopUp);
-router.post('/:id/upload-receipt', receiptUpload.single('receipt'), uploadTransactionReceipt);
+// router.post('/paypal/create-topup', createPayPalTopUp);
+// router.post('/paypal/capture-topup', capturePayPalTopUp);
+// router.post('/bank-transfer', createBankTransferTopUp);
+// router.post('/:id/upload-receipt', receiptUpload.single('receipt'), uploadTransactionReceipt);
 
 // Admin Routes
-router.get('/admin', authorize('admin'), getAllTransactions);
-router.put('/admin/:id/status', authorize('admin'), updateTransactionStatus);
+router.get('/admin', authorize('admin'), getTransactions);
+// router.put('/admin/:id/status', authorize('admin'), updateTransactionStatus);
 
 module.exports = router;

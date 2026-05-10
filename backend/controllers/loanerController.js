@@ -1,193 +1,125 @@
-const LoanerPhone = require('../models/LoanerPhone');
+/**
+ * backend/controllers/loanerController.js
+ * Loaner Phones management using Supabase
+ */
+'use strict';
 
-// @desc    Get loaner stats
-// @route   GET /api/loaners/stats
-// @access  Private/Admin
-exports.getLoanerStats = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/loaners
+exports.getLoaners = async (req, res, next) => {
     try {
-        const stats = await LoanerPhone.aggregate([
-            {
-                $group: {
-                    _id: "$status",
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
+        const { page = 1, limit = 20, status, search } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
 
-        const formattedStats = {
-            Total: 0,
-            Available: 0,
-            Lent: 0,
-            Maintenance: 0
-        };
+        let query = supabaseAdmin.from('loaner_phones').select('*, users(name, email), repair_tickets(ticket_id)', { count: 'exact' });
 
-        stats.forEach(stat => {
-            if (formattedStats[stat._id] !== undefined) {
-                formattedStats[stat._id] = stat.count;
-            }
-            formattedStats.Total += stat.count;
+        if (status) query = query.eq('status', status);
+        if (search) query = query.or(`name.ilike.%${search}%,imei.ilike.%${search}%`);
+
+        query = query.order('created_at', { ascending: false }).range(offset, offset + Number(limit) - 1);
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+
+        return res.status(200).json({
+            success: true, count,
+            pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
+            data
         });
-
-        res.json({ success: true, stats: formattedStats });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+    } catch (error) { next(error); }
 };
 
-// @desc    Get all loaner phones
-// @route   GET /api/loaners
-// @access  Private/Admin
-exports.getLoaners = async (req, res) => {
+// @route POST /api/loaners
+exports.createLoaner = async (req, res, next) => {
     try {
-        const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 15;
-        const search = req.query.search || '';
-        const statusFilter = req.query.status || '';
-        const startIndex = (page - 1) * limit;
+        const { name, imei, notes, status } = req.body;
+        if (!name || !imei) return res.status(400).json({ success: false, message: 'Name and IMEI are required' });
 
-        const query = {};
-        if (search) {
-            query.$or = [
-                { brand: { $regex: search, $options: 'i' } },
-                { model: { $regex: search, $options: 'i' } },
-                { imei: { $regex: search, $options: 'i' } },
-                { 'currentCustomer.name': { $regex: search, $options: 'i' } }
-            ];
+        const { data, error } = await supabaseAdmin
+            .from('loaner_phones')
+            .insert({ name, imei, notes, status: status || 'available' })
+            .select().single();
+
+        if (error) {
+            if (error.code === '23505') return res.status(400).json({ success: false, message: 'IMEI already exists' });
+            throw error;
         }
 
-        if (statusFilter && statusFilter !== 'All') {
-            query.status = statusFilter;
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route PUT /api/loaners/:id
+exports.updateLoaner = async (req, res, next) => {
+    try {
+        const { name, imei, status, notes } = req.body;
+        const updateData = {};
+        
+        if (name) updateData.name = name;
+        if (imei) updateData.imei = imei;
+        if (status) updateData.status = status;
+        if (notes !== undefined) updateData.notes = notes;
+
+        const { data, error } = await supabaseAdmin.from('loaner_phones').update(updateData).eq('id', req.params.id).select().single();
+        if (error) {
+            if (error.code === '23505') return res.status(400).json({ success: false, message: 'IMEI already exists' });
+            throw error;
         }
+        if (!data) return res.status(404).json({ success: false, message: 'Loaner phone not found' });
 
-        const [count, loaners] = await Promise.all([
-            LoanerPhone.countDocuments(query),
-            LoanerPhone.find(query)
-                .sort({ createdAt: -1 })
-                .skip(startIndex)
-                .limit(limit)
-        ]);
-
-        const totalPages = Math.ceil(count / limit);
-
-        res.status(200).json({
-            success: true,
-            loaners,
-            count,
-            totalPages,
-            currentPage: page
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Add a new loaner phone
-// @route   POST /api/loaners
-// @access  Private/Admin
-exports.addLoaner = async (req, res) => {
+// @route DELETE /api/loaners/:id
+exports.deleteLoaner = async (req, res, next) => {
     try {
-        const { brand, model, imei, status, notes } = req.body;
-
-        const existing = await LoanerPhone.findOne({ imei });
-        if (existing) {
-            return res.status(400).json({ message: 'A loaner phone with this IMEI already exists.' });
-        }
-
-        const loaner = await LoanerPhone.create({
-            brand,
-            model,
-            imei,
-            status: status || 'Available',
-            notes
-        });
-
-        res.status(201).json(loaner);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+        const { error } = await supabaseAdmin.from('loaner_phones').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Loaner phone deleted' });
+    } catch (error) { next(error); }
 };
 
-// @desc    Update a loaner phone
-// @route   PUT /api/loaners/:id
-// @access  Private/Admin
-exports.updateLoaner = async (req, res) => {
+// @route POST /api/loaners/:id/assign
+exports.assignLoaner = async (req, res, next) => {
     try {
-        const { brand, model, imei, status, notes } = req.body;
-        const loaner = await LoanerPhone.findByIdAndUpdate(
-            req.params.id,
-            { brand, model, imei, status, notes },
-            { new: true, runValidators: true }
-        );
-        if (!loaner) {return res.status(404).json({ message: 'Loaner phone not found' });}
-        res.json(loaner);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const { userId, ticketId, expectedReturn } = req.body;
+        if (!userId) return res.status(400).json({ success: false, message: 'User ID is required' });
+
+        const { data, error } = await supabaseAdmin
+            .from('loaner_phones')
+            .update({
+                status: 'loaned',
+                loaned_to: userId,
+                repair_ticket_id: ticketId || null,
+                loaned_at: new Date().toISOString(),
+                expected_return: expectedReturn || null
+            })
+            .eq('id', req.params.id)
+            .select().single();
+
+        if (error || !data) return res.status(404).json({ success: false, message: 'Loaner phone not found' });
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Delete a loaner phone
-// @route   DELETE /api/loaners/:id
-// @access  Private/Admin
-exports.deleteLoaner = async (req, res) => {
+// @route POST /api/loaners/:id/return
+exports.returnLoaner = async (req, res, next) => {
     try {
-        const result = await LoanerPhone.findByIdAndDelete(req.params.id);
-        if (!result) {return res.status(404).json({ message: 'Loaner phone not found' });}
-        res.json({ message: 'Loaner phone removed' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+        const { data, error } = await supabaseAdmin
+            .from('loaner_phones')
+            .update({
+                status: 'available',
+                loaned_to: null,
+                repair_ticket_id: null,
+                loaned_at: null,
+                expected_return: null
+            })
+            .eq('id', req.params.id)
+            .select().single();
 
-// @desc    Lend a phone to a customer
-// @route   POST /api/loaners/:id/lend
-// @access  Private/Admin
-exports.lendPhone = async (req, res) => {
-    try {
-        const { customerName, customerPhone, customerEmail, dueDate, notes } = req.body;
-        const loaner = await LoanerPhone.findById(req.params.id);
-
-        if (!loaner) {return res.status(404).json({ message: 'Loaner phone not found' });}
-        if (loaner.status === 'Lent') {return res.status(400).json({ message: 'Phone is already lent out.' });}
-
-        loaner.status = 'Lent';
-        loaner.currentCustomer = {
-            name: customerName,
-            phone: customerPhone,
-            email: customerEmail
-        };
-        loaner.lentDate = new Date();
-        loaner.dueDate = new Date(dueDate);
-
-        if (notes) {loaner.notes = notes;}
-
-        await loaner.save();
-        res.json(loaner);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-// @desc    Return a lent phone
-// @route   POST /api/loaners/:id/return
-// @access  Private/Admin
-exports.returnPhone = async (req, res) => {
-    try {
-        const { status, notes } = req.body;
-        const loaner = await LoanerPhone.findById(req.params.id);
-
-        if (!loaner) {return res.status(404).json({ message: 'Loaner phone not found' });}
-
-        // Reset customer details
-        loaner.status = status || 'Available';  // Can be moved to 'Maintenance' if returned damaged
-        loaner.currentCustomer = { name: '', phone: '', email: '' };
-        loaner.lentDate = null;
-        loaner.dueDate = null;
-
-        if (notes !== undefined) {loaner.notes = notes;}
-
-        await loaner.save();
-        res.json(loaner);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        if (error || !data) return res.status(404).json({ success: false, message: 'Loaner phone not found' });
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };

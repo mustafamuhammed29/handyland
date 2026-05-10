@@ -4,7 +4,9 @@ const {
     getTranslationsByLocale,
     updateTranslation,
     createTranslation,
-    deleteTranslation
+    deleteTranslation,
+    saveMissingTranslation,
+    autoTranslate
 } = require('../controllers/translationController');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -12,17 +14,17 @@ const { cacheMiddleware } = require('../middleware/cache');
 
 const router = express.Router();
 
-// Public endpoint used dynamically by i18next-http-backend
-router.get('/locales/:lang', cacheMiddleware(86400), getTranslationsByLocale);
+// ── Public: used by i18next-http-backend in the frontend ──────────────────────
+router.get('/locales/:lang', cacheMiddleware(3600), getTranslationsByLocale);
 
-// Auto-capture missing keys from frontend
-router.post('/missing/:lang/:namespace', require('../controllers/translationController').saveMissingTranslation);
+// ── Public: auto-capture missing translation keys from the frontend ───────────
+router.post('/missing/:lang/:namespace', saveMissingTranslation);
 
-// Admin restricted endpoints
+// ── Admin-only endpoints ──────────────────────────────────────────────────────
 router.use(protect);
 router.use(authorize('admin'));
 
-router.post('/auto-translate', require('../controllers/translationController').autoTranslate);
+router.post('/auto-translate', autoTranslate);
 
 router.route('/')
     .get(getAllTranslations)

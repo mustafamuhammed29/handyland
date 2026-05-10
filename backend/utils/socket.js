@@ -1,5 +1,5 @@
 const { Server } = require('socket.io');
-const jwt = require('jsonwebtoken');
+const { supabaseAdmin } = require('../config/supabase');
 
 let io;
 
@@ -24,7 +24,7 @@ const initSocket = (httpServer) => {
     });
 
     // ── JWT Authentication Middleware ─────────────────────────────────────────
-    io.use((socket, next) => {
+    io.use(async (socket, next) => {
         let token = socket.handshake.auth?.token;
 
         // Fallback: extract token from HTTP-only cookies if available
@@ -47,8 +47,12 @@ const initSocket = (httpServer) => {
             return next();
         }
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            socket.verifiedUser = decoded; // { id, role, ... }
+            const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+            if (error || !user) throw new Error('Invalid token');
+            
+            const { data: userProfile } = await supabaseAdmin.from('users').select('id, role').eq('id', user.id).single();
+
+            socket.verifiedUser = userProfile || null; // { id, role }
             next();
         } catch {
             socket.verifiedUser = null;

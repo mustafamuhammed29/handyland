@@ -8,10 +8,10 @@ router.use(protect);
 router.use(authorize('admin'));
 
 router.route('/')
-    .get(emailTemplateController.getEmailTemplates);
+    .get(emailTemplateController.getTemplates);
 
 router.route('/:id')
-    .get(emailTemplateController.getEmailTemplate)
-    .put(emailTemplateController.updateEmailTemplate);
+    .get(emailTemplateController.getTemplate)
+    .put(emailTemplateController.updateTemplate);
 
 module.exports = router;

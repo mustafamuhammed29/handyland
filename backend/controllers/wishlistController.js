@@ -1,118 +1,89 @@
-const Wishlist = require('../models/Wishlist');
-const Product = require('../models/Product');
-const Accessory = require('../models/Accessory');
-const mongoose = require('mongoose');
+/**
+ * backend/controllers/wishlistController.js
+ * Wishlist management using Supabase
+ */
+'use strict';
 
-// @desc    Get user's wishlist
-// @route   GET /api/wishlist
-// @access  Private
-exports.getWishlist = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/wishlist
+exports.getWishlist = async (req, res, next) => {
     try {
-        const wishlist = await Wishlist.findOne({ user: req.user.id });
-        if (!wishlist) {
-            return res.status(200).json({ success: true, products: [] });
-        }
-        res.status(200).json({ success: true, products: wishlist.products });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error fetching wishlist', error: error.message });
-    }
+        const { data, error } = await supabaseAdmin
+            .from('wishlists')
+            .select(`
+                id, product_type,
+                products (id, name, price, image, stock, is_active),
+                accessories (id, name, price, image, stock, is_active)
+            `)
+            .eq('user_id', req.user.id)
+            .order('added_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Clean up data formatting
+        const formattedData = data.map(item => ({
+            id: item.id,
+            productType: item.product_type,
+            item: item.product_type === 'Product' ? item.products : item.accessories
+        }));
+
+        return res.status(200).json({ success: true, data: formattedData });
+    } catch (error) { next(error); }
 };
 
-// @desc    Add item to wishlist
-// @route   POST /api/wishlist
-// @access  Private
-exports.addToWishlist = async (req, res) => {
+// @route POST /api/wishlist
+exports.addToWishlist = async (req, res, next) => {
     try {
-        const { productId, productType = 'Product' } = req.body;
+        const { itemId, productType = 'Product' } = req.body;
+        if (!itemId) return res.status(400).json({ success: false, message: 'Item ID is required' });
 
-        if (!productId) {
-            return res.status(400).json({ success: false, message: 'Product ID is required' });
-        }
+        const idField = productType === 'Product' ? 'product_id' : 'accessory_id';
 
-        // Look up product to get snapshot data
-        let productDoc;
-        if (productType === 'Accessory') {
-            productDoc = await Accessory.findOne({ $or: [{ _id: mongoose.Types.ObjectId.isValid(productId) ? productId : undefined }, { id: productId }] });
+        // Check if exists
+        const { data: existing } = await supabaseAdmin
+            .from('wishlists')
+            .select('id')
+            .eq('user_id', req.user.id)
+            .eq(idField, itemId)
+            .single();
+
+        if (existing) return res.status(200).json({ success: true, message: 'Item already in wishlist' });
+
+        const { data, error } = await supabaseAdmin
+            .from('wishlists')
+            .insert({ user_id: req.user.id, product_type: productType, [idField]: itemId })
+            .select().single();
+
+        if (error) throw error;
+        return res.status(201).json({ success: true, message: 'Added to wishlist', data });
+    } catch (error) { next(error); }
+};
+
+// @route DELETE /api/wishlist/:id
+exports.removeFromWishlist = async (req, res, next) => {
+    try {
+        // Can be wishlist ID, or Product/Accessory ID
+        let query = supabaseAdmin.from('wishlists').delete().eq('user_id', req.user.id);
+        
+        // Check if UUID
+        if (req.params.id.length === 36) {
+             query = query.or(`id.eq.${req.params.id},product_id.eq.${req.params.id},accessory_id.eq.${req.params.id}`);
         } else {
-            productDoc = await Product.findOne({ $or: [{ _id: mongoose.Types.ObjectId.isValid(productId) ? productId : undefined }, { id: productId }] });
+             return res.status(400).json({ success: false, message: 'Invalid ID format' });
         }
 
-        if (!productDoc) {
-            return res.status(404).json({ success: false, message: 'Product not found' });
-        }
-
-        let wishlist = await Wishlist.findOne({ user: req.user.id });
-
-        if (!wishlist) {
-            wishlist = await Wishlist.create({
-                user: req.user.id,
-                products: [{
-                    product: productDoc._id,
-                    productType,
-                    customId: productDoc.id, // Save actual UI string "id"
-                    name: productDoc.name,
-                    price: productDoc.price,
-                    image: productDoc.image || (productDoc.images && productDoc.images[0])
-                }]
-            });
-        } else {
-            // Check if already in wishlist by either native or custom ID
-            const exists = wishlist.products.some(p =>
-                p.product.toString() === productDoc._id.toString() || p.customId === productDoc.id
-            );
-            if (exists) {
-                return res.status(400).json({ success: false, message: 'Already in wishlist' });
-            }
-
-            wishlist.products.push({
-                product: productDoc._id,
-                productType,
-                customId: productDoc.id, // Save actual UI string "id"
-                name: productDoc.name,
-                price: productDoc.price,
-                image: productDoc.image || (productDoc.images && productDoc.images[0])
-            });
-            await wishlist.save();
-        }
-
-        res.status(200).json({ success: true, message: 'Added to wishlist', products: wishlist.products });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error adding to wishlist', error: error.message });
-    }
+        const { error } = await query;
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Removed from wishlist' });
+    } catch (error) { next(error); }
 };
 
-// @desc    Remove item from wishlist
-// @route   DELETE /api/wishlist/:itemId
-// @access  Private
-exports.removeFromWishlist = async (req, res) => {
+// @route DELETE /api/wishlist
+exports.clearWishlist = async (req, res, next) => {
     try {
-        const wishlist = await Wishlist.findOne({ user: req.user.id });
-        if (!wishlist) {
-            return res.status(404).json({ success: false, message: 'Wishlist not found' });
-        }
-
-        wishlist.products = wishlist.products.filter(
-            p =>
-                p._id.toString() !== req.params.itemId &&
-                p.product?.toString() !== req.params.itemId &&
-                p.customId !== req.params.itemId
-        );
-        await wishlist.save();
-
-        res.status(200).json({ success: true, message: 'Removed from wishlist', products: wishlist.products });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error removing from wishlist', error: error.message });
-    }
-};
-
-// @desc    Clear entire wishlist
-// @route   DELETE /api/wishlist
-// @access  Private
-exports.clearWishlist = async (req, res) => {
-    try {
-        await Wishlist.findOneAndUpdate({ user: req.user.id }, { products: [] });
-        res.status(200).json({ success: true, message: 'Wishlist cleared' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error clearing wishlist', error: error.message });
-    }
+        const { error } = await supabaseAdmin.from('wishlists').delete().eq('user_id', req.user.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Wishlist cleared' });
+    } catch (error) { next(error); }
 };

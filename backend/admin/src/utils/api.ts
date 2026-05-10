@@ -51,6 +51,11 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            // Prevent infinite loop: do not dispatch auth:unauthorized if the request was to /logout
+            if (error.config && error.config.url && error.config.url.includes('/logout')) {
+                return Promise.reject(error);
+            }
+
             console.error("Unauthorized! Redirecting to login...");
             localStorage.removeItem('adminUser');
             localStorage.removeItem('token');

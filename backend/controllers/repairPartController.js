@@ -1,102 +1,96 @@
-const RepairPart = require('../models/RepairPart');
-const { v4: uuidv4 } = require('uuid');
+/**
+ * backend/controllers/repairPartController.js
+ * Repair parts inventory management using Supabase
+ */
+'use strict';
 
-// @desc    Update a repair part
-// @route   PUT /api/repair-parts/:id
-// @access  Private/Admin
-exports.updateRepairPart = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/repair-parts
+exports.getParts = async (req, res, next) => {
     try {
-        const part = await RepairPart.findById(req.params.id);
+        const { page = 1, limit = 50, search, category, lowStock } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
 
-        if (!part) {
-            return res.status(404).json({ success: false, message: 'Repair part not found' });
+        let query = supabaseAdmin.from('repair_parts').select('*, suppliers(name)', { count: 'exact' });
+
+        if (category) query = query.eq('category', category);
+        if (search) query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%`);
+
+        query = query.order('name', { ascending: true }).range(offset, offset + Number(limit) - 1);
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+
+        let finalData = data;
+        let finalCount = count;
+
+        if (lowStock === 'true') {
+            finalData = data.filter(p => p.stock <= p.min_stock);
+            finalCount = finalData.length;
         }
 
-        // Update fields if provided in request body
-        const updatableFields = ['name', 'category', 'subCategory', 'brand', 'price', 'cost', 'stock', 'minStock', 'barcode', 'supplier', 'image', 'description', 'isActive'];
-
-        updatableFields.forEach(field => {
-            if (req.body[field] !== undefined) {
-                part[field] = req.body[field];
-            }
+        return res.status(200).json({
+            success: true, count: finalCount,
+            pagination: { page: Number(page), limit: Number(limit), total: finalCount, pages: Math.ceil(finalCount / Number(limit)) },
+            data: finalData
         });
-
-        // Special handling for specs map
-        if (req.body.specs) {
-            part.specs = req.body.specs;
-        }
-
-        const updatedPart = await part.save();
-
-        res.json({ success: true, data: updatedPart });
-    } catch (error) {
-        console.error('Error updating repair part:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+    } catch (error) { next(error); }
 };
 
-// @desc    Get all repair parts
-// @route   GET /api/repair-parts
-// @access  Private/Admin
-exports.getRepairParts = async (req, res) => {
+// @route POST /api/repair-parts
+exports.createPart = async (req, res, next) => {
     try {
-        const parts = await RepairPart.find({}).sort({ createdAt: -1 });
-        res.json({ success: true, count: parts.length, data: parts });
-    } catch (error) {
-        console.error('Error fetching repair parts:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        const { name, sku, category, compatibleDevices, stock, minStock, costPrice, sellPrice, supplierId } = req.body;
+        if (!name || !sku) return res.status(400).json({ success: false, message: 'Name and SKU are required' });
+
+        const { data, error } = await supabaseAdmin
+            .from('repair_parts')
+            .insert({
+                name, sku, category,
+                compatible_devices: compatibleDevices || [],
+                stock: stock || 0,
+                min_stock: minStock || 2,
+                cost_price: costPrice || 0,
+                sell_price: sellPrice || 0,
+                supplier_id: supplierId || null
+            })
+            .select().single();
+
+        if (error) throw error;
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Get single repair part
-// @route   GET /api/repair-parts/:id
-// @access  Private/Admin
-exports.getRepairPartById = async (req, res) => {
+// @route PUT /api/repair-parts/:id
+exports.updatePart = async (req, res, next) => {
     try {
-        const part = await RepairPart.findById(req.params.id);
-        if (!part) {
-            return res.status(404).json({ success: false, message: 'Repair part not found' });
-        }
-        res.json({ success: true, data: part });
-    } catch (error) {
-        console.error('Error fetching repair part:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        const { name, sku, category, compatibleDevices, stock, minStock, costPrice, sellPrice, supplierId, isActive } = req.body;
+        const updateData = {};
+
+        if (name) updateData.name = name;
+        if (sku) updateData.sku = sku;
+        if (category) updateData.category = category;
+        if (compatibleDevices) updateData.compatible_devices = compatibleDevices;
+        if (stock !== undefined) updateData.stock = stock;
+        if (minStock !== undefined) updateData.min_stock = minStock;
+        if (costPrice !== undefined) updateData.cost_price = costPrice;
+        if (sellPrice !== undefined) updateData.sell_price = sellPrice;
+        if (supplierId !== undefined) updateData.supplier_id = supplierId;
+        if (isActive !== undefined) updateData.is_active = isActive;
+
+        const { data, error } = await supabaseAdmin.from('repair_parts').update(updateData).eq('id', req.params.id).select().single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Part not found' });
+
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Create a repair part
-// @route   POST /api/repair-parts
-// @access  Private/Admin
-exports.createRepairPart = async (req, res) => {
+// @route DELETE /api/repair-parts/:id
+exports.deletePart = async (req, res, next) => {
     try {
-        const itemData = { ...req.body, id: req.body.id || uuidv4() };
-        if (!itemData.category) {
-            itemData.category = 'Repair Part';
-        }
-        const part = await RepairPart.create(itemData);
-        res.status(201).json({ success: true, data: part });
-    } catch (error) {
-        console.error('Error creating repair part:', error);
-        if (error.code === 11000) {
-            return res.status(400).json({ success: false, message: 'Barcode already exists' });
-        }
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
-
-// @desc    Delete a repair part
-// @route   DELETE /api/repair-parts/:id
-// @access  Private/Admin
-exports.deleteRepairPart = async (req, res) => {
-    try {
-        const part = await RepairPart.findById(req.params.id);
-        if (!part) {
-            return res.status(404).json({ success: false, message: 'Repair part not found' });
-        }
-        await part.deleteOne();
-        res.json({ success: true, message: 'Repair part removed' });
-    } catch (error) {
-        console.error('Error deleting repair part:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        const { error } = await supabaseAdmin.from('repair_parts').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Part deleted' });
+    } catch (error) { next(error); }
 };

@@ -1,30 +1,31 @@
-const AuditLog = require('../models/AuditLog');
+/**
+ * backend/controllers/auditController.js
+ * Audit logs management using Supabase
+ */
+'use strict';
 
-// @desc    Get all audit logs
-// @route   GET /api/audit-logs
-// @access  Private/Admin
-exports.getAuditLogs = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/audit
+exports.getAuditLogs = async (req, res, next) => {
     try {
-        const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 20;
-        const startIndex = (page - 1) * limit;
+        const { page = 1, limit = 50, action, userId } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
 
-        const total = await AuditLog.countDocuments();
-        const logs = await AuditLog.find()
-            .sort({ createdAt: -1 })
-            .skip(startIndex)
-            .limit(limit);
+        let query = supabaseAdmin.from('audit_logs').select('*, users(name, email)', { count: 'exact' });
 
-        res.status(200).json({
-            success: true,
-            count: logs.length,
-            total,
-            page,
-            pages: Math.ceil(total / limit),
-            data: logs
+        if (action) query = query.eq('action', action);
+        if (userId) query = query.eq('user_id', userId);
+
+        query = query.order('created_at', { ascending: false }).range(offset, offset + Number(limit) - 1);
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+
+        return res.status(200).json({
+            success: true, count,
+            pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
+            data
         });
-    } catch (error) {
-        console.error('Error fetching audit logs:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+    } catch (error) { next(error); }
 };
