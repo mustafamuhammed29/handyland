@@ -1,135 +1,107 @@
-const Accessory = require('../models/Accessory');
+/**
+ * backend/controllers/accessoriesController.js
+ * Accessories management using Supabase
+ */
+'use strict';
 
-exports.getAccessories = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/accessories
+exports.getAccessories = async (req, res, next) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 1000;
-        const skip = (page - 1) * limit;
+        const { page = 1, limit = 20, category, brand, search, sort = 'created_at', order = 'desc', isActive } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
 
-        const query = req.query.includeOutOfStock === 'true' ? {} : { stock: { $gt: 0 } };
+        let query = supabaseAdmin.from('accessories').select('*', { count: 'exact' });
 
-        if (req.query.search) {
-            const escapedSearch = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            query.$or = [
-                { name: { $regex: escapedSearch, $options: 'i' } },
-                { description: { $regex: escapedSearch, $options: 'i' } },
-                { category: { $regex: escapedSearch, $options: 'i' } },
-                { brand: { $regex: escapedSearch, $options: 'i' } }
-            ];
-        }
+        if (isActive !== undefined) query = query.eq('is_active', isActive === 'true');
+        else query = query.eq('is_active', true);
 
-        if (req.query.category && req.query.category !== '') {
-            query.category = req.query.category;
-        }
+        if (category && category !== 'All') query = query.ilike('category', category);
+        if (brand && brand !== 'All') query = query.ilike('brand', brand);
+        if (search) query = query.or(`name.ilike.%${search}%,brand.ilike.%${search}%,model.ilike.%${search}%`);
 
-        const [accessories, total] = await Promise.all([
-            Accessory.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
-            Accessory.countDocuments(query)
-        ]);
+        query = query.order(sort, { ascending: order === 'asc' }).range(offset, offset + Number(limit) - 1);
 
-        res.json({
-            accessories,
-            currentPage: page,
-            totalPages: Math.ceil(total / limit),
-            totalAccessories: total
+        const { data, error, count } = await query;
+        if (error) throw error;
+
+        const accessoriesWithId = (data || []).map(a => ({ ...a, _id: a.id }));
+        return res.status(200).json({
+            success: true, count,
+            pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
+            accessories: accessoriesWithId,
+            data: accessoriesWithId
         });
-    } catch (error) {
-        console.error("Get Accessories Error:", error);
-        res.status(500).json({ message: "Error reading data: " + error.message });
-    }
+    } catch (error) { next(error); }
 };
 
-exports.getAccessoryStats = async (req, res) => {
+// @route GET /api/accessories/:id
+exports.getAccessory = async (req, res, next) => {
     try {
-        const [totalAccessories, outOfStock, lowStock, accessories] = await Promise.all([
-            Accessory.countDocuments(),
-            Accessory.countDocuments({ stock: 0 }),
-            Accessory.countDocuments({ stock: { $gt: 0, $lt: 5 } }),
-            Accessory.find({}, 'price stock')
-        ]);
+        const { id } = req.params;
+        let query = supabaseAdmin.from('accessories').select('*');
+        if (id.includes('-') && id.length === 36) query = query.eq('id', id);
+        else query = query.eq('legacy_id', id);
 
-        const totalInventoryValue = accessories.reduce((sum, item) => sum + (item.price * (item.stock || 0)), 0);
-
-        res.json({
-            success: true,
-            stats: {
-                totalAccessories,
-                outOfStock,
-                lowStock,
-                totalInventoryValue
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error fetching stats', error: error.message });
-    }
+        const { data, error } = await query.single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Accessory not found' });
+        const accessoryWithId = { ...data, _id: data.id };
+        return res.status(200).json({ success: true, accessory: accessoryWithId, data: accessoryWithId });
+    } catch (error) { next(error); }
 };
 
-exports.createAccessory = async (req, res) => {
+// @route POST /api/accessories
+exports.createAccessory = async (req, res, next) => {
     try {
-        const accessoryData = { ...req.body };
-        if (!accessoryData.id) {
-            accessoryData.id = 'acc_' + Date.now() + Math.floor(Math.random() * 1000);
+        const insertData = { ...req.body };
+        if (req.fileUrl) insertData.image = req.fileUrl;
+        
+        // Supabase will automatically map the fields if names match exactly or close enough
+        // Ideally we map them to snake_case
+        const snakeCaseData = {};
+        for (const [key, value] of Object.entries(insertData)) {
+            const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+            snakeCaseData[snakeKey] = value;
         }
-        const newAccessory = new Accessory(accessoryData);
-        await newAccessory.save();
-        res.status(201).json(newAccessory);
-    } catch (error) {
-        console.error("Create Accessory Error:", error);
-        res.status(500).json({ message: "Error saving data: " + error.message });
-    }
+
+        const { data, error } = await supabaseAdmin.from('accessories').insert(snakeCaseData).select().single();
+        if (error) throw error;
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-exports.getAccessoryById = async (req, res) => {
+// @route PUT /api/accessories/:id
+exports.updateAccessory = async (req, res, next) => {
     try {
-        const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.id);
-        const query = isObjectId ? { _id: req.params.id } : { id: req.params.id };
-
-        const accessory = await Accessory.findOne(query);
-        if (accessory) {
-            res.json(accessory);
-        } else {
-            res.status(404).json({ message: "Accessory not found" });
+        const updateData = {};
+        for (const [key, value] of Object.entries(req.body)) {
+            const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+            updateData[snakeKey] = value;
         }
-    } catch (error) {
-        console.error("Get Accessory By Id Error:", error);
-        res.status(500).json({ message: "Error reading data: " + error.message });
-    }
+        if (req.fileUrl) updateData.image = req.fileUrl;
+
+        const { data, error } = await supabaseAdmin.from('accessories').update(updateData).eq('id', req.params.id).select().single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Accessory not found' });
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-exports.updateAccessory = async (req, res) => {
+// @route DELETE /api/accessories/:id
+exports.deleteAccessory = async (req, res, next) => {
     try {
-        const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.id);
-        const query = isObjectId ? { _id: req.params.id } : { id: req.params.id };
-
-        const accessory = await Accessory.findOneAndUpdate(
-            query,
-            req.body,
-            { new: true, runValidators: true }
-        );
-        if (accessory) {
-            res.json(accessory);
-        } else {
-            res.status(404).json({ message: "Accessory not found" });
-        }
-    } catch (error) {
-        console.error("Update Error:", error);
-        res.status(500).json({ message: "Error updating data: " + error.message });
-    }
+        const { error } = await supabaseAdmin.from('accessories').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Accessory deleted' });
+    } catch (error) { next(error); }
 };
 
-exports.deleteAccessory = async (req, res) => {
+// @route GET /api/accessories/categories
+exports.getCategories = async (req, res, next) => {
     try {
-        const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.id);
-        const query = isObjectId ? { _id: req.params.id } : { id: req.params.id };
-
-        const result = await Accessory.findOneAndDelete(query);
-        if (result) {
-            res.json({ message: "Accessory deleted" });
-        } else {
-            res.status(404).json({ message: "Item not found" });
-        }
-    } catch (error) {
-        console.error("Delete Error:", error);
-        res.status(500).json({ message: "Error deleting data: " + error.message });
-    }
+        const { data, error } = await supabaseAdmin.from('accessories').select('category').eq('is_active', true);
+        if (error) throw error;
+        const categories = [...new Set(data.map(a => a.category).filter(Boolean))];
+        return res.status(200).json({ success: true, categories, data: categories });
+    } catch (error) { next(error); }
 };

@@ -26,11 +26,13 @@ exports.getUsers = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
+        const usersWithId = (data || []).map(u => ({ ...u, _id: u.id }));
         return res.status(200).json({
             success: true,
             count,
             pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
-            data
+            users: usersWithId,
+            data: usersWithId
         });
     } catch (error) {
         next(error);
@@ -47,7 +49,8 @@ exports.getUser = async (req, res, next) => {
             .single();
 
         if (error || !data) return res.status(404).json({ success: false, message: 'User not found' });
-        return res.status(200).json({ success: true, data });
+        const userWithId = { ...data, _id: data.id };
+        return res.status(200).json({ success: true, user: userWithId, data: userWithId });
     } catch (error) {
         next(error);
     }

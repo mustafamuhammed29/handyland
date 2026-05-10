@@ -7,8 +7,8 @@ const { protect, authorize } = require('../middleware/auth');
 router.use(protect);
 router.use(authorize('admin'));
 
-router.get('/templates', emailController.getTemplates);
-router.post('/test', emailController.sendTestEmail);
-router.get('/logs', emailController.getEmailLogs);
+// router.get('/templates', emailController.getTemplates);
+// router.post('/test', emailController.sendTestEmail);
+// router.get('/logs', emailController.getEmailLogs);
 
 module.exports = router;

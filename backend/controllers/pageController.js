@@ -1,67 +1,97 @@
-const Page = require('../models/Page');
+/**
+ * backend/controllers/pageController.js
+ * CMS Pages management using Supabase
+ */
+'use strict';
 
-// @desc    Get page by slug
-// @route   GET /api/pages/:slug
-// @access  Public
-exports.getPageBySlug = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/pages
+exports.getPages = async (req, res, next) => {
     try {
-        const page = await Page.findOne({ slug: req.params.slug });
-        if (!page) {
-            return res.status(404).json({ message: 'Page not found' });
-        }
-        res.json(page);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const isAdmin = req.user?.role === 'admin';
+        let query = supabaseAdmin.from('pages').select('id, slug, title, is_published, created_at, updated_at').order('created_at', { ascending: false });
+
+        if (!isAdmin) query = query.eq('is_published', true);
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return res.status(200).json({ success: true, count: data.length, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Get all pages (Admin)
-// @route   GET /api/pages
-// @access  Private/Admin
-exports.getAllPages = async (req, res) => {
+// @route GET /api/pages/:slug
+exports.getPage = async (req, res, next) => {
     try {
-        const pages = await Page.find({});
-        res.json(pages);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-// @desc    Create/Update page
-// @route   POST /api/pages
-// @access  Private/Admin
-exports.createOrUpdatePage = async (req, res) => {
-    try {
-        const { slug, title, content, seo } = req.body;
-
-        let page = await Page.findOne({ slug });
-
-        if (page) {
-            page.title = title || page.title;
-            page.content = content || page.content;
-            if (seo !== undefined) {
-                page.seo = seo;
-            }
-            page.lastUpdated = Date.now();
-            await page.save();
+        const isAdmin = req.user?.role === 'admin';
+        let query = supabaseAdmin.from('pages').select('*');
+        
+        // Handle ID or slug
+        if (req.params.slug.length === 36 && req.params.slug.includes('-')) {
+            query = query.eq('id', req.params.slug);
         } else {
-            page = await Page.create({ slug, title, content, seo });
+            query = query.eq('slug', req.params.slug);
         }
 
-        res.json(page);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+        const { data, error } = await query.single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Page not found' });
+        
+        if (!data.is_published && !isAdmin) {
+            return res.status(403).json({ success: false, message: 'Page not published' });
+        }
+
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Delete page
-// @route   DELETE /api/pages/:id
-// @access  Private/Admin
-exports.deletePage = async (req, res) => {
+// @route POST /api/pages (Admin)
+exports.createPage = async (req, res, next) => {
     try {
-        await Page.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Page deleted' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const { slug, title, content, isPublished } = req.body;
+        if (!slug || !title) return res.status(400).json({ success: false, message: 'Slug and title are required' });
+
+        const { data, error } = await supabaseAdmin
+            .from('pages')
+            .insert({ slug, title, content, is_published: isPublished || false })
+            .select().single();
+
+        if (error) {
+            if (error.code === '23505') return res.status(400).json({ success: false, message: 'Slug already exists' });
+            throw error;
+        }
+
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route PUT /api/pages/:id (Admin)
+exports.updatePage = async (req, res, next) => {
+    try {
+        const { slug, title, content, isPublished } = req.body;
+        const updateData = {};
+        
+        if (slug) updateData.slug = slug;
+        if (title) updateData.title = title;
+        if (content !== undefined) updateData.content = content;
+        if (isPublished !== undefined) updateData.is_published = isPublished;
+
+        const { data, error } = await supabaseAdmin.from('pages').update(updateData).eq('id', req.params.id).select().single();
+        
+        if (error) {
+            if (error.code === '23505') return res.status(400).json({ success: false, message: 'Slug already exists' });
+            throw error;
+        }
+        if (!data) return res.status(404).json({ success: false, message: 'Page not found' });
+
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route DELETE /api/pages/:id (Admin)
+exports.deletePage = async (req, res, next) => {
+    try {
+        const { error } = await supabaseAdmin.from('pages').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Page deleted' });
+    } catch (error) { next(error); }
 };

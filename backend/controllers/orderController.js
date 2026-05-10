@@ -37,11 +37,14 @@ exports.getOrders = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
+        const ordersWithId = (data || []).map(o => ({ ...o, _id: o.id }));
+
         return res.status(200).json({
             success: true,
             count,
             pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
-            data
+            orders: ordersWithId,
+            data: ordersWithId
         });
     } catch (error) {
         next(error);
@@ -210,7 +213,8 @@ exports.createOrder = async (req, res, next) => {
             if (cart) await supabaseAdmin.from('cart_items').delete().eq('cart_id', cart.id);
         }
 
-        return res.status(201).json({ success: true, data: order });
+        const orderWithId = { ...order, _id: order.id };
+        return res.status(201).json({ success: true, order: orderWithId, data: orderWithId });
     } catch (error) {
         next(error);
     }
@@ -251,7 +255,8 @@ exports.updateOrderStatus = async (req, res, next) => {
             });
         }
 
-        return res.status(200).json({ success: true, data });
+        const orderWithId = { ...data, _id: data.id };
+        return res.status(200).json({ success: true, order: orderWithId, data: orderWithId });
     } catch (error) {
         next(error);
     }

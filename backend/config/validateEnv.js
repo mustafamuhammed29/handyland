@@ -1,9 +1,8 @@
 const logger = require('../utils/logger');
 
 const requiredEnvVars = [
-    'MONGO_URI',
-    'JWT_SECRET',
-    'REFRESH_TOKEN_SECRET',
+    'SUPABASE_URL',
+    'SUPABASE_SERVICE_KEY',
     'STRIPE_SECRET_KEY',
     'STRIPE_WEBHOOK_SECRET',
     'FRONTEND_URL'

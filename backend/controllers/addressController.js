@@ -1,95 +1,102 @@
-const Address = require('../models/Address');
-const User = require('../models/User');
+/**
+ * backend/controllers/addressController.js
+ * Address management using Supabase
+ */
+'use strict';
 
-// @desc    Get all addresses for a user
-// @route   GET /api/addresses
-// @access  Private
-exports.getAddresses = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/addresses
+exports.getAddresses = async (req, res, next) => {
     try {
-        const addresses = await Address.find({ user: req.user.id });
-        res.status(200).json({ success: true, count: addresses.length, addresses });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        const { data, error } = await supabaseAdmin
+            .from('addresses')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .order('is_default', { ascending: false })
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Add a new address
-// @route   POST /api/addresses
-// @access  Private
-exports.addAddress = async (req, res) => {
+// @route GET /api/addresses/:id
+exports.getAddress = async (req, res, next) => {
     try {
-        const { name, street, city, state, zipCode, country, isDefault } = req.body;
+        const { data, error } = await supabaseAdmin
+            .from('addresses')
+            .select('*')
+            .eq('id', req.params.id)
+            .eq('user_id', req.user.id)
+            .single();
+
+        if (error || !data) return res.status(404).json({ success: false, message: 'Address not found' });
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route POST /api/addresses
+exports.createAddress = async (req, res, next) => {
+    try {
+        const { fullName, email, phone, street, city, zipCode, country, isDefault } = req.body;
 
         if (isDefault) {
-            await Address.updateMany({ user: req.user.id }, { isDefault: false });
+            // Remove existing default
+            await supabaseAdmin.from('addresses').update({ is_default: false }).eq('user_id', req.user.id);
         }
 
-        const address = await Address.create({
-            user: req.user.id,
-            name,
-            street,
-            city,
-            state,
-            zipCode,
-            country,
-            isDefault
-        });
+        const { data, error } = await supabaseAdmin
+            .from('addresses')
+            .insert({
+                user_id: req.user.id,
+                full_name: fullName,
+                email, phone, street, city, zip_code: zipCode, country: country || 'Germany',
+                is_default: isDefault || false
+            })
+            .select().single();
 
-        res.status(201).json({ success: true, address });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        if (error) throw error;
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Update an address
-// @route   PUT /api/addresses/:id
-// @access  Private
-exports.updateAddress = async (req, res) => {
+// @route PUT /api/addresses/:id
+exports.updateAddress = async (req, res, next) => {
     try {
-        let address = await Address.findById(req.params.id);
+        const { fullName, email, phone, street, city, zipCode, country, isDefault } = req.body;
 
-        if (!address) {
-            return res.status(404).json({ success: false, message: 'Address not found' });
+        if (isDefault) {
+            await supabaseAdmin.from('addresses').update({ is_default: false }).eq('user_id', req.user.id);
         }
 
-        if (address.user.toString() !== req.user.id) {
-            return res.status(401).json({ success: false, message: 'Not authorized' });
-        }
+        const updateData = {};
+        if (fullName) updateData.full_name = fullName;
+        if (email) updateData.email = email;
+        if (phone) updateData.phone = phone;
+        if (street) updateData.street = street;
+        if (city) updateData.city = city;
+        if (zipCode) updateData.zip_code = zipCode;
+        if (country) updateData.country = country;
+        if (isDefault !== undefined) updateData.is_default = isDefault;
 
-        if (req.body.isDefault) {
-            await Address.updateMany({ user: req.user.id }, { isDefault: false });
-        }
+        const { data, error } = await supabaseAdmin
+            .from('addresses')
+            .update(updateData)
+            .eq('id', req.params.id)
+            .eq('user_id', req.user.id)
+            .select().single();
 
-        address = await Address.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        });
-
-        res.status(200).json({ success: true, address });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        if (error || !data) return res.status(404).json({ success: false, message: 'Address not found' });
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Delete an address
-// @route   DELETE /api/addresses/:id
-// @access  Private
-exports.deleteAddress = async (req, res) => {
+// @route DELETE /api/addresses/:id
+exports.deleteAddress = async (req, res, next) => {
     try {
-        const address = await Address.findById(req.params.id);
-
-        if (!address) {
-            return res.status(404).json({ success: false, message: 'Address not found' });
-        }
-
-        if (address.user.toString() !== req.user.id) {
-            return res.status(401).json({ success: false, message: 'Not authorized' });
-        }
-
-        await address.deleteOne();
-
-        res.status(200).json({ success: true, message: 'Address removed' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        const { error } = await supabaseAdmin.from('addresses').delete().eq('id', req.params.id).eq('user_id', req.user.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Address deleted' });
+    } catch (error) { next(error); }
 };

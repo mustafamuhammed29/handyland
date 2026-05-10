@@ -21,7 +21,7 @@ export const orderService = {
     fetchShippingMethods: async (): Promise<any[]> => {
         try {
             const response = await api.get('/api/shipping-methods');
-            return response as any;
+            return (response as any).shippingMethods || (response as any).data || response;
         } catch (error) {
             devLog('Order Service Fetch Shipping Methods Error:', error);
             // Return empty array instead of throwing to prevent crash if endpoint is missing momentarily
@@ -86,7 +86,7 @@ export const orderService = {
     applyCoupon: async (code: string, cartTotal: number): Promise<any> => {
         try {
             const response = await api.post('/api/orders/apply-coupon', { code, cartTotal });
-            return response as any;
+            return (response as any).data || response;
         } catch (error) {
             // Allow 400 errors to propagate naturally as they contain the message
             throw error;

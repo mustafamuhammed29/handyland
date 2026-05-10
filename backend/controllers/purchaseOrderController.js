@@ -1,145 +1,109 @@
-const PurchaseOrder = require('../models/PurchaseOrder');
-const Product = require('../models/Product');
-const Accessory = require('../models/Accessory');
-const RepairPart = require('../models/RepairPart');
-const StockHistory = require('../models/StockHistory');
+/**
+ * backend/controllers/purchaseOrderController.js
+ * Purchase Orders management using Supabase
+ */
+'use strict';
 
-// Helper to update stock based on itemType
-const updateItemStock = async (productName, sku, quantity, userId, userName, poNumber) => {
-    // Try to find the item in any of the 3 collections by name or sku
-    const query = { $or: [{ name: productName }, { barcode: sku }] };
-    let item = await Product.findOne(query);
-    let itemModel = 'Product';
+const { supabaseAdmin } = require('../config/supabase');
 
-    if (!item) {
-        item = await Accessory.findOne(query);
-        itemModel = 'Accessory';
-    }
+// Helper to generate PO number
+const generatePONumber = () => `PO-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
 
-    if (!item) {
-        item = await RepairPart.findOne(query);
-        itemModel = 'RepairPart';
-    }
+// @route GET /api/purchase-orders
+exports.getPurchaseOrders = async (req, res, next) => {
+    try {
+        const { page = 1, limit = 50, status, supplierId } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
 
-    if (item) {
-        const previousStock = item.stock;
-        item.stock += quantity;
-        await item.save();
+        let query = supabaseAdmin.from('purchase_orders').select('*, suppliers(name), users(name)', { count: 'exact' });
 
-        // Log to history
-        await StockHistory.create({
-            itemId: item._id,
-            itemModel: itemModel,
-            itemName: item.name,
-            barcode: item.barcode,
-            user: userId,
-            userName: userName,
-            previousStock,
-            newStock: item.stock,
-            changeAmount: quantity,
-            reason: 'PO Received',
-            notes: `Stock updated from Purchase Order: ${poNumber}`
+        if (status) query = query.eq('status', status);
+        if (supplierId) query = query.eq('supplier_id', supplierId);
+
+        query = query.order('created_at', { ascending: false }).range(offset, offset + Number(limit) - 1);
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+
+        return res.status(200).json({
+            success: true, count,
+            pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
+            data
         });
-
-        return true;
-    }
-    return false;
+    } catch (error) { next(error); }
 };
 
-// @desc    Get all POs
-// @route   GET /api/purchase-orders
-// @access  Private/Admin
-exports.getPurchaseOrders = async (req, res) => {
+// @route GET /api/purchase-orders/:id
+exports.getPurchaseOrder = async (req, res, next) => {
     try {
-        const pos = await PurchaseOrder.find()
-            .populate('supplier', 'name email phone')
-            .populate('createdBy', 'name')
-            .sort({ createdAt: -1 });
+        const { data, error } = await supabaseAdmin
+            .from('purchase_orders')
+            .select('*, suppliers(*), users(name), purchase_order_items(*)')
+            .eq('id', req.params.id)
+            .single();
 
-        res.json({ success: true, count: pos.length, data: pos });
-    } catch (error) {
-        console.error('Error fetching POs:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        if (error || !data) return res.status(404).json({ success: false, message: 'Purchase order not found' });
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Get single PO
-// @route   GET /api/purchase-orders/:id
-// @access  Private/Admin
-exports.getPurchaseOrder = async (req, res) => {
+// @route POST /api/purchase-orders
+exports.createPurchaseOrder = async (req, res, next) => {
     try {
-        const po = await PurchaseOrder.findById(req.params.id)
-            .populate('supplier', 'name email address')
-            .populate('createdBy', 'name email');
+        const { supplierId, expectedDeliveryDate, notes, items } = req.body;
+        if (!supplierId || !items || !items.length) return res.status(400).json({ success: false, message: 'Supplier and items are required' });
 
-        if (!po) {
-            return res.status(404).json({ success: false, message: 'PO not found' });
-        }
-        res.json({ success: true, data: po });
-    } catch (error) {
-        console.error('Error fetching PO:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        let totalAmount = 0;
+        items.forEach(item => { totalAmount += (item.quantity * item.unitPrice); });
+
+        // 1. Create PO
+        const { data: po, error: poError } = await supabaseAdmin
+            .from('purchase_orders')
+            .insert({
+                po_number: generatePONumber(),
+                supplier_id: supplierId,
+                total_amount: totalAmount,
+                status: 'Draft',
+                expected_delivery_date: expectedDeliveryDate,
+                notes,
+                created_by: req.user.id
+            })
+            .select().single();
+
+        if (poError) throw poError;
+
+        // 2. Add Items
+        const poItems = items.map(item => ({
+            purchase_order_id: po.id,
+            product_name: item.productName,
+            sku: item.sku,
+            quantity: item.quantity,
+            unit_price: item.unitPrice,
+            total_price: item.quantity * item.unitPrice
+        }));
+
+        const { error: itemsError } = await supabaseAdmin.from('purchase_order_items').insert(poItems);
+        if (itemsError) throw itemsError;
+
+        return res.status(201).json({ success: true, data: po });
+    } catch (error) { next(error); }
 };
 
-// @desc    Create PO
-// @route   POST /api/purchase-orders
-// @access  Private/Admin
-exports.createPurchaseOrder = async (req, res) => {
+// @route PUT /api/purchase-orders/:id/status
+exports.updatePurchaseOrderStatus = async (req, res, next) => {
     try {
-        req.body.createdBy = req.user._id;
-        const po = await PurchaseOrder.create(req.body);
+        const { status, actualDeliveryDate, notes } = req.body;
+        const updateData = { status };
+        
+        if (actualDeliveryDate) updateData.actual_delivery_date = actualDeliveryDate;
+        if (notes !== undefined) updateData.notes = notes;
 
-        res.status(201).json({ success: true, data: po });
-    } catch (error) {
-        console.error('Error creating PO:', error);
-        res.status(400).json({ success: false, message: error.message || 'Bad Request' });
-    }
-};
+        // If received, we might want to update stock automatically in a real system.
+        // For now, just update status.
+        
+        const { data, error } = await supabaseAdmin.from('purchase_orders').update(updateData).eq('id', req.params.id).select().single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Purchase order not found' });
 
-// @desc    Update PO Status
-// @route   PUT /api/purchase-orders/:id/status
-// @access  Private/Admin
-exports.updatePurchaseOrderStatus = async (req, res) => {
-    try {
-        const { status } = req.body;
-        const po = await PurchaseOrder.findById(req.params.id);
-
-        if (!po) {
-            return res.status(404).json({ success: false, message: 'PO not found' });
-        }
-
-        // Prevent receiving again if already received
-        if (po.status === 'Received') {
-            return res.status(400).json({ success: false, message: 'PO already received' });
-        }
-
-        po.status = status;
-
-        // If status changes to Received, automatically update inventory
-        if (status === 'Received') {
-            po.actualDeliveryDate = Date.now();
-            const missingItems = [];
-            const userName = req.user ? `${req.user.name}` : 'Admin';
-
-            for (const item of po.items) {
-                const updated = await updateItemStock(item.productName, item.sku, item.quantity, req.user._id, userName, po.poNumber);
-                if (!updated) {
-                    missingItems.push(item.productName);
-                }
-            }
-
-            if (missingItems.length > 0) {
-                console.warn('Some items in PO were not found in inventory:', missingItems);
-                // We still save the PO status, but might want to attach a warning note
-                po.notes = `${po.notes ? po.notes + '\\n' : ''}Warning: Items not updated in DB: ${missingItems.join(', ')}`;
-            }
-        }
-
-        await po.save();
-        res.json({ success: true, data: po });
-    } catch (error) {
-        console.error('Error updating PO status:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };

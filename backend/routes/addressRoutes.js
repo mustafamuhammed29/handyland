@@ -1,7 +1,7 @@
 const express = require('express');
 const {
     getAddresses,
-    addAddress,
+    createAddress,
     updateAddress,
     deleteAddress
 } = require('../controllers/addressController');
@@ -13,7 +13,7 @@ router.use(protect);
 
 router.route('/')
     .get(getAddresses)
-    .post(addAddress);
+    .post(createAddress);
 
 router.route('/:id')
     .put(updateAddress)

@@ -1,214 +1,191 @@
-const Translation = require('../models/Translation');
-const { clearCache } = require('../middleware/cache');
+'use strict';
+/**
+ * backend/controllers/translationController.js
+ * Translations CRUD — migrated from MongoDB to Supabase.
+ *
+ * Supabase schema (public.translations):
+ *   id UUID, key TEXT, namespace TEXT, language TEXT, value TEXT
+ *   UNIQUE(key, language)
+ */
 
-// @desc    Get all translations (Admin panel format)
-// @route   GET /api/translations
-// @access  Private/Admin
+const { supabaseAdmin } = require('../config/supabase');
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+// Collapse flat rows [ {key, language, value} ] into nested { key: {lang: value} }
+function rowsToMap(rows) {
+    const map = {};
+    for (const row of rows) {
+        if (!map[row.key]) map[row.key] = { id: row.id, key: row.key, namespace: row.namespace, values: {} };
+        map[row.key].values[row.language] = row.value;
+    }
+    return Object.values(map);
+}
+
+// ── @route GET /api/translations ─────────────────────────────────────────────
 exports.getAllTranslations = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = req.query.limit ? parseInt(req.query.limit) : 0; // 0 means no limit
-        const skip = (page - 1) * (limit || 0);
-        const search = req.query.search || '';
+        const { search, page = 1, limit = 0 } = req.query;
 
-        const query = {};
+        let query = supabaseAdmin.from('translations').select('*').order('namespace').order('key');
         if (search) {
-            query.$or = [
-                { key: { $regex: search, $options: 'i' } },
-                { namespace: { $regex: search, $options: 'i' } },
-                { 'values.en': { $regex: search, $options: 'i' } },
-                { 'values.de': { $regex: search, $options: 'i' } }
-            ];
+            query = query.or(`key.ilike.%${search}%,namespace.ilike.%${search}%,value.ilike.%${search}%`);
         }
 
-        const count = await Translation.countDocuments(query);
-        const translationsQuery = Translation.find(query).sort({ namespace: 1, key: 1 });
+        const { data, error, count } = await query;
+        if (error) throw error;
 
-        if (limit > 0) {
-            translationsQuery.skip(skip).limit(limit);
-        }
-
-        const translations = await translationsQuery;
+        const grouped = rowsToMap(data || []);
 
         res.status(200).json({
             success: true,
-            count,
-            data: translations,
-            totalPages: limit > 0 ? Math.ceil(count / limit) : 1,
-            currentPage: page
+            count: grouped.length,
+            data: grouped,
+            totalPages: 1,
+            currentPage: 1
         });
     } catch (error) {
+        console.error('getAllTranslations error:', error);
         res.status(500).json({ success: false, error: 'Server Error' });
     }
 };
 
-// @desc    Get compacted translations for i18next engine based on language code
-// @route   GET /api/translations/locales/:lang
-// @access  Public
+// ── @route GET /api/translations/locales/:lang ───────────────────────────────
 exports.getTranslationsByLocale = async (req, res) => {
     try {
         const { lang } = req.params;
 
-        const translations = await Translation.find();
+        const { data, error } = await supabaseAdmin
+            .from('translations')
+            .select('key, value, language')
+            .in('language', [lang, 'en']);
+
+        if (error) throw error;
+
+        // Build result: prefer requested lang, fallback to 'en'
+        const enMap = {};
+        const langMap = {};
+
+        for (const row of (data || [])) {
+            if (row.language === 'en') enMap[row.key] = row.value;
+            if (row.language === lang) langMap[row.key] = row.value;
+        }
 
         const result = {};
-
-        translations.forEach(doc => {
-            const rawValue = doc.values[lang];
-            const rawEn    = doc.values['en'];
-
-            // FIX: If the stored value equals the key name, it is polluted data
-            // (i18next saveMissing sends the key itself as a placeholder).
-            // Return empty string so the UI shows '-' instead of the key.
-            const cleanValue = (v) =>
-                v && v !== doc.key ? v : null;
-
-            const value = cleanValue(rawValue) || cleanValue(rawEn) || '';
-            result[doc.key] = value;
-        });
+        const allKeys = new Set([...Object.keys(enMap), ...Object.keys(langMap)]);
+        for (const key of allKeys) {
+            const val = langMap[key] || enMap[key] || '';
+            // Reject polluted values (key stored as its own value)
+            result[key] = val === key ? '' : val;
+        }
 
         res.status(200).json(result);
     } catch (error) {
-        console.error('Error fetching locale:', error);
+        console.error('getTranslationsByLocale error:', error);
         res.status(500).json({ error: 'Server Error' });
     }
 };
 
-// @desc    Update a specific translation row
-// @route   PUT /api/translations/:id
-// @access  Private/Admin
+// ── @route PUT /api/translations/:id ─────────────────────────────────────────
 exports.updateTranslation = async (req, res) => {
     try {
-        const translation = await Translation.findById(req.params.id);
-        if (!translation) {
-            return res.status(404).json({ success: false, error: 'Translation not found' });
+        const { id } = req.params;
+        const { values } = req.body;
+
+        if (!values || typeof values !== 'object') {
+            return res.status(400).json({ success: false, error: 'values object required' });
         }
 
-        // We only update the language values container to prevent key mismatches in frontend
-        if (req.body.values) {
-            translation.values = {
-                ...translation.values,
-                ...req.body.values
-            };
-        }
+        // Fetch existing row to get key & namespace
+        const { data: existing, error: fetchErr } = await supabaseAdmin
+            .from('translations').select('key, namespace').eq('id', id).single();
+        if (fetchErr || !existing) return res.status(404).json({ success: false, error: 'Translation not found' });
 
-        await translation.save();
-        clearCache('/api/translations');
+        // Upsert each language value
+        const upserts = Object.entries(values).map(([lang, val]) => ({
+            key: existing.key,
+            namespace: existing.namespace,
+            language: lang,
+            value: val
+        }));
 
-        res.status(200).json({
-            success: true,
-            data: translation
-        });
+        const { error } = await supabaseAdmin.from('translations').upsert(upserts, { onConflict: 'key,language' });
+        if (error) throw error;
+
+        res.status(200).json({ success: true, data: { id, key: existing.key, values } });
     } catch (error) {
+        console.error('updateTranslation error:', error);
         res.status(500).json({ success: false, error: 'Server Error' });
     }
 };
 
-// @desc    Add a new translation key
-// @route   POST /api/translations
-// @access  Private/Admin
+// ── @route POST /api/translations ────────────────────────────────────────────
 exports.createTranslation = async (req, res) => {
     try {
-        const { key, namespace, values } = req.body;
+        const { key, namespace = 'translation', values = {} } = req.body;
+        if (!key) return res.status(400).json({ success: false, error: 'key is required' });
 
-        if (!key) {
-             return res.status(400).json({ success: false, error: 'Translation key is required' });
-        }
-
-        const existing = await Translation.findOne({ key });
-        if (existing) {
-             return res.status(400).json({ success: false, error: 'Translation key already exists' });
-        }
-
-        const translation = await Translation.create({
-            key,
-            namespace: namespace || 'translation',
-            values: values || {}
-        });
-
-        clearCache('/api/translations');
-
-        res.status(201).json({
-            success: true,
-            data: translation
-        });
-    } catch (error) {
-        if (error.code === 11000) {
+        // Check duplicate
+        const { data: existing } = await supabaseAdmin
+            .from('translations').select('id').eq('key', key).eq('language', 'de').limit(1);
+        if (existing && existing.length > 0) {
             return res.status(400).json({ success: false, error: 'Translation key already exists' });
         }
+
+        const rows = Object.entries(values).map(([lang, val]) => ({ key, namespace, language: lang, value: val }));
+        if (rows.length === 0) rows.push({ key, namespace, language: 'de', value: '' });
+
+        const { error } = await supabaseAdmin.from('translations').insert(rows);
+        if (error) throw error;
+
+        res.status(201).json({ success: true, data: { key, namespace, values } });
+    } catch (error) {
+        console.error('createTranslation error:', error);
         res.status(500).json({ success: false, error: 'Server Error' });
     }
 };
 
-// @desc    Delete a translation key
-// @route   DELETE /api/translations/:id
-// @access  Private/Admin
+// ── @route DELETE /api/translations/:id ──────────────────────────────────────
 exports.deleteTranslation = async (req, res) => {
     try {
-        const translation = await Translation.findById(req.params.id);
-        if (!translation) {
-             return res.status(404).json({ success: false, error: 'Translation not found' });
-        }
+        const { id } = req.params;
 
-        await translation.deleteOne();
-        clearCache('/api/translations');
+        // Get key first, then delete all languages for that key
+        const { data: row } = await supabaseAdmin.from('translations').select('key').eq('id', id).single();
+        if (!row) return res.status(404).json({ success: false, error: 'Translation not found' });
 
-        res.status(200).json({
-            success: true,
-            data: {}
-        });
+        const { error } = await supabaseAdmin.from('translations').delete().eq('key', row.key);
+        if (error) throw error;
+
+        res.status(200).json({ success: true, data: {} });
     } catch (error) {
+        console.error('deleteTranslation error:', error);
         res.status(500).json({ success: false, error: 'Server Error' });
     }
 };
 
-// @desc    Auto-capture missing translation key from frontend
-// @route   POST /api/translations/missing/:lang/:namespace
-// @access  Public
+// ── @route POST /api/translations/missing/:lang/:namespace ───────────────────
 exports.saveMissingTranslation = async (req, res) => {
     try {
         const { lang, namespace } = req.params;
-        const keys = Object.keys(req.body);
+        const keys = Object.keys(req.body || {});
 
-        if (!keys || keys.length === 0) {
-            return res.status(200).json({ success: true, message: 'No keys provided' });
-        }
+        if (!keys.length) return res.status(200).json({ success: true });
 
-        let updated = false;
-
+        const upserts = [];
         for (const key of keys) {
-            // FIX: i18next sends the key itself as the fallback value when a key is missing.
-            // e.g. body = { "valuation.newValuation": "valuation.newValuation" }
-            // We must reject this — storing the key as a value poisons the DB.
-            const rawFallback = req.body[key] || '';
-            const fallbackValue = rawFallback === key ? '' : rawFallback;
-
-            const existing = await Translation.findOne({ key });
-
-            if (!existing) {
-                // Register the key so admins can fill it in the Translation Manager
-                const dbNamespace = key.includes('.') ? key.split('.')[0] : (namespace || 'translation');
-                await Translation.create({
-                    key,
-                    namespace: dbNamespace,
-                    values: {
-                        // Only store a real value — never the key name
-                        ...(fallbackValue ? { [lang]: fallbackValue } : {})
-                    }
-                });
-                updated = true;
-            } else if (fallbackValue && !existing.values[lang]) {
-                // Only fill in a genuinely missing language slot with a real value
-                existing.values[lang] = fallbackValue;
-                existing.markModified('values');
-                await existing.save();
-                updated = true;
-            }
+            const rawVal = req.body[key] || '';
+            // Reject polluted values where key === value (i18next saveMissing behavior)
+            const value = rawVal === key ? '' : rawVal;
+            const ns = key.includes('.') ? key.split('.')[0] : (namespace || 'translation');
+            upserts.push({ key, namespace: ns, language: lang, value });
         }
 
-        if (updated) {
-            clearCache('/api/translations');
-        }
+        // Use ignoreDuplicates to avoid overwriting existing real values
+        const { error } = await supabaseAdmin.from('translations')
+            .upsert(upserts, { onConflict: 'key,language', ignoreDuplicates: true });
+
+        if (error) console.warn('saveMissingTranslation upsert warn:', error.message);
 
         res.status(200).json({ success: true });
     } catch (error) {
@@ -217,36 +194,22 @@ exports.saveMissingTranslation = async (req, res) => {
     }
 };
 
-// @desc    Auto-translate a text to multiple languages using a public API
-// @route   POST /api/translations/auto-translate
-// @access  Private/Admin
+// ── @route POST /api/translations/auto-translate ─────────────────────────────
 exports.autoTranslate = async (req, res) => {
     try {
         const { text, from = 'en', toLangs = ['de', 'ar', 'tr', 'ru', 'fa'] } = req.body;
-        if (!text) {return res.status(400).json({ success: false, error: 'Text is required for translation' });}
+        if (!text) return res.status(400).json({ success: false, error: 'Text is required' });
 
         const results = {};
-
-        // Loop through target languages and translate using free MyMemory API
         for (const lang of toLangs) {
             try {
-                // MyMemory has a 500 words/day limit for free anonymous usage, sufficient for key translations.
-                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${lang}&de=test@example.com`);
+                const response = await fetch(
+                    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${lang}&de=test@example.com`
+                );
                 const data = await response.json();
-
-                if (data.responseData && data.responseData.translatedText) {
-                    // MyMemory sometimes echoes the search query or includes "MYMEMORY WARNING"
-                    const translated = data.responseData.translatedText;
-                    if (!translated.includes('MYMEMORY')) {
-                        results[lang] = translated;
-                    } else {
-                        results[lang] = text;
-                    }
-                } else {
-                    results[lang] = text;
-                }
-            } catch(e) {
-                console.error(`Translation fail for ${lang}:`, e.message);
+                const translated = data?.responseData?.translatedText || text;
+                results[lang] = translated.includes('MYMEMORY') ? text : translated;
+            } catch (e) {
                 results[lang] = text;
             }
         }

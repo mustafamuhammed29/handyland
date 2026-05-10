@@ -1,109 +1,131 @@
-const Warranty = require('../models/Warranty');
+/**
+ * backend/controllers/warrantyController.js
+ * Warranty management using Supabase
+ */
+'use strict';
 
-// @desc    Get all warranties
-// @route   GET /api/warranties
-// @access  Private/Admin
-exports.getWarranties = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+const { v4: uuidv4 } = require('uuid');
+
+const generateWarrantyCode = () =>
+    `WAR-${uuidv4().substring(0, 8).toUpperCase()}`;
+
+// @route GET /api/warranties
+exports.getWarranties = async (req, res, next) => {
     try {
-        const query = {};
+        const { page = 1, limit = 20, status, search } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
 
-        if (req.query.status) {query.status = req.query.status;}
-        if (req.query.itemType) {query.itemType = req.query.itemType;}
+        let query = supabaseAdmin
+            .from('warranties')
+            .select('*', { count: 'exact' });
 
-        const warranties = await Warranty.find(query).sort({ createdAt: -1 });
-        res.json(warranties);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+        if (status) query = query.eq('status', status);
+        if (search) query = query.or(`warranty_code.ilike.%${search}%,customer_name.ilike.%${search}%,customer_phone.ilike.%${search}%`);
 
-// @desc    Search warranty by code, phone, or IMEI
-// @route   GET /api/warranties/search
-// @access  Private/Admin
-exports.searchWarranty = async (req, res) => {
-    try {
-        const { query } = req.query;
-        if (!query) {return res.status(400).json({ message: 'Search query is required' });}
+        query = query.order('created_at', { ascending: false }).range(offset, offset + Number(limit) - 1);
 
-        // exact match on warrantyCode or partial match on phone/imei
-        const warranties = await Warranty.find({
-            $or: [
-                { warrantyCode: { $regex: query, $options: 'i' } },
-                { customerPhone: { $regex: query, $options: 'i' } },
-                { imeiOrSerial: { $regex: query, $options: 'i' } }
-            ]
-        }).sort({ createdAt: -1 });
+        const { data, error, count } = await query;
+        if (error) throw error;
 
-        res.json(warranties);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-// @desc    Create new warranty
-// @route   POST /api/warranties
-// @access  Private/Admin
-exports.addWarranty = async (req, res) => {
-    try {
-        // Compute endDate based on durationDays and startDate
-        const { durationDays, startDate } = req.body;
-
-        const start = startDate ? new Date(startDate) : new Date();
-        const end = new Date(start.getTime() + (durationDays || 90) * 24 * 60 * 60 * 1000);
-
-        const warranty = await Warranty.create({
-            ...req.body,
-            startDate: start,
-            endDate: end
+        return res.status(200).json({
+            success: true, count,
+            pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
+            data
         });
-
-        res.status(201).json(warranty);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+    } catch (error) { next(error); }
 };
 
-// @desc    Update a warranty
-// @route   PUT /api/warranties/:id
-// @access  Private/Admin
-exports.updateWarranty = async (req, res) => {
+// @route GET /api/warranties/:id
+exports.getWarranty = async (req, res, next) => {
     try {
-        const warranty = await Warranty.findById(req.params.id);
-        if (!warranty) {return res.status(404).json({ message: 'Warranty not found' });}
-
-        // Recalculate end date if startDate or durationDays changes
-        const newStartDate = req.body.startDate ? new Date(req.body.startDate) : warranty.startDate;
-        const newDuration = req.body.durationDays !== undefined ? req.body.durationDays : warranty.durationDays;
-
-        const newEndDate = new Date(newStartDate.getTime() + newDuration * 24 * 60 * 60 * 1000);
-
-        const updatedBody = {
-            ...req.body,
-            startDate: newStartDate,
-            durationDays: newDuration,
-            endDate: newEndDate
-        };
-
-        const updated = await Warranty.findByIdAndUpdate(
-            req.params.id,
-            updatedBody,
-            { new: true, runValidators: true }
-        );
-        res.json(updated);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const { data, error } = await supabaseAdmin
+            .from('warranties').select('*').eq('id', req.params.id).single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Warranty not found' });
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-// @desc    Delete a warranty
-// @route   DELETE /api/warranties/:id
-// @access  Private/Admin
-exports.deleteWarranty = async (req, res) => {
+// @route POST /api/warranties
+exports.createWarranty = async (req, res, next) => {
     try {
-        const result = await Warranty.findByIdAndDelete(req.params.id);
-        if (!result) {return res.status(404).json({ message: 'Warranty not found' });}
-        res.json({ message: 'Warranty deleted' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const { customerName, customerPhone, customerEmail, itemType, itemName, imeiOrSerial, supplierName, startDate, durationDays, notes } = req.body;
+
+        const start = new Date(startDate || Date.now());
+        const days = durationDays || 90;
+        const endDate = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
+
+        const { data, error } = await supabaseAdmin
+            .from('warranties')
+            .insert({
+                warranty_code: generateWarrantyCode(),
+                customer_name: customerName,
+                customer_phone: customerPhone,
+                customer_email: customerEmail || '',
+                item_type: itemType,
+                item_name: itemName,
+                imei_or_serial: imeiOrSerial || '',
+                supplier_name: supplierName || '',
+                start_date: start.toISOString(),
+                duration_days: days,
+                end_date: endDate.toISOString(),
+                notes: notes || ''
+            })
+            .select().single();
+
+        if (error) throw error;
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route PUT /api/warranties/:id
+exports.updateWarranty = async (req, res, next) => {
+    try {
+        const fields = ['customer_name','customer_phone','customer_email','status','notes','imei_or_serial'];
+        const updateData = {};
+        fields.forEach(f => { if (req.body[f] !== undefined) updateData[f] = req.body[f]; });
+
+        // Recalculate end_date if duration changed
+        if (req.body.durationDays || req.body.startDate) {
+            const { data: existing } = await supabaseAdmin.from('warranties').select('start_date, duration_days').eq('id', req.params.id).single();
+            const start = new Date(req.body.startDate || existing.start_date);
+            const days = req.body.durationDays || existing.duration_days;
+            updateData.end_date = new Date(start.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+            if (req.body.durationDays) updateData.duration_days = days;
+            if (req.body.startDate) updateData.start_date = start.toISOString();
+        }
+
+        const { data, error } = await supabaseAdmin.from('warranties').update(updateData).eq('id', req.params.id).select().single();
+        if (error) throw error;
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route DELETE /api/warranties/:id
+exports.deleteWarranty = async (req, res, next) => {
+    try {
+        const { error } = await supabaseAdmin.from('warranties').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Warranty deleted' });
+    } catch (error) { next(error); }
+};
+
+// @route GET /api/warranties/lookup/:code
+exports.lookupWarranty = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('warranties')
+            .select('warranty_code, customer_name, item_name, item_type, start_date, end_date, status, duration_days')
+            .eq('warranty_code', req.params.code.toUpperCase())
+            .single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Warranty not found' });
+
+        // Auto-expire check
+        if (data.status === 'Active' && new Date(data.end_date) < new Date()) {
+            await supabaseAdmin.from('warranties').update({ status: 'Expired' }).eq('warranty_code', req.params.code);
+            data.status = 'Expired';
+        }
+
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };

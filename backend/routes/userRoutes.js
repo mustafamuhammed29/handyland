@@ -4,23 +4,23 @@ const userController = require('../controllers/userController');
 const { protect, authorize } = require('../middleware/auth');
 
 // Public/Protected User Routes
-router.put('/profile', protect, userController.updateUserProfile);
-router.put('/change-password', protect, userController.changePassword);
-router.get('/notifications', protect, userController.getNotificationPrefs);
-router.put('/notifications', protect, userController.updateNotificationPrefs);
+// router.put('/profile', protect, userController.updateUserProfile);
+// router.put('/change-password', protect, userController.changePassword);
+// router.get('/notifications', protect, userController.getNotificationPrefs);
+// router.put('/notifications', protect, userController.updateNotificationPrefs);
 
-router.get('/addresses', protect, userController.getAddresses);
-router.post('/addresses', protect, userController.addAddress);
-router.delete('/addresses/:id', protect, userController.deleteAddress);
+// router.get('/addresses', protect, userController.getAddresses);
+// router.post('/addresses', protect, userController.addAddress);
+// router.delete('/addresses/:id', protect, userController.deleteAddress);
 
 // Admin Routes (Require Admin Role)
-router.get('/admin/all', protect, authorize('admin'), userController.getAllUsers);
+router.get('/admin/all', protect, authorize('admin'), userController.getUsers);
 router.get('/admin/stats', protect, authorize('admin'), userController.getUserStats);
 router.get('/admin/:id', protect, authorize('admin'), userController.getUser);
-router.put('/admin/:id/status', protect, authorize('admin'), userController.updateUserStatus);
-router.put('/admin/:id/unlock', protect, authorize('admin'), userController.unlockUser);
-router.put('/admin/:id/role', protect, authorize('admin'), userController.updateUserRole);
+// router.put('/admin/:id/status', protect, authorize('admin'), userController.updateUserStatus);
+// router.put('/admin/:id/unlock', protect, authorize('admin'), userController.unlockUser);
+// router.put('/admin/:id/role', protect, authorize('admin'), userController.updateUserRole);
 router.delete('/admin/:id', protect, authorize('admin'), userController.deleteUser);
-router.post('/admin/:id/wallet', protect, authorize('admin'), userController.adjustWalletBalance);
+router.post('/admin/:id/wallet', protect, authorize('admin'), userController.updateBalance);
 
 module.exports = router;

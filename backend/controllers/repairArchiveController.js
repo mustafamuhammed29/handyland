@@ -1,63 +1,87 @@
-const RepairCase = require('../models/RepairCase');
+/**
+ * backend/controllers/repairArchiveController.js
+ * Repair Cases/Archive management using Supabase
+ */
+'use strict';
 
-exports.getAllCases = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/repairs/archive
+exports.getAllCases = async (req, res, next) => {
     try {
-        const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 15;
-        const search = req.query.search || '';
-        const startIndex = (page - 1) * limit;
+        const { page = 1, limit = 15, search } = req.query;
+        const offset = (Number(page) - 1) * Number(limit);
 
-        const query = {};
+        let query = supabaseAdmin.from('repair_cases').select('*', { count: 'exact' });
+
         if (search) {
-            query.title = { $regex: search, $options: 'i' };
+            query = query.or(`title.ilike.%${search}%,category.ilike.%${search}%`);
         }
 
-        const [count, cases] = await Promise.all([
-            RepairCase.countDocuments(query),
-            RepairCase.find(query)
-                .sort({ createdAt: -1 })
-                .skip(startIndex)
-                .limit(limit)
-        ]);
+        query = query.order('created_at', { ascending: false }).range(offset, offset + Number(limit) - 1);
 
-        const totalPages = Math.ceil(count / limit);
+        const { data, error, count } = await query;
+        if (error) throw error;
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            cases,
+            cases: data,
             count,
-            totalPages,
-            currentPage: page
+            totalPages: Math.ceil(count / Number(limit)),
+            currentPage: Number(page)
         });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+    } catch (error) { next(error); }
 };
 
-exports.createCase = async (req, res) => {
+// @route POST /api/repairs/archive
+exports.createCase = async (req, res, next) => {
     try {
-        const newCase = new RepairCase(req.body);
-        await newCase.save();
-        res.status(201).json(newCase);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+        const { title, category, difficulty, time, labelBefore, labelAfter, description } = req.body;
+        
+        const insertData = { title, category, difficulty, time, description };
+        if (labelBefore) insertData.label_before = labelBefore;
+        if (labelAfter) insertData.label_after = labelAfter;
+        // In a real app, img_before and img_after would come from file uploads (req.files)
+        // Here we just accept them if passed via body for simplicity, or handle via upload middleware
+        if (req.body.imgBefore) insertData.img_before = req.body.imgBefore;
+        if (req.body.imgAfter) insertData.img_after = req.body.imgAfter;
+
+        const { data, error } = await supabaseAdmin.from('repair_cases').insert(insertData).select().single();
+        if (error) throw error;
+
+        return res.status(201).json(data);
+    } catch (error) { next(error); }
 };
 
-exports.deleteCase = async (req, res) => {
+// @route PUT /api/repairs/archive/:id
+exports.updateCase = async (req, res, next) => {
     try {
-        await RepairCase.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Case deleted' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const { id } = req.params;
+        const { title, category, difficulty, time, labelBefore, labelAfter, description } = req.body;
+        
+        const updateData = {};
+        if (title) updateData.title = title;
+        if (category) updateData.category = category;
+        if (difficulty) updateData.difficulty = difficulty;
+        if (time) updateData.time = time;
+        if (labelBefore) updateData.label_before = labelBefore;
+        if (labelAfter) updateData.label_after = labelAfter;
+        if (description) updateData.description = description;
+        if (req.body.imgBefore) updateData.img_before = req.body.imgBefore;
+        if (req.body.imgAfter) updateData.img_after = req.body.imgAfter;
+
+        const { data, error } = await supabaseAdmin.from('repair_cases').update(updateData).eq('id', id).select().single();
+        if (error || !data) return res.status(404).json({ message: 'Case not found' });
+
+        return res.json(data);
+    } catch (error) { next(error); }
 };
 
-exports.updateCase = async (req, res) => {
+// @route DELETE /api/repairs/archive/:id
+exports.deleteCase = async (req, res, next) => {
     try {
-        const updatedCase = await RepairCase.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(updatedCase);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+        const { error } = await supabaseAdmin.from('repair_cases').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.json({ message: 'Case deleted' });
+    } catch (error) { next(error); }
 };

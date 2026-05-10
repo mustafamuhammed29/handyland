@@ -7,10 +7,10 @@ const { protect, authorize } = require('../middleware/auth');
 router.get('/', accessoriesController.getAccessories);
 
 // Admin Stats
-router.get('/admin/stats', protect, authorize('admin'), accessoriesController.getAccessoryStats);
+// router.get('/admin/stats', protect, authorize('admin'), accessoriesController.getAccessoryStats);
 
 // Public - Get single accessory
-router.get('/:id', accessoriesController.getAccessoryById);
+router.get('/:id', accessoriesController.getAccessory);
 
 // Admin only - Create, Update, Delete
 router.post('/', protect, authorize('admin'), accessoriesController.createAccessory);

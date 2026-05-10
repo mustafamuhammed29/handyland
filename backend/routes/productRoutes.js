@@ -26,26 +26,29 @@ const { protect, authorize } = require('../middleware/auth');
  *       200:
  *         description: List of products with pagination info
  */
-router.get('/', productController.getAllProducts);
-router.get('/admin/stats', protect, authorize('admin'), productController.getProductStats);
-router.get('/:id', productController.getProductById);
+router.get('/', productController.getProducts);
+router.get('/categories', productController.getCategories);
+router.get('/featured', productController.getFeaturedProducts);
+router.post('/validate-stock', productController.validateStock);
+// router.get('/admin/stats', protect, authorize('admin'), productController.getProductStats);
+router.get('/:id', productController.getProduct);
 router.post('/', protect, authorize('admin'), productController.createProduct);
 router.put('/:id', protect, authorize('admin'), productController.updateProduct);
 router.delete('/:id', protect, authorize('admin'), productController.deleteProduct);
 
 // Reviews
-router.post('/:id/reviews', protect, productController.createProductReview);
-router.get('/:id/reviews', productController.getProductReviews);
+// router.post('/:id/reviews', protect, productController.createProductReview);
+// router.get('/:id/reviews', productController.getProductReviews);
 
 // Related Products
-router.get('/:id/related', productController.getRelatedProducts);
+// router.get('/:id/related', productController.getRelatedProducts);
 
 // Q&A
-router.get('/:id/questions', productController.getProductQuestions);
-router.post('/:id/questions', protect, productController.askQuestion);
-router.put('/questions/:id/answer', protect, authorize('admin'), productController.answerQuestion);
+// router.get('/:id/questions', productController.getProductQuestions);
+// router.post('/:id/questions', protect, productController.askQuestion);
+// router.put('/questions/:id/answer', protect, authorize('admin'), productController.answerQuestion);
 
 // Stock Validation
-router.post('/validate-stock', productController.validateStock);
+// router.post('/validate-stock', productController.validateStock);
 
 module.exports = router;

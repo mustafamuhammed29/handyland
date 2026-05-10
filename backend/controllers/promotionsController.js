@@ -1,78 +1,72 @@
-const Promotion = require('../models/Promotion');
+/**
+ * backend/controllers/promotionsController.js
+ * Promotions management using Supabase
+ */
+'use strict';
 
-exports.getPromotions = async (req, res) => {
+const { supabaseAdmin } = require('../config/supabase');
+
+// @route GET /api/promotions
+exports.getPromotions = async (req, res, next) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
-        const skip = (page - 1) * limit;
-        const search = req.query.search || '';
+        const isAdmin = req.user?.role === 'admin';
+        const { isActive } = req.query;
 
-        const query = {};
+        let query = supabaseAdmin.from('promotions').select('*').order('created_at', { ascending: false });
 
-        // Admins can see all, public API only sees active
-        if (!req.user || req.user.role !== 'admin') {
-            query.isActive = true;
+        if (!isAdmin) {
+            query = query.eq('is_active', true)
+                         .lte('starts_at', new Date().toISOString())
+                         .gte('ends_at', new Date().toISOString());
+        } else if (isActive !== undefined) {
+            query = query.eq('is_active', isActive === 'true');
         }
 
-        if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { code: { $regex: search, $options: 'i' } }
-            ];
-        }
-
-        const count = await Promotion.countDocuments(query);
-        const promotions = await Promotion.find(query)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
-
-        res.json({
-            success: true,
-            count,
-            promotions,
-            data: promotions,
-            totalPages: Math.ceil(count / limit),
-            currentPage: page
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        const { data, error } = await query;
+        if (error) throw error;
+        return res.status(200).json({ success: true, count: data.length, data });
+    } catch (error) { next(error); }
 };
 
-exports.createPromotion = async (req, res) => {
+// @route POST /api/promotions (Admin)
+exports.createPromotion = async (req, res, next) => {
     try {
-        const promotion = await Promotion.create(req.body);
-        res.status(201).json({ success: true, data: promotion, promotion });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        const { title, description, link, startsAt, endsAt, isActive } = req.body;
+        
+        const insertData = { title, description, link, starts_at: startsAt, ends_at: endsAt, is_active: isActive !== false };
+        if (req.fileUrl) insertData.image = req.fileUrl;
+
+        const { data, error } = await supabaseAdmin.from('promotions').insert(insertData).select().single();
+        if (error) throw error;
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-exports.updatePromotion = async (req, res) => {
+// @route PUT /api/promotions/:id (Admin)
+exports.updatePromotion = async (req, res, next) => {
     try {
-        const promotion = await Promotion.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        });
-        if (!promotion) {
-            return res.status(404).json({ success: false, message: 'Promotion not found' });
-        }
-        res.json({ success: true, data: promotion, promotion });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        const { title, description, link, startsAt, endsAt, isActive } = req.body;
+        const updateData = {};
+        
+        if (title) updateData.title = title;
+        if (description) updateData.description = description;
+        if (link) updateData.link = link;
+        if (startsAt) updateData.starts_at = startsAt;
+        if (endsAt) updateData.ends_at = endsAt;
+        if (isActive !== undefined) updateData.is_active = isActive;
+        if (req.fileUrl) updateData.image = req.fileUrl;
+
+        const { data, error } = await supabaseAdmin.from('promotions').update(updateData).eq('id', req.params.id).select().single();
+        if (error || !data) return res.status(404).json({ success: false, message: 'Promotion not found' });
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
 };
 
-exports.deletePromotion = async (req, res) => {
+// @route DELETE /api/promotions/:id (Admin)
+exports.deletePromotion = async (req, res, next) => {
     try {
-        const promotion = await Promotion.findById(req.params.id);
-        if (!promotion) {
-            return res.status(404).json({ success: false, message: 'Promotion not found' });
-        }
-        await promotion.deleteOne();
-        res.json({ success: true, data: {} });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
+        const { error } = await supabaseAdmin.from('promotions').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Promotion deleted' });
+    } catch (error) { next(error); }
 };

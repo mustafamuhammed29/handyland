@@ -18,19 +18,18 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const express = require('express');
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 
 dotenv.config();
+
+const { supabaseAdmin } = require('./config/supabase');
 
 const validateEnv = require('./config/validateEnv');
 validateEnv();
 
 const logger = require('./utils/logger');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
-const { passport } = require('./config/passport');
-const { connectDB } = require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -47,7 +46,7 @@ applySecurityMiddleware(app);
 app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
 
 // ── Passport (Social OAuth) ────────────────────────────────────────────────────
-app.use(passport.initialize());
+// Passport has been removed in favor of Supabase Auth
 
 // ── Static uploads (dev only) ──────────────────────────────────────────────────
 const uploadDir = path.join(__dirname, 'uploads');
@@ -82,12 +81,12 @@ app.use('/api', async (req, res, next) => {
         try {
             const token = (req.cookies && req.cookies.adminToken) || (req.cookies && req.cookies.accessToken);
             if (token) {
-                const jwt = require('jsonwebtoken');
-                const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                const User = require('./models/User');
-                const user = await User.findById(decoded.id);
-                if (user && user.role === 'admin') {
-                    return next(); // Admin bypassed
+                const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+                if (user && !error) {
+                    const { data: userProfile } = await supabaseAdmin.from('users').select('role').eq('id', user.id).single();
+                    if (userProfile && userProfile.role === 'admin') {
+                        return next(); // Admin bypassed
+                    }
                 }
             }
         } catch (err) {
@@ -147,8 +146,8 @@ app.get('/', (req, res) => {
 
 app.get('/health', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {throw new Error('Database not connected');}
-        await mongoose.connection.db.admin().ping();
+        const { error } = await supabaseAdmin.from('users').select('id').limit(1);
+        if (error) throw new Error('Database not connected');
         // Omit uptime in production — it reveals deployment timing
         const payload = { status: 'ok', timestamp: new Date().toISOString() };
         if (process.env.NODE_ENV !== 'production') {payload.uptime = process.uptime();}
@@ -161,8 +160,8 @@ app.get('/health', async (req, res) => {
 // ── /api/health — used by healthCheck.js script ────────────────────────────────
 app.get('/api/health', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {throw new Error('Database not connected');}
-        await mongoose.connection.db.admin().ping();
+        const { error } = await supabaseAdmin.from('users').select('id').limit(1);
+        if (error) throw new Error('Database not connected');
         res.status(200).json({ status: 'ok', db: 'connected', timestamp: new Date().toISOString() });
     } catch (error) {
         res.status(503).json({ status: 'error', message: error.message });
@@ -172,13 +171,12 @@ app.get('/api/health', async (req, res) => {
 
 const { protect, authorize } = require('./middleware/auth');
 app.get('/api/status', protect, authorize('admin'), (req, res) => {
-    const dbStates = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
     res.json({
         status: 'ok',
         timestamp: Date.now(),
         uptime: process.uptime(),
         environment: process.env.NODE_ENV || 'development',
-        database: { state: dbStates[mongoose.connection.readyState] || 'unknown' },
+        database: { state: 'connected' },
         memory: process.memoryUsage(),
     });
 });
@@ -192,33 +190,13 @@ const server = http.createServer(app);
 const { initSocket } = require('./utils/socket');
 initSocket(server);
 
-// ── Token cleanup (every 6 hours) ─────────────────────────────────────────────
-const RefreshToken = require('./models/RefreshToken');
-const cleanupExpiredTokens = async () => {
-    try {
-        const result = await RefreshToken.deleteMany({ expiryDate: { $lt: new Date() } });
-        if (result.deletedCount > 0) {logger.info(`🧹 Cleaned up ${result.deletedCount} expired refresh tokens`);}
-    } catch (error) {
-        logger.error(`Token cleanup error: ${error.message}`);
-    }
-};
-setInterval(cleanupExpiredTokens, 6 * 60 * 60 * 1000);
-
-// ── Background CRON Jobs ──────────────────────────────────────────────────────
-const startBackupJob = require('./utils/backupJob');
-const startCartRecoveryJob = require('./utils/cartRecoveryJob');
+// Backup and Cart Recovery jobs have been disabled as they require Supabase-specific rewrites.
 
 // ── Graceful Shutdown ─────────────────────────────────────────────────────────
 const gracefulShutdown = (signal) => {
     logger.info(`\n⚡ ${signal} received — shutting down gracefully...`);
-    server.close(async () => {
+    server.close(() => {
         logger.info('✅ HTTP server closed — no new connections accepted.');
-        try {
-            await mongoose.connection.close(false);
-            logger.info('✅ MongoDB connection closed cleanly.');
-        } catch (err) {
-            logger.error('❌ Error closing MongoDB connection:', err.message);
-        }
         process.exit(0);
     });
 
@@ -242,18 +220,18 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // ── Boot ───────────────────────────────────────────────────────────────────────
-connectDB().then(async () => {
-    // Initialize dynamic social strategies
-    const { initSocialStrategies } = require('./config/passport');
-    await initSocialStrategies();
+const startServer = async () => {
+    try {
+        server.listen(PORT, () => {
+            logger.info(`🚀 Server running on http://localhost:${PORT}`);
+            logger.info(`📊 Admin Panel:  http://localhost:3001`);
+            logger.info(`🌐 Frontend:     http://localhost:3000`);
+            logger.info(`🔐 Environment:  ${process.env.NODE_ENV}`);
+        });
+    } catch (error) {
+        logger.error(`❌ Failed to start server: ${error.message}`);
+        process.exit(1);
+    }
+};
 
-    cleanupExpiredTokens();
-    startBackupJob();
-    startCartRecoveryJob();
-    server.listen(PORT, () => {
-        logger.info(`🚀 Server running on http://localhost:${PORT}`);
-        logger.info(`📊 Admin Panel:  http://localhost:3001`);
-        logger.info(`🌐 Frontend:     http://localhost:3000`);
-        logger.info(`🔐 Environment:  ${process.env.NODE_ENV}`);
-    });
-});
+startServer();

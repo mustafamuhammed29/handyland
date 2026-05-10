@@ -9,15 +9,15 @@ router.use(authorize('admin'));
 
 router.route('/')
     .get(loanerController.getLoaners)
-    .post(loanerController.addLoaner);
+    .post(loanerController.createLoaner);
 
-router.get('/stats', loanerController.getLoanerStats);
+// router.get('/stats', loanerController.getLoanerStats);
 
 router.route('/:id')
     .put(loanerController.updateLoaner)
     .delete(loanerController.deleteLoaner);
 
-router.post('/:id/lend', loanerController.lendPhone);
-router.post('/:id/return', loanerController.returnPhone);
+router.post('/:id/lend', loanerController.assignLoaner);
+router.post('/:id/return', loanerController.returnLoaner);
 
 module.exports = router;

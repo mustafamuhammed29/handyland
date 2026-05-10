@@ -146,7 +146,7 @@ router.get('/admin/users', protect, (req, res, next) => {
 // Protected routes
 router.get('/me', protect, authController.getMe);
 router.put('/updateprofile', protect, authController.updateProfile);
-router.put('/changepassword', protect, authController.changePassword);
+router.put('/changepassword', protect, authController.updatePassword);
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', protect, authController.logout);
 
