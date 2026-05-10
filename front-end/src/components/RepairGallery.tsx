@@ -43,7 +43,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
             const casesArray = Array.isArray(data) ? data : (data.cases || []);
             setComparisons(casesArray);
             if (casesArray.length > 0) {
-                setSelectedId(casesArray[0]._id);
+                setSelectedId(casesArray[0].id);
             }
             setLoading(false);
         } catch (error) {
@@ -83,7 +83,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
         );
     }
 
-    const activeProject = comparisons.find(c => c._id === selectedId) || comparisons[0];
+    const activeProject = comparisons.find(c => c.id === selectedId) || comparisons[0];
     const filteredProjects = filter === 'all'
         ? comparisons
         : comparisons.filter(c => c.category === filter);
@@ -270,11 +270,11 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                             <div className="flex-1 overflow-y-auto pr-2 space-y-3 max-h-[500px] custom-scrollbar">
                                 {filteredProjects.map((project) => (
                                     <button
-                                        key={project._id}
-                                        onClick={() => setSelectedId(project._id)}
+                                        key={project.id}
+                                        onClick={() => setSelectedId(project.id)}
                                         className="w-full text-left group"
                                     >
-                                        <div className={`relative rounded-xl overflow-hidden border-2 transition-all ${selectedId === project._id
+                                        <div className={`relative rounded-xl overflow-hidden border-2 transition-all ${selectedId === project.id
                                             ? 'border-brand-primary shadow-[0_0_20px_rgba(6,182,212,0.4)]'
                                             : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
                                             }`}>
@@ -349,23 +349,23 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
                                 {comparisons.map((item) => (
                                     <button
-                                        key={item._id}
+                                        key={item.id}
                                         onClick={() => {
-                                            setSelectedId(item._id);
+                                            setSelectedId(item.id);
                                             setShowAllModal(false);
                                             // Optional: scroll into view
                                             document.getElementById('repair-gallery')?.scrollIntoView({ behavior: 'smooth' });
                                         }}
                                         className="w-full text-left group flex flex-col"
                                     >
-                                        <div className={`relative w-full aspect-[4/5] rounded-xl overflow-hidden border-2 mb-2 transition-all ${selectedId === item._id ? 'border-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'border-slate-800 group-hover:border-slate-600'}`}>
+                                        <div className={`relative w-full aspect-[4/5] rounded-xl overflow-hidden border-2 mb-2 transition-all ${selectedId === item.id ? 'border-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'border-slate-800 group-hover:border-slate-600'}`}>
                                             <img src={getImageUrl(item.imgAfter)} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                                             <div className="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm p-1 rounded-md">
                                                 {item.category === 'water' && <Droplets className="w-3 h-3 text-blue-400" />}
                                                 {item.category === 'screen' && <Monitor className="w-3 h-3 text-purple-400" />}
                                                 {item.category === 'glass' && <Hammer className="w-3 h-3 text-red-400" />}
                                             </div>
-                                            {selectedId === item._id && (
+                                            {selectedId === item.id && (
                                                 <div className="absolute inset-0 bg-brand-primary/20 flex items-center justify-center pointer-events-none">
                                                     <div className="bg-brand-primary text-slate-900 rounded-full p-1 shadow-lg">
                                                         <CheckCircle className="w-4 h-4" />

@@ -444,7 +444,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             try {
                 const response = await api.get<Settings>('/api/settings');
                 const data = response as any;
-                const safeData = (data || {}) as Partial<Settings>;
+                
+                // FIX: Extract the actual settings object from the response
+                const safeData = (data.settings || data.data || data || {}) as Partial<Settings>;
 
                 const merged: Settings = {
                     ...defaultSettings,
@@ -517,7 +519,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Clear cache and refetch to ensure UI matches database
             clearCache('/api/settings');
             const response = await api.get<Settings>('/api/settings');
-            const freshData = (response as any || {}) as Partial<Settings>;
+            const data = response as any;
+            const freshData = (data.settings || data.data || data || {}) as Partial<Settings>;
 
             setSettings(prev => ({
                 ...prev,
