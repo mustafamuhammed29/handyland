@@ -62,7 +62,6 @@ async function seedLegacyRepairs() {
         console.log('Seeding completed successfully!');
         process.exit(0);
     } catch (error) {
-        require('fs').writeFileSync('err.txt', error.stack || String(error));
         console.error('Error seeding legacy repairs:', error);
         process.exit(1);
     }
