@@ -16,7 +16,17 @@ exports.getPages = async (req, res, next) => {
 
         const { data, error } = await query;
         if (error) throw error;
-        return res.status(200).json({ success: true, count: data.length, data });
+
+        const mappedData = (data || []).map(p => ({
+            _id: p.id,
+            slug: p.slug,
+            title: p.title,
+            isPublished: p.is_published,
+            createdAt: p.created_at,
+            updatedAt: p.updated_at
+        }));
+
+        return res.status(200).json({ success: true, count: mappedData.length, data: mappedData });
     } catch (error) { next(error); }
 };
 
@@ -40,7 +50,17 @@ exports.getPage = async (req, res, next) => {
             return res.status(403).json({ success: false, message: 'Page not published' });
         }
 
-        return res.status(200).json({ success: true, data });
+        const mapped = {
+            _id: data.id,
+            slug: data.slug,
+            title: data.title,
+            content: data.content,
+            isPublished: data.is_published,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at
+        };
+
+        return res.status(200).json({ success: true, data: mapped });
     } catch (error) { next(error); }
 };
 
@@ -83,7 +103,17 @@ exports.updatePage = async (req, res, next) => {
         }
         if (!data) return res.status(404).json({ success: false, message: 'Page not found' });
 
-        return res.status(200).json({ success: true, data });
+        const mapped = {
+            _id: data.id,
+            slug: data.slug,
+            title: data.title,
+            content: data.content,
+            isPublished: data.is_published,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at
+        };
+
+        return res.status(200).json({ success: true, data: mapped });
     } catch (error) { next(error); }
 };
 

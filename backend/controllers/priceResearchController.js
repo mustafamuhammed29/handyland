@@ -107,7 +107,7 @@ exports.getResearchStatus = async (req, res) => {
         if (error) throw error;
 
         const withStatus = blueprints.map(bp => ({
-            id: bp.id,
+            _id: bp.id,
             brand: bp.brand,
             model: bp.model,
             basePrice: bp.base_price,

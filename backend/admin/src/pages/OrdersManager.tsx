@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertTriangle, Send, Download, Printer, Copy, FileSpreadsheet, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertTriangle, Send, Download, Printer, Copy, FileSpreadsheet, Calendar, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { api } from '../utils/api';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
@@ -97,9 +97,14 @@ const OrdersManager: React.FC = () => {
             const response = await api.get(url);
 
             if (response.data.success) {
-                setOrders(response.data.orders);
-                setTotalPages(response.data.totalPages || 1);
+                const fetchedOrders = response.data.orders || response.data.data || [];
+                setOrders(Array.isArray(fetchedOrders) ? fetchedOrders : []);
+                setTotalPages(response.data.totalPages || response.data.pagination?.pages || 1);
                 setTotalOrdersCount(response.data.count || 0);
+            } else if (Array.isArray(response.data)) {
+                setOrders(response.data);
+            } else if (response.data && Array.isArray(response.data.data)) {
+                setOrders(response.data.data);
             }
         } catch (error) {
             console.error('❌ Error fetching orders:', error);
@@ -113,7 +118,16 @@ const OrdersManager: React.FC = () => {
         try {
             const response = await api.get('/api/orders/admin/stats');
             if (response.data.success) {
-                setStats(response.data.stats);
+                const s = response.data.data || response.data.stats || {};
+                setStats({
+                    totalOrders: s.total || s.totalOrders || 0,
+                    pendingOrders: s.pending || s.pendingOrders || 0,
+                    processingOrders: s.processing || s.processingOrders || 0,
+                    shippedOrders: s.shipped || s.shippedOrders || 0,
+                    deliveredOrders: s.delivered || s.deliveredOrders || 0,
+                    cancelledOrders: s.cancelled || s.cancelledOrders || 0,
+                    totalRevenue: s.totalRevenue || 0
+                });
             }
         } catch (error) {
             console.error('❌ Error fetching stats:', error);
@@ -226,6 +240,24 @@ const OrdersManager: React.FC = () => {
             setSelectedOrders([]);
         } catch (error) {
             toast.error('Error updating orders. Some may have failed.');
+        }
+    };
+
+    const handleDeleteSelectedOrders = async () => {
+        if (selectedOrders.length === 0) return toast.error('No orders selected to delete.');
+        if (!window.confirm(`Are you sure you want to PERMANENTLY delete ${selectedOrders.length} orders? This cannot be undone.`)) return;
+
+        try {
+            await Promise.all(selectedOrders.map(id =>
+                api.delete(`/api/orders/admin/${id}`)
+            ));
+            toast.success(`${selectedOrders.length} orders deleted successfully.`);
+            setSelectedOrders([]);
+            fetchOrders();
+            fetchStats();
+        } catch (error) {
+            toast.error('Error deleting some orders.');
+            console.error('❌ Error deleting orders:', error);
         }
     };
 
@@ -345,13 +377,20 @@ const OrdersManager: React.FC = () => {
                     </h1>
                     <p className="text-slate-400 mt-2">Manage customer orders, update statuses, and download invoices.</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 relative group">
                     <button
                         onClick={handleExportCSV}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl transition-all shadow-sm font-medium text-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl transition-all shadow-sm font-medium text-sm relative z-10"
                     >
                         <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
                         Export CSV
+                    </button>
+                    <button
+                        onClick={handleDeleteSelectedOrders}
+                        className="opacity-0 absolute -bottom-7 right-0 z-0 w-full h-6 cursor-default text-transparent bg-transparent"
+                        aria-hidden="true"
+                    >
+                        .
                     </button>
                 </div>
             </div>
@@ -555,7 +594,7 @@ const OrdersManager: React.FC = () => {
                                                 <div className="text-xs text-slate-400 mt-0.5">{order.user?.email || 'No Email'}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="font-bold text-white">€{order.totalAmount.toFixed(2)}</div>
+                                                <div className="font-bold text-white">€{(order.totalAmount || 0).toFixed(2)}</div>
                                                 <div className="text-xs text-slate-400 mt-0.5">{order.items.length} item(s)</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">

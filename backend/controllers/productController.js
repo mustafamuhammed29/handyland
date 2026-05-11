@@ -316,4 +316,23 @@ exports.validateStock = async (req, res, next) => {
         next(error);
     }
 };
+// ── @route GET /api/products/admin/stats ──────────────────────
+exports.getProductStats = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('products')
+            .select('stock, price, is_active');
 
+        if (error) throw error;
+
+        const active = (data || []).filter(p => p.is_active !== false);
+        const stats = {
+            totalProducts: active.length,
+            totalInventoryValue: active.reduce((sum, p) => sum + ((p.stock || 0) * (p.price || 0)), 0),
+            lowStock: active.filter(p => (p.stock || 0) > 0 && (p.stock || 0) <= 5).length,
+            outOfStock: active.filter(p => (p.stock || 0) === 0).length
+        };
+
+        return res.status(200).json({ success: true, data: stats });
+    } catch (error) { next(error); }
+};

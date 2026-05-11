@@ -188,3 +188,32 @@ exports.clearCart = async (req, res, next) => {
         next(error);
     }
 };
+
+// ── @route GET /api/cart/all (Admin) ─────────────────────────
+exports.getAllCarts = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('carts')
+            .select(`
+                id, updated_at, user_id,
+                users (name, email),
+                cart_items (
+                    id, product_id, accessory_id, product_type, quantity
+                )
+            `)
+            .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+
+        const enrichedCarts = (data || []).filter(c => c.cart_items?.length > 0).map(c => ({
+            ...c,
+            _id: c.id,
+            user: c.users,
+            items: c.cart_items
+        }));
+
+        return res.status(200).json({ success: true, carts: enrichedCarts, data: enrichedCarts });
+    } catch (error) {
+        next(error);
+    }
+};

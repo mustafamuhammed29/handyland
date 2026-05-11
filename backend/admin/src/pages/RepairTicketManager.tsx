@@ -93,7 +93,7 @@ const RepairTicketManager: React.FC = () => {
         try {
             const response = await api.get('/api/repairs/tickets/admin/stats');
             if (response.data.success) {
-                setStats(response.data.stats);
+                setStats(response.data.data || response.data.stats);
             }
         } catch (error) {
             console.error('Error fetching stats:', error);
@@ -111,8 +111,13 @@ const RepairTicketManager: React.FC = () => {
             });
             const response = await api.get(`/api/repairs/admin/all?${queryParams.toString()}`);
             if (response.data.success) {
-                setTickets(response.data.tickets);
-                setTotalPages(response.data.totalPages || 1);
+                const fetchedTickets = response.data.tickets || response.data.data || [];
+                setTickets(Array.isArray(fetchedTickets) ? fetchedTickets : []);
+                setTotalPages(response.data.totalPages || response.data.pagination?.pages || 1);
+            } else if (Array.isArray(response.data)) {
+                setTickets(response.data);
+            } else if (response.data && Array.isArray(response.data.data)) {
+                setTickets(response.data.data);
             }
         } catch (error) {
             console.error('Error fetching repair tickets:', error);
@@ -230,7 +235,7 @@ const RepairTicketManager: React.FC = () => {
     const handleBulkDelete = async () => {
         if (!window.confirm(`Delete ${selectedTickets.length} tickets permanently?`)) return;
         try {
-            await Promise.all(selectedTickets.map(id => api.delete(`/api/repairs/admin/tickets/${id}`)));
+            await Promise.all(selectedTickets.map(id => api.delete(`/api/repairs/tickets/${id}`)));
             toast.success(`${selectedTickets.length} tickets deleted.`);
             fetchTickets();
             fetchStats();

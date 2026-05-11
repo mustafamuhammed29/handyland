@@ -22,7 +22,23 @@ exports.getCoupons = async (req, res, next) => {
         query = query.order('created_at', { ascending: false });
         const { data, error } = await query;
         if (error) throw error;
-        return res.status(200).json({ success: true, count: data.length, data });
+
+        // Map to camelCase for frontend
+        const mappedData = (data || []).map(c => ({
+            _id: c.id,
+            code: c.code,
+            discountType: c.discount_type,
+            discountValue: c.discount_value,
+            minOrderValue: c.min_order_value,
+            maxDiscount: c.max_discount,
+            validUntil: c.valid_until,
+            usageLimit: c.usage_limit,
+            usedCount: c.used_count,
+            isActive: c.is_active,
+            createdAt: c.created_at
+        }));
+
+        return res.status(200).json({ success: true, count: mappedData.length, data: mappedData });
     } catch (error) { next(error); }
 };
 
@@ -119,5 +135,51 @@ exports.validateCoupon = async (req, res, next) => {
         }
 
         return res.status(200).json({ success: true, data: coupon, calculatedDiscount: discountAmount });
+    } catch (error) { next(error); }
+};
+
+// @route PATCH /api/coupons/:id/toggle (Admin)
+exports.toggleCoupon = async (req, res, next) => {
+    try {
+        const { data: coupon, error: fetchError } = await supabaseAdmin.from('coupons').select('is_active').eq('id', req.params.id).single();
+        if (fetchError || !coupon) return res.status(404).json({ success: false, message: 'Coupon not found' });
+
+        const { error: updateError } = await supabaseAdmin
+            .from('coupons')
+            .update({ is_active: !coupon.is_active })
+            .eq('id', req.params.id);
+
+        if (updateError) throw updateError;
+        return res.status(200).json({ success: true, message: `Coupon ${!coupon.is_active ? 'activated' : 'deactivated'}` });
+    } catch (error) { next(error); }
+};
+
+// @route GET /api/coupons/latest-promo
+exports.getLatestPromo = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('coupons')
+            .select('*')
+            .eq('is_active', true)
+            .gte('valid_until', new Date().toISOString())
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data) return res.status(404).json({ success: false, message: 'No active promo found' });
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                _id: data.id,
+                code: data.code,
+                discountType: data.discount_type,
+                discountValue: data.discount_value,
+                minOrderValue: data.min_order_value,
+                maxDiscount: data.max_discount,
+                validUntil: data.valid_until
+            }
+        });
     } catch (error) { next(error); }
 };

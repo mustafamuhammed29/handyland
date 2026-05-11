@@ -35,11 +35,14 @@ exports.getTickets = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
+        const mappedData = (data || []).map(t => ({ ...t, _id: t.id }));
+
         return res.status(200).json({
             success: true,
             count,
             pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
-            data
+            tickets: mappedData,
+            data: mappedData
         });
     } catch (error) {
         next(error);
@@ -62,6 +65,26 @@ exports.getTicket = async (req, res, next) => {
         }
 
         return res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route GET /api/repairs/tickets/admin/stats ───────────────
+exports.getTicketStats = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin.from('repair_tickets').select('status, estimated_cost');
+        if (error) throw error;
+
+        const stats = {
+            totalTickets: data.length,
+            pendingTickets: data.filter(t => t.status === 'pending' || t.status === 'open').length,
+            inProgressTickets: data.filter(t => t.status === 'in-progress' || t.status === 'diagnosing' || t.status === 'waiting-parts').length,
+            completedTickets: data.filter(t => t.status === 'completed' || t.status === 'ready' || t.status === 'delivered').length,
+            totalEstimatedRevenue: data.reduce((acc, t) => acc + (Number(t.estimated_cost) || 0), 0)
+        };
+
+        return res.status(200).json({ success: true, data: stats });
     } catch (error) {
         next(error);
     }

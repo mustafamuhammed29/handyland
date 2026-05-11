@@ -16,7 +16,7 @@ const { supabaseAdmin } = require('../config/supabase');
 function rowsToMap(rows) {
     const map = {};
     for (const row of rows) {
-        if (!map[row.key]) map[row.key] = { id: row.id, key: row.key, namespace: row.namespace, values: {} };
+        if (!map[row.key]) map[row.key] = { _id: row.id, key: row.key, namespace: row.namespace, values: {} };
         map[row.key].values[row.language] = row.value;
     }
     return Object.values(map);
@@ -112,7 +112,7 @@ exports.updateTranslation = async (req, res) => {
         const { error } = await supabaseAdmin.from('translations').upsert(upserts, { onConflict: 'key,language' });
         if (error) throw error;
 
-        res.status(200).json({ success: true, data: { id, key: existing.key, values } });
+        res.status(200).json({ success: true, data: { _id: id, key: existing.key, values } });
     } catch (error) {
         console.error('updateTranslation error:', error);
         res.status(500).json({ success: false, error: 'Server Error' });
@@ -138,7 +138,10 @@ exports.createTranslation = async (req, res) => {
         const { error } = await supabaseAdmin.from('translations').insert(rows);
         if (error) throw error;
 
-        res.status(201).json({ success: true, data: { key, namespace, values } });
+        // Fetch newly created to get an ID for one of the rows
+        const { data: created } = await supabaseAdmin.from('translations').select('id').eq('key', key).limit(1).single();
+
+        res.status(201).json({ success: true, data: { _id: created?.id, key, namespace, values } });
     } catch (error) {
         console.error('createTranslation error:', error);
         res.status(500).json({ success: false, error: 'Server Error' });

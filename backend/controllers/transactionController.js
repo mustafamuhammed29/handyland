@@ -26,11 +26,77 @@ exports.getTransactions = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
+        // Map fields to camelCase for frontend
+        const mappedData = (data || []).map(t => ({
+            _id: t.id,
+            amount: t.amount,
+            type: t.type,
+            status: t.status,
+            paymentMethod: t.payment_method,
+            description: t.description,
+            createdAt: t.created_at,
+            receiptUrl: t.receipt_url,
+            stripePaymentId: t.stripe_payment_id,
+            order: t.orders,
+            user: t.users ? {
+                _id: t.user_id,
+                name: t.users.name,
+                email: t.users.email
+            } : null
+        }));
+
         return res.status(200).json({
-            success: true, count,
+            success: true,
+            count,
             pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
-            data
+            transactions: mappedData,
+            data: mappedData
         });
+    } catch (error) { next(error); }
+};
+
+// @route PUT /api/transactions/admin/:id/status
+exports.adminUpdateTransactionStatus = async (req, res, next) => {
+    try {
+        const { status } = req.body;
+        const transactionId = req.params.id;
+
+        // 1. Get the transaction and user details
+        const { data: tx, error: fetchErr } = await supabaseAdmin
+            .from('transactions')
+            .select('*, users(balance)')
+            .eq('id', transactionId)
+            .single();
+
+        if (fetchErr || !tx) return res.status(404).json({ success: false, message: 'Transaction not found' });
+        
+        // If it was already completed, don't double-credit
+        if (tx.status === 'completed' && status === 'completed') {
+            return res.status(400).json({ success: false, message: 'Transaction already completed' });
+        }
+
+        // 2. Update transaction status
+        const { data: updatedTx, error: updateErr } = await supabaseAdmin
+            .from('transactions')
+            .update({ status })
+            .eq('id', transactionId)
+            .select()
+            .single();
+
+        if (updateErr) throw updateErr;
+
+        // 3. If marked as completed, credit user balance
+        if (status === 'completed') {
+            const currentBalance = tx.users?.balance || 0;
+            const newBalance = Number(currentBalance) + Number(tx.amount);
+
+            await supabaseAdmin
+                .from('users')
+                .update({ balance: newBalance })
+                .eq('id', tx.user_id);
+        }
+
+        return res.status(200).json({ success: true, data: updatedTx });
     } catch (error) { next(error); }
 };
 

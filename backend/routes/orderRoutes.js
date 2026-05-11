@@ -8,7 +8,8 @@ const {
     updateOrderStatus,
     createOrder,
     getOrder,
-    cancelOrder
+    cancelOrder,
+    deleteOrder
 } = require('../controllers/orderController');
 const { protect, authorize, optionalProtect } = require('../middleware/auth');
 const upload = require('../utils/imageUpload');
@@ -26,8 +27,9 @@ const createOrderRules = [
 // Admin routes (protected + admin only)
 router.get('/admin/all', protect, authorize('admin'), getOrders);
 router.get('/admin/stats', protect, authorize('admin'), getOrderStats);
-// router.get('/admin/timeline', protect, authorize('admin'), getOrderTimeline);
+router.get('/admin/timeline', protect, authorize('admin'), require('../controllers/orderController').getOrderTimeline);
 router.put('/admin/:id/status', protect, authorize('admin'), updateOrderStatus);
+router.delete('/admin/:id', protect, authorize('admin'), deleteOrder);
 // router.put('/admin/:id/approve-bank-transfer', protect, authorize('admin'), require('../controllers/orderController').approveBankTransfer);
 
 // User routes (protected or optionally protected for guests)

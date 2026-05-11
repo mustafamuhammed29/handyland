@@ -123,9 +123,42 @@ const uploadMultiple = (bucket, fieldName = 'images', maxCount = 5, folder = '')
     ];
 };
 
+/**
+ * Middleware factory: upload multiple images for specific fields.
+ * Attaches URLs to req.body as [fieldName]
+ */
+const uploadFields = (bucket, fields = [], folder = '') => {
+    return [
+        upload.fields(fields.map(f => ({ name: f, maxCount: 1 }))),
+        async (req, res, next) => {
+            try {
+                if (!req.files) return next();
+
+                const bucketFolder = folder || bucket;
+
+                await Promise.all(
+                    fields.map(async (field) => {
+                        const fileArray = req.files[field];
+                        if (fileArray && fileArray[0]) {
+                            const file = fileArray[0];
+                            const filename = `${Date.now()}-${field}-${Math.random().toString(36).substr(2, 9)}`;
+                            req.body[field] = await processAndUpload(file.buffer, bucket, bucketFolder, filename, { width: 800, quality: 80 });
+                        }
+                    })
+                );
+
+                next();
+            } catch (err) {
+                next(err);
+            }
+        }
+    ];
+};
+
 module.exports = {
     upload,
     uploadSingle,
     uploadMultiple,
+    uploadFields,
     processAndUpload
 };

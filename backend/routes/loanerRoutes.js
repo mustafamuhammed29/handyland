@@ -11,7 +11,8 @@ router.route('/')
     .get(loanerController.getLoaners)
     .post(loanerController.createLoaner);
 
-// router.get('/stats', loanerController.getLoanerStats);
+// Stats must come BEFORE /:id to avoid 'stats' being treated as an ID
+router.get('/stats', loanerController.getLoanerStats);
 
 router.route('/:id')
     .put(loanerController.updateLoaner)

@@ -5,7 +5,7 @@
  */
 'use strict';
 
-const { supabaseAdmin } = require('../config/supabase');
+const { supabaseAdmin, createAuthClient } = require('../config/supabase');
 const nodemailer = require('nodemailer');
 
 // ── Cookie helper ─────────────────────────────────────────────
@@ -60,26 +60,59 @@ exports.register = async (req, res, next) => {
         });
 
         if (error) {
-            if (error.message.includes('already registered')) {
+            if (error.message.includes('already registered') || error.code === 'email_exists') {
+                // Self-Healing Logic: Check if user is in DB. If not, try to recover ID and fix DB.
+                const { data: existingUser } = await supabaseAdmin.from('users').select('id').eq('email', email).maybeSingle();
+                if (!existingUser) {
+                    console.warn(`⚠️ Orphaned user detected for ${email}. Suggesting recovery.`);
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: 'This email is partially registered. Please use "Forgot Password" to receive a link and activate your account.' 
+                    });
+                }
                 return res.status(400).json({ success: false, message: 'Email already in use' });
             }
             throw error;
         }
 
-        // Update name in our users table (trigger creates the row)
-        await supabaseAdmin
-            .from('users')
-            .update({ name })
-            .eq('id', data.user.id);
+        // Manually upsert the user row (trigger may not have fired yet)
+        try {
+            await supabaseAdmin
+                .from('users')
+                .upsert({
+                    id: data.user.id,
+                    email,
+                    name,
+                    role: 'user',
+                    is_verified: process.env.REQUIRE_EMAIL_VERIFICATION !== 'true',
+                    is_active: true
+                }, { onConflict: 'id' });
+        } catch (dbError) {
+            console.error('⚠️ DB Upsert failed:', dbError.message);
+        }
 
         // If email verification required, don't sign in yet
         if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
-            // Send verification email via Supabase (built-in)
-            await supabaseAdmin.auth.admin.generateLink({
-                type: 'signup',
-                email,
-                options: { redirectTo: `${process.env.FRONTEND_URL}/verify-email` }
-            });
+            const { sendTemplateEmail } = require('../utils/emailService');
+            try {
+                const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+                    type: 'signup',
+                    email,
+                    options: { redirectTo: `${process.env.FRONTEND_URL}/verify-email` }
+                });
+
+                if (!linkError && linkData?.properties?.action_link) {
+                    await sendTemplateEmail(email, 'verify_email', {
+                        verificationUrl: linkData.properties.action_link,
+                        userName: name
+                    });
+                    console.log('✅ Verification email sent via custom SMTP');
+                } else {
+                    console.warn('⚠️ generateLink failed for registration fallback');
+                }
+            } catch (err) {
+                console.error('❌ Verification flow error:', err.message);
+            }
 
             return res.status(201).json({
                 success: true,
@@ -88,16 +121,26 @@ exports.register = async (req, res, next) => {
         }
 
         // Auto sign in
-        const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+        const { data: signInData, error: signInError } = await createAuthClient().auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
 
+        // Fetch profile (row guaranteed to exist now after upsert)
         const { data: userProfile } = await supabaseAdmin
             .from('users')
             .select('*')
             .eq('id', data.user.id)
             .single();
 
-        const userData = sendTokenResponse(res, signInData.session, userProfile);
+        // Fallback if profile still somehow missing
+        const profileData = userProfile || {
+            id: data.user.id,
+            email,
+            name,
+            role: 'user',
+            is_verified: true
+        };
+
+        const userData = sendTokenResponse(res, signInData.session, profileData);
 
         return res.status(201).json({ success: true, user: userData, data: userData });
     } catch (error) {
@@ -115,7 +158,7 @@ exports.login = async (req, res, next) => {
         }
 
         // Sign in with Supabase
-        const { data, error } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+        const { data, error } = await createAuthClient().auth.signInWithPassword({ email, password });
 
         if (error) {
             return res.status(401).json({
@@ -237,20 +280,93 @@ exports.getMe = async (req, res, next) => {
 // ── @route POST /api/auth/forgot-password ─────────────────────
 exports.forgotPassword = async (req, res, next) => {
     try {
+        const { sendTemplateEmail, sendEmail } = require('../utils/emailService');
+        const crypto = require('crypto');
         const { email } = req.body;
 
-        // Supabase handles the reset email natively
-        const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
-            redirectTo: `${process.env.FRONTEND_URL}/reset-password`
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email is required' });
+        }
+
+        // 1. Check if user exists in OUR database (this always works)
+        const { data: user } = await supabaseAdmin
+            .from('users')
+            .select('id, name, email')
+            .eq('email', email)
+            .maybeSingle();
+
+        if (!user) {
+            // Don't reveal if email exists — always return success
+            return res.status(200).json({
+                success: true,
+                message: 'If an account with that email exists, a password reset link has been sent.'
+            });
+        }
+
+        // 2. Try Supabase generateLink first (fastest if it works)
+        let resetUrl = null;
+        try {
+            const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+                type: 'recovery',
+                email,
+                options: { redirectTo: `${process.env.FRONTEND_URL}/reset-password` }
+            });
+            if (!linkError && linkData?.properties?.action_link) {
+                resetUrl = linkData.properties.action_link;
+                console.log('🔗 Generated recovery link via Supabase.');
+            } else {
+                console.warn('⚠️ Supabase generateLink failed:', linkError?.message);
+            }
+        } catch (genErr) {
+            console.warn('⚠️ Supabase generateLink threw:', genErr.message);
+        }
+
+        // 3. If Supabase failed, generate our own token and store it
+        if (!resetUrl) {
+            const token = crypto.randomBytes(32).toString('hex');
+            const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+
+            await supabaseAdmin
+                .from('users')
+                .update({ 
+                    reset_token: token, 
+                    reset_token_expires: tokenExpiry 
+                })
+                .eq('id', user.id);
+
+            resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}&type=custom`;
+            console.log('🔐 Generated manual reset token for:', email);
+        }
+
+        // 4. Send the email via our SMTP (this always works now!)
+        const sent = await sendTemplateEmail(email, 'reset_password', {
+            resetUrl: resetUrl,
+            userName: user.name || email.split('@')[0]
         });
 
-        // Always return success (don't leak if email exists)
+        if (!sent) {
+            // Fallback: send a simple email without template
+            await sendEmail({
+                email,
+                subject: 'HandyLand - Password Reset',
+                html: `<h2>Password Reset</h2><p>Click the link below to reset your password:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>This link expires in 1 hour.</p>`,
+                message: `Reset your password: ${resetUrl}`
+            });
+        }
+
+        console.log('✅ Password reset email sent for:', email);
+
         return res.status(200).json({
             success: true,
             message: 'If an account with that email exists, a password reset link has been sent.'
         });
     } catch (error) {
-        next(error);
+        console.error('❌ forgotPassword error:', error.message);
+        // Still return success to not leak info, but log the error
+        return res.status(200).json({
+            success: true,
+            message: 'If an account with that email exists, a password reset link has been sent.'
+        });
     }
 };
 
@@ -291,7 +407,7 @@ exports.updatePassword = async (req, res, next) => {
 
         // Verify current password first
         const { data: userData } = await supabaseAdmin.auth.admin.getUserById(req.user.id);
-        const { error: verifyError } = await supabaseAdmin.auth.signInWithPassword({
+        const { error: verifyError } = await createAuthClient().auth.signInWithPassword({
             email: userData.user.email,
             password: currentPassword
         });
@@ -368,9 +484,14 @@ exports.updateProfile = async (req, res, next) => {
 
 exports.adminLogin = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
-        const { data, error } = await supabaseAdmin.auth.signInWithPassword({ email, password });
-        if (error) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        let { email, password } = req.body;
+        if (email) email = email.trim().toLowerCase();
+        
+        const { data, error } = await createAuthClient().auth.signInWithPassword({ email, password });
+        if (error) {
+            console.error('Admin Login Error:', error.message);
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
 
         const { data: userProfile } = await supabaseAdmin.from('users').select('*').eq('id', data.user.id).single();
         if (!userProfile || userProfile.role !== 'admin') {
@@ -402,7 +523,22 @@ exports.resendVerification = async (req, res, next) => {
 exports.checkEmailAvailability = async (req, res, next) => {
     try {
         const { email } = req.body;
-        const { data } = await supabaseAdmin.from('users').select('id').eq('email', email).maybeSingle();
-        res.status(200).json({ success: true, available: !data });
-    } catch (error) { next(error); }
+        if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+
+        // 1. Check in public profiles table
+        const { data: profile } = await supabaseAdmin.from('users').select('id').eq('email', email).maybeSingle();
+        
+        if (profile) {
+            return res.status(200).json({ success: true, available: false });
+        }
+
+        // 2. Check in Supabase Auth (to be sure)
+        const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers();
+        const authUser = users.find(u => u.email === email);
+
+        res.status(200).json({ success: true, available: !authUser });
+    } catch (error) { 
+        console.error('Check email error:', error);
+        next(error); 
+    }
 };

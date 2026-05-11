@@ -8,37 +8,30 @@ const { protect, authorize } = require('../middleware/auth');
 // ==========================================
 router.get('/', (req, res) => res.status(200).json({ success: true, message: 'Valuation API is healthy' }));
 
-// router.get('/devices', valuationController.getBlueprints);
-// router.post('/devices', protect, authorize('admin'), valuationController.createBlueprint);
-// router.put('/devices/:id', protect, authorize('admin'), valuationController.updateBlueprint);
-// router.delete('/devices/:id', protect, authorize('admin'), valuationController.deleteBlueprint);
-// Bulk operations
-// router.delete('/devices', protect, authorize('admin'), valuationController.bulkDeleteBlueprints);
-// router.post('/devices/reseed', protect, authorize('admin'), valuationController.reseedBlueprints);
+router.get('/devices', valuationController.getBlueprints);
+// Reseed must come BEFORE /:id
+router.post('/devices/reseed', protect, authorize('admin'), valuationController.reseedBlueprints);
+router.post('/devices', protect, authorize('admin'), valuationController.createBlueprint);
+router.put('/devices/:id', protect, authorize('admin'), valuationController.updateBlueprint);
+router.delete('/devices/:id', protect, authorize('admin'), valuationController.deleteBlueprint);
+// Bulk delete (uses request body, not params)
+router.delete('/devices', protect, authorize('admin'), valuationController.bulkDeleteBlueprints);
 
 // ==========================================
 // VALUATION & QUOTES (PUBLIC/USER)
 // ==========================================
 
-// Public Calculation Endpoint
-// router.post('/calculate', valuationController.calculateValuation);
-
 // Authorized Quote Management
-// router.post('/quote', protect, valuationController.createQuote);
 router.post('/saved', protect, valuationController.saveValuationQuote);
 router.get('/my-valuations', protect, valuationController.getSavedValuations); // Alias for frontend
 router.get('/saved', protect, valuationController.getSavedValuations);
-// router.delete('/saved/:id', protect, valuationController.deleteValuation);
-
-// Public Quote Retrieval & Confirmation
-// router.get('/quote/:reference', valuationController.getQuoteByReference);
-// router.put('/quote/:reference/confirm', valuationController.confirmQuote);
 
 // ==========================================
 // ADMIN QUOTES MANAGEMENT
 // ==========================================
 router.get('/admin/quotes', protect, authorize('admin'), valuationController.getValuations);
 router.put('/admin/quotes/:id/status', protect, authorize('admin'), valuationController.updateValuationStatus);
-// router.post('/admin/quotes/:id/complete-purchase', protect, authorize('admin'), valuationController.completePurchase);
+router.post('/admin/quotes/:id/complete-purchase', protect, authorize('admin'), valuationController.completePurchase);
 
 module.exports = router;
+

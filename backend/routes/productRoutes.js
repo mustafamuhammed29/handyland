@@ -31,6 +31,7 @@ router.get('/categories', productController.getCategories);
 router.get('/featured', productController.getFeaturedProducts);
 router.post('/validate-stock', productController.validateStock);
 // router.get('/admin/stats', protect, authorize('admin'), productController.getProductStats);
+router.get('/admin/stats', protect, authorize('admin'), productController.getProductStats);
 router.get('/:id', productController.getProduct);
 router.post('/', protect, authorize('admin'), productController.createProduct);
 router.put('/:id', protect, authorize('admin'), productController.updateProduct);

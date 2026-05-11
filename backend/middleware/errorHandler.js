@@ -62,11 +62,18 @@ const errorHandler = (err, req, res, next) => {
     }
 
     // Default error
-    res.status(err.statusCode || 500).json({
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Server Error';
+
+    // Log to file
+    const errLog = `[${new Date().toISOString()}] GLOBAL ERROR ${statusCode} on ${req.method} ${req.originalUrl}: ${err.stack || message}\n`;
+    require('fs').appendFileSync('backend_errors.log', errLog);
+
+    res.status(statusCode).json({
         success: false,
         error: {
             code: 'SERVER_ERROR',
-            message: err.message || 'Server Error',
+            message: message,
             details: process.env.NODE_ENV === 'development' ? err.stack : undefined
         }
     });

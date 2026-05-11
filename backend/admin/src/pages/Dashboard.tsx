@@ -29,20 +29,20 @@ const Dashboard: React.FC = () => {
         try {
             // Fetch order stats
             const orderResponse: any = await api.get('/api/orders/admin/stats');
-            const orderStats = orderResponse.stats || orderResponse.data?.stats || orderResponse;
+            const orderStats = orderResponse.data?.data || orderResponse.data || {};
 
             // Fetch user stats
             const userResponse: any = await api.get('/api/users/admin/stats');
-            const userStats = userResponse.stats || userResponse.data?.stats || userResponse;
+            const userStats = userResponse.data?.data || userResponse.data || {};
 
             // Check keys depending on API response structure
             if (orderStats && userStats) {
                 setStats({
-                    totalUsers: userStats.totalUsers || 0,
-                    activeUsers: userStats.activeUsers || 0,
-                    totalOrders: orderStats.totalOrders || 0,
-                    pendingOrders: orderStats.pendingOrders || 0,
-                    deliveredOrders: orderStats.deliveredOrders || 0,
+                    totalUsers: userStats.total || userStats.totalUsers || 0,
+                    activeUsers: userStats.active || userStats.activeUsers || 0,
+                    totalOrders: orderStats.total || orderStats.totalOrders || 0,
+                    pendingOrders: orderStats.pending || orderStats.pendingOrders || 0,
+                    deliveredOrders: orderStats.delivered || orderStats.deliveredOrders || 0,
                     totalRevenue: orderStats.totalRevenue || 0
                 });
             }

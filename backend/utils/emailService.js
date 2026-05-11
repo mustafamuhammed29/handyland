@@ -13,25 +13,45 @@ const getSmtpConfig = async () => {
     const now = Date.now();
     if (!_dbSmtpConfig || (now - _dbSmtpLastFetch) > DB_CACHE_TTL) {
         try {
-            const Settings = require('../models/Settings');
-            const settings = await Settings.findOne().lean();
-            if (settings?.smtp?.isConfigured && settings.smtp.host && settings.smtp.user && settings.smtp.pass) {
-                const { decrypt } = require('./encryption');
-                _dbSmtpConfig = {
-                    host: settings.smtp.host,
-                    port: settings.smtp.port || 587,
-                    secure: settings.smtp.secure || false,
-                    user: settings.smtp.user,
-                    pass: decrypt(settings.smtp.pass),
-                    fromEmail: settings.smtp.fromEmail || settings.smtp.user,
-                    fromName: settings.smtp.fromName || 'HandyLand',
-                    source: 'database'
-                };
+            const { supabaseAdmin } = require('../config/supabase');
+            const { data, error } = await supabaseAdmin.from('settings')
+                .select('key, value')
+                .in('key', ['smtp_host', 'smtp_port', 'smtp_secure', 'smtp_user', 'smtp_pass', 'smtp_from_email', 'smtp_from_name']);
+            
+            if (!error && data && data.length > 0) {
+                const s = {};
+                data.forEach(item => { s[item.key] = item.value; });
+                
+                if (s.smtp_host && s.smtp_user && s.smtp_pass) {
+                    const { decrypt } = require('./encryption');
+                    
+                    // Automatically clean host if user entered http://
+                    let cleanHost = s.smtp_host.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                    
+                    let portNum = parseInt(s.smtp_port) || 587;
+                    let isSecure = s.smtp_secure === 'true';
+                    if (portNum === 587) isSecure = false;
+                    if (portNum === 465) isSecure = true;
+                    
+                    _dbSmtpConfig = {
+                        host: cleanHost,
+                        port: portNum,
+                        secure: isSecure,
+                        user: s.smtp_user,
+                        pass: decrypt(s.smtp_pass),
+                        fromEmail: s.smtp_from_email || s.smtp_user,
+                        fromName: s.smtp_from_name || 'HandyLand',
+                        source: 'database'
+                    };
+                } else {
+                    _dbSmtpConfig = null;
+                }
             } else {
                 _dbSmtpConfig = null;
             }
             _dbSmtpLastFetch = now;
         } catch (e) {
+            console.error('Error fetching SMTP config from Supabase:', e);
             // Silently fall through to .env
             _dbSmtpConfig = null;
         }
@@ -74,7 +94,10 @@ const sendEmail = async (options) => {
                 auth: {
                     user: config.user,
                     pass: config.pass
-                }
+                },
+                connectionTimeout: 10000, // 10 seconds
+                greetingTimeout: 10000,
+                socketTimeout: 15000
             });
 
             const message = {
@@ -90,24 +113,12 @@ const sendEmail = async (options) => {
             console.log('📧 Email sent successfully: %s (via %s)', info.messageId, config.source);
         } catch (error) {
             console.error('❌ Error sending email via SMTP:', error.message);
-            console.log('⚠️ Overriding to mock email since real email failed.');
-            console.log('----------------------------------------------------');
-            console.log('📧 Mock Email Service (SMTP failed)');
-            console.log(`To: ${options.email}`);
-            console.log(`Subject: ${options.subject}`);
-            console.log(`Body: ${options.html || options.message}`);
-            console.log('----------------------------------------------------');
-
-            // Only throw here if you strictly want the API to fail. For development/robustness, we log and swallow the error.
-            // throw new Error('Email service failed: ' + error.message);
+            // Re-throw so the controller knows it failed
+            throw error;
         }
     } else {
-        console.log('----------------------------------------------------');
-        console.log('📧 Mock Email Service (No SMTP Configured)');
-        console.log(`To: ${options.email}`);
-        console.log(`Subject: ${options.subject}`);
-        console.log(`Body: ${options.html || options.message}`);
-        console.log('----------------------------------------------------');
+        console.warn('⚠️ No SMTP configuration found. Email not sent.');
+        throw new Error('Email service not configured');
     }
 };
 
@@ -146,32 +157,35 @@ const sendOrderConfirmation = async (order) => {
     }
 };
 
-const EmailTemplate = require('../models/EmailTemplate');
-
+// Template helper using Supabase
 const sendTemplateEmail = async (email, templateName, variablesContext = {}) => {
     try {
-        const template = await EmailTemplate.findOne({ name: templateName, isActive: true });
-        if (!template) {
+        const { supabaseAdmin } = require('../config/supabase');
+        const { data: template, error } = await supabaseAdmin
+            .from('email_templates')
+            .select('*')
+            .eq('name', templateName)
+            .eq('is_active', true)
+            .maybeSingle();
+
+        if (error || !template) {
             console.warn(`⚠️ Email template '${templateName}' not found or inactive. Falling back to default.`);
             return false;
         }
 
-        let html = template.html;
-        let subject = template.subject;
+        let html = template.body_html || '';
+        let text = template.body_text || '';
+        let subject = template.subject || '';
 
-        // Replace all {{variableName}} in HTML and Subject
+        // Replace all {{variableName}} in subject, html, text
         for (const [key, value] of Object.entries(variablesContext)) {
             const regex = new RegExp(`{{${key}}}`, 'g');
             html = html.replace(regex, value);
+            text = text.replace(regex, value);
             subject = subject.replace(regex, value);
         }
 
-        await sendEmail({
-            email,
-            subject,
-            html,
-            message: html.replace(/<[^>]*>?/gm, '') // Strip HTML tags for plain text fallback
-        });
+        await sendEmail({ email, subject, html, message: text });
         return true;
     } catch (error) {
         console.error(`❌ Error sending template email '${templateName}':`, error);

@@ -100,7 +100,19 @@ const UsersManager: React.FC = () => {
             try {
                 const response = await api.get('/api/users/admin/stats');
                 const data = (response as any)?.data || response;
-                if (data.success) setStats(data.stats);
+                if (data.success) {
+                    const statsData = data.data || data.stats || {};
+                    setStats({
+                        totalUsers: statsData.total || statsData.totalUsers || 0,
+                        activeUsers: statsData.active || statsData.activeUsers || 0,
+                        inactiveUsers: (statsData.total - statsData.active) || statsData.inactiveUsers || 0,
+                        usersByRole: {
+                            admin: statsData.admins || 0,
+                            seller: statsData.sellers || 0,
+                            user: (statsData.total - (statsData.admins || 0) - (statsData.sellers || 0)) || 0
+                        }
+                    });
+                }
             } catch (error) {
                 console.error('Error fetching user stats:', error);
             }
@@ -127,9 +139,14 @@ const UsersManager: React.FC = () => {
             const response = await api.get(url);
             const data = (response as any)?.data || response;
             if (data.success) {
-                setUsers(data.users);
-                setTotalPages(data.totalPages);
-                setTotalUsersCount(data.count);
+                const fetchedUsers = data.users || data.data || [];
+                setUsers(Array.isArray(fetchedUsers) ? fetchedUsers : []);
+                setTotalPages(data.totalPages || data.pagination?.pages || 1);
+                setTotalUsersCount(data.count || 0);
+            } else if (Array.isArray(data)) {
+                setUsers(data);
+            } else if (data && Array.isArray(data.data)) {
+                setUsers(data.data);
             }
         } catch (error) {
             console.error('Error fetching users:', error);

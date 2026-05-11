@@ -16,7 +16,7 @@ exports.getRefunds = async (req, res, next) => {
 
         let query = supabaseAdmin
             .from('refund_requests')
-            .select('*, orders(order_number), refund_request_items(*), users(name, email)', { count: 'exact' });
+            .select('*, orders(order_number), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)', { count: 'exact' });
 
         if (!isAdmin) query = query.eq('user_id', req.user.id);
         if (status) query = query.eq('status', status);
@@ -39,7 +39,7 @@ exports.getRefund = async (req, res, next) => {
     try {
         const { data, error } = await supabaseAdmin
             .from('refund_requests')
-            .select('*, orders(order_number), refund_request_items(*), users(name, email)')
+            .select('*, orders(order_number), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)')
             .eq('id', req.params.id)
             .single();
 

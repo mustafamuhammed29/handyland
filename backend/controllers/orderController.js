@@ -37,7 +37,7 @@ exports.getOrders = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
-        const ordersWithId = (data || []).map(o => ({ ...o, _id: o.id }));
+        const ordersWithId = (data || []).map(o => ({ ...o, _id: o.id, items: o.order_items || [] }));
 
         return res.status(200).json({
             success: true,
@@ -67,7 +67,9 @@ exports.getOrder = async (req, res, next) => {
             return res.status(403).json({ success: false, message: 'Not authorized' });
         }
 
-        return res.status(200).json({ success: true, data });
+        const mappedData = { ...data, _id: data.id, items: data.order_items || [] };
+
+        return res.status(200).json({ success: true, data: mappedData });
     } catch (error) {
         next(error);
     }
@@ -293,6 +295,37 @@ exports.cancelOrder = async (req, res, next) => {
     }
 };
 
+// ── @route DELETE /api/orders/admin/:id (Admin) ───────────────
+exports.deleteOrder = async (req, res, next) => {
+    try {
+        const orderId = req.params.id;
+
+        // Check if order exists
+        const { data: order, error: findError } = await supabaseAdmin
+            .from('orders')
+            .select('id')
+            .eq('id', orderId)
+            .single();
+
+        if (findError || !order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        // Delete related items manually in case there is no cascade
+        await supabaseAdmin.from('order_items').delete().eq('order_id', orderId);
+        await supabaseAdmin.from('order_status_history').delete().eq('order_id', orderId);
+
+        // Delete the order itself
+        const { error: deleteError } = await supabaseAdmin.from('orders').delete().eq('id', orderId);
+
+        if (deleteError) throw deleteError;
+
+        return res.status(200).json({ success: true, message: 'Order deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // ── @route GET /api/orders/stats (Admin) ─────────────────────
 exports.getOrderStats = async (req, res, next) => {
     try {
@@ -308,6 +341,36 @@ exports.getOrderStats = async (req, res, next) => {
             success: true,
             data: { total, pending, processing, delivered, totalRevenue: Number(totalRevenue.toFixed(2)) }
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route GET /api/orders/admin/timeline (Admin) ─────────────
+exports.getOrderTimeline = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('orders')
+            .select('created_at, total_amount')
+            .order('created_at', { ascending: true })
+            .limit(100);
+
+        if (error) throw error;
+
+        // Group by date for the chart
+        const timeline = (data || []).reduce((acc, order) => {
+            const date = new Date(order.created_at).toLocaleDateString();
+            const existing = acc.find(item => item.date === date);
+            if (existing) {
+                existing.sales += Number(order.total_amount);
+                existing.orders += 1;
+            } else {
+                acc.push({ date, sales: Number(order.total_amount), orders: 1 });
+            }
+            return acc;
+        }, []);
+
+        return res.status(200).json({ success: true, timeline, data: { timeline } });
     } catch (error) {
         next(error);
     }

@@ -72,8 +72,9 @@ export default function ProductsManager() {
             // Actually productService.getProducts doesn't have a specific category filter yet, but it searches globally.
             
             const res = await api.get(url);
-            if (res.data && Array.isArray(res.data.products)) {
-                let filteredProducts = res.data.products;
+            const fetchedProducts = res.data?.products || res.data?.data || [];
+            if (res.data && Array.isArray(fetchedProducts)) {
+                let filteredProducts = fetchedProducts;
                 
                 // Client-side category filtering since backend doesn't explicitly filter by category in getProducts yet
                 if (selectedCategory) {
@@ -107,7 +108,7 @@ export default function ProductsManager() {
         try {
             const res = await api.get('/api/products/admin/stats');
             if (res.data.success) {
-                setStats(res.data.stats);
+                setStats(res.data.data || res.data.stats);
             }
         } catch (error) {
             console.error('Error fetching stats', error);

@@ -49,10 +49,19 @@ const WarrantyManager = () => {
     const fetchWarranties = async () => {
         try {
             setLoading(true);
-            const { data } = await api.get('/api/warranties');
-            setWarranties(data);
+            const response = await api.get('/api/warranties');
+            const data = (response as any)?.data || response;
+            
+            if (data.data && Array.isArray(data.data)) {
+                setWarranties(data.data);
+            } else if (Array.isArray(data)) {
+                setWarranties(data);
+            } else {
+                setWarranties([]);
+            }
         } catch (error) {
             console.error('Failed to fetch warranties:', error);
+            setWarranties([]);
         } finally {
             setLoading(false);
         }

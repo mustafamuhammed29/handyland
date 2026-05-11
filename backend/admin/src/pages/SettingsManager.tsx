@@ -19,6 +19,7 @@ import { ProductFaqsTab } from './settings/ProductFaqsTab';
 import { AccessoryCategoriesTab } from './settings/AccessoryCategoriesTab';
 import { EmailSettingsTab } from './settings/EmailSettingsTab';
 import { CookieSettingsTab } from './settings/CookieSettingsTab';
+import { SEOTab } from './settings/SEOTab';
 
 interface HeroSettings {
     headline: string;
@@ -449,15 +450,18 @@ export default function SettingsManager() {
         const fetchSettings = async () => {
             try {
                 const response = await api.get('/api/settings');
-                // Admin API interceptor does NOT unwrap response.data, so we need to handle both cases
                 const data = (response as any)?.data || response;
+
+                // Extract actual settings object from the response wrapper
+                const settingsData = data.settings || data.data || {};
+
                 setSettings(prev => ({
                     ...prev,
-                    ...data,
-                    features: { ...prev.features, ...(data.features || {}) },
-                    promoPopup: { ...prev.promoPopup, ...(data.promoPopup || {}) },
-                    announcementBanner: { ...prev.announcementBanner, ...(data.announcementBanner || {}) },
-                    seo: { ...prev.seo, ...(data.seo || {}) },
+                    ...settingsData,
+                    features: { ...prev.features, ...(settingsData.features || {}) },
+                    promoPopup: { ...prev.promoPopup, ...(settingsData.promoPopup || {}) },
+                    announcementBanner: { ...prev.announcementBanner, ...(settingsData.announcementBanner || {}) },
+                    seo: { ...prev.seo, ...(settingsData.seo || {}) },
                 }));
             } catch (err) {
                 console.error('Failed to fetch settings:', err);
@@ -607,12 +611,13 @@ export default function SettingsManager() {
                     {activeTab === 'financials' && <FinancialSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'auth' && <SocialAuthTab />}
                     {activeTab === 'maintenance' && <MaintenanceSettingsTab settings={settings} handleChange={handleChange} />}
-                    { activeTab === 'hero' && <HeroSettingsTab settings={settings} handleChange={handleChange} /> }
-                    { activeTab === 'layout' && <SectionsTab settings={settings} handleChange={handleChange} /> }
-                    { activeTab === 'invoice' && <InvoiceSettingsTab settings={settings} handleChange={handleChange} /> }
-                    { activeTab === 'faqs' && <ProductFaqsTab settings={settings} handleChange={handleChange} /> }
-                    { activeTab === 'categories' && <AccessoryCategoriesTab settings={settings} handleChange={handleChange} /> }
-                    { activeTab === 'cookie' && <CookieSettingsTab settings={settings} handleChange={handleChange} /> }
+                    {activeTab === 'hero' && <HeroSettingsTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'layout' && <SectionsTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'invoice' && <InvoiceSettingsTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'faqs' && <ProductFaqsTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'categories' && <AccessoryCategoriesTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'cookie' && <CookieSettingsTab settings={settings} handleChange={handleChange} />}
+                    {activeTab === 'seo' && <SEOTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'email-server' && <EmailSettingsTab />}
 
                     {activeTab === 'suspension' && (
@@ -732,12 +737,12 @@ export default function SettingsManager() {
                                     Manage Repair Cases <ArrowRight size={16} />
                                 </Link>
                             </div>
-                            
+
                             <div className="p-5 border border-slate-700 rounded-xl bg-slate-900/50 space-y-4">
                                 <h4 className="text-purple-400 font-bold mb-2">Typography & CTA</h4>
                                 <Input label="Section Main Title" value={settings.repairArchive?.title} onChange={(v) => handleChange('repairArchive', 'title', v)} placeholder="REPAIR ARCHIVE" />
                                 <Input label="Section Subtitle" value={settings.repairArchive?.subtitle} onChange={(v) => handleChange('repairArchive', 'subtitle', v)} placeholder="Real documentation of our successful operations" />
-                                
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-800 mt-4">
                                     <Input label="Action Button Text" value={settings.repairArchive?.buttonText} onChange={(v) => handleChange('repairArchive', 'buttonText', v)} placeholder="View Full Archive" />
                                     <Input label="Live Counter: Total Success Stories" value={settings.repairArchive?.totalRepairs?.toString()} onChange={(v) => handleChange('repairArchive', 'totalRepairs', Number(v))} type="number" />
@@ -939,106 +944,6 @@ export default function SettingsManager() {
 
                     {activeTab === 'contact' && <ContactSettingsTab settings={settings} handleChange={handleChange} />}
 
-                    {activeTab === 'seo' && (
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="p-3 bg-purple-500/10 rounded-xl">
-                                    <Globe className="text-purple-400" size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white">SEO & Meta Tags</h3>
-                                    <p className="text-slate-400 text-sm">Configure default search engine optimization tags and analytics tracking.</p>
-                                </div>
-                            </div>
-
-                            <div className="p-5 border border-slate-700 rounded-xl space-y-5">
-                                <h4 className="text-blue-400 font-bold mb-2">Global Meta Details</h4>
-                                <div>
-                                    <label className="block text-slate-400 text-sm font-bold mb-2">Default Meta Title</label>
-                                    <input
-                                        type="text"
-                                        placeholder="HandyLand — Germany's #1 Phone Marketplace"
-                                        value={settings.seo?.defaultMetaTitle || ''}
-                                        onChange={e => handleChange('seo', 'defaultMetaTitle', e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-slate-400 text-sm font-bold mb-2">Default Meta Description</label>
-                                    <textarea
-                                        placeholder="Describe your site for search engines..."
-                                        value={settings.seo?.defaultMetaDescription || ''}
-                                        onChange={e => handleChange('seo', 'defaultMetaDescription', e.target.value)}
-                                        rows={3}
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none resize-none"
-                                    />
-                                    <p className="text-xs text-slate-500 mt-1">Recommended 150-160 characters.</p>
-                                </div>
-                                <div>
-                                    <label className="block text-slate-400 text-sm font-bold mb-2">Default Keywords</label>
-                                    <input
-                                        type="text"
-                                        value={settings.seo?.defaultKeywords || ''}
-                                        onChange={e => handleChange('seo', 'defaultKeywords', e.target.value)}
-                                        placeholder="Comma-separated keywords"
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
-                                    />
-                                </div>
-                                <div className="mt-4">
-                                    <ImageUpload
-                                        label="Default OpenGraph Image (Used when sharing links)"
-                                        value={settings.seo?.defaultOgImage || ''}
-                                        onChange={(url: string) => handleChange('seo', 'defaultOgImage', url)}
-                                    />
-                                </div>
-                                <div className="mt-4">
-                                    <ImageUpload
-                                        label="Global Site Favicon (Browser Tab Icon)"
-                                        value={settings.seo?.faviconUrl || ''}
-                                        onChange={url => handleChange('seo', 'faviconUrl', url)}
-                                    />
-                                    <p className="text-xs text-slate-500 mt-1">Recommended size: 32x32px or 64x64px (PNG or ICO).</p>
-                                </div>
-                            </div>
-
-                            <div className="p-5 border border-slate-700 rounded-xl space-y-5">
-                                <h4 className="text-blue-400 font-bold mb-2">Analytics, Tracking & Verification</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-slate-400 text-sm font-bold mb-2">Google Analytics ID (G-XXXX)</label>
-                                        <input
-                                            type="text"
-                                            value={settings.seo?.googleAnalyticsId || ''}
-                                            onChange={e => handleChange('seo', 'googleAnalyticsId', e.target.value)}
-                                            placeholder="G-..."
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-slate-400 text-sm font-bold mb-2">Facebook Pixel ID</label>
-                                        <input
-                                            type="text"
-                                            value={settings.seo?.facebookPixelId || ''}
-                                            onChange={e => handleChange('seo', 'facebookPixelId', e.target.value)}
-                                            placeholder="1234567890..."
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-slate-400 text-sm font-bold mb-2">Google Search Console Verification ID</label>
-                                    <input
-                                        type="text"
-                                        value={settings.seo?.googleSiteVerificationId || ''}
-                                        onChange={e => handleChange('seo', 'googleSiteVerificationId', e.target.value)}
-                                        placeholder="e.g. jxX1_example_ID_here"
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
-                                    />
-                                    <p className="text-xs text-slate-500 mt-1">Paste the code given by Google to verify site ownership.</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {activeTab === 'scripts' && (
                         <div className="space-y-6">

@@ -15,7 +15,9 @@ echo       Done. Ports are now free.
 echo.
 
 echo [2/4] Checking Supabase cloud connection...
-node -e "require('dotenv').config({path:'backend/.env'}); const {createClient}=require('./backend/node_modules/@supabase/supabase-js'); const s=createClient(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_KEY); s.from('products').select('id').limit(1).then(r=>{ if(r.error){console.log('  [ERROR] Supabase connection failed: '+r.error.message); process.exit(1);} else {console.log('  [OK] Supabase database is online and reachable.');}});" 2>nul
+pushd backend
+node -e "require('dotenv').config({path:'.env'}); const {createClient}=require('./node_modules/@supabase/supabase-js'); const s=createClient(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_KEY); s.from('products').select('id').limit(1).then(r=>{ if(r.error){console.log('  [ERROR] Supabase connection failed: '+r.error.message); process.exit(1);} else {console.log('  [OK] Supabase database is online and reachable.');}});" 2>nul
+popd
 echo.
 
 echo [3/4] Launching services in separate windows...

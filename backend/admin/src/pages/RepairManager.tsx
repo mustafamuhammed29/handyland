@@ -44,8 +44,9 @@ export default function RepairManager() {
             if (debouncedSearch) url += `&search=${encodeURIComponent(debouncedSearch)}`;
             
             const response = await api.get(url);
-            if (response.data && Array.isArray(response.data.devices)) {
-                setDevices(response.data.devices);
+            const fetchedDevices = response.data?.devices || response.data?.data || [];
+            if (response.data && Array.isArray(fetchedDevices)) {
+                setDevices(fetchedDevices);
                 setTotalPages(response.data.totalPages || 1);
             } else if (Array.isArray(response.data)) {
                 setDevices(response.data);
@@ -63,7 +64,7 @@ export default function RepairManager() {
         try {
             const res = await api.get('/api/repairs/admin/stats');
             if (res.data.success) {
-                setStats(res.data.stats);
+                setStats(res.data.data || res.data.stats);
             }
         } catch (error) {
             console.error('Error fetching stats', error);

@@ -250,6 +250,26 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 function AppContent() {
   const { isAuthenticated } = useAuth();
 
+  React.useEffect(() => {
+    // Dynamic favicon from API
+    import('./utils/api').then(({ api }) => {
+      api.get('/api/settings').then((res: any) => {
+        const data = res?.data || res;
+        const settingsData = data.settings || data.data || {};
+        const faviconUrl = settingsData.seo?.faviconUrl;
+        
+        if (faviconUrl) {
+          const link = document.getElementById('app-favicon') as HTMLLinkElement;
+          if (link) {
+            const finalUrl = faviconUrl.startsWith('http') ? faviconUrl : `${import.meta.env.VITE_API_URL || ''}${faviconUrl}`;
+            link.href = finalUrl;
+            link.removeAttribute('type');
+          }
+        }
+      }).catch(err => console.error("Failed to load favicon", err));
+    });
+  }, []);
+
   return (
     <Router>
       <Routes>

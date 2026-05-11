@@ -222,8 +222,8 @@ process.on('unhandledRejection', (reason, promise) => {
 // ── Boot ───────────────────────────────────────────────────────────────────────
 const startServer = async () => {
     try {
-        server.listen(PORT, () => {
-            logger.info(`🚀 Server running on http://localhost:${PORT}`);
+        server.listen(PORT, '127.0.0.1', () => {
+            logger.info(`🚀 Server running on http://127.0.0.1:${PORT}`);
             logger.info(`📊 Admin Panel:  http://localhost:3001`);
             logger.info(`🌐 Frontend:     http://localhost:3000`);
             logger.info(`🔐 Environment:  ${process.env.NODE_ENV}`);

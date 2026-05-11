@@ -23,9 +23,19 @@ exports.getAllCases = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
+        // Map snake_case DB columns to camelCase frontend fields
+        const mappedCases = (data || []).map(c => ({
+            ...c,
+            _id: c.id,
+            imgBefore: c.img_before || '',
+            imgAfter: c.img_after || '',
+            labelBefore: c.label_before || '',
+            labelAfter: c.label_after || ''
+        }));
+
         return res.status(200).json({
             success: true,
-            cases: data,
+            cases: mappedCases,
             count,
             totalPages: Math.ceil(count / Number(limit)),
             currentPage: Number(page)

@@ -1,6 +1,7 @@
 const express = require('express');
 const {
-    getTransactions
+    getTransactions,
+    adminUpdateTransactionStatus
 } = require('../controllers/transactionController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -20,6 +21,6 @@ router.get('/', getTransactions);
 
 // Admin Routes
 router.get('/admin', authorize('admin'), getTransactions);
-// router.put('/admin/:id/status', authorize('admin'), updateTransactionStatus);
+router.put('/admin/:id/status', authorize('admin'), adminUpdateTransactionStatus);
 
 module.exports = router;

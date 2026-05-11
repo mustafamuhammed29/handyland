@@ -50,7 +50,7 @@ const LoanerManager = () => {
         try {
             const { data } = await api.get('/api/loaners/stats');
             if (data.success) {
-                setStats(data.stats);
+                setStats(data.data || data.stats);
             }
         } catch (error) {
             console.error('Failed to fetch stats:', error);
@@ -68,10 +68,13 @@ const LoanerManager = () => {
             });
             const { data } = await api.get(`/api/loaners?${queryParams.toString()}`);
             if (data.success) {
-                setLoaners(data.loaners);
-                setTotalPages(data.totalPages || 1);
+                const fetchedLoaners = data.loaners || data.data || [];
+                setLoaners(Array.isArray(fetchedLoaners) ? fetchedLoaners : []);
+                setTotalPages(data.totalPages || data.pagination?.pages || 1);
             } else if (Array.isArray(data)) { // Fallback for old API format
                 setLoaners(data);
+            } else if (data && Array.isArray(data.data)) {
+                setLoaners(data.data);
             }
         } catch (error) {
             console.error('Failed to fetch loaners:', error);

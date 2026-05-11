@@ -11,7 +11,20 @@ exports.getTemplates = async (req, res, next) => {
     try {
         const { data, error } = await supabaseAdmin.from('email_templates').select('*').order('name', { ascending: true });
         if (error) throw error;
-        return res.status(200).json({ success: true, count: data.length, data });
+
+        // Map to camelCase for frontend
+        const mappedData = (data || []).map(t => ({
+            _id: t.id,
+            name: t.name,
+            subject: t.subject,
+            html: t.body_html,
+            text: t.body_text,
+            variables: t.variables || [],
+            isActive: t.is_active,
+            createdAt: t.created_at
+        }));
+
+        return res.status(200).json({ success: true, count: mappedData.length, data: mappedData });
     } catch (error) { next(error); }
 };
 
@@ -20,7 +33,19 @@ exports.getTemplate = async (req, res, next) => {
     try {
         const { data, error } = await supabaseAdmin.from('email_templates').select('*').eq('id', req.params.id).single();
         if (error || !data) return res.status(404).json({ success: false, message: 'Template not found' });
-        return res.status(200).json({ success: true, data });
+        
+        const mapped = {
+            _id: data.id,
+            name: data.name,
+            subject: data.subject,
+            html: data.body_html,
+            text: data.body_text,
+            variables: data.variables || [],
+            isActive: data.is_active,
+            createdAt: data.created_at
+        };
+
+        return res.status(200).json({ success: true, data: mapped });
     } catch (error) { next(error); }
 };
 
@@ -47,13 +72,19 @@ exports.createTemplate = async (req, res, next) => {
 // @route PUT /api/email-templates/:id
 exports.updateTemplate = async (req, res, next) => {
     try {
-        const { name, subject, bodyHtml, bodyText, variables, isActive } = req.body;
+        const { name, subject, html, bodyHtml, bodyText, text, variables, isActive } = req.body;
         const updateData = {};
         
         if (name) updateData.name = name;
         if (subject) updateData.subject = subject;
-        if (bodyHtml !== undefined) updateData.body_html = bodyHtml;
-        if (bodyText !== undefined) updateData.body_text = bodyText;
+        
+        // Handle both camelCase and short names from frontend
+        const finalHtml = html || bodyHtml;
+        if (finalHtml !== undefined) updateData.body_html = finalHtml;
+        
+        const finalText = text || bodyText;
+        if (finalText !== undefined) updateData.body_text = finalText;
+        
         if (variables) updateData.variables = variables;
         if (isActive !== undefined) updateData.is_active = isActive;
 
@@ -64,7 +95,18 @@ exports.updateTemplate = async (req, res, next) => {
         }
         if (!data) return res.status(404).json({ success: false, message: 'Template not found' });
 
-        return res.status(200).json({ success: true, data });
+        const mapped = {
+            _id: data.id,
+            name: data.name,
+            subject: data.subject,
+            html: data.body_html,
+            text: data.body_text,
+            variables: data.variables || [],
+            isActive: data.is_active,
+            createdAt: data.created_at
+        };
+
+        return res.status(200).json({ success: true, data: mapped });
     } catch (error) { next(error); }
 };
 

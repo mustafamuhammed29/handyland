@@ -42,8 +42,13 @@ export default function ReviewsManager() {
         try {
             const response = await api.get('/api/reviews/admin');
             const data = (response as any)?.data || response;
-            if (data.success) setReviews(data.reviews);
+            if (data.success && Array.isArray(data.reviews)) {
+                setReviews(data.reviews);
+            } else {
+                setReviews([]);
+            }
         } catch (e) {
+            setReviews([]);
             showToast('error', 'Failed to load reviews');
         } finally {
             setLoading(false);

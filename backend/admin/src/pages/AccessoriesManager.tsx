@@ -58,8 +58,9 @@ export default function AccessoriesManager() {
             if (selectedCategory) url += `&category=${encodeURIComponent(selectedCategory)}`;
             
             const res = await api.get(url);
-            if (res.data && Array.isArray(res.data.accessories)) {
-                let filteredAccessories = res.data.accessories;
+            const fetchedAccessories = res.data?.accessories || res.data?.data || [];
+            if (res.data && Array.isArray(fetchedAccessories)) {
+                let filteredAccessories = fetchedAccessories;
                 
                 // Client-side stock status filtering since backend doesn't explicitly filter by stock status dynamically yet
                 if (selectedStockStatus === 'in_stock') {
@@ -88,7 +89,7 @@ export default function AccessoriesManager() {
         try {
             const res = await api.get('/api/accessories/admin/stats');
             if (res.data.success) {
-                setStats(res.data.stats);
+                setStats(res.data.data || res.data.stats);
             }
         } catch (error) {
             console.error('Error fetching stats', error);

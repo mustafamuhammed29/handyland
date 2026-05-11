@@ -28,10 +28,30 @@ exports.getWarranties = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
+        // Map to camelCase for frontend
+        const mappedData = (data || []).map(w => ({
+            _id: w.id,
+            warrantyCode: w.warranty_code,
+            customerName: w.customer_name,
+            customerPhone: w.customer_phone,
+            customerEmail: w.customer_email,
+            itemType: w.item_type,
+            itemName: w.item_name,
+            imeiOrSerial: w.imei_or_serial,
+            supplierName: w.supplier_name,
+            startDate: w.start_date,
+            durationDays: w.duration_days,
+            endDate: w.end_date,
+            status: w.status,
+            notes: w.notes,
+            createdAt: w.created_at
+        }));
+
         return res.status(200).json({
-            success: true, count,
+            success: true, 
+            count,
             pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
-            data
+            data: mappedData
         });
     } catch (error) { next(error); }
 };

@@ -38,7 +38,8 @@ export default function ShippingManager() {
         try {
             setLoading(true);
             const res = await api.get('/api/shipping-methods/admin/all');
-            setMethods((res.data || res) as any);
+            const data = (res as any)?.data || res;
+            setMethods(Array.isArray(data) ? data : (data.data || []));
             setError(null);
         } catch (err: any) {
             console.error('Failed to fetch shipping methods:', err);

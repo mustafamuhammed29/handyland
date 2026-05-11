@@ -135,8 +135,13 @@ const Register: React.FC = () => {
                     body: JSON.stringify({ email })
                 });
                 const data = await res.json();
-                setEmailStatus(data.available ? 'available' : 'taken');
-            } catch {
+                if (data && typeof data.available === 'boolean') {
+                    setEmailStatus(data.available ? 'available' : 'taken');
+                } else {
+                    setEmailStatus('idle');
+                }
+            } catch (err) {
+                console.error('Email check error:', err);
                 setEmailStatus('idle'); // silent fail, don't block user
             }
         }, 600);

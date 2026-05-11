@@ -50,8 +50,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 password 
             });
             
-            // Read admin directly from response
-            const adminData = response.data?.admin || (response as any).admin;
+            // Read user directly from response data
+            const adminData = response.data.user;
             
             if (!adminData) {
                 throw new Error('Invalid response from server');

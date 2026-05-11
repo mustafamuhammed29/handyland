@@ -17,9 +17,9 @@ const { protect, authorize } = require('../middleware/auth');
 router.get('/admin/all', protect, authorize('admin'), userController.getUsers);
 router.get('/admin/stats', protect, authorize('admin'), userController.getUserStats);
 router.get('/admin/:id', protect, authorize('admin'), userController.getUser);
-// router.put('/admin/:id/status', protect, authorize('admin'), userController.updateUserStatus);
-// router.put('/admin/:id/unlock', protect, authorize('admin'), userController.unlockUser);
-// router.put('/admin/:id/role', protect, authorize('admin'), userController.updateUserRole);
+router.put('/admin/:id/status', protect, authorize('admin'), userController.updateUserStatus);
+router.put('/admin/:id/unlock', protect, authorize('admin'), userController.unlockUser);
+router.put('/admin/:id/role', protect, authorize('admin'), userController.updateUserRole);
 router.delete('/admin/:id', protect, authorize('admin'), userController.deleteUser);
 router.post('/admin/:id/wallet', protect, authorize('admin'), userController.updateBalance);
 

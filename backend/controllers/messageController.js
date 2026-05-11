@@ -65,7 +65,10 @@ exports.createMessage = async (req, res, next) => {
             .insert({ user_id: req.user?.id || null, name, email, message })
             .select().single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('DB_ERROR in createMessage:', JSON.stringify(error));
+            throw error;
+        }
 
         // Notify admins
         const { data: admins } = await supabaseAdmin.from('users').select('id').eq('role', 'admin');

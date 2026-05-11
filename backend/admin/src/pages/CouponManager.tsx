@@ -80,16 +80,17 @@ export default function CouponManager() {
                 ...(debouncedSearch && { search: debouncedSearch })
             });
             const response = await api.get(`/api/coupons?${queryParams.toString()}`);
-            const data = response.data;
-            if (data.coupons) {
-                setCoupons(data.coupons);
-                setTotalPages(data.totalPages || 1);
-                setTotalItems(data.count || 0);
+            const data = (response as any)?.data || response;
+            
+            // Backend returns { success, count, data: [] }
+            if (data.data && Array.isArray(data.data)) {
+                setCoupons(data.data);
+                setTotalItems(data.count || data.data.length);
+                setTotalPages(Math.ceil((data.count || data.data.length) / limit) || 1);
             } else if (Array.isArray(data)) {
-                // Fallback if backend isn't updated
                 setCoupons(data);
-                setTotalPages(1);
                 setTotalItems(data.length);
+                setTotalPages(1);
             }
         } catch (error) {
             console.error('Error fetching coupons:', error);
@@ -101,8 +102,24 @@ export default function CouponManager() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Final validation to ensure no NaNs are sent
+        const payload = {
+            code: formData.code.toUpperCase().trim(),
+            discountType: formData.discountType,
+            discountValue: isNaN(formData.amount) ? 0 : formData.amount,
+            minOrderValue: isNaN(formData.minOrderAmount) ? 0 : formData.minOrderAmount,
+            validUntil: formData.expiryDate,
+            usageLimit: formData.usageLimit && !isNaN(formData.usageLimit) ? formData.usageLimit : null
+        };
+
+        if (!payload.code || !payload.validUntil) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
         try {
-            await api.post('/api/coupons', formData);
+            await api.post('/api/coupons', payload);
             setShowForm(false);
             setFormData({
                 code: '',
@@ -411,7 +428,10 @@ export default function CouponManager() {
                                         step={formData.discountType === 'percentage' ? "1" : "0.01"}
                                         max={formData.discountType === 'percentage' ? "100" : undefined}
                                         value={formData.amount}
-                                        onChange={e => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
+                                        onChange={e => {
+                                            const val = parseFloat(e.target.value);
+                                            setFormData({ ...formData, amount: isNaN(val) ? 0 : val });
+                                        }}
                                         className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-emerald-400 font-bold focus:border-emerald-500 outline-none transition-colors"
                                     />
                                 </div>
@@ -422,7 +442,10 @@ export default function CouponManager() {
                                         min="0"
                                         step="0.01"
                                         value={formData.minOrderAmount}
-                                        onChange={e => setFormData({ ...formData, minOrderAmount: parseFloat(e.target.value) })}
+                                        onChange={e => {
+                                            const val = parseFloat(e.target.value);
+                                            setFormData({ ...formData, minOrderAmount: isNaN(val) ? 0 : val });
+                                        }}
                                         placeholder="0.00 (No minimum)"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:border-emerald-500 outline-none transition-colors"
                                     />
@@ -447,7 +470,10 @@ export default function CouponManager() {
                                         type="number"
                                         min="1"
                                         value={formData.usageLimit || ''}
-                                        onChange={e => setFormData({ ...formData, usageLimit: e.target.value ? parseInt(e.target.value) : null })}
+                                        onChange={e => {
+                                            const val = parseInt(e.target.value);
+                                            setFormData({ ...formData, usageLimit: isNaN(val) ? null : val });
+                                        }}
                                         placeholder="Leave blank for unlimited"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:border-emerald-500 outline-none transition-colors"
                                     />

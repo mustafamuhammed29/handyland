@@ -105,3 +105,24 @@ exports.getCategories = async (req, res, next) => {
         return res.status(200).json({ success: true, categories, data: categories });
     } catch (error) { next(error); }
 };
+
+// @route GET /api/accessories/admin/stats
+exports.getAccessoryStats = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('accessories')
+            .select('stock, price, is_active');
+
+        if (error) throw error;
+
+        const active = (data || []).filter(a => a.is_active !== false);
+        const stats = {
+            totalAccessories: active.length,
+            totalInventoryValue: active.reduce((sum, a) => sum + ((a.stock || 0) * (a.price || 0)), 0),
+            lowStock: active.filter(a => (a.stock || 0) > 0 && (a.stock || 0) <= 5).length,
+            outOfStock: active.filter(a => (a.stock || 0) === 0).length
+        };
+
+        return res.status(200).json({ success: true, data: stats });
+    } catch (error) { next(error); }
+};

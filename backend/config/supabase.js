@@ -93,10 +93,24 @@ const deleteImage = async (bucket, path) => {
     if (error) throw error;
 };
 
+/**
+ * Create a fresh client specifically for authentication operations (e.g. signInWithPassword)
+ * NEVER use supabaseAdmin for auth.signInWithPassword, as it taints the global instance with the user's JWT!
+ */
+const createAuthClient = () => {
+    return createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    });
+};
+
 module.exports = {
     supabaseAdmin,
     supabasePublic,
     getAuthenticatedClient,
+    createAuthClient,
     uploadImage,
     deleteImage
 };
