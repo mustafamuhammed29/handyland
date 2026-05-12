@@ -72,7 +72,7 @@ exports.createPage = async (req, res, next) => {
 
         const { data, error } = await supabaseAdmin
             .from('pages')
-            .insert({ slug, title, content, is_published: isPublished || false })
+            .upsert({ slug, title, content, is_published: isPublished !== false }, { onConflict: 'slug' })
             .select().single();
 
         if (error) {

@@ -10,6 +10,7 @@ const devLog = (...args: any[]) => {
 export const orderService = {
     createOrder: async (orderData: any): Promise<{ success: boolean; order: Order }> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.post('/api/orders', orderData);
             return response as any;
         } catch (error) {
@@ -56,6 +57,7 @@ export const orderService = {
 
     cancelOrder: async (id: string): Promise<{ success: boolean; message: string }> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.put(`/api/orders/${id}/cancel`, {});
             return response as any;
         } catch (error) {
@@ -66,6 +68,7 @@ export const orderService = {
 
     updateOrderStatus: async (id: string, status: string, trackingNumber?: string): Promise<{ success: boolean; order: Order }> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.put(`/api/orders/admin/${id}/status`, { status, trackingNumber });
             return response as any;
         } catch (error) {
@@ -85,7 +88,8 @@ export const orderService = {
 
     applyCoupon: async (code: string, cartTotal: number): Promise<any> => {
         try {
-            const response = await api.post('/api/orders/apply-coupon', { code, cartTotal });
+            await api.get('/api/auth/csrf');
+            const response = await api.post('/api/coupons/validate', { code, cartTotal });
             return (response as any).data || response;
         } catch (error) {
             // Allow 400 errors to propagate naturally as they contain the message
@@ -95,6 +99,7 @@ export const orderService = {
 
     createCheckoutSession: async (data: any): Promise<{ success: boolean; url: string }> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.post('/api/payment/create-checkout-session', data);
             return response as any;
         } catch (error) {

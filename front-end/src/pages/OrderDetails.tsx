@@ -616,12 +616,14 @@ export const OrderDetails = () => {
                         </div>
                     </div>
 
-                    <button
-                        onClick={() => orderService.downloadInvoice(order._id)}
-                        className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white rounded-xl transition-colors font-bold text-sm"
-                    >
-                        {t('orders.downloadInvoice')}
-                    </button>
+                    {order.hasInvoice && (
+                        <button
+                            onClick={() => orderService.downloadInvoice(order._id)}
+                            className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white rounded-xl transition-colors font-bold text-sm mb-2"
+                        >
+                            {t('orders.downloadInvoice')}
+                        </button>
+                    )}
                     {order.status === 'pending' && (
                         <button
                             onClick={() => setShowCancelConfirm(true)}

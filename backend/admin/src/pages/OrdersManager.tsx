@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertTriangle, Send, Download, Printer, Copy, FileSpreadsheet, Calendar, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertTriangle, Send, Download, Printer, Copy, FileSpreadsheet, Calendar, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import { api } from '../utils/api';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
@@ -48,6 +48,7 @@ interface Order {
     shippingMethod?: string;
     trackingNumber?: string;
     notes?: string;
+    hasInvoice?: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -263,7 +264,7 @@ const OrdersManager: React.FC = () => {
 
     const handleDownloadInvoice = async (orderId: string, orderNumber: string) => {
         try {
-            toast.success('Generating invoice...');
+            toast.success('Downloading invoice...');
             const res = await api.get(`/api/orders/${orderId}/invoice`, { responseType: 'blob' });
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
@@ -274,6 +275,24 @@ const OrdersManager: React.FC = () => {
             link.parentNode?.removeChild(link);
         } catch (error) {
             toast.error('Failed to download invoice');
+        }
+    };
+
+    const handleCreateInvoice = async (orderId: string) => {
+        try {
+            setLoading(true);
+            const res = await api.post(`/api/orders/admin/${orderId}/generate-invoice`);
+            if (res.data.success) {
+                toast.success('Invoice generated successfully!');
+                fetchOrders(); // Refresh to update state
+                if (selectedOrder) {
+                    setSelectedOrder({ ...selectedOrder, hasInvoice: true });
+                }
+            }
+        } catch (error) {
+            toast.error('Failed to generate invoice');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -695,11 +714,21 @@ const OrdersManager: React.FC = () => {
                                     Packing Slip
                                 </button>
                                 <button
-                                    onClick={() => handleDownloadInvoice(selectedOrder._id, selectedOrder.orderNumber)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl transition-colors font-medium text-sm"
+                                    onClick={() => {
+                                        if (selectedOrder.hasInvoice) {
+                                            handleDownloadInvoice(selectedOrder._id, selectedOrder.orderNumber);
+                                        } else {
+                                            handleCreateInvoice(selectedOrder._id);
+                                        }
+                                    }}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors font-medium text-sm ${
+                                        selectedOrder.hasInvoice 
+                                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20' 
+                                            : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                                    }`}
                                 >
-                                    <Download className="w-4 h-4" />
-                                    Invoice
+                                    {selectedOrder.hasInvoice ? <Download className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                    {selectedOrder.hasInvoice ? 'Download Invoice' : 'Generate Invoice'}
                                 </button>
                                 <button
                                     onClick={() => setSelectedOrder(null)}

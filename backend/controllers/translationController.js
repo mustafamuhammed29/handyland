@@ -27,15 +27,31 @@ exports.getAllTranslations = async (req, res) => {
     try {
         const { search, page = 1, limit = 0 } = req.query;
 
-        let query = supabaseAdmin.from('translations').select('*').order('namespace').order('key');
-        if (search) {
-            query = query.or(`key.ilike.%${search}%,namespace.ilike.%${search}%,value.ilike.%${search}%`);
+        let allData = [];
+        let start = 0;
+        const step = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+            let query = supabaseAdmin.from('translations').select('*').order('namespace').order('key');
+            if (search) {
+                query = query.or(`key.ilike.%${search}%,namespace.ilike.%${search}%,value.ilike.%${search}%`);
+            }
+            query = query.range(start, start + step - 1);
+
+            const { data, error } = await query;
+            if (error) throw error;
+
+            allData = allData.concat(data || []);
+            
+            if (!data || data.length < step) {
+                hasMore = false;
+            } else {
+                start += step;
+            }
         }
 
-        const { data, error, count } = await query;
-        if (error) throw error;
-
-        const grouped = rowsToMap(data || []);
+        const grouped = rowsToMap(allData);
 
         res.status(200).json({
             success: true,
@@ -55,18 +71,34 @@ exports.getTranslationsByLocale = async (req, res) => {
     try {
         const { lang } = req.params;
 
-        const { data, error } = await supabaseAdmin
-            .from('translations')
-            .select('key, value, language')
-            .in('language', [lang, 'en']);
+        let allData = [];
+        let start = 0;
+        const step = 1000;
+        let hasMore = true;
 
-        if (error) throw error;
+        while (hasMore) {
+            const { data, error } = await supabaseAdmin
+                .from('translations')
+                .select('key, value, language')
+                .in('language', [lang, 'en'])
+                .range(start, start + step - 1);
+
+            if (error) throw error;
+
+            allData = allData.concat(data || []);
+            
+            if (!data || data.length < step) {
+                hasMore = false;
+            } else {
+                start += step;
+            }
+        }
 
         // Build result: prefer requested lang, fallback to 'en'
         const enMap = {};
         const langMap = {};
 
-        for (const row of (data || [])) {
+        for (const row of allData) {
             if (row.language === 'en') enMap[row.key] = row.value;
             if (row.language === lang) langMap[row.key] = row.value;
         }

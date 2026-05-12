@@ -9,7 +9,9 @@ const {
     createOrder,
     getOrder,
     cancelOrder,
-    deleteOrder
+    deleteOrder,
+    generateInvoice,
+    createInvoiceAction
 } = require('../controllers/orderController');
 const { protect, authorize, optionalProtect } = require('../middleware/auth');
 const upload = require('../utils/imageUpload');
@@ -29,6 +31,7 @@ router.get('/admin/all', protect, authorize('admin'), getOrders);
 router.get('/admin/stats', protect, authorize('admin'), getOrderStats);
 router.get('/admin/timeline', protect, authorize('admin'), require('../controllers/orderController').getOrderTimeline);
 router.put('/admin/:id/status', protect, authorize('admin'), updateOrderStatus);
+router.post('/admin/:id/generate-invoice', protect, authorize('admin'), createInvoiceAction);
 router.delete('/admin/:id', protect, authorize('admin'), deleteOrder);
 // router.put('/admin/:id/approve-bank-transfer', protect, authorize('admin'), require('../controllers/orderController').approveBankTransfer);
 
@@ -36,7 +39,7 @@ router.delete('/admin/:id', protect, authorize('admin'), deleteOrder);
 router.get('/', protect, getOrders); // Convenience route for GET /api/orders
 router.get('/my', protect, getOrders);
 router.get('/:id', optionalProtect, getOrder);
-// router.get('/:id/invoice', optionalProtect, generateInvoice);
+router.get('/:id/invoice', optionalProtect, generateInvoice);
 // router.post('/apply-coupon', protect, applyCoupon);
 router.post('/', protect, validate(createOrderRules), createOrder);
 // router.post('/:id/receipt', protect, upload.single('receipt'), require('../controllers/orderController').uploadPaymentReceipt); // BUG-NEW-09 fix: require auth

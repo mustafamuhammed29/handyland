@@ -245,15 +245,15 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const validateCurrentCoupon = async () => {
             if (coupon && cartTotal > 0) {
                 try {
-                    const response = await api.post('/api/coupons/validate', { 
+                    const response: any = await api.post('/api/coupons/validate', { 
                         code: coupon.code,
-                        cartValue: cartTotal 
+                        cartTotal: cartTotal 
                     });
                     
-                    if (response.data?.success && response.data?.coupon) {
+                    const responseData = response.data || response;
+                    if (responseData?.success) {
                         // Keep it, but update discount if the logic returned a different value
-                        // (Optional: handle percentage vs fixed logic if backend sends it)
-                        const newDiscount = response.data.discount || response.data.coupon.discountValue || coupon.discount;
+                        const newDiscount = responseData.discount || responseData.calculatedDiscount || coupon.discount;
                         if (newDiscount !== coupon.discount) {
                             setCoupon({ code: coupon.code, discount: newDiscount });
                         }

@@ -138,8 +138,16 @@ export function useAddresses(options?: { enabled?: boolean }) {
         queryKey: dashboardKeys.addresses(),
         enabled: options?.enabled ?? true,
         queryFn: async () => {
-            const res = await authService.getAddresses();
-            return res.addresses || [];
+            const res = await authService.getAddresses() as any;
+            const addressList = res.data || res.addresses || [];
+            return addressList.map((a: any) => ({
+                ...a,
+                _id: a.id || a._id,
+                name: a.full_name || a.name,
+                zipCode: a.zip_code || a.zipCode,
+                state: a.state || '',
+                isDefault: a.is_default !== undefined ? a.is_default : a.isDefault,
+            }));
         },
         staleTime: 5 * 60 * 1000,
         retry: 2,
@@ -152,18 +160,20 @@ export function useWishlist(options?: { enabled?: boolean }) {
         enabled: options?.enabled ?? true,
         queryFn: async () => {
             const res = await api.get<any>('/api/wishlist') as any;
-            // The normalizer checks for 'items' inherently, but if it's 'products', we pass 'products'
             const items = normalizeResponse(res, 'products');
-            return items.map((item: any) => ({
-                id: item.customId || item.product || item._id, // The actual product string ID
-                _id: item._id,                      // The wishlist item ID
-                model: item.name || 'Unknown',      // Map snapshot name to model
-                images: item.image ? [item.image] : [], // Map snapshot image to images array
-                price: item.price || 0,             // Map snapshot price
-                brand: item.productType || 'Product', // Accessory or Phone
-                storage: '-',                       // Not in snapshot
-                stock: 1                            // Assume in stock for snapshot payload
-            }));
+            return items.map((w: any) => {
+                const itemDetails = w.item || {};
+                return {
+                    id: itemDetails.id || itemDetails._id || w.id, 
+                    _id: w.id,                      
+                    model: itemDetails.name || itemDetails.model || 'Unknown',
+                    images: itemDetails.images ? itemDetails.images : (itemDetails.image ? [itemDetails.image] : []), 
+                    price: itemDetails.price || 0,             
+                    brand: itemDetails.brand || w.productType || 'Product', 
+                    storage: itemDetails.storage || '-',                       
+                    stock: itemDetails.stock !== undefined ? itemDetails.stock : 1                            
+                };
+            });
         },
         staleTime: 3 * 60 * 1000,
         retry: 2,

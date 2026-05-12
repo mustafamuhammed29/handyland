@@ -6,6 +6,7 @@ const { protect, authorize } = require('../middleware/auth');
 const { cacheMiddleware } = require('../middleware/cache');
 
 router.get('/', cacheMiddleware(86400), settingsController.getSettings);
+router.get('/payment-config', settingsController.getPaymentConfig);
 router.put('/', protect, authorize('admin'), settingsController.updateSettings);
 
 // SMTP Email Server Management (Admin only)

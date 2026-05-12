@@ -1,0 +1,338 @@
+[
+  {
+    "id": "4b3e21d7-d905-4146-92e3-1c0fb65a6c60",
+    "key": "reset_token_00000000-69cb-0c34-96a4-3c9eb6d9807d",
+    "value": "{\"token\":\"27c5bb972866a7591dc9028086233867aa7e69187065d6e6b97f6774068d1896\",\"expires\":\"2026-05-11T23:03:01.581Z\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T22:03:01.505507+00:00"
+  },
+  {
+    "id": "4f5ca1f8-c5f6-44a3-b152-5c2e4e24de42",
+    "key": "siteName",
+    "value": "HANDY-LAND",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "762896fc-76c9-42a3-a385-d9e46853f95e",
+    "key": "contactEmail",
+    "value": "mustafamohammad0545@gmail.com",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "5bab5f62-c1ae-4a15-8951-b268460ee6c4",
+    "key": "footerText",
+    "value": "",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "2d0837e7-2693-4748-9946-7170aeb7f03b",
+    "key": "freeShippingThreshold",
+    "value": "1497",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "4092f869-4267-4900-aa23-e287f7a28629",
+    "key": "language",
+    "value": "de",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "c33822e4-99d7-4068-a74d-545fb18e8959",
+    "key": "navbar",
+    "value": "{\"logoText\":\"\",\"logoAccentText\":\"\",\"showLanguageSwitcher\":true}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "94ff5363-6b15-42a8-8321-3c44918217c2",
+    "key": "hero",
+    "value": "{\"headline\":\"Reparatur & Service\",\"subheadline\":\"Professionell, Schnell & Zuverlässig\",\"bgStart\":\"#0a0a0a\",\"bgEnd\":\"#1a1a1a\",\"accentColor\":\"#f73b61\",\"buttonMarket\":\"Markt betreten\",\"buttonValuation\":\"Gerät bewerten\",\"trustBadge1\":\"Verifizierte Profis\",\"trustBadge2\":\"24h Express\",\"trustBadge3\":\"1 Jahr Garantie\",\"productPrice\":\"€1199\",\"productName\":\"Apple iPhone 15 Pro Max\",\"heroImage\":\"https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=800&auto=format&fit=crop\",\"productLabel\":\"FEATURED DEVICE\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "064ccbc9-ea29-4c8d-b68f-5205f360ece5",
+    "key": "valuation",
+    "value": "{\"step1Title\":\"Wähle dein Gerät\",\"step2Title\":\"Zustand beschreiben\",\"step3Title\":\"Angebot erhalten\",\"brands\":[{\"id\":\"apple\",\"name\":\"Apple\",\"icon\":\"🍎\"},{\"id\":\"samsung\",\"name\":\"Samsung\",\"icon\":\"📱\"},{\"id\":\"xiaomi\",\"name\":\"Xiaomi\",\"icon\":\"⭐\"},{\"id\":\"google\",\"name\":\"Google\",\"icon\":\"⭐\"},{\"id\":\"oneplus\",\"name\":\"OnePlus\",\"icon\":\"⭐\"},{\"id\":\"sony\",\"name\":\"Sony\",\"icon\":\"⭐\"},{\"id\":\"oppo\",\"name\":\"OPPO\",\"icon\":\"⭐\"},{\"id\":\"microsoft\",\"name\":\"Microsoft\",\"icon\":\"⭐\"},{\"id\":\"dell\",\"name\":\"Dell\",\"icon\":\"⭐\"},{\"id\":\"lenovo\",\"name\":\"Lenovo\",\"icon\":\"⭐\"},{\"id\":\"hp\",\"name\":\"HP\",\"icon\":\"⭐\"},{\"id\":\"nintendo\",\"name\":\"Nintendo\",\"icon\":\"⭐\"},{\"id\":\"garmin\",\"name\":\"Garmin\",\"icon\":\"⭐\"},{\"id\":\"bose\",\"name\":\"Bose\",\"icon\":\"⭐\"}],\"models\":[{\"id\":\"69caed172f6d1a5fa80e69f5\",\"name\":\"iPhone 15 Pro\",\"brandId\":\"apple\",\"basePrice\":560},{\"id\":\"69caed172f6d1a5fa80e69f7\",\"name\":\"iPhone 14 Pro\",\"brandId\":\"apple\",\"basePrice\":415},{\"id\":\"69caed172f6d1a5fa80e69f6\",\"name\":\"iPhone 15\",\"brandId\":\"apple\",\"basePrice\":370},{\"id\":\"69caed172f6d1a5fa80e69f9\",\"name\":\"iPhone 13\",\"brandId\":\"apple\",\"basePrice\":220},{\"id\":\"69caed172f6d1a5fa80e69fa\",\"name\":\"iPhone 12\",\"brandId\":\"apple\",\"basePrice\":160},{\"id\":\"69caed172f6d1a5fa80e69f8\",\"name\":\"iPhone 14\",\"brandId\":\"apple\",\"basePrice\":265},{\"id\":\"69caed172f6d1a5fa80e69fb\",\"name\":\"Galaxy S24 Ultra\",\"brandId\":\"samsung\",\"basePrice\":670},{\"id\":\"69caed172f6d1a5fa80e69fc\",\"name\":\"Galaxy S24\",\"brandId\":\"samsung\",\"basePrice\":380},{\"id\":\"69caed172f6d1a5fa80e69fd\",\"name\":\"Galaxy S23\",\"brandId\":\"samsung\",\"basePrice\":265},{\"id\":\"69caed172f6d1a5fa80e69fe\",\"name\":\"Xiaomi 14\",\"brandId\":\"xiaomi\",\"basePrice\":390},{\"id\":\"69caed172f6d1a5fa80e69ff\",\"name\":\"Pixel 8 Pro\",\"brandId\":\"google\",\"basePrice\":400},{\"id\":\"69cc2b56351c715eeb56e665\",\"name\":\"iPhone 16 Pro Max\",\"brandId\":\"apple\",\"basePrice\":800},{\"id\":\"69cc2b56351c715eeb56e668\",\"name\":\"iPhone 16 Pro\",\"brandId\":\"apple\",\"basePrice\":700},{\"id\":\"69cc2b56351c715eeb56e66b\",\"name\":\"iPhone 16 Plus\",\"brandId\":\"apple\",\"basePrice\":560},{\"id\":\"69cc2b56351c715eeb56e66e\",\"name\":\"iPhone 16\",\"brandId\":\"apple\",\"basePrice\":480},{\"id\":\"69cc2b56351c715eeb56e671\",\"name\":\"iPhone 15 Pro Max\",\"brandId\":\"apple\",\"basePrice\":650},{\"id\":\"69cc2b56351c715eeb56e676\",\"name\":\"iPhone 15 Plus\",\"brandId\":\"apple\",\"basePrice\":420},{\"id\":\"69cc2b56351c715eeb56e67b\",\"name\":\"iPhone 14 Pro Max\",\"brandId\":\"apple\",\"basePrice\":490},{\"id\":\"69cc2b56351c715eeb56e680\",\"name\":\"iPhone 14 Plus\",\"brandId\":\"apple\",\"basePrice\":305},{\"id\":\"69cc2b56351c715eeb56e685\",\"name\":\"iPhone 13 Pro Max\",\"brandId\":\"apple\",\"basePrice\":360},{\"id\":\"69cc2b56351c715eeb56e688\",\"name\":\"iPhone 13 Pro\",\"brandId\":\"apple\",\"basePrice\":305},{\"id\":\"69cc2b56351c715eeb56e68d\",\"name\":\"iPhone 13 mini\",\"brandId\":\"apple\",\"basePrice\":178},{\"id\":\"69cc2b56351c715eeb56e690\",\"name\":\"iPhone 12 Pro Max\",\"brandId\":\"apple\",\"basePrice\":248},{\"id\":\"69cc2b56351c715eeb56e693\",\"name\":\"iPhone 12 Pro\",\"brandId\":\"apple\",\"basePrice\":210},{\"id\":\"69cc2b56351c715eeb56e698\",\"name\":\"iPhone 12 mini\",\"brandId\":\"apple\",\"basePrice\":130},{\"id\":\"69cc2b56351c715eeb56e69b\",\"name\":\"iPhone 11 Pro Max\",\"brandId\":\"apple\",\"basePrice\":165},{\"id\":\"69cc2b56351c715eeb56e69e\",\"name\":\"iPhone 11 Pro\",\"brandId\":\"apple\",\"basePrice\":140},{\"id\":\"69cc2b56351c715eeb56e6a1\",\"name\":\"iPhone 11\",\"brandId\":\"apple\",\"basePrice\":105},{\"id\":\"69cc2b56351c715eeb56e6a4\",\"name\":\"iPhone XS Max\",\"brandId\":\"apple\",\"basePrice\":130},{\"id\":\"69cc2b56351c715eeb56e6a7\",\"name\":\"iPhone XS\",\"brandId\":\"apple\",\"basePrice\":115},{\"id\":\"69cc2b56351c715eeb56e6aa\",\"name\":\"iPhone XR\",\"brandId\":\"apple\",\"basePrice\":80},{\"id\":\"69cc2b56351c715eeb56e6ad\",\"name\":\"iPhone X\",\"brandId\":\"apple\",\"basePrice\":70},{\"id\":\"69cc2b56351c715eeb56e6b0\",\"name\":\"iPhone SE (2022)\",\"brandId\":\"apple\",\"basePrice\":120},{\"id\":\"69cc2b56351c715eeb56e6b3\",\"name\":\"iPhone SE (2020)\",\"brandId\":\"apple\",\"basePrice\":65},{\"id\":\"69cc2b56351c715eeb56e6b6\",\"name\":\"iPhone 8 Plus\",\"brandId\":\"apple\",\"basePrice\":55},{\"id\":\"69cc2b56351c715eeb56e6b9\",\"name\":\"iPhone 8\",\"brandId\":\"apple\",\"basePrice\":45},{\"id\":\"69cc2b56351c715eeb56e6bc\",\"name\":\"Galaxy S25 Ultra\",\"brandId\":\"samsung\",\"basePrice\":820},{\"id\":\"69cc2b56351c715eeb56e6bf\",\"name\":\"Galaxy S25+\",\"brandId\":\"samsung\",\"basePrice\":620},{\"id\":\"69cc2b56351c715eeb56e6c2\",\"name\":\"Galaxy S25\",\"brandId\":\"samsung\",\"basePrice\":495},{\"id\":\"69cc2b56351c715eeb56e6c7\",\"name\":\"Galaxy S24+\",\"brandId\":\"samsung\",\"basePrice\":490},{\"id\":\"69cc2b56351c715eeb56e6cc\",\"name\":\"Galaxy S24 FE\",\"brandId\":\"samsung\",\"basePrice\":280},{\"id\":\"69cc2b56351c715eeb56e6cf\",\"name\":\"Galaxy S23 Ultra\",\"brandId\":\"samsung\",\"basePrice\":500},{\"id\":\"69cc2b56351c715eeb56e6d2\",\"name\":\"Galaxy S23+\",\"brandId\":\"samsung\",\"basePrice\":340},{\"id\":\"69cc2b56351c715eeb56e6d7\",\"name\":\"Galaxy S23 FE\",\"brandId\":\"samsung\",\"basePrice\":198},{\"id\":\"69cc2b56351c715eeb56e6da\",\"name\":\"Galaxy S22 Ultra\",\"brandId\":\"samsung\",\"basePrice\":340},{\"id\":\"69cc2b56351c715eeb56e6dd\",\"name\":\"Galaxy S22+\",\"brandId\":\"samsung\",\"basePrice\":225},{\"id\":\"69cc2b56351c715eeb56e6e0\",\"name\":\"Galaxy S22\",\"brandId\":\"samsung\",\"basePrice\":180},{\"id\":\"69cc2b56351c715eeb56e6e3\",\"name\":\"Galaxy S21 Ultra\",\"brandId\":\"samsung\",\"basePrice\":240},{\"id\":\"69cc2b56351c715eeb56e6e6\",\"name\":\"Galaxy S21+\",\"brandId\":\"samsung\",\"basePrice\":175},{\"id\":\"69cc2b56351c715eeb56e6e9\",\"name\":\"Galaxy S21\",\"brandId\":\"samsung\",\"basePrice\":140},{\"id\":\"69cc2b56351c715eeb56e6ec\",\"name\":\"Galaxy Z Fold 6\",\"brandId\":\"samsung\",\"basePrice\":820},{\"id\":\"69cc2b56351c715eeb56e6ef\",\"name\":\"Galaxy Z Flip 6\",\"brandId\":\"samsung\",\"basePrice\":480},{\"id\":\"69cc2b56351c715eeb56e6f2\",\"name\":\"Galaxy Z Fold 5\",\"brandId\":\"samsung\",\"basePrice\":650},{\"id\":\"69cc2b56351c715eeb56e6f5\",\"name\":\"Galaxy Z Flip 5\",\"brandId\":\"samsung\",\"basePrice\":355},{\"id\":\"69cc2b56351c715eeb56e6f8\",\"name\":\"Galaxy Z Fold 4\",\"brandId\":\"samsung\",\"basePrice\":480},{\"id\":\"69cc2b56351c715eeb56e6fb\",\"name\":\"Galaxy Z Flip 4\",\"brandId\":\"samsung\",\"basePrice\":240},{\"id\":\"69cc2b56351c715eeb56e6fe\",\"name\":\"Galaxy A56\",\"brandId\":\"samsung\",\"basePrice\":195},{\"id\":\"69cc2b56351c715eeb56e701\",\"name\":\"Galaxy A55\",\"brandId\":\"samsung\",\"basePrice\":168},{\"id\":\"69cc2b56351c715eeb56e704\",\"name\":\"Galaxy A54\",\"brandId\":\"samsung\",\"basePrice\":135},{\"id\":\"69cc2b56351c715eeb56e707\",\"name\":\"Galaxy A35\",\"brandId\":\"samsung\",\"basePrice\":118},{\"id\":\"69cc2b56351c715eeb56e70a\",\"name\":\"Galaxy A15\",\"brandId\":\"samsung\",\"basePrice\":75},{\"id\":\"69cc2b56351c715eeb56e70d\",\"name\":\"Pixel 9 Pro XL\",\"brandId\":\"google\",\"basePrice\":640},{\"id\":\"69cc2b56351c715eeb56e710\",\"name\":\"Pixel 9 Pro Fold\",\"brandId\":\"google\",\"basePrice\":850},{\"id\":\"69cc2b56351c715eeb56e713\",\"name\":\"Pixel 9 Pro\",\"brandId\":\"google\",\"basePrice\":548},{\"id\":\"69cc2b56351c715eeb56e716\",\"name\":\"Pixel 9\",\"brandId\":\"google\",\"basePrice\":415},{\"id\":\"69cc2b56351c715eeb56e71b\",\"name\":\"Pixel 8\",\"brandId\":\"google\",\"basePrice\":295},{\"id\":\"69cc2b56351c715eeb56e71e\",\"name\":\"Pixel 8a\",\"brandId\":\"google\",\"basePrice\":262},{\"id\":\"69cc2b56351c715eeb56e721\",\"name\":\"Pixel 7 Pro\",\"brandId\":\"google\",\"basePrice\":255},{\"id\":\"69cc2b56351c715eeb56e724\",\"name\":\"Pixel 7\",\"brandId\":\"google\",\"basePrice\":188},{\"id\":\"69cc2b56351c715eeb56e727\",\"name\":\"Pixel 7a\",\"brandId\":\"google\",\"basePrice\":162},{\"id\":\"69cc2b56351c715eeb56e72a\",\"name\":\"Pixel 6 Pro\",\"brandId\":\"google\",\"basePrice\":155},{\"id\":\"69cc2b56351c715eeb56e72d\",\"name\":\"Pixel 6\",\"brandId\":\"google\",\"basePrice\":120},{\"id\":\"69cc2b56351c715eeb56e730\",\"name\":\"Pixel 6a\",\"brandId\":\"google\",\"basePrice\":110},{\"id\":\"69cc2b56351c715eeb56e733\",\"name\":\"Xiaomi 15 Ultra\",\"brandId\":\"xiaomi\",\"basePrice\":720},{\"id\":\"69cc2b56351c715eeb56e736\",\"name\":\"Xiaomi 15\",\"brandId\":\"xiaomi\",\"basePrice\":520},{\"id\":\"69cc2b56351c715eeb56e739\",\"name\":\"Xiaomi 14 Ultra\",\"brandId\":\"xiaomi\",\"basePrice\":540},{\"id\":\"69cc2b56351c715eeb56e73e\",\"name\":\"Xiaomi 13 Ultra\",\"brandId\":\"xiaomi\",\"basePrice\":335},{\"id\":\"69cc2b56351c715eeb56e741\",\"name\":\"Xiaomi 13\",\"brandId\":\"xiaomi\",\"basePrice\":248},{\"id\":\"69cc2b56351c715eeb56e744\",\"name\":\"Xiaomi 13T Pro\",\"brandId\":\"xiaomi\",\"basePrice\":285},{\"id\":\"69cc2b56351c715eeb56e747\",\"name\":\"Xiaomi 13T\",\"brandId\":\"xiaomi\",\"basePrice\":220},{\"id\":\"69cc2b56351c715eeb56e74a\",\"name\":\"Xiaomi 12\",\"brandId\":\"xiaomi\",\"basePrice\":185},{\"id\":\"69cc2b56351c715eeb56e74d\",\"name\":\"Redmi Note 13 Pro\",\"brandId\":\"xiaomi\",\"basePrice\":148},{\"id\":\"69cc2b56351c715eeb56e750\",\"name\":\"Redmi Note 12 Pro\",\"brandId\":\"xiaomi\",\"basePrice\":118},{\"id\":\"69cc2b56351c715eeb56e753\",\"name\":\"OnePlus 13\",\"brandId\":\"oneplus\",\"basePrice\":440},{\"id\":\"69cc2b56351c715eeb56e756\",\"name\":\"OnePlus 12\",\"brandId\":\"oneplus\",\"basePrice\":335},{\"id\":\"69cc2b56351c715eeb56e759\",\"name\":\"OnePlus 11\",\"brandId\":\"oneplus\",\"basePrice\":255},{\"id\":\"69cc2b56351c715eeb56e75c\",\"name\":\"OnePlus 12R\",\"brandId\":\"oneplus\",\"basePrice\":210},{\"id\":\"69cc2b56351c715eeb56e75f\",\"name\":\"Xperia 1 VI\",\"brandId\":\"sony\",\"basePrice\":580},{\"id\":\"69cc2b56351c715eeb56e762\",\"name\":\"Xperia 5 VI\",\"brandId\":\"sony\",\"basePrice\":420},{\"id\":\"69cc2b56351c715eeb56e765\",\"name\":\"Xperia 1 V\",\"brandId\":\"sony\",\"basePrice\":420},{\"id\":\"69cc2b56351c715eeb56e768\",\"name\":\"Xperia 5 V\",\"brandId\":\"sony\",\"basePrice\":305},{\"id\":\"69cc2b56351c715eeb56e76b\",\"name\":\"Find X8 Pro\",\"brandId\":\"oppo\",\"basePrice\":480},{\"id\":\"69cc2b56351c715eeb56e76e\",\"name\":\"Find X7 Ultra\",\"brandId\":\"oppo\",\"basePrice\":380},{\"id\":\"69cc2b56351c715eeb56e771\",\"name\":\"Reno 12 Pro\",\"brandId\":\"oppo\",\"basePrice\":195},{\"id\":\"69cc2b56351c715eeb56e774\",\"name\":\"iPad Pro 13 M4 (2024)\",\"brandId\":\"apple\",\"basePrice\":780},{\"id\":\"69cc2b56351c715eeb56e777\",\"name\":\"iPad Pro 11 M4 (2024)\",\"brandId\":\"apple\",\"basePrice\":620},{\"id\":\"69cc2b56351c715eeb56e77a\",\"name\":\"iPad Pro 12.9 M2 (2022)\",\"brandId\":\"apple\",\"basePrice\":550},{\"id\":\"69cc2b56351c715eeb56e77d\",\"name\":\"iPad Pro 11 M2 (2022)\",\"brandId\":\"apple\",\"basePrice\":420},{\"id\":\"69cc2b56351c715eeb56e780\",\"name\":\"iPad Air M2 (2024)\",\"brandId\":\"apple\",\"basePrice\":460},{\"id\":\"69cc2b56351c715eeb56e783\",\"name\":\"iPad Air 5 (2022)\",\"brandId\":\"apple\",\"basePrice\":320},{\"id\":\"69cc2b56351c715eeb56e786\",\"name\":\"iPad (10th gen, 2022)\",\"brandId\":\"apple\",\"basePrice\":240},{\"id\":\"69cc2b56351c715eeb56e789\",\"name\":\"iPad (9th gen, 2021)\",\"brandId\":\"apple\",\"basePrice\":170},{\"id\":\"69cc2b56351c715eeb56e78c\",\"name\":\"iPad mini 7 (2024)\",\"brandId\":\"apple\",\"basePrice\":360},{\"id\":\"69cc2b56351c715eeb56e78f\",\"name\":\"iPad mini 6 (2021)\",\"brandId\":\"apple\",\"basePrice\":280},{\"id\":\"69cc2b56351c715eeb56e792\",\"name\":\"Galaxy Tab S10 Ultra\",\"brandId\":\"samsung\",\"basePrice\":580},{\"id\":\"69cc2b56351c715eeb56e795\",\"name\":\"Galaxy Tab S10+\",\"brandId\":\"samsung\",\"basePrice\":460},{\"id\":\"69cc2b56351c715eeb56e798\",\"name\":\"Galaxy Tab S10\",\"brandId\":\"samsung\",\"basePrice\":365},{\"id\":\"69cc2b56351c715eeb56e79b\",\"name\":\"Galaxy Tab S9 Ultra\",\"brandId\":\"samsung\",\"basePrice\":480},{\"id\":\"69cc2b56351c715eeb56e79e\",\"name\":\"Galaxy Tab S9+\",\"brandId\":\"samsung\",\"basePrice\":360},{\"id\":\"69cc2b56351c715eeb56e7a1\",\"name\":\"Galaxy Tab S9\",\"brandId\":\"samsung\",\"basePrice\":285},{\"id\":\"69cc2b56351c715eeb56e7a4\",\"name\":\"Galaxy Tab S9 FE\",\"brandId\":\"samsung\",\"basePrice\":210},{\"id\":\"69cc2b56351c715eeb56e7a7\",\"name\":\"Galaxy Tab S8 Ultra\",\"brandId\":\"samsung\",\"basePrice\":350},{\"id\":\"69cc2b56351c715eeb56e7aa\",\"name\":\"Galaxy Tab A9+\",\"brandId\":\"samsung\",\"basePrice\":145},{\"id\":\"69cc2b56351c715eeb56e7ad\",\"name\":\"Surface Pro 11\",\"brandId\":\"microsoft\",\"basePrice\":680},{\"id\":\"69cc2b56351c715eeb56e7b0\",\"name\":\"Surface Pro 9\",\"brandId\":\"microsoft\",\"basePrice\":480},{\"id\":\"69cc2b56351c715eeb56e7b3\",\"name\":\"MacBook Pro 16 M4 (2024)\",\"brandId\":\"apple\",\"basePrice\":1600},{\"id\":\"69cc2b56351c715eeb56e7b6\",\"name\":\"MacBook Pro 14 M4 (2024)\",\"brandId\":\"apple\",\"basePrice\":1200},{\"id\":\"69cc2b56351c715eeb56e7b9\",\"name\":\"MacBook Pro 16 M3 (2023)\",\"brandId\":\"apple\",\"basePrice\":1380},{\"id\":\"69cc2b56351c715eeb56e7bc\",\"name\":\"MacBook Pro 14 M3 (2023)\",\"brandId\":\"apple\",\"basePrice\":1050},{\"id\":\"69cc2b56351c715eeb56e7bf\",\"name\":\"MacBook Pro 16 M2 (2022)\",\"brandId\":\"apple\",\"basePrice\":1100},{\"id\":\"69cc2b56351c715eeb56e7c2\",\"name\":\"MacBook Pro 14 M2 (2022)\",\"brandId\":\"apple\",\"basePrice\":850},{\"id\":\"69cc2b56351c715eeb56e7c5\",\"name\":\"MacBook Air 15 M3 (2024)\",\"brandId\":\"apple\",\"basePrice\":860},{\"id\":\"69cc2b56351c715eeb56e7c8\",\"name\":\"MacBook Air 13 M3 (2024)\",\"brandId\":\"apple\",\"basePrice\":720},{\"id\":\"69cc2b56351c715eeb56e7cb\",\"name\":\"MacBook Air 15 M2 (2023)\",\"brandId\":\"apple\",\"basePrice\":720},{\"id\":\"69cc2b56351c715eeb56e7ce\",\"name\":\"MacBook Air 13 M2 (2022)\",\"brandId\":\"apple\",\"basePrice\":580},{\"id\":\"69cc2b56351c715eeb56e7d1\",\"name\":\"MacBook Air M1 (2020)\",\"brandId\":\"apple\",\"basePrice\":420},{\"id\":\"69cc2b56351c715eeb56e7d4\",\"name\":\"XPS 15 (2024)\",\"brandId\":\"dell\",\"basePrice\":880},{\"id\":\"69cc2b56351c715eeb56e7d7\",\"name\":\"XPS 13 (2024)\",\"brandId\":\"dell\",\"basePrice\":620},{\"id\":\"69cc2b56351c715eeb56e7da\",\"name\":\"Latitude 14\",\"brandId\":\"dell\",\"basePrice\":420},{\"id\":\"69cc2b56351c715eeb56e7dd\",\"name\":\"Inspiron 15\",\"brandId\":\"dell\",\"basePrice\":280},{\"id\":\"69cc2b56351c715eeb56e7e0\",\"name\":\"ThinkPad X1 Carbon\",\"brandId\":\"lenovo\",\"basePrice\":540},{\"id\":\"69cc2b56351c715eeb56e7e3\",\"name\":\"ThinkPad T14\",\"brandId\":\"lenovo\",\"basePrice\":380},{\"id\":\"69cc2b56351c715eeb56e7e6\",\"name\":\"IdeaPad 5\",\"brandId\":\"lenovo\",\"basePrice\":260},{\"id\":\"69cc2b56351c715eeb56e7e9\",\"name\":\"Yoga 9i\",\"brandId\":\"lenovo\",\"basePrice\":580},{\"id\":\"69cc2b56351c715eeb56e7ec\",\"name\":\"EliteBook 840\",\"brandId\":\"hp\",\"basePrice\":380},{\"id\":\"69cc2b56351c715eeb56e7ef\",\"name\":\"Spectre x360\",\"brandId\":\"hp\",\"basePrice\":620},{\"id\":\"69cc2b56351c715eeb56e7f2\",\"name\":\"Pavilion 15\",\"brandId\":\"hp\",\"basePrice\":230},{\"id\":\"69cc2b56351c715eeb56e7f5\",\"name\":\"Surface Laptop 6\",\"brandId\":\"microsoft\",\"basePrice\":720},{\"id\":\"69cc2b56351c715eeb56e7f8\",\"name\":\"Surface Laptop 5\",\"brandId\":\"microsoft\",\"basePrice\":520},{\"id\":\"69cc2b56351c715eeb56e7fb\",\"name\":\"PlayStation 5 (Disc)\",\"brandId\":\"sony\",\"basePrice\":280},{\"id\":\"69cc2b56351c715eeb56e7fe\",\"name\":\"PlayStation 5 Slim\",\"brandId\":\"sony\",\"basePrice\":260},{\"id\":\"69cc2b56351c715eeb56e801\",\"name\":\"PlayStation 5 Digital\",\"brandId\":\"sony\",\"basePrice\":220},{\"id\":\"69cc2b56351c715eeb56e804\",\"name\":\"PlayStation 4 Pro\",\"brandId\":\"sony\",\"basePrice\":120},{\"id\":\"69cc2b56351c715eeb56e807\",\"name\":\"PlayStation 4 Slim\",\"brandId\":\"sony\",\"basePrice\":80},{\"id\":\"69cc2b56351c715eeb56e80a\",\"name\":\"Xbox Series X\",\"brandId\":\"microsoft\",\"basePrice\":220},{\"id\":\"69cc2b56351c715eeb56e80d\",\"name\":\"Xbox Series S\",\"brandId\":\"microsoft\",\"basePrice\":148},{\"id\":\"69cc2b56351c715eeb56e810\",\"name\":\"Xbox One X\",\"brandId\":\"microsoft\",\"basePrice\":88},{\"id\":\"69cc2b56351c715eeb56e813\",\"name\":\"Switch OLED\",\"brandId\":\"nintendo\",\"basePrice\":158},{\"id\":\"69cc2b56351c715eeb56e816\",\"name\":\"Switch V2\",\"brandId\":\"nintendo\",\"basePrice\":115},{\"id\":\"69cc2b56351c715eeb56e819\",\"name\":\"Switch Lite\",\"brandId\":\"nintendo\",\"basePrice\":88},{\"id\":\"69cc2b56351c715eeb56e81c\",\"name\":\"Apple Watch Ultra 2\",\"brandId\":\"apple\",\"basePrice\":440},{\"id\":\"69cc2b56351c715eeb56e81f\",\"name\":\"Apple Watch Ultra 1\",\"brandId\":\"apple\",\"basePrice\":340},{\"id\":\"69cc2b56351c715eeb56e822\",\"name\":\"Apple Watch Series 10\",\"brandId\":\"apple\",\"basePrice\":280},{\"id\":\"69cc2b56351c715eeb56e825\",\"name\":\"Apple Watch Series 9\",\"brandId\":\"apple\",\"basePrice\":230},{\"id\":\"69cc2b56351c715eeb56e828\",\"name\":\"Apple Watch Series 8\",\"brandId\":\"apple\",\"basePrice\":175},{\"id\":\"69cc2b56351c715eeb56e82b\",\"name\":\"Apple Watch Series 7\",\"brandId\":\"apple\",\"basePrice\":130},{\"id\":\"69cc2b56351c715eeb56e82e\",\"name\":\"Apple Watch SE (2nd gen)\",\"brandId\":\"apple\",\"basePrice\":118},{\"id\":\"69cc2b56351c715eeb56e831\",\"name\":\"Apple Watch SE (1st gen)\",\"brandId\":\"apple\",\"basePrice\":82},{\"id\":\"69cc2b56351c715eeb56e834\",\"name\":\"Galaxy Watch 7\",\"brandId\":\"samsung\",\"basePrice\":175},{\"id\":\"69cc2b56351c715eeb56e837\",\"name\":\"Galaxy Watch Ultra\",\"brandId\":\"samsung\",\"basePrice\":280},{\"id\":\"69cc2b56351c715eeb56e83a\",\"name\":\"Galaxy Watch 6 Classic\",\"brandId\":\"samsung\",\"basePrice\":145},{\"id\":\"69cc2b56351c715eeb56e83d\",\"name\":\"Galaxy Watch 6\",\"brandId\":\"samsung\",\"basePrice\":110},{\"id\":\"69cc2b56351c715eeb56e840\",\"name\":\"Galaxy Watch 5 Pro\",\"brandId\":\"samsung\",\"basePrice\":95},{\"id\":\"69cc2b56351c715eeb56e843\",\"name\":\"Fenix 8\",\"brandId\":\"garmin\",\"basePrice\":420},{\"id\":\"69cc2b56351c715eeb56e846\",\"name\":\"Forerunner 965\",\"brandId\":\"garmin\",\"basePrice\":285},{\"id\":\"69cc2b56351c715eeb56e849\",\"name\":\"AirPods Pro (2nd gen)\",\"brandId\":\"apple\",\"basePrice\":120},{\"id\":\"69cc2b56351c715eeb56e84c\",\"name\":\"AirPods Pro (1st gen)\",\"brandId\":\"apple\",\"basePrice\":72},{\"id\":\"69cc2b56351c715eeb56e84f\",\"name\":\"AirPods (4th gen)\",\"brandId\":\"apple\",\"basePrice\":85},{\"id\":\"69cc2b56351c715eeb56e852\",\"name\":\"AirPods (3rd gen)\",\"brandId\":\"apple\",\"basePrice\":55},{\"id\":\"69cc2b56351c715eeb56e855\",\"name\":\"AirPods Max\",\"brandId\":\"apple\",\"basePrice\":255},{\"id\":\"69cc2b56351c715eeb56e858\",\"name\":\"WH-1000XM5\",\"brandId\":\"sony\",\"basePrice\":148},{\"id\":\"69cc2b56351c715eeb56e85b\",\"name\":\"WH-1000XM4\",\"brandId\":\"sony\",\"basePrice\":95},{\"id\":\"69cc2b56351c715eeb56e85e\",\"name\":\"WF-1000XM5\",\"brandId\":\"sony\",\"basePrice\":110},{\"id\":\"69cc2b56351c715eeb56e861\",\"name\":\"QuietComfort 45\",\"brandId\":\"bose\",\"basePrice\":118},{\"id\":\"69cc2b56351c715eeb56e864\",\"name\":\"QuietComfort Ultra\",\"brandId\":\"bose\",\"basePrice\":155},{\"id\":\"69cc2b56351c715eeb56e867\",\"name\":\"QuietComfort Earbuds II\",\"brandId\":\"bose\",\"basePrice\":88},{\"id\":\"69cc2b56351c715eeb56e86a\",\"name\":\"Galaxy Buds3 Pro\",\"brandId\":\"samsung\",\"basePrice\":85},{\"id\":\"69cc2b56351c715eeb56e86d\",\"name\":\"Galaxy Buds2 Pro\",\"brandId\":\"samsung\",\"basePrice\":55}],\"storageOptions\":[{\"label\":\"128GB\",\"multiplier\":1},{\"label\":\"256GB\",\"multiplier\":1.1},{\"label\":\"512GB\",\"multiplier\":1.25}],\"conditionOptions\":[{\"id\":\"hervorragend\",\"label\":\"Hervorragend\",\"multiplier\":1,\"color\":\"emerald\"},{\"id\":\"gut\",\"label\":\"Gut\",\"multiplier\":0.85,\"color\":\"blue\"},{\"id\":\"defekt\",\"label\":\"Defekt\",\"multiplier\":0.35,\"color\":\"red\"}]}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "2fac6cb1-c6cd-460a-bb56-b12164375526",
+    "key": "content",
+    "value": "{\"accessoriesTitle\":\"Premium Zubehör\",\"accessoriesSubtitle\":\"Schütze dein Gerät mit Stil\",\"repairTitle\":\"Service Terminal\",\"repairSubtitle\":\"Wähle deine Reparatur\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "7bdcd647-60c0-47f9-94d6-8623cb7510ef",
+    "key": "store_name",
+    "value": "HandyLand",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "cb438d17-8078-47dc-b2f2-3d8893b79c4a",
+    "key": "contact_email",
+    "value": "support@handyland.de",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "b1734730-265f-4f3e-9dab-1f98621e9519",
+    "key": "contact_phone",
+    "value": "+49 123 456789",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "ef5557b5-abf3-4a98-b2f2-5f8fbf2a2101",
+    "key": "currency",
+    "value": "EUR",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "e83d23d8-2cb6-42b5-8060-2b7bc16d677d",
+    "key": "tax_rate",
+    "value": "19",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "d7c4764c-9498-4b39-8df5-dcc4d258f5da",
+    "key": "free_shipping_threshold",
+    "value": "50",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "961df1c9-6e64-40db-91a0-a3b2258a875f",
+    "key": "maintenance_mode",
+    "value": "false",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "22ec3c4e-4d6e-4ba6-a965-3515b8c4bc91",
+    "key": "payment",
+    "value": "{\"stripe\":{\"enabled\":false,\"publicKey\":\"\"},\"paypal\":{\"enabled\":false,\"clientId\":\"admin@handyland.com\",\"secretKey\":\"admin@123\"},\"klarna\":{\"enabled\":false,\"publicKey\":\"\",\"secretKey\":\"\"},\"giropay\":{\"enabled\":false,\"publicKey\":\"\",\"secretKey\":\"\"},\"sepa\":{\"enabled\":false,\"publicKey\":\"\",\"secretKey\":\"\"},\"sofort\":{\"enabled\":false,\"publicKey\":\"admin@handyland.com\",\"secretKey\":\"admin@123\"},\"bankTransfer\":{\"enabled\":true,\"instructions\":\"\",\"bankName\":\"aa\",\"accountHolder\":\"aaa\",\"iban\":\"de111111111111111111\",\"bic\":\"1111111111\"},\"cashOnDelivery\":{\"enabled\":true}}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "261bdafc-2eb6-4012-bce8-377604061f77",
+    "key": "smtp_host",
+    "value": "smtp.gmail.com",
+    "group": "email",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "cab3b069-f376-4c9b-b52c-9aef1fb678d6",
+    "key": "smtp_port",
+    "value": "587",
+    "group": "email",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "12704fba-dc16-48ea-89e3-51fe5349bac2",
+    "key": "smtp_secure",
+    "value": "false",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "c1000fc6-de75-4adf-bd1d-7e1dcaaaf640",
+    "key": "smtp_user",
+    "value": "mustafamuhammed665@gmail.com",
+    "group": "email",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "1b12ed5d-4cf3-4948-8e77-4db18cc6eca5",
+    "key": "smtp_from_email",
+    "value": "",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "4e520a5c-a454-49d9-83a4-e469b167bc45",
+    "key": "smtp_from_name",
+    "value": "HandyLand",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "d3601735-d36f-460a-aaa7-df61995d65a9",
+    "key": "smtp_pass",
+    "value": "cc9cec3b371e7407766b668fbf7e6404:64ed16995a20eba5048ad2afeee14112724c0fb9304f15490ef6604f59192034",
+    "group": "email",
+    "updated_at": "2026-05-11T21:52:27.100061+00:00"
+  },
+  {
+    "id": "f7a6b6ce-5e9a-4b84-aca5-66210381d898",
+    "key": "vipTiers",
+    "value": "[{\"id\":\"bronze\",\"name\":\"Bronze\",\"color\":\"from-[#cd7f32] to-[#8b5a2b]\",\"minSpent\":0,\"maxSpent\":500},{\"id\":\"silver\",\"name\":\"Silver\",\"color\":\"from-slate-300 to-slate-500\",\"minSpent\":500,\"maxSpent\":2000},{\"id\":\"gold\",\"name\":\"Gold\",\"color\":\"from-amber-400 to-yellow-600\",\"minSpent\":2000,\"maxSpent\":5000},{\"id\":\"platinum\",\"name\":\"Platinum\",\"color\":\"from-slate-200 to-slate-400\",\"minSpent\":5000,\"maxSpent\":10000},{\"id\":\"diamond\",\"name\":\"Diamond\",\"color\":\"from-cyan-300 to-blue-500\",\"minSpent\":10000,\"maxSpent\":50000}]",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "856ec06e-1bed-471d-8e98-9a530e06f1f6",
+    "key": "productFaqs",
+    "value": "[{\"question\":\"Ist das Gerät ohne Simlock?\",\"answer\":\"Ja, alle unsere Geräte sind werksseitig entsperrt (ohne Simlock) und können mit jedem Netzbetreiber weltweit verwendet werden.\"},{\"question\":\"Was ist im Lieferumfang enthalten?\",\"answer\":\"Jedes Smartphone wird mit einem kompatiblen Ladekabel geliefert. Um Elektroschrott zu reduzieren, sind Netzteil und Kopfhörer nicht im Standard-Lieferumfang enthalten.\"},{\"question\":\"Wie lange ist die Garantie?\",\"answer\":\"Wir bieten standardmäßig 12 Monate Garantie auf alle unsere generalüberholten und neuen Geräte. Dies deckt alle technischen Defekte ab.\"},{\"question\":\"Kann ich das Gerät zurückgeben?\",\"answer\":\"Ja, Sie haben ein 14-tägiges Rückgaberecht ohne Angabe von Gründen, sofern sich das Gerät im gleichen Zustand wie bei der Lieferung befindet.\"}]",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "75da1a76-e337-4519-8640-334e6062e1de",
+    "key": "cookieConsent",
+    "value": "{\"enabled\":true,\"title\":\"Ihre Privatsphäre ist uns wichtig\",\"message\":\"Wir verwenden Cookies für eine Reihe von Auswertungen, um damit Ihren Besuch auf unserer Website kontinuierlich verbessern zu können (z. B. damit Ihnen Ihre Login-Daten erhalten bleiben).\\n\\nSie können Ihre Einstellungen ändern und verschiedenen Arten von Cookies erlauben, auf Ihrem Rechner gespeichert zu werden, während Sie unsere Webseite besuchen. Sie können auf Ihrem Rechner gespeicherte Cookies ebenso weitgehend wieder entfernen. Bitte bedenken Sie aber, dass dadurch Teile unserer Website möglicherweise nicht mehr in der gedachten Art und Weise nutzbar sind.\",\"acceptAllBtn\":\"Alle akzeptieren\",\"rejectAllBtn\":\"Ich lehne ab\",\"manageBtn\":\"Einstellungen ändern\",\"saveBtn\":\"Einstellungen speichern\",\"strictlyNecessaryTitle\":\"Technisch notwendige Cookies\",\"strictlyNecessaryDesc\":\"Erforderlich für die sichere Funktion der Website. Kann nicht deaktiviert werden.\",\"functionalTitle\":\"Funktions Cookies\",\"functionalDesc\":\"Ermöglicht der Website, erweiterte Funktionalität und Personalisierung bereitzustellen.\",\"analyticsTitle\":\"Tracking und Performance Cookies\",\"analyticsDesc\":\"Helfen uns zu verstehen, wie Besucher mit unserer Website interagieren, um die Benutzererfahrung zu verbessern.\",\"marketingTitle\":\"Targeting und Werbung Cookies\",\"marketingDesc\":\"Wird verwendet, um Werbung zu liefern, die relevanter für Sie und Ihre Interessen ist.\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "c9fe79e5-80a3-4ffa-8552-60d97d79bb06",
+    "key": "invoice",
+    "value": "{\"companyName\":\"HandyLand GmbH\",\"companyAddress\":\"Tech Street 123 - 10115 Berlin - Germany\",\"vatNumber\":\"DE123456789\",\"footerText\":\"Thank you for your business!\",\"prefix\":\"HL-\",\"titleLabel\":\"Invoice\",\"dateLabel\":\"Date:\",\"numberLabel\":\"Invoice #:\",\"vatIdLabel\":\"VAT ID:\",\"subtotalLabel\":\"Subtotal:\",\"taxLabel\":\"VAT\",\"shippingLabel\":\"Shipping:\",\"discountLabel\":\"Discount\",\"totalLabel\":\"Total:\",\"printBtnLabel\":\"Print Invoice\",\"closeBtnLabel\":\"Close\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "6701b74f-5c80-43d5-8862-0c8cac6a999d",
+    "key": "features",
+    "value": "{\"comparisonEngine\":true,\"cartUpselling\":true,\"loyalty\":{\"enabled\":true,\"earnRate\":10,\"redeemRate\":100,\"silverThreshold\":500,\"goldThreshold\":2000,\"platinumThreshold\":5000},\"whatsappOrders\":{\"enabled\":true,\"phoneNumber\":\"\",\"message\":\"\"}}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "16f5e14d-b136-4e77-acf2-24fb3427a5a5",
+    "key": "accountSuspension",
+    "value": "{\"title\":\"Account Suspended\",\"subtitle\":\"حسابك محظور من قِبَل الإدارة\",\"message\":\"Your account has been suspended. Please contact support for assistance.\",\"supportEmail\":\"support@handyland.com\",\"supportLabel\":\"Contact Support\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "5692cb8c-3347-4389-8492-2d3bd6d1a4d9",
+    "key": "stats",
+    "value": "{\"devicesRepaired\":3000,\"happyCustomers\":1200,\"averageRating\":4,\"marketExperience\":5}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "5c6c339b-9bce-4436-81c9-feaf8c0790f0",
+    "key": "repairArchive",
+    "value": "{\"title\":\"Reparatur Archiv\",\"subtitle\":\"Unsere Erfolgsgeschichten\",\"buttonText\":\"Mehr anzeigen\",\"totalRepairs\":5000}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "29fea3b0-0e97-4a3c-b225-32ae44831c5e",
+    "key": "sections",
+    "value": "{\"hero\":true,\"stats\":true,\"repairGallery\":true,\"marketplace\":true,\"accessories\":true,\"contact\":true}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "918b8ec1-d2ed-41bf-843c-b4b10b7cf5a3",
+    "key": "contactSection",
+    "value": "{\"socialLinks\":{\"instagram\":\"https://www.instagram.com/handyland.hd?igshid=MzNlNGNkZWQ4Mg%3D%3D\",\"youtube\":\"https://www.google.com/maps/place//data=!4m3!3m2!1s0x4797c13ff459f8b5:0x7e383811d13d7116!12e1?source=g.page.m.dd._&laa=lu-desktop-reviews-dialog-review-solicitation\"},\"address\":\"Walldorfer Straße 13\",\"phone\":\"015752908921\",\"email\":\"mustafamohammad0545@gmail.com\",\"formTitle\":\"\",\"formButton\":\"\",\"mapUrl\":\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2598.220622980945!2d8.68824122322083!3d49.366898264786656!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4797c13ff459f8b5%3A0x7e383811d13d7116!2sHandyLand%20Heidelberg%20%E2%80%93%20Handy%20Reparatur%20%26%20Ankauf!5e0!3m2!1sar!2sde!4v1770844156036!5m2!1sar!2sde\\\" width=\\\"600\\\" height=\\\"450\\\" style=\\\"border:0;\\\" allowfullscreen=\\\"\\\" loading=\\\"lazy\\\" referrerpolicy=\\\"no-referrer-when-downgrade\",\"whatsappPhone\":\"+905397200005\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "404c3d88-2804-4b7f-b46a-ff792f790564",
+    "key": "footerSection",
+    "value": "{\"aboutText\":\"\",\"tagline\":\"Wir arbeiten eng mit den besten Herstellern und Marken der Branche zusammen. Nur so können wir Ihre Zufriedenheit garantieren. Sagen Sie uns was Sie suchen, Wir helfen Ihnen gern. Schauen Sie sich unten einige unserer beliebtesten Marken an.\",\"copyright\":\"\",\"quickLinks\":true,\"legalLinks\":true,\"newsletter\":true,\"socialLinks\":true}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "6e84c993-9228-482e-b008-4993ce236ee5",
+    "key": "announcementBanner",
+    "value": "{\"enabled\":false,\"text\":\"514532\",\"color\":\"blue\",\"dismissible\":true,\"link\":\"\",\"linkText\":\"1212\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "f7b4ac45-d430-48e2-a369-3269db95d8ae",
+    "key": "promoPopup",
+    "value": "{\"enabled\":true,\"title\":\"\",\"message\":\"\",\"couponCode\":\"11111111111\",\"delay\":5}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "a7589be3-c1dd-4e16-a2db-2a03cfc3debf",
+    "key": "socialAuth",
+    "value": "{\"google\":true,\"facebook\":true}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "d218baff-8122-4460-9b7f-1ff3feda3219",
+    "key": "accessoryCategories",
+    "value": "[{\"id\":\"audio\",\"label\":\"Audio\",\"icon\":\"Headphones\"},{\"id\":\"power\",\"label\":\"Energie\",\"icon\":\"Zap\"},{\"id\":\"protection\",\"label\":\"Schutz\",\"icon\":\"Shield\"},{\"id\":\"wearables\",\"label\":\"Wearables\",\"icon\":\"Watch\"}]",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "83335951-a972-40be-9ad0-f6c9b9714d02",
+    "key": "maintenanceMode",
+    "value": "{\"enabled\":true,\"title\":\"Wartungsarbeiten\",\"message\":\"Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!\",\"estimatedTime\":\"wenige Minuten\",\"statusText1\":\"System wird diagnostiziert...\",\"statusText2\":\"Neue Reparaturen werden angewendet...\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "71f52a91-7890-48b1-81f1-b8bad846ca77",
+    "key": "quickReplies",
+    "value": "[\"We have received your message and are looking into it.\",\"Please provide us with your order number so we can investigate further.\",\"Your repair is currently in progress. We will update you soon.\",\"Thank you for reaching out. Your issue has been resolved.\"]",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "e985c6d1-ff6d-4e2d-bad6-0b42dda82e82",
+    "key": "seo",
+    "value": "{\"defaultMetaTitle\":\"HandyLand - E-Commerce & Repair Services\",\"defaultMetaDescription\":\"Your one-stop shop for electronics, mobile phones, and reliable repair services.\",\"defaultKeywords\":\"handyland, electronics, mobile repair, buy phones, sell phones\",\"defaultOgImage\":\"/uploads/compressed-1778532266125-142869780.webp\",\"faviconUrl\":\"/uploads/compressed-1778532264124-556570081.webp\",\"googleAnalyticsId\":\"\",\"facebookPixelId\":\"\"}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "f19bf50c-9d65-4c29-81ea-c0cd66044a8e",
+    "key": "taxRate",
+    "value": "19",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "91edd3eb-1b3e-4221-8541-2bca16a62b09",
+    "key": "ecoImpact",
+    "value": "{\"enabled\":true,\"co2PerDevice\":79,\"eWastePerDevice\":0.18}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "07bd7ce3-8809-4e62-955c-d9de8fb3e934",
+    "key": "success",
+    "value": "true",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "b1f5a531-5d18-4ba6-90a8-fc6f6e9d7d62",
+    "key": "settings",
+    "value": "{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"settings\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]},\"success\":\"true\",\"settings\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"hero\":{\"headline\":\"Germany's #1 Tech Hub\",\"subheadline\":\"Discover the future of mobile commerce.\",\"accentColor\":\"#22d3ee\",\"productName\":\"iPhone 15 Pro\",\"productPrice\":\"€950\",\"productLabel\":\"AKTUELLES ANGEBOT\"},\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]}},\"data\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"hero\":{\"headline\":\"Germany's #1 Tech Hub\",\"subheadline\":\"Discover the future of mobile commerce.\",\"accentColor\":\"#22d3ee\",\"productName\":\"iPhone 15 Pro\",\"productPrice\":\"€950\",\"productLabel\":\"AKTUELLES ANGEBOT\"},\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]}},\"hero\":{\"productName\":\"Xiaomi Xiaomi 14 256GB Weiß\",\"productPrice\":\"€649\",\"heroImage\":\"https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400\",\"productLabel\":\"FEATURED DEVICE\"}},\"seo\":{\"defaultMetaTitle\":\"HandyLand - E-Commerce & Repair Services\",\"defaultMetaDescription\":\"Your one-stop shop for electronics, mobile phones, and reliable repair services.\",\"defaultKeywords\":\"handyland, electronics, mobile repair, buy phones, sell phones\",\"defaultOgImage\":\"\",\"faviconUrl\":\"\",\"googleAnalyticsId\":\"\",\"facebookPixelId\":\"\"},\"data\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]},\"success\":\"true\",\"settings\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"hero\":{\"headline\":\"Germany's #1 Tech Hub\",\"subheadline\":\"Discover the future of mobile commerce.\",\"accentColor\":\"#22d3ee\",\"productName\":\"iPhone 15 Pro\",\"productPrice\":\"€950\",\"productLabel\":\"AKTUELLES ANGEBOT\"},\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]}},\"data\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"hero\":{\"headline\":\"Germany's #1 Tech Hub\",\"subheadline\":\"Discover the future of mobile commerce.\",\"accentColor\":\"#22d3ee\",\"productName\":\"iPhone 15 Pro\",\"productPrice\":\"€950\",\"productLabel\":\"AKTUELLES ANGEBOT\"},\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]}},\"hero\":{\"productName\":\"Xiaomi Xiaomi 14 256GB Weiß\",\"productPrice\":\"€649\",\"heroImage\":\"https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400\",\"productLabel\":\"FEATURED DEVICE\"}},\"valuation\":{\"step1Title\":\"\",\"step1Subtitle\":\"\",\"step1ModelTitle\":\"\",\"step2Title\":\"\",\"step3Title\":\"\",\"resetBtn\":\"\",\"saveBtn\":\"\",\"sellBtn\":\"\",\"brands\":[],\"models\":[],\"storageOptions\":[],\"conditionOptions\":[],\"batteryOptions\":[]},\"siteName\":\"\\\"\\\"\",\"announcementBanner\":{\"enabled\":false,\"text\":\"\",\"color\":\"blue\",\"dismissible\":true,\"link\":\"\",\"linkText\":\"\"},\"sections\":{\"hero\":true,\"stats\":true,\"repairGallery\":true,\"marketplace\":true,\"accessories\":true,\"contact\":true,\"marketplacePage\":true,\"valuationPage\":true,\"repairPage\":true,\"trackRepairPage\":true,\"authSystem\":true},\"content\":{\"accessoriesTitle\":\"\",\"accessoriesSubtitle\":\"\",\"repairTitle\":\"\",\"repairSubtitle\":\"\"},\"contactSection\":{\"address\":\"\",\"phone\":\"\",\"email\":\"\",\"formTitle\":\"\",\"formButton\":\"\",\"mapUrl\":\"\",\"socialLinks\":{\"facebook\":\"\",\"instagram\":\"\",\"twitter\":\"\",\"linkedin\":\"\",\"youtube\":\"\"},\"whatsappPhone\":\"\",\"whatsappMessage\":\"\"},\"contactEmail\":\"\\\"\\\"\",\"stats\":{\"devicesRepaired\":0,\"happyCustomers\":0,\"averageRating\":0,\"marketExperience\":0},\"footerSection\":{\"tagline\":\"\",\"copyright\":\"\"},\"promoPopup\":{\"enabled\":false,\"title\":\"\",\"message\":\"\",\"couponCode\":\"\",\"delay\":5},\"socialAuth\":{\"google\":false,\"facebook\":false},\"footerText\":\"\\\"\\\"\",\"freeShippingThreshold\":\"100\",\"taxRate\":\"19\",\"quickReplies\":[\"We have received your message and are looking into it.\",\"Please provide us with your order number so we can investigate further.\",\"Your repair is currently in progress. We will update you soon.\",\"Thank you for reaching out. Your issue has been resolved.\"],\"ecoImpact\":{\"enabled\":true,\"co2PerDevice\":79,\"eWastePerDevice\":0.18},\"success\":\"true\",\"repairArchive\":{\"title\":\"\",\"subtitle\":\"\",\"buttonText\":\"\",\"totalRepairs\":0},\"language\":\"\\\"de\\\"\",\"navbar\":{\"logoText\":\"HANDY\",\"logoAccentText\":\"LAND\",\"showLanguageSwitcher\":true},\"hero\":{\"headline\":\"\",\"subheadline\":\"\",\"bgStart\":\"\",\"bgEnd\":\"\",\"accentColor\":\"\",\"buttonMarket\":\"\",\"buttonValuation\":\"\",\"trustBadge1\":\"\",\"trustBadge2\":\"\",\"trustBadge3\":\"\",\"heroImage\":\"\",\"productName\":\"\",\"productPrice\":\"\",\"productLabel\":\"\",\"stat1Title\":\"\",\"stat1Value\":\"\",\"stat2Title\":\"\",\"stat2Value\":\"\"},\"vipTiers\":[{\"id\":\"bronze\",\"name\":\"Bronze\",\"color\":\"from-[#cd7f32] to-[#8b5a2b]\",\"minSpent\":0,\"maxSpent\":500},{\"id\":\"silver\",\"name\":\"Silver\",\"color\":\"from-slate-300 to-slate-500\",\"minSpent\":500,\"maxSpent\":2000},{\"id\":\"gold\",\"name\":\"Gold\",\"color\":\"from-amber-400 to-yellow-600\",\"minSpent\":2000,\"maxSpent\":5000},{\"id\":\"platinum\",\"name\":\"Platinum\",\"color\":\"from-slate-200 to-slate-400\",\"minSpent\":5000,\"maxSpent\":10000},{\"id\":\"diamond\",\"name\":\"Diamond\",\"color\":\"from-cyan-300 to-blue-500\",\"minSpent\":10000,\"maxSpent\":50000}],\"productFaqs\":[{\"question\":\"Ist das Gerät ohne Simlock?\",\"answer\":\"Ja, alle unsere Geräte sind werksseitig entsperrt (ohne Simlock) und können mit jedem Netzbetreiber weltweit verwendet werden.\"},{\"question\":\"Was ist im Lieferumfang enthalten?\",\"answer\":\"Jedes Smartphone wird mit einem kompatiblen Ladekabel geliefert. Um Elektroschrott zu reduzieren, sind Netzteil und Kopfhörer nicht im Standard-Lieferumfang enthalten.\"},{\"question\":\"Wie lange ist die Garantie?\",\"answer\":\"Wir bieten standardmäßig 12 Monate Garantie auf alle unsere generalüberholten und neuen Geräte. Dies deckt alle technischen Defekte ab.\"},{\"question\":\"Kann ich das Gerät zurückgeben?\",\"answer\":\"Ja, Sie haben ein 14-tägiges Rückgaberecht ohne Angabe von Gründen, sofern sich das Gerät im gleichen Zustand wie bei der Lieferung befindet.\"}],\"invoice\":{\"logoUrl\":\"\",\"primaryColor\":\"#00bcd4\",\"companyName\":\"HandyLand GmbH\",\"companyAddress\":\"Tech Street 123 - 10115 Berlin - Germany\",\"vatNumber\":\"DE123456789\",\"bankName\":\"\",\"iban\":\"\",\"bic\":\"\",\"footerText\":\"Thank you for your business!\",\"prefix\":\"HL-\",\"titleLabel\":\"Invoice\",\"dateLabel\":\"Date:\",\"numberLabel\":\"Invoice #:\",\"vatIdLabel\":\"VAT ID:\",\"subtotalLabel\":\"Subtotal:\",\"taxLabel\":\"VAT\",\"shippingLabel\":\"Shipping:\",\"discountLabel\":\"Discount\",\"totalLabel\":\"Total:\",\"printBtnLabel\":\"Print Invoice\",\"closeBtnLabel\":\"Close\",\"itemLabel\":\"Item\",\"quantityLabel\":\"Quantity\",\"priceLabel\":\"Price\"},\"features\":{\"comparisonEngine\":true,\"cartUpselling\":true,\"loyalty\":{\"enabled\":true,\"earnRate\":10,\"redeemRate\":100,\"silverThreshold\":500,\"goldThreshold\":2000,\"platinumThreshold\":5000},\"whatsappOrders\":{\"enabled\":true,\"phoneNumber\":\"\",\"message\":\"\"}},\"accountSuspension\":{\"title\":\"Account Suspended\",\"subtitle\":\"حسابك محظور من قِبَل الإدارة\",\"message\":\"Your account has been suspended. Please contact support for assistance.\",\"supportEmail\":\"support@handyland.com\",\"supportLabel\":\"Contact Support\"},\"accessoryCategories\":[{\"id\":\"audio\",\"label\":\"Audio\",\"icon\":\"Headphones\"},{\"id\":\"power\",\"label\":\"Energie\",\"icon\":\"Zap\"},{\"id\":\"protection\",\"label\":\"Schutz\",\"icon\":\"Shield\"},{\"id\":\"wearables\",\"label\":\"Wearables\",\"icon\":\"Watch\"}],\"cookieConsent\":{\"enabled\":true,\"title\":\"Ihre Privatsphäre ist uns wichtig\",\"message\":\"Wir verwenden Cookies für eine Reihe von Auswertungen, um damit Ihren Besuch auf unserer Website kontinuierlich verbessern zu können (z. B. damit Ihnen Ihre Login-Daten erhalten bleiben).\\n\\nSie können Ihre Einstellungen ändern und verschiedenen Arten von Cookies erlauben, auf Ihrem Rechner gespeichert zu werden, während Sie unsere Webseite besuchen. Sie können auf Ihrem Rechner gespeicherte Cookies ebenso weitgehend wieder entfernen. Bitte bedenken Sie aber, dass dadurch Teile unserer Website möglicherweise nicht mehr in der gedachten Art und Weise nutzbar sind.\",\"acceptAllBtn\":\"Alle akzeptieren\",\"rejectAllBtn\":\"Ich lehne ab\",\"manageBtn\":\"Einstellungen ändern\",\"saveBtn\":\"Einstellungen speichern\",\"strictlyNecessaryTitle\":\"Technisch notwendige Cookies\",\"strictlyNecessaryDesc\":\"Erforderlich für die sichere Funktion der Website. Kann nicht deaktiviert werden.\",\"functionalTitle\":\"Funktions Cookies\",\"functionalDesc\":\"Ermöglicht der Website, erweiterte Funktionalität und Personalisierung bereitzustellen.\",\"analyticsTitle\":\"Tracking und Performance Cookies\",\"analyticsDesc\":\"Helfen uns zu verstehen, wie Besucher mit unserer Website interagieren, um die Benutzererfahrung zu verbessern.\",\"marketingTitle\":\"Targeting und Werbung Cookies\",\"marketingDesc\":\"Wird verwendet, um Werbung zu liefern, die relevanter für Sie und Ihre Interessen ist.\"},\"maintenanceMode\":{\"enabled\":true,\"title\":\"Wartungsarbeiten\",\"message\":\"Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!\",\"estimatedTime\":\"wenige Minuten\",\"statusText1\":\"System wird diagnostiziert...\",\"statusText2\":\"Neue Reparaturen werden angewendet...\"}}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  },
+  {
+    "id": "1aa1357c-e3f8-4a86-bf51-a8b2cf5d32a4",
+    "key": "data",
+    "value": "{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"settings\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]},\"success\":\"true\",\"settings\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"hero\":{\"headline\":\"Germany's #1 Tech Hub\",\"subheadline\":\"Discover the future of mobile commerce.\",\"accentColor\":\"#22d3ee\",\"productName\":\"iPhone 15 Pro\",\"productPrice\":\"€950\",\"productLabel\":\"AKTUELLES ANGEBOT\"},\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]}},\"data\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"hero\":{\"headline\":\"Germany's #1 Tech Hub\",\"subheadline\":\"Discover the future of mobile commerce.\",\"accentColor\":\"#22d3ee\",\"productName\":\"iPhone 15 Pro\",\"productPrice\":\"€950\",\"productLabel\":\"AKTUELLES ANGEBOT\"},\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]}},\"hero\":{\"productName\":\"Xiaomi Xiaomi 14 256GB Weiß\",\"productPrice\":\"€649\",\"heroImage\":\"https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400\",\"productLabel\":\"FEATURED DEVICE\"}},\"seo\":{\"defaultMetaTitle\":\"HandyLand - E-Commerce & Repair Services\",\"defaultMetaDescription\":\"Your one-stop shop for electronics, mobile phones, and reliable repair services.\",\"defaultKeywords\":\"handyland, electronics, mobile repair, buy phones, sell phones\",\"defaultOgImage\":\"\",\"faviconUrl\":\"\",\"googleAnalyticsId\":\"\",\"facebookPixelId\":\"\"},\"data\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]},\"success\":\"true\",\"settings\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"hero\":{\"headline\":\"Germany's #1 Tech Hub\",\"subheadline\":\"Discover the future of mobile commerce.\",\"accentColor\":\"#22d3ee\",\"productName\":\"iPhone 15 Pro\",\"productPrice\":\"€950\",\"productLabel\":\"AKTUELLES ANGEBOT\"},\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]}},\"data\":{\"store_name\":\"HandyLand\",\"contact_email\":\"support@handyland.de\",\"contact_phone\":\"+49 123 456789\",\"currency\":\"EUR\",\"tax_rate\":19,\"free_shipping_threshold\":50,\"maintenance_mode\":false,\"hero\":{\"headline\":\"Germany's #1 Tech Hub\",\"subheadline\":\"Discover the future of mobile commerce.\",\"accentColor\":\"#22d3ee\",\"productName\":\"iPhone 15 Pro\",\"productPrice\":\"€950\",\"productLabel\":\"AKTUELLES ANGEBOT\"},\"stats\":{\"successRate\":98,\"averageRating\":4.9,\"happyCustomers\":1420,\"devicesRepaired\":3582,\"yearsExperience\":6,\"marketExperience\":6},\"contactSection\":{\"email\":\"support@handyland.de\",\"phone\":\"+49 30 1234 5678\",\"mapUrl\":\"\",\"address\":\"Berlin, HQ\",\"formTitle\":\"Sicherer Nachrichtenkanal\",\"formButton\":\"Protokoll senden\",\"socialLinks\":[{\"url\":\"#\",\"iconName\":\"Facebook\",\"platform\":\"Facebook\"},{\"url\":\"#\",\"iconName\":\"Instagram\",\"platform\":\"Instagram\"}]}},\"hero\":{\"productName\":\"Xiaomi Xiaomi 14 256GB Weiß\",\"productPrice\":\"€649\",\"heroImage\":\"https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400\",\"productLabel\":\"FEATURED DEVICE\"}},\"valuation\":{\"step1Title\":\"\",\"step1Subtitle\":\"\",\"step1ModelTitle\":\"\",\"step2Title\":\"\",\"step3Title\":\"\",\"resetBtn\":\"\",\"saveBtn\":\"\",\"sellBtn\":\"\",\"brands\":[],\"models\":[],\"storageOptions\":[],\"conditionOptions\":[],\"batteryOptions\":[]},\"siteName\":\"\\\"\\\"\",\"announcementBanner\":{\"enabled\":false,\"text\":\"\",\"color\":\"blue\",\"dismissible\":true,\"link\":\"\",\"linkText\":\"\"},\"sections\":{\"hero\":true,\"stats\":true,\"repairGallery\":true,\"marketplace\":true,\"accessories\":true,\"contact\":true,\"marketplacePage\":true,\"valuationPage\":true,\"repairPage\":true,\"trackRepairPage\":true,\"authSystem\":true},\"content\":{\"accessoriesTitle\":\"\",\"accessoriesSubtitle\":\"\",\"repairTitle\":\"\",\"repairSubtitle\":\"\"},\"contactSection\":{\"address\":\"\",\"phone\":\"\",\"email\":\"\",\"formTitle\":\"\",\"formButton\":\"\",\"mapUrl\":\"\",\"socialLinks\":{\"facebook\":\"\",\"instagram\":\"\",\"twitter\":\"\",\"linkedin\":\"\",\"youtube\":\"\"},\"whatsappPhone\":\"\",\"whatsappMessage\":\"\"},\"contactEmail\":\"\\\"\\\"\",\"stats\":{\"devicesRepaired\":0,\"happyCustomers\":0,\"averageRating\":0,\"marketExperience\":0},\"footerSection\":{\"tagline\":\"\",\"copyright\":\"\"},\"promoPopup\":{\"enabled\":false,\"title\":\"\",\"message\":\"\",\"couponCode\":\"\",\"delay\":5},\"socialAuth\":{\"google\":false,\"facebook\":false},\"footerText\":\"\\\"\\\"\",\"freeShippingThreshold\":\"100\",\"taxRate\":\"19\",\"quickReplies\":[\"We have received your message and are looking into it.\",\"Please provide us with your order number so we can investigate further.\",\"Your repair is currently in progress. We will update you soon.\",\"Thank you for reaching out. Your issue has been resolved.\"],\"ecoImpact\":{\"enabled\":true,\"co2PerDevice\":79,\"eWastePerDevice\":0.18},\"success\":\"true\",\"repairArchive\":{\"title\":\"\",\"subtitle\":\"\",\"buttonText\":\"\",\"totalRepairs\":0},\"language\":\"\\\"de\\\"\",\"navbar\":{\"logoText\":\"HANDY\",\"logoAccentText\":\"LAND\",\"showLanguageSwitcher\":true},\"hero\":{\"headline\":\"\",\"subheadline\":\"\",\"bgStart\":\"\",\"bgEnd\":\"\",\"accentColor\":\"\",\"buttonMarket\":\"\",\"buttonValuation\":\"\",\"trustBadge1\":\"\",\"trustBadge2\":\"\",\"trustBadge3\":\"\",\"heroImage\":\"\",\"productName\":\"\",\"productPrice\":\"\",\"productLabel\":\"\",\"stat1Title\":\"\",\"stat1Value\":\"\",\"stat2Title\":\"\",\"stat2Value\":\"\"},\"vipTiers\":[{\"id\":\"bronze\",\"name\":\"Bronze\",\"color\":\"from-[#cd7f32] to-[#8b5a2b]\",\"minSpent\":0,\"maxSpent\":500},{\"id\":\"silver\",\"name\":\"Silver\",\"color\":\"from-slate-300 to-slate-500\",\"minSpent\":500,\"maxSpent\":2000},{\"id\":\"gold\",\"name\":\"Gold\",\"color\":\"from-amber-400 to-yellow-600\",\"minSpent\":2000,\"maxSpent\":5000},{\"id\":\"platinum\",\"name\":\"Platinum\",\"color\":\"from-slate-200 to-slate-400\",\"minSpent\":5000,\"maxSpent\":10000},{\"id\":\"diamond\",\"name\":\"Diamond\",\"color\":\"from-cyan-300 to-blue-500\",\"minSpent\":10000,\"maxSpent\":50000}],\"productFaqs\":[{\"question\":\"Ist das Gerät ohne Simlock?\",\"answer\":\"Ja, alle unsere Geräte sind werksseitig entsperrt (ohne Simlock) und können mit jedem Netzbetreiber weltweit verwendet werden.\"},{\"question\":\"Was ist im Lieferumfang enthalten?\",\"answer\":\"Jedes Smartphone wird mit einem kompatiblen Ladekabel geliefert. Um Elektroschrott zu reduzieren, sind Netzteil und Kopfhörer nicht im Standard-Lieferumfang enthalten.\"},{\"question\":\"Wie lange ist die Garantie?\",\"answer\":\"Wir bieten standardmäßig 12 Monate Garantie auf alle unsere generalüberholten und neuen Geräte. Dies deckt alle technischen Defekte ab.\"},{\"question\":\"Kann ich das Gerät zurückgeben?\",\"answer\":\"Ja, Sie haben ein 14-tägiges Rückgaberecht ohne Angabe von Gründen, sofern sich das Gerät im gleichen Zustand wie bei der Lieferung befindet.\"}],\"invoice\":{\"logoUrl\":\"\",\"primaryColor\":\"#00bcd4\",\"companyName\":\"HandyLand GmbH\",\"companyAddress\":\"Tech Street 123 - 10115 Berlin - Germany\",\"vatNumber\":\"DE123456789\",\"bankName\":\"\",\"iban\":\"\",\"bic\":\"\",\"footerText\":\"Thank you for your business!\",\"prefix\":\"HL-\",\"titleLabel\":\"Invoice\",\"dateLabel\":\"Date:\",\"numberLabel\":\"Invoice #:\",\"vatIdLabel\":\"VAT ID:\",\"subtotalLabel\":\"Subtotal:\",\"taxLabel\":\"VAT\",\"shippingLabel\":\"Shipping:\",\"discountLabel\":\"Discount\",\"totalLabel\":\"Total:\",\"printBtnLabel\":\"Print Invoice\",\"closeBtnLabel\":\"Close\",\"itemLabel\":\"Item\",\"quantityLabel\":\"Quantity\",\"priceLabel\":\"Price\"},\"features\":{\"comparisonEngine\":true,\"cartUpselling\":true,\"loyalty\":{\"enabled\":true,\"earnRate\":10,\"redeemRate\":100,\"silverThreshold\":500,\"goldThreshold\":2000,\"platinumThreshold\":5000},\"whatsappOrders\":{\"enabled\":true,\"phoneNumber\":\"\",\"message\":\"\"}},\"accountSuspension\":{\"title\":\"Account Suspended\",\"subtitle\":\"حسابك محظور من قِبَل الإدارة\",\"message\":\"Your account has been suspended. Please contact support for assistance.\",\"supportEmail\":\"support@handyland.com\",\"supportLabel\":\"Contact Support\"},\"accessoryCategories\":[{\"id\":\"audio\",\"label\":\"Audio\",\"icon\":\"Headphones\"},{\"id\":\"power\",\"label\":\"Energie\",\"icon\":\"Zap\"},{\"id\":\"protection\",\"label\":\"Schutz\",\"icon\":\"Shield\"},{\"id\":\"wearables\",\"label\":\"Wearables\",\"icon\":\"Watch\"}],\"cookieConsent\":{\"enabled\":true,\"title\":\"Ihre Privatsphäre ist uns wichtig\",\"message\":\"Wir verwenden Cookies für eine Reihe von Auswertungen, um damit Ihren Besuch auf unserer Website kontinuierlich verbessern zu können (z. B. damit Ihnen Ihre Login-Daten erhalten bleiben).\\n\\nSie können Ihre Einstellungen ändern und verschiedenen Arten von Cookies erlauben, auf Ihrem Rechner gespeichert zu werden, während Sie unsere Webseite besuchen. Sie können auf Ihrem Rechner gespeicherte Cookies ebenso weitgehend wieder entfernen. Bitte bedenken Sie aber, dass dadurch Teile unserer Website möglicherweise nicht mehr in der gedachten Art und Weise nutzbar sind.\",\"acceptAllBtn\":\"Alle akzeptieren\",\"rejectAllBtn\":\"Ich lehne ab\",\"manageBtn\":\"Einstellungen ändern\",\"saveBtn\":\"Einstellungen speichern\",\"strictlyNecessaryTitle\":\"Technisch notwendige Cookies\",\"strictlyNecessaryDesc\":\"Erforderlich für die sichere Funktion der Website. Kann nicht deaktiviert werden.\",\"functionalTitle\":\"Funktions Cookies\",\"functionalDesc\":\"Ermöglicht der Website, erweiterte Funktionalität und Personalisierung bereitzustellen.\",\"analyticsTitle\":\"Tracking und Performance Cookies\",\"analyticsDesc\":\"Helfen uns zu verstehen, wie Besucher mit unserer Website interagieren, um die Benutzererfahrung zu verbessern.\",\"marketingTitle\":\"Targeting und Werbung Cookies\",\"marketingDesc\":\"Wird verwendet, um Werbung zu liefern, die relevanter für Sie und Ihre Interessen ist.\"},\"maintenanceMode\":{\"enabled\":true,\"title\":\"Wartungsarbeiten\",\"message\":\"Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!\",\"estimatedTime\":\"wenige Minuten\",\"statusText1\":\"System wird diagnostiziert...\",\"statusText2\":\"Neue Reparaturen werden angewendet...\"}}",
+    "group": "general",
+    "updated_at": "2026-05-11T20:49:06.991983+00:00"
+  }
+]

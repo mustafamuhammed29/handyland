@@ -29,7 +29,7 @@ exports.getShippingMethods = async (req, res, next) => {
             description: m.description,
             price: m.price,
             duration: m.estimated_days ? `${m.estimated_days} Days` : 'N/A',
-            isExpress: false, // Default if column missing
+            isExpress: m.name.toLowerCase().includes('express') || (m.description && m.description.toLowerCase().includes('express')),
             isActive: m.is_active
         }));
 
@@ -48,7 +48,7 @@ exports.getShippingMethod = async (req, res, next) => {
             description: data.description,
             price: data.price,
             duration: data.estimated_days ? `${data.estimated_days} Days` : 'N/A',
-            isExpress: false,
+            isExpress: data.name.toLowerCase().includes('express') || (data.description && data.description.toLowerCase().includes('express')),
             isActive: data.is_active
         };
         return res.status(200).json({ success: true, data: mapped });

@@ -140,6 +140,30 @@ exports.register = async (req, res, next) => {
             is_verified: true
         };
 
+        // Fetch user addresses
+        const { data: addresses } = await supabaseAdmin
+            .from('addresses')
+            .select('*')
+            .eq('user_id', data.user.id)
+            .order('is_default', { ascending: false });
+
+        // Map camelCase for frontend
+        const mappedAddresses = (addresses || []).map(addr => ({
+            _id: addr.id,
+            id: addr.id,
+            name: addr.name,
+            street: addr.street,
+            city: addr.city,
+            state: addr.state,
+            postalCode: addr.postal_code || addr.zip_code, // fallback if schema uses zip_code
+            zipCode: addr.zip_code || addr.postal_code,
+            country: addr.country,
+            phone: addr.phone,
+            isDefault: addr.is_default
+        }));
+
+        profileData.addresses = mappedAddresses;
+
         const userData = sendTokenResponse(res, signInData.session, profileData);
 
         return res.status(201).json({ success: true, user: userData, data: userData });
@@ -194,6 +218,30 @@ exports.login = async (req, res, next) => {
             });
         }
 
+        // Fetch user addresses
+        const { data: addresses } = await supabaseAdmin
+            .from('addresses')
+            .select('*')
+            .eq('user_id', data.user.id)
+            .order('is_default', { ascending: false });
+
+        // Map camelCase for frontend
+        const mappedAddresses = (addresses || []).map(addr => ({
+            _id: addr.id,
+            id: addr.id,
+            name: addr.name,
+            street: addr.street,
+            city: addr.city,
+            state: addr.state,
+            postalCode: addr.postal_code || addr.zip_code, // fallback if schema uses zip_code
+            zipCode: addr.zip_code || addr.postal_code,
+            country: addr.country,
+            phone: addr.phone,
+            isDefault: addr.is_default
+        }));
+
+        userProfile.addresses = mappedAddresses;
+
         const appType = req.headers['x-app-type'] || 'frontend';
         const userData = sendTokenResponse(res, data.session, userProfile, appType);
 
@@ -212,8 +260,23 @@ exports.login = async (req, res, next) => {
 // ── @route POST /api/auth/logout ──────────────────────────────
 exports.logout = async (req, res, next) => {
     try {
-        if (req.supabaseToken) {
-            await supabaseAdmin.auth.admin.signOut(req.supabaseToken);
+        let token;
+        
+        // Extract token from cookies or authorization header
+        if (req.cookies?.accessToken) token = req.cookies.accessToken;
+        else if (req.cookies?.adminToken) token = req.cookies.adminToken;
+        else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+            token = req.headers.authorization.split(' ')[1];
+        }
+
+        // Only try to sign out from Supabase if we have a token
+        if (token) {
+            try {
+                await supabaseAdmin.auth.admin.signOut(token);
+            } catch (signOutError) {
+                // Ignore sign out errors (token might already be expired/invalid)
+                console.warn('Supabase sign out failed during logout (expected if token expired):', signOutError.message);
+            }
         }
 
         res.clearCookie('accessToken');
@@ -270,7 +333,29 @@ exports.getMe = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        const userWithId = { ...userProfile, _id: userProfile.id };
+        // Fetch user addresses
+        const { data: addresses } = await supabaseAdmin
+            .from('addresses')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .order('is_default', { ascending: false });
+
+        // Map camelCase for frontend
+        const mappedAddresses = (addresses || []).map(addr => ({
+            _id: addr.id,
+            id: addr.id,
+            name: addr.name,
+            street: addr.street,
+            city: addr.city,
+            state: addr.state,
+            postalCode: addr.postal_code || addr.zip_code, // fallback if schema uses zip_code
+            zipCode: addr.zip_code || addr.postal_code,
+            country: addr.country,
+            phone: addr.phone,
+            isDefault: addr.is_default
+        }));
+
+        const userWithId = { ...userProfile, _id: userProfile.id, addresses: mappedAddresses };
         return res.status(200).json({ success: true, user: userWithId, data: userWithId });
     } catch (error) {
         next(error);
@@ -303,40 +388,20 @@ exports.forgotPassword = async (req, res, next) => {
             });
         }
 
-        // 2. Try Supabase generateLink first (fastest if it works)
-        let resetUrl = null;
-        try {
-            const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-                type: 'recovery',
-                email,
-                options: { redirectTo: `${process.env.FRONTEND_URL}/reset-password` }
-            });
-            if (!linkError && linkData?.properties?.action_link) {
-                resetUrl = linkData.properties.action_link;
-                console.log('🔗 Generated recovery link via Supabase.');
-            } else {
-                console.warn('⚠️ Supabase generateLink failed:', linkError?.message);
-            }
-        } catch (genErr) {
-            console.warn('⚠️ Supabase generateLink threw:', genErr.message);
-        }
+        // 2. Generate our own reset token (always reliable, bypasses Supabase Auth issues)
+        const token = crypto.randomBytes(32).toString('hex');
+        const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
 
-        // 3. If Supabase failed, generate our own token and store it
-        if (!resetUrl) {
-            const token = crypto.randomBytes(32).toString('hex');
-            const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+        // Store token in settings table (as a temporary key-value pair)
+        await supabaseAdmin
+            .from('settings')
+            .upsert({
+                key: `reset_token_${user.id}`,
+                value: JSON.stringify({ token, expires: tokenExpiry })
+            }, { onConflict: 'key' });
 
-            await supabaseAdmin
-                .from('users')
-                .update({ 
-                    reset_token: token, 
-                    reset_token_expires: tokenExpiry 
-                })
-                .eq('id', user.id);
-
-            resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}&type=custom`;
-            console.log('🔐 Generated manual reset token for:', email);
-        }
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}&type=custom&uid=${user.id}`;
+        console.log('🔐 Generated reset token for:', email);
 
         // 4. Send the email via our SMTP (this always works now!)
         const sent = await sendTemplateEmail(email, 'reset_password', {
@@ -373,13 +438,70 @@ exports.forgotPassword = async (req, res, next) => {
 // ── @route PUT /api/auth/reset-password ──────────────────────
 exports.resetPassword = async (req, res, next) => {
     try {
-        const { token, password } = req.body;
+        // Support both: PUT body token AND legacy POST /:token param
+        const token = req.body.token || req.params.token;
+        const { password, type, uid } = req.body;
 
         if (!token || !password) {
             return res.status(400).json({ success: false, message: 'Token and new password are required' });
         }
 
-        // Exchange the recovery token for a session
+        // Handle our custom manual tokens
+        if (type === 'custom' && uid) {
+            // Verify token from settings table
+            const { data: setting } = await supabaseAdmin
+                .from('settings')
+                .select('value')
+                .eq('key', `reset_token_${uid}`)
+                .maybeSingle();
+
+            if (!setting) {
+                return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+            }
+
+            const tokenData = JSON.parse(setting.value);
+            if (tokenData.token !== token || new Date(tokenData.expires) < new Date()) {
+                return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+            }
+
+            // Update password via Supabase Admin
+            const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(uid, { password });
+            
+            if (updateError) {
+                console.warn('⚠️ updateUserById failed (likely corrupted migration user):', updateError.message);
+                
+                // Fallback: Get user email, delete old Auth record, recreate with new password
+                const { data: userRow } = await supabaseAdmin.from('users').select('email, name').eq('id', uid).single();
+                if (!userRow) throw new Error('User not found in database');
+
+                // Delete corrupted Auth user
+                try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch (e) { /* may also fail, continue */ }
+
+                // Recreate with new password
+                const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+                    email: userRow.email,
+                    password,
+                    email_confirm: true,
+                    user_metadata: { name: userRow.name }
+                });
+
+                if (createError) throw createError;
+
+                // Update the users table to point to the new Auth ID
+                if (newUser.user.id !== uid) {
+                    await supabaseAdmin.from('users').update({ id: newUser.user.id }).eq('id', uid);
+                }
+
+                console.log('✅ User recreated with new password successfully');
+            }
+
+            // Clean up the token
+            await supabaseAdmin.from('settings').delete().eq('key', `reset_token_${uid}`);
+
+            return res.status(200).json({ success: true, message: 'Password reset successful' });
+        }
+
+        // Handle Supabase native recovery tokens
         const { data, error } = await supabaseAdmin.auth.exchangeCodeForSession(token);
 
         if (error) {
@@ -453,18 +575,28 @@ exports.verifyEmail = async (req, res, next) => {
 // ── @route PUT /api/auth/update-profile ──────────────────────
 exports.updateProfile = async (req, res, next) => {
     try {
-        const { name, phone, preferredLanguage, notificationPrefs } = req.body;
+        const { name, phone, preferredLanguage, notificationPrefs, avatar } = req.body;
 
         const updateData = {};
-        if (name) updateData.name = name;
-        if (phone) updateData.phone = phone;
-        if (preferredLanguage) updateData.preferred_language = preferredLanguage;
+        if (name !== undefined) updateData.name = name;
+        if (phone !== undefined) updateData.phone = phone;
+        if (preferredLanguage !== undefined) updateData.preferred_language = preferredLanguage;
+        if (avatar !== undefined) updateData.avatar = avatar;
         if (notificationPrefs) {
             if (notificationPrefs.orderUpdates !== undefined) updateData.notif_order_updates = notificationPrefs.orderUpdates;
             if (notificationPrefs.repairStatus !== undefined) updateData.notif_repair_status = notificationPrefs.repairStatus;
             if (notificationPrefs.promotions !== undefined) updateData.notif_promotions = notificationPrefs.promotions;
             if (notificationPrefs.newsletter !== undefined) updateData.notif_newsletter = notificationPrefs.newsletter;
         }
+
+        // If nothing to update, just return current user
+        if (Object.keys(updateData).length === 0) {
+            const { data: currentUser } = await supabaseAdmin.from('users').select('*').eq('id', req.user.id).single();
+            const userWithId = { ...currentUser, _id: currentUser.id };
+            return res.status(200).json({ success: true, user: userWithId, data: userWithId });
+        }
+
+        updateData.updated_at = new Date().toISOString();
 
         const { data, error } = await supabaseAdmin
             .from('users')
@@ -473,11 +605,15 @@ exports.updateProfile = async (req, res, next) => {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('❌ updateProfile DB error:', error.message, error.details);
+            throw error;
+        }
 
         const userWithId = { ...data, _id: data.id };
         return res.status(200).json({ success: true, user: userWithId, data: userWithId });
     } catch (error) {
+        console.error('❌ updateProfile error:', error.message);
         next(error);
     }
 };

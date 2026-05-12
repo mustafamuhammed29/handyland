@@ -35,6 +35,34 @@ exports.getSettings = async (req, res, next) => {
     } catch (error) { next(error); }
 };
 
+// ── @route GET /api/settings/payment-config ───────────────────
+exports.getPaymentConfig = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('settings')
+            .select('value')
+            .eq('key', 'payment')
+            .single();
+
+        if (error || !data || !data.value) {
+            return res.status(200).json({ success: true, data: {} });
+        }
+
+        let paymentSettings = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+
+        // Clean out secret keys before sending to frontend
+        const safeSettings = {};
+        for (const [provider, config] of Object.entries(paymentSettings)) {
+            safeSettings[provider] = { ...config };
+            delete safeSettings[provider].secretKey;
+        }
+
+        return res.status(200).json({ success: true, data: safeSettings });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // ── @route PUT /api/settings (Admin) ──────────────────────────
 exports.updateSettings = async (req, res, next) => {
     try {

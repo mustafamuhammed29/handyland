@@ -141,22 +141,61 @@ exports.addToCart = async (req, res, next) => {
     }
 };
 
-// ── @route PUT /api/cart/:itemId ──────────────────────────────
 exports.updateCartItem = async (req, res, next) => {
     try {
-        const { quantity } = req.body;
-        const { itemId } = req.params;
+        const { id, quantity, productType = 'Product' } = req.body;
+        
+        if (!id) return res.status(400).json({ success: false, message: 'Product ID is required' });
+
+        const cart = await getCart(req.user.id);
+        const idField = (productType === 'Product' || productType === 'device') ? 'product_id' : 'accessory_id';
 
         if (!quantity || quantity < 1) {
-            return exports.removeFromCart(req, res, next);
+            await supabaseAdmin.from('cart_items').delete().eq('cart_id', cart.id).eq(idField, id);
+            await supabaseAdmin.from('carts').update({ updated_at: new Date().toISOString() }).eq('id', cart.id);
+            return exports.getCart(req, res, next);
         }
 
         const { error } = await supabaseAdmin
             .from('cart_items')
             .update({ quantity: Number(quantity) })
-            .eq('id', itemId);
+            .eq('cart_id', cart.id)
+            .eq(idField, id);
 
         if (error) throw error;
+        
+        await supabaseAdmin.from('carts').update({ updated_at: new Date().toISOString() }).eq('id', cart.id);
+
+        return exports.getCart(req, res, next);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.syncCart = async (req, res, next) => {
+    try {
+        const { localItems = [] } = req.body;
+        const cart = await getCart(req.user.id);
+
+        if (localItems.length > 0) {
+            await supabaseAdmin.from('cart_items').delete().eq('cart_id', cart.id);
+            
+            const insertData = localItems.map(item => {
+                const isAccessory = item.category === 'Accessory' || item.category === 'accessory';
+                const d = {
+                    cart_id: cart.id,
+                    product_type: isAccessory ? 'Accessory' : 'Product',
+                    quantity: item.quantity
+                };
+                if (isAccessory) d.accessory_id = item.id;
+                else d.product_id = item.id;
+                return d;
+            });
+
+            await supabaseAdmin.from('cart_items').insert(insertData);
+            await supabaseAdmin.from('carts').update({ updated_at: new Date().toISOString() }).eq('id', cart.id);
+        }
+
         return exports.getCart(req, res, next);
     } catch (error) {
         next(error);
@@ -205,12 +244,35 @@ exports.getAllCarts = async (req, res, next) => {
 
         if (error) throw error;
 
-        const enrichedCarts = (data || []).filter(c => c.cart_items?.length > 0).map(c => ({
-            ...c,
-            _id: c.id,
-            user: c.users,
-            items: c.cart_items
-        }));
+        // Fetch product/accessory details for ALL carts
+        const enrichedCarts = await Promise.all(
+            (data || []).filter(c => c.cart_items?.length > 0).map(async (c) => {
+                
+                const enrichedItems = await Promise.all(
+                    c.cart_items.map(async (item) => {
+                        const table = item.product_type === 'Product' ? 'products' : 'accessories';
+                        const id = item.product_type === 'Product' ? item.product_id : item.accessory_id;
+        
+                        if (!id) return item;
+
+                        const { data: product } = await supabaseAdmin
+                            .from(table)
+                            .select('id, name, price, image, stock, is_active')
+                            .eq('id', id)
+                            .single();
+        
+                        return { ...item, product };
+                    })
+                );
+
+                return {
+                    ...c,
+                    _id: c.id,
+                    user: c.users,
+                    items: enrichedItems
+                };
+            })
+        );
 
         return res.status(200).json({ success: true, carts: enrichedCarts, data: enrichedCarts });
     } catch (error) {

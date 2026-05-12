@@ -3,7 +3,7 @@ import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, 
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../utils/api';
-import ImageUpload from '../components/ImageUpload';
+
 
 // Extracted Tab Components
 import { HeroSettingsTab } from './settings/HeroSettingsTab';

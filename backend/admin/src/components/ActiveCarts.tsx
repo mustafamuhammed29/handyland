@@ -49,6 +49,10 @@ export const ActiveCarts = () => {
 
             if (Array.isArray(data)) {
                 setCarts(data);
+            } else if (data.carts && Array.isArray(data.carts)) {
+                setCarts(data.carts);
+            } else if (data.data && Array.isArray(data.data)) {
+                setCarts(data.data);
             } else {
                 setCarts([]);
             }

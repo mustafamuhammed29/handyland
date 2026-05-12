@@ -53,11 +53,11 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
             title: cleanProductName(phone.model || (phone as any).name || 'Unknown Product', phone.brand),
             subtitle: `${phone.storage || ''} • ${phone.color || ''}`.replace(/^ • | • $/g, '') || '',
             price: phone.price || 0,
-            image: getImageUrl(phone.images?.[0] || phone.imageUrl || ''),
+            image: getImageUrl(phone.images?.[0] || phone.imageUrl || (phone as any).image || ''),
             category: 'device',
             stock: phone.stock || 0
         });
-        addToast(`${phone.model} added to cart`, 'success');
+        addToast(`${phone.model || (phone as any).name} added to cart`, 'success');
     }, [addToCart, addToast]);
 
     const handleBuyNow = React.useCallback((phone: PhoneListing) => {

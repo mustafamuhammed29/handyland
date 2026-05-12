@@ -63,7 +63,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
             <div className="flex flex-col md:flex-row gap-4 justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-white">{t('orders.title', 'Meine Bestellungen')}</h2>
-                    <p className="text-slate-400 text-sm">{t('orders.found', { count: filteredOrders.length })}</p>
+                    <p className="text-slate-400 text-sm">{t('orders.found', '{{count}} Bestellungen gefunden', { count: filteredOrders.length })}</p>
                 </div>
 
                 <div className="flex gap-3">
@@ -112,7 +112,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                     <div>
                                         <h3 className="font-bold text-white">{t('orders.orderLabel', 'Bestellung')} {order.orderNumber || `#${order._id?.slice(-8)}`}</h3>
                                         <p className="text-sm text-slate-400">
-                                            {new Date(order.createdAt).toLocaleDateString()} • {t('orders.items', { count: order.items?.length || 0 })}
+                                            {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '---'} • {t('orders.items', '{{count}} Artikel', { count: order.items?.length || 0 })}
                                         </p>
                                     </div>
                                 </div>
@@ -171,13 +171,15 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                             {t('orders.actions.uploadReceipt', 'Beleg hochladen')}
                                         </button>
                                     )}
-                                    <button
-                                        onClick={() => onDownloadInvoice(order._id)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition-colors"
-                                    >
-                                        <Download className="w-4 h-4" />
-                                        {t('orders.actions.downloadInvoice', 'Rechnung herunterladen')}
-                                    </button>
+                                    {order.hasInvoice && (
+                                        <button
+                                            onClick={() => onDownloadInvoice(order._id)}
+                                            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition-colors"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                            {t('orders.actions.downloadInvoice', 'Rechnung herunterladen')}
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => navigate(`/orders/${order._id}`)}
                                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-colors"

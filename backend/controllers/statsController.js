@@ -72,3 +72,41 @@ exports.getRevenueChartData = async (req, res, next) => {
         return res.status(200).json({ success: true, labels, data });
     } catch (error) { next(error); }
 };
+
+// @route GET /api/stats/user
+exports.getUserStats = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+
+        // Total orders
+        const { count: totalOrders } = await supabaseAdmin.from('orders')
+            .select('id', { count: 'exact' }).eq('user_id', userId);
+
+        // Total spent
+        const { data: spentData } = await supabaseAdmin.from('orders')
+            .select('total_amount')
+            .eq('user_id', userId)
+            .in('status', ['processing', 'shipped', 'delivered']);
+        const totalSpent = spentData ? spentData.reduce((sum, o) => sum + Number(o.total_amount), 0) : 0;
+
+        // Active repairs
+        const { count: activeRepairs } = await supabaseAdmin.from('repair_tickets')
+            .select('id', { count: 'exact' })
+            .eq('user_id', userId)
+            .in('status', ['pending', 'in_progress', 'waiting_parts']);
+
+        // Wishlist count
+        const { count: wishlistCount } = await supabaseAdmin.from('wishlists')
+            .select('id', { count: 'exact' }).eq('user_id', userId);
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                totalOrders: totalOrders || 0,
+                totalSpent: Number((totalSpent || 0).toFixed(2)),
+                activeRepairs: activeRepairs || 0,
+                wishlistCount: wishlistCount || 0
+            }
+        });
+    } catch (error) { next(error); }
+};

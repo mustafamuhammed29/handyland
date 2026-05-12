@@ -23,8 +23,6 @@ export const SEOTab = ({ settings, handleChange }: any) => {
                         <ImageUpload
                             value={settings.seo?.faviconUrl || ''}
                             onChange={(url: string) => handleChange('seo', 'faviconUrl', url)}
-                            placeholder="Upload Favicon"
-                            bucket="misc"
                         />
                         <p className="text-xs text-slate-500 mt-2">Recommended: 32x32px or 64x64px square image (.ico or .png).</p>
                     </div>
@@ -33,8 +31,6 @@ export const SEOTab = ({ settings, handleChange }: any) => {
                         <ImageUpload
                             value={settings.seo?.defaultOgImage || ''}
                             onChange={(url: string) => handleChange('seo', 'defaultOgImage', url)}
-                            placeholder="Upload Social Image"
-                            bucket="misc"
                         />
                         <p className="text-xs text-slate-500 mt-2">Recommended: 1200x630px. Used when sharing links on Facebook, Twitter, WhatsApp, etc.</p>
                     </div>

@@ -21,12 +21,14 @@ exports.getWishlist = async (req, res, next) => {
 
         if (error) throw error;
 
-        // Clean up data formatting
-        const formattedData = data.map(item => ({
-            id: item.id,
-            productType: item.product_type,
-            item: item.product_type === 'Product' ? item.products : item.accessories
-        }));
+        // Clean up data formatting and filter out items where the linked product/accessory doesn't exist
+        const formattedData = data
+            .filter(item => item.product_type === 'Product' ? item.products !== null : item.accessories !== null)
+            .map(item => ({
+                id: item.id,
+                productType: item.product_type,
+                item: item.product_type === 'Product' ? item.products : item.accessories
+            }));
 
         return res.status(200).json({ success: true, data: formattedData });
     } catch (error) { next(error); }
@@ -35,8 +37,10 @@ exports.getWishlist = async (req, res, next) => {
 // @route POST /api/wishlist
 exports.addToWishlist = async (req, res, next) => {
     try {
-        const { itemId, productType = 'Product' } = req.body;
-        if (!itemId) return res.status(400).json({ success: false, message: 'Item ID is required' });
+        const { itemId, productId, productType = 'Product' } = req.body;
+        const actualItemId = itemId || productId;
+        
+        if (!actualItemId) return res.status(400).json({ success: false, message: 'Item ID is required' });
 
         const idField = productType === 'Product' ? 'product_id' : 'accessory_id';
 
@@ -45,14 +49,14 @@ exports.addToWishlist = async (req, res, next) => {
             .from('wishlists')
             .select('id')
             .eq('user_id', req.user.id)
-            .eq(idField, itemId)
+            .eq(idField, actualItemId)
             .single();
 
         if (existing) return res.status(200).json({ success: true, message: 'Item already in wishlist' });
 
         const { data, error } = await supabaseAdmin
             .from('wishlists')
-            .insert({ user_id: req.user.id, product_type: productType, [idField]: itemId })
+            .insert({ user_id: req.user.id, product_type: productType, [idField]: actualItemId })
             .select().single();
 
         if (error) throw error;

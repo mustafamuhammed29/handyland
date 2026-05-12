@@ -39,7 +39,8 @@ exports.getAddress = async (req, res, next) => {
 // @route POST /api/addresses
 exports.createAddress = async (req, res, next) => {
     try {
-        const { fullName, email, phone, street, city, zipCode, country, isDefault } = req.body;
+        const { name, fullName, email, phone, street, city, state, zipCode, country, isDefault } = req.body;
+        const actualFullName = fullName || name;
 
         if (isDefault) {
             // Remove existing default
@@ -50,32 +51,40 @@ exports.createAddress = async (req, res, next) => {
             .from('addresses')
             .insert({
                 user_id: req.user.id,
-                full_name: fullName,
-                email, phone, street, city, zip_code: zipCode, country: country || 'Germany',
+                full_name: actualFullName,
+                email, phone, street, city, state, zip_code: zipCode, country: country || 'Germany',
                 is_default: isDefault || false
             })
             .select().single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Supabase Add Address Error:', error.message, error.details);
+            throw error;
+        }
         return res.status(201).json({ success: true, data });
-    } catch (error) { next(error); }
+    } catch (error) { 
+        console.error('❌ createAddress catch Error:', error);
+        next(error); 
+    }
 };
 
 // @route PUT /api/addresses/:id
 exports.updateAddress = async (req, res, next) => {
     try {
-        const { fullName, email, phone, street, city, zipCode, country, isDefault } = req.body;
+        const { name, fullName, email, phone, street, city, state, zipCode, country, isDefault } = req.body;
+        const actualFullName = fullName || name;
 
         if (isDefault) {
             await supabaseAdmin.from('addresses').update({ is_default: false }).eq('user_id', req.user.id);
         }
 
         const updateData = {};
-        if (fullName) updateData.full_name = fullName;
+        if (actualFullName) updateData.full_name = actualFullName;
         if (email) updateData.email = email;
         if (phone) updateData.phone = phone;
         if (street) updateData.street = street;
         if (city) updateData.city = city;
+        if (state) updateData.state = state;
         if (zipCode) updateData.zip_code = zipCode;
         if (country) updateData.country = country;
         if (isDefault !== undefined) updateData.is_default = isDefault;

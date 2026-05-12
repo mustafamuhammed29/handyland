@@ -61,6 +61,7 @@ export const AddressesTab: React.FC<AddressesTabProps> = ({
                                     <p className="text-white font-bold text-sm">{addr.name}</p>
                                     <p className="text-slate-400 text-sm mt-0.5">
                                         {addr.street}, {addr.city}
+                                        {addr.state ? `, ${addr.state}` : ''}
                                         {(addr as any).postalCode || addr.zipCode ? `, ${(addr as any).postalCode || addr.zipCode}` : ''}
                                         {addr.country ? `, ${addr.country}` : ''}
                                     </p>

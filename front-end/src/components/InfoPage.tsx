@@ -8,8 +8,8 @@ interface InfoPageProps {}
 
 const PAGE_TITLES: Record<string, string> = {
     '/agb': 'agb',
-    '/datenschutz': 'datenschutz',
-    '/privacy': 'datenschutz',
+    '/datenschutz': 'privacy',
+    '/privacy': 'privacy',
     '/impressum': 'impressum',
     '/kundenservice': 'kundenservice',
     '/service': 'kundenservice',

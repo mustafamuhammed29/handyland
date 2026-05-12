@@ -288,7 +288,14 @@ export default function ShippingManager() {
                                     <input
                                         type="checkbox"
                                         checked={formData.isExpress}
-                                        onChange={e => setFormData({ ...formData, isExpress: e.target.checked })}
+                                        onChange={e => {
+                                            const isChecked = e.target.checked;
+                                            let newName = formData.name || '';
+                                            if (isChecked && !newName.toLowerCase().includes('express')) {
+                                                newName = newName ? `${newName} (Express)` : 'Express';
+                                            }
+                                            setFormData({ ...formData, isExpress: isChecked, name: newName });
+                                        }}
                                         className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-500 focus:ring-blue-500"
                                     />
                                     <span className="text-sm font-bold text-orange-400">Express Method</span>

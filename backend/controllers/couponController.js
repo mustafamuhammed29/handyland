@@ -134,7 +134,13 @@ exports.validateCoupon = async (req, res, next) => {
             discountAmount = Math.min(discountAmount, cartTotal);
         }
 
-        return res.status(200).json({ success: true, data: coupon, calculatedDiscount: discountAmount });
+        return res.status(200).json({ 
+            success: true, 
+            data: coupon, 
+            calculatedDiscount: discountAmount,
+            couponCode: coupon.code,
+            discount: discountAmount
+        });
     } catch (error) { next(error); }
 };
 

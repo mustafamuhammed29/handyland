@@ -125,6 +125,7 @@ router.post('/forgot-password', emailLimiter, validate([
     body('email').isEmail().normalizeEmail().withMessage('Valid email is required')
 ]), authController.forgotPassword);
 router.post('/reset-password/:token', authController.resetPassword);
+router.put('/reset-password', authController.resetPassword);
 router.get('/verify-email/:token', emailLimiter, authController.verifyEmail);
 router.post('/resend-verification', emailLimiter, authController.resendVerification);
 
@@ -148,7 +149,7 @@ router.get('/me', protect, authController.getMe);
 router.put('/updateprofile', protect, authController.updateProfile);
 router.put('/changepassword', protect, authController.updatePassword);
 router.post('/refresh', authController.refreshToken);
-router.post('/logout', protect, authController.logout);
+router.post('/logout', authController.logout);
 
 // Email availability check (used for live validation in Register form)
 const checkEmailLimiter = rateLimit({

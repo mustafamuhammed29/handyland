@@ -82,10 +82,10 @@ export const authService = {
         }
     },
 
-    resetPassword: async (token: string, password: string): Promise<any> => {
+    resetPassword: async (token: string, password: string, type?: string, uid?: string): Promise<any> => {
         try {
             await api.get('/api/auth/csrf');
-            const response = await api.post(`/api/auth/reset-password/${token}`, { password });
+            const response = await api.put('/api/auth/reset-password', { token, password, type, uid });
             return response as any;
         } catch (error) {
             devLog('Auth Service Reset Password Error:', error);
@@ -105,6 +105,7 @@ export const authService = {
 
     updateProfile: async (data: Partial<User>): Promise<{ success: boolean; user: User }> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.put('/api/auth/updateprofile', data);
             return response as any;
         } catch (error) {
@@ -115,6 +116,7 @@ export const authService = {
 
     updatePassword: async (passwords: { oldPassword: string, newPassword: string }): Promise<{ success: boolean; message: string }> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.put('/api/auth/changepassword', { currentPassword: passwords.oldPassword, newPassword: passwords.newPassword });
             return response as any;
         } catch (error) {
@@ -125,6 +127,7 @@ export const authService = {
 
     addAddress: async (address: any): Promise<{ success: boolean; addresses: any[] }> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.post('/api/addresses', address);
             return response as any;
         } catch (error) {
@@ -145,6 +148,7 @@ export const authService = {
 
     updateAddress: async (id: string, address: any): Promise<{ success: boolean; addresses: any[] }> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.put(`/api/addresses/${id}`, address);
             return response as any;
         } catch (error) {
@@ -155,6 +159,7 @@ export const authService = {
 
     deleteAddress: async (id: string): Promise<{ success: boolean; addresses: any[] }> => {
         try {
+            await api.get('/api/auth/csrf');
             const response = await api.delete(`/api/addresses/${id}`);
             return response as any;
         } catch (error) {

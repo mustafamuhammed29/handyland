@@ -6,7 +6,7 @@ import { api } from '../utils/api';
 
 const PAGES = [
     { id: 'agb', label: 'AGB', full: 'Geschäftsbedingungen', icon: BookOpen },
-    { id: 'datenschutz', label: 'Datenschutz', full: 'Privatsphäre', icon: ShieldCheck },
+    { id: 'privacy', label: 'Privacy', full: 'Datenschutz & Privatsphäre', icon: ShieldCheck },
     { id: 'impressum', label: 'Impressum', full: 'Rechtliches', icon: Info },
     { id: 'kundenservice', label: 'Service', full: 'Hilfe & Kontakt', icon: HelpCircle },
     { id: 'ueber-uns', label: 'Über Uns', full: 'Unsere Story', icon: Users }
@@ -26,7 +26,7 @@ const QUILL_FORMATS = [
 ];
 
 export default function PageManager() {
-    const [selectedPage, setSelectedPage] = useState('impressum');
+    const [selectedPage, setSelectedPage] = useState('agb');
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);

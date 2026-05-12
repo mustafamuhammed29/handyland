@@ -335,7 +335,18 @@ export const ComparePage: React.FC = () => {
                                                 Details
                                             </button>
                                             <button 
-                                                onClick={() => addToCart(product)}
+                                                onClick={() => {
+                                                    const imageUrl = product.images?.length ? product.images[0] : (product.image || product.imageUrl || product.thumbnail);
+                                                    addToCart({
+                                                        id: product.id || product._id,
+                                                        title: product.name || product.model || 'Unknown Product',
+                                                        subtitle: product.storage ? `${product.storage} • ${product.color}` : undefined,
+                                                        price: product.pricing?.basePrice || product.price,
+                                                        image: getImageUrl(imageUrl),
+                                                        category: 'device',
+                                                        stock: product.stock ?? 0
+                                                    });
+                                                }}
                                                 className="flex-1 py-2.5 bg-brand-primary hover:bg-brand-secondary text-black rounded-xl text-sm font-bold transition-colors shadow-[0_0_15px_rgba(var(--brand-primary),0.3)] flex items-center justify-center gap-1"
                                             >
                                                 <ShoppingCart className="w-4 h-4" /> Add

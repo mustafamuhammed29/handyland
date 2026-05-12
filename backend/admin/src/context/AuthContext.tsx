@@ -76,15 +76,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
+        // Clear state SYNCHRONOUSLY to prevent redirect loops
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem('adminUser');
+        sessionStorage.removeItem('adminSocketToken');
+
         try {
             await api.post('/api/auth/logout');
         } catch (error) {
             console.error('Logout failed:', error);
-        } finally {
-            setUser(null);
-            setIsAuthenticated(false);
-            localStorage.removeItem('adminUser');
-            sessionStorage.removeItem('adminSocketToken');
         }
     };
 

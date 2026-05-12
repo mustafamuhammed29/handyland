@@ -38,14 +38,13 @@ router.put('/:id', protect, authorize('admin'), productController.updateProduct)
 router.delete('/:id', protect, authorize('admin'), productController.deleteProduct);
 
 // Reviews
-// router.post('/:id/reviews', protect, productController.createProductReview);
-// router.get('/:id/reviews', productController.getProductReviews);
+router.get('/:id/reviews', productController.getProductReviews);
 
 // Related Products
-// router.get('/:id/related', productController.getRelatedProducts);
+router.get('/:id/related', productController.getRelatedProducts);
 
 // Q&A
-// router.get('/:id/questions', productController.getProductQuestions);
+router.get('/:id/questions', productController.getProductQuestions);
 // router.post('/:id/questions', protect, productController.askQuestion);
 // router.put('/questions/:id/answer', protect, authorize('admin'), productController.answerQuestion);
 

@@ -127,7 +127,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
                 <Link to="/track-repair" className="hover:text-brand-primary uppercase transition-colors text-brand-primary font-bold">{t('hero.trackRepair')}</Link>
             )}
             <Link to="/agb" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">AGB</Link>
-            <Link to="/datenschutz" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Datenschutz</Link>
+            <Link to="/privacy" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Datenschutz</Link>
             <Link to="/impressum" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Impressum</Link>
             <Link to="/kundenservice" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Kundenservice</Link>
             <Link to="/uber-uns" className="hover:text-slate-900 dark:hover:text-white uppercase transition-colors">Über Uns</Link>

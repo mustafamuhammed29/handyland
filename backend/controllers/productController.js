@@ -336,3 +336,43 @@ exports.getProductStats = async (req, res, next) => {
         return res.status(200).json({ success: true, data: stats });
     } catch (error) { next(error); }
 };
+
+exports.getRelatedProducts = async (req, res, next) => {
+    try {
+        const { data: product } = await supabaseAdmin
+            .from('products')
+            .select('brand, category')
+            .eq('id', req.params.id)
+            .single();
+
+        if (!product) return res.status(200).json({ success: true, products: [] });
+
+        const { data: related } = await supabaseAdmin
+            .from('products')
+            .select('*')
+            .eq('is_active', true)
+            .neq('id', req.params.id)
+            .or(`brand.eq."${product.brand}",category.eq."${product.category}"`)
+            .limit(4);
+
+        res.status(200).json({ success: true, products: related || [] });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getProductReviews = async (req, res, next) => {
+    try {
+        res.status(200).json({ success: true, reviews: [] });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getProductQuestions = async (req, res, next) => {
+    try {
+        res.status(200).json({ success: true, questions: [] });
+    } catch (error) {
+        next(error);
+    }
+};

@@ -51,7 +51,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
     const { t } = useTranslation();
 
     return (
-        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 sticky top-28 shadow-2xl">
+        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 sticky top-28 shadow-2xl max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between">
                 <span>{t('checkout.orderSummary', 'Order Summary')}</span>
                 <span className="text-xs font-normal text-slate-500">{cart.length} {t('checkout.items', 'Items')}</span>

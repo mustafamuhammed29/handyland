@@ -54,10 +54,12 @@ const ResetPassword: React.FC = () => {
         }
 
         const token = searchParams.get('token');
+        const type = searchParams.get('type') || undefined;
+        const uid = searchParams.get('uid') || undefined;
         setStatus('loading');
 
         try {
-            const data = await authService.resetPassword(token as string, password);
+            const data = await authService.resetPassword(token as string, password, type, uid);
 
             if (data.success) {
                 setStatus('success');

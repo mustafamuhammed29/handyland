@@ -6,6 +6,7 @@
 
 const { supabaseAdmin } = require('../config/supabase');
 const crypto = require('crypto');
+const PDFDocument = require('pdfkit');
 
 const generateOrderNumber = () => {
     const now = new Date();
@@ -14,6 +15,43 @@ const generateOrderNumber = () => {
     const d = String(now.getDate()).padStart(2, '0');
     const suffix = crypto.randomBytes(3).toString('hex').toUpperCase();
     return `HL-${y}${m}${d}-${suffix}`;
+};
+
+const mapOrder = (o) => {
+    if (!o) return null;
+    return {
+        ...o,
+        _id: o.id,
+        orderNumber: o.order_number,
+        totalAmount: o.total_amount,
+        shippingFee: o.shipping_fee,
+        shippingMethod: o.shipping_method,
+        discountAmount: o.discount_amount,
+        couponCode: o.coupon_code,
+        appliedPoints: o.applied_points,
+        pointsEarned: o.points_earned,
+        paymentMethod: o.payment_method,
+        paymentStatus: o.payment_status,
+        hasInvoice: o.invoice_generated,
+        invoiceGeneratedAt: o.invoice_generated_at,
+        shippingAddress: {
+            fullName: o.shipping_full_name,
+            email: o.shipping_email,
+            phone: o.shipping_phone,
+            street: o.shipping_street,
+            city: o.shipping_city,
+            zipCode: o.shipping_zip,
+            country: o.shipping_country
+        },
+        createdAt: o.created_at,
+        updatedAt: o.updated_at,
+        items: (o.order_items || []).map(item => ({
+            ...item,
+            productId: item.product_id,
+            accessoryId: item.accessory_id,
+            productType: item.product_type
+        }))
+    };
 };
 
 // ── @route GET /api/orders ────────────────────────────────────
@@ -37,14 +75,14 @@ exports.getOrders = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
-        const ordersWithId = (data || []).map(o => ({ ...o, _id: o.id, items: o.order_items || [] }));
-
+        const ordersMapped = (data || []).map(mapOrder);
+        
         return res.status(200).json({
             success: true,
             count,
             pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
-            orders: ordersWithId,
-            data: ordersWithId
+            orders: ordersMapped,
+            data: ordersMapped
         });
     } catch (error) {
         next(error);
@@ -67,9 +105,9 @@ exports.getOrder = async (req, res, next) => {
             return res.status(403).json({ success: false, message: 'Not authorized' });
         }
 
-        const mappedData = { ...data, _id: data.id, items: data.order_items || [] };
+        const mappedData = mapOrder(data);
 
-        return res.status(200).json({ success: true, data: mappedData });
+        return res.status(200).json({ success: true, order: mappedData, data: mappedData });
     } catch (error) {
         next(error);
     }
@@ -93,16 +131,16 @@ exports.createOrder = async (req, res, next) => {
             const { data: product, error } = await supabaseAdmin
                 .from(table)
                 .select('id, name, price, stock, image')
-                .eq('id', item.productId)
+                .eq('id', item.product)
                 .single();
 
-            if (error || !product) return res.status(400).json({ success: false, message: `Product not found: ${item.productId}` });
+            if (error || !product) return res.status(400).json({ success: false, message: `Product not found: ${item.product}` });
             if (product.stock < item.quantity) return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}` });
 
             itemsTotal += product.price * item.quantity;
             orderItems.push({
-                product_id: item.productType === 'Product' ? item.productId : null,
-                accessory_id: item.productType === 'Accessory' ? item.productId : null,
+                product_id: item.productType === 'Product' ? item.product : null,
+                accessory_id: item.productType === 'Accessory' ? item.product : null,
                 product_type: item.productType,
                 name: product.name,
                 quantity: item.quantity,
@@ -194,7 +232,10 @@ exports.createOrder = async (req, res, next) => {
         // Decrement stock
         for (const item of items) {
             const table = item.productType === 'Product' ? 'products' : 'accessories';
-            await supabaseAdmin.rpc('decrement_stock', { table_name: table, item_id: item.productId, qty: item.quantity });
+            const { data: p } = await supabaseAdmin.from(table).select('stock').eq('id', item.product).single();
+            if (p) {
+                await supabaseAdmin.from(table).update({ stock: Math.max(0, p.stock - item.quantity) }).eq('id', item.product);
+            }
         }
 
         // Update coupon usage
@@ -204,9 +245,12 @@ exports.createOrder = async (req, res, next) => {
 
         // Award loyalty points
         if (req.user?.id && pointsEarned > 0) {
-            await supabaseAdmin.from('users').update({
-                loyalty_points: supabaseAdmin.rpc('increment', { x: pointsEarned })
-            }).eq('id', req.user.id);
+            const { data: user } = await supabaseAdmin.from('users').select('loyalty_points').eq('id', req.user.id).single();
+            if (user) {
+                await supabaseAdmin.from('users').update({
+                    loyalty_points: (user.loyalty_points || 0) + pointsEarned
+                }).eq('id', req.user.id);
+            }
         }
 
         // Clear cart
@@ -371,6 +415,119 @@ exports.getOrderTimeline = async (req, res, next) => {
         }, []);
 
         return res.status(200).json({ success: true, timeline, data: { timeline } });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route GET /api/orders/:id/invoice ───────────────────────
+exports.generateInvoice = async (req, res, next) => {
+    try {
+        const { data: order, error } = await supabaseAdmin
+            .from('orders')
+            .select('*, order_items(*)')
+            .eq('id', req.params.id)
+            .single();
+
+        if (error || !order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+        // Check auth
+        const isAdmin = req.user?.role === 'admin';
+        if (!isAdmin && order.user_id !== req.user?.id) {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        // Check if generated (unless admin)
+        if (!isAdmin && !order.invoice_generated) {
+            return res.status(403).json({ success: false, message: 'Invoice not yet available' });
+        }
+
+        const doc = new PDFDocument({ margin: 50 });
+        
+        // Response headers
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.order_number}.pdf`);
+        
+        doc.pipe(res);
+
+        // Header
+        doc.fontSize(20).text('HandyLand Invoice', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(10).text(`Bestellnummer: ${order.order_number}`, { align: 'right' });
+        doc.text(`Datum: ${new Date(order.created_at).toLocaleDateString()}`, { align: 'right' });
+        doc.moveDown();
+
+        // Customer Info
+        doc.fontSize(12).text('Rechnungsadresse:', { underline: true });
+        doc.fontSize(10).text(order.shipping_full_name);
+        doc.text(order.shipping_street);
+        doc.text(`${order.shipping_zip} ${order.shipping_city}`);
+        doc.text(order.shipping_country);
+        doc.moveDown();
+
+        // Table Header
+        const tableTop = 250;
+        doc.fontSize(10).font('Helvetica-Bold');
+        doc.text('Artikel', 50, tableTop);
+        doc.text('Menge', 300, tableTop, { width: 50, align: 'right' });
+        doc.text('Preis', 350, tableTop, { width: 80, align: 'right' });
+        doc.text('Gesamt', 450, tableTop, { width: 80, align: 'right' });
+        
+        doc.moveDown();
+        doc.font('Helvetica').lineWidth(1);
+        doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+
+        // Items
+        let y = tableTop + 25;
+        (order.order_items || []).forEach(item => {
+            doc.text(item.name, 50, y);
+            doc.text(item.quantity.toString(), 300, y, { width: 50, align: 'right' });
+            doc.text(`${item.price.toFixed(2)} €`, 350, y, { width: 80, align: 'right' });
+            doc.text(`${(item.price * item.quantity).toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
+            y += 20;
+        });
+
+        doc.moveTo(50, y).lineTo(550, y).stroke();
+        y += 10;
+
+        // Totals
+        doc.text('Zwischensumme:', 350, y, { width: 100, align: 'right' });
+        doc.text(`${(order.total_amount - order.shipping_fee + order.discount_amount).toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
+        y += 15;
+        doc.text('Versand:', 350, y, { width: 100, align: 'right' });
+        doc.text(`${order.shipping_fee.toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
+        y += 15;
+        if (order.discount_amount > 0) {
+            doc.text('Rabatt:', 350, y, { width: 100, align: 'right' });
+            doc.text(`-${order.discount_amount.toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
+            y += 15;
+        }
+        doc.fontSize(12).font('Helvetica-Bold').text('Gesamtbetrag:', 350, y, { width: 100, align: 'right' });
+        doc.text(`${order.total_amount.toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
+
+        doc.end();
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route POST /api/orders/admin/:id/generate-invoice (Admin) ──
+exports.createInvoiceAction = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('orders')
+            .update({ 
+                invoice_generated: true, 
+                invoice_generated_at: new Date().toISOString() 
+            })
+            .eq('id', req.params.id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        if (!data) return res.status(404).json({ success: false, message: 'Order not found' });
+
+        return res.status(200).json({ success: true, message: 'Invoice generated successfully', order: mapOrder(data) });
     } catch (error) {
         next(error);
     }

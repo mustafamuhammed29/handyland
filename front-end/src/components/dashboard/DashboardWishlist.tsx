@@ -25,10 +25,10 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
     const handleAddToCart = (item: PhoneListing) => {
         // Convert PhoneListing to CartItem format
         const cartItem: any = {
-            id: item.id,
-            title: item.model,
+            id: item.id || (item as any)._id,
+            title: item.model || (item as any).name || 'Unknown',
             subtitle: item.brand,
-            image: item.images?.[0] || item.imageUrl,
+            image: item.images?.[0] || item.imageUrl || (item as any).image || '',
             price: item.price,
             category: 'device',
             quantity: 1
@@ -110,7 +110,7 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                                     {t('wishlist.add_to_cart', 'In den Warenkorb')}
                                 </button>
                                 <button
-                                    onClick={() => navigate(`/product/${item.id}`)}
+                                    onClick={() => navigate(`/products/${item.id}`)}
                                     aria-label={t('wishlist.actions.view', 'View product details')}
                                     title={t('wishlist.actions.view', 'View product')}
                                     className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors"
