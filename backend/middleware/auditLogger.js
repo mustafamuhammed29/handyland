@@ -18,7 +18,7 @@ const auditLogger = async (req, res, next) => {
         try {
             // We do not wait for the DB to save the log so it doesn't slow down the response
             supabaseAdmin.from('audit_logs').insert({
-                admin_id: req.user._id || req.user.id,
+                admin_id: req.user.id,
                 admin_email: req.user.email,
                 action: req.method,
                 resource: req.originalUrl,

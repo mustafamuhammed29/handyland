@@ -4,38 +4,25 @@ const errorHandler = (err, req, res, next) => {
         console.error('Error:', err);
     }
 
-    // Mongoose validation error
-    if (err.name === 'ValidationError') {
-        const messages = Object.values(err.errors).map(val => val.message);
-        return res.status(400).json({
-            success: false,
-            error: {
-                code: 'VALIDATION_ERROR',
-                message: 'Validation failed',
-                details: messages
-            }
-        });
-    }
-
-    // Mongoose duplicate key error
-    if (err.code === 11000) {
-        const field = Object.keys(err.keyValue)[0];
+    // Supabase / PostgreSQL unique violation
+    if (err.code === '23505') {
         return res.status(400).json({
             success: false,
             error: {
                 code: 'DUPLICATE_KEY',
-                message: `${field} already exists`
+                message: 'A record with this value already exists',
+                details: err.detail
             }
         });
     }
 
-    // Mongoose cast error (invalid ObjectId)
-    if (err.name === 'CastError') {
-        return res.status(404).json({
+    // PostgreSQL invalid input
+    if (err.code === '22P02') {
+        return res.status(400).json({
             success: false,
             error: {
-                code: 'RESOURCE_NOT_FOUND',
-                message: 'Resource not found'
+                code: 'INVALID_INPUT',
+                message: 'Invalid input syntax'
             }
         });
     }

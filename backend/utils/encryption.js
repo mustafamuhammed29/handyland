@@ -12,7 +12,8 @@ const IV_LENGTH = 16;
  * Derive a 32-byte key from JWT_SECRET
  */
 const getKey = () => {
-    const secret = process.env.JWT_SECRET || 'fallback-secret-key-for-dev-only';
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET is required for encryption');
     return crypto.createHash('sha256').update(secret).digest();
 };
 
