@@ -34,6 +34,10 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust first proxy (Render, Cloudflare, Nginx) so req.ip returns the real client IP.
+// Without this, rate limiting blocks ALL users behind the proxy as one.
+app.set('trust proxy', 1);
+
 // ── Environment ────────────────────────────────────────────────────────────────
 console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
 if (!process.env.NODE_ENV) {process.env.NODE_ENV = 'development';}

@@ -229,12 +229,27 @@ exports.createOrder = async (req, res, next) => {
             note: 'Order created'
         });
 
-        // Decrement stock
+        // Atomic stock decrement — prevents race condition / overselling
+        // Uses database-level WHERE stock >= qty to guarantee atomicity
         for (const item of items) {
             const table = item.productType === 'Product' ? 'products' : 'accessories';
-            const { data: p } = await supabaseAdmin.from(table).select('stock').eq('id', item.product).single();
-            if (p) {
-                await supabaseAdmin.from(table).update({ stock: Math.max(0, p.stock - item.quantity) }).eq('id', item.product);
+            const { data: success, error: rpcError } = await supabaseAdmin.rpc('atomic_decrement_stock', {
+                p_table: table,
+                p_id: item.product,
+                p_qty: item.quantity
+            });
+            if (rpcError || !success) {
+                // Rollback: delete the order we just created since stock is insufficient
+                await supabaseAdmin.from('order_items').delete().eq('order_id', order.id);
+                await supabaseAdmin.from('order_status_history').delete().eq('order_id', order.id);
+                await supabaseAdmin.from('orders').delete().eq('id', order.id);
+                const failedItem = orderItems.find(oi =>
+                    (item.productType === 'Product' ? oi.product_id : oi.accessory_id) === item.product
+                );
+                return res.status(409).json({
+                    success: false,
+                    message: `Insufficient stock for ${failedItem?.name || 'item'}. Another customer may have just purchased it. Please try again.`
+                });
             }
         }
 
@@ -330,6 +345,21 @@ exports.cancelOrder = async (req, res, next) => {
             if (id) {
                 const { data: p } = await supabaseAdmin.from(table).select('stock').eq('id', id).single();
                 if (p) await supabaseAdmin.from(table).update({ stock: p.stock + item.quantity }).eq('id', id);
+            }
+        }
+
+        // Restore coupon usage if a coupon was applied
+        if (order.coupon_code && order.discount_amount > 0) {
+            await supabaseAdmin.rpc('decrement_coupon_usage', { coupon_code: order.coupon_code });
+        }
+
+        // Reverse loyalty points that were earned from this order
+        if (order.user_id && order.points_earned > 0) {
+            const { data: user } = await supabaseAdmin.from('users').select('loyalty_points').eq('id', order.user_id).single();
+            if (user) {
+                await supabaseAdmin.from('users').update({
+                    loyalty_points: Math.max(0, (user.loyalty_points || 0) - order.points_earned)
+                }).eq('id', order.user_id);
             }
         }
 

@@ -80,13 +80,10 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                // Try to refresh the access token - use correct /api/auth/refresh endpoint
-                const refreshResponse = await api.post('/api/auth/refresh');
-                const newToken = (refreshResponse as any)?.token; // Access token from response
+                // Try to refresh the access token — backend sets new HttpOnly cookie directly
+                await api.post('/api/auth/refresh');
 
-                // Backend already set the new HttpOnly cookie — no manual token handling needed.
-
-                // Retry the original request
+                // Retry the original request with the refreshed cookie
                 return api.request(originalRequest);
             } catch (refreshError) {
                 // Clear authentication state

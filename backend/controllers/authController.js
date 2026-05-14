@@ -279,10 +279,17 @@ exports.logout = async (req, res, next) => {
             }
         }
 
-        res.clearCookie('accessToken');
-        res.clearCookie('refreshToken');
-        res.clearCookie('adminToken');
-        res.clearCookie('adminRefreshToken');
+        // Must pass the same options used when setting the cookie (minus maxAge)
+        // or modern browsers will silently refuse to delete the cookie
+        const clearOpts = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        };
+        res.clearCookie('accessToken', clearOpts);
+        res.clearCookie('refreshToken', clearOpts);
+        res.clearCookie('adminToken', clearOpts);
+        res.clearCookie('adminRefreshToken', clearOpts);
 
         return res.status(200).json({ success: true, message: 'Logged out successfully' });
     } catch (error) {
@@ -302,8 +309,13 @@ exports.refreshToken = async (req, res, next) => {
         const { data, error } = await supabaseAdmin.auth.refreshSession({ refresh_token: refreshToken });
 
         if (error || !data.session) {
-            res.clearCookie('accessToken');
-            res.clearCookie('refreshToken');
+            const clearOpts = {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+            };
+            res.clearCookie('accessToken', clearOpts);
+            res.clearCookie('refreshToken', clearOpts);
             return res.status(401).json({ success: false, message: 'Refresh token expired', requireAuth: true });
         }
 
@@ -392,12 +404,14 @@ exports.forgotPassword = async (req, res, next) => {
         const token = crypto.randomBytes(32).toString('hex');
         const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
 
-        // Store token in settings table (as a temporary key-value pair)
+        // Store HASH of token in DB — never store plain text tokens
+        // The user receives the plain token via email; we only compare hashes
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
         await supabaseAdmin
             .from('settings')
             .upsert({
                 key: `reset_token_${user.id}`,
-                value: JSON.stringify({ token, expires: tokenExpiry })
+                value: JSON.stringify({ token: tokenHash, expires: tokenExpiry })
             }, { onConflict: 'key' });
 
         const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}&type=custom&uid=${user.id}`;
@@ -460,7 +474,9 @@ exports.resetPassword = async (req, res, next) => {
             }
 
             const tokenData = JSON.parse(setting.value);
-            if (tokenData.token !== token || new Date(tokenData.expires) < new Date()) {
+            // Compare hash of incoming token with stored hash
+            const incomingHash = crypto.createHash('sha256').update(token).digest('hex');
+            if (tokenData.token !== incomingHash || new Date(tokenData.expires) < new Date()) {
                 return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
             }
 
