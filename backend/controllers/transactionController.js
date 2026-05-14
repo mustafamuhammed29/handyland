@@ -149,3 +149,41 @@ exports.updateTransactionStatus = async (stripePaymentId, status, receiptUrl = n
         throw error;
     }
 };
+// @route POST /api/transactions/bank-transfer
+exports.createBankTransferTopUp = async (req, res, next) => {
+    try {
+        const { amount } = req.body;
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid amount' });
+        }
+
+        const { data, error } = await supabaseAdmin
+            .from('transactions')
+            .insert({
+                user_id: req.user.id,
+                amount: Number(amount),
+                type: 'deposit',
+                status: 'pending',
+                payment_method: 'bank_transfer',
+                description: 'Guthabenaufladung per Banküberweisung'
+            })
+            .select().single();
+
+        if (error) throw error;
+
+        // Notify admins about the new bank transfer
+        const { data: admins } = await supabaseAdmin.from('users').select('id').eq('role', 'admin');
+        if (admins) {
+            await supabaseAdmin.from('notifications').insert(
+                admins.map(a => ({
+                    user_id: a.id,
+                    message: `Neue Banküberweisung (${amount}€) von ${req.user.name || 'User'}`,
+                    type: 'info',
+                    link: '/admin/transactions'
+                }))
+            );
+        }
+
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
+};

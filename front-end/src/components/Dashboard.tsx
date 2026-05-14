@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     UserCircle, Settings, LogOut, Activity,
@@ -6,7 +7,6 @@ import {
     Zap, Wrench as RepairIcon, BarChart2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import { User as UserType, PhoneListing } from '../types';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { useAuth } from '../context/AuthContext';
@@ -42,6 +42,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     const { t, i18n } = useTranslation();
     const { setUser } = useAuth();
     const { setLang } = useLang();
+    const [searchParams] = useSearchParams();
 
     // Use the new data fetching hook
     const dashboardData = useDashboardData(activeTab);
@@ -237,6 +238,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
     ];
 
     const ADMIN_PANEL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3001';
+
+    // Handle initial tab from URL
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab && navItems.some(item => item.id === tab)) {
+            setActiveTab(tab);
+        }
+    }, [searchParams, navItems]);
 
     return (
         <div className="min-h-[100dvh] pt-28 pb-12 px-4 max-w-7xl mx-auto">

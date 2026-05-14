@@ -123,6 +123,29 @@ const getSeriesName = (brand: string, modelName: string, category: string): stri
     return words.slice(0, Math.min(3, words.length)).join(' ');
 };
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const isCategoryMatch = (deviceCat: string, targetId: string) => {
+    if (!deviceCat || !targetId) return false;
+    const d = deviceCat.toLowerCase().trim();
+    const t = targetId.toLowerCase().trim();
+    
+    // 1. Exact or plural match
+    if (d === t || d === t + 's' || d === t.replace(/s$/, '')) return true;
+    
+    // 2. German/English mapping & Substring matching
+    const mapping: Record<string, string[]> = {
+        'smartphone': ['handy', 'mobiltelefon', 'phone'],
+        'tablet': ['tablet', 'ipad'],
+        'laptop': ['computer', 'notebook', 'macbook', 'laptop'],
+        'gaming': ['konsole', 'console', 'playstation', 'xbox', 'nintendo', 'gaming'],
+        'smartwatch': ['uhr', 'watch', 'apple watch'],
+        'audio': ['kopfhörer', 'headphones', 'airpods', 'audio']
+    };
+    
+    const equivalents = mapping[t] || [];
+    return equivalents.some(eq => d.includes(eq) || eq.includes(d));
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export const ValuationLanding = ({
     t,
@@ -144,17 +167,17 @@ export const ValuationLanding = ({
 
     const isSearching = searchTerm.trim().length > 0;
 
-    // Available categories (only show those with actual devices)
+    // Available categories (always show all, but we could mark those with devices)
     const availableCategories = useMemo(() => {
-        if (!apiDevices) return CATEGORIES;
-        const presentCats = new Set(apiDevices.map((d: any) => d.category));
-        return CATEGORIES.filter(c => presentCats.has(c.id));
-    }, [apiDevices]);
+        return CATEGORIES;
+    }, []);
+
+
 
     // Available brands for selected category
     const availableBrands = useMemo(() => {
         if (!selectedCategory || !apiDevices) return [];
-        const filtered = apiDevices.filter((d: any) => d.category === selectedCategory);
+        const filtered = apiDevices.filter((d: any) => isCategoryMatch(d.category, selectedCategory));
         const brandSet = new Set(filtered.map((d: any) => d.brand).filter(Boolean));
         return Array.from(brandSet) as string[];
     }, [selectedCategory, apiDevices]);
@@ -162,7 +185,7 @@ export const ValuationLanding = ({
     // Series for selected brand+category
     const brandSeries = useMemo(() => {
         if (!selectedBrand || !selectedCategory || !apiDevices) return [];
-        const filtered = apiDevices.filter((d: any) => d.brand === selectedBrand && d.category === selectedCategory);
+        const filtered = apiDevices.filter((d: any) => d.brand === selectedBrand && isCategoryMatch(d.category, selectedCategory));
         const seriesSet = new Set(filtered.map((d: any) => getSeriesName(d.brand, d.modelName, d.category)));
         return Array.from(seriesSet as Set<string>).sort((a: string, b: string) => b.localeCompare(a));
     }, [selectedBrand, selectedCategory, apiDevices]);
@@ -171,7 +194,7 @@ export const ValuationLanding = ({
     const seriesModels = useMemo(() => {
         if (!selectedSeries || !selectedBrand || !selectedCategory || !apiDevices) return [];
         return apiDevices
-            .filter((d: any) => d.brand === selectedBrand && d.category === selectedCategory && getSeriesName(d.brand, d.modelName, d.category) === selectedSeries)
+            .filter((d: any) => d.brand === selectedBrand && isCategoryMatch(d.category, selectedCategory) && getSeriesName(d.brand, d.modelName, d.category) === selectedSeries)
             .sort((a: any, b: any) => b.basePrice - a.basePrice);
     }, [selectedSeries, selectedBrand, selectedCategory, apiDevices]);
 
@@ -321,24 +344,41 @@ export const ValuationLanding = ({
 
                         {/* Step: Category */}
                         {funnelStep === 'category' && (
-                            <div>
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-6">Was möchtest du verkaufen?</h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                    {availableCategories.map(cat => {
-                                        const Icon = cat.icon;
-                                        return (
-                                            <button
-                                                key={cat.id}
-                                                title={cat.label}
-                                                onClick={() => handleCategorySelect(cat.id)}
-                                                className="group relative bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-500 transition-all flex flex-col items-center justify-center gap-3 hover:-translate-y-1"
-                                            >
-                                                <span className="text-5xl">{cat.emoji}</span>
-                                                <span className="font-bold text-base text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center">{cat.label}</span>
-                                            </button>
-                                        );
-                                    })}
+                            <div className="space-y-12">
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-6">Was möchtest du verkaufen?</h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                        {availableCategories.map(cat => {
+                                            const Icon = cat.icon;
+                                            return (
+                                                <button
+                                                    key={cat.id}
+                                                    title={cat.label}
+                                                    onClick={() => handleCategorySelect(cat.id)}
+                                                    className="group relative bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-500 transition-all flex flex-col items-center justify-center gap-3 hover:-translate-y-1"
+                                                >
+                                                    <span className="text-5xl">{cat.emoji}</span>
+                                                    <span className="font-bold text-base text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center">{cat.label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
+
+                                {/* Popular Devices Section */}
+                                {apiDevices && apiDevices.length > 0 && (
+                                    <div className="pt-8 border-t border-slate-100 dark:border-slate-800/50">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Beliebte Geräte</h3>
+                                            <span className="px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-black rounded-full uppercase tracking-wider">Top-Angebote</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                                            {apiDevices.slice(0, 8).map((device: any) => (
+                                                <DeviceCard key={device._id || device.id} device={device} onClick={() => startWizard(device)} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 

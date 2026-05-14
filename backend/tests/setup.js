@@ -1,22 +1,64 @@
-const mongoose = require('mongoose');
-// const { MongoMemoryServer } = require('mongodb-memory-server');
+// Set mock environment variables before any files are required
+process.env.STRIPE_SECRET_KEY = 'sk_test_123';
+process.env.JWT_SECRET = 'test_jwt_secret';
+process.env.SUPABASE_URL = 'http://localhost:54321';
+process.env.SUPABASE_SERVICE_KEY = 'test_service_key';
 
-let mongoServer;
-
-beforeAll(async () => {
-    // Use in-memory MongoDB for tests if possible, or mock it. 
-    // For simplicity without installing mongo-memory-server right now (it's heavy), 
-    // we will mock mongoose models in unit tests or use a test database if available.
-    // Actually, unit tests should mock dependencies. Integration tests use a real DB.
-    // Let's stick to unit testing controllers by mocking req, res, and models where possible,
-    // OR use a test database connection if we want integration tests.
-
-    // For this phase, let's focus on unit testing controllers with mocks to avoid DB dependency complexity.
-    // So this setup file might just handle env vars.
-    process.env.JWT_SECRET = 'test_secret';
-    process.env.NODE_ENV = 'test';
+// Mock UUID to avoid ESM 'export' syntax errors in Jest
+jest.mock('uuid', () => {
+    return {
+        v4: jest.fn(() => 'test-uuid-1234')
+    };
 });
 
-afterAll(async () => {
-    await mongoose.disconnect();
+// Mock Supabase to avoid hitting real database during isolated tests
+jest.mock('../config/supabase', () => {
+    return {
+        supabaseAdmin: {
+            auth: {
+                admin: {
+                    createUser: jest.fn(),
+                    deleteUser: jest.fn(),
+                    updateUserById: jest.fn(),
+                    listUsers: jest.fn(),
+                    generateLink: jest.fn().mockResolvedValue({ data: { properties: { action_link: 'http://test' } }, error: null }),
+                    getUserById: jest.fn()
+                },
+                exchangeCodeForSession: jest.fn(),
+                refreshSession: jest.fn(),
+                getUser: jest.fn(),
+                signInWithPassword: jest.fn().mockResolvedValue({ data: { session: { access_token: 'fake-token' }, user: { id: 'test-id' } }, error: null })
+            },
+            from: jest.fn(() => ({
+                select: jest.fn().mockReturnThis(),
+                insert: jest.fn().mockReturnThis(),
+                update: jest.fn().mockReturnThis(),
+                upsert: jest.fn().mockReturnThis(),
+                delete: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                ilike: jest.fn().mockReturnThis(),
+                or: jest.fn().mockReturnThis(),
+                in: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({ data: { id: 'test-id', is_active: true, role: 'admin' }, error: null }),
+                maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+                order: jest.fn().mockReturnThis(),
+                limit: jest.fn().mockReturnThis(),
+                range: jest.fn().mockReturnThis(),
+                then: function(resolve) { resolve({ data: [], error: null }); }
+            }))
+        },
+        createAuthClient: jest.fn(() => {
+            if (!global.__mockAuthClient) {
+                global.__mockAuthClient = {
+                    auth: {
+                        signInWithPassword: jest.fn(),
+                        exchangeCodeForSession: jest.fn(),
+                        refreshSession: jest.fn(),
+                        getUser: jest.fn()
+                    }
+                };
+            }
+            return global.__mockAuthClient;
+        })
+    };
 });

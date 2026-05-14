@@ -22,7 +22,9 @@ router.delete('/devices', protect, authorize('admin'), valuationController.bulkD
 // ==========================================
 
 // Authorized Quote Management
-router.post('/saved', protect, valuationController.saveValuationQuote);
+router.post('/calculate', valuationController.calculatePrice);
+router.post('/saved', valuationController.saveValuationQuote);
+router.get('/quote/:reference', valuationController.getQuoteByReference);
 router.get('/my-valuations', protect, valuationController.getSavedValuations); // Alias for frontend
 router.get('/saved', protect, valuationController.getSavedValuations);
 

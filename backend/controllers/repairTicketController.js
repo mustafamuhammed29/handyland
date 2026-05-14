@@ -170,7 +170,7 @@ exports.updateStatus = async (req, res, next) => {
                 user_id: data.user_id,
                 message: `Ihr Reparatur-Ticket ${data.ticket_id} wurde aktualisiert: ${status}`,
                 type: 'info',
-                link: `/dashboard/repairs/${data.id}`
+                link: `/dashboard?tab=repairs`
             });
         }
 

@@ -1,7 +1,8 @@
 const express = require('express');
 const {
     getTransactions,
-    adminUpdateTransactionStatus
+    adminUpdateTransactionStatus,
+    createBankTransferTopUp
 } = require('../controllers/transactionController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -16,7 +17,7 @@ router.get('/', getTransactions);
 
 // router.post('/paypal/create-topup', createPayPalTopUp);
 // router.post('/paypal/capture-topup', capturePayPalTopUp);
-// router.post('/bank-transfer', createBankTransferTopUp);
+router.post('/bank-transfer', createBankTransferTopUp);
 // router.post('/:id/upload-receipt', receiptUpload.single('receipt'), uploadTransactionReceipt);
 
 // Admin Routes

@@ -56,23 +56,29 @@ const GuestTicketTracking = React.lazy(() => import('../pages/GuestTicketTrackin
 const Dashboard = React.lazy(() => import('../components/Dashboard').then(module => ({ default: module.Dashboard })));
 
 const AdminRedirect = () => {
-    const adminUrl = import.meta.env.VITE_ADMIN_URL;
-    const isProduction = import.meta.env.PROD;
+    const adminUrl = import.meta.env.VITE_ADMIN_URL || 'http://localhost:3001';
+    const location = useLocation();
 
     useEffect(() => {
-        // In production, only redirect if VITE_ADMIN_URL is explicitly set.
-        // Falling back to localhost in production would silently break for end-users.
-        const target = adminUrl || (isProduction ? null : 'http://localhost:3001');
-        if (target) {
-            window.location.href = target;
-        }
-    }, [adminUrl, isProduction]);
+        const subPath = location.pathname.startsWith('/admin') ? location.pathname.substring(6) : location.pathname;
+        window.location.href = `${adminUrl}${subPath}${location.search}${location.hash}`;
+    }, [adminUrl, location]);
 
-    if (!adminUrl && isProduction) {
-        return <Navigate to="/" replace />;
-    }
+    return (
+        <div className="min-h-[100dvh] bg-slate-950 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4 text-center">
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-slate-400 text-sm animate-pulse">Redirecting to Admin Portal...</p>
+            </div>
+        </div>
+    );
+};
 
-    return null;
+// Legacy Redirect Helpers
+const LegacyOrderRedirect = () => {
+    const { id } = useParams();
+    if (!id || id === ':id') return <Navigate to="/dashboard?tab=orders" replace />;
+    return <Navigate to={`/orders/${id}`} replace />;
 };
 
 // Home Component to group Home-related sections
@@ -241,7 +247,14 @@ export const AppRouter = () => {
                             
                             <Route path="/cart" element={<ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><CartPage lang={lang} /></Suspense></PageTransition></ErrorBoundary>} />
                             <Route path="/about" element={<Navigate to="/uber-uns" replace />} />
-                            <Route path="/admin" element={<AdminRedirect />} />
+                            
+                            {/* Legacy Dashboard Redirects */}
+                            <Route path="/dashboard/orders/:id" element={<LegacyOrderRedirect />} />
+                            <Route path="/dashboard/repairs/:id" element={<Navigate to="/dashboard?tab=repairs" replace />} />
+                            <Route path="/dashboard/repairs" element={<Navigate to="/dashboard?tab=repairs" replace />} />
+                            <Route path="/dashboard/refunds/:id" element={<Navigate to="/dashboard?tab=orders" replace />} />
+                            
+                            <Route path="/admin/*" element={<AdminRedirect />} />
 
                             <Route path="/info" element={<PageTransition><InfoPage /></PageTransition>} />
                             <Route path="/agb" element={<PageTransition><TermsAndConditions /></PageTransition>} />

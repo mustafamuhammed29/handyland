@@ -67,7 +67,8 @@ export const useValuation = () => {
             if (countdownRef.current) clearInterval(countdownRef.current);
             return;
         }
-        const expiresAt = quoteData.expiresAt || (Date.now() + 48 * 60 * 60 * 1000);
+        const rawExp = quoteData.expiresAt;
+        const expiresAt = (typeof rawExp === 'string' ? new Date(rawExp).getTime() : rawExp) || (Date.now() + 48 * 60 * 60 * 1000);
         const updateCountdown = () => {
             const remaining = expiresAt - Date.now();
             if (remaining <= 0) {
@@ -179,27 +180,50 @@ export const useValuation = () => {
     };
 
     const handleSubmitQuote = async () => {
-        sessionStorage.setItem('pendingValuationQuote', JSON.stringify({ quoteData, formData }));
         setLoading(true);
+        // Always generate a reference to ensure navigation is possible
+        const fallbackRef = quoteData?.quoteReference || `Q-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+        
         try {
             const payload = {
-                model: quoteData?.model || formData.model,
-                storage: quoteData?.storage || formData.storage,
-                screenCondition: quoteData?.screenCondition || formData.screenCondition,
-                bodyCondition: quoteData?.bodyCondition || formData.bodyCondition,
-                isFunctional: quoteData?.isFunctional ?? formData.isFunctional
+                model: selectedDevice?.modelName || formData.model,
+                storage: formData.storage,
+                screenCondition: formData.screenCondition,
+                bodyCondition: formData.bodyCondition,
+                isFunctional: formData.isFunctional,
+                estimatedValue: quoteData?.estimatedValue || displayPrice,
+                brand: selectedDevice?.brand || 'Unbekannt'
             };
+            
             const data: any = await api.post('/api/valuation/saved', payload);
+            
             if (data.success || data.quoteReference) {
-                sessionStorage.removeItem('pendingValuationQuote');
-                addToast("Angebot erfolgreich gespeichert!", "success");
-                navigate(`/sell/${data.quoteReference}`);
+                const finalRef = data.quoteReference || (data.data && data.data.quoteReference) || fallbackRef;
+                addToast(t('valuation.saveSuccess') || "Angebot erfolgreich gespeichert!", "success");
+                navigate(`/sell/${finalRef}`);
                 return;
             }
-            addToast(data.message || "Fehler beim Speichern", "error");
+            
+            throw new Error(data.message || "Speichern fehlgeschlagen");
         } catch (error: any) {
-            const msg = error?.response?.data?.message || error?.message || "Netzwerkfehler";
-            addToast(msg, "error");
+            console.error('Submit Quote Error:', error);
+            
+            // Critical Fallback: Store locally so user isn't blocked
+            const localQuote = {
+                quoteData: {
+                    ...quoteData,
+                    ...formData,
+                    quoteReference: fallbackRef,
+                    estimatedValue: quoteData?.estimatedValue || displayPrice,
+                    model: selectedDevice?.modelName || formData.model,
+                    storage: formData.storage
+                },
+                timestamp: Date.now()
+            };
+            sessionStorage.setItem('pendingValuationQuote', JSON.stringify(localQuote));
+            
+            addToast(t('valuation.localSave') || "Angebot lokal gesichert. Bitte fahre fort.", "info");
+            navigate(`/sell/${fallbackRef}`);
         } finally {
             setLoading(false);
         }

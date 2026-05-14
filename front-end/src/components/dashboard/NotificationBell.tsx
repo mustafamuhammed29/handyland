@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, ShoppingBag, Wrench, MessageSquare, Info, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { useSocket } from '../../hooks/useSocket';
 
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' }) => {
+    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(false);
@@ -34,9 +36,17 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
         try {
             const res = await api.get('/api/notifications');
             const data = res?.data || res;
-            const list = data?.notifications || (Array.isArray(data) ? data : []);
-            setNotifications(list);
-        } catch { /* silent */ }
+            const list = data?.notifications || (Array.isArray(data) ? data : (data?.data || []));
+            
+            // Map backend fields to frontend interface
+            const mapped = list.map((n: any) => ({
+                ...n,
+                _id: n.id || n._id,
+                createdAt: n.created_at || n.createdAt
+            }));
+            
+            setNotifications(mapped);
+        } catch (err) { console.error('fetchNotifs err:', err); }
         finally { setLoading(false); }
     };
 
@@ -173,7 +183,19 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                             notifications.map(n => (
                                 <button
                                     key={n._id}
-                                    onClick={() => { markRead(n._id); if (n.link) window.location.href = n.link; }}
+                                    onClick={() => { 
+                                        markRead(n._id); 
+                                        if (n.link) {
+                                            if (n.link.startsWith('http')) {
+                                                window.location.href = n.link;
+                                            } else {
+                                                // Ensure leading slash for absolute SPA navigation
+                                                const targetLink = n.link.startsWith('/') ? n.link : `/${n.link}`;
+                                                navigate(targetLink);
+                                            }
+                                            setOpen(false);
+                                        }
+                                    }}
                                     className={`w-full text-left px-4 py-3.5 flex items-start gap-3 hover:bg-slate-800 transition-colors border-b border-slate-800/40 last:border-0 relative ${!n.read ? 'bg-slate-800/40' : 'bg-transparent'}`}
                                 >
                                     {!n.read && (

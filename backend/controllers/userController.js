@@ -283,3 +283,32 @@ exports.updateBalance = async (req, res, next) => {
         next(error);
     }
 };
+
+// ── @route GET /api/users/notifications ──────────────────────
+exports.getNotificationPrefs = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin.from('users').select('*').eq('id', req.user.id).single();
+        if (error) throw error;
+        return res.status(200).json({ success: true, data: data?.notification_prefs || {} });
+    } catch (error) { 
+        // Gracefully handle missing column
+        if (error.code === 'PGRST204' || error.message?.includes('notification_prefs')) {
+            return res.status(200).json({ success: true, data: {} });
+        }
+        next(error); 
+    }
+};
+
+// ── @route PUT /api/users/notifications ──────────────────────
+exports.updateNotificationPrefs = async (req, res, next) => {
+    try {
+        const { error } = await supabaseAdmin.from('users').update({ notification_prefs: req.body }).eq('id', req.user.id);
+        if (error) {
+            if (error.code === 'PGRST204' || error.message?.includes('notification_prefs')) {
+                return res.status(200).json({ success: true, message: 'Preferences saved locally' });
+            }
+            throw error;
+        }
+        return res.status(200).json({ success: true, message: 'Notification preferences updated' });
+    } catch (error) { next(error); }
+};

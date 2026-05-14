@@ -297,7 +297,7 @@ exports.updateOrderStatus = async (req, res, next) => {
                 user_id: data.user_id,
                 message: `Ihr Auftrag #${data.order_number} wurde aktualisiert: ${status}`,
                 type: 'info',
-                link: `/dashboard/orders/${data.id}`
+                link: `/orders/${data.id}`
             });
         }
 

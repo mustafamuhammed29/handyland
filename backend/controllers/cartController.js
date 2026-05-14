@@ -279,3 +279,64 @@ exports.getAllCarts = async (req, res, next) => {
         next(error);
     }
 };
+
+// ── @route POST /api/cart/admin/:cartId/remind ──────────────
+exports.sendCartReminder = async (req, res, next) => {
+    try {
+        const { cartId } = req.params;
+
+        // Get cart to find user_id
+        const { data: cart, error: cartError } = await supabaseAdmin
+            .from('carts')
+            .select('id, user_id')
+            .eq('id', cartId)
+            .single();
+
+        if (cartError || !cart) {
+            return res.status(404).json({ success: false, message: 'Cart not found' });
+        }
+
+        // Get user info
+        const { data: user, error: userError } = await supabaseAdmin
+            .from('users')
+            .select('email, name')
+            .eq('id', cart.user_id)
+            .single();
+
+        if (userError || !user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Get cart items
+        const cartData = await getCartWithItems(cart.user_id);
+        if (!cartData || !cartData.cart_items?.length) {
+            return res.status(400).json({ success: false, message: 'User cart is empty' });
+        }
+
+        // Send reminder email
+        try {
+            const { sendTemplateEmail, sendEmail } = require('../utils/emailService');
+            const sent = await sendTemplateEmail(user.email, 'cart_reminder', {
+                userName: user.name || user.email.split('@')[0],
+                itemCount: cartData.cart_items.length,
+                cartUrl: `${process.env.FRONTEND_URL}/cart`
+            });
+
+            if (!sent) {
+                await sendEmail({
+                    email: user.email,
+                    subject: 'HandyLand - Items in your cart are waiting!',
+                    html: `<h2>Hi ${user.name || 'there'}!</h2><p>You have ${cartData.cart_items.length} item(s) waiting in your cart.</p><p><a href="${process.env.FRONTEND_URL}/cart">Complete your purchase</a></p>`,
+                    message: `You have items in your cart at HandyLand.`
+                });
+            }
+        } catch (emailErr) {
+            console.warn('Cart reminder email failed:', emailErr.message);
+        }
+
+        return res.status(200).json({ success: true, message: 'Reminder sent successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+

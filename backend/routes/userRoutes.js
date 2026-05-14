@@ -6,8 +6,8 @@ const { protect, authorize } = require('../middleware/auth');
 // Public/Protected User Routes
 // router.put('/profile', protect, userController.updateUserProfile);
 // router.put('/change-password', protect, userController.changePassword);
-// router.get('/notifications', protect, userController.getNotificationPrefs);
-// router.put('/notifications', protect, userController.updateNotificationPrefs);
+router.get('/notifications', protect, userController.getNotificationPrefs);
+router.put('/notifications', protect, userController.updateNotificationPrefs);
 
 // router.get('/addresses', protect, userController.getAddresses);
 // router.post('/addresses', protect, userController.addAddress);

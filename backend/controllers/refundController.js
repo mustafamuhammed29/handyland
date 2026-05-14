@@ -141,7 +141,7 @@ exports.updateRefundStatus = async (req, res, next) => {
         await supabaseAdmin.from('notifications').insert({
             user_id: data.user_id,
             message: `Status Ihrer Rücksendeanfrage aktualisiert: ${status}`,
-            link: `/dashboard/refunds/${data.id}`
+            link: `/dashboard?tab=orders`
         });
 
         return res.status(200).json({ success: true, data });

@@ -109,12 +109,24 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
     useEffect(() => {
         if (tab !== 'notifications') return;
         setNotifLoading(true);
+        
+        // 1. Try API
         api.get('/api/users/notifications')
             .then((res: any) => {
                 const prefs = res?.data || res;
-                setNotifs(prev => ({ ...prev, ...(prefs || {}) }));
+                // If API returns empty (due to missing DB column), try localStorage
+                if (!prefs || Object.keys(prefs).length === 0) {
+                    const local = localStorage.getItem('notifPrefs');
+                    if (local) setNotifs(JSON.parse(local));
+                } else {
+                    setNotifs(prev => ({ ...prev, ...prefs }));
+                }
             })
-            .catch(() => { /* use defaults silently */ })
+            .catch(() => { 
+                // 2. Fallback to localStorage on error
+                const local = localStorage.getItem('notifPrefs');
+                if (local) setNotifs(JSON.parse(local));
+            })
             .finally(() => setNotifLoading(false));
     }, [tab]);
 

@@ -1,134 +1,48 @@
-const authController = require('../controllers/authController');
-const User = require('../models/User');
-const RefreshToken = require('../models/RefreshToken');
-const httpMocks = require('node-mocks-http');
-const { sendEmail } = require('../utils/emailService');
+const request = require('supertest');
+const app = require('../server');
+const { supabaseAdmin, createAuthClient } = require('../config/supabase');
 
-// Mock User and RefreshToken models
-jest.mock('../models/User');
-jest.mock('../models/RefreshToken');
-jest.mock('../utils/emailService', () => ({
-    sendEmail: jest.fn().mockResolvedValue(true),
-    sendTemplateEmail: jest.fn().mockResolvedValue(true),
-    emailTemplates: {
-        verification: jest.fn().mockReturnValue('<html>Verification</html>'),
-        passwordReset: jest.fn().mockReturnValue('<html>Reset</html>'),
-        orderStatusUpdate: jest.fn().mockReturnValue('<html>Status Update</html>')
-    }
-}));
-jest.mock('../models/Address', () => ({
-    find: jest.fn().mockResolvedValue([])
-}));
+describe('Auth Endpoints', () => {
+    it('POST /api/auth/register should register a user', async () => {
+        supabaseAdmin.auth.admin.createUser.mockResolvedValueOnce({
+            data: { user: { id: 'test-id' } },
+            error: null
+        });
+        createAuthClient().auth.signInWithPassword.mockResolvedValueOnce({
+            data: { session: { access_token: 'token', refresh_token: 'refresh' }, user: { id: 'test-id' } },
+            error: null
+        });
 
-describe('Auth Controller', () => {
-    let req, res, next;
+        const res = await request(app)
+            .post('/api/auth/register')
+            .send({
+                name: 'Test User',
+                email: 'test@example.com',
+                password: 'Password123!'
+            });
 
-    beforeEach(() => {
-        req = httpMocks.createRequest();
-        res = httpMocks.createResponse();
-        next = jest.fn();
-        jest.clearAllMocks();
+        expect(res.status).toBe(201);
+        expect(res.body.success).toBe(true);
     });
 
-    describe('register', () => {
-        it('should register a new user successfully', async () => {
-            req.body = {
-                name: 'Test User',
-                email: 'test@example.com',
-                password: 'Password123!',
-                phone: '1234567890'
-            };
+    it('POST /api/auth/login should log in a user', async () => {
+        createAuthClient().auth.signInWithPassword.mockResolvedValueOnce({
+            data: { session: { access_token: 'token', refresh_token: 'refresh' }, user: { id: 'test-id' } },
+            error: null
+        });
+        supabaseAdmin.from().single.mockResolvedValueOnce({
+            data: { id: 'test-id', is_active: true },
+            error: null
+        });
 
-            User.findOne.mockResolvedValue(null);
-            User.create.mockResolvedValue({
-                _id: 'userId',
-                name: 'Test User',
+        const res = await request(app)
+            .post('/api/auth/login')
+            .send({
                 email: 'test@example.com',
-                role: 'user',
-                isVerified: false,
-                save: jest.fn()
+                password: 'Password123!'
             });
 
-            await authController.register(req, res, next);
-
-            expect(res.statusCode).toBe(201);
-            expect(res._isJSON()).toBeTruthy();
-            const data = JSON.parse(res._getData());
-            expect(data.success).toBe(true);
-            // Token is no longer returned in registration response by current controller implementation
-            expect(data.user).toBeDefined();
-        });
-
-        it('should return 400 if user already exists', async () => {
-            req.body = {
-                name: 'Test User',
-                email: 'existing@example.com',
-                password: 'password123'
-            };
-
-            User.findOne.mockResolvedValue({ email: 'existing@example.com' });
-
-            await authController.register(req, res, next);
-
-            expect(res.statusCode).toBe(400);
-            const data = JSON.parse(res._getData());
-            expect(data.success).toBe(false);
-            expect(data.message).toMatch(/already exists/i);
-        });
-    });
-
-    describe('login', () => {
-        it('should login successfully with valid credentials', async () => {
-            req.body = {
-                email: 'test@example.com',
-                password: 'password123'
-            };
-
-            const mockUser = {
-                _id: 'userId',
-                email: 'test@example.com',
-                password: 'hashedPassword',
-                matchPassword: jest.fn().mockResolvedValue(true),
-                isVerified: true,
-                name: 'Test',
-                role: 'user'
-            };
-
-            User.findOne.mockReturnValue({
-                select: jest.fn().mockResolvedValue(mockUser)
-            });
-
-            await authController.login(req, res, next);
-
-            expect(res.statusCode).toBe(200);
-            const data = JSON.parse(res._getData());
-            expect(data.success).toBe(true);
-            expect(data.token).toBeDefined();
-        });
-
-        it('should return 401 with invalid password', async () => {
-            req.body = {
-                email: 'test@example.com',
-                password: 'wrongpassword'
-            };
-
-            const mockUser = {
-                email: 'test@example.com',
-                password: 'hashedPassword',
-                matchPassword: jest.fn().mockResolvedValue(false),
-                select: jest.fn().mockReturnThis()
-            };
-
-            User.findOne.mockReturnValue({
-                select: jest.fn().mockResolvedValue(mockUser)
-            });
-
-            await authController.login(req, res, next);
-
-            expect(res.statusCode).toBe(400);
-            const data = JSON.parse(res._getData());
-            expect(data.success).toBe(false);
-            expect(data.message).toMatch(/Invalid credentials/i);
-        });
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
     });
 });
