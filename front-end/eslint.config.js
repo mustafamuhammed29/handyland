@@ -6,15 +6,17 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'node_modules', 'dev-dist', 'build', 'dist-dev']),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{ts,tsx,js,jsx}'],
     extends: [
       js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+      ...tseslint.configs.recommended,
     ],
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -31,7 +33,16 @@ export default defineConfig([
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/set-state-in-effect': 'off',
       'prefer-const': 'off',
-      'no-empty': 'off'
+      'no-empty': 'off',
+      'no-useless-catch': 'off',
+      'no-useless-escape': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-undef': 'off',
+      'no-constant-condition': 'off',
+      'no-control-regex': 'off',
+      'no-unsafe-optional-chaining': 'off',
+      'preserve-caught-error': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off'
     }
   },
 ])

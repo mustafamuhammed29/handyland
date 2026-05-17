@@ -22,7 +22,7 @@ const QUILL_MODULES = {
 };
 
 const QUILL_FORMATS = [
-    'header', 'bold', 'italic', 'underline', 'strike', 'list', 'bullet', 'link'
+    'header', 'bold', 'italic', 'underline', 'strike', 'list', 'link'
 ];
 
 export default function PageManager() {
@@ -42,8 +42,9 @@ export default function PageManager() {
         setMessage(null);
         try {
             const response = await api.get(`/api/pages/${slug}`);
-            const data = response.data || response;
-            setContent(data.content || '');
+            const payload = response.data || response;
+            const pageData = payload.data || payload;
+            setContent(pageData.content || '');
         } catch (error) {
             console.error('Failed to fetch page:', error);
             setMessage({ type: 'error', text: 'Fehler beim Laden.' });
@@ -59,12 +60,15 @@ export default function PageManager() {
             await api.post(`/api/pages`, { 
                 slug: selectedPage, 
                 title: PAGES.find(p => p.id === selectedPage)?.label, 
-                content: content 
+                content: content,
+                isPublished: true
             });
             setMessage({ type: 'success', text: 'Änderungen gespeichert!' });
             setTimeout(() => setMessage(null), 3000);
-        } catch (error) {
-            setMessage({ type: 'error', text: 'Fehler beim Speichern.' });
+        } catch (error: any) {
+            const errMsg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Unbekannter Fehler';
+            console.error('Page save error:', error?.response?.status, error?.response?.data);
+            setMessage({ type: 'error', text: `Fehler beim Speichern: ${errMsg}` });
         } finally {
             setSaving(false);
         }

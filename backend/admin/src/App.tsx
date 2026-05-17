@@ -38,6 +38,7 @@ const WarrantyManager = React.lazy(() => import('./pages/WarrantyManager'));
 const TranslationManager = React.lazy(() => import('./pages/TranslationManager'));
 const PriceResearchManager = React.lazy(() => import('./pages/PriceResearchManager'));
 const RefundManager = React.lazy(() => import('./pages/RefundManager'));
+const ValuationSettings = React.lazy(() => import('./pages/ValuationSettings'));
 
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 
@@ -163,6 +164,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarLink to="/archive" icon={ScanLine} label="Repair Archive" />
           <SidebarLink to="/loaners" icon={PhoneForwarded} label="Loaner Phones" />
           <SidebarLink to="/valuation" icon={FileText} label="Valuation Tool" />
+          <SidebarLink to="/valuation-settings" icon={Settings} label="Valuation Settings" />
 
           <SidebarSectionHeader title="Marketing & Users" />
           <SidebarLink to="/users" icon={Users} label="Users" />
@@ -316,6 +318,7 @@ function AppContent() {
                   <Route path="/translations" element={<TranslationManager />} />
                   <Route path="/price-research" element={<PriceResearchManager />} />
                   <Route path="/refunds" element={<RefundManager />} />
+                  <Route path="/valuation-settings" element={<ValuationSettings />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>

@@ -224,3 +224,48 @@ body {
   background-color: #0f172a; /* Tailwind slate-900 */
   color: #ffffff;
 }
+
+/* =========================================
+   Quill Editor Styling (Writing Format - Dark Mode)
+   ========================================= */
+.ql-writing-format .ql-editor {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 15px !important; 
+  line-height: 1.6 !important;
+  padding: 24px !important; 
+  color: #cbd5e1 !important; 
+  word-break: normal !important;
+  overflow-wrap: break-word !important; 
+  white-space: normal !important; /* Fix: Allows fluid wrapping like the admin panel */
+  hyphens: none !important;      /* Fix: Prevents automatic hyphenation breaks */
+}
+
+.ql-writing-format .ql-editor p {
+  margin-bottom: 0.75rem !important; 
+}
+
+.ql-writing-format .ql-editor h1 {
+  font-size: 2.25rem !important;
+  font-weight: 800 !important;
+  color: #f8fafc !important;
+  margin-bottom: 1.5rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.ql-writing-format .ql-editor h2 {
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  color: #f1f5f9 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.ql-writing-format .ql-editor ul, .ql-writing-format .ql-editor ol {
+  padding-left: 2rem !important;
+  margin-bottom: 1.25rem !important;
+}
+
+.ql-writing-format .ql-editor li {
+  margin-bottom: 0.5rem !important;
+}

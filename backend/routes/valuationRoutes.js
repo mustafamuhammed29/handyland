@@ -35,5 +35,17 @@ router.get('/admin/quotes', protect, authorize('admin'), valuationController.get
 router.put('/admin/quotes/:id/status', protect, authorize('admin'), valuationController.updateValuationStatus);
 router.post('/admin/quotes/:id/complete-purchase', protect, authorize('admin'), valuationController.completePurchase);
 
-module.exports = router;
+// ==========================================
+// CATEGORY & BRAND MANAGEMENT
+// ==========================================
+router.get('/categories', valuationController.getCategories);
+router.post('/categories', protect, authorize('admin'), valuationController.createCategory);
+router.put('/categories/:id', protect, authorize('admin'), valuationController.updateCategory);
+router.delete('/categories/:id', protect, authorize('admin'), valuationController.deleteCategory);
 
+router.get('/brands', valuationController.getBrands);
+router.post('/brands', protect, authorize('admin'), valuationController.createBrand);
+router.put('/brands/:id', protect, authorize('admin'), valuationController.updateBrand);
+router.delete('/brands/:id', protect, authorize('admin'), valuationController.deleteBrand);
+
+module.exports = router;

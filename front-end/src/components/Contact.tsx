@@ -71,7 +71,7 @@ export const Contact: React.FC<ContactProps> = () => {
 
     if (loading) {
         return (
-            <section className="relative py-24 bg-black">
+            <section className="relative py-24 bg-slate-950">
                 <div className="flex items-center justify-center h-96">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
                 </div>
@@ -80,8 +80,8 @@ export const Contact: React.FC<ContactProps> = () => {
     }
 
     return (
-        <section className="relative py-24 bg-white dark:bg-black border-t border-slate-200 dark:border-slate-900 transition-colors duration-300">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_var(--tw-gradient-stops))] from-blue-100/30 dark:from-blue-900/10 via-white dark:via-slate-950 to-slate-50 dark:to-black pointer-events-none"></div>
+        <section className="relative py-24 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 transition-colors duration-300">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_var(--tw-gradient-stops))] from-blue-100/30 dark:from-blue-900/10 via-white dark:via-slate-950 to-slate-50 dark:to-slate-950 pointer-events-none"></div>
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>

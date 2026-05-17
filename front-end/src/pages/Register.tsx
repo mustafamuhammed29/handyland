@@ -264,7 +264,7 @@ const Register: React.FC = () => {
                                 <input
                                     type="email" name="email" value={formData.email} onChange={handleChange}
                                     placeholder="secure@handyland.com" required
-                                    className={`w-full pl-11 pr-11 py-3 bg-slate-800/50 border rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                                    className={`w-full pl-11 pr-11 py-3 bg-white dark:bg-slate-800/50 border rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
                                         emailStatus === 'available' ? 'border-emerald-500/70 focus:ring-emerald-500'
                                         : emailStatus === 'taken' ? 'border-red-500/70 focus:ring-red-500'
                                         : 'border-slate-700 focus:ring-green-500'

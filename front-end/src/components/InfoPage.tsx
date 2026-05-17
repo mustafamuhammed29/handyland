@@ -41,9 +41,15 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
         try {
             const res = await api.get<any>(`/api/pages/${slug}`);
             const data = res as any;
-            setTitle(data.title);
-            setContent(data.content);
-            setSeo(data.seo);
+            if (data && data.data) {
+                setTitle(data.data.title);
+                setContent(data.data.content);
+                setSeo(data.data.seo);
+            } else if (data) {
+                setTitle(data.title);
+                setContent(data.content);
+                setSeo(data.seo);
+            }
         } catch (err) {
             console.error(err);
             setError(true);
@@ -82,11 +88,15 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
                     {title}
                 </h1>
 
-                <div className="prose prose-invert prose-lg max-w-none text-slate-300">
+                <div className="ql-writing-format mt-8">
                     {content ? (
-                        <div dangerouslySetInnerHTML={{ __html: content }} />
+                        <div className="ql-snow">
+                            <div className="ql-editor" dangerouslySetInnerHTML={{ __html: content }} />
+                        </div>
                     ) : (
-                        <p className="text-slate-600 italic">No content has been added to this page yet.</p>
+                        <div className="p-12 text-center border border-dashed border-slate-700 rounded-xl">
+                            <p className="text-slate-500 italic">No content has been added to this page yet.</p>
+                        </div>
                     )}
                 </div>
             </div>

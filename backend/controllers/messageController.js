@@ -83,7 +83,7 @@ exports.createMessage = async (req, res, next) => {
         }
 
         const messageWithId = { ...data, _id: data.id };
-        return res.status(201).json({ success: true, message: 'Message sent successfully', message: messageWithId, data: messageWithId });
+        return res.status(201).json({ success: true, msg: 'Message sent successfully', message: messageWithId, data: messageWithId });
     } catch (error) { next(error); }
 };
 

@@ -2,8 +2,8 @@ import axios from 'axios';
 
 
 // Force empty baseURL — Vite proxy handles all /api calls in dev;
-// In production, the admin panel is served from the same origin as the API.
-const API_URL = '';
+// In production, the admin panel might be served from a different origin.
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 export const api = axios.create({
     baseURL: API_URL,

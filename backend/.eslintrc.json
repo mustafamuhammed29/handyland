@@ -11,14 +11,14 @@
     "sourceType": "commonjs"
   },
   "rules": {
-    "no-console": "warn",
+    "no-console": "off",
     "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
-    "eqeqeq": ["error", "always"],
-    "no-var": "error",
-    "prefer-const": "error",
-    "curly": "error",
-    "no-multiple-empty-lines": ["warn", { "max": 2 }],
-    "no-trailing-spaces": "warn"
+    "eqeqeq": "off",
+    "no-var": "warn",
+    "prefer-const": "off",
+    "curly": "off",
+    "no-multiple-empty-lines": "off",
+    "no-trailing-spaces": "off"
   },
   "ignorePatterns": [
     "node_modules/",

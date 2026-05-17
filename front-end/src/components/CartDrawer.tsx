@@ -250,7 +250,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <div className="text-xs text-slate-400 truncate mt-0.5">{item.subtitle || item.category}</div>
+                                                <div className="text-xs text-slate-400 truncate mt-0.5">{(item.subtitle && item.subtitle !== 'null' && !item.subtitle.includes('null • null')) ? item.subtitle : (item.category && item.category !== 'null' ? item.category : '')}</div>
                                             </div>
 
                                             <div className="flex items-end justify-between mt-2">

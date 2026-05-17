@@ -103,7 +103,7 @@ export const GuestTicketTracking: React.FC = () => {
                             disabled={loading || !ticketId || !email}
                             className="w-full py-4 bg-brand-primary hover:bg-brand-primary text-slate-900 dark:text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Search className="w-5 h-5" /> {t('trackRepair.trackButton', 'Ticket verfolgen')}</>}
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Search className="w-5 h-5" /> {t('track.button', 'Track Ticket')}</>}
                         </button>
                     </form>
                 </div>

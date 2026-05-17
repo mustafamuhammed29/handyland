@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { authService } from '../services/authService';
 
 const ForgotPassword: React.FC = () => {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
@@ -23,11 +25,11 @@ const ForgotPassword: React.FC = () => {
                 setEmail('');
             } else {
                 setStatus('error');
-                setMessage(data.message || 'Error sending reset email');
+                setMessage(data.message || t('forgotPassword.errorSending', 'Fehler beim Senden der E-Mail'));
             }
         } catch (error) {
             setStatus('error');
-            setMessage('Error connecting to server');
+            setMessage(t('forgotPassword.errorServer', 'Verbindungsfehler zum Server'));
         }
     };
 
@@ -38,27 +40,33 @@ const ForgotPassword: React.FC = () => {
                     <div className="inline-block p-4 bg-gradient-to-br from-purple-600 to-brand-secondary rounded-2xl shadow-2xl shadow-purple-900/50 mb-4">
                         <Mail className="w-12 h-12 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-2">Forgot Password?</h1>
-                    <p className="text-slate-500 dark:text-slate-400">We'll send you a reset link</p>
+                    <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-2">
+                        {t('forgotPassword.title', 'Passwort vergessen?')}
+                    </h1>
+                    <p className="text-slate-500 dark:text-slate-400">
+                        {t('forgotPassword.subtitle', 'Wir senden Ihnen einen Link zum Zurücksetzen')}
+                    </p>
                 </div>
 
                 <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
                     {status === 'success' ? (
                         <div className="text-center">
                             <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Email Sent!</h2>
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                                {t('forgotPassword.emailSent', 'E-Mail gesendet!')}
+                            </h2>
                             <p className="text-slate-500 dark:text-slate-400 mb-6">{message}</p>
                             <Link
                                 to="/login"
-                                className="inline-block px-6 py-3 bg-blue-600 text-slate-900 dark:text-white font-semibold rounded-lg hover:bg-blue-500 transition-colors"
+                                className="inline-block px-6 py-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-semibold rounded-lg hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all shadow-lg shadow-brand-primary/25"
                             >
-                                Back to Login
+                                {t('forgotPassword.backToLogin', 'Zurück zum Login')}
                             </Link>
                         </div>
                     ) : (
                         <>
                             <p className="text-slate-700 dark:text-slate-300 mb-6 text-center">
-                                Enter your email address and we'll send you a link to reset your password.
+                                {t('forgotPassword.description', 'Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.')}
                             </p>
 
                             {status === 'error' && (
@@ -71,7 +79,7 @@ const ForgotPassword: React.FC = () => {
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                        Email Address
+                                        {t('forgotPassword.emailLabel', 'E-Mail-Adresse')}
                                     </label>
                                     <div className="relative">
                                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
@@ -89,22 +97,22 @@ const ForgotPassword: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={status === 'loading'}
-                                    className="w-full py-3 bg-gradient-to-r from-purple-600 to-brand-secondary text-slate-900 dark:text-white font-bold rounded-lg shadow-lg hover:from-purple-500 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="w-full py-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-bold rounded-lg shadow-lg shadow-brand-primary/25 hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {status === 'loading' ? (
                                         <>
                                             <Loader className="w-5 h-5 animate-spin" />
-                                            Sending...
+                                            {t('forgotPassword.sending', 'Wird gesendet...')}
                                         </>
                                     ) : (
-                                        'Send Reset Link'
+                                        t('forgotPassword.sendLink', 'Link zum Zurücksetzen senden')
                                     )}
                                 </button>
                             </form>
 
-                            <div className="mt-6 pt-6 border-t border-slate-800 text-center">
+                            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
                                 <Link to="/login" className="text-blue-400 hover:text-blue-300 text-sm transition-colors">
-                                    ← Back to Login
+                                    ← {t('forgotPassword.backToLogin', 'Zurück zum Login')}
                                 </Link>
                             </div>
                         </>

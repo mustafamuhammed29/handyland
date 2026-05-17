@@ -81,7 +81,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
   }
 
   return (
-    <footer className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 mt-auto relative z-10">
+    <footer className="bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 mt-auto relative z-10 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] dark:shadow-none">
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className={`grid gap-12 mb-12 ${settings.columns.length === 0 ? 'md:grid-cols-1' : settings.columns.length === 1 ? 'md:grid-cols-2' : settings.columns.length === 2 ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
           {/* Company Info */}

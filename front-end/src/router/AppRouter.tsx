@@ -1,5 +1,5 @@
 import React, { useEffect, Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from '../components/PageTransition';
 import { CartDrawer } from '../components/CartDrawer';
@@ -247,6 +247,11 @@ export const AppRouter = () => {
                             
                             <Route path="/cart" element={<ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><CartPage lang={lang} /></Suspense></PageTransition></ErrorBoundary>} />
                             <Route path="/about" element={<Navigate to="/uber-uns" replace />} />
+                            
+                            {/* Alias redirects for common URL patterns */}
+                            <Route path="/sell-device" element={<ProtectedRoute><Navigate to="/valuation" replace /></ProtectedRoute>} />
+                            <Route path="/privacy-policy" element={<Navigate to="/privacy" replace />} />
+                            <Route path="/terms" element={<Navigate to="/agb" replace />} />
                             
                             {/* Legacy Dashboard Redirects */}
                             <Route path="/dashboard/orders/:id" element={<LegacyOrderRedirect />} />

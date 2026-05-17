@@ -213,13 +213,19 @@ export const ComparePage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-[100dvh] bg-slate-950 pt-32 pb-24 text-slate-900 dark:text-white">
+        <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 pt-32 pb-24 text-slate-900 dark:text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div className="mb-12 text-center">
-                    <h1 className="text-4xl md:text-5xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-secondary">
+                    <p className="text-sm font-mono text-brand-primary uppercase tracking-widest mb-3">
+                        {t('compare.subtitle', 'Side-by-side Vergleich')}
+                    </p>
+                    <h1 className="text-4xl md:text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-secondary">
                         {t('compare.title', 'Compare Devices')}
                     </h1>
+                    <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-6">
+                        {t('compare.description', 'Wähle bis zu 3 Geräte aus und vergleiche Spezifikationen, Preise und Leistung auf einen Blick.')}
+                    </p>
                     
                     <div className="flex flex-wrap items-center justify-center gap-4 mb-4">
                         <button 
@@ -340,7 +346,7 @@ export const ComparePage: React.FC = () => {
                                                     addToCart({
                                                         id: product.id || product._id,
                                                         title: product.name || product.model || 'Unknown Product',
-                                                        subtitle: product.storage ? `${product.storage} • ${product.color}` : undefined,
+                                                        subtitle: product.storage ? `${product.storage} • ${product.color}` : '',
                                                         price: product.pricing?.basePrice || product.price,
                                                         image: getImageUrl(imageUrl),
                                                         category: 'device',

@@ -16,7 +16,7 @@ exports.createPaymentIntent = async (req, res, next) => {
         const { data: order, error } = await supabaseAdmin.from('orders').select('*').eq('id', orderId).single();
         if (error || !order) return res.status(404).json({ success: false, message: 'Order not found' });
         
-        if (order.user_id && order.user_id !== req.user.id && req.user.role !== 'admin') {
+        if (order.user_id && (!req.user || (order.user_id !== req.user.id && req.user.role !== 'admin'))) {
             return res.status(403).json({ success: false, message: 'Not authorized' });
         }
 
@@ -30,7 +30,7 @@ exports.createPaymentIntent = async (req, res, next) => {
 
         // Store transaction
         await supabaseAdmin.from('transactions').insert({
-            user_id: req.user.id,
+            user_id: req.user ? req.user.id : null,
             order_id: order.id,
             amount: amountInCents,
             currency: 'eur',
@@ -50,7 +50,7 @@ exports.stripeWebhook = async (req, res, next) => {
     let event;
 
     try {
-        event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }

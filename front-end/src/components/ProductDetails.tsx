@@ -186,7 +186,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
         addToCart({
             id: product.id,
             title: cleanProductName(product.model, product.brand),
-            subtitle: `${product.storage} • ${product.color}`,
+            subtitle: [product.storage, product.color].filter(v => v && v !== 'null').join(' • ') || 'Device',
             price: product.price,
             image: activeImage,
             category: 'device',

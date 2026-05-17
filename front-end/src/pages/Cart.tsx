@@ -58,8 +58,8 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
 
     if (cart.length === 0) {
         return (
-            <div className="min-h-[100dvh] bg-slate-950 pt-32 pb-20 flex flex-col items-center justify-center text-center px-4">
-                <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center mb-6 border border-slate-800">
+            <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 pt-32 pb-20 flex flex-col items-center justify-center text-center px-4">
+                <div className="w-24 h-24 bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center mb-6 border border-slate-200 dark:border-slate-800">
                     <ShoppingCart className="w-12 h-12 text-slate-500" />
                 </div>
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">{t('cart.emptyTitle', 'Your Cart is Empty')}</h1>
@@ -78,11 +78,11 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
     }
 
     return (
-        <div className="min-h-[100dvh] bg-slate-950 pt-24 pb-20">
+        <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 pt-24 pb-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-800">
+                <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
                     <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                         <ShoppingCart className="w-8 h-8 text-blue-500" />
                         {t('cart.title', 'Shopping Cart')}
@@ -102,7 +102,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                     {/* Cart Items */}
                     <div className="lg:col-span-8 space-y-6">
                         {cart.map((item) => (
-                            <div key={item.id} className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/60 p-4 sm:p-6 flex flex-col sm:flex-row gap-6 shadow-xl transition-all hover:bg-slate-900/80 hover:border-slate-700">
+                            <div key={item.id} className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800/60 p-4 sm:p-6 flex flex-col sm:flex-row gap-6 shadow-sm dark:shadow-xl transition-all hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700">
                                 {/* Image */}
                                 <div className="w-full sm:w-32 h-32 bg-white rounded-xl overflow-hidden flex-shrink-0 border border-slate-200 p-2">
                                     <img
@@ -132,7 +132,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                     {/* Actions */}
                                     <div className="w-full flex justify-between items-center mt-auto">
                                         {/* Quantity Controls */}
-                                        <div className="flex items-center bg-slate-950 rounded-lg p-1 border border-slate-700">
+                                        <div className="flex items-center bg-slate-100 dark:bg-slate-950 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
                                             <button
                                                 onClick={() => updateQuantity(item.id, -1)}
                                                 className="w-8 h-8 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white hover:bg-slate-800 rounded-md transition-colors"
@@ -207,8 +207,8 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
 
                     {/* Order Summary */}
                     <div className="lg:col-span-4 lg:sticky lg:top-28 self-start mt-8 lg:mt-0">
-                        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/60 shadow-2xl rounded-2xl p-6 sm:p-8">
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-800 pb-4">
+                        <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700/60 shadow-lg dark:shadow-2xl rounded-2xl p-6 sm:p-8">
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-4">
                                 {t('cart.summary', 'Order Summary')}
                             </h2>
 
@@ -246,7 +246,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 )}
                             </div>
 
-                            <div className="border-t border-slate-700 pt-6 mb-8">
+                                <div className="border-t border-slate-200 dark:border-slate-700 pt-6 mb-8">
                                 <div className="flex justify-between items-center">
                                     <span className="text-lg font-bold text-slate-900 dark:text-white">{t('cart.total', 'Total')}</span>
                                     <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">

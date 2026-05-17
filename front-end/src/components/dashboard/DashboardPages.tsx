@@ -32,7 +32,8 @@ export const DashboardPages: React.FC = () => {
 
     const fetchPages = async () => {
         try {
-            const data = (await api.get<Page[]>('/api/pages')) as unknown as Page[];
+            const res = await api.get<any>('/api/pages');
+            const data = (res as any).data || res;
             setPages(data);
             if (data.length > 0 && !selectedPage) {
                 setSelectedPage(data[0]);

@@ -30,17 +30,16 @@ export default defineConfig({
       testDir: './tests/admin',
     },
   ],
-  /* 
   webServer: [
     {
       command: 'cd ../front-end && npm run dev',
-      url: 'http://localhost:5173',
+      url: 'http://localhost:3000',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
     },
     {
       command: 'cd ../backend/admin && npm run dev',
-      url: 'http://localhost:5174',
+      url: 'http://localhost:3001',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
     },
@@ -51,5 +50,4 @@ export default defineConfig({
       timeout: 120 * 1000,
     }
   ],
-  */
 });

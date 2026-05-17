@@ -12,7 +12,10 @@ const TermsAndConditions: React.FC = () => {
             try {
                 const res = await api.get<any>('/api/pages/agb');
                 const data = res as any;
-                if (data && data.content) {
+                if (data && data.data && data.data.content) {
+                    setContent(data.data.content);
+                } else if (data && data.content) {
+                    // Fallback just in case
                     setContent(data.content);
                 }
             } catch (err) {
@@ -42,7 +45,11 @@ const TermsAndConditions: React.FC = () => {
                             <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
                         </div>
                     ) : content ? (
-                        <div className="prose prose-invert max-w-none text-slate-300" dangerouslySetInnerHTML={{ __html: content }} />
+                        <div className="ql-writing-format">
+                            <div className="ql-snow">
+                                <div className="ql-editor" dangerouslySetInnerHTML={{ __html: content }} />
+                            </div>
+                        </div>
                     ) : (
                         <div className="space-y-8">
                             <p className="text-slate-500 dark:text-slate-400 mb-8">Last updated: February 2026</p>

@@ -70,15 +70,19 @@ export function useValuations(options?: { enabled?: boolean }) {
             const res = await api.get<any>('/api/valuation/my-valuations') as any;
             const list = normalizeResponse(res, 'valuations');
             return list.map((v: any) => ({
-                id: v._id,
-                device: v.device || v.deviceName || 'Unknown Device',
+                id: v.id || v._id,
+                device: v.device_name || v.device || v.deviceName || 'Unknown Device',
                 specs: v.specs || v.storage || '-',
                 condition: v.condition || '-',
-                date: v.createdAt ? new Date(v.createdAt).toLocaleDateString('de-DE') : '-',
-                estimatedValue: v.estimatedValue ?? 0,
-                quoteReference: v.quoteReference,
+                date: (v.created_at || v.createdAt) ? new Date(v.created_at || v.createdAt).toLocaleDateString('de-DE') : '-',
+                estimatedValue: v.estimated_value ?? v.estimatedValue ?? 0,
+                quoteReference: v.quote_reference || v.quoteReference,
                 status: v.status || 'active',
-                expiresAt: v.expiresAt || v.expiry || null
+                expiresAt: v.expires_at || v.expiresAt || v.expiry || (
+                    (v.created_at || v.createdAt) 
+                    ? new Date(new Date(v.created_at || v.createdAt).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString() 
+                    : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+                )
             }));
         },
         staleTime: 30 * 1000, // 30 seconds so it stays fresh

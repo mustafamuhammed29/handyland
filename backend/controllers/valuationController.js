@@ -259,13 +259,13 @@ exports.getValuations = async (req, res, next) => {
         const { page = 1, limit = 20, status, search } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
 
-        let query = supabaseAdmin.from('valuations').select('*, users(name, email, phone)', { count: 'exact' });
+        let query = supabaseAdmin.from('saved_valuations').select('*', { count: 'exact' });
         
         if (req.user.role !== 'admin') query = query.eq('user_id', req.user.id);
         if (status && status !== 'All') query = query.eq('status', status);
 
         if (search) {
-            query = query.or(`device_name.ilike.%${search}%,brand.ilike.%${search}%`);
+            query = query.or(`device.ilike.%${search}%,contact_name.ilike.%${search}%`);
         }
 
         query = query.order('created_at', { ascending: false }).range(offset, offset + Number(limit) - 1);
@@ -274,7 +274,7 @@ exports.getValuations = async (req, res, next) => {
         if (error) throw error;
 
         // Stats calculation
-        const { data: allStats, error: statsError } = await supabaseAdmin.from('valuations').select('status, estimated_value, created_at');
+        const { data: allStats, error: statsError } = await supabaseAdmin.from('saved_valuations').select('status, estimated_value, created_at');
         if (statsError) throw statsError;
 
         const today = new Date().toISOString().split('T')[0];
@@ -287,18 +287,18 @@ exports.getValuations = async (req, res, next) => {
 
         const quotes = (data || []).map(v => ({
             _id: v.id,
-            quoteReference: `HV-${v.id.substring(0, 8).toUpperCase()}`,
-            device: v.device_name || 'Unbekanntes Gerät',
-            brand: v.brand,
+            quoteReference: v.quote_reference || `HV-${v.id.substring(0, 8).toUpperCase()}`,
+            device: v.device || 'Unbekanntes Gerät',
+            brand: '', 
             estimatedValue: v.estimated_value,
             status: v.status || 'active',
             createdAt: v.created_at,
-            user: v.users ? {
-                name: v.users.name,
-                email: v.users.email,
-                phone: v.users.phone
+            user: v.contact_name ? {
+                name: v.contact_name,
+                email: v.contact_email,
+                phone: v.contact_phone
             } : null,
-            specs: `${v.storage || ''} ${v.battery_health ? `(${v.battery_health}%)` : ''}`.trim(),
+            specs: v.specs || '',
             condition: v.condition
         }));
 
@@ -318,12 +318,15 @@ exports.updateValuationStatus = async (req, res, next) => {
     try {
         const { status, adminMessage } = req.body;
         const { data, error } = await supabaseAdmin
-            .from('valuations')
+            .from('saved_valuations')
             .update({ status, updated_at: new Date().toISOString() })
             .eq('id', req.params.id)
             .select().single();
 
-        if (error) throw error;
+        if (error) {
+            if (error.code === 'PGRST116') return res.status(404).json({ success: false, message: 'Angebot nicht gefunden' });
+            throw error;
+        }
         
         // Optional: Trigger notification/email if message provided
         
@@ -335,11 +338,11 @@ exports.updateValuationStatus = async (req, res, next) => {
 exports.completePurchase = async (req, res, next) => {
     try {
         const { deviceImei, digitalSignature } = req.body;
-        const { data: quote, error: quoteError } = await supabaseAdmin.from('valuations').select('*').eq('id', req.params.id).single();
+        const { data: quote, error: quoteError } = await supabaseAdmin.from('saved_valuations').select('*').eq('id', req.params.id).single();
         if (quoteError || !quote) return res.status(404).json({ success: false, message: 'Angebot nicht gefunden' });
 
         // 1. Update quote status to paid
-        const { error: updateError } = await supabaseAdmin.from('valuations').update({ 
+        const { error: updateError } = await supabaseAdmin.from('saved_valuations').update({ 
             status: 'paid',
             updated_at: new Date().toISOString() 
         }).eq('id', req.params.id);
@@ -347,9 +350,9 @@ exports.completePurchase = async (req, res, next) => {
 
         // 2. Add to products/inventory as used device
         const { error: prodError } = await supabaseAdmin.from('products').insert({
-            name: `${quote.device_name} (Gebraucht)`,
-            brand: quote.brand,
-            model: quote.device_name,
+            name: `${quote.device} (Gebraucht)`,
+            brand: quote.brand || 'Unbekannt',
+            model: quote.device,
             price: (quote.estimated_value || 0) * 1.4, // Suggest 40% margin for resale
             cost_price: quote.estimated_value,
             stock: 1,
@@ -357,7 +360,7 @@ exports.completePurchase = async (req, res, next) => {
             sub_category: 'Gebraucht',
             description: `Gebrauchtes Gerät aus Ankauf. Zustand: ${quote.condition}. IMEI: ${deviceImei}`,
             is_active: true,
-            features: [`Zustand: ${quote.condition}`, `Speicher: ${quote.storage}`]
+            features: [`Zustand: ${quote.condition}`, `Speicher: ${quote.specs}`]
         });
 
         return res.status(200).json({ success: true, message: 'Ankauf erfolgreich abgeschlossen' });
@@ -373,7 +376,7 @@ exports.createValuation = async (req, res, next) => {
         }
 
         const { data, error } = await supabaseAdmin
-            .from('valuations')
+            .from('saved_valuations')
             .insert({
                 user_id: req.user.id,
                 device_name: deviceName,
@@ -391,15 +394,7 @@ exports.createValuation = async (req, res, next) => {
     } catch (error) { next(error); }
 };
 
-// @route PUT /api/valuations/:id/status (Admin)
-exports.updateValuationStatus = async (req, res, next) => {
-    try {
-        const { status } = req.body;
-        const { data, error } = await supabaseAdmin.from('valuations').update({ status }).eq('id', req.params.id).select().single();
-        if (error || !data) return res.status(404).json({ success: false, message: 'Valuation not found' });
-        return res.status(200).json({ success: true, data });
-    } catch (error) { next(error); }
-};
+
 
 // @route GET /api/valuations/saved
 exports.getSavedValuations = async (req, res, next) => {
@@ -445,17 +440,20 @@ exports.saveValuationQuote = async (req, res, next) => {
         const quoteRef = `Q-${uuidv4().substring(0,8).toUpperCase()}`;
 
         const { data, error } = await supabaseAdmin
-            .from('valuations')
+            .from('saved_valuations')
             .insert({
                 user_id: (req.user && req.user.id) ? req.user.id : null,
-                device_name: finalDevice,
-                brand: req.body.brand || 'Unbekannt',
-                storage: finalSpecs,
+                contact_name: contactName || (req.user ? req.user.name : 'Guest'),
+                contact_email: contactEmail || (req.user ? req.user.email : null),
+                contact_phone: contactPhone || null,
+                device: finalDevice,
+                specs: finalSpecs,
                 condition: finalCondition || 'Gut',
                 estimated_value: estimatedValue || 0,
-                quote_reference: quoteRef, // Added this field!
+                quote_reference: quoteRef,
                 status: 'active',
-                include_accessories: false
+                is_quote: true,
+                expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
             })
             .select().single();
 
@@ -482,7 +480,7 @@ exports.getQuoteByReference = async (req, res, next) => {
     try {
         const { reference } = req.params;
         const { data, error } = await supabaseAdmin
-            .from('valuations')
+            .from('saved_valuations')
             .select('*')
             .eq('quote_reference', reference)
             .single();
@@ -551,5 +549,111 @@ exports.generatePurchaseAgreement = async (req, res, next) => {
         doc.text(`Ankaufspreis: ${quote.estimated_value} EUR`);
         doc.end();
 
+    } catch (error) { next(error); }
+};
+
+// ==========================================
+// CATEGORY & BRAND MANAGEMENT
+// ==========================================
+
+// @route GET /api/valuation/categories
+exports.getCategories = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('valuation_categories')
+            .select('*')
+            .order('display_order', { ascending: true });
+        if (error) throw error;
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route POST /api/valuation/categories
+exports.createCategory = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('valuation_categories')
+            .insert(req.body)
+            .select()
+            .single();
+        if (error) throw error;
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route PUT /api/valuation/categories/:id
+exports.updateCategory = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('valuation_categories')
+            .update(req.body)
+            .eq('id', req.params.id)
+            .select()
+            .single();
+        if (error) throw error;
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route DELETE /api/valuation/categories/:id
+exports.deleteCategory = async (req, res, next) => {
+    try {
+        const { error } = await supabaseAdmin
+            .from('valuation_categories')
+            .delete()
+            .eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Kategorie gelöscht' });
+    } catch (error) { next(error); }
+};
+
+// @route GET /api/valuation/brands
+exports.getBrands = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('valuation_brands')
+            .select('*')
+            .order('name', { ascending: true });
+        if (error) throw error;
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route POST /api/valuation/brands
+exports.createBrand = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('valuation_brands')
+            .insert(req.body)
+            .select()
+            .single();
+        if (error) throw error;
+        return res.status(201).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route PUT /api/valuation/brands/:id
+exports.updateBrand = async (req, res, next) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('valuation_brands')
+            .update(req.body)
+            .eq('id', req.params.id)
+            .select()
+            .single();
+        if (error) throw error;
+        return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route DELETE /api/valuation/brands/:id
+exports.deleteBrand = async (req, res, next) => {
+    try {
+        const { error } = await supabaseAdmin
+            .from('valuation_brands')
+            .delete()
+            .eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Marke gelöscht' });
     } catch (error) { next(error); }
 };

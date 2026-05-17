@@ -87,11 +87,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('marketplace.priceRange', 'PREISBEREICH')}</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{t('marketplace.priceRange', 'PREISBEREICH')}</label>
                         <div className="flex items-center gap-2">
-                            <input type="number" placeholder="Min" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm border border-transparent focus:border-brand-primary outline-none transition-colors" />
+                            <input type="number" placeholder="Min" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm border border-transparent focus:border-brand-primary outline-none transition-colors placeholder-slate-400 dark:placeholder-slate-400" />
                             <span className="text-slate-400">-</span>
-                            <input type="number" placeholder="Max" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm border border-transparent focus:border-brand-primary outline-none transition-colors" />
+                            <input type="number" placeholder="Max" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm border border-transparent focus:border-brand-primary outline-none transition-colors placeholder-slate-400 dark:placeholder-slate-400" />
                         </div>
                     </div>
 

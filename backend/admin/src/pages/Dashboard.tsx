@@ -182,7 +182,7 @@ const Dashboard: React.FC = () => {
                 <div className="glass-panel rounded-2xl p-6 lg:p-8 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-500">
                     <h2 className="text-xl font-bold text-white mb-6">Sales Overview (Last 30 Days)</h2>
                     <div className="h-80 w-full relative z-10">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                             <LineChart data={timelineData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                                 <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dy={10} />
@@ -201,7 +201,7 @@ const Dashboard: React.FC = () => {
                 <div className="glass-panel rounded-2xl p-6 lg:p-8 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-500">
                     <h2 className="text-xl font-bold text-white mb-6">Repair Tickets by Status</h2>
                     <div className="h-80 w-full relative z-10">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                             <PieChart>
                                 <Pie
                                     data={repairStats}

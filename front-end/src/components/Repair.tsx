@@ -165,9 +165,9 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                             <Wrench className="w-6 h-6 text-blue-500" />
                             <span className="text-blue-500 font-mono text-sm tracking-widest uppercase">{t('repair.title')}</span>
                         </div>
-                        <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white">
+                        <h1 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white">
                             {settings?.content?.repairTitle || t('repair.title')}
-                        </h2>
+                        </h1>
                         <p className="text-slate-600 dark:text-slate-400 mt-2 font-light border-l-2 border-blue-900 pl-4">
                             {settings?.content?.repairSubtitle || t('repair.subtitle')}
                         </p>

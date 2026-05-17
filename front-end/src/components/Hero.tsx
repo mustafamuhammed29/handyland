@@ -46,7 +46,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
     return (
         <div
-            className="relative min-h-[90vh] flex items-center justify-center overflow-hidden perspective-container transition-colors duration-300 bg-slate-50 dark:bg-slate-950"
+            className="relative min-h-[90vh] flex items-center justify-center overflow-hidden perspective-container transition-colors duration-300 bg-slate-50 dark:bg-slate-950 pt-28 lg:pt-32 pb-12"
             style={theme === 'dark' ? {
                 background: `linear-gradient(to bottom right, ${settings.hero.bgStart || '#0f172a'}, ${settings.hero.bgEnd || '#020617'})`
             } : undefined}
@@ -58,7 +58,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] animate-pulse delay-1000"></div>
             </div>
 
-            <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-28 md:pt-16 lg:pt-0">
+            <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
                 {/* Text Content */}
                 <div

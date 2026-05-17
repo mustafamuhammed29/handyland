@@ -47,7 +47,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
         addToCart({
             id: item._id || item.id,
             title: item.name,
-            subtitle: item.category,
+            subtitle: item.category && item.category !== 'null' ? item.category : 'Accessory',
             price: item.price,
             image: imageUrl,
             category: 'accessory',
@@ -112,11 +112,11 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
                                 {settings?.content?.accessoriesTitle || t('accessories.accTitle', 'Premium Zubehör')}
                             </span>
-                        </h2>
+                        </h1>
                         <p className="text-slate-500 dark:text-slate-400 mt-2 font-mono text-sm tracking-wider">
                             {settings?.content?.accessoriesSubtitle || t('accessories.accSubtitle', 'Schütze dein Gerät mit Stil')}
                         </p>
@@ -175,7 +175,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                 <img
                                     src={getImageUrl(item.image)}
                                     alt={item.name}
-                                    onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
+                                    onError={(e: any) => { e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='none'%3E%3Crect width='200' height='200' fill='%23f1f5f9'/%3E%3Cpath d='M85 75h30v10H85zm0 20h30v10H85zm0 20h30v10H85z' fill='%2394a3b8'/%3E%3C/svg%3E"; }}
                                     className={`w-full h-full object-cover transition-transform duration-700 ${hoveredId === item.id ? 'scale-110' : 'scale-100'
                                         }`}
                                 />

@@ -72,7 +72,7 @@ exports.createRefund = async (req, res, next) => {
             .insert({
                 user_id: req.user.id,
                 order_id: orderId,
-                reason, description, within_withdrawal_period
+                reason, description, within_withdrawal_period: withinWithdrawalPeriod
             })
             .select().single();
         if (error) throw error;

@@ -64,30 +64,72 @@ exports.getPage = async (req, res, next) => {
     } catch (error) { next(error); }
 };
 
-// @route POST /api/pages (Admin)
+// @route POST /api/pages (Admin — Create or Update by slug)
 exports.createPage = async (req, res, next) => {
     try {
-        const { slug, title, content, isPublished } = req.body;
+        const { slug, title, isPublished } = req.body;
+        let { content } = req.body;
+        if (content) content = content.replace(/&nbsp;/g, ' ').replace(/  +/g, ' ');
+
         if (!slug || !title) return res.status(400).json({ success: false, message: 'Slug and title are required' });
 
-        const { data, error } = await supabaseAdmin
-            .from('pages')
-            .upsert({ slug, title, content, is_published: isPublished !== false }, { onConflict: 'slug' })
-            .select().single();
+        // Check if page already exists by slug
+        const { data: existing } = await supabaseAdmin
+            .from('pages').select('id').eq('slug', slug).maybeSingle();
+
+        let data, error;
+
+        if (existing) {
+            // Update existing page
+            const result = await supabaseAdmin
+                .from('pages')
+                .update({ title, content, is_published: isPublished !== false, updated_at: new Date().toISOString() })
+                .eq('id', existing.id)
+                .select()
+                .single();
+            data = result.data;
+            error = result.error;
+        } else {
+            // Insert new page
+            const result = await supabaseAdmin
+                .from('pages')
+                .insert({ slug, title, content, is_published: isPublished !== false })
+                .select()
+                .single();
+            data = result.data;
+            error = result.error;
+        }
 
         if (error) {
+            console.error('createPage Supabase error:', error);
             if (error.code === '23505') return res.status(400).json({ success: false, message: 'Slug already exists' });
             throw error;
         }
 
-        return res.status(201).json({ success: true, data });
-    } catch (error) { next(error); }
+        const mapped = {
+            _id: data.id,
+            slug: data.slug,
+            title: data.title,
+            content: data.content,
+            isPublished: data.is_published,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at
+        };
+
+        return res.status(existing ? 200 : 201).json({ success: true, data: mapped });
+    } catch (error) {
+        console.error('createPage error:', error);
+        next(error);
+    }
 };
 
 // @route PUT /api/pages/:id (Admin)
 exports.updatePage = async (req, res, next) => {
     try {
-        const { slug, title, content, isPublished } = req.body;
+        const { slug, title, isPublished } = req.body;
+        let { content } = req.body;
+        if (content) content = content.replace(/&nbsp;/g, ' ').replace(/  +/g, ' ');
+
         const updateData = {};
         
         if (slug) updateData.slug = slug;

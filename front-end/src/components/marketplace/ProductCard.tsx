@@ -65,7 +65,9 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         </div>
                         <div className="text-right pr-12">
                             <div className="text-2xl font-bold text-slate-900 dark:text-white">{formatPrice(product.price)}</div>
-                            <div className={`text-xs font-bold uppercase ${product.condition === 'new' ? 'text-emerald-400' : 'text-purple-400'}`}>{product.condition ? product.condition.toUpperCase() : ''}</div>
+                            {product.condition && product.condition.trim() !== '' && (
+                                <div className={`text-xs font-bold uppercase ${product.condition === 'new' ? 'text-emerald-400' : 'text-purple-400'}`}>{product.condition.toUpperCase()}</div>
+                            )}
                         </div>
                     </div>
                     <p className="text-slate-400 text-sm line-clamp-2 mb-4">{product.description}</p>

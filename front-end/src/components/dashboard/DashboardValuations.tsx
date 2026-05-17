@@ -143,12 +143,12 @@ export const DashboardValuations: React.FC<DashboardValuationsProps> = ({
                     const statusCfg = STATUS_CONFIG_I18N[statusKey] || STATUS_CONFIG_I18N.active;
                     const isExpiredOrEmpty = !val.expiresAt || new Date(val.expiresAt).getTime() < Date.now();
                     const isPaid = statusKey === 'paid';
-                    const canSell = !isPaid && statusKey === 'active';
+                    const canSell = !isPaid && statusKey === 'active' && !isExpiredOrEmpty;
 
                     return (
                         <div
                             key={val.id}
-                            className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 hover:border-blue-500/30 transition-all group relative overflow-hidden"
+                            className="flex flex-col h-full bg-slate-900/50 border border-slate-800 rounded-3xl p-6 hover:border-blue-500/30 transition-all group relative overflow-hidden"
                         >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -z-10 group-hover:bg-blue-500/10 transition-colors"></div>
 
@@ -165,6 +165,9 @@ export const DashboardValuations: React.FC<DashboardValuationsProps> = ({
                                         <div className="flex flex-wrap items-center gap-2 mt-1">
                                             <span className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[10px] uppercase font-bold text-slate-400">
                                                 {val.specs?.split('|')[0]?.trim() || val.specs?.split('•')[0] || '128GB'}
+                                            </span>
+                                            <span className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[10px] uppercase font-bold text-slate-400">
+                                                {val.condition === 'hervorragend' ? t('valuations.condition.excellent', 'Like New') : val.condition === 'sehr_gut' ? t('valuations.condition.veryGood', 'Very Good') : val.condition === 'gut' ? t('valuations.condition.good', 'Good') : val.condition === 'beschadigt' ? t('valuations.condition.damaged', 'Damaged') : val.condition || t('common.variant', 'Variant')}
                                             </span>
                                             {/* Status Badge */}
                                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold ${statusCfg.color}`}>
@@ -188,12 +191,12 @@ export const DashboardValuations: React.FC<DashboardValuationsProps> = ({
                                 </div>
                             )}
 
-                            <div className="border-t border-slate-800/50 pt-4 flex items-end justify-between">
+                            <div className="border-t border-slate-800/50 pt-4 flex flex-wrap items-end justify-between gap-4 mt-auto">
                                 <div>
                                     <div className="text-xs text-slate-500 font-mono uppercase tracking-wider mb-1">{t('valuations.item.payoutAmount', 'Payout Amount')}</div>
                                     <div className="text-3xl font-black text-white tracking-tight">€{val.estimatedValue}</div>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap items-center gap-2">
                                     <button
                                         onClick={() => setSelectedDetails(val)}
                                         className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"

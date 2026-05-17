@@ -141,7 +141,7 @@ exports.updateTranslation = async (req, res) => {
             value: val
         }));
 
-        const { error } = await supabaseAdmin.from('translations').upsert(upserts, { onConflict: 'key,language' });
+        const { error } = await supabaseAdmin.from('translations').upsert(upserts, { onConflict: 'key,language,namespace' });
         if (error) throw error;
 
         res.status(200).json({ success: true, data: { _id: id, key: existing.key, values } });
@@ -218,7 +218,7 @@ exports.saveMissingTranslation = async (req, res) => {
 
         // Use ignoreDuplicates to avoid overwriting existing real values
         const { error } = await supabaseAdmin.from('translations')
-            .upsert(upserts, { onConflict: 'key,language', ignoreDuplicates: true });
+            .upsert(upserts, { onConflict: 'key,language,namespace', ignoreDuplicates: true });
 
         if (error) console.warn('saveMissingTranslation upsert warn:', error.message);
 
