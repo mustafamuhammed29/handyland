@@ -224,7 +224,7 @@ CREATE POLICY "Users view own tickets"
 
 CREATE POLICY "Users create tickets"
   ON public.repair_tickets FOR INSERT WITH CHECK (
-    auth.uid() = user_id OR auth.uid() IS NULL
+    auth.uid() = user_id OR public.is_admin()
   );
 
 CREATE POLICY "Admins full access tickets"
@@ -239,8 +239,8 @@ CREATE POLICY "Service role full access tickets"
 CREATE POLICY "Users view own messages"
   ON public.messages FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Anyone can create message"
-  ON public.messages FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service role can create message"
+  ON public.messages FOR INSERT WITH CHECK (auth.role() = 'service_role');
 
 CREATE POLICY "Admins full access messages"
   ON public.messages FOR ALL USING (public.is_admin());
@@ -275,8 +275,8 @@ CREATE POLICY "Admins full access valuations"
 CREATE POLICY "Users view own saved valuations"
   ON public.saved_valuations FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Anyone can create saved valuation"
-  ON public.saved_valuations FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service role can create saved valuation"
+  ON public.saved_valuations FOR INSERT WITH CHECK (auth.role() = 'service_role');
 
 CREATE POLICY "Admins full access saved valuations"
   ON public.saved_valuations FOR ALL USING (public.is_admin());

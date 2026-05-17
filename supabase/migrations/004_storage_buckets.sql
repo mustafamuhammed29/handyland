@@ -13,7 +13,11 @@ VALUES
   ('warranties', 'warranties', false, 5242880, ARRAY['image/jpeg','image/png','application/pdf']),
   ('pages', 'pages', true, 2097152, ARRAY['image/jpeg','image/png','image/webp']),
   ('blueprints', 'blueprints', true, 2097152, ARRAY['image/jpeg','image/png','image/webp']),
-  ('signatures', 'signatures', false, 1048576, ARRAY['image/png','image/jpeg']);
+  ('signatures', 'signatures', false, 1048576, ARRAY['image/png','image/jpeg'])
+ON CONFLICT (id) DO UPDATE SET 
+  public = EXCLUDED.public,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- Storage file_size_limit:
 -- 2097152 = 2MB (product images — compressed)
@@ -38,12 +42,27 @@ CREATE POLICY "Admins delete products storage"
     bucket_id = 'products' AND public.is_admin()
   );
 
+CREATE POLICY "Admins update products storage"
+  ON storage.objects FOR UPDATE USING (
+    bucket_id = 'products' AND public.is_admin()
+  );
+
 -- ACCESSORIES bucket: public read, admin write
 CREATE POLICY "Public read accessories storage"
   ON storage.objects FOR SELECT USING (bucket_id = 'accessories');
 
 CREATE POLICY "Admins upload accessories storage"
   ON storage.objects FOR INSERT WITH CHECK (
+    bucket_id = 'accessories' AND public.is_admin()
+  );
+
+CREATE POLICY "Admins update accessories storage"
+  ON storage.objects FOR UPDATE USING (
+    bucket_id = 'accessories' AND public.is_admin()
+  );
+
+CREATE POLICY "Admins delete accessories storage"
+  ON storage.objects FOR DELETE USING (
     bucket_id = 'accessories' AND public.is_admin()
   );
 
@@ -91,12 +110,32 @@ CREATE POLICY "Admins upload pages storage"
     bucket_id = 'pages' AND public.is_admin()
   );
 
+CREATE POLICY "Admins update pages storage"
+  ON storage.objects FOR UPDATE USING (
+    bucket_id = 'pages' AND public.is_admin()
+  );
+
+CREATE POLICY "Admins delete pages storage"
+  ON storage.objects FOR DELETE USING (
+    bucket_id = 'pages' AND public.is_admin()
+  );
+
 -- BLUEPRINTS bucket: public read, admin write
 CREATE POLICY "Public read blueprints storage"
   ON storage.objects FOR SELECT USING (bucket_id = 'blueprints');
 
 CREATE POLICY "Admins upload blueprints storage"
   ON storage.objects FOR INSERT WITH CHECK (
+    bucket_id = 'blueprints' AND public.is_admin()
+  );
+
+CREATE POLICY "Admins update blueprints storage"
+  ON storage.objects FOR UPDATE USING (
+    bucket_id = 'blueprints' AND public.is_admin()
+  );
+
+CREATE POLICY "Admins delete blueprints storage"
+  ON storage.objects FOR DELETE USING (
     bucket_id = 'blueprints' AND public.is_admin()
   );
 
