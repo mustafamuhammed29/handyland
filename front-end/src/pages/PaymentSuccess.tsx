@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { CheckCircle, Loader2, AlertCircle, Download, Package, Home, Upload } from 'lucide-react';
-import { useCart } from './context/CartContext';
-import { useToast } from './context/ToastContext';
-import { ENV } from './config/env';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
+import { ENV } from '../config/env';
 import { useQueryClient } from '@tanstack/react-query';
-import { dashboardKeys } from './hooks/useDashboardData';
+import { dashboardKeys } from '../hooks/useDashboardData';
 
 interface OrderSummary {
     id: string;

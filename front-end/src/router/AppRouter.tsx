@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 're
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from '../components/PageTransition';
 import { CartDrawer } from '../components/CartDrawer';
-import PaymentSuccess from '../PaymentSuccess';
+import PaymentSuccess from '../pages/PaymentSuccess';
 import NotFound from '../pages/NotFound';
 import MaintenancePage from '../pages/MaintenancePage';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
