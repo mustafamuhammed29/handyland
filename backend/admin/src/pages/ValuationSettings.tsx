@@ -49,8 +49,8 @@ const ValuationSettings = () => {
         setLoading(true);
         try {
             const [catRes, brandRes] = await Promise.all([
-                api.get('/api/valuation/categories'),
-                api.get('/api/valuation/brands')
+                api.get(`/api/valuation/categories?_t=${Date.now()}`),
+                api.get(`/api/valuation/brands?_t=${Date.now()}`)
             ]);
             setCategories(catRes.data.data || []);
             setBrands(brandRes.data.data || []);

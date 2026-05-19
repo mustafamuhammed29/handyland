@@ -199,6 +199,7 @@ exports.login = async (req, res, next) => {
             .eq('id', data.user.id)
             .single();
 
+        require('fs').appendFileSync('debug_login.log', JSON.stringify({ id: data.user?.id, err: profileError, user: !!userProfile }) + '\n');
         if (profileError || !userProfile) {
             return res.status(401).json({ success: false, message: 'User profile not found' });
         }

@@ -67,12 +67,14 @@ exports.addToWishlist = async (req, res, next) => {
 // @route DELETE /api/wishlist/:id
 exports.removeFromWishlist = async (req, res, next) => {
     try {
+        const itemId = req.params.itemId || req.params.id; // Support both just in case
+        
         // Can be wishlist ID, or Product/Accessory ID
         let query = supabaseAdmin.from('wishlists').delete().eq('user_id', req.user.id);
         
         // Check if UUID
-        if (req.params.id.length === 36) {
-             query = query.or(`id.eq.${req.params.id},product_id.eq.${req.params.id},accessory_id.eq.${req.params.id}`);
+        if (itemId && itemId.length === 36) {
+             query = query.or(`id.eq.${itemId},product_id.eq.${itemId},accessory_id.eq.${itemId}`);
         } else {
              return res.status(400).json({ success: false, message: 'Invalid ID format' });
         }

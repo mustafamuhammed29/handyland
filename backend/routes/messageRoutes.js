@@ -7,6 +7,9 @@ const { protect, authorize, optionalProtect } = require('../middleware/auth');
 // @route   POST /api/messages
 // @access  Public (Optional Auth)
 router.post('/', optionalProtect, messageController.createMessage);
+router.post('/admin/send', protect, authorize('admin'), messageController.sendSingleAdminMessage);
+router.post('/admin/bulk', protect, authorize('admin'), messageController.sendBulkAdminMessages);
+
 router.get('/my-messages', protect, messageController.getMessages);
 router.get('/', protect, authorize('admin'), messageController.getMessages);
 router.put('/:id', protect, authorize('admin'), messageController.updateMessageStatus);

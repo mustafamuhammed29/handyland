@@ -178,8 +178,8 @@ export const ValuationLanding = ({
         const fetchDynamicConfig = async () => {
             try {
                 const [catRes, brandRes] = await Promise.all([
-                    api.get('/api/valuation/categories'),
-                    api.get('/api/valuation/brands')
+                    api.get(`/api/valuation/categories?_t=${Date.now()}`),
+                    api.get(`/api/valuation/brands?_t=${Date.now()}`)
                 ]);
                 
                 if (catRes.data.success && catRes.data.data?.length > 0) {
@@ -196,7 +196,7 @@ export const ValuationLanding = ({
                 }
                 
                 if (brandRes.data.success && brandRes.data.data?.length > 0) {
-                    const mappedBrands: Record<string, string> = {};
+                    const mappedBrands: Record<string, string> = { ...INITIAL_BRAND_LOGOS };
                     brandRes.data.data.forEach((b: any) => {
                         mappedBrands[b.name] = b.logo_url;
                     });

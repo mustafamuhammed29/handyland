@@ -31,8 +31,8 @@ const NotificationRow = ({
     onNavigate,
 }: {
     notification: AdminNotification;
-    onRead: (id: number) => void;
-    onNavigate: (link?: string, id?: number) => void;
+    onRead: (id: number | string) => void;
+    onNavigate: (link?: string, id?: number | string) => void;
 }) => {
     const cfg = TYPE_CONFIG[notification.type] || TYPE_CONFIG.new_message;
     const Icon = cfg.Icon;
@@ -85,7 +85,7 @@ interface NotificationBellProps {
     unreadCount: number;
     isConnected: boolean;
     onMarkAllRead: () => void;
-    onMarkOneRead: (id: number) => void;
+    onMarkOneRead: (id: number | string) => void;
     onClearAll: () => void;
 }
 
@@ -123,10 +123,18 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    const handleNavigate = (link?: string, id?: number) => {
+    const handleNavigate = (link?: string, id?: number | string) => {
         if (id) onMarkOneRead(id);
         setOpen(false);
-        if (link) navigate(link);
+        if (link) {
+            // Remove /admin prefix if present because React routes are rooted at /
+            let cleanLink = link.startsWith('/admin') ? link.replace('/admin', '') : link;
+            // Most managers (Orders, Messages, Refunds) don't support /:id routing yet,
+            // they manage state internally. Strip UUIDs from the URL so it doesn't 404.
+            cleanLink = cleanLink.replace(/\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i, '');
+            
+            navigate(cleanLink || '/');
+        }
     };
 
     return (

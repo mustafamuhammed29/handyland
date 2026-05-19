@@ -9,7 +9,7 @@ import { io, Socket } from 'socket.io-client';
 export type NotificationType = 'new_user' | 'new_order' | 'new_message' | 'new_repair' | 'new_valuation';
 
 export interface AdminNotification {
-    id: number;
+    id: number | string;
     type: NotificationType;
     title: string;
     body: string;
@@ -33,16 +33,46 @@ export const useAdminNotifications = (isAuthenticated: boolean) => {
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     }, []);
 
-    const markOneRead = useCallback((id: number) => {
+    const markOneRead = useCallback((id: number | string) => {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        
+        // Mark as read in DB if it's a UUID string
+        if (typeof id === 'string') {
+            import('../utils/api').then(({ api }) => {
+                api.put(`/api/notifications/${id}/read`).catch(console.error);
+            });
+        }
     }, []);
 
     const clearAll = useCallback(() => {
         setNotifications([]);
+        import('../utils/api').then(({ api }) => {
+            api.put('/api/notifications/mark-all-read').catch(console.error);
+        });
     }, []);
 
     useEffect(() => {
         if (!isAuthenticated) return;
+
+        // Fetch initial unread notifications from the database
+        import('../utils/api').then(({ api }) => {
+            api.get('/api/notifications?unreadOnly=true').then((res: any) => {
+                const data = res?.data || res;
+                if (data && data.data && Array.isArray(data.data)) {
+                    const mapped = data.data.map((n: any) => ({
+                        id: n.id,
+                        type: n.type || 'new_message',
+                        title: n.type === 'new_order' ? 'Neue Bestellung' : 'System Benachrichtigung',
+                        body: n.message,
+                        icon: n.type === 'new_order' ? '📦' : '🔔',
+                        link: n.link,
+                        timestamp: n.created_at,
+                        read: n.read
+                    }));
+                    setNotifications(mapped);
+                }
+            }).catch(console.error);
+        });
 
         const socket = io(SOCKET_URL, {
             withCredentials: true,
