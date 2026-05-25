@@ -196,6 +196,13 @@ exports.updateRefundStatus = async (req, res, next) => {
         const { data, error } = await supabaseAdmin.from('refund_requests').update(updateData).eq('id', req.params.id).select().single();
         if (error) throw error;
 
+        // Sync order status
+        if (status === 'processed') {
+            await supabaseAdmin.from('orders').update({ status: 'refunded' }).eq('id', refundReq.order_id);
+        } else if (status === 'rejected') {
+            await supabaseAdmin.from('orders').update({ status: 'delivered' }).eq('id', refundReq.order_id);
+        }
+
         // Notify user
         await supabaseAdmin.from('notifications').insert({
             user_id: data.user_id,

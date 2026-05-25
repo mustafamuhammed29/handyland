@@ -121,7 +121,7 @@ const ValuationSettings = () => {
         <div className="space-y-8 pb-20">
             <header>
                 <h1 className="text-3xl font-bold text-white mb-2">Valuation Settings</h1>
-                <p className="text-slate-400">Verwalten Sie Kategorien und Markensymbole für den Ankaufsprozess.</p>
+                <p className="text-slate-400">Verwalten Sie Categories und Markensymbole für den Ankaufsprozess.</p>
             </header>
 
             {/* Tabs */}
@@ -132,7 +132,7 @@ const ValuationSettings = () => {
                 >
                     <div className="flex items-center gap-2 font-semibold text-sm">
                         <LayoutGrid size={18} />
-                        Kategorien
+                        Categories
                     </div>
                     {activeTab === 'categories' && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />}
                 </button>
@@ -142,7 +142,7 @@ const ValuationSettings = () => {
                 >
                     <div className="flex items-center gap-2 font-semibold text-sm">
                         <ImageIcon size={18} />
-                        Marken-Logos
+                        Brand Logos
                     </div>
                     {activeTab === 'brands' && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />}
                 </button>
@@ -156,13 +156,13 @@ const ValuationSettings = () => {
                 ) : activeTab === 'categories' ? (
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-xl font-bold">Kategorien verwalten</h2>
+                            <h2 className="text-xl font-bold">Categories verwalten</h2>
                             <button
                                 onClick={() => { setEditingCat(null); setCatForm({ name: '', label: '', emoji: '', icon_name: 'Smartphone', color: 'blue', display_order: categories.length * 10, is_active: true }); setIsCatModalOpen(true); }}
                                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl transition-all text-sm font-bold"
                             >
                                 <Plus size={18} />
-                                Neue Kategorie
+                                New Category
                             </button>
                         </div>
 
@@ -189,7 +189,7 @@ const ValuationSettings = () => {
                 ) : (
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-xl font-bold">Marken-Logos verwalten</h2>
+                            <h2 className="text-xl font-bold">Brand Logos verwalten</h2>
                             <button
                                 onClick={() => { setEditingBrand(null); setBrandForm({ name: '', logo_url: '', is_popular: false }); setIsBrandModalOpen(true); }}
                                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl transition-all text-sm font-bold"
@@ -233,7 +233,7 @@ const ValuationSettings = () => {
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
                             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                                 <LayoutGrid className="text-blue-400" />
-                                {editingCat ? 'Kategorie bearbeiten' : 'Neue Kategorie'}
+                                {editingCat ? 'Kategorie bearbeiten' : 'New Category'}
                             </h3>
                             <div className="space-y-4">
                                 <div><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Interner Name (ID)</label><input type="text" className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2.5 mt-1 focus:border-blue-500 outline-none transition-all" value={catForm.name} onChange={e => setCatForm({...catForm, name: e.target.value})} placeholder="z.B. Smartphone" /></div>

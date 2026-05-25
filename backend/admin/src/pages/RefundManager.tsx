@@ -109,7 +109,7 @@ export default function RefundManager() {
             setNewOrderStatus(newStatus);
             fetchRefunds();
         } catch (err: any) {
-            toast.error(err?.response?.data?.message || err?.message || 'Fehler beim Aktualisieren des Bestellstatus');
+            toast.error(err?.response?.data?.message || err?.message || 'Fehler beim Refresh des Bestellstatus');
         } finally {
             setStatusLoading(false);
         }
@@ -159,9 +159,9 @@ export default function RefundManager() {
                     </h2>
                     <p className="text-slate-400 mt-1 text-sm">EU Widerrufsrecht · Bestellstatus-Kontrolle · Stripe Auto-Refund</p>
                 </div>
-                <button onClick={fetchRefunds} disabled={loading} title="Aktualisieren"
+                <button onClick={fetchRefunds} disabled={loading} title="Refresh"
                     className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors text-sm font-bold border border-slate-700">
-                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Aktualisieren
+                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
                 </button>
             </div>
 

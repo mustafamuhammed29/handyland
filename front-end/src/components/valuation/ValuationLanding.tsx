@@ -285,9 +285,9 @@ export const ValuationLanding = ({
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-full text-sm mb-2 shadow-sm">
                     <Sparkles size={16} /> {t('valuation.badge', 'Sell your device — fast & fair')}
                 </div>
-                <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight">
+                <h2 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight">
                     {t('valuation.title', 'Verkaufe mit')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">HandyLand</span>
-                </h1>
+                </h2>
                 <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-medium">
                     {t('valuation.subtitle', 'Sofortangebot für dein Gerät — Smartphones, Tablets, Laptops, Konsolen & mehr.')}
                 </p>

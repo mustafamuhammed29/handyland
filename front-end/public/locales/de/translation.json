@@ -12,10 +12,7 @@
     "trackRepair": "Reparatur verfolgen",
     "signInRegister": "Anmelden / Registrieren"
   },
-  "market": {
-    "Market Highlights": "Markt-Highlights",
-    "condition": "Zustand"
-  },
+  "market": "Marktplatz",
   "hero": {
     "title": "HANDYLAND",
     "subtitle": "Der globale Standard für Premium-Gerätehandel und Reparatur.",

@@ -53,7 +53,7 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                     </h3>
                     <div className="flex items-center gap-2 text-xs text-slate-500 font-mono bg-black/40 px-3 py-1 rounded-full border border-slate-800">
                         <Cpu className="w-3 h-3" />
-                        <span>ID: {selectedDevice.id?.toUpperCase() || 'N/A'}</span>
+                        <span>REF: {(selectedDevice.brand?.substring(0, 3) || 'SYS').toUpperCase()}-{(selectedDevice.model?.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4) || 'RDY').toUpperCase()}</span>
                     </div>
                 </div>
 

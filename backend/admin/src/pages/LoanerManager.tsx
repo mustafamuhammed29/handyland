@@ -200,7 +200,7 @@ const LoanerManager = () => {
                     onClick={() => setIsAddModalOpen(true)}
                     className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20"
                 >
-                    <Plus size={20} /> Neues Gerät anlegen
+                    <Plus size={20} /> Add New Device
                 </button>
             </div>
 

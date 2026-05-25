@@ -427,7 +427,7 @@ const ValuationManager = () => {
                             title="Alle Geräte mit aktuellen Marktpreisen neu laden"
                             className="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 disabled:opacity-50 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg"
                         >
-                            {reseeding ? '⏳' : '🔄'} {reseeding ? 'Updating...' : 'Update Preise'}
+                            {reseeding ? '⏳' : '🔄'} {reseeding ? 'Updating...' : 'Update Prices'}
                         </button>
                         {/* Delete All */}
                         <button
@@ -435,7 +435,7 @@ const ValuationManager = () => {
                             title="Alle Blueprints löschen"
                             className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg"
                         >
-                            <Trash2 size={16} /> Alle löschen
+                            <Trash2 size={16} /> Delete All
                         </button>
                         {/* Add New */}
                         <button
@@ -448,7 +448,7 @@ const ValuationManager = () => {
                             onClick={openNew}
                             className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-2.5 rounded-xl font-bold hover:shadow-lg hover:shadow-cyan-900/40 transition-all text-white border border-white/10"
                         >
-                            <Plus size={20} /> Neues Blueprint
+                            <Plus size={20} /> New Blueprint
                         </button>
                     </div>
                 )}
@@ -1155,7 +1155,7 @@ const ValuationManager = () => {
                                     <div className="p-2 bg-slate-800 rounded-xl border border-slate-700">
                                         <Calculator className="text-cyan-400" size={20} />
                                     </div>
-                                    {editingDevice ? 'Blueprint bearbeiten' : 'Neues Blueprint'}
+                                    {editingDevice ? 'Blueprint bearbeiten' : 'New Blueprint'}
                                 </h2>
                                 <button onClick={closeModal} aria-label="Close modal" title="Close" className="text-slate-500 hover:text-white transition-colors p-2 rounded-xl hover:bg-slate-800 border border-transparent hover:border-slate-700"><X size={20} /></button>
                             </div>

@@ -10,9 +10,12 @@ interface ValuationProps {
     lang: LanguageCode;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
     const valuation = useValuation();
     const { settings } = useSettings();
+    const { t } = useTranslation();
 
     const screenConditions = settings?.valuation?.screenConditions || [
         { id: 'hervorragend', title: 'Hervorragend', desc: 'Keine sichtbaren Kratzer. Wie neu.' },
@@ -41,6 +44,8 @@ export const Valuation: React.FC<ValuationProps> = ({ lang }) => {
 
     return (
         <div className="py-24 px-4 min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-[#0a0f1c] relative overflow-hidden">
+            <h1 className="sr-only">{t('nav.valuation', 'Verkaufen')}</h1>
+
             {/* Background Decorations */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full point-events-none" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full point-events-none" />

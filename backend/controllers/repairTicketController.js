@@ -90,6 +90,8 @@ exports.getTicketStats = async (req, res, next) => {
     }
 };
 
+const xss = require('xss');
+
 // ── @route POST /api/repairs ──────────────────────────────────
 exports.createTicket = async (req, res, next) => {
     try {
@@ -104,14 +106,15 @@ exports.createTicket = async (req, res, next) => {
         const insertData = {
             ticket_id: ticketId,
             user_id: req.user?.id || null,
-            device,
-            issue,
-            service_type: serviceType || 'In-Store',
-            notes: notes || null,
+            device: xss(device),
+            issue: xss(issue),
+            service_type: xss(serviceType || 'In-Store'),
+            notes: notes ? xss(notes) : null,
             appointment_date: appointmentDate || null,
-            guest_name: guestContact?.name || null,
-            guest_email: guestContact?.email || null,
-            guest_phone: guestContact?.phone || null
+            guest_name: guestContact?.name ? xss(guestContact.name) : null,
+            guest_email: guestContact?.email ? xss(guestContact.email) : null,
+            guest_phone: guestContact?.phone ? xss(guestContact.phone) : null,
+            created_at: new Date().toISOString()
         };
 
         const { data: ticket, error } = await supabaseAdmin

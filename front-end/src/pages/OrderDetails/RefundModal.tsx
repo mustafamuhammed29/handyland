@@ -28,7 +28,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({ orderId, totalAmount, 
                 description: refundDescription,
                 customerConfirmedReturn: refundConfirmed,
             });
-            const newRefund = res?.refund || res?.data?.refund;
+            const newRefund = res?.data || res?.refund;
             addToast('Rückgabeanfrage erfolgreich eingereicht!', 'success');
             onSuccess(newRefund);
         } catch (err: any) {

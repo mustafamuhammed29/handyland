@@ -22,7 +22,16 @@ exports.getSettings = async (req, res, next) => {
             try {
                 // Try to parse as JSON if it looks like an object/array
                 if (typeof item.value === 'string' && (item.value.startsWith('{') || item.value.startsWith('['))) {
-                    settings[item.key] = JSON.parse(item.value);
+                    let parsed = JSON.parse(item.value);
+                    if (item.key === 'payment') {
+                        for (const provider of Object.keys(parsed)) {
+                            if (parsed[provider]) {
+                                delete parsed[provider].secretKey;
+                                delete parsed[provider].webhookSecret;
+                            }
+                        }
+                    }
+                    settings[item.key] = parsed;
                 } else {
                     settings[item.key] = item.value;
                 }
@@ -69,6 +78,24 @@ exports.updateSettings = async (req, res, next) => {
         const updates = req.body;
         if (!updates || typeof updates !== 'object') {
             return res.status(400).json({ success: false, error: 'Invalid body' });
+        }
+
+        // Preserve payment secrets if they are not provided
+        if (updates.payment) {
+            const { data: existingData } = await supabaseAdmin.from('settings').select('value').eq('key', 'payment').single();
+            if (existingData && existingData.value) {
+                let existingPayment = typeof existingData.value === 'string' ? JSON.parse(existingData.value) : existingData.value;
+                for (const provider of Object.keys(updates.payment)) {
+                    if (existingPayment[provider]) {
+                        if (!updates.payment[provider].secretKey) {
+                            updates.payment[provider].secretKey = existingPayment[provider].secretKey;
+                        }
+                        if (!updates.payment[provider].webhookSecret && existingPayment[provider].webhookSecret) {
+                            updates.payment[provider].webhookSecret = existingPayment[provider].webhookSecret;
+                        }
+                    }
+                }
+            }
         }
 
         const rows = Object.entries(updates)

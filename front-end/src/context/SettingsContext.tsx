@@ -200,13 +200,20 @@ interface Settings {
     payment?: {
         stripe?: {
             enabled: boolean;
-            publishableKey: string;
+            publicKey: string;
+            secretKey?: string;
+            webhookSecret?: string;
         };
         paypal?: {
             enabled: boolean;
             clientId: string;
-            mode: 'sandbox' | 'live';
+            secretKey?: string;
         };
+        klarna?: { enabled: boolean; publicKey: string; secretKey?: string; };
+        giropay?: { enabled: boolean; publicKey: string; secretKey?: string; };
+        sepa?: { enabled: boolean; publicKey: string; secretKey?: string; };
+        sofort?: { enabled: boolean; publicKey: string; secretKey?: string; };
+        cashOnDelivery?: { enabled: boolean; };
         bankTransfer?: {
             enabled: boolean;
             instructions: string;
@@ -341,7 +348,7 @@ const defaultSettings: Settings = {
         links: [
             { labelKey: 'nav.home', defaultLabel: 'Home', path: '/', iconName: 'Home' },
             { labelKey: 'nav.marketplace', defaultLabel: 'Marketplace', path: '/marketplace', iconName: 'ShoppingBag' },
-            { labelKey: 'nav.repair', defaultLabel: 'Repair', path: '/repair', iconName: 'Wrench' },
+            { labelKey: 'nav.repair', defaultLabel: 'Repair', path: '/#repair', iconName: 'Wrench' },
             { labelKey: 'nav.valuation', defaultLabel: 'Sell', path: '/valuation', iconName: 'BarChart3' }
         ]
     },

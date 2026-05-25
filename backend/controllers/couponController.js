@@ -175,17 +175,6 @@ exports.getLatestPromo = async (req, res, next) => {
         if (error) throw error;
         if (!data) return res.status(404).json({ success: false, message: 'No active promo found' });
 
-        return res.status(200).json({
-            success: true,
-            data: {
-                _id: data.id,
-                code: data.code,
-                discountType: data.discount_type,
-                discountValue: data.discount_value,
-                minOrderValue: data.min_order_value,
-                maxDiscount: data.max_discount,
-                validUntil: data.valid_until
-            }
-        });
+        return res.status(200).json({ found: true, code: data.code, discountType: data.discount_type, discountValue: data.discount_value, usageLimit: data.usage_limit, usedCount: data.used_count, validUntil: data.valid_until });
     } catch (error) { next(error); }
 };

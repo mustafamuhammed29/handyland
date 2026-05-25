@@ -12,7 +12,8 @@ const authLimiter = rateLimit({
     },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    // Skip successful requests
+    // Skip successful requests so users can log in multiple times if needed, 
+    // but failed attempts count against the limit.
     skipSuccessfulRequests: true
 });
 

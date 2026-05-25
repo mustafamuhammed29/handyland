@@ -345,7 +345,7 @@ const PriceResearchManager: React.FC = () => {
                                 type="text"
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                placeholder="Gerät suchen..."
+                                placeholder="Search device..."
                                 title="Gerät suchen"
                                 className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-white focus:border-blue-500 outline-none text-sm"
                             />
@@ -387,7 +387,7 @@ const PriceResearchManager: React.FC = () => {
                                         <p className="text-emerald-400 font-black">{bp.basePrice}€</p>
                                         <div className="flex items-center justify-end gap-1.5 mt-0.5">
                                             {bp.needsUpdate
-                                                ? <span className="text-[10px] text-amber-400 font-bold">⚠ Update nötig</span>
+                                                ? <span className="text-[10px] text-amber-400 font-bold">⚠ Update needed</span>
                                                 : <span className="text-[10px] text-emerald-400 font-bold">✓ Aktuell</span>
                                             }
                                             <span className="text-[10px] text-slate-600">{timeSince(bp.lastResearched)}</span>
@@ -409,7 +409,7 @@ const PriceResearchManager: React.FC = () => {
                             <div className="p-4 bg-slate-800/50 rounded-2xl mb-4">
                                 <Search className="w-8 h-8 text-slate-600" />
                             </div>
-                            <h3 className="text-slate-400 font-bold mb-2">Gerät auswählen</h3>
+                            <h3 className="text-slate-400 font-bold mb-2">Select Device</h3>
                             <p className="text-slate-600 text-sm">Wähle ein Gerät aus der Liste um aktuelle eBay.de Preise abzurufen</p>
                             <div className="mt-6 p-4 bg-blue-950/40 border border-blue-800/30 rounded-xl text-left max-w-xs">
                                 <p className="text-blue-400 text-xs font-bold flex items-center gap-2 mb-2"><Info size={12} /> Wie funktioniert das?</p>
