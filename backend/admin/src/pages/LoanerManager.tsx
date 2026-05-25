@@ -10,7 +10,7 @@ interface Loaner {
     _id: string;
     name: string;
     imei: string;
-    status: 'Available' | 'Lent' | 'Maintenance';
+    status: 'available' | 'loaned' | 'maintenance';
     currentCustomer: { name: string; phone: string; email: string };
     lentDate: string;
     dueDate: string;
@@ -43,7 +43,7 @@ const LoanerManager = () => {
     const [isLendModalOpen, setIsLendModalOpen] = useState<{ open: boolean, loaner: Loaner | null }>({ open: false, loaner: null });
 
     // Forms
-    const [formData, setFormData] = useState({ brand: '', model: '', imei: '', status: 'Available', notes: '' });
+    const [formData, setFormData] = useState({ brand: '', model: '', imei: '', status: 'available', notes: '' });
     const [lendFormData, setLendFormData] = useState({ customerName: '', customerPhone: '', customerEmail: '', dueDate: '', notes: '' });
     
     const fetchStats = async () => {
@@ -64,7 +64,7 @@ const LoanerManager = () => {
                 page: page.toString(),
                 limit: limit.toString(),
                 search: debouncedSearch,
-                status: filterStatus !== 'All' ? filterStatus : ''
+                status: filterStatus === 'Available' ? 'available' : filterStatus === 'Lent' ? 'loaned' : filterStatus === 'Maintenance' ? 'maintenance' : ''
             });
             const { data } = await api.get(`/api/loaners?${queryParams.toString()}`);
             if (data.success) {
@@ -103,7 +103,7 @@ const LoanerManager = () => {
             fetchLoaners();
             fetchStats();
             setIsAddModalOpen(false);
-            setFormData({ brand: '', model: '', imei: '', status: 'Available', notes: '' });
+            setFormData({ brand: '', model: '', imei: '', status: 'available', notes: '' });
             toast.success('Neues Leihgerät hinzugefügt!');
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Error adding loaner');
@@ -155,7 +155,7 @@ const LoanerManager = () => {
     };
 
     const StatusBadge = ({ status, isOverdue }: { status: string, isOverdue?: boolean }) => {
-        if (isOverdue && status === 'Lent') {
+        if (isOverdue && status === 'loaned') {
             return (
                 <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/30 flex items-center gap-1.5 shadow-sm">
                     <AlertTriangle size={12} /> Überfällig
@@ -164,9 +164,9 @@ const LoanerManager = () => {
         }
 
         const styles: Record<string, { colors: string, label: string, icon: React.ReactNode }> = {
-            'Available': { colors: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30', label: 'Available', icon: <CheckCircle size={12} /> },
-            'Lent': { colors: 'bg-blue-500/10 text-blue-400 border-blue-500/30', label: 'Ausgeliehen', icon: <Clock size={12} /> },
-            'Maintenance': { colors: 'bg-amber-500/10 text-amber-400 border-amber-500/30', label: 'Wartung', icon: <Wrench size={12} /> }
+            'available': { colors: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30', label: 'Available', icon: <CheckCircle size={12} /> },
+            'loaned': { colors: 'bg-blue-500/10 text-blue-400 border-blue-500/30', label: 'Ausgeliehen', icon: <Clock size={12} /> },
+            'maintenance': { colors: 'bg-amber-500/10 text-amber-400 border-amber-500/30', label: 'Wartung', icon: <Wrench size={12} /> }
         };
         
         const config = styles[status] || { colors: 'bg-slate-700 text-slate-300 border-slate-600', label: status, icon: null };
@@ -271,7 +271,7 @@ const LoanerManager = () => {
                         <motion.div
                             layout
                             key={loaner._id}
-                            className={`bg-slate-900/40 backdrop-blur-xl border ${isOverdue && loaner.status === 'Lent' ? 'border-red-500/50 shadow-lg shadow-red-900/10' : 'border-white/5'} rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all flex flex-col group`}
+                            className={`bg-slate-900/40 backdrop-blur-xl border ${isOverdue && loaner.status === 'loaned' ? 'border-red-500/50 shadow-lg shadow-red-900/10' : 'border-white/5'} rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all flex flex-col group`}
                         >
                             <div className="p-5 border-b border-white/5 flex justify-between items-start bg-slate-900/50">
                                 <div>
@@ -295,7 +295,7 @@ const LoanerManager = () => {
                             </div>
 
                             <div className="p-5 flex-1 space-y-4">
-                                {loaner.status === 'Lent' ? (
+                                {loaner.status === 'loaned' ? (
                                     <div className={`rounded-xl border p-4 space-y-3 ${isOverdue ? 'bg-red-500/5 border-red-500/20' : 'bg-blue-500/5 border-blue-500/10'}`}>
                                         <div className={`text-xs font-black uppercase tracking-wider mb-2 flex items-center gap-2 ${isOverdue ? 'text-red-400' : 'text-blue-400'}`}>
                                             <Clock size={14} /> {isOverdue ? 'Rückgabe überfällig!' : 'Ausgeliehen an'}
@@ -333,7 +333,7 @@ const LoanerManager = () => {
                                             </span>
                                         </div>
                                     </div>
-                                ) : loaner.status === 'Maintenance' ? (
+                                ) : loaner.status === 'maintenance' ? (
                                     <div className="h-full flex items-center justify-center py-6">
                                         <div className="text-center text-slate-500">
                                             <div className="w-16 h-16 mx-auto bg-amber-500/10 rounded-full flex items-center justify-center mb-3">
@@ -362,7 +362,7 @@ const LoanerManager = () => {
                             </div>
 
                             <div className="p-4 border-t border-white/5 flex gap-2 bg-slate-950/50 mt-auto">
-                                {loaner.status === 'Available' && (
+                                {loaner.status === 'available' && (
                                     <button
                                         onClick={() => setIsLendModalOpen({ open: true, loaner })}
                                         className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-900/20"
@@ -370,7 +370,7 @@ const LoanerManager = () => {
                                         Gerät verleihen
                                     </button>
                                 )}
-                                {loaner.status === 'Lent' && (
+                                {loaner.status === 'loaned' && (
                                     <button
                                         onClick={() => handleReturnPhone(loaner._id)}
                                         className="flex-1 bg-emerald-600/20 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/30 hover:border-emerald-500 py-2.5 rounded-xl text-sm font-bold transition-all"
@@ -378,7 +378,7 @@ const LoanerManager = () => {
                                         Zurücknehmen
                                     </button>
                                 )}
-                                {loaner.status === 'Maintenance' && (
+                                {loaner.status === 'maintenance' && (
                                     <button
                                         onClick={() => handleReturnPhone(loaner._id)}
                                         className="flex-1 bg-emerald-600/20 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/30 hover:border-emerald-500 py-2.5 rounded-xl text-sm font-bold transition-all"
@@ -386,7 +386,7 @@ const LoanerManager = () => {
                                         Wartung beenden
                                     </button>
                                 )}
-                                {loaner.status === 'Available' && (
+                                {loaner.status === 'available' && (
                                     <button
                                         onClick={() => handleReturnPhone(loaner._id, true)}
                                         className="px-3 py-2 text-amber-400 bg-amber-500/10 hover:bg-amber-500 hover:text-white border border-amber-500/20 rounded-xl transition-all"
