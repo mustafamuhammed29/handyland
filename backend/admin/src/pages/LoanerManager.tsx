@@ -8,8 +8,7 @@ import toast from 'react-hot-toast';
 
 interface Loaner {
     _id: string;
-    brand: string;
-    model: string;
+    name: string;
     imei: string;
     status: 'Available' | 'Lent' | 'Maintenance';
     currentCustomer: { name: string; phone: string; email: string };
@@ -278,7 +277,7 @@ const LoanerManager = () => {
                                 <div>
                                     <h3 className="text-lg font-black text-white mb-1.5 flex items-center gap-2">
                                         <Smartphone size={18} className="text-blue-400" />
-                                        {loaner.brand} {loaner.model}
+                                        {loaner.name}
                                     </h3>
                                     <div className="flex items-center gap-2">
                                         <span className="font-mono text-[11px] text-slate-400 bg-slate-950 px-2 py-1 rounded-md border border-slate-800">IMEI: {loaner.imei}</span>
@@ -515,7 +514,7 @@ const LoanerManager = () => {
                                     Gerät verleihen
                                 </h2>
                                 <p className="text-sm text-slate-400 font-mono bg-slate-950 border border-slate-800 px-3 py-2 rounded-xl">
-                                    {isLendModalOpen.loaner.brand} {isLendModalOpen.loaner.model} <br/>
+                                    {isLendModalOpen.loaner.name} <br/>
                                     <span className="text-xs text-slate-500">IMEI: {isLendModalOpen.loaner.imei}</span>
                                 </p>
                             </div>
