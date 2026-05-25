@@ -250,7 +250,11 @@ const Register: React.FC = () => {
                                         defaultCountry="DE"
                                         value={formData.phone}
                                         onChange={handlePhoneChange}
-                                        className="w-full bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white transition-all [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:text-slate-900 dark:text-white [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:p-3 [&_.PhoneInputCountryIcon]:ml-3"
+                                        placeholder="z.B. +49 170 1234567"
+                                        className="w-full flex items-center bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white transition-all focus-within:ring-2 focus-within:ring-green-500 px-3 py-1 [&_.PhoneInputCountryIcon]:ml-2"
+                                        numberInputProps={{
+                                            className: "w-full bg-transparent border-none outline-none py-2 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-0 focus:outline-none ml-2"
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -349,7 +353,7 @@ const Register: React.FC = () => {
                             type="submit" disabled={loading}
                             className="w-full py-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-bold rounded-lg shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            {loading ? <><Loader className="w-5 h-5 animate-spin" />Konto wird erstellt...</> : 'Konto erstellen →'}
+                            {loading ? <><Loader className="w-5 h-5 animate-spin" />Konto wird erstellt...</> : 'Konto erstellen'}
                         </button>
                     </form>
 

@@ -8,6 +8,7 @@ import { LanguageCode } from '../types';
 import { api } from '../utils/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { FREE_SHIPPING_THRESHOLD } from '../utils/constants';
+import { formatPrice } from '../utils/formatPrice';
 
 interface CartProps {
     lang: LanguageCode;
@@ -230,7 +231,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                     <div className="mt-4 pt-4 border-t border-slate-800">
                                         <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
                                             {Math.max(0, threshold - cartTotal) > 0 ? (
-                                                <span>{t('cart.addForFreeShipping', 'Add €{{amount}} for Free Shipping', { amount: Math.max(0, threshold - cartTotal).toFixed(2) })}</span>
+                                                <span>{t('cart.addForFreeShipping', 'Noch {{amount}} bis zum Gratisversand', { amount: formatPrice(Math.max(0, threshold - cartTotal)) })}</span>
                                             ) : (
                                                 <span className="text-emerald-400 font-bold">{t('cart.freeShippingUnlocked', "You've unlocked Free Shipping!")}</span>
                                             )}

@@ -36,6 +36,14 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
           { label: t('footer.trackRepair', 'REPARATUR VERFOLGEN'), url: '/track-repair' },
           { label: t('footer.support', 'SUPPORT'), url: '/kundenservice' },
         ]
+      },
+      {
+        title: t('footer.aboutTitle', 'UNTERNEHMEN'),
+        links: [
+          { label: t('footer.aboutUs', 'ÜBER UNS'), url: '/uber-uns' },
+          { label: t('footer.customerService', 'KUNDENSERVICE'), url: '/kundenservice' },
+          { label: t('footer.impressum', 'IMPRESSUM'), url: '/impressum' },
+        ]
       }
     ],
     bottomLinks: globalSettings?.footerSection?.bottomLinks || []
@@ -93,6 +101,17 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
             <p className="text-slate-500 mt-4 max-w-sm leading-relaxed">
               {settings.companyInfo.tagline}
             </p>
+            <div className="flex gap-3 mt-6">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
+                <Twitter className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
           {/* Dynamic Columns */}

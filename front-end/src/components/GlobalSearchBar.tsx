@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api';
 import { getImageUrl } from '../utils/imageUrl';
+import { getConditionLabel } from '../utils/cleanProductName';
 
 interface GlobalSearchBarProps {
     className?: string;
@@ -180,7 +181,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ className = "h
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-bold text-white truncate">{product.name || product.model}</p>
-                                                <p className="text-xs text-slate-400 capitalize">{product.condition} • {product.storage}</p>
+                                                <p className="text-xs text-slate-400 capitalize">{getConditionLabel(product.condition)} • {product.storage}</p>
                                             </div>
                                             <div className="text-sm font-bold text-brand-primary whitespace-nowrap">
                                                 €{(product.price).toFixed(2)}

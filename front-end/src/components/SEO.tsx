@@ -29,12 +29,26 @@ export const SEO: React.FC<SEOProps> = ({
     const siteTitle = settings?.siteName || localStorage.getItem('handyland_sitename') || 'HandyLand';
     
     // If a specific title is given, use it. Otherwise, use global default, otherwise use site name.
-    const finalTitle = title 
+    let rawTitle = title 
         ? `${title} | ${siteTitle}` 
         : (seoSettings.defaultMetaTitle || siteTitle);
         
-    const finalDescription = description || seoSettings.defaultMetaDescription || '';
-    const finalKeywords = keywords || seoSettings.defaultKeywords || '';
+    // Sanitize any literal "null" or "undefined" leaks from database models
+    const finalTitle = rawTitle
+        .replace(/\s*\|\s*null\b/gi, '')
+        .replace(/\bnull\s*\|\s*/gi, '')
+        .replace(/\bnull\b/gi, '')
+        .replace(/\s*\|\s*undefined\b/gi, '')
+        .replace(/\bundefined\b/gi, '')
+        .replace(/\s*-\s*null\b/gi, '')
+        .trim();
+        
+    const finalDescription = (description || seoSettings.defaultMetaDescription || '')
+        .replace(/\bnull\b/gi, '')
+        .trim();
+    const finalKeywords = (keywords || seoSettings.defaultKeywords || '')
+        .replace(/\bnull\b/gi, '')
+        .trim();
     
     // Resolve absolute paths for images to ensure they show up in external link sharing
     const rawOg = ogImage || seoSettings.defaultOgImage || '/og-image.jpg';

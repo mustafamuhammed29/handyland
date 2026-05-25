@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { PhoneListing } from '../../types';
 import { getImageUrl } from '../../utils/imageUrl';
 import { formatPrice } from '../../utils/formatPrice';
-import { cleanProductName } from '../../utils/cleanProductName';
+import { cleanProductName, getConditionLabel } from '../../utils/cleanProductName';
 import { useSettings } from '../../context/SettingsContext';
 import { generateWhatsAppLink } from '../../utils/whatsappHelper';
 import { useCart } from '../../context/CartContext';
@@ -106,7 +106,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                             />
                             {product.condition && (
                                 <div className="absolute top-2 left-2 z-10 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
-                                    {product.condition}
+                                    {getConditionLabel(product.condition)}
                                 </div>
                             )}
                         </div>
@@ -179,7 +179,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                                 <Smartphone className="w-5 h-5 text-slate-400" />
                                 <div className="text-xs">
                                     <div className="text-slate-500 dark:text-slate-400">{t('product.condition', 'Condition')}</div>
-                                    <div className="font-bold text-slate-900 dark:text-slate-200">{product.condition}</div>
+                                    <div className="font-bold text-slate-900 dark:text-slate-200">{getConditionLabel(product.condition)}</div>
                                 </div>
                             </div>
                         </div>

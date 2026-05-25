@@ -62,7 +62,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                 {cartTotal < freeShippingThreshold ? (
                     <div className="bg-slate-950/50 rounded-xl p-4 border border-blue-500/30 mb-4">
                         <div className="flex justify-between text-xs font-bold mb-2">
-                            <span className="text-blue-400">{t('checkout.addForFreeShipping', 'Add {{amount}} for Free Shipping', { amount: formatPrice(Math.max(0, freeShippingThreshold - cartTotal)) })}</span>
+                            <span className="text-blue-400">{t('checkout.addForFreeShipping', 'Noch {{amount}} bis zum Gratisversand', { amount: formatPrice(Math.max(0, freeShippingThreshold - cartTotal)) })}</span>
                             <span className="text-slate-500">{Math.round((cartTotal / freeShippingThreshold) * 100)}%</span>
                         </div>
                         <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">

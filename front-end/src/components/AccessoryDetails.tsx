@@ -15,6 +15,7 @@ import { TrustBadges } from './products/TrustBadges';
 import { ProductGallery } from './products/ProductGallery';
 import { ProductTabs } from './products/ProductTabs';
 import { ReviewModal } from './products/ReviewModal';
+import { cleanAccessoryName } from '../utils/cleanProductName';
 
 export const AccessoryDetails: React.FC = () => {
     const { id } = useParams();
@@ -46,7 +47,8 @@ export const AccessoryDetails: React.FC = () => {
                 const formatted = {
                     ...data,
                     id: data.id || data._id,
-                    model: data.name || 'Accessory',
+                    name: cleanAccessoryName(data.name) || 'Accessory',
+                    model: cleanAccessoryName(data.name) || 'Accessory',
                     brand: data.brand || 'HandyLand',
                     imageUrl: data.image || '/images/placeholder.png',
                     images: data.image ? [data.image] : ['/images/placeholder.png']

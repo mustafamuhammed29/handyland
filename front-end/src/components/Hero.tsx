@@ -173,7 +173,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
                     {/* Floating Elements (Parallax Layers) */}
                     <div
-                        className="absolute top-[15%] md:top-1/4 right-[2%] sm:right-4 md:-right-4 lg:-right-20 xl:-right-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
+                        className="absolute top-[15%] md:top-1/4 right-2 sm:right-4 md:-right-4 lg:-right-20 xl:-right-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
                         style={{ transform: 'translateZ(80px)' }}
                     >
                         <div className="flex items-center gap-2 md:gap-3">
@@ -188,7 +188,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     </div>
 
                     <div
-                        className="absolute bottom-[40%] md:bottom-[35%] lg:bottom-[45%] left-[2%] sm:left-0 md:-left-4 lg:-left-20 xl:-left-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
+                        className="absolute bottom-[40%] md:bottom-[35%] lg:bottom-[45%] left-2 sm:left-0 md:-left-4 lg:-left-20 xl:-left-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
                         style={{ transform: 'translateZ(100px)' }}
                     >
                         <div className="flex items-center gap-2 md:gap-3">

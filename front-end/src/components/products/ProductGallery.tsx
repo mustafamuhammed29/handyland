@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
+import { getConditionLabel } from '../../utils/cleanProductName';
 
 interface ProductGalleryProps {
     product: any;
@@ -38,7 +39,7 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({
                         className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md flex items-center gap-1.5 transition-transform hover:scale-105 shadow-sm active:scale-95 ${product.condition === 'new' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30' : product.condition === 'fair' ? 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30'}`}
                     >
                         <span className={`w-1.5 h-1.5 rounded-full ${product.condition === 'new' ? 'bg-emerald-500' : product.condition === 'fair' ? 'bg-purple-500' : 'bg-blue-500'}`} />
-                        {product.condition}
+                        {getConditionLabel(product.condition)}
                         <HelpCircle className="w-3.5 h-3.5 opacity-70 ml-0.5" />
                     </button>
                 </div>

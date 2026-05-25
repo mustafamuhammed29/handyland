@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { PhoneListing } from '../../types';
 import { formatPrice } from '../../utils/formatPrice';
 import { getImageUrl } from '../../utils/imageUrl';
+import { getConditionLabel } from '../../utils/cleanProductName';
 
 interface ProductDetailModalProps {
     product: PhoneListing | null;
@@ -73,7 +74,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto bg-slate-50 dark:bg-slate-950">
                     <div className="flex items-center gap-2 mb-2">
                         <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full ${product.condition === 'new' ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/30' : 'bg-purple-500/10 text-purple-400 border border-purple-500/30'}`}>
-                            {product.condition}
+                            {getConditionLabel(product.condition)}
                         </span>
                     </div>
 

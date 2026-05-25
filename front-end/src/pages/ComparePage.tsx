@@ -92,7 +92,7 @@ export const ComparePage: React.FC = () => {
     const handleShare = () => {
         navigator.clipboard.writeText(window.location.href);
         setCopied(true);
-        toast.success(t('compare.copied', 'Link copied to clipboard!'));
+        toast.success(t('compare.linkCopied', 'Vergleichslink in Zwischenablage kopiert!'));
         setTimeout(() => setCopied(false), 2000);
     };
 
@@ -133,7 +133,7 @@ export const ComparePage: React.FC = () => {
                         {t('compare.subtitle', 'Side-by-side Vergleich')}
                     </p>
                     <h1 className="text-4xl md:text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-secondary">
-                        {t('compare.title', 'Compare Devices')}
+                        {t('compare.title', 'Geräte vergleichen')}
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-6">
                         {t('compare.description', 'Wähle bis zu 3 Geräte aus und vergleiche Spezifikationen, Preise und Leistung auf einen Blick.')}
@@ -145,7 +145,7 @@ export const ComparePage: React.FC = () => {
                             className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 border border-slate-700 hover:border-brand-primary/50 text-slate-700 dark:text-slate-300 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-brand-primary/20"
                         >
                             {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />} 
-                            {copied ? 'Link Copied!' : 'Share Compare'}
+                            {copied ? t('compare.copiedText', 'Kopiert!') : t('compare.shareCompare', 'Vergleich teilen')}
                         </button>
                         
                         {activeProducts.length > 1 && (
@@ -154,7 +154,7 @@ export const ComparePage: React.FC = () => {
                                 className={`flex items-center gap-2 px-5 py-2.5 border rounded-full font-bold text-sm transition-all shadow-lg ${showDifferencesOnly ? 'bg-brand-primary border-brand-primary text-black' : 'bg-slate-900 border-slate-700 text-slate-700 dark:text-slate-300 hover:border-brand-primary/50 hover:shadow-brand-primary/20'}`}
                             >
                                 <Zap className="w-4 h-4" /> 
-                                {showDifferencesOnly ? 'Showing Differences' : 'Show Differences Only'}
+                                {showDifferencesOnly ? t('compare.showingDifferences', 'Unterschiede werden angezeigt') : t('compare.showDifferencesOnly', 'Nur Unterschiede anzeigen')}
                             </button>
                         )}
                     </div>
@@ -184,7 +184,7 @@ export const ComparePage: React.FC = () => {
 
                 {activeProducts.length === 0 && (
                     <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-                        <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 text-center mb-6">Popular Devices to Compare</h3>
+                        <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 text-center mb-6">{t('compare.popularDevices', 'Beliebte Geräte zum Vergleich')}</h3>
                         <div className="flex flex-wrap justify-center gap-4">
                             {suggestedProducts.map(p => (
                                 <button

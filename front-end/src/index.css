@@ -22,6 +22,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100dvh;
+  overflow-x: hidden;
   @apply bg-slate-50 text-slate-900 transition-colors duration-300;
 }
 

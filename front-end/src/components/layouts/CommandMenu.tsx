@@ -5,6 +5,7 @@ import { Search, Loader2, ArrowRight, Smartphone, Compass, Clock, TerminalSquare
 import { api } from '../../utils/api';
 import { getImageUrl } from '../../utils/imageUrl';
 import { formatPrice } from '../../utils/formatPrice';
+import { getConditionLabel } from '../../utils/cleanProductName';
 
 interface SearchResult {
     id: string;
@@ -258,7 +259,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                                                                             product.condition?.toLowerCase() === 'fair' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' :
                                                                             'bg-blue-500/10 text-blue-600 dark:text-blue-400'
                                                                         }`}>
-                                                                            {product.condition}
+                                                                            {getConditionLabel(product.condition)}
                                                                         </span>
                                                                     )}
                                                                 </div>

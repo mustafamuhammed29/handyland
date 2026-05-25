@@ -17,6 +17,77 @@ const PAGE_TITLES: Record<string, string> = {
     '/about': 'ueber-uns'
 };
 
+const formatMarkdownToHTML = (text: string): string => {
+    if (!text) return '';
+    
+    // Check if it's already HTML
+    if (text.includes('<p>') || text.includes('</div>') || text.includes('<br')) {
+        return text;
+    }
+    
+    const lines = text.split('\n');
+    let inList = false;
+    
+    const formattedLines = lines.map(line => {
+        let trimmed = line.trim();
+        
+        // Horizontal rule
+        if (trimmed === '---' || trimmed === '***') {
+            return '<hr class="border-slate-800 my-8" />';
+        }
+        
+        // Headings
+        if (trimmed.startsWith('# ')) {
+            return `<h1 class="text-3xl font-black text-white mt-8 mb-4">${trimmed.slice(2)}</h1>`;
+        }
+        if (trimmed.startsWith('## ')) {
+            return `<h2 class="text-2xl font-bold text-white mt-8 mb-4">${trimmed.slice(3)}</h2>`;
+        }
+        if (trimmed.startsWith('### ')) {
+            return `<h3 class="text-xl font-bold text-white mt-6 mb-3">${trimmed.slice(4)}</h3>`;
+        }
+        if (trimmed.startsWith('#### ')) {
+            return `<h4 class="text-lg font-bold text-slate-300 mt-4 mb-2">${trimmed.slice(5)}</h4>`;
+        }
+        
+        // Lists
+        if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            let item = trimmed.slice(2);
+            let prefix = '';
+            if (!inList) {
+                inList = true;
+                prefix = '<ul class="list-disc list-inside space-y-2 text-slate-300 my-4">';
+            }
+            return `${prefix}<li class="text-slate-300">${item}</li>`;
+        } else if (inList && trimmed === '') {
+            inList = false;
+            return '</ul>';
+        }
+        
+        // Bold/Italic replacements
+        let formattedLine = line
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em class="text-slate-300 italic">$1</em>');
+            
+        if (trimmed === '') {
+            return '<div class="h-4"></div>';
+        }
+        
+        if (inList) {
+            inList = false;
+            return `</ul><p class="text-slate-300 leading-relaxed mb-4">${formattedLine}</p>`;
+        }
+        
+        return `<p class="text-slate-300 leading-relaxed mb-4">${formattedLine}</p>`;
+    });
+    
+    let html = formattedLines.join('\n');
+    if (inList) {
+        html += '</ul>';
+    }
+    return html;
+};
+
 export const InfoPage: React.FC<InfoPageProps> = () => {
     const location = useLocation();
     const { t } = useTranslation();
@@ -91,7 +162,7 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
                 <div className="ql-writing-format mt-8">
                     {content ? (
                         <div className="ql-snow">
-                            <div className="ql-editor" dangerouslySetInnerHTML={{ __html: content }} />
+                            <div className="ql-editor" dangerouslySetInnerHTML={{ __html: formatMarkdownToHTML(content) }} />
                         </div>
                     ) : (
                         <div className="p-12 text-center border border-dashed border-slate-700 rounded-xl">

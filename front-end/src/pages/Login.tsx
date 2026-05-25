@@ -118,13 +118,13 @@ const Login: React.FC = () => {
                     <div className="inline-block p-4 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl shadow-2xl shadow-blue-900/50 mb-4">
                         <Lock className="w-12 h-12 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black text-slate-900 dark:text-white">{t('auth.welcomeBack', 'Willkommen')}</h1>
+                    <h1 className="text-4xl font-black text-slate-900 dark:text-white">{t('auth.welcomeBack', 'Willkommen zurück')}</h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-2">{t('auth.loginSubtitle', 'Melde dich bei deinem Konto an')}</p>
                 </div>
 
                 {/* Login Card */}
                 <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">{t('auth.loginTitle', 'Bei deinem Konto anmelden')}</h2>
+
 
                     {/* Success Message */}
                     {resendSuccess && (

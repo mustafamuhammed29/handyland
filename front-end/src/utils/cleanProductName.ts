@@ -21,3 +21,31 @@ export const cleanProductName = (model: string, brand?: string): string => {
     
     return model;
 };
+
+export const cleanAccessoryName = (name: string): string => {
+    if (!name) return '';
+    // Strip trailing digital IDs like " 1778013742728" or "(E2E) 1778013709170"
+    return name
+        .replace(/\s*\(?E2E\)?\s*\d{8,}$/gi, '')
+        .replace(/\s*\d{8,}$/g, '')
+        .trim();
+};
+
+const conditionLabels: Record<string, string> = {
+    sehr_gut: 'Sehr Gut',
+    hervorragend: 'Hervorragend',
+    wie_neu: 'Wie Neu',
+    gut: 'Gut',
+    akzeptabel: 'Akzeptabel',
+    SEHR_GUT: 'Sehr Gut',
+    HERVORRAGEND: 'Hervorragend',
+    WIE_NEU: 'Wie Neu',
+    GUT: 'Gut',
+    AKZEPTABEL: 'Akzeptabel'
+};
+
+export const getConditionLabel = (cond: string): string => {
+    if (!cond) return '';
+    const trimmed = cond.trim();
+    return conditionLabels[trimmed] || trimmed.charAt(0).toUpperCase() + trimmed.slice(1).replace('_', ' ');
+};

@@ -4,6 +4,7 @@ import { X, Cpu, Activity, Clock, ShieldCheck, Wrench } from 'lucide-react';
 import { RepairDevice } from './types';
 import { getServiceIcon } from './utils';
 import { LazyImage } from '../ui/LazyImage';
+import { getCleanDeviceModel, getDeviceImage } from './RepairCatalogList';
 
 interface RepairDeviceModalProps {
     selectedDevice: RepairDevice;
@@ -40,19 +41,15 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                     <div className="relative w-48 h-64 mb-6 group">
                         <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-50 group-hover:opacity-75 transition-opacity"></div>
                         <LazyImage
-                            src={selectedDevice.image || (selectedDevice as any).images?.[0]}
-                            alt={(selectedDevice.model && !selectedDevice.model.includes('يشر')) ? selectedDevice.model : 'Unknown Device'}
+                            src={getDeviceImage(selectedDevice)}
+                            alt={getCleanDeviceModel(selectedDevice)}
                             className="relative w-full h-full object-contain drop-shadow-2xl z-10"
                         />
                         {/* Scan Line */}
                         <div className="absolute top-0 left-0 w-full h-1 bg-blue-400 shadow-[0_0_15px_#60a5fa] animate-[scan_2s_linear_infinite] opacity-50 z-20"></div>
                     </div>
                     <h3 className="text-xl font-bold text-white text-center mb-1">
-                        {(() => {
-                            const name = selectedDevice.model || '';
-                            const isValidName = (n: string) => /^[\x00-\x7F\u00C0-\u024F\u0400-\u04FF]+$/.test(n);
-                            return isValidName(name) ? name : 'Standard Device';
-                        })()}
+                        {getCleanDeviceModel(selectedDevice)}
                     </h3>
                     <div className="flex items-center gap-2 text-xs text-slate-500 font-mono bg-black/40 px-3 py-1 rounded-full border border-slate-800">
                         <Cpu className="w-3 h-3" />

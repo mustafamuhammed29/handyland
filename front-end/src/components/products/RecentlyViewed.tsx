@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { RecentlyViewedProduct } from '../../hooks/useRecentlyViewed';
 import { getImageUrl } from '../../utils/imageUrl';
+import { getConditionLabel } from '../../utils/cleanProductName';
 
 interface RecentlyViewedProps {
     products: RecentlyViewedProduct[];
@@ -39,7 +40,7 @@ export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ products, curren
                             />
                         </div>
                         <h4 className="font-bold text-slate-900 dark:text-white mb-1 truncate" title={product.model}>{product.model}</h4>
-                        <div className="text-sm text-slate-500 mb-2 truncate">{product.condition} • {product.brand}</div>
+                        <div className="text-sm text-slate-500 mb-2 truncate">{getConditionLabel(product.condition)} • {product.brand}</div>
                         <div className="text-brand-primary font-bold mt-auto">
                             {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(product.price)}
                         </div>

@@ -15,7 +15,35 @@ const CATEGORIES_KEYS = [
 
 import { useSettings } from '../context/SettingsContext';
 import { getImageUrl } from '../utils/imageUrl';
-// ... (keep props interface)
+
+const getCleanArchiveImage = (url: string, category: string, isAfter: boolean): string => {
+    if (!url || url.includes('placeholder') || url.includes('room') || url.includes('hotel') || url.includes('interior') || url.includes('unsplash.com/photo-1540518614-') || url.includes('unsplash.com/photo-1566073771259-') || url.includes('unsplash.com/photo-1520250497591-')) {
+        if (category === 'screen') {
+            return isAfter 
+                ? 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop'
+                : 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?q=80&w=600&auto=format&fit=crop';
+        }
+        if (category === 'glass' || category === 'body') {
+            return isAfter 
+                ? 'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=600&auto=format&fit=crop'
+                : 'https://images.unsplash.com/photo-1605152276897-4f618f831968?q=80&w=600&auto=format&fit=crop';
+        }
+        if (category === 'water') {
+            return isAfter 
+                ? 'https://images.unsplash.com/photo-1563770660941-20978e870e26?q=80&w=600&auto=format&fit=crop'
+                : 'https://images.unsplash.com/photo-1542546068979-b6affb46ea8f?q=80&w=600&auto=format&fit=crop';
+        }
+        if (category === 'camera') {
+            return isAfter 
+                ? 'https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?q=80&w=600&auto=format&fit=crop'
+                : 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=600&auto=format&fit=crop';
+        }
+        return isAfter 
+            ? 'https://images.unsplash.com/photo-1616440347437-b1c73416efc2?q=80&w=600&auto=format&fit=crop'
+            : 'https://images.unsplash.com/photo-1597740985671-2a8a3b80502e?q=80&w=600&auto=format&fit=crop';
+    }
+    return url;
+};
 
 export const RepairGallery: React.FC<RepairGalleryProps> = () => {
     const navigate = useNavigate();
@@ -162,7 +190,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                 {/* AFTER Image (Right) */}
                                 <div className="absolute inset-0">
                                     <img
-                                        src={getImageUrl(activeProject.imgAfter)}
+                                        src={getImageUrl(getCleanArchiveImage(activeProject.imgAfter, activeProject.category, true))}
                                         alt="After"
                                         className="w-full h-full object-cover"
                                     />
@@ -178,7 +206,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                     style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
                                 >
                                     <img
-                                        src={getImageUrl(activeProject.imgBefore)}
+                                        src={getImageUrl(getCleanArchiveImage(activeProject.imgBefore, activeProject.category, false))}
                                         alt="Before"
                                         className="w-full h-full object-cover"
                                     />
@@ -281,7 +309,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                             {/* Thumbnail */}
                                             <div className="relative h-32 bg-slate-900">
                                                 <img
-                                                    src={getImageUrl(project.imgAfter)}
+                                                    src={getImageUrl(getCleanArchiveImage(project.imgAfter, project.category, true))}
                                                     alt={project.title}
                                                     className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                                 />
@@ -359,7 +387,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                         className="w-full text-left group flex flex-col"
                                     >
                                         <div className={`relative w-full aspect-[4/5] rounded-xl overflow-hidden border-2 mb-2 transition-all ${selectedId === item.id ? 'border-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'border-slate-800 group-hover:border-slate-600'}`}>
-                                            <img src={getImageUrl(item.imgAfter)} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                            <img src={getImageUrl(getCleanArchiveImage(item.imgAfter, item.category, true))} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                                             <div className="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm p-1 rounded-md">
                                                 {item.category === 'water' && <Droplets className="w-3 h-3 text-blue-400" />}
                                                 {item.category === 'screen' && <Monitor className="w-3 h-3 text-purple-400" />}

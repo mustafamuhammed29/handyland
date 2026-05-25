@@ -31,7 +31,7 @@ export const CompareTable: React.FC<CompareTableProps> = ({ slots, selectedProdu
                     <tbody>
                         <tr className="bg-slate-950/80">
                             <td className="p-4 md:p-6 text-emerald-400 font-bold border-b border-slate-800 flex items-center gap-2 text-xs uppercase tracking-wider">
-                                <Zap className="w-4 h-4" /> Performance
+                                <Zap className="w-4 h-4" /> Leistung
                             </td>
                             {slots.map((_, i) => <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>)}
                         </tr>

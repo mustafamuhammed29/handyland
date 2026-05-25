@@ -8,6 +8,11 @@ import { useToast } from '../context/ToastContext';
 import { useSettings } from '../context/SettingsContext';
 import { api } from '../utils/api';
 import { getImageUrl } from '../utils/imageUrl';
+import { cleanAccessoryName } from '../utils/cleanProductName';
+
+const getFallbackImage = () => {
+    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400' width='100%25' height='100%25'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e1b4b'/%3E%3Cstop offset='100%25' stop-color='%230f172a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23grad)'/%3E%3Ccircle cx='200' cy='180' r='60' fill='none' stroke='%238b5cf6' stroke-width='3' stroke-dasharray='5,5'/%3E%3Cpath d='M170 180h60M200 150v60' stroke='%238b5cf6' stroke-width='4' stroke-linecap='round'/%3E%3Ctext x='200' y='290' fill='%2394a3b8' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle'%3EHandyLand Premium%3C/text%3E%3Ctext x='200' y='320' fill='%2364748b' font-family='sans-serif' font-size='14' text-anchor='middle'%3EAccessory%3C/text%3E%3C/svg%3E`;
+};
 
 interface AccessoriesProps {
     lang: LanguageCode;
@@ -46,14 +51,14 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
         const imageUrl = getImageUrl(item.image || item.images?.[0]);
         addToCart({
             id: item._id || item.id,
-            title: item.name,
+            title: cleanAccessoryName(item.name),
             subtitle: item.category && item.category !== 'null' ? item.category : 'Accessory',
             price: item.price,
             image: imageUrl,
             category: 'accessory',
             stock: item.stock ?? 0
         });
-        addToast(`${item.name} wurde zum Warenkorb hinzugefügt!`, 'success');
+        addToast(`${cleanAccessoryName(item.name)} wurde zum Warenkorb hinzugefügt!`, 'success');
     };
 
     const getCategoryIcon = (iconName: string) => {
@@ -174,8 +179,8 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                             >
                                 <img
                                     src={getImageUrl(item.image)}
-                                    alt={item.name}
-                                    onError={(e: any) => { e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='none'%3E%3Crect width='200' height='200' fill='%23f1f5f9'/%3E%3Cpath d='M85 75h30v10H85zm0 20h30v10H85zm0 20h30v10H85z' fill='%2394a3b8'/%3E%3C/svg%3E"; }}
+                                    alt={cleanAccessoryName(item.name)}
+                                    onError={(e: any) => { e.target.src = getFallbackImage(); }}
                                     className={`w-full h-full object-cover transition-transform duration-700 ${hoveredId === item.id ? 'scale-110' : 'scale-100'
                                         }`}
                                 />
@@ -195,7 +200,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
                             {/* Info */}
                             <div className="space-y-1 flex-1 flex flex-col justify-between">
-                                <h3 className="text-slate-900 dark:text-white font-bold text-sm md:text-base line-clamp-2 hover:text-purple-500 dark:hover:text-purple-400 cursor-pointer" onClick={() => navigate(`/accessories/${item.id || item._id}`)}>{item.name}</h3>
+                                <h3 className="text-slate-900 dark:text-white font-bold text-sm md:text-base line-clamp-2 hover:text-purple-500 dark:hover:text-purple-400 cursor-pointer" onClick={() => navigate(`/accessories/${item.id || item._id}`)}>{cleanAccessoryName(item.name)}</h3>
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
                                     <span className="text-purple-400 font-mono font-bold text-base md:text-lg">{item.price}{t('common.currency')}</span>
 

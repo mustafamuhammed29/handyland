@@ -162,6 +162,32 @@ export const GuestTicketTracking: React.FC = () => {
                         </div>
                     </div>
                 )}
+
+                {!ticket && (
+                    <div className="mt-16 w-full max-w-4xl border-t border-slate-900 pt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                        <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-white mb-10 uppercase tracking-widest">{t('trackRepair.howItWorksTitle', 'SO EINFACH FUNKTIONIERT ES')}</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg relative group overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
+                                <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-full flex items-center justify-center text-lg font-bold font-mono mb-4 border border-blue-500/20">1</div>
+                                <h3 className="font-bold text-white text-lg mb-2">{t('trackRepair.step1Title', 'Ticket erstellen')}</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">{t('trackRepair.step1Desc', 'Buche eine Reparatur online oder besuche uns direkt im Store, um eine eindeutige Ticket-ID zu erhalten.')}</p>
+                            </div>
+                            <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg relative group overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors"></div>
+                                <div className="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-full flex items-center justify-center text-lg font-bold font-mono mb-4 border border-cyan-500/20">2</div>
+                                <h3 className="font-bold text-white text-lg mb-2">{t('trackRepair.step2Title', 'Echtzeit-Tracking')}</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">{t('trackRepair.step2Desc', 'Gib deine Ticket-ID und deine E-Mail-Adresse hier ein, um den Fortschritt deiner Reparatur live zu verfolgen.')}</p>
+                            </div>
+                            <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg relative group overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
+                                <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center text-lg font-bold font-mono mb-4 border border-emerald-500/20">3</div>
+                                <h3 className="font-bold text-white text-lg mb-2">{t('trackRepair.step3Title', 'Abholung & Garantie')}</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">{t('trackRepair.step3Desc', 'Sobald die Reparatur abgeschlossen ist, holst du dein Gerät ab. Du erhältst 12 Monate Garantie auf alle getauschten Teile.')}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

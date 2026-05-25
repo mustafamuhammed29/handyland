@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { getImageUrl } from '../utils/imageUrl';
 import { formatPrice } from '../utils/formatPrice';
 import { Breadcrumbs } from './Breadcrumbs';
-import { cleanProductName } from '../utils/cleanProductName';
+import { cleanProductName, getConditionLabel } from '../utils/cleanProductName';
 import { ConditionGuide } from './products/ConditionGuide';
 import { TrustBadges } from './products/TrustBadges';
 import { ProductGallery } from './products/ProductGallery';
@@ -93,7 +93,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                     id: productData.id || productData._id || id,
                     model: productData.name || productData.model,
                     specs: {
-                        cpu: productData.processor || productData.chipset || 'See full specs',
+                        cpu: productData.processor || productData.chipset || productData.specs?.cpu || 'Standard',
                         battery: productData.battery || productData.specs?.battery || 'Standard Battery',
                         screen: productData.display || productData.specs?.screen || 'HD Display',
                         ram: productData.specs?.ram || 'N/A',
@@ -202,8 +202,12 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
     return (
         <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 relative">
             <SEO
-                title={(product as any).seo?.metaTitle || `${cleanProductName(product.model, product.brand)} - ${product.condition} | ${product.storage}`}
-                description={(product as any).seo?.metaDescription || `Gebrauchtes ${cleanProductName(product.model, product.brand)} kaufen - ${product.storage} - ${product.color} im Zustand ${product.condition}. Zertifizierte Qualität, Garantie inklusive.`}
+                title={(product as any).seo?.metaTitle || [
+                    cleanProductName(product.model, product.brand),
+                    product.condition ? getConditionLabel(product.condition) : '',
+                    product.storage && product.storage !== 'null' ? product.storage : ''
+                ].filter(Boolean).join(' - ')}
+                description={(product as any).seo?.metaDescription || `Gebrauchtes ${cleanProductName(product.model, product.brand)} kaufen - ${[product.storage, product.color].filter(v => v && v !== 'null').join(' - ')} im Zustand ${product.condition ? getConditionLabel(product.condition) : ''}. Zertifizierte Qualität, Garantie inklusive.`}
                 keywords={(product as any).seo?.keywords}
                 canonical={(product as any).seo?.canonicalUrl || window.location.href}
                 ogImage={(product as any).seo?.ogImage || getImageUrl(activeImage)}

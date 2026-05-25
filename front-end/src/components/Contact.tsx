@@ -108,7 +108,7 @@ export const Contact: React.FC<ContactProps> = () => {
                         <div className="relative h-64 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 group">
                             {settings.mapUrl ? (
                                 <iframe
-                                    src={settings.mapUrl}
+                                    src={settings.mapUrl.includes('?') ? (settings.mapUrl.includes('hl=') ? settings.mapUrl.replace(/hl=[a-zA-Z-]+/g, 'hl=de') : `${settings.mapUrl}&hl=de`) : `${settings.mapUrl}?hl=de`}
                                     width="100%"
                                     height="100%"
                                     style={{ border: 0 }}

@@ -49,7 +49,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             <div className="sticky top-24 flex flex-col gap-4">
                 <div className="flex justify-between items-end gap-4 md:hidden">
                     <div>
-                        <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">MARKT<span className="text-brand-primary">PLATZ</span></h2>
+                        <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight whitespace-nowrap">MARKT<span className="text-brand-primary">PLATZ</span></h2>
                         <div className="h-1 w-16 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full"></div>
                     </div>
                     <button onClick={() => setShowFilters(!showFilters)} aria-label="Toggle filters" className={`p-2 w-10 h-10 flex items-center justify-center rounded-xl transition-all ${showFilters ? 'bg-black/5 dark:bg-white/5 text-brand-primary border border-black/10 dark:border-white/10' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white glass-modern'}`}><Filter className="w-5 h-5" /></button>
