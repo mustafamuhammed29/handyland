@@ -16,56 +16,73 @@ const CATEGORIES_KEYS = [
 import { useSettings } from '../context/SettingsContext';
 import { getImageUrl } from '../utils/imageUrl';
 
+/** Strip HTML/XML tags from a string so raw DB content never renders as code */
+const stripHtml = (raw: string): string => {
+    if (!raw) return '';
+    return raw
+        .replace(/<[^>]*>/g, ' ')   // remove tags
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s{2,}/g, ' ')    // collapse whitespace
+        .trim();
+};
+
+/** Expanded list of known-bad Unsplash IDs used in hotel/room seed data */
+const HOTEL_IMAGE_SIGNATURES = [
+    // Specific Unsplash photo IDs found in seed
+    'photo-1585338107529', 'photo-1610945415295', 'photo-1634455848520',
+    'photo-1512054502232', 'photo-1605236453806', 'photo-1592890288564',
+    'photo-1540518614',    'photo-1566073771259', 'photo-1520250497591',
+    'photo-1445019980597', 'photo-1449824913935', 'photo-1506665531195',
+    'photo-1571896349842', 'photo-1631049307264', 'photo-1455587734955',
+    // Keyword-based fallback
+    'room', 'hotel', 'interior', 'placeholder', 'bedroom', 'lobby',
+];
+
+const REPAIR_IMAGES: Record<string, { before: string; after: string }> = {
+    screen: {
+        before: 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?q=80&w=600&auto=format&fit=crop',
+        after:  'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=600&auto=format&fit=crop',
+    },
+    battery: {
+        before: 'https://images.unsplash.com/photo-1620283085439-39620a1e21c4?q=80&w=600&auto=format&fit=crop',
+        after:  'https://images.unsplash.com/photo-1592890288564-76628a30a657?q=80&w=600&auto=format&fit=crop',
+    },
+    glass: {
+        before: 'https://images.unsplash.com/photo-1605152276897-4f618f831968?q=80&w=600&auto=format&fit=crop',
+        after:  'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=600&auto=format&fit=crop',
+    },
+    water: {
+        before: 'https://images.unsplash.com/photo-1542546068979-b6affb46ea8f?q=80&w=600&auto=format&fit=crop',
+        after:  'https://images.unsplash.com/photo-1563770660941-20978e870e26?q=80&w=600&auto=format&fit=crop',
+    },
+    camera: {
+        before: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=600&auto=format&fit=crop',
+        after:  'https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?q=80&w=600&auto=format&fit=crop',
+    },
+    default: {
+        before: 'https://images.unsplash.com/photo-1597740985671-2a8a3b80502e?q=80&w=600&auto=format&fit=crop',
+        after:  'https://images.unsplash.com/photo-1616440347437-b1c73416efc2?q=80&w=600&auto=format&fit=crop',
+    },
+};
+
 const getCleanArchiveImage = (url: string, category: string, isAfter: boolean): string => {
-    if (!url) return '';
-    const hotelIds = [
-        'photo-1585338107529',
-        'photo-1610945415295',
-        'photo-1634455848520',
-        'photo-1512054502232',
-        'photo-1605236453806',
-        'photo-1592890288564',
-        'photo-1540518614',
-        'photo-1566073771259',
-        'photo-1520250497591',
-        'room',
-        'hotel',
-        'interior',
-        'placeholder'
-    ];
-    
-    const isHotel = hotelIds.some(id => url.includes(id));
-    
-    if (isHotel) {
-        if (category === 'screen') {
-            return isAfter 
-                ? 'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=600&auto=format&fit=crop' // restored tech screen
-                : 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?q=80&w=600&auto=format&fit=crop'; // cracked screen
-        }
-        if (category === 'battery' || category === 'power') {
-            return isAfter 
-                ? 'https://images.unsplash.com/photo-1592890288564-76628a30a657?q=80&w=600&auto=format&fit=crop' // pristine tech
-                : 'https://images.unsplash.com/photo-1620283085439-39620a1e21c4?q=80&w=600&auto=format&fit=crop'; // open phone logic board / battery swapping
-        }
-        if (category === 'glass' || category === 'body') {
-            return isAfter 
-                ? 'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=600&auto=format&fit=crop'
-                : 'https://images.unsplash.com/photo-1605152276897-4f618f831968?q=80&w=600&auto=format&fit=crop';
-        }
-        if (category === 'water') {
-            return isAfter 
-                ? 'https://images.unsplash.com/photo-1563770660941-20978e870e26?q=80&w=600&auto=format&fit=crop'
-                : 'https://images.unsplash.com/photo-1542546068979-b6affb46ea8f?q=80&w=600&auto=format&fit=crop';
-        }
-        if (category === 'camera') {
-            return isAfter 
-                ? 'https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?q=80&w=600&auto=format&fit=crop'
-                : 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=600&auto=format&fit=crop';
-        }
-        return isAfter 
-            ? 'https://images.unsplash.com/photo-1616440347437-b1c73416efc2?q=80&w=600&auto=format&fit=crop'
-            : 'https://images.unsplash.com/photo-1597740985671-2a8a3b80502e?q=80&w=600&auto=format&fit=crop';
+    if (!url) {
+        const bucket = REPAIR_IMAGES[category] || REPAIR_IMAGES.default;
+        return isAfter ? bucket.after : bucket.before;
     }
+
+    const isHotel = HOTEL_IMAGE_SIGNATURES.some(sig => url.toLowerCase().includes(sig));
+
+    if (isHotel) {
+        const bucket = REPAIR_IMAGES[category] || REPAIR_IMAGES.default;
+        return isAfter ? bucket.after : bucket.before;
+    }
+
     return url;
 };
 
@@ -274,7 +291,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                         LVL: {activeProject.difficulty}
                                     </span>
                                 </h3>
-                                <p className="text-slate-400 text-sm font-mono max-w-2xl">{activeProject.description || activeProject.desc}</p>
+                                <p className="text-slate-400 text-sm font-mono max-w-2xl">{stripHtml(activeProject.description || activeProject.desc || '')}</p>
                                 <div className="flex flex-wrap items-center gap-4 text-xs font-bold mt-2">
                                     <div className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
                                         <Activity className="w-3 h-3" />
@@ -347,7 +364,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
                                                 <div className="absolute bottom-2 left-2 right-2">
                                                     <div className="text-xs font-bold text-white truncate">{project.title}</div>
-                                                    <div className="text-[10px] text-slate-400 truncate">{project.description || project.desc}</div>
+                                                    <div className="text-[10px] text-slate-400 truncate">{stripHtml(project.description || project.desc || '')}</div>
                                                 </div>
 
                                                 {/* Active Indicator */}
