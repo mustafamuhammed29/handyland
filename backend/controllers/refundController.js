@@ -16,7 +16,7 @@ exports.getRefunds = async (req, res, next) => {
 
         let query = supabaseAdmin
             .from('refund_requests')
-            .select('*, orders(id, order_number, status, payment_method, total_amount), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)', { count: 'exact' });
+            .select('*, orders!refund_requests_order_id_fkey(id, order_number, status, payment_method, total_amount), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)', { count: 'exact' });
 
         if (!isAdmin) query = query.eq('user_id', req.user.id);
         if (status) query = query.eq('status', status);
@@ -64,7 +64,7 @@ exports.getRefund = async (req, res, next) => {
     try {
         const { data, error } = await supabaseAdmin
             .from('refund_requests')
-            .select('*, orders(id, order_number, status, payment_method, total_amount), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)')
+            .select('*, orders!refund_requests_order_id_fkey(id, order_number, status, payment_method, total_amount), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)')
             .eq('id', req.params.id)
             .single();
 
