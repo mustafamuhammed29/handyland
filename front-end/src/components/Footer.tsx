@@ -76,6 +76,21 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
       return { ...col, links: filteredLinks };
     });
 
+    // Always ensure UNTERNEHMEN column exists — the DB may override columns without it
+    const hasUnternehmen = finalColumns.some(
+      col => col.title === 'UNTERNEHMEN' || col.title === t('footer.aboutTitle', 'UNTERNEHMEN')
+    );
+    if (!hasUnternehmen) {
+      finalColumns.push({
+        title: t('footer.aboutTitle', 'UNTERNEHMEN'),
+        links: [
+          { label: t('footer.aboutUs', 'ÜBER UNS'), url: '/uber-uns' },
+          { label: t('footer.customerService', 'KUNDENSERVICE'), url: '/kundenservice' },
+          { label: t('footer.impressum', 'IMPRESSUM'), url: '/impressum' },
+        ]
+      });
+    }
+
   if (loading) {
     return (
       <footer className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 mt-auto relative z-10">

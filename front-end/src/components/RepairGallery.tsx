@@ -70,20 +70,16 @@ const REPAIR_IMAGES: Record<string, { before: string; after: string }> = {
     },
 };
 
+/**
+ * C-08 fix: always return a curated repair image based on category.
+ * We do NOT trust URLs from the DB because seed data contains unpredictable
+ * hotel/interior images that we cannot fully enumerate.
+ */
 const getCleanArchiveImage = (url: string, category: string, isAfter: boolean): string => {
-    if (!url) {
-        const bucket = REPAIR_IMAGES[category] || REPAIR_IMAGES.default;
-        return isAfter ? bucket.after : bucket.before;
-    }
-
-    const isHotel = HOTEL_IMAGE_SIGNATURES.some(sig => url.toLowerCase().includes(sig));
-
-    if (isHotel) {
-        const bucket = REPAIR_IMAGES[category] || REPAIR_IMAGES.default;
-        return isAfter ? bucket.after : bucket.before;
-    }
-
-    return url;
+    // Normalise: 'body'→'glass', 'power'→'battery' so lookup hits the right bucket
+    const cat = category === 'body' ? 'glass' : category === 'power' ? 'battery' : category;
+    const bucket = REPAIR_IMAGES[cat] || REPAIR_IMAGES.default;
+    return isAfter ? bucket.after : bucket.before;
 };
 
 export const RepairGallery: React.FC<RepairGalleryProps> = () => {

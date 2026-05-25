@@ -68,7 +68,17 @@
     "freeShippingProgress": "Fügen Sie {{amount}} für kostenlosen Versand hinzu",
     "addForFreeShipping": "Noch {{amount}} bis zum Gratisversand",
     "freeShippingUnlocked": "Du hast kostenlosen Versand freigeschaltet!",
-    "reserveWhatsapp": "Über WhatsApp reservieren"
+    "reserveWhatsapp": "Über WhatsApp reservieren",
+    "shopNow": "Jetzt einkaufen",
+    "apply": "Anwenden",
+    "promoCode": "Promo Code",
+    "checkoutSecurely": "Sicher zur Kasse",
+    "removeFromFavorites": "Aus Favoriten entfernen",
+    "addToFavorites": "Zu Favoriten hinzufügen",
+    "toggleFavorite": "Favorit umschalten",
+    "swipeRemove": "Zum Entfernen wischen",
+    "removeItem": "{{name}} aus dem Warenkorb entfernen",
+    "close": "Warenkorb schließen"
   },
   "checkout": {
     "title": "Kasse",
@@ -608,5 +618,14 @@
     "backBtn": "Zurück",
     "confirmBtn": "Bestätigen",
     "processing": "Wird bearbeitet..."
+  },
+  "repair": {
+    "searchPlaceholder": "Gerätemodell suchen (z.B. iPhone 15, S24)...",
+    "bookRepair": "Reparatur buchen",
+    "allDevices": "Alle Geräte",
+    "noPricingYet": "Wir haben derzeit keine Standardpreise für \"{{device}}\" gelistet. Wir reparieren es trotzdem!",
+    "noResults": "Keine Geräte gefunden",
+    "noResultsHint": "Versuche einen anderen Suchbegriff.",
+    "loading": "Geräte werden geladen..."
   }
 }

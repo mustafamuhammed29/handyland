@@ -21,7 +21,10 @@ i18n
       caches: ['localStorage'],
     },
     backend: {
-      loadPath: '/api/translations/locales/{{lng}}',
+      // Load from static public/locales files — complete, version-controlled, always correct.
+      // The Supabase-backed /api/translations/locales/:lang has incomplete DE keys so we bypass it.
+      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      // Still report missing keys to the backend so the admin can track gaps
       addPath: '/api/translations/missing/{{lng}}/{{ns}}',
     },
     saveMissing: true,

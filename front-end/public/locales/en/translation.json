@@ -68,7 +68,17 @@
     "freeShippingProgress": "Add {{amount}} more for free shipping",
     "addForFreeShipping": "Add {{amount}} more for Free Shipping",
     "freeShippingUnlocked": "You have unlocked Free Shipping!",
-    "reserveWhatsapp": "Reserve via WhatsApp"
+    "reserveWhatsapp": "Reserve via WhatsApp",
+    "shopNow": "Shop Now",
+    "apply": "Apply",
+    "promoCode": "Promo Code",
+    "checkoutSecurely": "Secure Checkout",
+    "removeFromFavorites": "Remove from Favorites",
+    "addToFavorites": "Add to Favorites",
+    "toggleFavorite": "Toggle Favorite",
+    "swipeRemove": "Swipe to remove",
+    "removeItem": "Remove {{name}} from cart",
+    "close": "Close cart"
   },
   "checkout": {
     "title": "Checkout",
@@ -436,5 +446,14 @@
     "backBtn": "Back",
     "confirmBtn": "Confirm",
     "processing": "Processing..."
+  },
+  "repair": {
+    "searchPlaceholder": "Search device model (e.g. iPhone 15, S24)...",
+    "bookRepair": "Book Repair",
+    "allDevices": "All Devices",
+    "noPricingYet": "We don't currently have standard pricing for \"{{device}}\". We can still repair it!",
+    "noResults": "No devices found",
+    "noResultsHint": "Try a different search term.",
+    "loading": "Loading devices..."
   }
 }
