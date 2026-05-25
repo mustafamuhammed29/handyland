@@ -1,6 +1,12 @@
 import axios from 'axios';
 import { ENV } from '../config/env';
 
+declare module 'axios' {
+    export interface AxiosRequestConfig {
+        rawResponse?: boolean;
+    }
+}
+
 // Dynamically set baseURL from environment or fallback to empty for Vite proxy in development
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -22,19 +28,21 @@ api.interceptors.request.use(
 
         // CSRF: Read the XSRF-TOKEN cookie (set by server on first GET) and forward it as a header
         // for all state-changing requests. Safe methods (GET/HEAD/OPTIONS) are excluded by the server.
-        let csrfToken = document.cookie
+        let csrfTokenCookie = document.cookie
             .split('; ')
             .find(row => row.startsWith('XSRF-TOKEN='))
             ?.split('=')?.[1];
+        let csrfToken = csrfTokenCookie ? decodeURIComponent(csrfTokenCookie) : undefined;
 
         // If making a mutating request and token is missing, fetch it automatically
         if (!csrfToken && config.method && ['post', 'put', 'delete', 'patch'].includes(config.method.toLowerCase())) {
             try {
                 await axios.get('/api/auth/csrf', { baseURL: API_BASE_URL, withCredentials: true });
-                csrfToken = document.cookie
+                let cookieVal = document.cookie
                     .split('; ')
                     .find(row => row.startsWith('XSRF-TOKEN='))
                     ?.split('=')?.[1];
+                csrfToken = cookieVal ? decodeURIComponent(cookieVal) : undefined;
             } catch (err) {
                 console.error('Failed to pre-fetch CSRF token', err);
             }
@@ -54,12 +62,17 @@ api.interceptors.request.use(
 
 // Response interceptor - Handle errors and token refresh
 api.interceptors.response.use(
-    (response) => response.data, // ✅ Directly return data as per user instructions
+    (response) => {
+        if (response.config?.rawResponse) {
+            return response;
+        }
+        return response.data;
+    },
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.config?.url?.includes('/auth/refresh')) {
-            sessionStorage.removeItem('user');
+        if (error.config?.url?.includes('/auth/refresh-token') || error.config?.url?.includes('/auth/refresh')) {
+            localStorage.removeItem('user');
 
             // Only redirect if NOT already on login/public pages
             const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
@@ -73,21 +86,24 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        // Handle 401 Unauthorized for other endpoints, but NEVER for login/register/forgot-password/reset-password
-        const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') || originalRequest?.url?.includes('/auth/register');
+        // Handle 401 Unauthorized for other endpoints, but NEVER for login/register/forgot-password/reset-password/refresh-token
+        const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') || 
+                               originalRequest?.url?.includes('/auth/register') ||
+                               originalRequest?.url?.includes('/auth/refresh-token') ||
+                               originalRequest?.url?.includes('/auth/refresh');
         
         if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
             originalRequest._retry = true;
 
             try {
                 // Try to refresh the access token — backend sets new HttpOnly cookie directly
-                await api.post('/api/auth/refresh');
+                await api.post('/api/auth/refresh-token');
 
                 // Retry the original request with the refreshed cookie
                 return api.request(originalRequest);
             } catch (refreshError) {
                 // Clear authentication state
-                sessionStorage.removeItem('user');
+                localStorage.removeItem('user');
 
                 // Only redirect if NOT on public pages
                 const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
@@ -114,7 +130,7 @@ api.interceptors.response.use(
         if (error.response?.status === 403) {
             const isAuthError = error.response.data?.accountDeactivated || error.response.data?.emailNotVerified;
             if (isAuthError) {
-                sessionStorage.removeItem('user');
+                localStorage.removeItem('user');
                 // Only redirect if NOT on public pages
                 const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/'];
                 const currentPath = window.location.pathname;

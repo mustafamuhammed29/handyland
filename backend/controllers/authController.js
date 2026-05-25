@@ -7,6 +7,7 @@
 
 const { supabaseAdmin, createAuthClient } = require('../config/supabase');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 // ── Cookie helper ─────────────────────────────────────────────
 const cookieOptions = {
@@ -38,7 +39,8 @@ const sendTokenResponse = (res, session, user, appType = 'frontend') => {
         balance: user.balance,
         loyaltyPoints: user.loyalty_points,
         membershipLevel: user.membership_level,
-        twoFactorEnabled: user.two_factor_enabled
+        twoFactorEnabled: user.two_factor_enabled,
+        isActive: user.is_active ?? true
     };
 };
 
@@ -199,7 +201,6 @@ exports.login = async (req, res, next) => {
             .eq('id', data.user.id)
             .single();
 
-        require('fs').appendFileSync('debug_login.log', JSON.stringify({ id: data.user?.id, err: profileError, user: !!userProfile }) + '\n');
         if (profileError || !userProfile) {
             return res.status(401).json({ success: false, message: 'User profile not found' });
         }
@@ -597,10 +598,8 @@ exports.updateProfile = async (req, res, next) => {
         const updateData = {};
         if (name !== undefined) updateData.name = name;
         if (phone !== undefined) {
-            // Reset verification if the phone number has changed
             if (phone !== req.user.phone) {
                 updateData.phone = phone;
-                updateData.is_verified = false;
             }
         }
         if (preferredLanguage !== undefined) updateData.preferred_language = preferredLanguage;
@@ -684,18 +683,10 @@ exports.checkEmailAvailability = async (req, res, next) => {
         const { email } = req.body;
         if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
 
-        // 1. Check in public profiles table
+        // Check in public profiles table (trigger & upsert keeps it in sync)
         const { data: profile } = await supabaseAdmin.from('users').select('id').eq('email', email).maybeSingle();
         
-        if (profile) {
-            return res.status(200).json({ success: true, available: false });
-        }
-
-        // 2. Check in Supabase Auth (to be sure)
-        const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers();
-        const authUser = users.find(u => u.email === email);
-
-        res.status(200).json({ success: true, available: !authUser });
+        return res.status(200).json({ success: true, available: !profile });
     } catch (error) { 
         console.error('Check email error:', error);
         next(error); 

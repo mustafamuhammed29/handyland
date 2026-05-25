@@ -26,13 +26,13 @@ exports.createPaymentIntent = async (req, res, next) => {
             amount: amountInCents,
             currency: 'eur',
             metadata: { orderId: order.id, userId: order.user_id || 'guest' }
-        });
+        }, { idempotencyKey: `pi-${order.id}` });
 
         // Store transaction
         await supabaseAdmin.from('transactions').insert({
             user_id: req.user ? req.user.id : null,
             order_id: order.id,
-            amount: amountInCents,
+            amount: order.total_amount,
             currency: 'eur',
             status: 'pending',
             type: 'purchase',
@@ -77,6 +77,16 @@ exports.stripeWebhook = async (req, res, next) => {
             }
         } else if (event.type === 'payment_intent.payment_failed') {
             const paymentIntent = event.data.object;
+            // Idempotency check: see if transaction is already updated/failed
+            const { data: existingTx } = await supabaseAdmin
+                .from('transactions')
+                .select('status')
+                .eq('stripe_payment_id', paymentIntent.id)
+                .maybeSingle();
+
+            if (existingTx && (existingTx.status === 'failed' || existingTx.status === 'completed')) {
+                return res.json({ received: true });
+            }
             await updateTransactionStatus(paymentIntent.id, 'failed');
         }
         res.json({ received: true });

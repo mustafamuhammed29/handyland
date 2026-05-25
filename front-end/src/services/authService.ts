@@ -93,9 +93,9 @@ export const authService = {
         }
     },
 
-    getMe: async (): Promise<{ success: boolean; user: User }> => {
+    getMe: async (headers?: Record<string, string>): Promise<{ success: boolean; user: User }> => {
         try {
-            const response = await api.get('/api/auth/me');
+            const response = await api.get('/api/auth/me', { headers });
             return response as any;
         } catch (error) {
             devLog('Auth Service Get Me Error:', error);
@@ -106,7 +106,7 @@ export const authService = {
     updateProfile: async (data: Partial<User>): Promise<{ success: boolean; user: User }> => {
         try {
             await api.get('/api/auth/csrf');
-            const response = await api.put('/api/auth/updateprofile', data);
+            const response = await api.put('/api/auth/update-profile', data);
             return response as any;
         } catch (error) {
             devLog('Auth Service Update Profile Error:', error);
@@ -117,7 +117,7 @@ export const authService = {
     updatePassword: async (passwords: { oldPassword: string, newPassword: string }): Promise<{ success: boolean; message: string }> => {
         try {
             await api.get('/api/auth/csrf');
-            const response = await api.put('/api/auth/changepassword', { currentPassword: passwords.oldPassword, newPassword: passwords.newPassword });
+            const response = await api.put('/api/auth/update-password', { currentPassword: passwords.oldPassword, newPassword: passwords.newPassword });
             return response as any;
         } catch (error) {
             devLog('Auth Service Update Password Error:', error);
@@ -170,7 +170,7 @@ export const authService = {
 
     refreshToken: async (): Promise<{ token: string }> => {
         try {
-            const response = await api.post('/api/auth/refresh');
+            const response = await api.post('/api/auth/refresh-token');
             return response as any;
         } catch (error) {
             devLog('Auth Service Refresh Token Error:', error);

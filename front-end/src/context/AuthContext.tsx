@@ -27,10 +27,24 @@ const getSafeUserForStorage = (user: User) => ({
     isLoggedIn: true,
 });
 
+const migrateLegacySession = () => {
+    try {
+        const legacy = sessionStorage.getItem('user');
+        if (legacy && !localStorage.getItem('user')) {
+            localStorage.setItem('user', legacy);
+            sessionStorage.removeItem('user');
+        }
+    } catch (e) {
+        console.error("Session migration failed", e);
+    }
+};
+
+migrateLegacySession();
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(() => {
         try {
-            const storedUser = sessionStorage.getItem('user');
+            const storedUser = localStorage.getItem('user');
             return storedUser ? JSON.parse(storedUser) : null;
         } catch {
             return null;
@@ -66,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let ignore = false; // cleanup flag to cancel stale invocations
 
         const initAuth = async () => {
-            const storedUser = sessionStorage.getItem('user');
+            const storedUser = localStorage.getItem('user');
 
             if (!storedUser) {
                 if (!ignore) setLoading(false);
@@ -84,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     if (!ignore) {
                         setUser(user);
                         setIsVerified(true); // Session confirmed by backend
-                        sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
+                        localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                     }
                 } catch {
                     // Try refresh before giving up
@@ -95,23 +109,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 const { user } = await authService.getMe();
                                 setUser(user);
                                 setIsVerified(true); // Session confirmed after refresh
-                                sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
+                                localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                             } catch {
                                 setUser(null);
                                 setIsVerified(false);
-                                sessionStorage.removeItem('user');
+                                localStorage.removeItem('user');
                             }
                         } else {
                             setUser(null);
                             setIsVerified(false);
-                            sessionStorage.removeItem('user');
+                            localStorage.removeItem('user');
                         }
                     }
                 }
             } catch (parseError) {
                 if (!ignore) {
                     setUser(null);
-                    sessionStorage.removeItem('user');
+                    localStorage.removeItem('user');
                 }
             }
 
@@ -125,18 +139,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const loginWithToken = useCallback(async (token: string) => {
         try {
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            const { user: userData } = await authService.getMe();
-            sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(userData)));
+            const { user: userData } = await authService.getMe({
+                'Authorization': `Bearer ${token}`
+            });
+            localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(userData)));
             setUser(userData);
             setIsVerified(true); // Social login confirmed by backend
         } catch (error) {
             setUser(null);
             setIsVerified(false);
-            sessionStorage.removeItem('user');
+            localStorage.removeItem('user');
             throw new Error('Social login failed. Please try again.');
-        } finally {
-            delete api.defaults.headers.common['Authorization'];
         }
     }, []);
 
@@ -149,7 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 // FIXED: [Removed localStorage.setItem for accessToken and refreshToken to prevent XSS vulnerability]
 
-                sessionStorage.setItem('user', JSON.stringify(getSafeUserForStorage(data.user)));
+                localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(data.user)));
                 setUser(data.user);
                 setIsVerified(true); // Login confirmed directly by backend
 
@@ -181,15 +194,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [navigate]);
 
     const logout = useCallback(() => {
+        // Call the API in the background (fire-and-forget is fine, but we can wait or handle it)
+        authService.logout().catch(() => {});
+        
+        // Clear state and navigate cleanly
+        localStorage.removeItem('user');
+        setIsVerified(false);
         setUser(null);
-        setIsVerified(false); // Reset verification on logout
-        sessionStorage.removeItem('user');
-        // FIXED: [Removed localStorage.removeItem for tokens as they are cleared server-side via cookies]
-
-        authService.logout().catch(err => {
-        });
-
-        navigate('/login');
+        
+        // Let the ProtectedRoute navigate, or if on a public page, go to /login
+        const protectedPaths = ['/dashboard', '/checkout', '/orders'];
+        const isProtected = protectedPaths.some(path => window.location.pathname.startsWith(path));
+        if (!isProtected) {
+            navigate('/login');
+        }
     }, [navigate]);
 
     return (

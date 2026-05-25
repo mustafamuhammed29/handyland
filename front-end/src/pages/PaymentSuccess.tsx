@@ -6,6 +6,8 @@ import { useToast } from '../context/ToastContext';
 import { ENV } from '../config/env';
 import { useQueryClient } from '@tanstack/react-query';
 import { dashboardKeys } from '../hooks/useDashboardData';
+import { api } from '../utils/api';
+import { orderService } from '../services/orderService';
 
 interface OrderSummary {
     id: string;
@@ -41,51 +43,35 @@ const PaymentSuccess: React.FC = () => {
 
         const verifyOrder = async () => {
             try {
-                const headers: any = { 'Content-Type': 'application/json' };
-
-                const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
-
                 let data;
 
                 if (sessionId) {
-                    // Stripe Verification
-                    const response = await fetch(`${baseUrl}/api/payment/success`, {
-                        method: 'POST',
-                        headers,
-                        credentials: 'include',
-                        body: JSON.stringify({ sessionId })
-                    });
-                    data = await response.json();
+                    // Stripe Verification using API helper with rawResponse
+                    const response = await api.post('/api/payment/success', { sessionId }, { rawResponse: true });
+                    data = response.data;
                 } else if (orderId) {
-                    // COD / Direct Order Verification
-                    // We assume if they have the ID and are redirected here, it's valid for now.
-                    // For guests, we can't easily fetch details without a public token.
-                    // If logged in, we fetch the order.
-                    // We can check if `user` context exists, but inside useEffect we might not have it.
-                    // The backend API will return 401 if not authorized anyway.
+                    // COD / Direct Order / Stripe Elements Verification using api.get with rawResponse
                     try {
-                        const response = await fetch(`${baseUrl}/api/orders/${orderId}`, {
-                            method: 'GET',
-                            headers,
-                            credentials: 'include'
-                        });
-                        const resData = await response.json();
+                        const response = await api.get(`/api/orders/${orderId}`, { rawResponse: true });
+                        const resData = response.data;
                         if (resData.success) {
                             data = { success: true, order: resData.order };
                         } else {
                             data = { success: false, message: "Order not found" };
                         }
                     } catch (e) {
-                        // Guest COD Success - Mock the order summary or just show success
-                        // We can't fetch details securely.
-                        data = {
-                            success: true,
-                            order: {
-                                id: orderId,
-                                totalAmount: 0, // Unknown
-                                items: []
+                        // Guest COD / Direct Order Success Cache Verification
+                        const storedOrderId = sessionStorage.getItem('placed_order_id') || sessionStorage.getItem('pending_stripe_order_id');
+                        if (storedOrderId === orderId) {
+                            const cachedOrder = sessionStorage.getItem('last_placed_order');
+                            if (cachedOrder) {
+                                data = { success: true, order: JSON.parse(cachedOrder) };
+                            } else {
+                                data = { success: true, order: { id: orderId, totalAmount: 0, items: [] } };
                             }
-                        };
+                        } else {
+                            data = { success: false, message: "Unauthorized or order not found" };
+                        }
                     }
                 }
 
@@ -115,9 +101,7 @@ const PaymentSuccess: React.FC = () => {
         if (method === 'bank_transfer') {
             const fetchSettings = async () => {
                 try {
-                    const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
-                    const res = await fetch(`${baseUrl}/api/settings`);
-                    const data = await res.json();
+                    const data: any = await api.get('/api/settings');
                     if (data && data.payment && data.payment.bankTransfer) {
                         setPaymentConfig(data.payment.bankTransfer);
                     }
@@ -127,9 +111,7 @@ const PaymentSuccess: React.FC = () => {
             };
             fetchSettings();
         }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [sessionId, orderId, method]);
+    }, [sessionId, orderId, method, clearCart, queryClient]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || !e.target.files[0]) return;
@@ -138,30 +120,16 @@ const PaymentSuccess: React.FC = () => {
         formData.append('receipt', file);
         try {
             setUploading(true);
-            const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
-
-            // Ensure we have a CSRF token before uploading (multipart bypasses interceptor)
-            let csrfToken = document.cookie.split('; ').find(r => r.startsWith('XSRF-TOKEN='))?.split('=')[1];
-            if (!csrfToken) {
-                await fetch(`${baseUrl}/api/auth/csrf`, { credentials: 'include' });
-                csrfToken = document.cookie.split('; ').find(r => r.startsWith('XSRF-TOKEN='))?.split('=')[1];
-            }
-
-            const headers: Record<string, string> = {};
-            if (csrfToken) headers['X-XSRF-Token'] = csrfToken;
-
-            const res = await fetch(`${baseUrl}/api/orders/${orderId}/receipt`, {
-                method: 'POST',
-                credentials: 'include',
-                headers,
-                body: formData
+            const response: any = await api.post(`/api/orders/${orderId}/receipt`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             });
-            const data = await res.json();
-            if (data.success) {
-                setReceiptUrl(data.receiptUrl);
+            if (response && response.success) {
+                setReceiptUrl(response.receiptUrl);
                 addToast('Receipt uploaded successfully! We will process your order soon.', 'success');
             } else {
-                addToast(data.message || 'Failed to upload receipt', 'error');
+                addToast(response?.message || 'Failed to upload receipt', 'error');
             }
         } catch (err) {
             addToast('Error uploading receipt', 'error');
@@ -175,14 +143,7 @@ const PaymentSuccess: React.FC = () => {
         const id = order._id || order.id;
         if (!id) return addToast('Bestellungs-ID nicht gefunden', 'error');
         try {
-            const baseUrl = ENV.API_URL.endsWith('/api') ? ENV.API_URL.slice(0, -4) : ENV.API_URL;
-            const response = await fetch(`${baseUrl}/api/orders/${id}/invoice`, {
-                credentials: 'include'
-            });
-            const html = await response.text();
-            const blob = new Blob([html], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
+            await orderService.downloadInvoice(id);
         } catch {
             alert('Rechnung konnte nicht geladen werden.');
         }
@@ -242,19 +203,19 @@ const PaymentSuccess: React.FC = () => {
                                     <div className="bg-slate-900 rounded-lg p-4 space-y-2 mb-6">
                                         <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                             <span className="text-slate-400 text-sm">Bank:</span>
-                                            <span className="text-white font-bold select-all">{paymentConfig?.bankName || import.meta.env.VITE_BANK_NAME || "Pending Configuration"}</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.bankName || "Pending Configuration"}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                             <span className="text-slate-400 text-sm">Account Holder:</span>
-                                            <span className="text-white font-bold select-all">{paymentConfig?.accountHolder || import.meta.env.VITE_BANK_HOLDER || "Your Company"}</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.accountHolder || "Your Company"}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                             <span className="text-slate-400 text-sm">IBAN:</span>
-                                            <span className="text-white font-bold select-all">{paymentConfig?.iban || import.meta.env.VITE_BANK_IBAN || "DE00 0000 0000 0000 0000 00"}</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.iban || "DE00 0000 0000 0000 0000 00"}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
                                             <span className="text-slate-400 text-sm">BIC:</span>
-                                            <span className="text-white font-bold select-all">{paymentConfig?.bic || import.meta.env.VITE_BANK_BIC || "XXXXXXXX"}</span>
+                                            <span className="text-white font-bold select-all">{paymentConfig?.bic || "XXXXXXXX"}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-blue-500/20 p-2 rounded border border-blue-500/30 mt-4">
                                             <span className="text-blue-300 text-sm font-bold">Reference:</span>

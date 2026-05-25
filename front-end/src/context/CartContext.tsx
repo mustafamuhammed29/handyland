@@ -29,14 +29,18 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const getCartKey = (userId?: string) => userId ? `handyland_cart_${userId}` : 'handyland_cart_guest';
+
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { user } = useAuth();
+    const userId = user?.id || (user as any)?._id;
 
     // Cart State
     const [cart, setCart] = useState<CartItem[]>(() => {
         if (typeof window !== 'undefined') {
             try {
-                const saved = localStorage.getItem('handyland_cart');
+                const key = getCartKey(user?.id || (user as any)?._id);
+                const saved = localStorage.getItem(key);
                 return saved ? JSON.parse(saved) : [];
             } catch (error) {
                 console.error("Failed to parse cart from localStorage", error);
@@ -53,10 +57,22 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { settings } = useSettings();
     const freeShippingThreshold = settings?.freeShippingThreshold ?? FREE_SHIPPING_THRESHOLD;
 
+    // Load user specific cart when userId changes
+    useEffect(() => {
+        const key = getCartKey(userId);
+        try {
+            const saved = localStorage.getItem(key);
+            setCart(saved ? JSON.parse(saved) : []);
+        } catch (error) {
+            setCart([]);
+        }
+    }, [userId]);
+
     // Persistence (Local)
     useEffect(() => {
-        localStorage.setItem('handyland_cart', JSON.stringify(cart));
-    }, [cart]);
+        const key = getCartKey(userId);
+        localStorage.setItem(key, JSON.stringify(cart));
+    }, [cart, userId]);
 
     // Backend Sync on Login / Refresh
     useEffect(() => {
@@ -71,8 +87,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         const response = await api.post<CartItem[]>('/api/cart/sync', {
                             localItems: cart.map(item => ({
                                 id: item.id,
-                                quantity: item.quantity,
-                                category: item.category
+                                quantity: item.quantity || 1,
+                                category: item.category || (item as any).productType || 'Product'
                             }))
                         });
 
@@ -106,25 +122,22 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Debounced API Update to prevent race conditions
     // Using useMemo to ensure the debounced function distinctive instance persists
+    const apiUpdateCallbackRef = React.useRef<any>(null);
+    apiUpdateCallbackRef.current = async (id: string | number, quantity: number, category: string) => {
+        try {
+            await api.put('/api/cart', {
+                id,
+                productType: category || 'Product',
+                quantity
+            });
+        } catch (err) {
+            console.error("Cart sync failed:", err);
+        }
+    };
+
     const debouncedApiUpdate = React.useMemo(
-        () => debounce(async (id: string | number, quantity: number, category: string) => {
-            try {
-                if (quantity === 0) {
-                    await api.put('/api/cart', {
-                        id,
-                        productType: category,
-                        quantity: 0
-                    });
-                } else {
-                    await api.put('/api/cart', {
-                        id,
-                        productType: category,
-                        quantity
-                    });
-                }
-            } catch (err) {
-                console.error("Cart sync failed:", err);
-            }
+        () => debounce((id: string | number, quantity: number, category: string) => {
+            apiUpdateCallbackRef.current?.(id, quantity, category);
         }, 500),
         []
     );
@@ -242,8 +255,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Re-validate coupon when cart changes
     useEffect(() => {
+        if (!coupon?.code) return;
+
         const validateCurrentCoupon = async () => {
-            if (coupon && cartTotal > 0) {
+            if (cartTotal > 0) {
                 try {
                     const response: any = await api.post('/api/coupons/validate', { 
                         code: coupon.code,
@@ -272,7 +287,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Debounce slightly to prevent rapid validation calls when rapidly changing quantities
         const timeoutId = setTimeout(() => {
             validateCurrentCoupon();
-        }, 1000);
+        }, 2000);
 
         return () => clearTimeout(timeoutId);
     }, [cartTotal, coupon?.code]);

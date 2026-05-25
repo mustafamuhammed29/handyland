@@ -59,10 +59,12 @@ const StripePaymentForm: React.FC<{
         setSubmitting(true);
 
         // confirmPayment triggers 3D Secure / SCA automatically (EU PSD2 compliant)
+        const pendingOrderId = sessionStorage.getItem('pending_stripe_order_id') || '';
+        // confirmPayment triggers 3D Secure / SCA automatically (EU PSD2 compliant)
         const { error } = await stripe.confirmPayment({
             elements,
             confirmParams: {
-                return_url: `${window.location.origin}/payment-success`,
+                return_url: `${window.location.origin}/payment-success?order_id=${pendingOrderId}&method=stripe`,
             },
         });
 
@@ -138,7 +140,7 @@ export const CheckoutPaymentSection: React.FC<Props> = ({
         }
     }, [paymentConfig]);
 
-    // When user selects Stripe → create PaymentIntent on backend
+    // When user selects Stripe → create Order then create PaymentIntent on backend
     useEffect(() => {
         if (selectedPaymentMethod !== 'stripe' || !stripePromise || clientSecret) return;
 
@@ -150,7 +152,8 @@ export const CheckoutPaymentSection: React.FC<Props> = ({
                 let shippingFee = selectedMethod ? selectedMethod.price : 5.99;
                 if (cartTotal >= freeShippingThreshold && selectedMethod && !selectedMethod.isExpress) shippingFee = 0;
 
-                const res = await api.post('/api/payment/create-payment-intent', {
+                // 1. Create order first to get orderId
+                const orderRes = await api.post<any, any>('/api/orders', {
                     items: cart.map(item => ({
                         product: item.id,
                         productType: (item as any).productType || (item.category?.toLowerCase() === 'accessory' ? 'Accessory' : 'Product'),
@@ -160,19 +163,36 @@ export const CheckoutPaymentSection: React.FC<Props> = ({
                         quantity: item.quantity || 1,
                     })),
                     shippingAddress: { ...shippingDetails, street: shippingDetails.address },
-                    shippingFee,
+                    shippingMethod: selectedMethod?.name || 'Standard',
+                    paymentMethod: 'stripe',
                     couponCode: coupon?.code,
                     discountAmount: coupon?.discount,
                     termsAccepted: true,
                 });
 
-                if (res.data.clientSecret) {
-                    setClientSecret(res.data.clientSecret);
+                if (!orderRes || !orderRes.success || !orderRes.order) {
+                    throw new Error(orderRes?.message || 'Failed to create order');
+                }
+
+                const createdOrder = orderRes.order;
+                const orderId = createdOrder._id || createdOrder.id;
+
+                // 2. Create PaymentIntent with orderId
+                const res = await api.post<any, any>('/api/payment/create-payment-intent', {
+                    orderId: orderId
+                });
+
+                if (res && res.clientSecret) {
+                    setClientSecret(res.clientSecret);
+                    // Also store orderId and details in session storage so we have it for verification
+                    sessionStorage.setItem('pending_stripe_order_id', orderId);
+                    sessionStorage.setItem('placed_order_id', orderId);
+                    sessionStorage.setItem('last_placed_order', JSON.stringify(createdOrder));
                 } else {
                     setError('Could not initialize payment. Please try again.');
                 }
             } catch (err: any) {
-                setError(err.response?.data?.message || 'Failed to initialize Stripe payment.');
+                setError(err.response?.data?.message || err.message || 'Failed to initialize Stripe payment.');
             } finally {
                 setStripeLoading(false);
             }

@@ -79,7 +79,10 @@ export const orderService = {
 
     downloadInvoice: async (id: string): Promise<void> => {
         try {
-            window.open(`/api/orders/${id}/invoice`, '_blank');
+            const html = await api.get<any, string>(`/api/orders/${id}/invoice`, { responseType: 'text' });
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
         } catch (error) {
             devLog('Order Service Download Invoice Error:', error);
             throw error;
@@ -100,7 +103,7 @@ export const orderService = {
     createCheckoutSession: async (data: any): Promise<{ success: boolean; url: string }> => {
         try {
             await api.get('/api/auth/csrf');
-            const response = await api.post('/api/payment/create-checkout-session', data);
+            const response = await api.post('/api/payments/create-checkout-session', data);
             return response as any;
         } catch (error) {
             devLog('Order Service Create Checkout Session Error:', error);

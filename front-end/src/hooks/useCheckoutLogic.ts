@@ -13,7 +13,7 @@ export const shippingSchema = z.object({
     phone: z.string().regex(/^(\+|00)?[1-9][0-9\s\-().]{6,20}$/, "Invalid phone number format"),
     address: z.string().min(5, "Address is too short").max(200, "Address is too long"),
     city: z.string().min(2, "City is required").max(100, "City name too long"),
-    state: z.string().min(2, "State/Region is required"),
+    state: z.string().optional().or(z.literal('')),
     zipCode: z.string().regex(/^[0-9]{4,10}$/, "Invalid Zip/Postal Code (4-10 digits)"),
     country: z.string().min(2, "Country is required"),
 });
@@ -139,7 +139,6 @@ export const useCheckoutLogic = () => {
             try {
                 const parsed = JSON.parse(saved);
                 if (parsed.address === '[object Object]') parsed.address = '';
-                delete parsed.fullName;
                 setShippingDetails(prev => ({ ...prev, ...parsed }));
             } catch (e) {
                 console.error("Failed to parse saved shipping details");
@@ -295,8 +294,11 @@ export const useCheckoutLogic = () => {
                 });
 
                 if (r.success) {
+                    const orderId = r.order._id || r.order.id;
+                    sessionStorage.setItem('placed_order_id', orderId);
+                    sessionStorage.setItem('last_placed_order', JSON.stringify(r.order));
                     sessionStorage.removeItem('checkout_shipping');
-                    navigate(`/payment-success?order_id=${r.order._id}&method=${selectedPaymentMethod}`);
+                    navigate(`/payment-success?order_id=${orderId}&method=${selectedPaymentMethod}`);
                 }
 
             } else if (['stripe', 'paypal', 'klarna', 'giropay', 'sepa_debit', 'sofort'].includes(selectedPaymentMethod)) {

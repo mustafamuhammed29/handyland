@@ -279,16 +279,33 @@ exports.getValuations = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
-        // Stats calculation
-        const { data: allStats, error: statsError } = await supabaseAdmin.from('saved_valuations').select('status, estimated_value, created_at');
-        if (statsError) throw statsError;
+        // Bounded/Optimized stats calculation using fast head count requests and specific columns select
+        const { count: totalCount } = await supabaseAdmin
+            .from('saved_valuations')
+            .select('*', { count: 'exact', head: true });
 
-        const today = new Date().toISOString().split('T')[0];
+        const todayStr = new Date().toISOString().split('T')[0];
+        const { count: todayCount } = await supabaseAdmin
+            .from('saved_valuations')
+            .select('*', { count: 'exact', head: true })
+            .gte('created_at', `${todayStr}T00:00:00.000Z`);
+
+        const { count: pendingCount } = await supabaseAdmin
+            .from('saved_valuations')
+            .select('*', { count: 'exact', head: true })
+            .in('status', ['pending_shipment', 'active', 'pending']);
+
+        const { data: paidSumData } = await supabaseAdmin
+            .from('saved_valuations')
+            .select('estimated_value')
+            .eq('status', 'paid');
+        const totalPaidValue = (paidSumData || []).reduce((sum, v) => sum + (Number(v.estimated_value) || 0), 0);
+
         const stats = {
-            totalCount: allStats.length,
-            todayCount: allStats.filter(v => v.created_at.startsWith(today)).length,
-            pendingCount: allStats.filter(v => v.status === 'pending_shipment' || v.status === 'active').length,
-            totalPaidValue: allStats.filter(v => v.status === 'paid').reduce((sum, v) => sum + (v.estimated_value || 0), 0)
+            totalCount: totalCount || 0,
+            todayCount: todayCount || 0,
+            pendingCount: pendingCount || 0,
+            totalPaidValue
         };
 
         const quotes = (data || []).map(v => ({
@@ -354,10 +371,26 @@ exports.completePurchase = async (req, res, next) => {
         }).eq('id', req.params.id);
         if (updateError) throw updateError;
 
+        // Parse brand from the device name since brand is not stored in saved_valuations
+        let brand = 'Unbekannt';
+        if (quote.device) {
+            const deviceLower = quote.device.toLowerCase();
+            if (deviceLower.includes('iphone') || deviceLower.includes('apple') || deviceLower.includes('ipad')) {
+                brand = 'Apple';
+            } else if (deviceLower.includes('galaxy') || deviceLower.includes('samsung')) {
+                brand = 'Samsung';
+            } else if (deviceLower.includes('pixel') || deviceLower.includes('google')) {
+                brand = 'Google';
+            } else {
+                const firstWord = quote.device.split(' ')[0];
+                if (firstWord) brand = firstWord;
+            }
+        }
+
         // 2. Add to products/inventory as used device
         const { error: prodError } = await supabaseAdmin.from('products').insert({
             name: `${quote.device} (Gebraucht)`,
-            brand: quote.brand || 'Unbekannt',
+            brand: brand,
             model: quote.device,
             price: (quote.estimated_value || 0) * 1.4, // Suggest 40% margin for resale
             cost_price: quote.estimated_value,
@@ -385,7 +418,7 @@ exports.createValuation = async (req, res, next) => {
             .from('saved_valuations')
             .insert({
                 user_id: req.user.id,
-                device_name: deviceName,
+                device: deviceName,
                 brand, storage,
                 battery_health: batteryHealth,
                 condition,
@@ -471,12 +504,7 @@ exports.saveValuationQuote = async (req, res, next) => {
 
         if (error) {
             console.error('Save Error:', error);
-            // Even if DB save fails, return success with ref so frontend doesn't crash
-            return res.status(201).json({ 
-                success: true, 
-                quoteReference: quoteRef,
-                data: { quoteReference: quoteRef } 
-            });
+            return res.status(500).json({ success: false, message: 'Fehler beim Speichern des Angebots' });
         }
         
         return res.status(201).json({ 
@@ -507,7 +535,7 @@ exports.getQuoteByReference = async (req, res, next) => {
             _id: data.id,
             quoteReference: data.quote_reference,
             estimatedValue: data.estimated_value,
-            model: data.device_name,
+            model: data.device,
             storage: data.storage,
             condition: data.condition
         };
