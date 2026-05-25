@@ -43,9 +43,9 @@ const LoanerManager = () => {
     const [isLendModalOpen, setIsLendModalOpen] = useState<{ open: boolean, loaner: Loaner | null }>({ open: false, loaner: null });
 
     // Forms
-    const [formData, setFormData] = useState({ brand: '', model: '', imei: '', status: 'available', notes: '' });
+    const [formData, setFormData] = useState({ name: '', imei: '', status: 'available', notes: '' });
     const [lendFormData, setLendFormData] = useState({ customerName: '', customerPhone: '', customerEmail: '', dueDate: '', notes: '' });
-    
+
     const fetchStats = async () => {
         try {
             const { data } = await api.get('/api/loaners/stats');
@@ -103,7 +103,7 @@ const LoanerManager = () => {
             fetchLoaners();
             fetchStats();
             setIsAddModalOpen(false);
-            setFormData({ brand: '', model: '', imei: '', status: 'available', notes: '' });
+            setFormData({ name: '', imei: '', status: 'available', notes: '' });
             toast.success('Neues Leihgerät hinzugefügt!');
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Error adding loaner');
@@ -472,15 +472,9 @@ const LoanerManager = () => {
                             </div>
 
                             <form onSubmit={handleAddLoaner} className="p-6 space-y-5">
-                                <div className="grid grid-cols-2 gap-5">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Marke</label>
-                                        <input required value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} placeholder="z.B. Apple" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-blue-500 transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Modell</label>
-                                        <input required value={formData.model} onChange={e => setFormData({ ...formData, model: e.target.value })} placeholder="z.B. iPhone 13" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-blue-500 transition-colors" />
-                                    </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Gerätename</label>
+                                    <input required value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="z.B. Apple iPhone 13 Pro" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-blue-500 transition-colors" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">IMEI (15-stellig)</label>
