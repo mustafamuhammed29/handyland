@@ -119,7 +119,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                 >
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <ShoppingCart className="w-5 h-5 text-brand-primary" /> {t('cart', 'Warenkorb')}
+                            <ShoppingCart className="w-5 h-5 text-brand-primary" /> {t('cart.title', 'Warenkorb')}
                             <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs px-2 py-0.5 rounded-full">{cart.length}</span>
                         </h3>
                         <button onClick={() => setIsCartOpen(false)} aria-label={t('cart.close', 'Warenkorb schließen')} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">

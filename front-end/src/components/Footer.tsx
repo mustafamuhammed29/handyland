@@ -117,13 +117,13 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
               {settings.companyInfo.tagline}
             </p>
             <div className="flex gap-3 mt-6">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Visit our Facebook page" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
                 <Facebook className="w-4 h-4" />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Visit our Instagram page" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
                 <Instagram className="w-4 h-4" />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" title="Twitter" aria-label="Visit our Twitter page" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
                 <Twitter className="w-4 h-4" />
               </a>
             </div>

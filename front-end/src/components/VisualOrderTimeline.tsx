@@ -1,6 +1,8 @@
 import React from 'react';
 import { Package, Truck, CheckCircle2, Clock, Wrench, Search, ShieldCheck, Inbox, XCircle, RotateCcw, BadgeCheck } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
+
 interface TimelineStep {
     id: string;
     label: string;
@@ -16,6 +18,7 @@ interface VisualOrderTimelineProps {
 }
 
 export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ currentStatus, type = 'order', history = [] }) => {
+    const { t } = useTranslation();
 
     // Abstract the mapping logic based on type
     const getStepsForType = () => {
@@ -31,12 +34,12 @@ export const VisualOrderTimeline: React.FC<VisualOrderTimelineProps> = ({ curren
                 { id: 'completed', label: 'Completed', icon: <CheckCircle2 className="w-5 h-5" /> }
             ];
         }
-        // Default order steps
+        // Default order steps matching Admin Panel logic
         return [
-            { id: 'pending', label: 'Order Placed', icon: <Package className="w-5 h-5" /> },
-            { id: 'processing', label: 'Processing', icon: <Clock className="w-5 h-5" /> },
-            { id: 'shipped', label: 'Shipped', icon: <Truck className="w-5 h-5" /> },
-            { id: 'delivered', label: 'Delivered', icon: <CheckCircle2 className="w-5 h-5" /> }
+            { id: 'pending', label: t('orders.status.pending', 'Ausstehend'), icon: <Package className="w-5 h-5" /> },
+            { id: 'processing', label: t('orders.status.processing', 'In Bearbeitung'), icon: <Clock className="w-5 h-5" /> },
+            { id: 'shipped', label: t('orders.status.shipped', 'Versandt'), icon: <Truck className="w-5 h-5" /> },
+            { id: 'delivered', label: t('orders.status.delivered', 'Geliefert'), icon: <CheckCircle2 className="w-5 h-5" /> }
         ];
     };
 

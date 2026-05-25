@@ -33,10 +33,63 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     const { t } = useTranslation();
     const navigate = useNavigate();
 
+    // Known-bad Unsplash IDs from seed data (guitar, hotel, etc.)
+    const BAD_IMAGE_IDS = ['photo-1510915361894', 'photo-1558098329', 'photo-1493225457124', 'photo-1588449668365', 'guitar', 'music', 'instrument'];
+
+    // Reliable category-specific images
+    const CATEGORY_IMAGES: Record<string, string> = {
+        airpods: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?q=80&w=600&auto=format&fit=crop',
+        audio: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?q=80&w=600&auto=format&fit=crop',
+        iphone: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=600&auto=format&fit=crop',
+        samsung: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=600&auto=format&fit=crop',
+        laptop: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=600&auto=format&fit=crop',
+    };
+
     const getProductImage = (p: any) => {
-        if (p.images && p.images.length > 0) return getImageUrl(p.images[0]);
-        if (p.imageUrl) return getImageUrl(p.imageUrl);
+        const brand = (p.brand || '').toLowerCase();
+        const cat = (p.category || '').toLowerCase();
+        const name = (p.model || p.name || '').toLowerCase();
+
+        // PRIORITY 1: Force override for products whose DB images are known-unreliable
+        if (name.includes('airpods') || cat.includes('audio') || cat.includes('headphone'))
+            return CATEGORY_IMAGES.airpods;
+
+        // PRIORITY 2: Try the DB image
+        const raw = p.images?.[0] || p.imageUrl || p.image || '';
+        const url = raw ? getImageUrl(raw) : '';
+
+        // PRIORITY 3: Block known-bad images
+        const isBad = !url || BAD_IMAGE_IDS.some(id => url.toLowerCase().includes(id));
+
+        if (!isBad) return url;
+
+        // PRIORITY 4: Category-appropriate fallback
+        if (brand === 'apple' || name.includes('iphone')) return CATEGORY_IMAGES.iphone;
+        if (brand === 'samsung' || name.includes('galaxy')) return CATEGORY_IMAGES.samsung;
+        if (name.includes('thinkpad') || name.includes('laptop') || cat.includes('laptop')) return CATEGORY_IMAGES.laptop;
         return '/placeholder-device.svg';
+    };
+
+    /** Get the primary spec text (CPU chip, storage, etc.) */
+    const getPrimarySpec = (p: any): string => {
+        if (p.specs?.cpu) return p.specs.cpu;
+        if (p.storage) return p.storage;
+        if (p.ram) return p.ram;
+        return p.brand || '';
+    };
+
+    /** Get the secondary spec text (connectivity, storage, etc.) — never hardcode '5G' */
+    const getSecondarySpec = (p: any): string => {
+        if (p.specs?.connectivity) return p.specs.connectivity;
+        if (p.specs?.network) return p.specs.network;
+        if (p.storage && p.specs?.cpu) return p.storage; // Show storage if CPU already shown
+        const name = (p.model || p.name || '').toLowerCase();
+        // Don't show 5G for accessories or laptops
+        if (name.includes('airpods') || name.includes('thinkpad') || name.includes('laptop')) return '';
+        // Phones without explicit connectivity — still likely 5G
+        const brand = (p.brand || '').toLowerCase();
+        if (['apple', 'samsung', 'google', 'xiaomi', 'huawei'].includes(brand)) return '5G';
+        return '';
     };
 
     if (viewMode === 'list') {
@@ -119,7 +172,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     <motion.img
                         whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.4 }}
-                        src={getImageUrl(product.images?.[0] || (product as any).image)}
+                        src={getProductImage(product)}
                         alt={product.model || (product as any).name || 'Product'}
                         onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
                         loading="lazy"
@@ -154,14 +207,18 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     <h3 className="text-sm md:text-xl font-bold text-slate-900 dark:text-white hover:text-brand-primary transition-colors cursor-pointer line-clamp-2" onClick={() => onSelect(product)}>{cleanProductName(product.model || (product as any).name, product.brand)}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-1 md:gap-2 mb-3 md:mb-6">
+                    {getPrimarySpec(product) && (
                     <div className="bg-slate-100 dark:bg-slate-900/50 rounded-md md:rounded-lg p-1.5 md:p-2 border border-slate-200 dark:border-slate-800 flex items-center gap-1 md:gap-2">
                         <Cpu className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-500 dark:text-slate-400" />
-                        <span className="text-[9px] md:text-xs text-slate-600 dark:text-slate-300 truncate">{product.specs?.cpu}</span>
+                        <span className="text-[9px] md:text-xs text-slate-600 dark:text-slate-300 truncate">{getPrimarySpec(product)}</span>
                     </div>
+                    )}
+                    {getSecondarySpec(product) && (
                     <div className="bg-slate-100 dark:bg-slate-900/50 rounded-md md:rounded-lg p-1.5 md:p-2 border border-slate-200 dark:border-slate-800 flex items-center gap-1 md:gap-2">
                         <Signal className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-500 dark:text-slate-400" />
-                        <span className="text-[9px] md:text-xs text-slate-600 dark:text-slate-300">5G</span>
+                        <span className="text-[9px] md:text-xs text-slate-600 dark:text-slate-300">{getSecondarySpec(product)}</span>
                     </div>
+                    )}
                 </div>
                 <div className="mt-auto flex flex-row items-center justify-between gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-slate-800/50">
                     <div className="text-base md:text-lg lg:text-xl font-bold text-slate-900 dark:text-white whitespace-nowrap">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { Search, CheckCircle, XCircle, Wallet, Edit, Loader2, AlertCircle, FileText, ExternalLink } from 'lucide-react';
 import { api } from '../utils/api';
 
@@ -224,7 +225,7 @@ const WalletManager: React.FC = () => {
                                         transactions.map((tx) => (
                                             <tr key={tx._id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
                                                 <td className="px-6 py-4 text-slate-300 text-sm">
-                                                    {new Date(tx.createdAt).toLocaleString()}
+                                                    {formatDateTime(tx.createdAt)}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="text-white font-medium">{tx.user?.name || 'Unknown'}</div>

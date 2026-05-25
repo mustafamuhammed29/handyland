@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatTime } from '../../../utils/formatDate';
 import { FileText } from 'lucide-react';
 import { Pagination } from './Pagination';
 
@@ -28,7 +29,7 @@ export function HistoryTable({ historyPageData, totalHistory, historyPage, setHi
                         {historyPageData.map((log) => (
                             <tr key={log._id} className="transition-all duration-200 hover:bg-slate-800/60">
                                 <td className="p-5 pl-6 text-sm text-slate-400">
-                                    {new Date(log.createdAt).toLocaleDateString()} <span className="text-slate-500 text-[11px] font-mono ml-2 bg-slate-800/50 px-2 py-1 rounded-md">{new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    {formatDate(log.createdAt)} <span className="text-slate-500 text-[11px] font-mono ml-2 bg-slate-800/50 px-2 py-1 rounded-md">{formatTime(log.createdAt)}</span>
                                 </td>
                                 <td className="p-4">
                                     <div className="text-sm font-bold text-white">{log.itemName}</div>

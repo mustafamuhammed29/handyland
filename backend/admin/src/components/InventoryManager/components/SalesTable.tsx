@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatTime } from '../../../utils/formatDate';
 import { ShoppingCart } from 'lucide-react';
 import { Pagination } from './Pagination';
 
@@ -28,7 +29,7 @@ export function SalesTable({ salesPageData, totalSales, salesPage, setSalesPage,
                         {salesPageData.map((sale, idx) => (
                             <tr key={`${sale.orderId}-${idx}`} className="transition-all duration-200 hover:bg-slate-800/60">
                                 <td className="p-5 pl-6 text-sm text-slate-300">
-                                    {new Date(sale.date).toLocaleDateString()} <span className="text-slate-500 text-[11px] font-mono ml-2 bg-slate-800/50 px-2 py-1 rounded-md">{new Date(sale.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    {formatDate(sale.date)} <span className="text-slate-500 text-[11px] font-mono ml-2 bg-slate-800/50 px-2 py-1 rounded-md">{formatTime(sale.date)}</span>
                                 </td>
                                 <td className="p-4 text-sm font-mono text-slate-400">{sale.orderNumber}</td>
                                 <td className="p-4 text-sm text-white">{sale.customer}</td>

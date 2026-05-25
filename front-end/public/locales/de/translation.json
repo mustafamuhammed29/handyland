@@ -208,7 +208,7 @@
       "pending": "Ausstehend",
       "processing": "In Bearbeitung",
       "shipped": "Versandt",
-      "delivered": "Zugestellt",
+      "delivered": "Geliefert",
       "cancelled": "Storniert",
       "return_requested": "Rückgabe beantragt",
       "refunded": "Rückerstattet"
@@ -441,21 +441,15 @@
     "add_to_compare": "Zum Vergleich hinzufügen"
   },
   "repair": {
-    "title": "Reparatur & Service",
-    "search": "Gerätemodell suchen...",
+    "title": "Service Terminal",
+    "subtitle": "Professionelle Reparaturen für alle Geräte",
     "searchPlaceholder": "Gerätemodell suchen (z.B. iPhone 15, S24)...",
-    "services": "Dienste",
-    "status": "Status",
-    "serviceable": "Reparierbar",
-    "open_diagnostics": "Diagnose öffnen",
-    "screen": "Displayreparatur",
-    "battery": "Akku",
-    "na": "Auf Anfrage",
-    "subtitle": "Transparente Preise für fortschrittliche Hardware-Reparaturen",
     "bookRepair": "Reparatur buchen",
-    "trackRepair": "Reparatur verfolgen",
-    "ticketNumber": "Ticketnummer",
-    "track": "Verfolgen"
+    "allDevices": "Alle Geräte",
+    "noPricingYet": "Wir haben derzeit keine Standardpreise für \"{{device}}\" gelistet. Wir reparieren es trotzdem!",
+    "noResults": "Keine Geräte gefunden",
+    "noResultsHint": "Versuche einen anderen Suchbegriff.",
+    "loading": "Geräte werden geladen..."
   },
   "track": {
     "ticket_id": "Ticket ID",
@@ -478,13 +472,12 @@
     "noDevicesFound": "Keine Geräte gefunden."
   },
   "home": {
-    "featured_device": "HIGHLIGHT GERÄT",
-    "customer_rating": "Kundenbewertung",
-    "device_sold": "Verkaufte Geräte",
-    "this_week": "diese Woche",
-    "special_offers": "Sonderangebote",
-    "spring_deals": "Frühlingsangebote",
-    "explore_now": "Jetzt entdecken"
+    "featuredDevice": "EMPFOHLENES GERÄT",
+    "tagline": "DEUTSCHLANDS #1 TECH-HUB",
+    "deviceSold": "Geräte verkauft",
+    "thisWeek": "+24% diese Woche",
+    "customerRating": "Kundenbewertung",
+    "excellent": "4.9/5.0 Ausgezeichnet"
   },
   "footer": {
     "shop": "SHOP",
@@ -537,6 +530,7 @@
     "noResults": "Keine Produkte gefunden",
     "addToCart": "In den Warenkorb",
     "buyNow": "Jetzt kaufen",
+    "conditionLabel": "ZUSTAND",
     "condition": {
       "new": "Neu",
       "used": "Gebraucht",
@@ -618,14 +612,5 @@
     "backBtn": "Zurück",
     "confirmBtn": "Bestätigen",
     "processing": "Wird bearbeitet..."
-  },
-  "repair": {
-    "searchPlaceholder": "Gerätemodell suchen (z.B. iPhone 15, S24)...",
-    "bookRepair": "Reparatur buchen",
-    "allDevices": "Alle Geräte",
-    "noPricingYet": "Wir haben derzeit keine Standardpreise für \"{{device}}\" gelistet. Wir reparieren es trotzdem!",
-    "noResults": "Keine Geräte gefunden",
-    "noResultsHint": "Versuche einen anderen Suchbegriff.",
-    "loading": "Geräte werden geladen..."
   }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Plus, Search, Trash2, FileText, Clock } from 'lucide-react';
 import { api } from '../utils/api';
@@ -107,7 +108,7 @@ const WarrantyManager = () => {
         };
         return (
             <span className={`px-2 py-1 rounded-md text-xs font-bold ${styles[status] || 'bg-slate-700 text-slate-300'}`}>
-                {status === 'Active' ? 'Aktiv' : status === 'Expired' ? 'Abgelaufen' : status === 'Claimed' ? 'Eingelöst' : 'Nichtig'}
+                {status === 'Active' ? 'Active' : status === 'Expired' ? 'Expired' : status === 'Claimed' ? 'Claimed' : 'Void'}
             </span>
         );
     };
@@ -140,7 +141,7 @@ const WarrantyManager = () => {
                     onClick={() => setIsAddModalOpen(true)}
                     className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg flex items-center gap-2"
                 >
-                    <Plus size={20} /> Neue Garantie
+                    <Plus size={20} /> New Warranty
                 </button>
             </div>
 
@@ -150,7 +151,7 @@ const WarrantyManager = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                     <input
                         type="text"
-                        placeholder="Suchen nach Code, IMEI, Telefonnummer oder Kunde..."
+                        placeholder="Search by Code, IMEI, Telefonnummer oder Kunde..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -163,7 +164,7 @@ const WarrantyManager = () => {
                             onClick={() => setFilterStatus(f)}
                             className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${filterStatus === f ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-900 border border-slate-700 text-slate-400 hover:text-white'}`}
                         >
-                            {f === 'All' ? 'Alle' : f === 'Active' ? 'Aktiv' : f === 'Expired' ? 'Abgelaufen' : f === 'Claimed' ? 'Eingelöst' : 'Nichtig'}
+                            {f === 'All' ? 'All' : f === 'Active' ? 'Active' : f === 'Expired' ? 'Expired' : f === 'Claimed' ? 'Claimed' : 'Void'}
                         </button>
                     ))}
                 </div>
@@ -174,7 +175,7 @@ const WarrantyManager = () => {
                 {loading ? (
                     <div className="col-span-full py-12 text-center text-slate-400">Garantien werden geladen...</div>
                 ) : filteredWarranties.length === 0 ? (
-                    <div className="col-span-full py-12 text-center text-slate-400 bg-slate-900/50 rounded-2xl border border-slate-800">Keine Garantien gefunden.</div>
+                    <div className="col-span-full py-12 text-center text-slate-400 bg-slate-900/50 rounded-2xl border border-slate-800">No data found.</div>
                 ) : (
                     filteredWarranties.map(warranty => {
                         const daysLeft = calculateDaysLeft(warranty.endDate);
@@ -227,7 +228,7 @@ const WarrantyManager = () => {
                                     ) : (
                                         <div className="p-3 rounded-xl border bg-slate-800/50 border-slate-700 text-slate-400 text-sm flex justify-between">
                                             <span>Gültig bis:</span>
-                                            <span>{new Date(warranty.endDate).toLocaleDateString('de-DE')}</span>
+                                            <span>{formatDate(warranty.endDate)}</span>
                                         </div>
                                     )}
 
@@ -263,7 +264,7 @@ const WarrantyManager = () => {
                 {isAddModalOpen && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
-                            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><ShieldCheck className="text-emerald-500" /> Neue Garantie erstellen</h2>
+                            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><ShieldCheck className="text-emerald-500" /> New Warranty erstellen</h2>
                             <form onSubmit={handleAddWarranty} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div><label className="text-xs text-slate-400 mb-1 block">Kundenname <span className="text-red-400">*</span></label><input aria-label="Kundenname" title="Kundenname" placeholder="Name" required value={formData.customerName} onChange={e => setFormData({ ...formData, customerName: e.target.value })} className="w-full bg-slate-800 border-slate-700 rounded-xl px-4 py-2 text-white" /></div>

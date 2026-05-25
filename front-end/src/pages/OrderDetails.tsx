@@ -59,7 +59,7 @@ export const OrderDetails = () => {
         if (showLoading) setRefundLoading(true);
         try {
             const res: any = await api.get('/api/refunds/my');
-            const refunds = res?.refunds || res?.data?.refunds || [];
+            const refunds = res?.refunds || res?.data?.refunds || res?.data?.data || res?.data || [];
             const match = refunds.find((r: any) => {
                 const refOrderId = r.order?._id || r.order;
                 return refOrderId === order._id || refOrderId === id;

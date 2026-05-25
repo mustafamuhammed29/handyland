@@ -3,6 +3,7 @@
  * Premium real-time notification bell for the Admin Panel header.
  */
 import React, { useState, useRef, useEffect } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { Bell, X, Check, CheckCheck, UserPlus, ShoppingBag, MessageSquare, Wrench, ScanLine, Trash2, Wifi, WifiOff, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { AdminNotification, NotificationType } from '../hooks/useAdminNotifications';
@@ -16,12 +17,12 @@ const TYPE_CONFIG: Record<NotificationType, { color: string; bg: string; Icon: R
     new_valuation: { color: 'text-cyan-400',    bg: 'bg-cyan-500/15',    Icon: ScanLine },
 };
 
-const formatTime = (ts: string) => {
+const getRelativeTime = (ts: string) => {
     const diff = Date.now() - new Date(ts).getTime();
     if (diff < 60000) return 'Gerade eben';
     if (diff < 3600000) return `vor ${Math.floor(diff / 60000)}m`;
     if (diff < 86400000) return `vor ${Math.floor(diff / 3600000)}h`;
-    return new Date(ts).toLocaleDateString('de-DE');
+    return formatDate(ts);
 };
 
 // ─── Single Notification Row ─────────────────────────────────────────────────
@@ -60,7 +61,7 @@ const NotificationRow = ({
                     <p className={`text-sm font-semibold ${notification.read ? 'text-slate-400' : 'text-white'} truncate`}>
                         {notification.title}
                     </p>
-                    <span className="text-[10px] text-slate-500 flex-shrink-0 mt-0.5">{formatTime(notification.timestamp)}</span>
+                    <span className="text-[10px] text-slate-500 flex-shrink-0 mt-0.5">{getRelativeTime(notification.timestamp)}</span>
                 </div>
                 <p className="text-xs text-slate-500 mt-0.5 leading-relaxed line-clamp-2">{notification.body}</p>
             </div>

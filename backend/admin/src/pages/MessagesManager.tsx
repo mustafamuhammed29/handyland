@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 import { api } from '../utils/api';
@@ -350,7 +351,7 @@ export default function MessagesManager() {
                                             <div className="flex justify-between items-center mb-1">
                                                 <div className="font-bold text-slate-200 text-sm truncate pr-2 group-hover:text-blue-400 transition-colors">{group.name}</div>
                                                 <div className="text-[10px] text-slate-500 font-medium whitespace-nowrap bg-slate-900/50 px-1.5 py-0.5 rounded border border-slate-800">
-                                                    {new Date(group.lastActivity).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                    {formatDate(group.lastActivity)}
                                                 </div>
                                             </div>
                                             <div className="flex justify-between items-center">
@@ -411,7 +412,7 @@ export default function MessagesManager() {
                                             {statusBadge(thread.status)}
                                         </div>
                                         <div className="flex justify-between items-center text-[11px] text-slate-500 font-medium">
-                                            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-slate-600" /> {new Date(thread.createdAt).toLocaleString()}</span>
+                                            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-slate-600" /> {formatDateTime(thread.createdAt)}</span>
                                             <span className="flex items-center gap-2 px-2.5 py-1 bg-slate-950/50 rounded-lg border border-slate-800">
                                                 <MessageSquare className="w-3.5 h-3.5 text-blue-400/70" /> 
                                                 <span className="text-slate-300">{thread.replies?.length || 0}</span> messages
@@ -454,7 +455,7 @@ export default function MessagesManager() {
                                 {/* Original message */}
                                 <div className={`max-w-[85%] ${selectedThread.initiatedByAdmin ? 'self-end' : 'self-start'}`}>
                                     <div className={`flex items-center gap-2 mb-1.5 ${selectedThread.initiatedByAdmin ? 'justify-end' : 'justify-start'}`}>
-                                        <div className="text-[10px] text-slate-500 font-medium">{new Date(selectedThread.createdAt).toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })}</div>
+                                        <div className="text-[10px] text-slate-500 font-medium">{formatDateTime(selectedThread.createdAt)}</div>
                                         <span className={`text-xs font-bold ${selectedThread.initiatedByAdmin ? 'text-blue-400' : 'text-slate-300'}`}>
                                             {selectedThread.initiatedByAdmin ? 'Support Team' : 'Customer'}
                                         </span>
@@ -473,7 +474,7 @@ export default function MessagesManager() {
                                             <span className={`text-xs font-bold ${reply.isAdmin ? 'text-blue-400' : 'text-slate-300'}`}>
                                                 {reply.isAdmin ? 'You' : 'Customer'}
                                             </span>
-                                            <div className="text-[10px] text-slate-500 font-medium">{new Date(reply.createdAt).toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })}</div>
+                                            <div className="text-[10px] text-slate-500 font-medium">{formatDateTime(reply.createdAt)}</div>
                                         </div>
                                         <div className={reply.isAdmin
                                             ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-2xl rounded-tr-sm p-4 shadow-[0_4px_15px_rgba(59,130,246,0.2)] border border-blue-500/20'

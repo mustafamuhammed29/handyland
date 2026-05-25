@@ -120,7 +120,7 @@ export const SocialAuthTab = () => {
                             <div className={`block w-10 h-6 rounded-full transition-colors ${config.google.enabled ? 'bg-cyan-500' : 'bg-slate-700'}`}></div>
                             <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${config.google.enabled ? 'transform translate-x-4' : ''}`}></div>
                         </div>
-                        <span className="ml-3 text-sm font-medium text-slate-300">{config.google.enabled ? 'Aktiviert' : 'Deaktiviert'}</span>
+                        <span className="ml-3 text-sm font-medium text-slate-300">{config.google.enabled ? 'Activeiert' : 'Deaktiviert'}</span>
                     </label>
                 </div>
 
@@ -188,7 +188,7 @@ export const SocialAuthTab = () => {
                             <div className={`block w-10 h-6 rounded-full transition-colors ${config.facebook.enabled ? 'bg-cyan-500' : 'bg-slate-700'}`}></div>
                             <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${config.facebook.enabled ? 'transform translate-x-4' : ''}`}></div>
                         </div>
-                        <span className="ml-3 text-sm font-medium text-slate-300">{config.facebook.enabled ? 'Aktiviert' : 'Deaktiviert'}</span>
+                        <span className="ml-3 text-sm font-medium text-slate-300">{config.facebook.enabled ? 'Activeiert' : 'Deaktiviert'}</span>
                     </label>
                 </div>
 

@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { useState, useEffect } from 'react';
 import { Star, Trash2, Search, CheckCircle, AlertCircle, ShieldCheck, Filter } from 'lucide-react';
 import { api } from '../utils/api';
@@ -242,7 +243,7 @@ export default function ReviewsManager() {
                                             )}
                                         </td>
                                         <td className="px-6 py-4 text-slate-500 text-sm whitespace-nowrap">
-                                            {new Date(review.createdAt).toLocaleDateString()}
+                                            {formatDate(review.createdAt)}
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <button

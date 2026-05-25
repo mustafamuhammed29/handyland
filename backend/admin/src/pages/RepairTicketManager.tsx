@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { Eye, Search, Filter, CheckCircle, XCircle, Clock, CheckSquare, Square, Plus, Wrench, Smartphone, FileText, Send, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../utils/api';
 import useDebounce from '../hooks/useDebounce';
@@ -403,7 +404,7 @@ const RepairTicketManager: React.FC = () => {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="font-bold text-white font-mono group-hover:text-blue-400 transition-colors cursor-pointer" onClick={() => setSelectedTicket(ticket)}>{ticket.ticketId}</div>
-                                                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-600"></div>{new Date(ticket.createdAt).toLocaleDateString()}</div>
+                                                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-600"></div>{formatDate(ticket.createdAt)}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="font-bold text-white">{getCustomerName(ticket)}</div>
@@ -510,7 +511,7 @@ const RepairTicketManager: React.FC = () => {
                                         <h2 className="text-2xl font-black text-white flex items-center gap-2">
                                             Ticket <span className="font-mono text-blue-400">{selectedTicket.ticketId}</span>
                                         </h2>
-                                        <p className="text-slate-400 text-sm mt-1">Created on {new Date(selectedTicket.createdAt).toLocaleString()}</p>
+                                        <p className="text-slate-400 text-sm mt-1">Created on {formatDateTime(selectedTicket.createdAt)}</p>
                                     </div>
                                 </div>
                                 <button title="Close Details" aria-label="Close Details" onClick={() => setSelectedTicket(null)} className="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
@@ -614,7 +615,7 @@ const RepairTicketManager: React.FC = () => {
                                                             <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                                                         </div>
                                                         <span className={`text-[10px] text-slate-500 font-mono font-medium ${msg.role === 'admin' ? 'text-right pr-1' : 'text-left pl-1'} `}>
-                                                            {new Date(msg.timestamp).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' })}
+                                                            {formatDateTime(msg.timestamp)}
                                                         </span>
                                                     </div>
                                                 </div>

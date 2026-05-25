@@ -61,7 +61,7 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                 <div className="w-full md:w-2/3 p-8 overflow-y-auto bg-slate-950/80">
                     <div className="flex items-center gap-2 mb-6">
                         <Activity className="w-5 h-5 text-blue-400" />
-                        <h4 className="text-lg font-bold text-white uppercase tracking-wider">{t('repair.title')}</h4>
+                        <h4 className="text-lg font-bold text-white uppercase tracking-wider">{t('repair.title', 'Service Terminal')}</h4>
                     </div>
 
                     <div className="space-y-3">

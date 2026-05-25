@@ -120,7 +120,7 @@ const ValuationSettings = () => {
     return (
         <div className="space-y-8 pb-20">
             <header>
-                <h1 className="text-3xl font-bold text-white mb-2">Ankauf-Konfiguration</h1>
+                <h1 className="text-3xl font-bold text-white mb-2">Valuation Settings</h1>
                 <p className="text-slate-400">Verwalten Sie Kategorien und Markensymbole für den Ankaufsprozess.</p>
             </header>
 

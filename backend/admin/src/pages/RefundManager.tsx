@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { useState, useEffect } from 'react';
 import {
     RotateCcw, CheckCircle, XCircle, Eye, Loader2, ShieldCheck,
@@ -75,7 +76,7 @@ export default function RefundManager() {
         setLoading(true);
         try {
             const res: any = await api.get(`/api/refunds${filterStatus ? `?status=${filterStatus}` : ''}`);
-            setRefunds(res?.refunds || res?.data?.refunds || []);
+            setRefunds(res?.refunds || res?.data?.refunds || res?.data?.data || res?.data || []);
         } catch {
             toast.error('Fehler beim Laden der Rückerstattungsanfragen');
         } finally {
@@ -119,13 +120,14 @@ export default function RefundManager() {
         setActionLoading(true);
         try {
             if (newStatus === 'approved') {
-                await api.put(`/api/refunds/${selectedRefund._id}/approve`, {
+                await api.put(`/api/refunds/${selectedRefund._id}/status`, {
+                    status: newStatus,
                     refundAmount: refundAmount ? parseFloat(refundAmount) : undefined,
                     adminNotes,
-                    processStripe,
+                    processStripeRefund: processStripe,
                 });
             } else if (newStatus === 'rejected') {
-                await api.put(`/api/refunds/${selectedRefund._id}/reject`, { adminNotes });
+                await api.put(`/api/refunds/${selectedRefund._id}/status`, { status: newStatus, adminNotes });
             } else {
                 await api.put(`/api/refunds/${selectedRefund._id}/status`, { status: newStatus, adminNotes });
             }
@@ -153,7 +155,7 @@ export default function RefundManager() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-3xl font-black text-white flex items-center gap-3">
-                        <RotateCcw className="w-7 h-7 text-orange-400" /> Rückerstattungen
+                        <RotateCcw className="w-7 h-7 text-orange-400" /> Refunds
                     </h2>
                     <p className="text-slate-400 mt-1 text-sm">EU Widerrufsrecht · Bestellstatus-Kontrolle · Stripe Auto-Refund</p>
                 </div>
@@ -179,7 +181,7 @@ export default function RefundManager() {
                 <span className="text-slate-500 text-xs font-bold uppercase tracking-widest ml-2 mr-2">Filter:</span>
                 <button onClick={() => setFilterStatus('')}
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${filterStatus === '' ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>
-                    Alle ({refunds.length})
+                    All ({refunds.length})
                 </button>
                 {REFUND_STATUSES.map(s => (
                     <button key={s} onClick={() => setFilterStatus(filterStatus === s ? '' : s)}
@@ -195,8 +197,8 @@ export default function RefundManager() {
             ) : refunds.length === 0 ? (
                 <div className="text-center py-24 text-slate-500 bg-slate-900/50 border border-slate-800 rounded-2xl">
                     <RotateCcw className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                    <p className="font-bold uppercase tracking-widest text-sm text-slate-600">Keine Rückerstattungsanfragen gefunden</p>
-                    <p className="text-xs mt-2 italic">Filter: {STATUS_LABELS[filterStatus] || 'Alle'}</p>
+                    <p className="font-bold uppercase tracking-widest text-sm text-slate-600">No data found</p>
+                    <p className="text-xs mt-2 italic">Filter: {STATUS_LABELS[filterStatus] || 'All'}</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-4">
@@ -243,7 +245,7 @@ export default function RefundManager() {
                                         </div>
                                         <div className="flex items-center gap-2 text-slate-400 bg-slate-950/50 p-2 rounded-lg border border-slate-800">
                                             <Calendar className="w-4 h-4 text-blue-400 shrink-0" />
-                                            <span>{new Date(r.createdAt).toLocaleDateString('de-DE')}</span>
+                                            <span>{formatDate(r.createdAt)}</span>
                                         </div>
                                     </div>
 
@@ -324,7 +326,7 @@ export default function RefundManager() {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Eingereicht am</p>
-                                        <p className="text-slate-300 font-bold mt-1">{new Date(selectedRefund.createdAt).toLocaleDateString('de-DE')} {new Date(selectedRefund.createdAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
+                                        <p className="text-slate-300 font-bold mt-1">{formatDate(selectedRefund.createdAt)} {formatTime(selectedRefund.createdAt)}</p>
                                     </div>
                                 </div>
                                 

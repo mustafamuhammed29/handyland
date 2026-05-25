@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { Plus, Search, Trash2, Edit, Save, X, Calculator, ClipboardList, Package, Banknote, TrendingUp, ChevronDown, ChevronUp, MessageSquare, Send, AlertCircle, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
@@ -471,7 +472,7 @@ const ValuationManager = () => {
                         : 'border-transparent text-slate-400 hover:text-slate-200'
                         }`}
                 >
-                    <ClipboardList size={16} /> Angebote (Quotes)
+                    <ClipboardList size={16} /> Offers (Quotes)
                 </button>
                 <button
                     onClick={() => setActiveSection('research')}
@@ -480,7 +481,7 @@ const ValuationManager = () => {
                         : 'border-transparent text-slate-400 hover:text-slate-200'
                         }`}
                 >
-                    <TrendingUp size={16} /> 📈 Preisrecherche
+                    <TrendingUp size={16} /> 📈 Price Research
                 </button>
             </div>
 
@@ -493,7 +494,7 @@ const ValuationManager = () => {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                             <input
                                 type="text"
-                                placeholder="Suchen nach Modell oder Marke..."
+                                placeholder="Search by Modell oder Marke..."
                                 value={bpSearchTerm}
                                 onChange={(e) => setBpSearchTerm(e.target.value)}
                                 aria-label="Search models"
@@ -554,7 +555,7 @@ const ValuationManager = () => {
                                     {loading ? (
                                         <tr><td colSpan={6} className="p-12 text-center text-slate-500"><div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>
                                     ) : devices.length === 0 ? (
-                                        <tr><td colSpan={6} className="p-12 text-center text-slate-500 font-medium bg-slate-900/20">Keine Geräte gefunden.</td></tr>
+                                        <tr><td colSpan={6} className="p-12 text-center text-slate-500 font-medium bg-slate-900/20">No data found.</td></tr>
                                     ) : (
                                         devices.map(device => (
                                             <tr key={device._id} className={`hover:bg-slate-800/40 transition-colors group ${selectedIds.includes(device._id) ? 'bg-cyan-900/10' : ''}`}>
@@ -628,7 +629,7 @@ const ValuationManager = () => {
                         {[
                             { label: 'Heute erstellt', value: quoteStats.todayCount, icon: <TrendingUp size={20} className="text-cyan-400" />, colors: 'bg-cyan-500/5 border-cyan-500/20 text-cyan-400', blur: 'bg-cyan-500/10' },
                             { label: 'Versand ausstehend', value: quoteStats.pendingCount, icon: <Package size={20} className="text-amber-400" />, colors: 'bg-amber-500/5 border-amber-500/20 text-amber-400', blur: 'bg-amber-500/10' },
-                            { label: 'Angebote Gesamt', value: quoteStats.totalCount, icon: <ClipboardList size={20} className="text-blue-400" />, colors: 'bg-blue-500/5 border-blue-500/20 text-blue-400', blur: 'bg-blue-500/10' },
+                            { label: 'Offers Gesamt', value: quoteStats.totalCount, icon: <ClipboardList size={20} className="text-blue-400" />, colors: 'bg-blue-500/5 border-blue-500/20 text-blue-400', blur: 'bg-blue-500/10' },
                             { label: 'Gesamt Ausgezahlt', value: `€${quoteStats.totalPaidValue.toLocaleString('de-DE')}`, icon: <Banknote size={20} className="text-emerald-400" />, colors: 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400', blur: 'bg-emerald-500/10' },
                         ].map(s => (
                             <div key={s.label} className={`backdrop-blur-xl border rounded-2xl p-5 relative overflow-hidden group transition-all hover:scale-[1.02] ${s.colors}`}>
@@ -648,7 +649,7 @@ const ValuationManager = () => {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                             <input
                                 type="text"
-                                placeholder="Suchen nach Referenz (HV-...), Gerät, Kundenname oder E-Mail..."
+                                placeholder="Search by Referenz (HV-...), Gerät, Kundenname oder E-Mail..."
                                 value={quoteSearchTerm}
                                 onChange={(e) => setQuoteSearchTerm(e.target.value)}
                                 className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:ring-2 focus:ring-blue-500 focus:bg-slate-900 transition-colors"
@@ -657,7 +658,7 @@ const ValuationManager = () => {
                         <div className="flex flex-wrap gap-2">
                             {[
                                 { value: 'All', label: 'Alle' },
-                                { value: 'active', label: '⏳ Aktiv' },
+                                { value: 'active', label: '⏳ Active' },
                                 { value: 'pending_shipment', label: '📦 Versand' },
                                 { value: 'received', label: '✅ Erhalten' },
                                 { value: 'paid', label: '💶 Bezahlt' }
@@ -692,7 +693,7 @@ const ValuationManager = () => {
                                     {quotesLoading ? (
                                         <tr><td colSpan={7} className="p-12 text-center text-slate-500"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>
                                     ) : quotes.length === 0 ? (
-                                        <tr><td colSpan={7} className="p-12 text-center text-slate-500 font-medium bg-slate-900/20">Keine Angebote gefunden.</td></tr>
+                                        <tr><td colSpan={7} className="p-12 text-center text-slate-500 font-medium bg-slate-900/20">No data found.</td></tr>
                                     ) : (
                                         quotes.map((quote: any) => {
                                             const customerName = quote.user?.firstName ? `${quote.user.firstName} ${quote.user.lastName || ''}`.trim() : (quote.contact?.name || quote.user?.name || '—');
@@ -742,7 +743,7 @@ const ValuationManager = () => {
                                                                                         'text-slate-400 bg-slate-500/10 border-slate-500/20'
                                                                             }`}
                                                                     >
-                                                                        <option value="active">⏳ Aktiv (Angebot)</option>
+                                                                        <option value="active">⏳ Active (Angebot)</option>
                                                                         <option value="pending_shipment">📦 Versand ausstehend</option>
                                                                         <option value="received">✅ Gerät erhalten</option>
                                                                         <option value="paid">💶 Bezahlt / Im Inventar</option>
@@ -752,7 +753,7 @@ const ValuationManager = () => {
                                                             </div>
                                                         </td>
                                                         <td className="p-5 text-xs font-medium text-slate-400">
-                                                            {new Date(quote.createdAt).toLocaleDateString('de-DE', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                            {formatDate(quote.createdAt)}
                                                         </td>
                                                     </tr>
 
@@ -991,7 +992,7 @@ const ValuationManager = () => {
                                                 {statusDialog.newStatus === 'paid' ? '💶 Bezahlt' :
                                                     statusDialog.newStatus === 'received' ? '✅ Erhalten' :
                                                         statusDialog.newStatus === 'pending_shipment' ? '📦 Versand' :
-                                                            '⏳ Aktiv'}
+                                                            '⏳ Active'}
                                             </span>
                                         </p>
                                     </div>

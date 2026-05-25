@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import {
     Tag,
     Plus,
@@ -265,7 +266,7 @@ export default function CouponManager() {
                                             </td>
                                             <td className="p-5">
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-medium text-slate-300">{new Date(coupon.validUntil).toLocaleDateString()}</span>
+                                                    <span className="text-sm font-medium text-slate-300">{formatDate(coupon.validUntil)}</span>
                                                     {new Date(coupon.validUntil) < new Date() && (
                                                         <span className="text-[10px] text-red-400 font-bold uppercase tracking-wider">Expired</span>
                                                     )}
@@ -321,7 +322,7 @@ export default function CouponManager() {
                                                                     {usage.email || (usage.user ? usage.user.email : 'No email')}
                                                                 </div>
                                                                 <div className="text-[10px] text-slate-500 mt-1 font-medium">
-                                                                    {new Date(usage.usedAt).toLocaleString()}
+                                                                    {formatDateTime(usage.usedAt)}
                                                                 </div>
                                                             </div>
                                                         ))}

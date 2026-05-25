@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PhoneForwarded, Plus, Search, Trash2, Smartphone, FileText, CheckCircle, Clock, Copy, Phone, MessageCircle, AlertTriangle, ChevronLeft, ChevronRight, Wrench } from 'lucide-react';
 import { api } from '../utils/api';
@@ -164,7 +165,7 @@ const LoanerManager = () => {
         }
 
         const styles: Record<string, { colors: string, label: string, icon: React.ReactNode }> = {
-            'Available': { colors: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30', label: 'Verfügbar', icon: <CheckCircle size={12} /> },
+            'Available': { colors: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30', label: 'Available', icon: <CheckCircle size={12} /> },
             'Lent': { colors: 'bg-blue-500/10 text-blue-400 border-blue-500/30', label: 'Ausgeliehen', icon: <Clock size={12} /> },
             'Maintenance': { colors: 'bg-amber-500/10 text-amber-400 border-amber-500/30', label: 'Wartung', icon: <Wrench size={12} /> }
         };
@@ -193,7 +194,7 @@ const LoanerManager = () => {
                     <div className="p-2.5 bg-blue-500/20 rounded-xl">
                         <PhoneForwarded className="w-8 h-8 text-blue-400" />
                     </div>
-                    Leihgeräte Manager
+                    Loaner Phones
                 </h1>
                 <button
                     onClick={() => setIsAddModalOpen(true)}
@@ -207,12 +208,12 @@ const LoanerManager = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 p-5 rounded-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-slate-500/10 rounded-full blur-2xl group-hover:bg-slate-500/20 transition-colors"></div>
-                    <div className="text-sm text-slate-400 mb-1 relative z-10 font-bold tracking-wider uppercase">Geräte Gesamt</div>
+                    <div className="text-sm text-slate-400 mb-1 relative z-10 font-bold tracking-wider uppercase">Total Devices</div>
                     <div className="text-3xl font-black text-white relative z-10">{stats.Total}</div>
                 </div>
                 <div className="bg-emerald-500/5 backdrop-blur-xl border border-emerald-500/20 p-5 rounded-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-colors"></div>
-                    <div className="text-sm text-emerald-400/80 font-bold mb-1 relative z-10 tracking-wider uppercase">Verfügbar</div>
+                    <div className="text-sm text-emerald-400/80 font-bold mb-1 relative z-10 tracking-wider uppercase">Available</div>
                     <div className="text-3xl font-black text-emerald-400 relative z-10">{stats.Available}</div>
                 </div>
                 <div className="bg-blue-500/5 backdrop-blur-xl border border-blue-500/20 p-5 rounded-2xl relative overflow-hidden group">
@@ -233,7 +234,7 @@ const LoanerManager = () => {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                     <input
                         type="text"
-                        placeholder="Suchen nach Modell, IMEI oder Kundenname..."
+                        placeholder="Search by Modell, IMEI oder Kundenname..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:bg-slate-900 transition-colors"
@@ -246,7 +247,7 @@ const LoanerManager = () => {
                             onClick={() => setFilterStatus(f)}
                             className={`px-5 py-3 rounded-xl text-sm font-bold transition-colors ${filterStatus === f ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'bg-slate-950/50 border border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-900'}`}
                         >
-                            {f === 'All' ? 'Alle Geräte' : f === 'Available' ? 'Verfügbar' : f === 'Lent' ? 'Ausgeliehen' : 'Wartung'}
+                            {f === 'All' ? 'Alle Geräte' : f === 'Available' ? 'Available' : f === 'Lent' ? 'Ausgeliehen' : 'Wartung'}
                         </button>
                     ))}
                 </div>
@@ -261,8 +262,8 @@ const LoanerManager = () => {
                 ) : loaners.length === 0 ? (
                     <div className="col-span-full py-16 text-center bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/5 flex flex-col items-center">
                         <Smartphone size={48} className="text-slate-700 mb-4" />
-                        <h3 className="text-xl font-bold text-white mb-2">Keine Leihgeräte gefunden</h3>
-                        <p className="text-slate-400">Es wurden keine Geräte gefunden, die deinen Kriterien entsprechen.</p>
+                        <h3 className="text-xl font-bold text-white mb-2">No data found</h3>
+                        <p className="text-slate-400">Es wurden No data found, die deinen Kriterien entsprechen.</p>
                     </div>
                 ) : (
                     loaners.map(loaner => {
@@ -328,7 +329,7 @@ const LoanerManager = () => {
                                             <span className="text-slate-400 text-xs flex items-center justify-between">
                                                 Rückgabe bis: 
                                                 <span className={`font-black px-2 py-0.5 rounded ${isOverdue ? 'bg-red-500/20 text-red-400' : 'bg-slate-800 text-amber-400'}`}>
-                                                    {new Date(loaner.dueDate).toLocaleDateString('de-DE')}
+                                                    {formatDate(loaner.dueDate)}
                                                 </span>
                                             </span>
                                         </div>

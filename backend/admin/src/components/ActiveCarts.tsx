@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { useState, useEffect } from 'react';
 import { ShoppingCart, User, Clock, Package, Mail, Trash2, Loader2, Euro, Activity, CheckCircle2 } from 'lucide-react';
 import { api } from '../utils/api';
@@ -200,7 +201,7 @@ export const ActiveCarts = () => {
                                     </div>
                                     <div className="flex items-center justify-end gap-1 text-slate-400 text-xs mt-1">
                                         <Clock className="w-3 h-3" />
-                                        Updated: {new Date(cart.updatedAt).toLocaleString()}
+                                        Updated: {formatDateTime(cart.updatedAt)}
                                     </div>
                                 </div>
                             </div>
@@ -242,7 +243,7 @@ export const ActiveCarts = () => {
                                     {cart.lastReminderSentAt ? (
                                         <span className="flex items-center gap-1 text-emerald-500/80 bg-emerald-500/10 px-2 py-1 rounded-md">
                                             <CheckCircle2 className="w-3.5 h-3.5" />
-                                            Reminder sent: {new Date(cart.lastReminderSentAt).toLocaleString()}
+                                            Reminder sent: {formatDateTime(cart.lastReminderSentAt)}
                                         </span>
                                     ) : (
                                         "No manual reminder sent yet."

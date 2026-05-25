@@ -62,7 +62,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('marketplace.condition', 'ZUSTAND')}</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('marketplace.conditionLabel', 'ZUSTAND')}</label>
                         <select aria-label="Filter by Condition" value={selectedCondition} onChange={(e) => setSelectedCondition(e.target.value)} className="bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-sm border border-transparent focus:border-brand-primary outline-none transition-colors">
                             <option value="">{t('marketplace.allConditions', 'Alle Zustände')}</option>
                             {conditions.map(opt => {

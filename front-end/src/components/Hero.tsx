@@ -156,7 +156,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                             <div className="absolute bottom-6 md:bottom-8 left-5 md:left-6 right-5 md:right-6">
                                 <div className="flex justify-between items-end mb-4 gap-3">
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-brand-primary text-[10px] md:text-xs font-bold mb-1 truncate">{settings.hero.productLabel || t('hero.currentOffer', 'AKTUELLES ANGEBOT')}</div>
+                                        <div className="text-brand-primary text-[10px] md:text-xs font-bold mb-1 truncate">{(!settings.hero.productLabel || settings.hero.productLabel === 'FEATURED DEVICE') ? t('home.featuredDevice', 'EMPFOHLENES GERÄT') : settings.hero.productLabel}</div>
                                         <div className="text-white text-lg md:text-xl font-black leading-tight break-words line-clamp-2 md:line-clamp-3">{settings.hero.productName || 'iPhone 15 Pro'}</div>
                                     </div>
                                     <div className="text-white text-lg md:text-xl font-bold whitespace-nowrap shrink-0">{settings.hero.productPrice || '€950'}</div>

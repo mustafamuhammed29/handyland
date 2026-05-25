@@ -161,6 +161,15 @@ export const Contact: React.FC<ContactProps> = () => {
                                     <div className="text-white font-bold text-lg">{settings.location.name}</div>
                                 </div>
                             </div>
+                            {/* Explicit "Open in Maps" link — the iframe's built-in link resolves to about:invalid */}
+                            <a
+                                href={`https://maps.google.com/?q=${encodeURIComponent(settings.location.name)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="absolute top-4 right-4 z-10 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-lg border border-white/10 hover:bg-black/80 transition-colors flex items-center gap-1.5"
+                            >
+                                <MapPin className="w-3 h-3" /> {t('contact.openInMaps', 'In Maps öffnen')}
+                            </a>
                         </div>
 
                         {/* Info Grid */}

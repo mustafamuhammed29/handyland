@@ -118,6 +118,26 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                                         {getBatteryPrice(device)}
                                     </span>
                                 </div>
+                                {/* Render any additional services beyond screen & battery */}
+                                {device.services?.filter(s => s.type !== 'screen' && s.type !== 'battery').map((s, idx) => {
+                                    const typeLabels: Record<string, string> = {
+                                        charging: t('repair.chargingPort', 'Ladebuchse'),
+                                        camera: t('repair.camera', 'Kamera'),
+                                        backglass: t('repair.backGlass', 'Rückglas'),
+                                        faceid: t('repair.faceId', 'Face ID'),
+                                    };
+                                    const label = s.label || typeLabels[s.type] || s.type;
+                                    return (
+                                        <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800/50 group-hover:border-blue-500/20 transition-colors">
+                                            <span className="text-slate-500 dark:text-slate-400 text-xs flex items-center gap-2">
+                                                <Wrench className="w-3 h-3" /> {label}
+                                            </span>
+                                            <span className="text-slate-900 dark:text-white font-mono text-xs font-bold">
+                                                {s.price > 0 ? `${s.price}€` : t('repair.onRequest', 'Auf Anfrage')}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             <div className="mt-6 flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-4 group-hover:border-blue-500/20">

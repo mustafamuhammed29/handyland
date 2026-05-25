@@ -292,6 +292,7 @@ function AppContent() {
                 <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
+                  <Route path="/dashboard" element={<Navigate to="/" replace />} />
                   <Route path="/carts" element={<ActiveCarts />} />
                   <Route path="/users" element={<UsersManager />} />
                   <Route path="/wallet" element={<WalletManager />} />
@@ -319,6 +320,7 @@ function AppContent() {
                   <Route path="/price-research" element={<PriceResearchManager />} />
                   <Route path="/refunds" element={<RefundManager />} />
                   <Route path="/valuation-settings" element={<ValuationSettings />} />
+                  <Route path="/analytics" element={<Navigate to="/" replace />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>

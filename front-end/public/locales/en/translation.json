@@ -181,7 +181,16 @@
     "buyAgain": "Buy Again",
     "cancelling": "Cancelling...",
     "keepOrder": "Keep Order",
-    "confirmCancel": "Yes, Cancel it"
+    "confirmCancel": "Yes, Cancel it",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "return_requested": "Return Requested",
+      "refunded": "Refunded",
+      "cancelled": "Cancelled"
+    }
   },
   "repairs": {
     "title": "Active Repairs",
@@ -278,21 +287,15 @@
     "add_to_compare": "Add to Compare"
   },
   "repair": {
-    "title": "Repair & Service",
-    "search": "Search device model...",
+    "title": "Service Terminal",
+    "subtitle": "Professional repairs for all devices",
     "searchPlaceholder": "Search device model (e.g. iPhone 15, S24)...",
-    "services": "Services",
-    "status": "Status",
-    "serviceable": "Serviceable",
-    "open_diagnostics": "Open Diagnostics",
-    "screen": "Screen Repair",
-    "battery": "Battery",
-    "na": "On Request",
-    "subtitle": "Transparent pricing for advanced hardware repair",
     "bookRepair": "Book Repair",
-    "trackRepair": "Track Repair",
-    "ticketNumber": "Ticket Number",
-    "track": "Track"
+    "allDevices": "All Devices",
+    "noPricingYet": "We don't currently have standard pricing for \"{{device}}\". We can still repair it!",
+    "noResults": "No devices found",
+    "noResultsHint": "Try a different search term.",
+    "loading": "Loading devices..."
   },
   "track": {
     "ticket_id": "Ticket ID",
@@ -306,13 +309,12 @@
     "add": "Add Device to Compare"
   },
   "home": {
-    "featured_device": "FEATURED DEVICE",
-    "customer_rating": "Customer Rating",
-    "device_sold": "Device Sold",
-    "this_week": "this week",
-    "special_offers": "Special Offers",
-    "spring_deals": "Spring Deals",
-    "explore_now": "Explore Now"
+    "featuredDevice": "FEATURED DEVICE",
+    "tagline": "GERMANY'S #1 TECH HUB",
+    "deviceSold": "Devices Sold",
+    "thisWeek": "+24% this week",
+    "customerRating": "Customer Rating",
+    "excellent": "4.9/5.0 Excellent"
   },
   "footer": {
     "shop": "SHOP",
@@ -365,6 +367,7 @@
     "noResults": "No products found",
     "addToCart": "Add to Cart",
     "buyNow": "Buy Now",
+    "conditionLabel": "CONDITION",
     "condition": {
       "new": "New",
       "used": "Used",
@@ -446,14 +449,5 @@
     "backBtn": "Back",
     "confirmBtn": "Confirm",
     "processing": "Processing..."
-  },
-  "repair": {
-    "searchPlaceholder": "Search device model (e.g. iPhone 15, S24)...",
-    "bookRepair": "Book Repair",
-    "allDevices": "All Devices",
-    "noPricingYet": "We don't currently have standard pricing for \"{{device}}\". We can still repair it!",
-    "noResults": "No devices found",
-    "noResultsHint": "Try a different search term.",
-    "loading": "Loading devices..."
   }
 }

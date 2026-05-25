@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertTriangle, Send, Download, Printer, Copy, FileSpreadsheet, Calendar, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import { api } from '../utils/api';
 import { io } from 'socket.io-client';
@@ -321,7 +322,7 @@ const OrdersManager: React.FC = () => {
                     </div>
                     <div style="text-align: right;">
                         <h3>Order #${order.orderNumber}</h3>
-                        <p>Date: ${new Date(order.createdAt).toLocaleDateString()}</p>
+                        <p>Date: ${formatDate(order.createdAt)}</p>
                     </div>
                 </div>
                 <div class="ship-to">
@@ -351,7 +352,7 @@ const OrdersManager: React.FC = () => {
     const handleExportCSV = () => {
         toast.success('Preparing CSV export...');
         const headers = "Order Number,Date,Customer Name,Email,Phone,Items,Total,Status,Payment Method\n";
-        const rows = orders.map(o => `"${o.orderNumber}","${new Date(o.createdAt).toLocaleDateString()}","${o.user?.name || ''}","${o.user?.email || ''}","${o.user?.phone || ''}",${o.items.length},${o.totalAmount},"${o.status}","${o.paymentMethod}"`).join('\n');
+        const rows = orders.map(o => `"${o.orderNumber}","${formatDate(o.createdAt)}","${o.user?.name || ''}","${o.user?.email || ''}","${o.user?.phone || ''}",${o.items.length},${o.totalAmount},"${o.status}","${o.paymentMethod}"`).join('\n');
         const csv = headers + rows;
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = window.URL.createObjectURL(blob);
@@ -623,8 +624,8 @@ const OrdersManager: React.FC = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                                                <div className="font-medium">{new Date(order.createdAt).toLocaleDateString()}</div>
-                                                <div className="text-xs text-slate-500 mt-0.5">{new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                                                <div className="font-medium">{formatDate(order.createdAt)}</div>
+                                                <div className="text-xs text-slate-500 mt-0.5">{formatTime(order.createdAt)}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right">
                                                 <button
@@ -703,7 +704,7 @@ const OrdersManager: React.FC = () => {
                                     Order #{selectedOrder.orderNumber}
                                     <button title="Copy Order Number" aria-label="Copy Order Number" onClick={() => copyToClipboard(selectedOrder.orderNumber, 'Order Number')} className="text-slate-500 hover:text-white transition-colors"><Copy className="w-4 h-4" /></button>
                                 </h2>
-                                <p className="text-slate-400 text-sm mt-1">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                                <p className="text-slate-400 text-sm mt-1">{formatDateTime(selectedOrder.createdAt)}</p>
                             </div>
                             <div className="flex gap-3">
                                 <button

@@ -79,12 +79,20 @@ export const useMarketplace = () => {
         viewMode, setViewMode,
         
         // Data
-        products: (data?.products || []).filter((product: PhoneListing) => 
-            !debouncedSearchTerm || 
-            (product as any).name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-            product.brand?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-            product.model?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-        ),
+        // Deduplicate by model+brand+storage+condition — the DB has genuine duplicate rows with different IDs
+        products: [...new Map(
+            (data?.products || [])
+                .filter((product: PhoneListing) => 
+                    !debouncedSearchTerm || 
+                    (product as any).name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                    product.brand?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                    product.model?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+                )
+                .map((p: PhoneListing) => {
+                    const key = `${(p.brand || '').toLowerCase()}_${(p.model || (p as any).name || '').toLowerCase()}_${(p.storage || '').toLowerCase()}_${(p.condition || '').toLowerCase()}`;
+                    return [key, p] as [string, PhoneListing];
+                })
+        ).values()],
         totalPages: data?.totalPages || 1,
         isLoading,
         isError

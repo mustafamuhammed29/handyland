@@ -4,14 +4,15 @@ const {
     createRefund,
     getRefunds,
     getRefund,
-    updateRefundStatus
+    updateRefundStatus,
+    deleteRefundRequest
 } = require('../controllers/refundController');
 const { protect, authorize } = require('../middleware/auth');
 
 // Customer routes
 router.post('/', protect, createRefund);
 router.get('/my', protect, getRefunds);
-// router.delete('/:id', protect, deleteRefundRequest);
+router.delete('/:id', protect, deleteRefundRequest);
 
 // Admin routes
 router.get('/', protect, authorize('admin', 'staff'), getRefunds);

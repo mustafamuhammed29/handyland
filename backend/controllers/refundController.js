@@ -16,7 +16,7 @@ exports.getRefunds = async (req, res, next) => {
 
         let query = supabaseAdmin
             .from('refund_requests')
-            .select('*, orders(order_number), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)', { count: 'exact' });
+            .select('*, orders(id, order_number, status, payment_method, total_amount), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)', { count: 'exact' });
 
         if (!isAdmin) query = query.eq('user_id', req.user.id);
         if (status) query = query.eq('status', status);
@@ -26,10 +26,35 @@ exports.getRefunds = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
+        const formattedData = data.map(r => ({
+            _id: r.id,
+            status: r.status,
+            reason: r.reason,
+            description: r.description,
+            withinWithdrawalPeriod: r.within_withdrawal_period,
+            refundAmount: r.refund_amount,
+            adminNotes: r.admin_notes,
+            stripeRefundId: r.stripe_refund_id,
+            createdAt: r.created_at,
+            order: r.orders ? {
+                _id: r.orders.id || r.order_id,
+                orderNumber: r.orders.order_number,
+                paymentMethod: r.orders.payment_method,
+                totalAmount: r.orders.total_amount,
+                status: r.orders.status
+            } : { _id: r.order_id },
+            user: {
+                _id: r.user_id,
+                firstName: r.users?.name ? r.users.name.split(' ')[0] : '',
+                lastName: r.users?.name ? r.users.name.split(' ').slice(1).join(' ') : '',
+                email: r.users?.email
+            }
+        }));
+
         return res.status(200).json({
             success: true, count,
             pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
-            data
+            data: formattedData
         });
     } catch (error) { next(error); }
 };
@@ -39,14 +64,39 @@ exports.getRefund = async (req, res, next) => {
     try {
         const { data, error } = await supabaseAdmin
             .from('refund_requests')
-            .select('*, orders(order_number), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)')
+            .select('*, orders(id, order_number, status, payment_method, total_amount), refund_request_items(*), users!refund_requests_user_id_fkey(name, email)')
             .eq('id', req.params.id)
             .single();
 
         if (error || !data) return res.status(404).json({ success: false, message: 'Refund request not found' });
         if (req.user.role !== 'admin' && data.user_id !== req.user.id) return res.status(403).json({ success: false, message: 'Not authorized' });
 
-        return res.status(200).json({ success: true, data });
+        const formattedData = {
+            _id: data.id,
+            status: data.status,
+            reason: data.reason,
+            description: data.description,
+            withinWithdrawalPeriod: data.within_withdrawal_period,
+            refundAmount: data.refund_amount,
+            adminNotes: data.admin_notes,
+            stripeRefundId: data.stripe_refund_id,
+            createdAt: data.created_at,
+            order: data.orders ? {
+                _id: data.orders.id || data.order_id,
+                orderNumber: data.orders.order_number,
+                paymentMethod: data.orders.payment_method,
+                totalAmount: data.orders.total_amount,
+                status: data.orders.status
+            } : { _id: data.order_id },
+            user: {
+                _id: data.user_id,
+                firstName: data.users?.name ? data.users.name.split(' ')[0] : '',
+                lastName: data.users?.name ? data.users.name.split(' ').slice(1).join(' ') : '',
+                email: data.users?.email
+            }
+        };
+
+        return res.status(200).json({ success: true, data: formattedData });
     } catch (error) { next(error); }
 };
 
@@ -60,6 +110,12 @@ exports.createRefund = async (req, res, next) => {
         const { data: order, error: orderError } = await supabaseAdmin.from('orders').select('*').eq('id', orderId).single();
         if (orderError || !order) return res.status(404).json({ success: false, message: 'Order not found' });
         if (order.user_id !== req.user.id) return res.status(403).json({ success: false, message: 'Not authorized' });
+
+        // Check if refund request already exists for this order
+        const { data: existingRefund } = await supabaseAdmin.from('refund_requests').select('id').eq('order_id', orderId).maybeSingle();
+        if (existingRefund) {
+            return res.status(400).json({ success: false, message: 'Es existiert bereits eine Rückgabeanfrage für diese Bestellung.' });
+        }
 
         // Check if within 14 days (widerrufsrecht)
         const orderDate = new Date(order.created_at);
@@ -76,6 +132,9 @@ exports.createRefund = async (req, res, next) => {
             })
             .select().single();
         if (error) throw error;
+
+        // Update order status to reflect the return request
+        await supabaseAdmin.from('orders').update({ status: 'return_requested' }).eq('id', orderId);
 
         // Add items if any
         if (items && items.length > 0) {
@@ -145,5 +204,25 @@ exports.updateRefundStatus = async (req, res, next) => {
         });
 
         return res.status(200).json({ success: true, data });
+    } catch (error) { next(error); }
+};
+
+// @route DELETE /api/refunds/:id
+exports.deleteRefundRequest = async (req, res, next) => {
+    try {
+        const { data: refundReq } = await supabaseAdmin.from('refund_requests').select('order_id, user_id').eq('id', req.params.id).single();
+        if (!refundReq) return res.status(404).json({ success: false, message: 'Refund request not found' });
+        
+        if (req.user.role !== 'admin' && refundReq.user_id !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        const { error } = await supabaseAdmin.from('refund_requests').delete().eq('id', req.params.id);
+        if (error) throw error;
+
+        // Revert order status to delivered
+        await supabaseAdmin.from('orders').update({ status: 'delivered' }).eq('id', refundReq.order_id);
+
+        return res.status(200).json({ success: true, message: 'Refund request deleted' });
     } catch (error) { next(error); }
 };

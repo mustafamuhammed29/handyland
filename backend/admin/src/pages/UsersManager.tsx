@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { Search, Trash2, Lock, Unlock, Users, Shield, UserCheck, UserX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../utils/api';
 import toast from 'react-hot-toast';
@@ -477,7 +478,7 @@ const UsersManager: React.FC = () => {
                                             )}
                                         </td>
                                         <td className="p-5 text-slate-400 text-xs font-mono font-medium">
-                                            {new Date(user.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                            {formatDate(user.createdAt)}
                                         </td>
                                         <td className="p-5 pr-6">
                                             <div className="flex items-center justify-end gap-3">

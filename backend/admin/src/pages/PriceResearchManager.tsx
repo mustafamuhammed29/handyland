@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
 import { Search, TrendingUp, RefreshCw, CheckCircle, AlertCircle, Loader2, ExternalLink, ChevronDown, ChevronUp, BarChart3, Zap, Target, Info } from 'lucide-react';
 import { api } from '../utils/api';
 import toast from 'react-hot-toast';
@@ -52,7 +53,7 @@ const SampleRow = ({ sample }: { sample: any }) => (
             <p className="text-white text-sm font-semibold truncate group-hover:text-blue-400 transition-colors">
                 {sample.title}
             </p>
-            <p className="text-slate-500 text-xs mt-0.5">{sample.condition} · {sample.soldDate ? new Date(sample.soldDate).toLocaleDateString('de-DE') : ''}</p>
+            <p className="text-slate-500 text-xs mt-0.5">{sample.condition} · {sample.soldDate ? formatDate(sample.soldDate) : ''}</p>
         </div>
         <div className="flex items-center gap-2 ml-4 shrink-0">
             <span className="text-emerald-400 font-black text-lg">{sample.price.toFixed(0)}€</span>
@@ -166,7 +167,7 @@ const PriceResearchManager: React.FC = () => {
     };
 
     const handleBulkPricing = async () => {
-        if (blueprints.length === 0) return toast.error('Keine Geräte gefunden');
+        if (blueprints.length === 0) return toast.error('No data found');
         const confirmMsg = `Möchtest du automatisiert ${blueprints.length} Geräte von eBay auf Basis von ${globalMargin}% Marge recherchieren und aktualisieren?\n\nDies dauert etwa ${blueprints.length * 2.5} Sekunden.`;
         if (!confirm(confirmMsg)) return;
 
@@ -236,7 +237,7 @@ const PriceResearchManager: React.FC = () => {
                         <TrendingUp className="w-7 h-7 text-blue-400" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-white">eBay Preisrecherche</h1>
+                        <h1 className="text-2xl font-black text-white">eBay Price Research</h1>
                         <p className="text-slate-400 text-sm">Aktuelle Gebrauchtpreise von eBay.de · Abgeschlossene Verkäufe</p>
                     </div>
                 </div>
@@ -318,9 +319,9 @@ const PriceResearchManager: React.FC = () => {
             {/* Stats Row */}
             <div className="grid grid-cols-3 gap-4">
                 {[
-                    { label: 'Geräte gesamt', value: stats.total, color: 'blue', icon: BarChart3 },
-                    { label: 'Recherchiert', value: stats.researched, color: 'emerald', icon: CheckCircle },
-                    { label: 'Braucht Update', value: stats.needsUpdate, color: 'amber', icon: AlertCircle },
+                    { label: 'Total Devices', value: stats.total, color: 'blue', icon: BarChart3 },
+                    { label: 'Researched', value: stats.researched, color: 'emerald', icon: CheckCircle },
+                    { label: 'Needs Update', value: stats.needsUpdate, color: 'amber', icon: AlertCircle },
                 ].map(stat => (
                     <div key={stat.label} className="p-5 bg-slate-900/60 border border-slate-800 rounded-2xl flex items-center gap-4">
                         <div className={`p-2.5 rounded-xl bg-${stat.color}-500/10`}>
@@ -357,8 +358,8 @@ const PriceResearchManager: React.FC = () => {
                             className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                         >
                             <option value="all">Alle</option>
-                            <option value="needs_update">Braucht Update</option>
-                            <option value="researched">Recherchiert</option>
+                            <option value="needs_update">Needs Update</option>
+                            <option value="researched">Researched</option>
                         </select>
                     </div>
 
@@ -396,7 +397,7 @@ const PriceResearchManager: React.FC = () => {
                             </button>
                         ))}
                         {!loading && filtered.length === 0 && (
-                            <div className="py-12 text-center text-slate-500">Keine Geräte gefunden</div>
+                            <div className="py-12 text-center text-slate-500">No data found</div>
                         )}
                     </div>
                 </div>
@@ -519,7 +520,7 @@ const PriceResearchManager: React.FC = () => {
                                         {isExpanded && !result?.avg && (
                                             <div className="p-6 text-center border-t border-slate-800 bg-slate-950/50">
                                                 <Target className="w-8 h-8 text-slate-700 mx-auto mb-2" />
-                                                <p className="text-slate-500 text-sm">Keine abgeschlossenen eBay-Verkäufe gefunden für "{storage}"</p>
+                                                <p className="text-slate-500 text-sm">No data found für "{storage}"</p>
                                             </div>
                                         )}
                                     </div>

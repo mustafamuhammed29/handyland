@@ -163,13 +163,13 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <Wrench className="w-6 h-6 text-blue-500" />
-                            <span className="text-blue-500 font-mono text-sm tracking-widest uppercase">{t('repair.title')}</span>
+                            <span className="text-blue-500 font-mono text-sm tracking-widest uppercase">{t('repair.title', 'Service Terminal')}</span>
                         </div>
                         <h1 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white">
-                            {settings?.content?.repairTitle || t('repair.title')}
+                            {settings?.content?.repairTitle || t('repair.title', 'Service Terminal')}
                         </h1>
                         <p className="text-slate-600 dark:text-slate-400 mt-2 font-light border-l-2 border-blue-900 pl-4">
-                            {settings?.content?.repairSubtitle || t('repair.subtitle')}
+                            {settings?.content?.repairSubtitle || t('repair.subtitle', 'Professionelle Reparaturen für alle Geräte')}
                         </p>
                     </div>
 
