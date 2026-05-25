@@ -35,14 +35,15 @@ const REASON_LABELS: Record<string, string> = {
     other:            'Sonstiges',
 };
 
-const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
+const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded', 'return_requested'];
 const ORDER_STATUS_LABELS: Record<string, string> = {
     pending: 'Ausstehend',
     processing: 'In Bearbeitung',
     shipped: 'Versandt',
     delivered: 'Geliefert',
     cancelled: 'Storniert',
-    refunded: 'Rückerstattet'
+    refunded: 'Rückerstattet',
+    return_requested: 'Rückgabe Angefragt'
 };
 
 const ORDER_STATUS_COLORS: Record<string, string> = {
@@ -51,7 +52,8 @@ const ORDER_STATUS_COLORS: Record<string, string> = {
     shipped:    'bg-indigo-500/10 text-indigo-400 border-indigo-500/30',
     delivered:  'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
     cancelled:  'bg-red-500/10 text-red-400 border-red-500/30',
-    refunded:   'bg-orange-500/10 text-orange-400 border-orange-500/30',
+    refunded:   'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    return_requested: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
