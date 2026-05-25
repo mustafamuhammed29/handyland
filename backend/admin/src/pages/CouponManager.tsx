@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
+import { formatDate, formatDateTime } from '../utils/formatDate';
 import {
     Tag,
     Plus,

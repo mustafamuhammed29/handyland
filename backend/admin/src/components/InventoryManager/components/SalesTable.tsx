@@ -1,4 +1,4 @@
-import { formatDate, formatDateTime, formatTime } from '../../../utils/formatDate';
+import { formatDate, formatTime } from '../../../utils/formatDate';
 import { ShoppingCart } from 'lucide-react';
 import { Pagination } from './Pagination';
 
