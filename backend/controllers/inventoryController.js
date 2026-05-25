@@ -5,43 +5,19 @@ const { supabaseAdmin } = require('../config/supabase');
 // @route GET /api/inventory/stats
 exports.getInventoryStats = async (req, res, next) => {
     try {
-        // 1. Total Stock & Value from Products
-        const { data: products } = await supabaseAdmin.from('products').select('stock, price, cost_price, min_stock');
-        
-        // 2. Total Stock & Value from Accessories
-        const { data: accessories } = await supabaseAdmin.from('accessories').select('stock, price, cost_price, min_stock');
-
-        // 3. Total Stock & Value from Repair Parts
-        const { data: parts } = await supabaseAdmin.from('repair_parts').select('stock, price, cost_price, min_stock');
-
-        const allItems = [...(products || []), ...(accessories || []), ...(parts || [])];
-
-        let totalStock = 0;
-        let totalValue = 0;
-        let lowStockCount = 0;
-        let outOfStockCount = 0;
-
-        allItems.forEach(item => {
-            totalStock += (item.stock || 0);
-            totalValue += (item.stock || 0) * (item.price || 0);
-            if ((item.stock || 0) <= (item.min_stock || 2) && (item.stock || 0) > 0) lowStockCount++;
-            if ((item.stock || 0) === 0) outOfStockCount++;
-        });
-
-        // 4. Sales Stats (from Orders)
-        const { data: orders } = await supabaseAdmin.from('orders').select('total_amount').eq('status', 'delivered');
-        const totalRevenue = orders?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0;
+        const { data, error } = await supabaseAdmin.rpc('get_inventory_stats');
+        if (error) throw error;
 
         return res.status(200).json({
             success: true,
             data: {
-                totalStock,
-                totalValue,
-                lowStockCount,
-                criticalStockCount: lowStockCount, // Can refine later
-                outOfStockCount,
-                totalItemsSold: orders?.length || 0,
-                totalRevenue
+                totalStock: data.totalStock,
+                totalValue: Number(Number(data.totalValue).toFixed(2)),
+                lowStockCount: data.lowStockCount,
+                criticalStockCount: data.lowStockCount,
+                outOfStockCount: data.outOfStockCount,
+                totalItemsSold: data.totalItemsSold,
+                totalRevenue: Number(Number(data.totalRevenue).toFixed(2))
             }
         });
     } catch (error) { next(error); }

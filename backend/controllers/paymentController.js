@@ -13,7 +13,7 @@ exports.createPaymentIntent = async (req, res, next) => {
     try {
         const { orderId } = req.body;
         
-        const { data: order, error } = await supabaseAdmin.from('orders').select('*').eq('id', orderId).single();
+        const { data: order, error } = await supabaseAdmin.from('orders').select('id, user_id, total_amount').eq('id', orderId).single();
         if (error || !order) return res.status(404).json({ success: false, message: 'Order not found' });
         
         if (order.user_id && (!req.user || (order.user_id !== req.user.id && req.user.role !== 'admin'))) {
@@ -61,6 +61,17 @@ exports.stripeWebhook = async (req, res, next) => {
             const orderId = paymentIntent.metadata.orderId;
 
             if (orderId) {
+                // Idempotency check: see if order is already paid/processed
+                const { data: existingOrder } = await supabaseAdmin
+                    .from('orders')
+                    .select('payment_status')
+                    .eq('id', orderId)
+                    .single();
+
+                if (existingOrder && existingOrder.payment_status === 'paid') {
+                    return res.status(200).json({ received: true, message: 'Already processed' });
+                }
+
                 await supabaseAdmin.from('orders').update({ payment_status: 'paid', status: 'processing' }).eq('id', orderId);
                 await updateTransactionStatus(paymentIntent.id, 'completed', paymentIntent.charges?.data?.[0]?.receipt_url);
             }

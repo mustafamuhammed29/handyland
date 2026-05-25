@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const valuationController = require('../controllers/valuationController');
 const { protect, authorize } = require('../middleware/auth');
+const { valuationLimiter } = require('../middleware/rateLimiter');
 
 // ==========================================
 // BLUEPRINT MANAGEMENT (ADMIN)
@@ -22,8 +23,8 @@ router.delete('/devices', protect, authorize('admin'), valuationController.bulkD
 // ==========================================
 
 // Authorized Quote Management
-router.post('/calculate', valuationController.calculatePrice);
-router.post('/saved', valuationController.saveValuationQuote);
+router.post('/calculate', valuationLimiter, valuationController.calculatePrice);
+router.post('/saved', valuationLimiter, valuationController.saveValuationQuote);
 router.get('/quote/:reference', valuationController.getQuoteByReference);
 router.get('/my-valuations', protect, valuationController.getSavedValuations); // Alias for frontend
 router.get('/saved', protect, valuationController.getSavedValuations);

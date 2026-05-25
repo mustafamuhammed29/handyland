@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authLimiter, passwordResetLimiter } = require('../middleware/rateLimiter');
+const { authLimiter, passwordResetLimiter, otpLimiter } = require('../middleware/rateLimiter');
 const authController = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 const { body } = require('express-validator');
@@ -153,7 +153,7 @@ router.post('/refresh', authController.refreshToken);
 router.post('/logout', authController.logout);
 
 // Phone Verification Routes
-router.post('/phone/send-otp', protect, validate([
+router.post('/phone/send-otp', otpLimiter, protect, validate([
     body('phone').trim().notEmpty().withMessage('Phone number is required').matches(/^\+?[0-9\s\-()]{7,20}$/).withMessage('Invalid phone number format')
 ]), async (req, res) => {
     const { phone } = req.body;

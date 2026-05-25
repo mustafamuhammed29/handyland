@@ -127,7 +127,7 @@ exports.register = async (req, res, next) => {
         // Fetch profile (row guaranteed to exist now after upsert)
         const { data: userProfile } = await supabaseAdmin
             .from('users')
-            .select('*')
+            .select('id, name, email, role, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at')
             .eq('id', data.user.id)
             .single();
 
@@ -195,7 +195,7 @@ exports.login = async (req, res, next) => {
         // Fetch profile
         const { data: userProfile, error: profileError } = await supabaseAdmin
             .from('users')
-            .select('*')
+            .select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at')
             .eq('id', data.user.id)
             .single();
 
@@ -614,7 +614,7 @@ exports.updateProfile = async (req, res, next) => {
 
         // If nothing to update, just return current user
         if (Object.keys(updateData).length === 0) {
-            const { data: currentUser } = await supabaseAdmin.from('users').select('*').eq('id', req.user.id).single();
+            const { data: currentUser } = await supabaseAdmin.from('users').select('id, name, email, role, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at').eq('id', req.user.id).single();
             const userWithId = { ...currentUser, _id: currentUser.id };
             return res.status(200).json({ success: true, user: userWithId, data: userWithId });
         }
@@ -652,7 +652,7 @@ exports.adminLogin = async (req, res, next) => {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
-        const { data: userProfile } = await supabaseAdmin.from('users').select('*').eq('id', data.user.id).single();
+        const { data: userProfile } = await supabaseAdmin.from('users').select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at').eq('id', data.user.id).single();
         if (!userProfile || userProfile.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'Access denied' });
         }
@@ -664,7 +664,7 @@ exports.adminLogin = async (req, res, next) => {
 
 exports.getAllUsers = async (req, res, next) => {
     try {
-        const { data, error } = await supabaseAdmin.from('users').select('*');
+        const { data, error } = await supabaseAdmin.from('users').select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at');
         if (error) throw error;
         res.status(200).json({ success: true, count: data.length, data });
     } catch (error) { next(error); }

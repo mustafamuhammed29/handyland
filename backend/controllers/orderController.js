@@ -190,47 +190,8 @@ exports.createOrder = async (req, res, next) => {
         const totalAmount = Math.max(0, itemsTotal + shippingFee - discountAmount - pointsDiscount);
         const pointsEarned = Math.floor(totalAmount);
 
-        // Create order
-        const { data: order, error: orderError } = await supabaseAdmin
-            .from('orders')
-            .insert({
-                order_number: generateOrderNumber(),
-                user_id: req.user?.id || null,
-                total_amount: Number(totalAmount.toFixed(2)),
-                shipping_fee: shippingFee,
-                shipping_method: shippingMethod || 'Standard',
-                discount_amount: Number(discountAmount.toFixed(2)),
-                coupon_code: couponCode || null,
-                applied_points: appliedPoints || 0,
-                points_earned: pointsEarned,
-                payment_method: paymentMethod || 'card',
-                shipping_full_name: shippingAddress.fullName,
-                shipping_email: shippingAddress.email,
-                shipping_phone: shippingAddress.phone,
-                shipping_street: shippingAddress.street,
-                shipping_city: shippingAddress.city,
-                shipping_zip: shippingAddress.zipCode,
-                shipping_country: shippingAddress.country || 'Germany',
-                notes: req.body.notes || null
-            })
-            .select()
-            .single();
-
-        if (orderError) throw orderError;
-
-        // Insert order items
-        const itemsWithOrderId = orderItems.map(i => ({ ...i, order_id: order.id }));
-        await supabaseAdmin.from('order_items').insert(itemsWithOrderId);
-
-        // Initial status history
-        await supabaseAdmin.from('order_status_history').insert({
-            order_id: order.id,
-            status: 'pending',
-            note: 'Order created'
-        });
-
-        // Atomic stock decrement — prevents race condition / overselling
-        // Uses database-level WHERE stock >= qty to guarantee atomicity
+        // Atomic stock decrement — reserve stock first before creating database records
+        const decrementedItems = [];
         for (const item of items) {
             const table = item.productType === 'Product' ? 'products' : 'accessories';
             const { data: success, error: rpcError } = await supabaseAdmin.rpc('atomic_decrement_stock', {
@@ -239,10 +200,14 @@ exports.createOrder = async (req, res, next) => {
                 p_qty: item.quantity
             });
             if (rpcError || !success) {
-                // Rollback: delete the order we just created since stock is insufficient
-                await supabaseAdmin.from('order_items').delete().eq('order_id', order.id);
-                await supabaseAdmin.from('order_status_history').delete().eq('order_id', order.id);
-                await supabaseAdmin.from('orders').delete().eq('id', order.id);
+                // Restore stock for already decremented items
+                for (const decItem of decrementedItems) {
+                    const rTable = decItem.productType === 'Product' ? 'products' : 'accessories';
+                    const { data: p } = await supabaseAdmin.from(rTable).select('stock').eq('id', decItem.product).single();
+                    if (p) {
+                        await supabaseAdmin.from(rTable).update({ stock: p.stock + decItem.quantity }).eq('id', decItem.product);
+                    }
+                }
                 const failedItem = orderItems.find(oi =>
                     (item.productType === 'Product' ? oi.product_id : oi.accessory_id) === item.product
                 );
@@ -251,6 +216,64 @@ exports.createOrder = async (req, res, next) => {
                     message: `Insufficient stock for ${failedItem?.name || 'item'}. Another customer may have just purchased it. Please try again.`
                 });
             }
+            decrementedItems.push(item);
+        }
+
+        // Now that stock is reserved, write order records inside a try/catch block
+        let order;
+        try {
+            // Create order
+            const { data: createdOrder, error: orderError } = await supabaseAdmin
+                .from('orders')
+                .insert({
+                    order_number: generateOrderNumber(),
+                    user_id: req.user?.id || null,
+                    total_amount: Number(totalAmount.toFixed(2)),
+                    shipping_fee: shippingFee,
+                    shipping_method: shippingMethod || 'Standard',
+                    discount_amount: Number(discountAmount.toFixed(2)),
+                    coupon_code: couponCode || null,
+                    applied_points: appliedPoints || 0,
+                    points_earned: pointsEarned,
+                    payment_method: paymentMethod || 'card',
+                    shipping_full_name: shippingAddress.fullName,
+                    shipping_email: shippingAddress.email,
+                    shipping_phone: shippingAddress.phone,
+                    shipping_street: shippingAddress.street,
+                    shipping_city: shippingAddress.city,
+                    shipping_zip: shippingAddress.zipCode,
+                    shipping_country: shippingAddress.country || 'Germany',
+                    notes: req.body.notes || null
+                })
+                .select()
+                .single();
+
+            if (orderError) throw orderError;
+            order = createdOrder;
+
+            // Insert order items
+            const itemsWithOrderId = orderItems.map(i => ({ ...i, order_id: order.id }));
+            const { error: itemsError } = await supabaseAdmin.from('order_items').insert(itemsWithOrderId);
+            if (itemsError) throw itemsError;
+
+            // Initial status history
+            const { error: historyError } = await supabaseAdmin.from('order_status_history').insert({
+                order_id: order.id,
+                status: 'pending',
+                note: 'Order created'
+            });
+            if (historyError) throw historyError;
+
+        } catch (dbError) {
+            // Restore all reserved stocks if database creation fails unexpectedly
+            for (const decItem of decrementedItems) {
+                const rTable = decItem.productType === 'Product' ? 'products' : 'accessories';
+                const { data: p } = await supabaseAdmin.from(rTable).select('stock').eq('id', decItem.product).single();
+                if (p) {
+                    await supabaseAdmin.from(rTable).update({ stock: p.stock + decItem.quantity }).eq('id', decItem.product);
+                }
+            }
+            throw dbError;
         }
 
         // Update coupon usage

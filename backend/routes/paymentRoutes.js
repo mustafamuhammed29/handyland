@@ -5,9 +5,10 @@ const {
     stripeWebhook
 } = require('../controllers/paymentController');
 const { protect, authorize, optionalProtect } = require('../middleware/auth');
+const { paymentLimiter } = require('../middleware/rateLimiter');
 
 // Stripe Routes
-router.post('/create-payment-intent', optionalProtect, createPaymentIntent); // Stripe Elements (embedded)
+router.post('/create-payment-intent', paymentLimiter, optionalProtect, createPaymentIntent); // Stripe Elements (embedded)
 // router.post('/create-checkout-session', optionalProtect, createCheckoutSession); // Stripe Checkout (redirect)
 // BUG-NEW-01 fix: optionalProtect captures req.user when a cookie exists;
 // full 'protect' would break Stripe server-side callbacks that have no user token.

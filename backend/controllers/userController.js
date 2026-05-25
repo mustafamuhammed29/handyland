@@ -112,7 +112,7 @@ exports.getUser = async (req, res, next) => {
     try {
         const { data, error } = await supabaseAdmin
             .from('users')
-            .select('*')
+            .select('id, name, email, role, is_active, is_verified, phone, avatar, balance, loyalty_points, membership_level, created_at, preferred_language')
             .eq('id', req.params.id)
             .single();
 
@@ -284,12 +284,17 @@ exports.updateBalance = async (req, res, next) => {
     }
 };
 
-// ── @route GET /api/users/notifications ──────────────────────
 exports.getNotificationPrefs = async (req, res, next) => {
     try {
-        const { data, error } = await supabaseAdmin.from('users').select('*').eq('id', req.user.id).single();
+        const { data, error } = await supabaseAdmin.from('users').select('notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter').eq('id', req.user.id).single();
         if (error) throw error;
-        return res.status(200).json({ success: true, data: data?.notification_prefs || {} });
+        const prefs = {
+            orderUpdates: data?.notif_order_updates,
+            repairStatus: data?.notif_repair_status,
+            promotions: data?.notif_promotions,
+            newsletter: data?.notif_newsletter
+        };
+        return res.status(200).json({ success: true, data: prefs });
     } catch (error) { 
         // Gracefully handle missing column
         if (error.code === 'PGRST204' || error.message?.includes('notification_prefs')) {

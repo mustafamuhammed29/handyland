@@ -45,3 +45,13 @@ jobs:
     - name: Build Admin Panel
       run: npm run build
       working-directory: ./backend/admin
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    steps:
+      - name: Trigger Render.com Webhook Deploy
+        run: |
+          curl -f "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" || echo "RENDER_DEPLOY_HOOK_URL secret not set"
+
