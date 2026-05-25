@@ -49,7 +49,7 @@ exports.protect = async (req, res, next) => {
         // Fetch user profile from our users table
         const { data: userProfile, error: profileError } = await supabaseAdmin
             .from('users')
-            .select('id, name, email, role, is_active, is_verified, balance, loyalty_points, membership_level, preferred_language, two_factor_enabled')
+            .select('id, name, email, role, is_active, is_verified, balance, loyalty_points, membership_level, preferred_language, two_factor_enabled, phone')
             .eq('id', supabaseUser.id)
             .single();
 
@@ -92,7 +92,8 @@ exports.protect = async (req, res, next) => {
             loyaltyPoints: userProfile.loyalty_points,
             membershipLevel: userProfile.membership_level,
             preferredLanguage: userProfile.preferred_language,
-            twoFactorEnabled: userProfile.two_factor_enabled
+            twoFactorEnabled: userProfile.two_factor_enabled,
+            phone: userProfile.phone
         };
 
         req.supabaseToken = token;
@@ -163,7 +164,7 @@ exports.optionalProtect = async (req, res, next) => {
 
         const { data: userProfile } = await supabaseAdmin
             .from('users')
-            .select('id, name, email, role, is_active, is_verified, balance, loyalty_points, membership_level, preferred_language')
+            .select('id, name, email, role, is_active, is_verified, balance, loyalty_points, membership_level, preferred_language, phone')
             .eq('id', supabaseUser.id)
             .single();
 
@@ -179,7 +180,8 @@ exports.optionalProtect = async (req, res, next) => {
                 balance: userProfile.balance,
                 loyaltyPoints: userProfile.loyalty_points,
                 membershipLevel: userProfile.membership_level,
-                preferredLanguage: userProfile.preferred_language
+                preferredLanguage: userProfile.preferred_language,
+                phone: userProfile.phone
             };
             req.supabaseToken = token;
         }

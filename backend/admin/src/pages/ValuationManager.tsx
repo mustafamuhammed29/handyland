@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
 import useDebounce from '../hooks/useDebounce';
 import toast from 'react-hot-toast';
+import { EbayImportModal } from '../components/EbayImportModal';
 
 const PriceResearchManager = lazy(() => import('./PriceResearchManager'));
 
@@ -75,6 +76,7 @@ const DEFAULT_FORM: Partial<DeviceBlueprint> = {
 
 const ValuationManager = () => {
     const [activeSection, setActiveSection] = useState<'blueprints' | 'quotes' | 'research'>('blueprints');
+    const [isEbayModalOpen, setIsEbayModalOpen] = useState(false);
 
     // --- BLUEPRINTS STATE ---
     const [devices, setDevices] = useState<DeviceBlueprint[]>([]);
@@ -435,6 +437,12 @@ const ValuationManager = () => {
                             <Trash2 size={16} /> Alle löschen
                         </button>
                         {/* Add New */}
+                        <button
+                            onClick={() => setIsEbayModalOpen(true)}
+                            className="flex items-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg"
+                        >
+                            <Search size={16} /> Import from eBay
+                        </button>
                         <button
                             onClick={openNew}
                             className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-2.5 rounded-xl font-bold hover:shadow-lg hover:shadow-cyan-900/40 transition-all text-white border border-white/10"
@@ -1500,17 +1508,16 @@ const ValuationManager = () => {
 
             {/* ── PRICE RESEARCH SECTION ── */}
             {activeSection === 'research' && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <Suspense fallback={
-                        <div className="flex flex-col items-center justify-center py-32 text-slate-400">
-                            <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-400 rounded-full animate-spin mb-4" />
-                            <p className="font-bold tracking-wider uppercase text-sm">Preisrecherche wird geladen...</p>
-                        </div>
-                    }>
-                        <PriceResearchManager />
-                    </Suspense>
-                </motion.div>
+                <Suspense fallback={<div className="flex justify-center p-20"><div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+                    <PriceResearchManager />
+                </Suspense>
             )}
+
+            <EbayImportModal 
+                isOpen={isEbayModalOpen} 
+                onClose={() => setIsEbayModalOpen(false)} 
+                onImportSuccess={fetchDevices} 
+            />
         </div>
     );
 };

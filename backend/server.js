@@ -131,7 +131,9 @@ const server = http.createServer(app);
 const { initSocket } = require('./utils/socket');
 initSocket(server);
 
-// Backup and Cart Recovery jobs have been disabled as they require Supabase-specific rewrites.
+// ── Background Jobs (Cron) ───────────────────────────────────────────────────
+const { initCronJobs } = require('./services/cronService');
+initCronJobs();
 
 // ── Graceful Shutdown ─────────────────────────────────────────────────────────
 const gracefulShutdown = (signal) => {

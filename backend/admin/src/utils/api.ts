@@ -12,7 +12,7 @@ export const api = axios.create({
         'Content-Type': 'application/json',
         'x-app-type': 'admin'
     },
-    timeout: 10000
+    timeout: 60000 // Increased from 10000 to allow long bulk imports
 });
 
 // Request interceptor for CSRF Protection

@@ -207,7 +207,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
             if (data.success && data.imageUrl) {
                 // 2. Update user profile
-                await api.put('/api/users/profile', { avatar: data.imageUrl });
+                await api.put('/api/auth/updateprofile', { avatar: data.imageUrl });
                 await user.refetch();
                 toast.success('Profilbild erfolgreich aktualisiert!', { id: loadingToast });
             } else {

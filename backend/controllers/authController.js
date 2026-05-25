@@ -596,7 +596,13 @@ exports.updateProfile = async (req, res, next) => {
 
         const updateData = {};
         if (name !== undefined) updateData.name = name;
-        if (phone !== undefined) updateData.phone = phone;
+        if (phone !== undefined) {
+            // Reset verification if the phone number has changed
+            if (phone !== req.user.phone) {
+                updateData.phone = phone;
+                updateData.is_verified = false;
+            }
+        }
         if (preferredLanguage !== undefined) updateData.preferred_language = preferredLanguage;
         if (avatar !== undefined) updateData.avatar = avatar;
         if (notificationPrefs) {

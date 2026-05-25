@@ -203,7 +203,13 @@ const ValuationSettings = () => {
                             {brands.map((brand) => (
                                 <div key={brand.id} className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 flex flex-col items-center gap-3 group relative hover:border-blue-500/30 transition-all">
                                     <div className="h-16 w-full flex items-center justify-center p-2 bg-white/90 rounded-xl backdrop-blur-sm">
-                                        <img src={brand.logo_url} alt={brand.name} className="max-h-full max-w-full object-contain" />
+                                        {brand.logo_url ? (
+                                            <img src={brand.logo_url} alt={brand.name} className="max-h-full max-w-full object-contain" />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center text-slate-400">
+                                                <ImageIcon size={24} className="opacity-50" />
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{brand.name}</div>
                                     

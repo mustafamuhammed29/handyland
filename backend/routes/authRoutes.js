@@ -5,6 +5,7 @@ const authController = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 const { body } = require('express-validator');
 const validate = require('../middleware/validation');
+const phoneVerificationService = require('../services/phoneVerificationService');
 
 const rateLimit = require('express-rate-limit');
 
@@ -150,6 +151,34 @@ router.put('/updateprofile', protect, authController.updateProfile);
 router.put('/changepassword', protect, authController.updatePassword);
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', authController.logout);
+
+// Phone Verification Routes
+router.post('/phone/send-otp', protect, validate([
+    body('phone').trim().notEmpty().withMessage('Phone number is required').matches(/^\+?[0-9\s\-()]{7,20}$/).withMessage('Invalid phone number format')
+]), async (req, res) => {
+    const { phone } = req.body;
+    try {
+        const result = await phoneVerificationService.sendOTP(phone);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error('Error sending OTP:', error);
+        return res.status(500).json({ success: false, message: 'Failed to send verification code.' });
+    }
+});
+
+router.post('/phone/verify-otp', protect, validate([
+    body('phone').trim().notEmpty().withMessage('Phone number is required'),
+    body('otp').trim().isLength({ min: 6, max: 6 }).withMessage('OTP must be exactly 6 digits')
+]), async (req, res) => {
+    const { phone, otp } = req.body;
+    try {
+        const result = await phoneVerificationService.verifyOTP(req.user.id, phone, otp);
+        return res.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+        console.error('Error verifying OTP:', error);
+        return res.status(500).json({ success: false, message: 'Verification process failed.' });
+    }
+});
 
 // Email availability check (used for live validation in Register form)
 const checkEmailLimiter = rateLimit({

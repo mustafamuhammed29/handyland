@@ -78,5 +78,6 @@ router.use('/price-research', require('./priceResearchRoutes'));
 router.use('/suppliers', require('./supplierRoutes'));
 router.use('/purchase-orders', require('./purchaseOrderRoutes'));
 router.use('/refunds', require('./refundRoutes'));
+router.use('/ebay-catalog', require('./ebayCatalogRoutes'));
 
 module.exports = router;

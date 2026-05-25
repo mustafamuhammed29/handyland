@@ -178,12 +178,12 @@ export const ValuationLanding = ({
         const fetchDynamicConfig = async () => {
             try {
                 const [catRes, brandRes] = await Promise.all([
-                    api.get(`/api/valuation/categories?_t=${Date.now()}`),
-                    api.get(`/api/valuation/brands?_t=${Date.now()}`)
+                    api.get(`/api/valuation/categories?_t=${Date.now()}`) as any,
+                    api.get(`/api/valuation/brands?_t=${Date.now()}`) as any
                 ]);
                 
-                if (catRes.data.success && catRes.data.data?.length > 0) {
-                    const mappedCats = catRes.data.data
+                if (catRes.success && catRes.data?.length > 0) {
+                    const mappedCats = catRes.data
                         .filter((c: any) => c.is_active)
                         .map((c: any) => ({
                             id: c.name,
@@ -195,9 +195,9 @@ export const ValuationLanding = ({
                     setCategories(mappedCats);
                 }
                 
-                if (brandRes.data.success && brandRes.data.data?.length > 0) {
+                if (brandRes.success && brandRes.data?.length > 0) {
                     const mappedBrands: Record<string, string> = { ...INITIAL_BRAND_LOGOS };
-                    brandRes.data.data.forEach((b: any) => {
+                    brandRes.data.forEach((b: any) => {
                         mappedBrands[b.name] = b.logo_url;
                     });
                     setBrandLogos(mappedBrands);
@@ -365,7 +365,7 @@ export const ValuationLanding = ({
                                     {selectedCategory && (
                                         <>
                                             <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-                                            <button onClick={() => { setFunnelStep('brand'); setSelectedSeries(null); }} className="text-slate-400 hover:text-blue-500 transition-colors">{catInfo?.label}</button>
+                                            <button onClick={() => { setFunnelStep('brand'); setSelectedSeries(null); }} className="text-slate-400 hover:text-blue-500 transition-colors">{catInfo ? t(`valuation.category.${catInfo.id.toLowerCase()}`, catInfo.label) : ''}</button>
                                         </>
                                     )}
                                     {funnelStep === 'series' && selectedBrand && (
@@ -402,7 +402,7 @@ export const ValuationLanding = ({
                                                     className="group relative bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-500 transition-all flex flex-col items-center justify-center gap-3 hover:-translate-y-1"
                                                 >
                                                     <span className="text-5xl">{cat.emoji}</span>
-                                                    <span className="font-bold text-base text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center">{cat.label}</span>
+                                                    <span className="font-bold text-base text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center">{t(`valuation.category.${cat.id.toLowerCase()}`, cat.label)}</span>
                                                 </button>
                                             );
                                         })}

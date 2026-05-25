@@ -29,8 +29,14 @@ exports.getBlueprints = async (req, res, next) => {
         query = query.order('brand', { ascending: true }).order('model', { ascending: true })
             .range(offset, offset + Number(limit) - 1);
 
-        const { data, error, count } = await query;
-        if (error) throw error;
+        let { data, error, count } = await query;
+        if (error) {
+            if (error.code === 'PGRST103' || error.message.includes('range not satisfiable')) {
+                data = []; // It just means we asked for a page past the end
+            } else {
+                throw error;
+            }
+        }
 
         // Map actual DB columns → camelCase frontend fields
         const blueprints = (data || []).map(d => ({
@@ -159,18 +165,18 @@ exports.bulkDeleteBlueprints = async (req, res, next) => {
 exports.reseedBlueprints = async (req, res, next) => {
     try {
         const defaultDevices = [
-            { brand: 'Apple', model: 'iPhone 15 Pro Max', base_price: 650, valid_storages: ['256GB', '512GB', '1TB'], storage_prices: { '256GB': 0, '512GB': 80, '1TB': 160 } },
-            { brand: 'Apple', model: 'iPhone 15 Pro', base_price: 550, valid_storages: ['128GB', '256GB', '512GB', '1TB'], storage_prices: { '128GB': 0, '256GB': 50, '512GB': 100, '1TB': 150 } },
-            { brand: 'Apple', model: 'iPhone 15', base_price: 420, valid_storages: ['128GB', '256GB', '512GB'], storage_prices: { '128GB': 0, '256GB': 40, '512GB': 80 } },
-            { brand: 'Apple', model: 'iPhone 14 Pro Max', base_price: 520, valid_storages: ['128GB', '256GB', '512GB', '1TB'], storage_prices: { '128GB': 0, '256GB': 40, '512GB': 80, '1TB': 130 } },
-            { brand: 'Apple', model: 'iPhone 14 Pro', base_price: 430, valid_storages: ['128GB', '256GB', '512GB', '1TB'], storage_prices: { '128GB': 0, '256GB': 35, '512GB': 70, '1TB': 120 } },
-            { brand: 'Apple', model: 'iPhone 14', base_price: 320, valid_storages: ['128GB', '256GB', '512GB'], storage_prices: { '128GB': 0, '256GB': 30, '512GB': 60 } },
-            { brand: 'Samsung', model: 'Galaxy S24 Ultra', base_price: 580, valid_storages: ['256GB', '512GB', '1TB'], storage_prices: { '256GB': 0, '512GB': 70, '1TB': 140 } },
-            { brand: 'Samsung', model: 'Galaxy S24+', base_price: 420, valid_storages: ['256GB', '512GB'], storage_prices: { '256GB': 0, '512GB': 50 } },
-            { brand: 'Samsung', model: 'Galaxy S24', base_price: 350, valid_storages: ['128GB', '256GB'], storage_prices: { '128GB': 0, '256GB': 40 } },
-            { brand: 'Samsung', model: 'Galaxy S23 Ultra', base_price: 450, valid_storages: ['256GB', '512GB', '1TB'], storage_prices: { '256GB': 0, '512GB': 60, '1TB': 120 } },
-            { brand: 'Google', model: 'Pixel 8 Pro', base_price: 350, valid_storages: ['128GB', '256GB', '512GB'], storage_prices: { '128GB': 0, '256GB': 30, '512GB': 60 } },
-            { brand: 'Google', model: 'Pixel 8', base_price: 280, valid_storages: ['128GB', '256GB'], storage_prices: { '128GB': 0, '256GB': 30 } },
+            { brand: 'Apple', model: 'iPhone 15 Pro Max', base_price: 650, valid_storages: ['256GB', '512GB', '1TB'], storage_prices: { '256GB': 0, '512GB': 80, '1TB': 160 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15-pro-max.jpg' },
+            { brand: 'Apple', model: 'iPhone 15 Pro', base_price: 550, valid_storages: ['128GB', '256GB', '512GB', '1TB'], storage_prices: { '128GB': 0, '256GB': 50, '512GB': 100, '1TB': 150 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15-pro-max.jpg' },
+            { brand: 'Apple', model: 'iPhone 15', base_price: 420, valid_storages: ['128GB', '256GB', '512GB'], storage_prices: { '128GB': 0, '256GB': 40, '512GB': 80 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15.jpg' },
+            { brand: 'Apple', model: 'iPhone 14 Pro Max', base_price: 520, valid_storages: ['128GB', '256GB', '512GB', '1TB'], storage_prices: { '128GB': 0, '256GB': 40, '512GB': 80, '1TB': 130 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-14-pro-max-.jpg' },
+            { brand: 'Apple', model: 'iPhone 14 Pro', base_price: 430, valid_storages: ['128GB', '256GB', '512GB', '1TB'], storage_prices: { '128GB': 0, '256GB': 35, '512GB': 70, '1TB': 120 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-14-pro-max-.jpg' },
+            { brand: 'Apple', model: 'iPhone 14', base_price: 320, valid_storages: ['128GB', '256GB', '512GB'], storage_prices: { '128GB': 0, '256GB': 30, '512GB': 60 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-14.jpg' },
+            { brand: 'Samsung', model: 'Galaxy S24 Ultra', base_price: 580, valid_storages: ['256GB', '512GB', '1TB'], storage_prices: { '256GB': 0, '512GB': 70, '1TB': 140 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s24-ultra-5g-sm-s928-1.jpg' },
+            { brand: 'Samsung', model: 'Galaxy S24+', base_price: 420, valid_storages: ['256GB', '512GB'], storage_prices: { '256GB': 0, '512GB': 50 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s24-5g-sm-s921.jpg' },
+            { brand: 'Samsung', model: 'Galaxy S24', base_price: 350, valid_storages: ['128GB', '256GB'], storage_prices: { '128GB': 0, '256GB': 40 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s24-5g-sm-s921.jpg' },
+            { brand: 'Samsung', model: 'Galaxy S23 Ultra', base_price: 450, valid_storages: ['256GB', '512GB', '1TB'], storage_prices: { '256GB': 0, '512GB': 60, '1TB': 120 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s23-ultra-5g.jpg' },
+            { brand: 'Google', model: 'Pixel 8 Pro', base_price: 350, valid_storages: ['128GB', '256GB', '512GB'], storage_prices: { '128GB': 0, '256GB': 30, '512GB': 60 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/google-pixel-8-pro.jpg' },
+            { brand: 'Google', model: 'Pixel 8', base_price: 280, valid_storages: ['128GB', '256GB'], storage_prices: { '128GB': 0, '256GB': 30 }, image: 'https://fdn2.gsmarena.com/vv/bigpic/google-pixel-8-pro.jpg' },
         ];
 
         const devicesWithModifiers = defaultDevices.map(d => ({
@@ -409,8 +415,14 @@ exports.getSavedValuations = async (req, res, next) => {
 
         query = query.order('created_at', { ascending: false }).range(offset, offset + Number(limit) - 1);
 
-        const { data, error, count } = await query;
-        if (error) throw error;
+        let { data, error, count } = await query;
+        if (error) {
+            if (error.code === 'PGRST103' || error.message.includes('range not satisfiable')) {
+                data = [];
+            } else {
+                throw error;
+            }
+        }
 
         return res.status(200).json({
             success: true, count,

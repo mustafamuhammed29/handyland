@@ -47,6 +47,80 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Phone Verification States
+    const [showOtpInput, setShowOtpInput] = useState(false);
+    const [otpCode, setOtpCode] = useState('');
+    const [isSendingOtp, setIsSendingOtp] = useState(false);
+    const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+    const [resendCooldown, setResendCooldown] = useState(0);
+
+    React.useEffect(() => {
+        if (resendCooldown <= 0) return;
+        const timer = setTimeout(() => {
+            setResendCooldown(c => c - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [resendCooldown]);
+
+    const handleSendOtp = async () => {
+        if (!profileForm.phone) {
+            toast.error(t('settings.profile.phone.required', 'Bitte gib eine gültige Telefonnummer ein.'));
+            return;
+        }
+
+        setIsSendingOtp(true);
+        try {
+            const res = await api.post('/api/auth/phone/send-otp', { phone: profileForm.phone });
+            const data = (res as any)?.data || res;
+            if (data.success) {
+                setShowOtpInput(true);
+                setResendCooldown(60);
+                toast.success(t('settings.profile.phone.otpSent', 'Verifizierungscode wurde gesendet! Bitte überprüfe dein Handy.'));
+                // In dev mode, let user know the code is in terminal
+                if (data.devCode) {
+                    console.log(`[Dev Mode] Verification code is: ${data.devCode}`);
+                }
+            } else {
+                toast.error(data.message || t('settings.profile.phone.sendFailed', 'Fehler beim Senden des Codes.'));
+            }
+        } catch (error: any) {
+            console.error('Error sending phone verification OTP:', error);
+            const errMsg = error.response?.data?.message || t('settings.profile.phone.sendError', 'Senden des Verifizierungscodes fehlgeschlagen.');
+            toast.error(errMsg);
+        } finally {
+            setIsSendingOtp(false);
+        }
+    };
+
+    const handleVerifyOtp = async () => {
+        if (!otpCode || otpCode.length !== 6) {
+            toast.error(t('settings.profile.phone.otpInvalidLength', 'Bitte gib den 6-stelligen Code ein.'));
+            return;
+        }
+
+        setIsVerifyingOtp(true);
+        try {
+            const res = await api.post('/api/auth/phone/verify-otp', { phone: profileForm.phone, otp: otpCode });
+            const data = (res as any)?.data || res;
+            if (data.success) {
+                setShowOtpInput(false);
+                setOtpCode('');
+                toast.success(t('settings.profile.phone.verifiedSuccess', 'Telefonnummer erfolgreich verifiziert!'));
+                
+                // Instantly update local profile state
+                onUpdateProfile({ phone: profileForm.phone, is_verified: true });
+            } else {
+                toast.error(data.message || t('settings.profile.phone.verifyFailed', 'Ungültiger Code. Bitte versuche es erneut.'));
+            }
+        } catch (error: any) {
+            console.error('Error verifying phone OTP:', error);
+            const errMsg = error.response?.data?.message || t('settings.profile.phone.verifyError', 'Fehler beim Verifizieren des Codes.');
+            toast.error(errMsg);
+        } finally {
+            setIsVerifyingOtp(false);
+        }
+    };
+
     const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -190,12 +264,19 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                 {[
                     { id: 'name', label: t('settings.profile.fullName', 'Full Name'), icon: <User className="w-4 h-4" />, type: 'text', key: 'name' as const, placeholder: 'John Doe' },
                     { id: 'email', label: t('settings.profile.email', 'Email Address'), icon: <Mail className="w-4 h-4" />, type: 'email', key: 'email' as const, placeholder: 'john@example.com', disabled: true },
-                    { id: 'phone', label: t('settings.profile.phone', 'Phone Number'), icon: <Phone className="w-4 h-4" />, type: 'tel', key: 'phone' as const, placeholder: '+1 234 567 890' },
+                    { id: 'phone', label: t('settings.profile.phoneNumber', 'Phone Number'), icon: <Phone className="w-4 h-4" />, type: 'tel', key: 'phone' as const, placeholder: '+1 234 567 890' },
                 ].map(f => (
                     <div key={f.id}>
-                        <label htmlFor={`profile-${f.id}`} className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
-                            <span className="text-slate-500">{f.icon}</span> {f.label}
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label htmlFor={`profile-${f.id}`} className="flex items-center gap-2 text-sm text-slate-400 font-medium">
+                                <span className="text-slate-500">{f.icon}</span> {f.label}
+                            </label>
+                            {f.id === 'phone' && user.is_verified && (
+                                <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full select-none">
+                                    <Check className="w-3 h-3" /> {t('settings.profile.phone.verified', 'Verifiziert')}
+                                </span>
+                            )}
+                        </div>
                         <input
                             id={`profile-${f.id}`}
                             type={f.type}
@@ -207,6 +288,79 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                                 ? 'bg-slate-800 border border-slate-600 focus:border-blue-500 cursor-text'
                                 : 'bg-slate-800/40 border border-slate-800 cursor-default text-slate-300'}`}
                         />
+                        
+                        {f.id === 'phone' && !user.is_verified && profileForm.phone && !profileEditing && (
+                            <div className="mt-2.5 flex flex-col gap-2 p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                                        <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                                        {t('settings.profile.phone.notVerified', 'Telefonnummer ist noch nicht verifiziert.')}
+                                    </span>
+                                    {!showOtpInput ? (
+                                        <button
+                                            type="button"
+                                            onClick={handleSendOtp}
+                                            disabled={isSendingOtp || resendCooldown > 0}
+                                            className="text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-500/5 hover:bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                        >
+                                            {isSendingOtp ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                                            {resendCooldown > 0 
+                                                ? `${t('settings.profile.phone.resendIn', 'Erneut in')} ${resendCooldown}s`
+                                                : t('settings.profile.phone.verifyNow', 'Jetzt verifizieren')}
+                                        </button>
+                                    ) : (
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={handleSendOtp}
+                                                disabled={isSendingOtp || resendCooldown > 0}
+                                                className="text-xs font-bold text-blue-400 hover:text-blue-300 disabled:opacity-50 flex items-center gap-1"
+                                            >
+                                                {isSendingOtp ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                                                {resendCooldown > 0 
+                                                    ? `${t('settings.profile.phone.resendIn', 'Erneut in')} ${resendCooldown}s`
+                                                    : t('settings.profile.phone.resendCode', 'Code erneut senden')}
+                                            </button>
+                                            <span className="text-slate-700">|</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowOtpInput(false)}
+                                                className="text-xs text-slate-500 hover:text-slate-400 font-medium"
+                                            >
+                                                {t('common.cancel', 'Abbrechen')}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {showOtpInput && (
+                                    <div className="mt-2 pt-2.5 border-t border-slate-800/80 space-y-3">
+                                        <p className="text-[11px] text-slate-400">
+                                            {t('settings.profile.phone.otpSentDesc', 'Wir haben dir einen 6-stelligen Verifizierungscode per WhatsApp/SMS gesendet. Bitte gib ihn unten ein:')}
+                                        </p>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                maxLength={6}
+                                                value={otpCode}
+                                                onChange={e => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
+                                                placeholder="123456"
+                                                className="flex-1 px-4 py-2 rounded-lg bg-slate-950 border border-slate-800 text-white font-mono text-center tracking-[0.2em] text-sm focus:border-blue-500 outline-none"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleVerifyOtp}
+                                                disabled={isVerifyingOtp || otpCode.length !== 6}
+                                                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                            >
+                                                {isVerifyingOtp ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                                                {t('common.confirm', 'Bestätigen')}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 ))}
 

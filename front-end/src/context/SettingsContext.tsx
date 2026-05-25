@@ -173,6 +173,7 @@ interface Settings {
         faviconUrl?: string;
         googleAnalyticsId?: string;
         facebookPixelId?: string;
+        googleSiteVerificationId?: string;
     };
     cookieConsent?: {
         enabled?: boolean;

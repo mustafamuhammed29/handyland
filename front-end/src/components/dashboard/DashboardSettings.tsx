@@ -60,7 +60,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
         setProfileSaving(true);
         setProfileMsg(null);
         try {
-            const res = await api.put('/api/users/profile', profileForm) as any;
+            const res = await api.put('/api/auth/updateprofile', profileForm) as any;
             onUpdateProfile(res?.user || res?.data || profileForm);
             setProfileMsg({ type: 'ok', text: t('settings.profile.success', 'Profile updated successfully!') });
             setProfileEditing(false);
@@ -84,7 +84,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
         if (pwForm.newPw.length < 8) { setPwMsg({ type: 'err', text: t('settings.security.error.length', 'Password must be at least 8 characters.') }); return; }
         setPwSaving(true);
         try {
-            await api.put('/api/users/change-password', { currentPassword: pwForm.current, newPassword: pwForm.newPw });
+            await api.put('/api/auth/changepassword', { currentPassword: pwForm.current, newPassword: pwForm.newPw });
             onUpdatePassword(pwForm.current, pwForm.newPw);
             setPwMsg({ type: 'ok', text: t('settings.security.success', 'Password updated successfully!') });
             setPwForm({ current: '', newPw: '', confirm: '' });
