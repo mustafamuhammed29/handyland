@@ -66,6 +66,8 @@
     "quantity": "Menge",
     "freeShipping": "Kostenloser Versand!",
     "freeShippingProgress": "Fügen Sie {{amount}} für kostenlosen Versand hinzu",
+    "addForFreeShipping": "Noch {{amount}} bis zum Gratisversand",
+    "freeShippingUnlocked": "Du hast kostenlosen Versand freigeschaltet!",
     "reserveWhatsapp": "Über WhatsApp reservieren"
   },
   "checkout": {
@@ -96,7 +98,11 @@
     "couponCode": "Gutscheincode",
     "applyCoupon": "Anwenden",
     "removeCoupon": "Entfernen",
-    "discount": "Rabatt"
+    "discount": "Rabatt",
+    "addForFreeShipping": "Noch {{amount}} bis zum Gratisversand",
+    "freeShippingQualified": "Sie erhalten kostenlosen Standardversand!",
+    "free": "KOSTENLOS",
+    "items": "Artikel"
   },
   "dashboard": {
     "overview": "Übersicht",
@@ -427,6 +433,7 @@
   "repair": {
     "title": "Reparatur & Service",
     "search": "Gerätemodell suchen...",
+    "searchPlaceholder": "Gerätemodell suchen (z.B. iPhone 15, S24)...",
     "services": "Dienste",
     "status": "Status",
     "serviceable": "Reparierbar",

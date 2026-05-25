@@ -20,34 +20,59 @@ const PAGE_TITLES: Record<string, string> = {
 const formatMarkdownToHTML = (text: string): string => {
     if (!text) return '';
     
-    // Check if it's already HTML
-    if (text.includes('<p>') || text.includes('</div>') || text.includes('<br')) {
-        return text;
-    }
-    
-    const lines = text.split('\n');
+    // Normalize basic HTML paragraphs and breaks back to clean newlines for Markdown parsing
+    let normalized = text
+        .replace(/<p>\s*---\s*<\/p>/gi, '\n<hr class="border-slate-800 my-8" />\n')
+        .replace(/<p>\s*\*\*\*\s*<\/p>/gi, '\n<hr class="border-slate-800 my-8" />\n')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<p>/gi, '')
+        .replace(/<\/div>/gi, '\n')
+        .replace(/<div>/gi, '')
+        .replace(/&nbsp;/g, ' ');
+
+    const lines = normalized.split('\n');
     let inList = false;
     
     const formattedLines = lines.map(line => {
         let trimmed = line.trim();
         
+        // If it is a pre-replaced hr, return it as is
+        if (trimmed.startsWith('<hr')) {
+            return trimmed;
+        }
+        
         // Horizontal rule
-        if (trimmed === '---' || trimmed === '***') {
-            return '<hr class="border-slate-800 my-8" />';
+        if (trimmed === '---' || trimmed === '***' || trimmed === '--- ' || trimmed === '*** ') {
+            return '<hr class="border-slate-850 dark:border-slate-800 my-8 border-t" />';
         }
         
         // Headings
         if (trimmed.startsWith('# ')) {
-            return `<h1 class="text-3xl font-black text-white mt-8 mb-4">${trimmed.slice(2)}</h1>`;
+            return `<h1 class="text-3xl font-black text-slate-900 dark:text-white mt-8 mb-4 tracking-tight">${trimmed.slice(2)}</h1>`;
         }
         if (trimmed.startsWith('## ')) {
-            return `<h2 class="text-2xl font-bold text-white mt-8 mb-4">${trimmed.slice(3)}</h2>`;
+            return `<h2 class="text-2xl font-bold text-slate-900 dark:text-white mt-8 mb-4 tracking-tight">${trimmed.slice(3)}</h2>`;
         }
         if (trimmed.startsWith('### ')) {
-            return `<h3 class="text-xl font-bold text-white mt-6 mb-3">${trimmed.slice(4)}</h3>`;
+            return `<h3 class="text-xl font-bold text-slate-900 dark:text-white mt-6 mb-3 tracking-tight">${trimmed.slice(4)}</h3>`;
         }
         if (trimmed.startsWith('#### ')) {
-            return `<h4 class="text-lg font-bold text-slate-300 mt-4 mb-2">${trimmed.slice(5)}</h4>`;
+            return `<h4 class="text-lg font-bold text-slate-850 dark:text-slate-300 mt-4 mb-2">${trimmed.slice(5)}</h4>`;
+        }
+        
+        // Smart Header Identification:
+        // Identify short title lines in Impressum and Service pages to turn them into beautiful headings
+        const isNumberedHeader = /^\d+\.\s+\w+/.test(trimmed);
+        const knownHeaders = [
+            'impressum', 'unternehmensgegenstand', 'angaben zur umsatzsteuer',
+            'garantie & gewährleistung', 'haftungshinweise', 'gewerbeanmeldung',
+            'verbraucherinformationen & online-streitbeilegung'
+        ];
+        const isKnownHeader = knownHeaders.includes(trimmed.toLowerCase());
+        
+        if (isKnownHeader || isNumberedHeader) {
+            return `<h2 class="text-2xl font-black text-slate-900 dark:text-white mt-10 mb-4 tracking-tight border-l-4 border-cyan-500 pl-4 uppercase text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-400">${trimmed}</h2>`;
         }
         
         // Lists
@@ -56,9 +81,9 @@ const formatMarkdownToHTML = (text: string): string => {
             let prefix = '';
             if (!inList) {
                 inList = true;
-                prefix = '<ul class="list-disc list-inside space-y-2 text-slate-300 my-4">';
+                prefix = '<ul class="list-disc list-inside space-y-2 text-slate-600 dark:text-slate-300 my-4">';
             }
-            return `${prefix}<li class="text-slate-300">${item}</li>`;
+            return `${prefix}<li class="text-slate-600 dark:text-slate-300">${item}</li>`;
         } else if (inList && trimmed === '') {
             inList = false;
             return '</ul>';
@@ -66,8 +91,8 @@ const formatMarkdownToHTML = (text: string): string => {
         
         // Bold/Italic replacements
         let formattedLine = line
-            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em class="text-slate-300 italic">$1</em>');
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 dark:text-white font-bold">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em class="text-slate-600 dark:text-slate-300 italic">$1</em>');
             
         if (trimmed === '') {
             return '<div class="h-4"></div>';
@@ -75,10 +100,10 @@ const formatMarkdownToHTML = (text: string): string => {
         
         if (inList) {
             inList = false;
-            return `</ul><p class="text-slate-300 leading-relaxed mb-4">${formattedLine}</p>`;
+            return `</ul><p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">${formattedLine}</p>`;
         }
         
-        return `<p class="text-slate-300 leading-relaxed mb-4">${formattedLine}</p>`;
+        return `<p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">${formattedLine}</p>`;
     });
     
     let html = formattedLines.join('\n');

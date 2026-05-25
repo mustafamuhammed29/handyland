@@ -66,8 +66,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         </div>
                         <div className="text-right pr-12">
                             <div className="text-2xl font-bold text-slate-900 dark:text-white">{formatPrice(product.price)}</div>
-                            {product.condition && product.condition.trim() !== '' && (
-                                <div className={`text-xs font-bold uppercase ${product.condition === 'new' ? 'text-emerald-400' : 'text-purple-400'}`}>{getConditionLabel(product.condition)}</div>
+                             {product.condition && product.condition.trim() !== '' && (
+                                <div className={`text-xs font-black uppercase ${product.condition === 'new' ? 'text-emerald-700 dark:text-emerald-400' : 'text-purple-700 dark:text-purple-400'}`}>{getConditionLabel(product.condition)}</div>
                             )}
                         </div>
                     </div>
@@ -127,7 +127,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     />
                     <div className="absolute top-2 left-2 flex gap-1">
                         {product.condition && product.condition.trim() !== '' && (
-                        <span className={`text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur-md border ${product.condition === 'new' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'}`}>
+                        <span className={`text-[8px] md:text-[10px] font-extrabold px-2 py-0.5 rounded backdrop-blur-md border ${product.condition === 'new' ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 dark:border-emerald-500/40' : 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/30 dark:border-purple-500/40'}`}>
                             {getConditionLabel(product.condition)}
                         </span>
                         )}

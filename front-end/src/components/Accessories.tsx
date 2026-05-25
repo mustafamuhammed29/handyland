@@ -36,7 +36,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
 
     useEffect(() => {
-        api.get<any>('/api/accessories')
+        api.get<any>('/api/accessories?limit=1000')
             .then((data: any) => {
                 setAccessories(Array.isArray(data) ? data : (data?.accessories || []));
                 setLoading(false);

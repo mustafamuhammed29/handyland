@@ -21,7 +21,23 @@ export const getCleanDeviceModel = (device: RepairDevice): string => {
 
 export const getDeviceImage = (device: RepairDevice): string => {
     const img = device.image || (device as any).images?.[0];
-    if (!img || img.includes('placeholder') || img.includes('room') || img.includes('hotel') || img.includes('interior') || img.includes('unsplash.com/photo-1540518614-')) {
+    const isApple = device.brand?.toLowerCase() === 'apple';
+    const isSamsung = device.brand?.toLowerCase() === 'samsung';
+    
+    if (!img || 
+        img.includes('placeholder') || 
+        img.includes('room') || 
+        img.includes('hotel') || 
+        img.includes('interior') || 
+        img.includes('unsplash.com/photo-1540518614-') ||
+        img.includes('compressed-1778456262699-718780140')
+    ) {
+        if (isApple) {
+            return 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=600&auto=format&fit=crop'; // iPhone 15 Pro mockup
+        }
+        if (isSamsung) {
+            return 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=600&auto=format&fit=crop'; // Galaxy device mockup
+        }
         return 'https://images.unsplash.com/photo-1597740985671-2a8a3b80502e?q=80&w=600&auto=format&fit=crop';
     }
     return img;

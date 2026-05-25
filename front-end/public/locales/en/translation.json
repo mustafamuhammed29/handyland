@@ -66,6 +66,8 @@
     "quantity": "Quantity",
     "freeShipping": "Free Shipping!",
     "freeShippingProgress": "Add {{amount}} more for free shipping",
+    "addForFreeShipping": "Add {{amount}} more for Free Shipping",
+    "freeShippingUnlocked": "You have unlocked Free Shipping!",
     "reserveWhatsapp": "Reserve via WhatsApp"
   },
   "checkout": {
@@ -96,7 +98,11 @@
     "couponCode": "Coupon Code",
     "applyCoupon": "Apply",
     "removeCoupon": "Remove",
-    "discount": "Discount"
+    "discount": "Discount",
+    "addForFreeShipping": "Add {{amount}} more for Free Shipping",
+    "freeShippingQualified": "You have qualified for free shipping!",
+    "free": "FREE",
+    "items": "Items"
   },
   "dashboard": {
     "overview": "Overview",
@@ -264,6 +270,7 @@
   "repair": {
     "title": "Repair & Service",
     "search": "Search device model...",
+    "searchPlaceholder": "Search device model (e.g. iPhone 15, S24)...",
     "services": "Services",
     "status": "Status",
     "serviceable": "Serviceable",

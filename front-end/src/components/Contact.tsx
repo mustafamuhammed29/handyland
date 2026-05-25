@@ -106,19 +106,45 @@ export const Contact: React.FC<ContactProps> = () => {
                     <div className="space-y-6">
                         {/* Map Visual - Google Maps or Fallback */}
                         <div className="relative h-64 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 group">
-                            {settings.mapUrl ? (
-                                <iframe
-                                    src={settings.mapUrl.includes('?') ? (settings.mapUrl.includes('hl=') ? settings.mapUrl.replace(/hl=[a-zA-Z-]+/g, 'hl=de') : `${settings.mapUrl}&hl=de`) : `${settings.mapUrl}?hl=de`}
-                                    width="100%"
-                                    height="100%"
-                                    style={{ border: 0 }}
-                                    allowFullScreen
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                    className="absolute inset-0"
-                                    title="Google Maps Location"
-                                ></iframe>
-                            ) : (
+                            {(() => {
+                                if (!settings.mapUrl) return null;
+                                
+                                // 1. Force the protobuf language segment from ar (Arabic) or other languages to de (German)
+                                let cleanMapUrl = settings.mapUrl
+                                    .replace(/!3m2!1s[a-zA-Z]{2}!2s[a-zA-Z]{2}/g, '!3m2!1sde!2sde')
+                                    .replace(/!5m2!1s[a-zA-Z]{2}!2s[a-zA-Z]{2}/g, '!5m2!1sde!2sde');
+                                    
+                                // 2. Force hl=de and gl=DE as query params
+                                if (cleanMapUrl.includes('?')) {
+                                    if (cleanMapUrl.includes('hl=')) {
+                                        cleanMapUrl = cleanMapUrl.replace(/hl=[a-zA-Z-]+/g, 'hl=de');
+                                    } else {
+                                        cleanMapUrl = `${cleanMapUrl}&hl=de`;
+                                    }
+                                    if (cleanMapUrl.includes('gl=')) {
+                                        cleanMapUrl = cleanMapUrl.replace(/gl=[a-zA-Z-]+/g, 'gl=DE');
+                                    } else {
+                                        cleanMapUrl = `${cleanMapUrl}&gl=DE`;
+                                    }
+                                } else {
+                                    cleanMapUrl = `${cleanMapUrl}?hl=de&gl=DE`;
+                                }
+                                
+                                return (
+                                    <iframe
+                                        src={cleanMapUrl}
+                                        width="100%"
+                                        height="100%"
+                                        style={{ border: 0 }}
+                                        allowFullScreen
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                        className="absolute inset-0"
+                                        title="Google Maps Location"
+                                    ></iframe>
+                                );
+                            })()}
+                            {!settings.mapUrl && (
                                 <>
                                     <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-40 group-hover:scale-110 transition-transform duration-700"></div>
                                     <div className="absolute inset-0 bg-blue-900/20 mix-blend-overlay"></div>

@@ -17,11 +17,35 @@ import { useSettings } from '../context/SettingsContext';
 import { getImageUrl } from '../utils/imageUrl';
 
 const getCleanArchiveImage = (url: string, category: string, isAfter: boolean): string => {
-    if (!url || url.includes('placeholder') || url.includes('room') || url.includes('hotel') || url.includes('interior') || url.includes('unsplash.com/photo-1540518614-') || url.includes('unsplash.com/photo-1566073771259-') || url.includes('unsplash.com/photo-1520250497591-')) {
+    if (!url) return '';
+    const hotelIds = [
+        'photo-1585338107529',
+        'photo-1610945415295',
+        'photo-1634455848520',
+        'photo-1512054502232',
+        'photo-1605236453806',
+        'photo-1592890288564',
+        'photo-1540518614',
+        'photo-1566073771259',
+        'photo-1520250497591',
+        'room',
+        'hotel',
+        'interior',
+        'placeholder'
+    ];
+    
+    const isHotel = hotelIds.some(id => url.includes(id));
+    
+    if (isHotel) {
         if (category === 'screen') {
             return isAfter 
-                ? 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop'
-                : 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?q=80&w=600&auto=format&fit=crop';
+                ? 'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=600&auto=format&fit=crop' // restored tech screen
+                : 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?q=80&w=600&auto=format&fit=crop'; // cracked screen
+        }
+        if (category === 'battery' || category === 'power') {
+            return isAfter 
+                ? 'https://images.unsplash.com/photo-1592890288564-76628a30a657?q=80&w=600&auto=format&fit=crop' // pristine tech
+                : 'https://images.unsplash.com/photo-1620283085439-39620a1e21c4?q=80&w=600&auto=format&fit=crop'; // open phone logic board / battery swapping
         }
         if (category === 'glass' || category === 'body') {
             return isAfter 
