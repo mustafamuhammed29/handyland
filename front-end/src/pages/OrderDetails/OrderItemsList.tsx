@@ -15,10 +15,10 @@ export const OrderItemsList: React.FC<OrderItemsListProps> = ({ order, onBuyAgai
     return (
         <div className="bg-white/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 overflow-hidden">
             <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <Package className="w-5 h-5 text-blue-400" /> {t('orders.items')}
+                <Package className="w-5 h-5 text-blue-400" /> {t('orders.items', { count: order.items?.length || 0 })}
             </h2>
             <div className="space-y-4">
-                {order.items.map((item: any, idx: number) => (
+                {order.items?.map((item: any, idx: number) => (
                     <div key={idx} className="flex gap-4 p-3 bg-black/30 rounded-xl border border-slate-800/50">
                         <div className="w-16 h-16 bg-slate-800 rounded-lg shrink-0 overflow-hidden">
                             {item.image ? (
