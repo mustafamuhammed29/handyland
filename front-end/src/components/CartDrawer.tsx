@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -40,9 +40,67 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
 
+    const drawerRef = useRef<HTMLDivElement>(null);
+    const previousFocusRef = useRef<HTMLElement | null>(null);
+
     const threshold = freeShippingThreshold;
     const progress = Math.min((cartTotal / threshold) * 100, 100);
     const remainingForFreeShipping = Math.max(0, threshold - cartTotal);
+
+    useEffect(() => {
+        if (isCartOpen) {
+            previousFocusRef.current = document.activeElement as HTMLElement;
+            // Focus the close button or first focusable element when opened
+            const timer = setTimeout(() => {
+                if (drawerRef.current) {
+                    const focusable = drawerRef.current.querySelectorAll<HTMLElement>(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    if (focusable.length > 0) {
+                        focusable[0].focus();
+                    }
+                }
+            }, 50);
+
+            const handleKeyDown = (e: KeyboardEvent) => {
+                if (e.key === 'Escape') {
+                    setIsCartOpen(false);
+                    return;
+                }
+
+                if (e.key === 'Tab' && drawerRef.current) {
+                    const focusable = drawerRef.current.querySelectorAll<HTMLElement>(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    if (focusable.length === 0) return;
+
+                    const firstElement = focusable[0];
+                    const lastElement = focusable[focusable.length - 1];
+
+                    if (e.shiftKey) {
+                        if (document.activeElement === firstElement) {
+                            lastElement.focus();
+                            e.preventDefault();
+                        }
+                    } else {
+                        if (document.activeElement === lastElement) {
+                            firstElement.focus();
+                            e.preventDefault();
+                        }
+                    }
+                }
+            };
+
+            window.addEventListener('keydown', handleKeyDown);
+            return () => {
+                window.removeEventListener('keydown', handleKeyDown);
+                clearTimeout(timer);
+                if (previousFocusRef.current) {
+                    previousFocusRef.current.focus();
+                }
+            };
+        }
+    }, [isCartOpen, setIsCartOpen]);
 
     const handleCheckout = () => {
         setIsCartOpen(false);
@@ -109,7 +167,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
             )}
 
             {/* Drawer */}
-            <div className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-700 transform transition-transform duration-500 z-[120] flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div
+                ref={drawerRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={t('cart.title', 'Warenkorb')}
+                tabIndex={-1}
+                className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-700 transform transition-transform duration-500 z-[120] flex flex-col focus:outline-none ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
 
                 {/* Header */}
                 <div
@@ -122,7 +187,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                             <ShoppingCart className="w-5 h-5 text-brand-primary" /> {t('cart.title', 'Warenkorb')}
                             <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs px-2 py-0.5 rounded-full">{cart.length}</span>
                         </h3>
-                        <button onClick={() => setIsCartOpen(false)} aria-label={t('cart.close', 'Warenkorb schließen')} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+                        <button onClick={() => setIsCartOpen(false)} aria-label={t('cart.close', 'Warenkorb schließen')} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary rounded">
                             <X className="w-6 h-6" />
                         </button>
                     </div>

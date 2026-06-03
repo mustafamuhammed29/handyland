@@ -138,15 +138,15 @@ export default function ProductsManager() {
         if (!confirm(`Set ${product.model || product.name} as the featured device on the homepage?`)) return;
         try {
             const res = await api.get('/api/settings');
-            const data = res.data;
+            const settingsData = res.data?.settings || res.data?.data || res.data;
             const updatedHero = {
-                ...data.hero,
+                ...(settingsData.hero || {}),
                 productName: product.name || product.model,
                 productPrice: `€${product.price}`,
                 heroImage: product.image || product.imageUrl || '',
                 productLabel: 'FEATURED DEVICE'
             };
-            const updatedSettings = { ...data, hero: updatedHero };
+            const updatedSettings = { hero: updatedHero };
             await api.put('/api/settings', updatedSettings);
             toast.success('Successfully updated homepage featured device!');
         } catch (error) {

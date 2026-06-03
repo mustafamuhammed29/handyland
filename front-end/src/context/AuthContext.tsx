@@ -100,7 +100,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         setIsVerified(true); // Session confirmed by backend
                         localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                     }
-                } catch {
+                } catch (error: any) {
+                    // Check if error is a network connection error (server offline/no response)
+                    const isNetworkError = !error?.response || error?.code === 'ERR_NETWORK' || error?.message === 'Network Error';
+                    if (isNetworkError) {
+                        // Keep user state optimistically, but do not mark verified yet
+                        if (!ignore) {
+                            setIsVerified(false);
+                        }
+                        return;
+                    }
+
                     // Try refresh before giving up
                     const refreshed = await refreshAccessToken();
                     if (!ignore) {

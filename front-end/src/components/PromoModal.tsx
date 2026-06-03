@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Tag, Copy, CheckCircle2, Clock, AlertCircle, Sparkles } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 
@@ -18,6 +18,8 @@ export const PromoModal = () => {
     const [copied, setCopied] = useState(false);
     const [coupon, setCoupon] = useState<PromoCoupon | null>(null);
     const hasDismissed = React.useRef(false);
+    const modalRef = useRef<HTMLDivElement>(null);
+    const previousFocusRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
         // Master toggle from admin settings
@@ -57,6 +59,63 @@ export const PromoModal = () => {
         fetchPromo();
     }, [settings?.promoPopup?.enabled]);
 
+    useEffect(() => {
+        if (isOpen) {
+            previousFocusRef.current = document.activeElement as HTMLElement;
+            // Delay slightly to allow the modal to mount and render fully
+            const focusTimer = setTimeout(() => {
+                if (modalRef.current) {
+                    const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    if (focusable.length > 0) {
+                        focusable[0].focus();
+                    }
+                }
+            }, 50);
+
+            const handleKeyDown = (e: KeyboardEvent) => {
+                if (e.key === 'Escape') {
+                    handleClose();
+                    return;
+                }
+
+                if (e.key === 'Tab' && modalRef.current) {
+                    const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    if (focusable.length === 0) return;
+
+                    const firstElement = focusable[0];
+                    const lastElement = focusable[focusable.length - 1];
+
+                    if (e.shiftKey) {
+                        // Shift + Tab
+                        if (document.activeElement === firstElement) {
+                            lastElement.focus();
+                            e.preventDefault();
+                        }
+                    } else {
+                        // Tab
+                        if (document.activeElement === lastElement) {
+                            firstElement.focus();
+                            e.preventDefault();
+                        }
+                    }
+                }
+            };
+
+            window.addEventListener('keydown', handleKeyDown);
+            return () => {
+                window.removeEventListener('keydown', handleKeyDown);
+                clearTimeout(focusTimer);
+                if (previousFocusRef.current) {
+                    previousFocusRef.current.focus();
+                }
+            };
+        }
+    }, [isOpen]);
+
     const handleClose = () => {
         hasDismissed.current = true;
         setIsOpen(false);
@@ -92,14 +151,22 @@ export const PromoModal = () => {
             />
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-md bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+            <div
+                ref={modalRef}
+                className="relative w-full max-w-md bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300 focus:outline-none"
+                tabIndex={-1}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="promo-title"
+                aria-describedby="promo-description"
+            >
                 {/* Decorative Elements */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
                 <button
                     onClick={handleClose}
-                    className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-colors z-20"
+                    className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-colors z-20 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     aria-label="Close Promo Modal"
                 >
                     <X className="w-5 h-5" />
@@ -118,10 +185,10 @@ export const PromoModal = () => {
                             </span>
                             <Sparkles className="w-5 h-5 text-amber-400" />
                         </div>
-                        <h2 className="text-2xl sm:text-3xl font-black text-white px-4">
+                        <h2 id="promo-title" className="text-2xl sm:text-3xl font-black text-white px-4">
                             {title}
                         </h2>
-                        <p className="text-slate-300 leading-relaxed max-w-[280px] mx-auto text-sm sm:text-base">
+                        <p id="promo-description" className="text-slate-300 leading-relaxed max-w-[280px] mx-auto text-sm sm:text-base">
                             {message}
                         </p>
                     </div>
@@ -132,7 +199,16 @@ export const PromoModal = () => {
                         </p>
                         <div
                             onClick={handleCopy}
-                            className="group relative bg-black/40 border border-slate-700 hover:border-blue-500 rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all overflow-hidden"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleCopy();
+                                }
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            className="group relative bg-black/40 border border-slate-700 hover:border-blue-500 rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            aria-label={`Copy coupon code: ${coupon.code}`}
                         >
                             <span className="font-mono font-bold text-lg text-white tracking-widest pl-2">
                                 {coupon.code}
@@ -172,7 +248,7 @@ export const PromoModal = () => {
 
                     <button
                         onClick={handleClose}
-                        className="text-xs font-medium text-slate-500 hover:text-slate-300 underline-offset-4 hover:underline transition-colors mt-4 block mx-auto"
+                        className="text-xs font-medium text-slate-500 hover:text-slate-300 underline-offset-4 hover:underline transition-colors mt-4 block mx-auto focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1"
                     >
                         Nein danke, weiter zur Seite
                     </button>
@@ -181,3 +257,4 @@ export const PromoModal = () => {
         </div>
     );
 };
+

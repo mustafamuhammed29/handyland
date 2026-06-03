@@ -54,6 +54,7 @@
         "xss-clean": "^0.1.4"
     },
     "devDependencies": {
+        "axios-cookiejar-support": "^7.0.0",
         "cheerio": "^1.2.0",
         "eslint": "^8.57.1",
         "jest": "^30.2.0",
@@ -61,6 +62,7 @@
         "nodemon": "^3.1.11",
         "prettier": "^3.8.1",
         "puppeteer": "^24.38.0",
-        "supertest": "^7.2.2"
+        "supertest": "^7.2.2",
+        "tough-cookie": "^6.0.1"
     }
 }
