@@ -266,7 +266,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
           <div className="flex items-center justify-between px-2 py-2 mt-2 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/10 dark:border-white/10">
             <div className="flex items-center">
               {(settings.navbar?.showLanguageSwitcher !== false) && (
-                <LanguageSwitcher />
+                <LanguageSwitcher align="left" />
               )}
             </div>
             <button onClick={toggleTheme} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">

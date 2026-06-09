@@ -13,7 +13,11 @@ const LANGUAGES: { code: LanguageCode; label: string; flag: string }[] = [
   { code: 'fa', label: 'فارسی', flag: '🇮🇷' }
 ];
 
-export const LanguageSwitcher: React.FC = () => {
+interface LanguageSwitcherProps {
+  align?: 'left' | 'right';
+}
+
+export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ align = 'right' }) => {
   const { i18n } = useTranslation();
   const { lang, setLang } = useLang();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -47,7 +51,7 @@ export const LanguageSwitcher: React.FC = () => {
           {lang}
         </span>
       </button>
-      <div className={`absolute top-[calc(100%+0.5rem)] right-0 md:right-0 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/50 overflow-hidden border border-slate-200 dark:border-slate-700/50 transition-all duration-200 z-[100] origin-top ${isOpen ? 'scale-100 opacity-100 visible' : 'scale-95 opacity-0 invisible'}`}>
+      <div className={`absolute top-[calc(100%+0.5rem)] ${align === 'left' ? 'left-0' : 'right-0'} w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/50 overflow-hidden border border-slate-200 dark:border-slate-700/50 transition-all duration-200 z-[100] origin-top ${isOpen ? 'scale-100 opacity-100 visible' : 'scale-95 opacity-0 invisible'}`}>
         {LANGUAGES.map(({ code, label, flag }) => (
           <button
             key={code}
