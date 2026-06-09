@@ -20,29 +20,30 @@ export const api = axios.create({
     timeout: 30000,
 });
 
+let cachedCsrfToken = '';
+
 // Request interceptor
 api.interceptors.request.use(
     async (config) => {
-        // Frontend relies entirely on HTTP-Only cookies (withCredentials: true)
-        // We do not send Authorization headers here to prevent mixing with Admin panel tokens.
-
-        // CSRF: Read the XSRF-TOKEN cookie (set by server on first GET) and forward it as a header
-        // for all state-changing requests. Safe methods (GET/HEAD/OPTIONS) are excluded by the server.
         let csrfTokenCookie = document.cookie
             .split('; ')
             .find(row => row.startsWith('XSRF-TOKEN='))
             ?.split('=')?.[1];
-        let csrfToken = csrfTokenCookie ? decodeURIComponent(csrfTokenCookie) : undefined;
+        let csrfToken = csrfTokenCookie ? decodeURIComponent(csrfTokenCookie) : cachedCsrfToken;
 
-        // If making a mutating request and token is missing, fetch it automatically
         if (!csrfToken && config.method && ['post', 'put', 'delete', 'patch'].includes(config.method.toLowerCase())) {
             try {
-                await axios.get('/api/auth/csrf', { baseURL: API_BASE_URL, withCredentials: true });
-                let cookieVal = document.cookie
-                    .split('; ')
-                    .find(row => row.startsWith('XSRF-TOKEN='))
-                    ?.split('=')?.[1];
-                csrfToken = cookieVal ? decodeURIComponent(cookieVal) : undefined;
+                const response = await axios.get('/api/auth/csrf', { baseURL: API_BASE_URL, withCredentials: true });
+                if (response.data && response.data.token) {
+                    cachedCsrfToken = response.data.token;
+                    csrfToken = cachedCsrfToken;
+                } else {
+                    let cookieVal = document.cookie
+                        .split('; ')
+                        .find(row => row.startsWith('XSRF-TOKEN='))
+                        ?.split('=')?.[1];
+                    csrfToken = cookieVal ? decodeURIComponent(cookieVal) : undefined;
+                }
             } catch (err) {
                 console.error('Failed to pre-fetch CSRF token', err);
             }

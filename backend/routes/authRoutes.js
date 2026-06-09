@@ -69,7 +69,10 @@ const loginRules = [
 ];
 
 // Public routes
-router.get('/csrf', (req, res) => res.status(204).send());
+router.get('/csrf', (req, res) => {
+    const token = req.cookies && req.cookies['XSRF-TOKEN'];
+    res.status(200).json({ success: true, token });
+});
 
 /**
  * @swagger

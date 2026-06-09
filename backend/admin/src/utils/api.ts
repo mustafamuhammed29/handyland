@@ -15,21 +15,28 @@ export const api = axios.create({
     timeout: 60000 // Increased from 10000 to allow long bulk imports
 });
 
+let cachedCsrfToken = '';
+
 // Request interceptor for CSRF Protection
 api.interceptors.request.use(
     async (config) => {
         let csrfToken = document.cookie
             .split('; ')
             .find(row => row.startsWith('XSRF-TOKEN='))
-            ?.split('=')?.[1];
+            ?.split('=')?.[1] || cachedCsrfToken;
 
         if (!csrfToken && config.method && ['post', 'put', 'delete', 'patch'].includes(config.method.toLowerCase())) {
             try {
-                await axios.get('/api/auth/csrf', { baseURL: API_URL, withCredentials: true });
-                csrfToken = document.cookie
-                    .split('; ')
-                    .find(row => row.startsWith('XSRF-TOKEN='))
-                    ?.split('=')?.[1];
+                const response = await axios.get('/api/auth/csrf', { baseURL: API_URL, withCredentials: true });
+                if (response.data && response.data.token) {
+                    cachedCsrfToken = response.data.token;
+                    csrfToken = cachedCsrfToken;
+                } else {
+                    csrfToken = document.cookie
+                        .split('; ')
+                        .find(row => row.startsWith('XSRF-TOKEN='))
+                        ?.split('=')?.[1];
+                }
             } catch (err) {
                 console.error('Failed to pre-fetch CSRF token', err);
             }
