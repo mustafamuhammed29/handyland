@@ -10,7 +10,7 @@ export const getImageUrl = (path: string | undefined | null): string => {
   }
   
   // 3. Otherwise, prepend the API base URL
-  const base = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const base = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
   // Ensure we don't have double slashes
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
   return `${base}/${cleanPath}`;

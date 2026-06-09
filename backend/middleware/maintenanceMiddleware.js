@@ -1,8 +1,64 @@
-const fs = require('fs');
-const path = require('path');
 const { supabaseAdmin } = require('../config/supabase');
 
-const MAINTENANCE_FLAG = path.join(__dirname, '../MAINTENANCE_MODE');
+let cachedMaintenance = null;
+let lastCheckTime = 0;
+const CACHE_TTL = 3000; // 3 seconds cache
+
+async function getMaintenanceConfig() {
+    const now = Date.now();
+    if (cachedMaintenance !== null && (now - lastCheckTime < CACHE_TTL)) {
+        return cachedMaintenance;
+    }
+
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('settings')
+            .select('value')
+            .eq('key', 'maintenanceMode')
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') { // Row not found
+                cachedMaintenance = { enabled: false };
+                lastCheckTime = now;
+                return cachedMaintenance;
+            }
+            throw error;
+        }
+
+        if (data && data.value) {
+            const config = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+            cachedMaintenance = config || { enabled: false };
+        } else {
+            cachedMaintenance = { enabled: false };
+        }
+    } catch (err) {
+        console.error('Failed to fetch maintenance mode settings:', err.message);
+        if (cachedMaintenance === null) {
+            return { enabled: false };
+        }
+    }
+
+    lastCheckTime = now;
+    return cachedMaintenance;
+}
+
+async function checkIsAdmin(req) {
+    try {
+        const token = (req.cookies && req.cookies.adminToken) || (req.cookies && req.cookies.accessToken);
+        if (!token) return false;
+        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+        if (user && !error) {
+            const { data: userProfile } = await supabaseAdmin.from('users').select('role').eq('id', user.id).single();
+            if (userProfile && userProfile.role === 'admin') {
+                return true;
+            }
+        }
+    } catch (err) {
+        console.error('Maintenance Admin Check Error:', err.message);
+    }
+    return false;
+}
 
 exports.maintenanceGate = async (req, res, next) => {
     // Skip: health, auth (all endpoints), admin status, maintenance info, translations, and public promo
@@ -11,32 +67,16 @@ exports.maintenanceGate = async (req, res, next) => {
         return next();
     }
 
-    if (fs.existsSync(MAINTENANCE_FLAG)) {
-        // Admins bypass maintenance mode
-        try {
-            const token = (req.cookies && req.cookies.adminToken) || (req.cookies && req.cookies.accessToken);
-            if (token) {
-                const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-                if (user && !error) {
-                    const { data: userProfile } = await supabaseAdmin.from('users').select('role').eq('id', user.id).single();
-                    if (userProfile && userProfile.role === 'admin') {
-                        return next(); // Admin bypassed
-                    }
-                }
-            }
-        } catch (err) {
-            console.error('Maintenance Mode Bypass Error:', err.message);
+    const config = await getMaintenanceConfig();
+    if (config && config.enabled) {
+        const isAdmin = await checkIsAdmin(req);
+        if (isAdmin) {
+            return next(); // Admin bypassed
         }
 
-        let title = 'Wartungsarbeiten';
-        let message = 'The site is currently undergoing maintenance. Please check back soon.';
-        let estimatedTime = '';
-        try {
-            const data = JSON.parse(fs.readFileSync(MAINTENANCE_FLAG, 'utf8'));
-            if(data.title) {title = data.title;}
-            if(data.message) {message = data.message;}
-            if(data.estimatedTime) {estimatedTime = data.estimatedTime;}
-        } catch(e) { /* ignore parse error */ }
+        const title = config.title || 'Wartungsarbeiten';
+        const message = config.message || 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!';
+        const estimatedTime = config.estimatedTime || '';
 
         return res.status(503).json({
             success: false,
@@ -49,23 +89,37 @@ exports.maintenanceGate = async (req, res, next) => {
     next();
 };
 
-exports.maintenanceInfo = (req, res) => {
-    if (fs.existsSync(MAINTENANCE_FLAG)) {
-        let title = 'Wartungsarbeiten';
-        let message = 'The site is currently undergoing maintenance. Please check back soon.';
-        let estimatedTime = '';
-        let statusText1 = 'System wird diagnostiziert...';
-        let statusText2 = 'Neue Reparaturen werden angewendet...';
-        try {
-            const data = JSON.parse(fs.readFileSync(MAINTENANCE_FLAG, 'utf8'));
-            if(data.title) {title = data.title;}
-            if(data.message) {message = data.message;}
-            if(data.estimatedTime) {estimatedTime = data.estimatedTime;}
-            if(data.statusText1) {statusText1 = data.statusText1;}
-            if(data.statusText2) {statusText2 = data.statusText2;}
-        } catch(e) { /* ignore parse error */ }
+exports.maintenanceInfo = async (req, res) => {
+    const config = await getMaintenanceConfig();
+    if (config && config.enabled) {
+        const isAdmin = await checkIsAdmin(req);
+        const title = config.title || 'Wartungsarbeiten';
+        const message = config.message || 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!';
+        const estimatedTime = config.estimatedTime || '';
+        const statusText1 = config.statusText1 || 'System wird diagnostiziert...';
+        const statusText2 = config.statusText2 || 'Neue Reparaturen werden angewendet...';
 
-        return res.json({ maintenance: true, title, message, estimatedTime, statusText1, statusText2 });
+        if (isAdmin) {
+            return res.json({ 
+                maintenance: false, 
+                bypassActive: true, 
+                title, 
+                message, 
+                estimatedTime, 
+                statusText1, 
+                statusText2 
+            });
+        }
+
+        return res.json({ 
+            maintenance: true, 
+            title, 
+            message, 
+            estimatedTime, 
+            statusText1, 
+            statusText2 
+        });
     }
     res.json({ maintenance: false });
 };
+

@@ -173,7 +173,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
     };
 
     return (
-        <section className="py-24 relative bg-slate-50 dark:bg-slate-900">
+        <section id="repair" className="py-24 relative bg-slate-50 dark:bg-slate-900">
             {/* Grid Pattern Background */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(13,148,136,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(13,148,136,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
@@ -419,7 +419,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                             setSelectedId(item.id);
                                             setShowAllModal(false);
                                             // Optional: scroll into view
-                                            document.getElementById('repair-gallery')?.scrollIntoView({ behavior: 'smooth' });
+                                            document.getElementById('repair')?.scrollIntoView({ behavior: 'smooth' });
                                         }}
                                         className="w-full text-left group flex flex-col"
                                     >

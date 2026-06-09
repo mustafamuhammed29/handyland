@@ -8,7 +8,7 @@ import {
     SquarePen, X, Users, CheckSquare, Square, Megaphone, ChevronRight, Lock
 } from 'lucide-react';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
 type ComposeMode = 'single' | 'bulk';
 
@@ -127,7 +127,7 @@ export default function MessagesManager() {
     
     const markAsReadMutation = useMutation({
         mutationFn: async (id: string) => {
-            const res = await api.put(`/api/messages/${id}`, { status: 'pending' }) as any;
+            const res = await api.put(`/api/messages/${id}`, { status: 'read' }) as any;
             return res?.data || res;
         },
         onSuccess: (updatedThread) => {

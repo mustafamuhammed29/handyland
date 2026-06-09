@@ -348,7 +348,7 @@ const defaultSettings: Settings = {
         links: [
             { labelKey: 'nav.home', defaultLabel: 'Home', path: '/', iconName: 'Home' },
             { labelKey: 'nav.marketplace', defaultLabel: 'Marketplace', path: '/marketplace', iconName: 'ShoppingBag' },
-            { labelKey: 'nav.repair', defaultLabel: 'Repair', path: '/#repair', iconName: 'Wrench' },
+            { labelKey: 'nav.repair', defaultLabel: 'Repair', path: '/repair', iconName: 'Wrench' },
             { labelKey: 'nav.valuation', defaultLabel: 'Sell', path: '/valuation', iconName: 'BarChart3' }
         ]
     },

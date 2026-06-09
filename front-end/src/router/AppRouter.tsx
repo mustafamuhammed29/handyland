@@ -129,6 +129,7 @@ export const AppRouter = () => {
     // /api/maintenance-info endpoint. If maintenance is active, ALL routes
     // are blocked and MaintenancePage is shown regardless of URL.
     const [isMaintenanceActive, setIsMaintenanceActive] = React.useState<boolean | null>(null);
+    const [isAdminBypass, setIsAdminBypass] = React.useState<boolean>(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -141,10 +142,14 @@ export const AppRouter = () => {
                 const data = await res.json();
                 if (!cancelled) {
                     setIsMaintenanceActive(data.maintenance === true);
+                    setIsAdminBypass(data.bypassActive === true);
                 }
             } catch {
                 // If the endpoint itself fails, don't block the site
-                if (!cancelled) setIsMaintenanceActive(false);
+                if (!cancelled) {
+                    setIsMaintenanceActive(false);
+                    setIsAdminBypass(false);
+                }
             }
         };
         checkMaintenance();
@@ -207,6 +212,12 @@ export const AppRouter = () => {
     return (
         <div className={`min-h-[100dvh] font-sans bg-transparent selection:bg-brand-primary/30 selection:text-brand-primary ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <SEO />
+            {isAdminBypass && (
+                <div className="bg-amber-500 text-slate-900 px-4 py-2.5 text-center font-bold relative z-[9999] shadow-lg flex items-center justify-center gap-3">
+                    <span className="text-xl animate-bounce">⚠️</span>
+                    Wartungsmodus ist AKTIV! Sie umgehen ihn als Admin. Kunden sehen die Wartungsseite.
+                </div>
+            )}
             <AnnouncementBanner />
             <OfflineBanner />
             <PromoModal />
