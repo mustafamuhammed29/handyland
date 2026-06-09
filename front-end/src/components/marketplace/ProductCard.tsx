@@ -104,7 +104,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                 <div className="w-32 h-32 bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer" onClick={() => onSelect(product)}>
                     <img
                         src={getProductImage(product)}
-                        alt={product.model}
+                        alt={`${cleanProductName(product.model || (product as any).name, product.brand)}${product.color ? ' - ' + product.color : ''}`}
                         onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -173,7 +173,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.4 }}
                         src={getProductImage(product)}
-                        alt={product.model || (product as any).name || 'Product'}
+                        alt={`${cleanProductName(product.model || (product as any).name, product.brand)}${product.color ? ' - ' + product.color : ''}`}
                         onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
                         loading="lazy"
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100"

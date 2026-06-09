@@ -41,6 +41,14 @@ export const cleanAccessoryName = (name: string): string => {
     return cleaned;
 };
 
+export const stripInternalId = (name: string): string => {
+    if (!name) return '';
+    return name
+        .replace(/\s*\(?E2E\)?\s*\d{8,}$/gi, '')
+        .replace(/\s*\d{8,}$/g, '')
+        .trim();
+};
+
 const conditionLabels: Record<string, string> = {
     sehr_gut: 'Sehr Gut',
     'sehr gut': 'Sehr Gut',
@@ -60,10 +68,8 @@ const conditionLabels: Record<string, string> = {
     'akzeptabel': 'Akzeptabel',
     'Akzeptabel': 'Akzeptabel',
     neu: 'Neu',
-    'neu': 'Neu',
     'Neu': 'Neu',
     new: 'Neu',
-    'new': 'Neu',
     'New': 'Neu',
     SEHR_GUT: 'Sehr Gut',
     HERVORRAGEND: 'Hervorragend',

@@ -123,12 +123,20 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
           {(!(settings as any).features || (settings as any).features.comparisonEngine !== false) && settings.sections?.marketplacePage !== false && (
             <Link
               to="/compare"
-              className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-purple-500/50 text-purple-500 hover:bg-purple-500/10 transition-all duration-200 xl:mx-2"
+              className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border transition-all duration-200 xl:mx-1 ${location.pathname === '/compare' ? 'bg-purple-500 text-white border-purple-500' : 'border-purple-500/50 text-purple-500 hover:bg-purple-500/10'}`}
             >
               <Layers className="w-3.5 h-3.5" />
               {t('nav.compare', 'Vergleichen')}
             </Link>
           )}
+          
+          <Link
+            to="/accessories"
+            className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border transition-all duration-200 xl:mx-1 ${location.pathname === '/accessories' ? 'bg-blue-500 text-white border-blue-500' : 'border-blue-500/50 text-blue-500 hover:bg-blue-500/10'}`}
+          >
+            <ShoppingBag className="w-3.5 h-3.5" />
+            {t('nav.accessories', 'Zubehör')}
+          </Link>
           {settings.sections?.trackRepairPage !== false && (
             <Link
               to="/track-repair"
@@ -275,12 +283,21 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
               <Link
                 to="/compare"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center px-5 py-4 rounded-2xl text-base font-bold uppercase tracking-widest transition-all duration-300 shrink-0 bg-black/[0.02] dark:bg-white/[0.02] text-slate-600 dark:text-slate-300 border border-transparent hover:bg-black/[0.05] dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white"
+                className={`flex items-center px-5 py-4 rounded-2xl text-base font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${location.pathname === '/compare' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' : 'bg-black/[0.02] dark:bg-white/[0.02] text-slate-600 dark:text-slate-300 border border-transparent hover:bg-black/[0.05] dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white'}`}
               >
                 <span className="me-4 scale-125 opacity-80"><Layers className="w-4 h-4" /></span>
                 {t('marketplace.compare', 'Vergleichen')}
               </Link>
             )}
+
+            <Link
+              to="/accessories"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center px-5 py-4 rounded-2xl text-base font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${location.pathname === '/accessories' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-black/[0.02] dark:bg-white/[0.02] text-slate-600 dark:text-slate-300 border border-transparent hover:bg-black/[0.05] dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white'}`}
+            >
+              <span className="me-4 scale-125 opacity-80"><ShoppingBag className="w-4 h-4" /></span>
+              {t('nav.accessories', 'Zubehör')}
+            </Link>
 
             {settings.sections?.trackRepairPage !== false && (
               <Link

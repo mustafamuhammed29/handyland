@@ -1,5 +1,6 @@
 import React from 'react';
 import { Zap, CheckCircle2 } from 'lucide-react';
+import { stripInternalId } from '../../utils/cleanProductName';
 import { getWinnerIndices, getDynamicSpecs } from './compareUtils';
 
 interface CompareTableProps {
@@ -75,7 +76,7 @@ export const CompareTable: React.FC<CompareTableProps> = ({ slots, selectedProdu
                                         
                                         if (category === 'Stammdaten') {
                                             if (specKey === 'Marke') return p.brand;
-                                            if (specKey === 'Modell') return p.model || p.name;
+                                            if (specKey === 'Modell') return stripInternalId(p.model || p.name);
                                             if (specKey === 'Farbe') return p.color || p.farbe;
                                             if (specKey === 'Speicher') return p.storage || p.speicher;
                                             if (specKey === 'Zustand') return p.condition;

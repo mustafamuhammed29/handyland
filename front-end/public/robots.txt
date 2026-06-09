@@ -5,4 +5,4 @@ Disallow: /checkout
 Disallow: /cart
 Disallow: /seller
 Disallow: /admin
-Sitemap: https://handyland.com/sitemap.xml
+Sitemap: https://front-end-rho-five-94.vercel.app/sitemap.xml

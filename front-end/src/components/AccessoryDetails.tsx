@@ -245,7 +245,7 @@ export const AccessoryDetails: React.FC = () => {
                                             : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}`}
                                 >
                                     <ShoppingCart className="w-5 h-5" />
-                                    {((accessory.stock || 0) > 0) ? 'Add to Cart' : 'Out of Stock'}
+                                    {((accessory.stock || 0) > 0) ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Ausverkauft')}
                                 </button>
                             </div>
                         </div>

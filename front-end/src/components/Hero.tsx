@@ -46,7 +46,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
     return (
         <div
-            className="relative min-h-[90vh] flex items-center justify-center overflow-hidden perspective-container transition-colors duration-300 bg-slate-50 dark:bg-slate-950 pt-28 lg:pt-32 pb-12"
+            className="relative min-h-[calc(100vh-80px)] flex items-center justify-center overflow-hidden perspective-container transition-colors duration-300 bg-slate-50 dark:bg-slate-950 pt-20 lg:pt-24 pb-12"
             style={theme === 'dark' ? {
                 background: `linear-gradient(to bottom right, ${settings.hero.bgStart || '#0f172a'}, ${settings.hero.bgEnd || '#020617'})`
             } : undefined}
@@ -71,7 +71,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     </div>
 
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white leading-tight tracking-tight whitespace-pre-line">
-                        {settings.hero.headline}
+                        {settings.hero.headline && settings.hero.headline.length > 1 ? settings.hero.headline : t('home.headline', 'HandyLand Premium Tech Hub')}
                     </h1>
 
                     <p className="text-base md:text-lg text-slate-400 max-w-lg leading-relaxed border-l-2 border-slate-800 pl-4 md:pl-6">

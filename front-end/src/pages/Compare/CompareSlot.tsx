@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Plus, Search, ShoppingCart } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
+import { stripInternalId } from '../../utils/cleanProductName';
 
 interface CompareSlotProps {
     slotIndex: number;
@@ -66,7 +67,7 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                             >
                                 <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-10 h-10 object-contain bg-white rounded-md p-1" />
                                 <div className="min-w-0">
-                                    <div className="font-bold text-sm truncate">{p.name || p.model}</div>
+                                    <div className="font-bold text-sm truncate">{stripInternalId(p.name || p.model)}</div>
                                     <div className="text-xs text-slate-500 dark:text-slate-400">{p.price} €</div>
                                 </div>
                             </button>
@@ -87,7 +88,7 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                         <div className="absolute inset-0 bg-brand-primary/10 rounded-full blur-[40px] -z-10 group-hover:bg-brand-primary/20 transition-all"></div>
                         <img src={getImageUrl(product.images?.[0] || product.image || product.thumbnail)} alt={product.name || product.model} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-auto h-full max-w-full rounded-2xl object-cover mb-4 shadow-xl group-hover:scale-105 transition-transform duration-500" />
                     </div>
-                    <h3 className="text-xl font-black text-center mb-2 line-clamp-1">{product.name || product.model}</h3>
+                    <h3 className="text-xl font-black text-center mb-2 line-clamp-1">{stripInternalId(product.name || product.model)}</h3>
                     
                     <div className="flex flex-col items-center justify-center gap-1 mb-4">
                         {product.specs?.globalPrice && (

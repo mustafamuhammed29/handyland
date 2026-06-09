@@ -7,6 +7,8 @@ import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 import { getImageUrl } from '../utils/imageUrl';
 
+import { stripInternalId } from '../utils/cleanProductName';
+
 import { CompareSlot } from './Compare/CompareSlot';
 import { CompareTable } from './Compare/CompareTable';
 
@@ -100,7 +102,7 @@ export const ComparePage: React.FC = () => {
         const imageUrl = product.images?.length ? product.images[0] : (product.image || product.imageUrl || product.thumbnail);
         addToCart({
             id: product.id || product._id,
-            title: product.name || product.model || 'Unknown Product',
+            title: stripInternalId(product.name || product.model || 'Unknown Product'),
             subtitle: product.storage ? `${product.storage} • ${product.color}` : '',
             price: product.pricing?.basePrice || product.price,
             image: getImageUrl(imageUrl),
@@ -113,7 +115,7 @@ export const ComparePage: React.FC = () => {
     const safeProducts = Array.isArray(products) ? products : [];
     
     const filteredSearch = safeProducts.filter(p => {
-        const matchesSearch = (p.name || p.model || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = stripInternalId(p.name || p.model || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesBrand = brandFilter === '' || (p.brand || '').toLowerCase() === brandFilter.toLowerCase();
         return matchesSearch && matchesBrand;
     });
@@ -193,7 +195,7 @@ export const ComparePage: React.FC = () => {
                                     className="flex items-center gap-3 bg-slate-900 border border-slate-800 hover:border-brand-primary/50 px-4 py-2 rounded-2xl transition-colors"
                                 >
                                     <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-8 h-8 object-contain bg-white rounded-md p-1" />
-                                    <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{p.name || p.model}</span>
+                                    <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{stripInternalId(p.name || p.model)}</span>
                                 </button>
                             ))}
                         </div>
