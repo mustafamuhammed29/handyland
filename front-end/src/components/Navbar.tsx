@@ -158,19 +158,23 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 border-s border-black/10 dark:border-white/[0.05] ps-2 ms-1">
-            {(settings.navbar?.showLanguageSwitcher !== false) && (
-              <LanguageSwitcher />
-            )}
+            <div className="hidden md:block">
+              {(settings.navbar?.showLanguageSwitcher !== false) && (
+                <LanguageSwitcher />
+              )}
+            </div>
 
-            <button onClick={toggleTheme} className="w-10 h-10 flex items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all outline-none">
+            <button onClick={toggleTheme} className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all outline-none">
               {theme === 'dark' ? <Sun className="w-5 h-5 text-slate-400 hover:text-white" /> : <Moon className="w-5 h-5 text-slate-600 hover:text-slate-900" />}
             </button>
 
             {user && (
-              <NotificationBell userId={user._id} variant="navbar" />
+              <div className="hidden md:block">
+                <NotificationBell userId={user._id} variant="navbar" />
+              </div>
             )}
 
-            <button onClick={() => setIsCartOpen(true)} className="relative flex items-center justify-center w-10 h-10 rounded-full bg-transparent transition-all duration-300 group outline-none hover:bg-black/5 dark:hover:bg-white/5">
+            <button onClick={() => setIsCartOpen(true)} className="hidden md:flex relative items-center justify-center w-10 h-10 rounded-full bg-transparent transition-all duration-300 group outline-none hover:bg-black/5 dark:hover:bg-white/5">
               <ShoppingCart className={`w-5 h-5 transition-colors ${cart.length > 0 ? 'text-brand-primary group-hover:text-brand-secondary drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'}`} />
               {cart.length > 0 && <span className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 min-w-[18px] h-[18px] flex items-center justify-center bg-brand-primary text-black text-[10px] font-black rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)] px-1">{cart.length}</span>}
             </button>
@@ -186,7 +190,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
               <Link
                 to={user ? '/dashboard' : '/login'}
                 aria-label={user ? 'Go to dashboard' : 'Log in'}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300 active:scale-95 group outline-none"
+                className="hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300 active:scale-95 group outline-none"
               >
                 <UserIcon className={`w-5 h-5 transition-colors ${user ? 'text-emerald-500 dark:text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)] group-hover:text-emerald-600 dark:group-hover:text-emerald-300' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'}`} />
               </Link>
@@ -250,6 +254,21 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
               </Link>
             );
           })}
+
+          <div className="flex items-center justify-between px-2 py-2 mt-2 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/10 dark:border-white/10">
+            <div className="flex items-center">
+              {(settings.navbar?.showLanguageSwitcher !== false) && (
+                <LanguageSwitcher />
+              )}
+            </div>
+            <button onClick={toggleTheme} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              {theme === 'dark' ? (
+                <><Sun className="w-4 h-4 text-amber-500" /> <span className="text-xs font-bold text-slate-300">Light Mode</span></>
+              ) : (
+                <><Moon className="w-4 h-4 text-indigo-500" /> <span className="text-xs font-bold text-slate-700">Dark Mode</span></>
+              )}
+            </button>
+          </div>
 
           <div className="flex flex-col gap-2 shrink-0">
             {(!settings.features || settings.features.comparisonEngine !== false) && (
