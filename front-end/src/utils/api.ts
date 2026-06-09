@@ -42,7 +42,7 @@ api.interceptors.request.use(
                         .split('; ')
                         .find(row => row.startsWith('XSRF-TOKEN='))
                         ?.split('=')?.[1];
-                    csrfToken = cookieVal ? decodeURIComponent(cookieVal) : undefined;
+                    csrfToken = cookieVal ? decodeURIComponent(cookieVal) : '';
                 }
             } catch (err) {
                 console.error('Failed to pre-fetch CSRF token', err);

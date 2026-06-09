@@ -35,7 +35,7 @@ api.interceptors.request.use(
                     csrfToken = document.cookie
                         .split('; ')
                         .find(row => row.startsWith('XSRF-TOKEN='))
-                        ?.split('=')?.[1];
+                        ?.split('=')?.[1] || '';
                 }
             } catch (err) {
                 console.error('Failed to pre-fetch CSRF token', err);
