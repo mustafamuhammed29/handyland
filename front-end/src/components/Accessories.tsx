@@ -106,7 +106,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
 
 
-        <section className="py-24 relative bg-brand-surface-light dark:bg-brand-surface-dark border-t border-slate-200 dark:border-slate-800/50 transition-colors duration-300">
+        <section className="pt-32 pb-24 relative bg-brand-surface-light dark:bg-brand-surface-dark border-t border-slate-200 dark:border-slate-800/50 transition-colors duration-300">
 
             {/* Background Atmosphere */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-100/30 dark:from-purple-900/20 via-white dark:via-slate-950 to-slate-50 dark:to-black pointer-events-none"></div>
@@ -147,7 +147,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                 <button
                                     key={cat.id}
                                     onClick={() => setActiveCat(cat.id)}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold border transition-all uppercase tracking-wider ${activeCat === cat.id
+                                    className={`flex-1 min-w-[100px] justify-center flex items-center gap-2 px-3 py-2 md:px-4 rounded-lg text-[10px] md:text-xs font-bold border transition-all uppercase tracking-wider ${activeCat === cat.id
                                         ? 'bg-brand-primary/20 border-brand-primary text-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]'
                                         : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-brand-primary/30 dark:hover:border-slate-700 hover:text-brand-primary dark:hover:text-white'
                                         }`}

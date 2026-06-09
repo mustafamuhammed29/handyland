@@ -162,25 +162,26 @@ export const ComparePage: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 md:grid md:grid-cols-3 md:gap-6 mb-12" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                     {slots.map((slotIndex) => (
-                        <CompareSlot 
-                            key={slotIndex}
-                            slotIndex={slotIndex}
-                            product={selectedProducts[slotIndex]}
-                            isSearching={isSearching?.slotIndex === slotIndex}
-                            searchTerm={searchTerm}
-                            brandFilter={brandFilter}
-                            filteredSearch={filteredSearch}
-                            onSetIsSearching={setIsSearching}
-                            onSetSearchTerm={setSearchTerm}
-                            onSetBrandFilter={setBrandFilter}
-                            onSelectProduct={handleSelectProduct}
-                            onRemoveProduct={handleRemoveProduct}
-                            onNavigate={navigate}
-                            onAddToCart={handleAddToCart}
-                            t={t}
-                        />
+                        <div key={slotIndex} className="min-w-[85vw] sm:min-w-[320px] snap-center flex-shrink-0 md:min-w-0">
+                            <CompareSlot 
+                                slotIndex={slotIndex}
+                                product={selectedProducts[slotIndex]}
+                                isSearching={isSearching?.slotIndex === slotIndex}
+                                searchTerm={searchTerm}
+                                brandFilter={brandFilter}
+                                filteredSearch={filteredSearch}
+                                onSetIsSearching={setIsSearching}
+                                onSetSearchTerm={setSearchTerm}
+                                onSetBrandFilter={setBrandFilter}
+                                onSelectProduct={handleSelectProduct}
+                                onRemoveProduct={handleRemoveProduct}
+                                onNavigate={navigate}
+                                onAddToCart={handleAddToCart}
+                                t={t}
+                            />
+                        </div>
                     ))}
                 </div>
 

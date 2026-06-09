@@ -124,6 +124,11 @@ export const AppRouter = () => {
 
     const { settings, loading: settingsLoading, error: settingsError } = useSettings();
 
+    // Scroll to top on route change
+    React.useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.pathname]);
+
     // ── Global Maintenance Gate ─────────────────────────────────────────────
     // This runs INDEPENDENTLY of settings and checks the always-available
     // /api/maintenance-info endpoint. If maintenance is active, ALL routes

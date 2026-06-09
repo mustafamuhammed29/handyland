@@ -63,16 +63,16 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                 <div className="w-24 h-24 bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center mb-6 border border-slate-200 dark:border-slate-800">
                     <ShoppingCart className="w-12 h-12 text-slate-500" />
                 </div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">{t('cart.emptyTitle', 'Your Cart is Empty')}</h1>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">{t('cart.emptyTitle', 'Dein Warenkorb ist leer')}</h1>
                 <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-md">
-                    {t('cart.emptyText', 'Looks like you haven\'t added anything to your cart yet. Discover our premium refurbished devices and accessories.')}
+                    {t('cart.emptyText', 'Du hast noch keine Artikel hinzugefügt. Entdecke unsere generalüberholten Premium-Geräte und Zubehör.')}
                 </p>
                 <button
                     onClick={() => navigate('/marketplace')}
                     className="flex items-center gap-2 bg-brand-primary text-black px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-brand-primary/25 hover:scale-[1.02]"
                 >
                     <ShoppingCart className="w-5 h-5" />
-                    {t('cart.continueShopping', 'Continue Shopping')}
+                    {t('cart.continueShopping', 'Jetzt einkaufen')}
                 </button>
             </div>
         );
@@ -94,7 +94,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                         className="hidden md:flex items-center gap-2 text-brand-primary hover:text-brand-primary/80 font-medium transition-colors"
                     >
                         <ArrowLeft className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
-                        {t('cart.continueShopping', 'Continue Shopping')}
+                        {t('cart.continueShopping', 'Jetzt einkaufen')}
                     </button>
                 </div>
 
@@ -272,7 +272,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                     onClick={() => navigate('/marketplace')}
                                     className="md:hidden text-sm text-blue-400 hover:text-blue-300 transition-colors"
                                 >
-                                    {t('cart.continueShopping', 'Continue Shopping')}
+                                    {t('cart.continueShopping', 'Jetzt einkaufen')}
                                 </button>
                             </div>
 

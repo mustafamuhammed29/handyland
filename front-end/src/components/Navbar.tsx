@@ -226,7 +226,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
 
       {/* Mobile Nav Menu Drawer */}
       {isOpen && (
-        <div id="mobile-menu" className="xl:hidden absolute top-[calc(100%+0.75rem)] left-0 right-0 w-full max-h-[calc(100dvh-7rem)] bg-white/95 dark:bg-[#0b1121]/95 backdrop-blur-3xl border border-black/5 dark:border-white/[0.05] rounded-3xl flex flex-col px-6 py-6 gap-3 animate-in fade-in slide-in-from-top-4 duration-300 z-50 overflow-y-auto custom-scrollbar shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+        <div id="mobile-menu" className="xl:hidden absolute top-[calc(100%+0.75rem)] left-0 right-0 w-full max-h-[calc(100dvh-7rem)] bg-white/95 dark:bg-[#0b1121]/95 backdrop-blur-3xl border border-black/5 dark:border-white/[0.05] rounded-3xl flex flex-col px-6 py-6 gap-3 animate-in fade-in slide-in-from-top-4 duration-300 z-[100] overflow-y-auto custom-scrollbar shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
           <div className="w-full mb-2">
             <button
                onClick={() => {

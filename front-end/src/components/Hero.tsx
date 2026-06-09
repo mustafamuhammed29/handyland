@@ -63,7 +63,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                 {/* Text Content */}
                 <div
                     ref={textRef}
-                    className="space-y-8 order-2 lg:order-1 transition-transform duration-100 ease-out"
+                    className="space-y-8 transition-transform duration-100 ease-out"
                 >
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-700 backdrop-blur-md animate-in slide-in-from-bottom-4 fade-in duration-700">
                         <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: settings.hero.accentColor }}></span>
@@ -71,7 +71,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     </div>
 
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white leading-tight tracking-tight whitespace-pre-line">
-                        {settings.hero.headline && settings.hero.headline.length > 1 ? settings.hero.headline : t('home.headline', 'HandyLand Premium Tech Hub')}
+                        {settings.hero.headline && settings.hero.headline.trim().length > 1 ? settings.hero.headline : t('home.headline', 'HandyLand Premium Tech Hub')}
                     </h1>
 
                     <p className="text-base md:text-lg text-slate-400 max-w-lg leading-relaxed border-l-2 border-slate-800 pl-4 md:pl-6">
@@ -125,7 +125,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                 </div>
 
                 {/* 3D Visual */}
-                <div className="order-1 lg:order-2 relative h-[400px] md:h-[500px] lg:h-[700px] flex items-center justify-center preserve-3d">
+                <div className="relative h-[400px] md:h-[500px] lg:h-[700px] flex items-center justify-center preserve-3d">
 
                     {/* Main Phone Card - Rotates opposite to mouse */}
                     <div
@@ -173,7 +173,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
                     {/* Floating Elements (Parallax Layers) */}
                     <div
-                        className="absolute top-[15%] md:top-1/4 right-2 sm:right-4 md:-right-4 lg:-right-20 xl:-right-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
+                        className="absolute top-[15%] md:top-1/4 right-2 sm:right-4 md:-right-4 lg:-right-20 xl:-right-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 max-w-[calc(100%-16px)] md:max-w-none overflow-hidden"
                         style={{ transform: 'translateZ(80px)' }}
                     >
                         <div className="flex items-center gap-2 md:gap-3">
@@ -188,7 +188,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     </div>
 
                     <div
-                        className="absolute bottom-[40%] md:bottom-[35%] lg:bottom-[45%] left-2 sm:left-0 md:-left-4 lg:-left-20 xl:-left-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 md:max-w-none"
+                        className="absolute bottom-[40%] md:bottom-[35%] lg:bottom-[45%] left-2 sm:left-0 md:-left-4 lg:-left-20 xl:-left-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 max-w-[calc(100%-16px)] md:max-w-none overflow-hidden"
                         style={{ transform: 'translateZ(100px)' }}
                     >
                         <div className="flex items-center gap-2 md:gap-3">
