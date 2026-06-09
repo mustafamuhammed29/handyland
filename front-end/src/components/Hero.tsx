@@ -81,29 +81,31 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                             : settings.hero.subheadline}
                     </p>
 
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <div className="flex flex-row flex-wrap gap-2 md:gap-4 pt-4 w-full">
                         <button
                             onClick={() => navigate('/marketplace')}
-                            className="group relative px-8 py-4 bg-brand-primary text-black font-extrabold text-lg rounded-full overflow-hidden hover:scale-105 transition-all duration-300 shadow-lg shadow-brand-primary/25"
+                            className="flex-1 min-w-[140px] group relative px-3 py-3 md:px-8 md:py-4 bg-brand-primary text-black font-bold md:font-extrabold text-xs md:text-lg rounded-full overflow-hidden hover:scale-105 transition-all duration-300 shadow-lg shadow-brand-primary/25 flex items-center justify-center"
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <span className="relative flex items-center gap-2">
-                                {settings.hero.buttonMarket || t('hero.shopNow')} {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+                            <span className="relative flex items-center justify-center gap-1 md:gap-2 text-center">
+                                {settings.hero.buttonMarket || t('hero.shopNow')} {isRTL ? <ArrowLeft className="w-3 h-3 md:w-5 md:h-5 shrink-0" /> : <ArrowRight className="w-3 h-3 md:w-5 md:h-5 shrink-0" />}
                             </span>
                         </button>
 
                         <button
                             onClick={() => navigate('/valuation')}
-                            className="px-8 py-4 rounded-full border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors flex items-center justify-center gap-2 glass-modern shadow-sm"
+                            className="flex-1 min-w-[140px] px-3 py-3 md:px-8 md:py-4 rounded-full border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs md:text-base hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors flex items-center justify-center gap-1 md:gap-2 glass-modern shadow-sm text-center"
                         >
-                            <Zap className="w-5 h-5 text-amber-400 fill-amber-400/20" /> {settings.hero.buttonValuation || t('hero.sellDevice')}
+                            <Zap className="w-3 h-3 md:w-5 md:h-5 text-amber-400 fill-amber-400/20 shrink-0" /> 
+                            <span>{settings.hero.buttonValuation || t('hero.sellDevice')}</span>
                         </button>
                         
                         <button
                             onClick={() => navigate('/track-repair')}
-                            className="px-8 py-4 rounded-full border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 font-bold hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 backdrop-blur-md shadow-sm"
+                            className="flex-1 min-w-[140px] px-3 py-3 md:px-8 md:py-4 rounded-full border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 font-bold text-xs md:text-base hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1 md:gap-2 backdrop-blur-md shadow-sm text-center"
                         >
-                            <Search className="w-5 h-5" /> {t('hero.trackRepair')}
+                            <Search className="w-3 h-3 md:w-5 md:h-5 shrink-0" /> 
+                            <span>{t('hero.trackRepair')}</span>
                         </button>
                     </div>
 
