@@ -58,16 +58,15 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 const corsMiddleware = cors({
     origin: (origin, callback) => {
-        // BUG-NEW-10 fix: reject no-origin requests in production.
-        // In dev, allow no-origin (Postman, curl) for convenience.
+        // Allow no-origin requests (e.g. mobile apps, curl, postman)
         if (!origin) {
-            if (process.env.NODE_ENV === 'production') {
-                return callback(new Error('CORS: Requests without origin are not allowed in production'), false);
-            }
             return callback(null, true);
         }
-        if (allowedOrigins.includes(origin)) {return callback(null, true);}
-        return callback(new Error('CORS: Origin not allowed'), false);
+        // Allow specific origins or any vercel.app subdomain
+        if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com')) {
+            return callback(null, true);
+        }
+        return callback(new Error('CORS: Origin not allowed: ' + origin), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
