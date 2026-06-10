@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Zap, CheckCircle2 } from 'lucide-react';
 import { stripInternalId } from '../../utils/cleanProductName';
 import { getWinnerIndices, getDynamicSpecs } from './compareUtils';
@@ -11,6 +12,7 @@ interface CompareTableProps {
 }
 
 export const CompareTable: React.FC<CompareTableProps> = ({ slots, selectedProducts, activeProducts, showDifferencesOnly }) => {
+    const { t } = useTranslation();
     return (
         <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700 mb-12">
             <div className="overflow-x-auto">
@@ -32,7 +34,7 @@ export const CompareTable: React.FC<CompareTableProps> = ({ slots, selectedProdu
                     <tbody>
                         <tr className="bg-slate-950/80">
                             <td className="p-4 md:p-6 text-emerald-400 font-bold border-b border-slate-800 flex items-center gap-2 text-xs uppercase tracking-wider">
-                                <Zap className="w-4 h-4" /> Leistung
+                                <Zap className="w-4 h-4" /> {t('compare.performance', 'Leistung')}
                             </td>
                             {slots.map((_, i) => <td key={i} className="p-4 md:p-6 border-b border-slate-800 border-l border-slate-800/50"></td>)}
                         </tr>
@@ -96,7 +98,7 @@ export const CompareTable: React.FC<CompareTableProps> = ({ slots, selectedProdu
 
                                     const renderedValues = rawValues.map(specValue => {
                                         if (specValue !== undefined && specValue !== null && specValue !== '') {
-                                            if (typeof specValue === 'boolean') return specValue ? 'Ja' : 'Nein';
+                                            if (typeof specValue === 'boolean') return specValue ? t('compare.yes', 'Ja') : t('compare.no', 'Nein');
                                             return String(specValue);
                                         }
                                         return '-';

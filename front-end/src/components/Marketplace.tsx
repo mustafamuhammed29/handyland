@@ -144,42 +144,42 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
                                 />
                             </div>
                             
-                            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                            <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-between sm:justify-end">
                                 <select 
                                     aria-label="Sort products" 
                                     value={mp.sort} 
                                     onChange={(e) => mp.setSort(e.target.value)} 
-                                    className="bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl px-4 py-3 md:py-2 text-sm border-none focus:ring-1 focus:ring-brand-primary outline-none cursor-pointer font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                                    className="bg-black/5 dark:bg-white/5 text-slate-900 dark:text-white rounded-xl px-2 sm:px-4 py-2.5 sm:py-3 md:py-2 text-[11px] sm:text-sm border-none focus:ring-1 focus:ring-brand-primary outline-none cursor-pointer font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-1 min-w-0"
                                 >
                                     <option value="newest">{t('marketplace.sortNewest', 'Sortieren - Neueste')}</option>
                                     <option value="price_asc">{t('marketplace.sortPriceLow', 'Preis: Aufsteigend')}</option>
                                     <option value="price_desc">{t('marketplace.sortPriceHigh', 'Preis: Absteigend')}</option>
                                 </select>
-                                <div className="flex items-center gap-1 border-l border-black/10 dark:border-white/10 pl-2">
+                                <div className="flex items-center gap-0.5 sm:gap-1 border-l border-black/10 dark:border-white/10 pl-1.5 sm:pl-2 shrink-0">
                                     {(!features || features.comparisonEngine !== false) && (
                                         <button 
                                             aria-label="Compare Devices" 
                                             title="Compare Devices"
                                             onClick={() => navigate('/compare')} 
-                                            className="px-3 md:px-4 py-2 flex items-center justify-center gap-2 rounded-xl md:rounded-lg transition-all bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-black font-bold mr-1"
+                                            className="px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl md:rounded-lg transition-all bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-black font-bold mr-0.5 sm:mr-1"
                                         >
-                                            <Layers className="w-4 h-4" />
-                                            <span className="hidden md:inline text-sm">{t('marketplace.compare', 'Vergleichen')}</span>
+                                            <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                            <span className="hidden sm:inline text-xs sm:text-sm">{t('marketplace.compare', 'Vergleichen')}</span>
                                         </button>
                                     )}
                                     <button 
                                         aria-label="Grid View" 
                                         onClick={() => mp.setViewMode('grid')} 
-                                        className={`p-3 md:p-2 w-11 h-11 md:w-9 md:h-9 flex items-center justify-center rounded-xl md:rounded-lg transition-all ${mp.viewMode === 'grid' ? 'bg-black/5 dark:bg-white/5 text-brand-primary shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                                        className={`p-2 sm:p-3 md:p-2 w-9 h-9 sm:w-11 sm:h-11 md:w-9 md:h-9 flex items-center justify-center rounded-xl md:rounded-lg transition-all ${mp.viewMode === 'grid' ? 'bg-black/5 dark:bg-white/5 text-brand-primary shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
                                     >
-                                        <Grid className="w-5 h-5 md:w-4 md:h-4" />
+                                        <Grid className="w-4 h-4 sm:w-5 sm:h-5 md:w-4 md:h-4" />
                                     </button>
                                     <button 
                                         aria-label="List View" 
                                         onClick={() => mp.setViewMode('list')} 
-                                        className={`p-3 md:p-2 w-11 h-11 md:w-9 md:h-9 flex items-center justify-center rounded-xl md:rounded-lg transition-all ${mp.viewMode === 'list' ? 'bg-black/5 dark:bg-white/5 text-brand-primary shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                                        className={`p-2 sm:p-3 md:p-2 w-9 h-9 sm:w-11 sm:h-11 md:w-9 md:h-9 flex items-center justify-center rounded-xl md:rounded-lg transition-all ${mp.viewMode === 'list' ? 'bg-black/5 dark:bg-white/5 text-brand-primary shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
                                     >
-                                        <List className="w-5 h-5 md:w-4 md:h-4" />
+                                        <List className="w-4 h-4 sm:w-5 sm:h-5 md:w-4 md:h-4" />
                                     </button>
                                 </div>
                             </div>

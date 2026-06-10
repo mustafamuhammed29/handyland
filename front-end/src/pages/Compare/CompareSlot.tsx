@@ -39,7 +39,7 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                             className="bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-primary"
                             value={brandFilter} onChange={(e) => onSetBrandFilter(e.target.value)}
                         >
-                            <option value="">All Brands</option>
+                            <option value="">{t('compare.allBrands', 'Alle Marken')}</option>
                             <option value="Apple">Apple</option>
                             <option value="Samsung">Samsung</option>
                             <option value="Google">Google</option>
@@ -51,7 +51,7 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                             <input 
                                 autoFocus
                                 type="text" 
-                                placeholder="Search..."
+                                placeholder={t('compare.searchPlaceholder', 'Suchen...')}
                                 value={searchTerm}
                                 onChange={(e) => onSetSearchTerm(e.target.value)}
                                 className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-primary transition-colors"
@@ -109,13 +109,13 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                             onClick={() => onNavigate(`/products/${product.id || product._id}`)}
                             className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm font-bold transition-colors text-center"
                         >
-                            Details
+                            {t('compare.details', 'Details')}
                         </button>
                         <button 
                             onClick={() => onAddToCart(product)}
                             className="flex-1 py-2.5 bg-brand-primary hover:bg-brand-secondary text-black rounded-xl text-sm font-bold transition-colors shadow-[0_0_15px_rgba(var(--brand-primary),0.3)] flex items-center justify-center gap-1"
                         >
-                            <ShoppingCart className="w-4 h-4" /> Add
+                            <ShoppingCart className="w-4 h-4" /> {t('compare.add', 'Hinzufügen')}
                         </button>
                     </div>
                 </>
@@ -127,7 +127,7 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                     <div className="w-20 h-20 rounded-full border-2 border-dashed border-slate-800 group-hover:border-brand-primary flex items-center justify-center transition-colors">
                         <Plus className="w-8 h-8" />
                     </div>
-                    <span className="font-bold">{t('compare.addDevice', 'Add Device')}</span>
+                    <span className="font-bold">{t('compare.addDevice', 'Gerät hinzufügen')}</span>
                 </button>
             )}
         </div>

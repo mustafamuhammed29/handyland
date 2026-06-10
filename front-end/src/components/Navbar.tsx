@@ -28,7 +28,22 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
   const location = useLocation();
   const { t } = useTranslation();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const iconMap: Record<string, React.ReactNode> = {
     Home: <Home className="w-4 h-4" />,
@@ -69,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
   const hasBanner = settings.announcementBanner?.enabled && settings.announcementBanner?.text;
 
   return (
-    <nav className={`fixed left-1/2 -translate-x-1/2 w-[98%] max-w-[1600px] z-50 rtl:left-auto rtl:right-1/2 rtl:translate-x-1/2 transition-all duration-500 ${hasBanner ? 'top-14' : 'top-6'}`}>
+    <nav ref={navRef} className={`fixed left-1/2 -translate-x-1/2 w-[98%] max-w-[1600px] z-50 rtl:left-auto rtl:right-1/2 rtl:translate-x-1/2 transition-all duration-500 ${hasBanner ? 'top-14' : 'top-6'}`}>
       <div className="bg-white/80 dark:bg-[#0b1121]/80 backdrop-blur-2xl rounded-2xl px-3 md:px-6 py-3 border border-black/5 dark:border-white/[0.05] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] flex items-center justify-between w-full transition-all">
         
         {/* Left: Logo & Brand */}

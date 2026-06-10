@@ -27,10 +27,10 @@ export const GuestTicketTracking: React.FC = () => {
             if (res.success && res.ticket) {
                 setTicket(res.ticket);
             } else {
-                setError('Failed to retrieve ticket information.');
+                setError(t('trackRepair.errorRetrieve', 'Fehler beim Abrufen der Ticketinformationen.'));
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Ticket not found or email doesn\'t match.');
+            setError(err.response?.data?.message || t('trackRepair.notFound', 'Ticket nicht gefunden oder E-Mail stimmt nicht überein.'));
         } finally {
             setLoading(false);
         }
@@ -45,10 +45,10 @@ export const GuestTicketTracking: React.FC = () => {
 
     const getStatusConfig = (status: string) => {
         switch (status) {
-            case 'pending': return { text: 'Pending', icon: <Clock className="w-5 h-5 text-yellow-500" />, bg: 'bg-yellow-500/20' };
-            case 'in_progress': return { text: 'In Progress', icon: <Wrench className="w-5 h-5 text-blue-500" />, bg: 'bg-blue-500/20' };
-            case 'completed': return { text: 'Completed', icon: <CheckCircle className="w-5 h-5 text-emerald-500" />, bg: 'bg-emerald-500/20' };
-            case 'cancelled': return { text: 'Cancelled', icon: <div className="w-3 h-3 rounded-full bg-red-500" />, bg: 'bg-red-500/20' };
+            case 'pending': return { text: t('status.pending', 'Ausstehend'), icon: <Clock className="w-5 h-5 text-yellow-500" />, bg: 'bg-yellow-500/20' };
+            case 'in_progress': return { text: t('status.inProgress', 'In Bearbeitung'), icon: <Wrench className="w-5 h-5 text-blue-500" />, bg: 'bg-blue-500/20' };
+            case 'completed': return { text: t('status.completed', 'Abgeschlossen'), icon: <CheckCircle className="w-5 h-5 text-emerald-500" />, bg: 'bg-emerald-500/20' };
+            case 'cancelled': return { text: t('status.cancelled', 'Storniert'), icon: <div className="w-3 h-3 rounded-full bg-red-500" />, bg: 'bg-red-500/20' };
             default: return { text: status, icon: <div className="w-3 h-3 rounded-full bg-slate-500" />, bg: 'bg-slate-500/20' };
         }
     };
@@ -56,8 +56,8 @@ export const GuestTicketTracking: React.FC = () => {
     return (
         <div className="page-container min-h-[100dvh] bg-slate-950 pt-32 px-4 flex flex-col items-center">
             <SEO
-                title="Track Repair Ticket"
-                description="Track the status of your device repair with HandyLand."
+                title={t('trackRepair.seoTitle', 'Reparatur-Ticket verfolgen')}
+                description={t('trackRepair.seoDesc', 'Verfolge den Status deiner Gerätereparatur bei HandyLand.')}
             />
 
             <div className="max-w-md w-full text-center mb-8">
@@ -103,7 +103,7 @@ export const GuestTicketTracking: React.FC = () => {
                             disabled={loading || !ticketId || !email}
                             className="w-full py-4 bg-brand-primary hover:bg-brand-primary text-slate-900 dark:text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Search className="w-5 h-5" /> {t('track.button', 'Track Ticket')}</>}
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Search className="w-5 h-5" /> {t('trackRepair.button', 'Ticket verfolgen')}</>}
                         </button>
                     </form>
                 </div>

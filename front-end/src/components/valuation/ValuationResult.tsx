@@ -41,18 +41,18 @@ export const ValuationResult = ({
 
                         <div className="border border-slate-200/80 dark:border-slate-800/80 rounded-3xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
                             <div className="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/50">
-                                <span className="text-slate-500 font-bold text-sm">Bildschirm</span>
+                                <span className="text-slate-500 font-bold text-sm">{t('valuation.screen', 'Bildschirm')}</span>
                                 <span className="font-bold text-slate-900 dark:text-white capitalize truncate bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg text-sm">{formData.screenCondition}</span>
                             </div>
                             <div className="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/50">
-                                <span className="text-slate-500 font-bold text-sm">Gehäuse</span>
+                                <span className="text-slate-500 font-bold text-sm">{t('valuation.body', 'Gehäuse')}</span>
                                 <span className="font-bold text-slate-900 dark:text-white capitalize truncate bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg text-sm">{formData.bodyCondition}</span>
                             </div>
                             <div className="p-5 flex items-center justify-between">
-                                <span className="text-slate-500 font-bold text-sm">Zustand</span>
+                                <span className="text-slate-500 font-bold text-sm">{t('valuation.condition', 'Zustand')}</span>
                                 <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white">
                                     {formData.isFunctional ? <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div> : <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>}
-                                    {formData.isFunctional ? 'Funktionsfähig' : 'Teildefekt'}
+                                    {formData.isFunctional ? t('valuation.functional', 'Funktionsfähig') : t('valuation.partialDefect', 'Teildefekt')}
                                 </span>
                             </div>
                         </div>
@@ -68,11 +68,11 @@ export const ValuationResult = ({
                             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-400/20 blur-[60px] rounded-full pointer-events-none" />
 
                             <div className="inline-flex items-center justify-center gap-2 bg-emerald-400 text-emerald-950 font-black px-5 py-2 rounded-full uppercase tracking-wider mb-8 mx-auto shadow-lg">
-                                <CheckCircle2 size={18} /> Bestpreis gesichert
+                                <CheckCircle2 size={18} /> {t('valuation.bestPriceGuaranteed', 'Bestpreis gesichert')}
                             </div>
 
                             <p className="text-blue-200 font-medium mb-2 text-lg">
-                                Dein garantierter Auszahlungsbetrag
+                                {t('valuation.guaranteedPayout', 'Dein garantierter Auszahlungsbetrag')}
                             </p>
 
                             <div className="text-7xl sm:text-8xl md:text-9xl font-black tracking-tighter text-white mb-6 drop-shadow-md">
@@ -81,19 +81,19 @@ export const ValuationResult = ({
 
                             {countdown && (
                                 <div className="inline-flex items-center justify-center gap-2 mt-2 px-4 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white font-bold mx-auto">
-                                    <ShieldCheck size={18} className="text-emerald-300" /> Preis gültig für: {countdown}
+                                    <ShieldCheck size={18} className="text-emerald-300" /> {t('valuation.priceValidFor', 'Preis gültig für:')} {countdown}
                                 </div>
                             )}
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-10 pt-8 border-t border-white/20">
                                 <div className="flex items-center gap-2 text-sm font-bold text-blue-100 uppercase tracking-wider">
                                     <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><Wallet size={18} /></div>
-                                    Schnelle Auszahlung
+                                    {t('valuation.fastPayout', 'Schnelle Auszahlung')}
                                 </div>
                                 <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                                 <div className="flex items-center gap-2 text-sm font-bold text-blue-100 uppercase tracking-wider">
                                     <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><Truck size={18} /></div>
-                                    Gratis Versand
+                                    {t('valuation.freeShipping', 'Gratis Versand')}
                                 </div>
                             </div>
                         </div>
@@ -117,12 +117,12 @@ export const ValuationResult = ({
                         </div>
 
                         <div className="mt-6 p-5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl">
-                            <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 text-center">Wie geht es weiter?</p>
+                            <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 text-center">{t('valuation.whatsNext', 'Wie geht es weiter?')}</p>
                             <div className="flex items-center justify-between gap-2">
                                 {[
-                                    { icon: '✅', label: 'Angebot annehmen' },
-                                    { icon: '📦', label: 'Gerät einsenden' },
-                                    { icon: '💰', label: 'Geld erhalten' }
+                                    { icon: '✅', label: t('valuation.next.accept', 'Angebot annehmen') },
+                                    { icon: '📦', label: t('valuation.next.send', 'Gerät einsenden') },
+                                    { icon: '💰', label: t('valuation.next.receive', 'Geld erhalten') }
                                 ].map((s, i) => (
                                     <React.Fragment key={s.label}>
                                         <div className="flex flex-col items-center gap-1.5 text-center flex-1">

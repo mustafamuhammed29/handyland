@@ -500,11 +500,26 @@ const DeviceCard = ({ device, onClick, t }: { device: any; onClick: () => void; 
         </div>
         
         <div className="relative w-24 h-24 rounded-2xl flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 p-3 shadow-inner group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors mt-4">
-            {device.imageUrl ? (
-                <LazyImage src={device.imageUrl} alt={device.modelName} className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-300" />
-            ) : (
-                <Smartphone className="w-10 h-10 text-slate-300 dark:text-slate-600 group-hover:text-blue-400 transition-colors" />
-            )}
+            {(() => {
+                const raw = device.imageUrl || '';
+                const isBad = !raw || ['photo-1510915361894', 'photo-1558098329', 'photo-1493225457124', 'photo-1588449668365', 'guitar', 'music', 'instrument'].some(id => raw.toLowerCase().includes(id));
+                const brand = (device.brand || '').toLowerCase();
+                const name = (device.modelName || '').toLowerCase();
+                
+                let finalImage = raw;
+                if (isBad) {
+                    if (brand === 'apple' || name.includes('iphone')) finalImage = 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=600&auto=format&fit=crop';
+                    else if (brand === 'samsung' || name.includes('galaxy')) finalImage = 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=600&auto=format&fit=crop';
+                    else if (name.includes('laptop') || name.includes('macbook')) finalImage = 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=600&auto=format&fit=crop';
+                    else finalImage = ''; // fall back to icon
+                }
+
+                return finalImage ? (
+                    <LazyImage src={finalImage} alt={device.modelName} className="object-contain w-full h-full drop-shadow-md group-hover:scale-110 transition-transform duration-300" />
+                ) : (
+                    <Smartphone className="w-10 h-10 text-slate-300 dark:text-slate-600 group-hover:text-blue-400 transition-colors" />
+                );
+            })()}
         </div>
         
         <div className="text-center w-full z-10 flex flex-col items-center gap-1">

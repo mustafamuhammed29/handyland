@@ -10,7 +10,24 @@ import { api } from '../utils/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { cleanAccessoryName } from '../utils/cleanProductName';
 
-const getFallbackImage = () => {
+const BAD_IMAGE_IDS = ['photo-1510915361894', 'photo-1558098329', 'photo-1493225457124', 'photo-1588449668365', 'guitar', 'music', 'instrument'];
+const CATEGORY_IMAGES: Record<string, string> = {
+    airpods: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?q=80&w=600&auto=format&fit=crop',
+    watch: 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?q=80&w=600&auto=format&fit=crop', // Apple watch
+    tv: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=600&auto=format&fit=crop', // Apple TV
+    power: 'https://images.unsplash.com/photo-1615526659840-0e9bd2872332?q=80&w=600&auto=format&fit=crop', // Charger
+    case: 'https://images.unsplash.com/photo-1603313011101-320f26a4f6f6?q=80&w=600&auto=format&fit=crop'
+};
+
+const getFallbackImage = (item?: any) => {
+    if (item) {
+        const name = (item.name || '').toLowerCase();
+        if (name.includes('watch')) return CATEGORY_IMAGES.watch;
+        if (name.includes('tv')) return CATEGORY_IMAGES.tv;
+        if (name.includes('airpods') || name.includes('kopfhörer') || name.includes('audio')) return CATEGORY_IMAGES.airpods;
+        if (name.includes('charger') || name.includes('ladegerät') || name.includes('cable') || name.includes('kabel')) return CATEGORY_IMAGES.power;
+        if (name.includes('case') || name.includes('hülle')) return CATEGORY_IMAGES.case;
+    }
     return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400' width='100%25' height='100%25'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e1b4b'/%3E%3Cstop offset='100%25' stop-color='%230f172a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23grad)'/%3E%3Ccircle cx='200' cy='180' r='60' fill='none' stroke='%238b5cf6' stroke-width='3' stroke-dasharray='5,5'/%3E%3Cpath d='M170 180h60M200 150v60' stroke='%238b5cf6' stroke-width='4' stroke-linecap='round'/%3E%3Ctext x='200' y='290' fill='%2394a3b8' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle'%3EHandyLand Premium%3C/text%3E%3Ctext x='200' y='320' fill='%2364748b' font-family='sans-serif' font-size='14' text-anchor='middle'%3EAccessory%3C/text%3E%3C/svg%3E`;
 };
 
@@ -38,7 +55,11 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
     useEffect(() => {
         api.get<any>('/api/accessories?limit=1000')
             .then((data: any) => {
-                setProducts(Array.isArray(data) ? data : (data?.accessories || []));
+                let items = [];
+                if (Array.isArray(data)) items = data;
+                else if (Array.isArray(data?.data)) items = data.data;
+                else if (Array.isArray(data?.accessories)) items = data.accessories;
+                setProducts(items);
                 setLoading(false);
             })
             .catch(() => setLoading(false));
@@ -95,7 +116,8 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
     ];
 
     const filteredProducts = products.filter(p => {
-        const matchesCategory = activeCategory === 'all' || p.category === activeCategory;
+        const catValue = typeof p.category === 'object' ? (p.category?.id || p.category?.name || '') : (p.category || '');
+        const matchesCategory = activeCategory === 'all' || catValue.toLowerCase() === activeCategory.toLowerCase();
         const matchesSearch = (p.name || '').toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
     });
@@ -178,9 +200,14 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                 onClick={() => navigate(`/accessories/${item.id || item._id}`)}
                             >
                                 <img
-                                    src={getImageUrl(item.image)}
+                                    src={(() => {
+                                        const raw = item.image || '';
+                                        const url = raw ? getImageUrl(raw) : '';
+                                        const isBad = !url || BAD_IMAGE_IDS.some(id => url.toLowerCase().includes(id));
+                                        return isBad ? getFallbackImage(item) : url;
+                                    })()}
                                     alt={cleanAccessoryName(item.name)}
-                                    onError={(e: any) => { e.target.src = getFallbackImage(); }}
+                                    onError={(e: any) => { e.target.src = getFallbackImage(item); }}
                                     className={`w-full h-full object-cover transition-transform duration-700 ${hoveredId === item.id ? 'scale-110' : 'scale-100'
                                         }`}
                                 />

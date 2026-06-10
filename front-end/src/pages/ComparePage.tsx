@@ -118,12 +118,21 @@ export const ComparePage: React.FC = () => {
         const matchesSearch = stripInternalId(p.name || p.model || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesBrand = brandFilter === '' || (p.brand || '').toLowerCase() === brandFilter.toLowerCase();
         return matchesSearch && matchesBrand;
-    });
+    }).filter((p, index, self) => 
+        index === self.findIndex((t) => (
+            stripInternalId(t.name || t.model || '') === stripInternalId(p.name || p.model || '')
+        ))
+    );
 
     const activeProducts = selectedProducts.filter(Boolean);
     
     const suggestedProducts = safeProducts
         .filter(p => !activeProducts.find(ap => (ap._id || ap.id) === (p._id || p.id)))
+        .filter((p, index, self) => 
+            index === self.findIndex((t) => (
+                stripInternalId(t.name || t.model || '') === stripInternalId(p.name || p.model || '')
+            ))
+        )
         .slice(0, 4);
 
     return (

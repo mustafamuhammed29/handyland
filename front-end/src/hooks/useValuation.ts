@@ -199,7 +199,7 @@ export const useValuation = () => {
             
             if (data.success || data.quoteReference) {
                 const finalRef = data.quoteReference || (data.data && data.data.quoteReference) || fallbackRef;
-                addToast(t('valuation.saveSuccess') || "Angebot erfolgreich gespeichert!", "success");
+                addToast(t('valuation.saveSuccess', 'Angebot erfolgreich gespeichert!'), "success");
                 navigate(`/sell/${finalRef}`);
                 return;
             }

@@ -67,16 +67,16 @@ const Login: React.FC = () => {
         setResendSuccess(false);
         setIsBlocked(false);
 
-        if (!validateRequired(email)) { setError('Email is required'); return; }
-        if (!validateEmail(email)) { setError('Please enter a valid email address'); return; }
-        if (!validateRequired(password)) { setError('Password is required'); return; }
+        if (!validateRequired(email)) { setError(t('auth.emailRequired', 'E-Mail ist erforderlich')); return; }
+        if (!validateEmail(email)) { setError(t('auth.emailInvalid', 'Bitte gib eine gültige E-Mail-Adresse ein')); return; }
+        if (!validateRequired(password)) { setError(t('auth.passwordRequired', 'Passwort ist erforderlich')); return; }
 
         setLoading(true);
         try {
             const redirectPath = location.state?.from?.pathname;
             await login(email, password, redirectPath);
         } catch (err: any) {
-            const errorMessage = err.message || 'Invalid email or password';
+            const errorMessage = err.message || t('auth.invalidCredentials', 'Ungültige E-Mail oder Passwort');
             // Check if account is blocked
             if (err.isBlocked || err.data?.isBlocked) {
                 setIsBlocked(true);
@@ -104,7 +104,7 @@ const Login: React.FC = () => {
                 setError(data.message);
             }
         } catch (err: any) {
-            setError(err.message || 'Failed to resend email');
+            setError(err.message || t('auth.resendFailed', 'Senden der E-Mail fehlgeschlagen'));
         } finally {
             setLoading(false);
         }
@@ -129,7 +129,7 @@ const Login: React.FC = () => {
                     {/* Success Message */}
                     {resendSuccess && (
                         <div className="mb-6 p-4 bg-green-500/10 border border-green-500/50 rounded-lg text-green-400 text-sm">
-                            ✅ Verification email sent! Please check your inbox.
+                            {t('auth.verificationSent', '✅ Bestätigungs-E-Mail gesendet! Bitte überprüfe deinen Posteingang.')}
                         </div>
                     )}
 
@@ -142,10 +142,10 @@ const Login: React.FC = () => {
                                 </div>
                                 <div>
                                     <p className="text-red-300 font-bold text-sm">
-                                        {(settings as any).accountSuspension?.title || 'Account Suspended'}
+                                        {(settings as any).accountSuspension?.title || t('auth.accountSuspended', 'Konto gesperrt')}
                                     </p>
                                     <p className="text-red-400/80 text-xs mt-0.5">
-                                        {(settings as any).accountSuspension?.subtitle || 'حسابك محظور من قِبَل الإدارة'}
+                                        {(settings as any).accountSuspension?.subtitle || t('auth.accountSuspendedSub', 'Dein Konto wurde von der Verwaltung gesperrt')}
                                     </p>
                                 </div>
                             </div>
@@ -154,7 +154,7 @@ const Login: React.FC = () => {
                                 href={`mailto:${(settings as any).accountSuspension?.supportEmail || 'support@handyland.com'}`}
                                 className="text-xs text-orange-400 hover:text-orange-300 underline font-semibold transition-colors"
                             >
-                                📩 {(settings as any).accountSuspension?.supportLabel || 'Contact Support'}: {(settings as any).accountSuspension?.supportEmail || 'support@handyland.com'}
+                                📩 {(settings as any).accountSuspension?.supportLabel || t('auth.contactSupport', 'Support kontaktieren')}: {(settings as any).accountSuspension?.supportEmail || 'support@handyland.com'}
                             </a>
                         </div>
                     )}
@@ -172,7 +172,7 @@ const Login: React.FC = () => {
                                     disabled={loading}
                                     className="text-xs text-blue-400 hover:text-blue-300 underline font-semibold ml-8 disabled:opacity-50"
                                 >
-                                    Resend Verification Email
+                                    {t('auth.resendVerification', 'Bestätigungs-E-Mail erneut senden')}
                                 </button>
                             )}
                         </div>

@@ -146,8 +146,8 @@ export const ValuationWizard = ({
                                         <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/30 transition-colors shadow-inner">
                                             <CheckCircle2 className="w-10 h-10 text-slate-400 dark:text-slate-500 group-hover:text-emerald-500 transition-colors" />
                                         </div>
-                                        <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Ja</h3>
-                                        <p className="text-slate-500 font-medium">100% Funktionalität</p>
+                                        <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">{t('valuation.yes', 'Ja')}</h3>
+                                        <p className="text-slate-500 font-medium">{t('valuation.fullFunctional', '100% Funktionalität')}</p>
                                     </div>
                                 </button>
 
@@ -161,8 +161,8 @@ export const ValuationWizard = ({
                                         <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors shadow-inner">
                                             <Zap className="w-10 h-10 text-slate-400 dark:text-slate-500 group-hover:text-red-500 transition-colors pointer-events-none" />
                                         </div>
-                                        <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Nein</h3>
-                                        <p className="text-slate-500 font-medium">Teildefekt oder gesperrt</p>
+                                        <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">{t('valuation.no', 'Nein')}</h3>
+                                        <p className="text-slate-500 font-medium">{t('valuation.partialDefect', 'Teildefekt oder gesperrt')}</p>
                                     </div>
                                 </button>
                             </div>
