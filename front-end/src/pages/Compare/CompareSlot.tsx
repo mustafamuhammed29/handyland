@@ -25,7 +25,7 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
     onSetIsSearching, onSetSearchTerm, onSetBrandFilter, onSelectProduct, onRemoveProduct, onNavigate, onAddToCart, t
 }) => {
     return (
-        <div className="relative bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-2xl md:rounded-3xl p-4 md:p-6 min-h-[240px] md:min-h-[360px] flex flex-col items-center justify-center group overflow-hidden transition-all hover:border-brand-primary/30 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+        <div className="relative bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-2xl md:rounded-3xl p-4 md:p-6 min-h-[180px] sm:min-h-[220px] md:min-h-[360px] flex flex-col items-center justify-center group overflow-hidden transition-all hover:border-brand-primary/30 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
             {isSearching ? (
                 <div className="absolute inset-0 bg-slate-900 z-20 flex flex-col p-4 animate-in fade-in zoom-in-95 duration-200">
                     <div className="flex justify-between items-center mb-4">
@@ -124,10 +124,10 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                     onClick={() => onSetIsSearching({ slotIndex })}
                     className="flex flex-col items-center justify-center gap-4 text-slate-500 hover:text-brand-primary transition-colors h-full w-full"
                 >
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-dashed border-slate-800 group-hover:border-brand-primary flex items-center justify-center transition-colors">
+                    <div className="w-14 h-14 md:w-20 md:h-20 rounded-full border-2 border-dashed border-slate-800 group-hover:border-brand-primary flex items-center justify-center transition-colors mb-2 md:mb-0">
                         <Plus className="w-6 h-6 md:w-8 md:h-8" />
                     </div>
-                    <span className="font-bold text-sm md:text-base text-center px-2">{t('compare.addDevice', 'Gerät hinzufügen')}</span>
+                    <span className="font-bold text-xs sm:text-sm md:text-base text-center px-2">{t('compare.addDevice', 'Gerät hinzufügen')}</span>
                 </button>
             )}
         </div>
