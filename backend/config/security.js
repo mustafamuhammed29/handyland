@@ -119,9 +119,12 @@ const CSRF_EXCLUDED_PATHS = [
     '/api/auth/forgot-password',
     '/api/auth/reset-password',
     '/api/auth/resend-verification',
+    '/api/settings',
 ];
 const csrfMiddleware = (req, res, next) => {
-    if (CSRF_EXCLUDED_PATHS.some(p => req.path.startsWith(p))) {return next();}
+    // Use originalUrl for reliable matching (req.path can be stripped by sub-routers)
+    const url = req.originalUrl || req.path;
+    if (CSRF_EXCLUDED_PATHS.some(p => url.startsWith(p))) {return next();}
     return csrfProtection(req, res, next);
 };
 
