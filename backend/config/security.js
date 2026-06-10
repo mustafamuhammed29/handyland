@@ -110,6 +110,15 @@ const CSRF_EXCLUDED_PATHS = [
     '/api/auth/facebook/callback',
     '/api/translations/missing',
     '/api/auth/check-email',
+    '/api/auth/login',
+    '/api/auth/admin/login',
+    '/api/auth/register',
+    '/api/auth/logout',
+    '/api/auth/refresh-token',
+    '/api/auth/refresh',
+    '/api/auth/forgot-password',
+    '/api/auth/reset-password',
+    '/api/auth/resend-verification',
 ];
 const csrfMiddleware = (req, res, next) => {
     if (CSRF_EXCLUDED_PATHS.some(p => req.path.startsWith(p))) {return next();}
