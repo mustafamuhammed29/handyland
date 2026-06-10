@@ -21,7 +21,7 @@ interface ShippingFormData {
     phone: string;
     address: string;
     city: string;
-    state: string;
+    state?: string;
     zipCode: string;
     country: string;
 }
@@ -196,7 +196,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         <input
                             type="text"
                             name="state"
-                            value={formData.state}
+                            value={formData.state || ''}
                             onChange={onChange}
                             className={`w-full bg-black/40 border ${formErrors.state ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                             placeholder="BE"

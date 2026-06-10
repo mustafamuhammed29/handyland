@@ -6,7 +6,7 @@ const NotFound: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center px-4">
+        <div className="page-container min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center px-4 pt-16">
             <div className="text-center">
                 <div className="mb-8">
                     <h1 className="text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">404</h1>

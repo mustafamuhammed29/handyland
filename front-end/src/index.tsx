@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
+import { ScrollToTop } from './components/ScrollToTop';
 import './index.css';
 import i18n from './i18n'; // FIX 4: import instance to check initialization
 import './i18n';
@@ -64,6 +65,7 @@ const AppWithI18nGate: React.FC = () => {
         <ErrorBoundary>
           <LoadingProvider>
             <BrowserRouter>
+              <ScrollToTop />
               <App />
               <GlobalLoader />
             </BrowserRouter>

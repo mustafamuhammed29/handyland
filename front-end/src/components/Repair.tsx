@@ -142,7 +142,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     };
 
     return (
-        <div className="relative min-h-[100dvh] pt-32 pb-20 overflow-hidden bg-slate-50 dark:bg-[#0a0f1c]">
+        <div className="relative min-h-0 md:min-h-[100dvh] pt-32 page-container md:pb-20 overflow-hidden bg-slate-50 dark:bg-[#0a0f1c]">
 
             {/* Abstract Background Tech Lines */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none"></div>

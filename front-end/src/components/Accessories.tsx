@@ -115,7 +115,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8 px-4 md:px-0">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
@@ -128,7 +128,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                     </div>
 
                     {/* Search & Categories */}
-                    <div className="flex flex-col md:flex-row gap-4 items-end">
+                    <div className="flex flex-col md:flex-row gap-4 items-end w-full md:w-auto">
                         {/* Search Bar */}
                         <div className="relative group w-full md:w-64">
                             <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-purple-400 transition-colors" />
@@ -142,12 +142,12 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                         </div>
 
                         {/* Category Selector */}
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 w-full md:w-auto">
                             {categories.map(cat => (
                                 <button
                                     key={cat.id}
                                     onClick={() => setActiveCat(cat.id)}
-                                    className={`flex-1 min-w-[100px] justify-center flex items-center gap-2 px-3 py-2 md:px-4 rounded-lg text-[10px] md:text-xs font-bold border transition-all uppercase tracking-wider ${activeCat === cat.id
+                                    className={`whitespace-nowrap justify-center flex items-center gap-2 px-3 py-2 md:px-4 rounded-lg text-[10px] md:text-xs font-bold border transition-all uppercase tracking-wider ${activeCat === cat.id
                                         ? 'bg-brand-primary/20 border-brand-primary text-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]'
                                         : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-brand-primary/30 dark:hover:border-slate-700 hover:text-brand-primary dark:hover:text-white'
                                         }`}

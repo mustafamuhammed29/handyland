@@ -162,9 +162,9 @@ export const ComparePage: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 md:grid md:grid-cols-3 md:gap-6 mb-12" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <div className="flex flex-row gap-4 overflow-x-auto snap-x snap-mandatory pb-8 md:grid md:grid-cols-3 md:gap-6 mb-12 md:overflow-x-visible -mx-4 px-4 md:mx-0 md:px-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
                     {slots.map((slotIndex) => (
-                        <div key={slotIndex} className="min-w-[85vw] sm:min-w-[320px] snap-center flex-shrink-0 md:min-w-0">
+                        <div key={slotIndex} className="min-w-[75vw] sm:min-w-[320px] snap-center flex-shrink-0 md:min-w-0">
                             <CompareSlot 
                                 slotIndex={slotIndex}
                                 product={selectedProducts[slotIndex]}

@@ -58,12 +58,12 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] animate-pulse delay-1000"></div>
             </div>
 
-            <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col-reverse lg:flex-row gap-12 items-center">
 
                 {/* Text Content */}
                 <div
                     ref={textRef}
-                    className="space-y-8 transition-transform duration-100 ease-out"
+                    className="w-full lg:w-1/2 order-2 lg:order-1 space-y-6 md:space-y-8 mb-4 md:mb-0 transition-transform duration-100 ease-out"
                 >
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-700 backdrop-blur-md animate-in slide-in-from-bottom-4 fade-in duration-700">
                         <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: settings.hero.accentColor }}></span>
@@ -81,7 +81,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                             : settings.hero.subheadline}
                     </p>
 
-                    <div className="flex flex-row flex-wrap gap-2 md:gap-4 pt-4 w-full">
+                    <div className="flex flex-col md:flex-row flex-wrap gap-3 md:gap-4 pt-4 w-full">
                         <button
                             onClick={() => navigate('/marketplace')}
                             className="flex-1 min-w-[140px] group relative px-3 py-3 md:px-8 md:py-4 bg-brand-primary text-black font-bold md:font-extrabold text-xs md:text-lg rounded-full overflow-hidden hover:scale-105 transition-all duration-300 shadow-lg shadow-brand-primary/25 flex items-center justify-center"
@@ -110,7 +110,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     </div>
 
                     {/* Trust Indicators */}
-                    <div className="flex flex-wrap items-center gap-3 md:gap-6 pt-6 md:pt-8">
+                    <div className="flex flex-wrap items-center gap-3 md:gap-6 pt-4 md:pt-8 mb-6 md:mb-12">
                         <div className="group flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-slate-900/30 border border-slate-800/50 rounded-lg hover:border-emerald-500/30 transition-all">
                             <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
                             <span className="text-[10px] md:text-xs font-mono text-slate-300 group-hover:text-emerald-300 transition-colors">{settings.hero.trustBadge1 || t('hero.trustBadge1', 'VERIFIZIERTE HÄNDLER')}</span>
@@ -127,7 +127,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                 </div>
 
                 {/* 3D Visual */}
-                <div className="relative h-[400px] md:h-[500px] lg:h-[700px] flex items-center justify-center preserve-3d">
+                <div className="relative w-full lg:w-1/2 order-1 lg:order-2 h-[400px] md:h-[500px] lg:h-[700px] flex items-center justify-center preserve-3d">
 
                     {/* Main Phone Card - Rotates opposite to mouse */}
                     <div
@@ -175,16 +175,16 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
 
                     {/* Floating Elements (Parallax Layers) */}
                     <div
-                        className="absolute top-[15%] md:top-1/4 right-2 sm:right-4 md:-right-4 lg:-right-20 xl:-right-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 max-w-[calc(100%-16px)] md:max-w-none overflow-hidden"
+                        className="absolute top-3 md:top-1/4 right-2 sm:right-4 md:-right-4 lg:-right-20 xl:-right-24 glass-modern p-2 md:p-4 rounded-xl md:rounded-2xl shrink-0 z-20 max-w-[160px] md:max-w-none overflow-hidden"
                         style={{ transform: 'translateZ(80px)' }}
                     >
                         <div className="flex items-center gap-2 md:gap-3">
                             <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 shrink-0">
                                 <Smartphone className="w-4 h-4 md:w-5 md:h-5" />
                             </div>
-                            <div className="min-w-0">
-                                <div className="text-[9px] md:text-xs text-slate-400 whitespace-nowrap">{settings.hero.stat1Title || t('home.deviceSold', 'Geräte verkauft')}</div>
-                                <div className="text-[11px] md:text-base text-slate-900 dark:text-white font-bold whitespace-nowrap">{settings.hero.stat1Value || t('home.thisWeek', '+24% diese Woche')}</div>
+                            <div className="min-w-0 flex-1 overflow-hidden">
+                                <div className="text-[9px] md:text-xs text-slate-400 truncate">{settings.hero.stat1Title || t('home.deviceSold', 'Geräte verkauft')}</div>
+                                <div className="text-[11px] md:text-base text-cyan-400 font-bold truncate">{settings.hero.stat1Value || t('home.thisWeek', '+24% diese Woche')}</div>
                             </div>
                         </div>
                     </div>

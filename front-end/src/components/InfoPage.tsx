@@ -172,7 +172,7 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
     }
 
     return (
-        <div className="min-h-[100dvh] pt-32 pb-20 bg-slate-950">
+        <div className="page-container min-h-[100dvh] pt-32 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
             <SEO
                 title={seo?.metaTitle || title}
                 description={seo?.metaDescription}
@@ -180,20 +180,22 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
                 canonical={seo?.canonicalUrl || window.location.href}
             />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-4xl md:text-5xl font-black text-white mb-12 border-b border-slate-800 pb-8">
-                    {title}
-                </h1>
+                <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-12 shadow-xl shadow-slate-200/50 dark:shadow-none min-h-[400px]">
+                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-12 border-b border-slate-200 dark:border-slate-800 pb-8">
+                        {title}
+                    </h1>
 
-                <div className="ql-writing-format mt-8">
-                    {content ? (
-                        <div className="ql-snow">
-                            <div className="ql-editor" dangerouslySetInnerHTML={{ __html: formatMarkdownToHTML(content) }} />
-                        </div>
-                    ) : (
-                        <div className="p-12 text-center border border-dashed border-slate-700 rounded-xl">
-                            <p className="text-slate-500 italic">No content has been added to this page yet.</p>
-                        </div>
-                    )}
+                    <div className="ql-writing-format mt-8">
+                        {content ? (
+                            <div className="ql-snow">
+                                <div className="ql-editor" dangerouslySetInnerHTML={{ __html: formatMarkdownToHTML(content) }} />
+                            </div>
+                        ) : (
+                            <div className="p-12 text-center border border-dashed border-slate-300 dark:border-slate-700 rounded-xl">
+                                <p className="text-slate-500 italic">No content has been added to this page yet.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

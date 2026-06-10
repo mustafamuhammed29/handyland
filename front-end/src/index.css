@@ -4,6 +4,13 @@
 :root {
   font-family: 'Inter', 'Tajawal', sans-serif;
   overflow-x: hidden;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --page-bottom-padding: calc(7rem + env(safe-area-inset-bottom));
+}
+
+.page-container {
+  padding-bottom: var(--page-bottom-padding);
 }
 
 /* Base Light and Dark Adjustments */

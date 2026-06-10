@@ -294,7 +294,7 @@ export const useCheckoutLogic = () => {
                 });
 
                 if (r.success) {
-                    const orderId = r.order._id || r.order.id;
+                    const orderId = r.order._id || r.order.id || '';
                     sessionStorage.setItem('placed_order_id', orderId);
                     sessionStorage.setItem('last_placed_order', JSON.stringify(r.order));
                     sessionStorage.removeItem('checkout_shipping');

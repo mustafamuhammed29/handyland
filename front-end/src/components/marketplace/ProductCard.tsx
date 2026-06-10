@@ -180,7 +180,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     />
                     <div className="absolute top-2 left-2 flex gap-1">
                         {product.condition && product.condition.trim() !== '' && (
-                        <span className={`text-[8px] md:text-[10px] font-extrabold px-2 py-0.5 rounded backdrop-blur-md border ${(product.condition === 'new' || product.condition === 'neu') ? 'bg-emerald-500/10 dark:bg-emerald-500/25 text-emerald-700 dark:text-white border-emerald-500/30 dark:border-emerald-400/50' : 'bg-purple-500/10 dark:bg-purple-500/25 text-purple-700 dark:text-white border-purple-500/30 dark:border-purple-400/50'}`}>
+                        <span className={`text-[8px] md:text-[10px] font-extrabold px-2 py-0.5 rounded backdrop-blur-md border ${((product.condition as string) === 'new' || (product.condition as string) === 'neu') ? 'bg-emerald-500/10 dark:bg-emerald-500/25 text-emerald-700 dark:text-white border-emerald-500/30 dark:border-emerald-400/50' : 'bg-purple-500/10 dark:bg-purple-500/25 text-purple-700 dark:text-white border-purple-500/30 dark:border-purple-400/50'}`}>
                             {getConditionLabel(product.condition)}
                         </span>
                         )}

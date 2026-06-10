@@ -127,7 +127,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
                     <div className="flex flex-col gap-4 sticky md:relative top-0 z-[60] bg-slate-100/95 dark:bg-slate-950/95 md:bg-transparent dark:md:bg-transparent backdrop-blur-xl -mx-4 px-4 py-3 md:py-0 md:mx-0 md:px-0 md:backdrop-blur-none transition-colors border-b border-black/5 dark:border-white/5 md:border-transparent">
                         <div className="hidden md:flex justify-between items-end gap-4 mb-2">
                             <div>
-                                <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight whitespace-nowrap">MARKT<span className="text-brand-primary">PLATZ</span></h2>
+                                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight whitespace-nowrap px-4 md:px-0">MARKT<span className="text-brand-primary">PLATZ</span></h2>
                                 <div className="h-1 w-16 md:w-24 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full"></div>
                             </div>
                         </div>
