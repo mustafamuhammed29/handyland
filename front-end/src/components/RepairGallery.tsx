@@ -15,6 +15,7 @@ const CATEGORIES_KEYS = [
 
 import { useSettings } from '../context/SettingsContext';
 import { getImageUrl } from '../utils/imageUrl';
+import { api } from '../utils/api';
 
 /** Strip HTML/XML tags from a string so raw DB content never renders as code */
 const stripHtml = (raw: string): string => {
@@ -103,8 +104,8 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
     const fetchData = async () => {
         try {
-            const res = await fetch('/api/repair-archive');
-            const data = await res.json();
+            const res = await api.get('/api/repair-archive');
+            const data = res as any;
             const casesArray = Array.isArray(data) ? data : (data.cases || []);
             setComparisons(casesArray);
             if (casesArray.length > 0) {
