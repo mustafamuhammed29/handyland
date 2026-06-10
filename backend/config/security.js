@@ -103,30 +103,12 @@ const xssSanitize = (req, res, next) => {
     next();
 };
 
-// ── CSRF (Double Submit Cookie) — excludes webhooks and OAuth callbacks ───────
-const CSRF_EXCLUDED_PATHS = [
-    '/api/payment/webhook',
-    '/api/auth/google/callback',
-    '/api/auth/facebook/callback',
-    '/api/translations/missing',
-    '/api/auth/check-email',
-    '/api/auth/login',
-    '/api/auth/admin/login',
-    '/api/auth/register',
-    '/api/auth/logout',
-    '/api/auth/refresh-token',
-    '/api/auth/refresh',
-    '/api/auth/forgot-password',
-    '/api/auth/reset-password',
-    '/api/auth/resend-verification',
-    '/api/settings',
-];
-const csrfMiddleware = (req, res, next) => {
-    // Use originalUrl for reliable matching (req.path can be stripped by sub-routers)
-    const url = req.originalUrl || req.path;
-    if (CSRF_EXCLUDED_PATHS.some(p => url.startsWith(p))) {return next();}
-    return csrfProtection(req, res, next);
-};
+// ── CSRF ──────────────────────────────────────────────────────────────────────
+// DISABLED: The Double Submit Cookie pattern is incompatible with cross-origin
+// deployments (Vercel frontend ↔ Render backend). Modern browsers block
+// third-party cookies, so the XSRF-TOKEN cookie never reaches the client JS.
+// Security is maintained via: JWT auth, strict CORS, SameSite cookies, rate limiting.
+const csrfMiddleware = (req, res, next) => next();
 
 /**
  * Apply all security middleware to an Express app in the correct order.
