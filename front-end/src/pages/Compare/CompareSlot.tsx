@@ -25,7 +25,7 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
     onSetIsSearching, onSetSearchTerm, onSetBrandFilter, onSelectProduct, onRemoveProduct, onNavigate, onAddToCart, t
 }) => {
     return (
-        <div className="relative bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 min-h-[360px] flex flex-col items-center justify-center group overflow-hidden transition-all hover:border-brand-primary/30 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+        <div className="relative bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-2xl md:rounded-3xl p-4 md:p-6 min-h-[240px] md:min-h-[360px] flex flex-col items-center justify-center group overflow-hidden transition-all hover:border-brand-primary/30 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
             {isSearching ? (
                 <div className="absolute inset-0 bg-slate-900 z-20 flex flex-col p-4 animate-in fade-in zoom-in-95 duration-200">
                     <div className="flex justify-between items-center mb-4">
@@ -84,20 +84,20 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                     >
                         <X className="w-4 h-4" />
                     </button>
-                    <div className="h-40 w-full mb-6 relative flex items-center justify-center">
+                    <div className="h-32 md:h-40 w-full mb-4 md:mb-6 relative flex items-center justify-center">
                         <div className="absolute inset-0 bg-brand-primary/10 rounded-full blur-[40px] -z-10 group-hover:bg-brand-primary/20 transition-all"></div>
-                        <img src={getImageUrl(product.images?.[0] || product.image || product.thumbnail)} alt={product.name || product.model} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-auto h-full max-w-full rounded-2xl object-cover mb-4 shadow-xl group-hover:scale-105 transition-transform duration-500" />
+                        <img src={getImageUrl(product.images?.[0] || product.image || product.thumbnail)} alt={product.name || product.model} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-auto h-full max-w-full rounded-2xl object-cover mb-2 md:mb-4 shadow-xl group-hover:scale-105 transition-transform duration-500" />
                     </div>
-                    <h3 className="text-xl font-black text-center mb-2 line-clamp-1">{stripInternalId(product.name || product.model)}</h3>
+                    <h3 className="text-lg md:text-xl font-black text-center mb-1 md:mb-2 line-clamp-1">{stripInternalId(product.name || product.model)}</h3>
                     
                     <div className="flex flex-col items-center justify-center gap-1 mb-4">
                         {product.specs?.globalPrice && (
                             <div className="text-slate-500 dark:text-slate-400 text-sm line-through decoration-red-500/50">{t('compare.marketAverage', 'Markt Ø')} €{product.specs.globalPrice}</div>
                         )}
-                        <div className="text-brand-primary font-black text-2xl flex items-center gap-2">
+                        <div className="text-brand-primary font-black text-xl md:text-2xl flex items-center gap-1 md:gap-2">
                             €{product.pricing?.basePrice || product.price}
                             {product.specs?.globalPrice && Number(product.specs.globalPrice) > Number(product.price) && (
-                                <span className="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                <span className="text-[10px] md:text-xs font-bold bg-emerald-500/20 text-emerald-400 px-1.5 md:px-2 py-0.5 rounded-full uppercase tracking-wider">
                                     {t('compare.save', 'Spare')} €{Number(product.specs.globalPrice) - Number(product.price)}
                                 </span>
                             )}
@@ -107,15 +107,15 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                     <div className="flex w-full gap-2 mt-auto">
                         <button 
                             onClick={() => onNavigate(`/products/${product.id || product._id}`)}
-                            className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm font-bold transition-colors text-center"
+                            className="flex-1 py-2 md:py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs md:text-sm font-bold transition-colors text-center"
                         >
                             {t('compare.details', 'Details')}
                         </button>
                         <button 
                             onClick={() => onAddToCart(product)}
-                            className="flex-1 py-2.5 bg-brand-primary hover:bg-brand-secondary text-black rounded-xl text-sm font-bold transition-colors shadow-[0_0_15px_rgba(var(--brand-primary),0.3)] flex items-center justify-center gap-1"
+                            className="flex-1 py-2 md:py-2.5 bg-brand-primary hover:bg-brand-secondary text-black rounded-xl text-xs md:text-sm font-bold transition-colors shadow-[0_0_15px_rgba(var(--brand-primary),0.3)] flex items-center justify-center gap-1"
                         >
-                            <ShoppingCart className="w-4 h-4" /> {t('compare.add', 'Hinzufügen')}
+                            <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">{t('compare.add', 'Hinzufügen')}</span>
                         </button>
                     </div>
                 </>
@@ -124,10 +124,10 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                     onClick={() => onSetIsSearching({ slotIndex })}
                     className="flex flex-col items-center justify-center gap-4 text-slate-500 hover:text-brand-primary transition-colors h-full w-full"
                 >
-                    <div className="w-20 h-20 rounded-full border-2 border-dashed border-slate-800 group-hover:border-brand-primary flex items-center justify-center transition-colors">
-                        <Plus className="w-8 h-8" />
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-dashed border-slate-800 group-hover:border-brand-primary flex items-center justify-center transition-colors">
+                        <Plus className="w-6 h-6 md:w-8 md:h-8" />
                     </div>
-                    <span className="font-bold">{t('compare.addDevice', 'Gerät hinzufügen')}</span>
+                    <span className="font-bold text-sm md:text-base text-center px-2">{t('compare.addDevice', 'Gerät hinzufügen')}</span>
                 </button>
             )}
         </div>
