@@ -222,7 +222,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
                 {/* Load More Button */}
                 {
-                    visibleCount < filteredItems.length && (
+                    visibleCount < filteredProducts.length && (
                         <div className="mt-12 text-center">
                             <button
                                 onClick={() => setVisibleCount(prev => prev + 15)}
