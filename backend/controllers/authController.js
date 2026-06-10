@@ -187,6 +187,7 @@ exports.login = async (req, res, next) => {
         const { data, error } = await createAuthClient().auth.signInWithPassword({ email, password });
 
         if (error) {
+            console.error('Supabase Login Error:', error.message, error);
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials',
@@ -202,6 +203,7 @@ exports.login = async (req, res, next) => {
             .single();
 
         if (profileError || !userProfile) {
+            console.error('Login Profile Error: User profile not found for ID', data?.user?.id, profileError);
             return res.status(401).json({ success: false, message: 'User profile not found' });
         }
 

@@ -5,6 +5,7 @@
 'use strict';
 
 const { supabaseAdmin } = require('../config/supabase');
+const { clearCache } = require('../middleware/cache');
 
 // ── @route GET /api/settings ──────────────────────────────────
 exports.getSettings = async (req, res, next) => {
@@ -116,6 +117,8 @@ exports.updateSettings = async (req, res, next) => {
         const { error } = await supabaseAdmin.from('settings').upsert(rows, { onConflict: 'key' });
         if (error) throw error;
 
+        clearCache('/api/settings');
+
         return res.status(200).json({ success: true, message: 'Settings updated' });
     } catch (error) { next(error); }
 };
@@ -178,6 +181,8 @@ exports.updateSmtpSettings = async (req, res, next) => {
 
         const { error } = await supabaseAdmin.from('settings').upsert(updates, { onConflict: 'key' });
         if (error) throw error;
+
+        clearCache('/api/settings');
 
         return res.status(200).json({ success: true, message: 'SMTP settings updated' });
     } catch (error) { next(error); }
@@ -283,6 +288,8 @@ exports.updateSocialAuthSettings = async (req, res, next) => {
         const { error } = await supabaseAdmin.from('settings').upsert(updates, { onConflict: 'key' });
         if (error) throw error;
 
+        clearCache('/api/settings');
+
         return res.status(200).json({ success: true, message: 'Social Auth settings updated' });
     } catch (error) { next(error); }
 };
@@ -319,6 +326,8 @@ exports.updateTranslations = async (req, res, next) => {
             await supabaseAdmin.from('translations')
                 .upsert({ key, language: lang, namespace, value }, { onConflict: 'key,language,namespace' });
         }
+
+        clearCache('/api/translations');
 
         return res.status(200).json({ success: true, message: 'Translations updated' });
     } catch (error) { next(error); }
