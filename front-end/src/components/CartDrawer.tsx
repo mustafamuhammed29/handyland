@@ -197,7 +197,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                         <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
                             <Truck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                             {remainingForFreeShipping > 0
-                                ? <span>{t('cart.addForFreeShipping', 'Noch {{amount}} für kostenlosen Versand', { amount: formatPrice(remainingForFreeShipping) })}</span>
+                                ? <span>{t('cart.addForFreeShipping', 'Noch {{amount}} bis zum kostenlosen Versand', { amount: formatPrice(remainingForFreeShipping) })}</span>
                                 : <span className="text-emerald-500 dark:text-emerald-400">{t('cart.freeShippingUnlocked', 'Du hast kostenlosen Versand freigeschaltet!')}</span>
                             }
                         </div>
@@ -228,7 +228,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                             </div>
                             <h4 className="text-xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">{t('cart.emptyTitle', 'Dein Warenkorb ist leer')}</h4>
                             <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-[240px] leading-relaxed">
-                                {t('cart.emptyText', 'Sieht so aus, als hättest du noch nichts in deinen Warenkorb gelegt. Entdecke unsere Top-Produkte!')}
+                                {t('cart.emptyText', 'Du hast noch keine Artikel hinzugefügt.')}
                             </p>
                             <button
                                 onClick={() => { setIsCartOpen(false); navigate('/marketplace'); }}
@@ -414,7 +414,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                         disabled={cart.length === 0}
                         className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
-                        {settings?.features?.whatsappOrders?.enabled ? t('cart.reserveWhatsapp', 'Über WhatsApp reservieren') : t('cart.checkoutSecurely', 'Sicher zur Kasse')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        {settings?.features?.whatsappOrders?.enabled ? t('cart.reserveWhatsapp', 'Über WhatsApp reservieren') : t('cart.checkoutSecurely', 'Sicher bezahlen')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
             </div>

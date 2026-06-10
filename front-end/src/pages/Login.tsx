@@ -111,7 +111,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="page-container min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center pt-32 p-4">
+        <div className="page-container min-h-[100dvh] bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center px-4 pt-32 pb-28 md:pb-8">
             <div className="w-full max-w-md">
                 {/* Logo & Title */}
                 <div className="text-center mb-8">

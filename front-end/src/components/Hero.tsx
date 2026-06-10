@@ -183,8 +183,8 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                                 <Smartphone className="w-4 h-4 md:w-5 md:h-5" />
                             </div>
                             <div className="min-w-0 flex-1 overflow-hidden">
-                                <div className="text-[9px] md:text-xs text-slate-400 truncate">{settings.hero.stat1Title || t('home.deviceSold', 'Geräte verkauft')}</div>
-                                <div className="text-[11px] md:text-base text-cyan-400 font-bold truncate">{settings.hero.stat1Value || t('home.thisWeek', '+24% diese Woche')}</div>
+                                <div className="text-[9px] md:text-xs text-slate-400 whitespace-normal leading-tight">{settings.hero.stat1Title || t('home.deviceSold', 'Geräte verkauft')}</div>
+                                <div className="text-[11px] md:text-base text-cyan-400 font-bold whitespace-normal leading-tight">{settings.hero.stat1Value || t('home.thisWeek', '+24% diese Woche')}</div>
                             </div>
                         </div>
                     </div>

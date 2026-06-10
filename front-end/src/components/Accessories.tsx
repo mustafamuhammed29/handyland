@@ -22,7 +22,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
     const { t } = useTranslation();
     const { settings } = useSettings();
     const navigate = useNavigate();
-    const [activeCat, setActiveCat] = useState('all');
+    const [activeCategory, setActiveCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [visibleCount, setVisibleCount] = useState(15);
     const [hoveredId, setHoveredId] = useState<number | null>(null);
@@ -30,7 +30,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
     const { addToast } = useToast();
 
     // State for dynamic accessories from database
-    const [accessories, setAccessories] = useState<any[]>([]);
+    const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
 
@@ -38,7 +38,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
     useEffect(() => {
         api.get<any>('/api/accessories?limit=1000')
             .then((data: any) => {
-                setAccessories(Array.isArray(data) ? data : (data?.accessories || []));
+                setProducts(Array.isArray(data) ? data : (data?.accessories || []));
                 setLoading(false);
             })
             .catch(() => setLoading(false));
@@ -94,9 +94,9 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
         ...dynamicCategories
     ];
 
-    const filteredItems = accessories.filter(item => {
-        const matchesCategory = activeCat === 'all' || item.category === activeCat;
-        const matchesSearch = (item.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const filteredProducts = products.filter(p => {
+        const matchesCategory = activeCategory === 'all' || p.category === activeCategory;
+        const matchesSearch = (p.name || '').toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
@@ -115,7 +115,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8 px-4 md:px-0">
+                <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 gap-8 px-4 md:px-0 text-center md:text-left">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
@@ -146,8 +146,8 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                             {categories.map(cat => (
                                 <button
                                     key={cat.id}
-                                    onClick={() => setActiveCat(cat.id)}
-                                    className={`whitespace-nowrap justify-center flex items-center gap-2 px-3 py-2 md:px-4 rounded-lg text-[10px] md:text-xs font-bold border transition-all uppercase tracking-wider ${activeCat === cat.id
+                                    onClick={() => setActiveCategory(cat.id)}
+                                    className={`whitespace-nowrap justify-center flex items-center gap-2 px-3 py-2 md:px-4 rounded-lg text-[10px] md:text-xs font-bold border transition-all uppercase tracking-wider ${activeCategory === cat.id
                                         ? 'bg-brand-primary/20 border-brand-primary text-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.3)]'
                                         : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-brand-primary/30 dark:hover:border-slate-700 hover:text-brand-primary dark:hover:text-white'
                                         }`}
@@ -162,7 +162,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
                 {/* Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
-                    {filteredItems.slice(0, visibleCount).map((item) => (
+                    {filteredProducts.slice(0, visibleCount).map((item) => (
                         <div
                             key={item.id}
                             onMouseEnter={() => setHoveredId(item.id)}
