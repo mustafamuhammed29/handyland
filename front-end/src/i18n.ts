@@ -21,10 +21,15 @@ i18n
       caches: ['localStorage'],
     },
     backend: {
-      // Load from static public/locales files — complete, version-controlled, always correct.
-      // The Supabase-backed /api/translations/locales/:lang has incomplete DE keys so we bypass it.
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
-      // Still report missing keys to the backend so the admin can track gaps
+      loadPath: `${import.meta.env.VITE_API_URL || ''}/api/translations/{{lng}}?namespace={{ns}}`,
+      parse: (data: string) => {
+        try {
+          const parsed = JSON.parse(data);
+          return parsed.data || parsed;
+        } catch (e) {
+          return {};
+        }
+      },
       addPath: `${import.meta.env.VITE_API_URL || ''}/api/translations/missing/{{lng}}/{{ns}}`,
     },
     saveMissing: import.meta.env.DEV,
