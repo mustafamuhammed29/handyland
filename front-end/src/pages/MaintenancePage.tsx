@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Settings, RefreshCw, Clock, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { api } from '../utils/api';
 
 const MaintenancePage: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -26,12 +27,11 @@ const MaintenancePage: React.FC = () => {
         let isMounted = true;
         
         const checkStatus = () => {
-            fetch('/api/maintenance-info', { 
-                credentials: 'include',
-                cache: 'no-store'
+            api.get('/api/maintenance-info', { 
+                headers: { 'Cache-Control': 'no-store' }
             })
-                .then(res => res.json())
-                .then(data => {
+                .then(response => {
+                    const data = response.data || response;
                     if (!isMounted) return;
                     if (data.bypassActive) setIsAdminBypass(true);
 
@@ -49,7 +49,8 @@ const MaintenancePage: React.FC = () => {
                         window.location.href = '/';
                     }
                 })
-                .catch(() => {
+                .catch((error) => {
+                    console.error("Maintenance check error:", error);
                     if (!isMounted) return;
                     // Fallback to localized defaults
                     setContent({
