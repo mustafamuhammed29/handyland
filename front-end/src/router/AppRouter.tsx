@@ -1,6 +1,7 @@
 import React, { useEffect, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { api } from '../utils/api';
 import PageTransition from '../components/PageTransition';
 import { CartDrawer } from '../components/CartDrawer';
 import PaymentSuccess from '../pages/PaymentSuccess';
@@ -140,11 +141,11 @@ export const AppRouter = () => {
         let cancelled = false;
         const checkMaintenance = async () => {
             try {
-                const res = await fetch('/api/maintenance-info', { 
-                    credentials: 'include',
-                    cache: 'no-store'
+                // Use the custom api instance to ensure the correct base URL is used
+                const data = await api.get('/api/maintenance-info', {
+                    headers: { 'Cache-Control': 'no-store', 'Pragma': 'no-cache' }
                 });
-                const data = await res.json();
+                
                 if (!cancelled) {
                     setIsMaintenanceActive(data.maintenance === true);
                     setIsAdminBypass(data.bypassActive === true);
