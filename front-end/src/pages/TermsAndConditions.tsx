@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { api } from '../utils/api';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 
 const TermsAndConditions: React.FC = () => {
     const [content, setContent] = useState<string>('');
@@ -45,10 +47,10 @@ const TermsAndConditions: React.FC = () => {
                             <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
                         </div>
                     ) : content ? (
-                        <div className="ql-writing-format">
-                            <div className="ql-snow">
-                                <div className="ql-editor" dangerouslySetInnerHTML={{ __html: content }} />
-                            </div>
+                        <div className="prose dark:prose-invert max-w-none prose-blue">
+                            <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                                {content}
+                            </ReactMarkdown>
                         </div>
                     ) : (
                         <div className="space-y-8">

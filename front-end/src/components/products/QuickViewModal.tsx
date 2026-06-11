@@ -165,7 +165,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                                 <Battery className="w-5 h-5 text-slate-400" />
                                 <div className="text-xs">
                                     <div className="text-slate-500 dark:text-slate-400">{t('product.battery', 'Battery')}</div>
-                                    <div className="font-bold text-slate-900 dark:text-slate-200 truncate">{product.specs?.battery || 'Good'}</div>
+                                    <div className="font-bold text-slate-900 dark:text-slate-200 truncate">{product.specs?.battery || 'Standard Battery'}</div>
                                 </div>
                             </div>
                             <div className="bg-slate-100 dark:bg-slate-800/50 p-3 rounded-xl flex items-center gap-3">

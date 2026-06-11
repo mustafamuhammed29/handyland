@@ -280,15 +280,21 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                         )}
 
                         <div className="flex items-center gap-4 mb-6">
-                            <div className="flex items-center gap-2 text-yellow-500">
-                                <span className="font-bold text-slate-900 dark:text-white text-lg">{product.rating ? Number(product.rating).toFixed(1) : '5.0'}</span>
-                                <div className="flex">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} className={`w-5 h-5 ${i < Math.round(product.rating || 5) ? 'fill-current' : 'text-slate-700'}`} />
-                                    ))}
+                            {(product.numReviews > 0 || (reviews && reviews.length > 0) || product.rating) ? (
+                                <div className="flex items-center gap-2 text-yellow-500">
+                                    <span className="font-bold text-slate-900 dark:text-white text-lg">{product.rating ? Number(product.rating).toFixed(1) : '5.0'}</span>
+                                    <div className="flex">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} className={`w-5 h-5 ${i < Math.round(product.rating || 5) ? 'fill-current' : 'text-slate-700'}`} />
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                            <span className="text-slate-400 text-sm">{product.numReviews || reviews?.length || 0} {t('product.reviews', 'Bewertungen')}</span>
+                            ) : (
+                                <div className="flex items-center gap-2 text-slate-400">
+                                    <span className="text-sm italic">{t('product.noReviewsYet', 'Noch keine Bewertungen')}</span>
+                                </div>
+                            )}
+                            <span className="text-slate-400 text-sm">{(product.numReviews || reviews?.length || 0)} {t('product.reviews', 'Bewertungen')}</span>
                         </div>
 
                         <div className="flex items-end gap-3 mb-8">

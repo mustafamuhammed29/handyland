@@ -76,7 +76,15 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                                             {getServiceIcon(service.type)}
                                         </div>
                                         <div>
-                                            <div className="font-bold text-white group-hover:text-blue-200 transition-colors">{service.label}</div>
+                                            <div className="font-bold text-white group-hover:text-blue-200 transition-colors">
+                                                {service.type === 'screen' ? t('repair.screenReplacement', 'Displayreparatur') :
+                                                 service.type === 'battery' ? t('repair.batteryReplacement', 'Akkutausch') :
+                                                 service.type === 'charging' ? t('repair.chargingPort', 'Ladebuchse') :
+                                                 service.type === 'camera' ? t('repair.camera', 'Kamera') :
+                                                 service.type === 'backglass' ? t('repair.backGlass', 'Rückglas') :
+                                                 service.type === 'faceid' ? t('repair.faceId', 'Face ID') :
+                                                 service.label}
+                                            </div>
                                             <div className="flex items-center gap-3 mt-1">
                                                 <span className="text-xs text-slate-500 flex items-center gap-1">
                                                     <Clock className="w-3 h-3" /> {service.duration}

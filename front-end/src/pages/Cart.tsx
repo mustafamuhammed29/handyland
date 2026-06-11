@@ -9,6 +9,7 @@ import { api } from '../utils/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { FREE_SHIPPING_THRESHOLD } from '../utils/constants';
 import { formatPrice } from '../utils/formatPrice';
+import { generateWhatsAppLink } from '../utils/whatsappHelper';
 
 interface CartProps {
     lang: LanguageCode;
@@ -259,11 +260,22 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
 
                             <button
                                 onClick={() => {
-                                    navigate('/checkout');
+                                    const whatsappMode = features?.whatsappOrders;
+                                    if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+                                        const url = generateWhatsAppLink({
+                                            phoneNumber: whatsappMode.phoneNumber,
+                                            messageTemplate: whatsappMode.message,
+                                            items: cart.map(i => ({ name: i.title, quantity: i.quantity || 1, price: i.price })),
+                                            totalAmount: finalTotal
+                                        });
+                                        window.open(url, '_blank');
+                                    } else {
+                                        navigate('/checkout');
+                                    }
                                 }}
                                 className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white py-4 rounded-xl font-bold text-lg hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/30 transform hover:-translate-y-0.5"
                             >
-                                {t('cart.checkout', 'Proceed to Checkout')}
+                                {features?.whatsappOrders?.enabled ? t('cart.reserveWhatsapp', 'Über WhatsApp reservieren') : t('cart.checkout', 'Proceed to Checkout')}
                                 <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
                             </button>
                             
