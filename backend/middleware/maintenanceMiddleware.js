@@ -96,6 +96,11 @@ exports.maintenanceGate = async (req, res, next) => {
 };
 
 exports.maintenanceInfo = async (req, res) => {
+    // Prevent browser caching
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     const config = await getMaintenanceConfig();
     if (config && config.enabled) {
         const isAdmin = await checkIsAdmin(req);

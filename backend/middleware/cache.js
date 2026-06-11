@@ -10,6 +10,11 @@ exports.cacheMiddleware = (durationInSeconds) => {
         const key = req.originalUrl;
         const cachedResponse = cache.get(key);
 
+        // Prevent browser from caching API responses (force re-fetch)
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+
         if (cachedResponse) {
             console.log(`[Cache Hit] ${key}`);
             return res.json(cachedResponse);
