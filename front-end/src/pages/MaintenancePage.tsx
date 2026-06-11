@@ -52,6 +52,20 @@ const MaintenancePage: React.FC = () => {
                 .catch((error) => {
                     console.error("Maintenance check error:", error);
                     if (!isMounted) return;
+                    
+                    const errData = error.response?.data;
+                    if (errData && (errData.maintenance || errData.bypassActive)) {
+                        setContent({
+                            title: errData.title || safeT('maintenance.default_title', 'Wartungsarbeiten'),
+                            message: errData.message || safeT('maintenance.default_message', 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!'),
+                            estimatedTime: errData.estimatedTime || '',
+                            statusText1: errData.statusText1 || safeT('maintenance.diagnosing', 'System wird diagnostiziert...'),
+                            statusText2: errData.statusText2 || safeT('maintenance.repairing', 'Neue Reparaturen werden angewendet...')
+                        });
+                        setIsLoading(false);
+                        return;
+                    }
+
                     // Fallback to localized defaults
                     setContent({
                         title: safeT('maintenance.default_title', 'Wartungsarbeiten'),
