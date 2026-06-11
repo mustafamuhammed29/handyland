@@ -76,10 +76,20 @@ exports.getPaymentConfig = async (req, res, next) => {
 // ── @route PUT /api/settings (Admin) ──────────────────────────
 exports.updateSettings = async (req, res, next) => {
     try {
-        const updates = req.body;
+        let updates = req.body;
         if (!updates || typeof updates !== 'object') {
             return res.status(400).json({ success: false, error: 'Invalid body' });
         }
+        
+        // If the frontend accidentally sends the GET response format back
+        if (updates.success !== undefined && updates.settings) {
+            updates = updates.settings;
+        }
+
+        // Prevent reserved keys from being saved
+        delete updates.success;
+        delete updates.data;
+        delete updates.settings;
 
         // Preserve payment secrets if they are not provided
         if (updates.payment) {
@@ -100,7 +110,7 @@ exports.updateSettings = async (req, res, next) => {
         }
 
         const rows = Object.entries(updates)
-            .filter(([_, value]) => value !== undefined) // Skip undefined values
+            .filter(([key, value]) => value !== undefined && !['createdAt', 'updatedAt'].includes(key)) // Skip undefined values and timestamps
             .map(([key, value]) => {
             // Determine group based on key if possible, or leave as 'general'
             let group = 'general';
