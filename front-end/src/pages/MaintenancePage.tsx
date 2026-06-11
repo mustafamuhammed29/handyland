@@ -23,46 +23,56 @@ const MaintenancePage: React.FC = () => {
     };
 
     useEffect(() => {
-        // Fetch dynamic maintenance info from unblocked endpoint
         let isMounted = true;
-        fetch('/api/maintenance-info', { 
-            credentials: 'include',
-            cache: 'no-store'
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (!isMounted) return;
-                if (data.bypassActive) setIsAdminBypass(true);
-
-                if (data.maintenance || data.bypassActive) {
-                    setContent({
-                        title: data.title || safeT('maintenance.default_title', 'Wartungsarbeiten'),
-                        message: data.message || safeT('maintenance.default_message', 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!'),
-                        estimatedTime: data.estimatedTime || '',
-                        statusText1: data.statusText1 || safeT('maintenance.diagnosing', 'System wird diagnostiziert...'),
-                        statusText2: data.statusText2 || safeT('maintenance.repairing', 'Neue Reparaturen werden angewendet...')
-                    });
-                } else {
-                    // If maintenance is OFF, automatically redirect to home page
-                    window.location.href = '/';
-                    return;
-                }
-                setIsLoading(false);
-            })
-            .catch(() => {
-                if (!isMounted) return;
-                // Fallback to localized defaults
-                setContent({
-                    title: safeT('maintenance.default_title', 'Wartungsarbeiten'),
-                    message: safeT('maintenance.default_message', 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!'),
-                    estimatedTime: '',
-                    statusText1: safeT('maintenance.diagnosing', 'System wird diagnostiziert...'),
-                    statusText2: safeT('maintenance.repairing', 'Neue Reparaturen werden angewendet...')
-                });
-                setIsLoading(false);
-            });
         
-        return () => { isMounted = false; };
+        const checkStatus = () => {
+            fetch('/api/maintenance-info', { 
+                credentials: 'include',
+                cache: 'no-store'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (!isMounted) return;
+                    if (data.bypassActive) setIsAdminBypass(true);
+
+                    if (data.maintenance || data.bypassActive) {
+                        setContent({
+                            title: data.title || safeT('maintenance.default_title', 'Wartungsarbeiten'),
+                            message: data.message || safeT('maintenance.default_message', 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!'),
+                            estimatedTime: data.estimatedTime || '',
+                            statusText1: data.statusText1 || safeT('maintenance.diagnosing', 'System wird diagnostiziert...'),
+                            statusText2: data.statusText2 || safeT('maintenance.repairing', 'Neue Reparaturen werden angewendet...')
+                        });
+                        setIsLoading(false);
+                    } else {
+                        // If maintenance is OFF, automatically redirect to home page
+                        window.location.href = '/';
+                    }
+                })
+                .catch(() => {
+                    if (!isMounted) return;
+                    // Fallback to localized defaults
+                    setContent({
+                        title: safeT('maintenance.default_title', 'Wartungsarbeiten'),
+                        message: safeT('maintenance.default_message', 'Wir führen gerade wichtige Systemwartungen durch, um Ihnen ein noch besseres Erlebnis zu bieten. Wir sind gleich wieder für Sie da!'),
+                        estimatedTime: '',
+                        statusText1: safeT('maintenance.diagnosing', 'System wird diagnostiziert...'),
+                        statusText2: safeT('maintenance.repairing', 'Neue Reparaturen werden angewendet...')
+                    });
+                    setIsLoading(false);
+                });
+        };
+
+        // Check immediately on mount
+        checkStatus();
+
+        // Then poll every 10 seconds
+        const pollInterval = setInterval(checkStatus, 10000);
+        
+        return () => { 
+            isMounted = false; 
+            clearInterval(pollInterval);
+        };
     }, [t]);
 
     useEffect(() => {
