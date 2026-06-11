@@ -45,7 +45,13 @@ async function getMaintenanceConfig() {
 
 async function checkIsAdmin(req) {
     try {
-        const token = (req.cookies && req.cookies.adminToken) || (req.cookies && req.cookies.accessToken);
+        let token = (req.cookies && req.cookies.adminToken) || (req.cookies && req.cookies.accessToken);
+        
+        // Support Authorization header for cross-domain admin panels (e.g. Vercel frontend calling Render backend)
+        if (!token && req.headers && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+            token = req.headers.authorization.split(' ')[1];
+        }
+
         if (!token) return false;
         const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
         if (user && !error) {
