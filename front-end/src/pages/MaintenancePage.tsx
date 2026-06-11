@@ -43,14 +43,9 @@ const MaintenancePage: React.FC = () => {
                         statusText2: data.statusText2 || safeT('maintenance.repairing', 'Neue Reparaturen werden angewendet...')
                     });
                 } else {
-                    // If maintenance is OFF but we are on this page, show generic message
-                    setContent({
-                        title: safeT('maintenance.default_title', 'Wartungsarbeiten'),
-                        message: safeT('maintenance.not_active', 'Das System ist online. Bitte aktualisieren Sie die Seite.'),
-                        estimatedTime: '',
-                        statusText1: safeT('maintenance.diagnosing', 'System wird diagnostiziert...'),
-                        statusText2: safeT('maintenance.repairing', 'Neue Reparaturen werden angewendet...')
-                    });
+                    // If maintenance is OFF, automatically redirect to home page
+                    window.location.href = '/';
+                    return;
                 }
                 setIsLoading(false);
             })
