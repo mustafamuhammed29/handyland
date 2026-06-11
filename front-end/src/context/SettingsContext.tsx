@@ -492,6 +492,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 
                 // Check if this is a maintenance mode response (503)
                 if (error?.response?.status === 503 && error?.response?.data?.maintenance) {
+                    if (!isBackgroundPolling) setLoading(false);
                     // Redirect to maintenance page instead of showing error
                     if (window.location.pathname !== '/maintenance') {
                         window.location.href = '/maintenance';
