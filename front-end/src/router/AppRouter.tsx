@@ -295,7 +295,8 @@ export const AppRouter = () => {
                             <Route path="/seller" element={<PageTransition><Suspense fallback={<GlobalLoader />}><SellerStudio lang={lang} /></Suspense></PageTransition>} />
                         </Route>
 
-                        <Route path="/maintenance" element={<MaintenancePage />} />
+                        {/* Prevent access to maintenance page if maintenance is off */}
+                        <Route path="/maintenance" element={<Navigate to="/" replace />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </AnimatePresence>
