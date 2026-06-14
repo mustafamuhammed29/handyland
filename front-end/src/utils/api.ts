@@ -98,7 +98,7 @@ api.interceptors.response.use(
 
             try {
                 // Try to refresh the access token — backend sets new HttpOnly cookie directly
-                await api.post('/api/auth/refresh-token');
+                await api.post('/api/auth/refresh');
 
                 // Retry the original request with the refreshed cookie
                 return api.request(originalRequest);
