@@ -419,15 +419,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                 totalAmount: finalTotal
                             });
                             return (
-                                <a
-                                    href={url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={() => setIsCartOpen(false)}
+                                <button
+                                    onClick={() => {
+                                        window.open(url, '_blank');
+                                        setIsCartOpen(false);
+                                    }}
                                     className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 group"
                                 >
                                     {t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                </a>
+                                </button>
                             );
                         }
                         
