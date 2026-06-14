@@ -7,8 +7,8 @@ declare module 'axios' {
     }
 }
 
-// Dynamically set baseURL from environment or fallback to empty for Vite proxy in development
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// Use relative path in production to leverage Vercel proxy and avoid Cross-Site Cookie blocking
+const API_BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || '');
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
