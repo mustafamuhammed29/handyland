@@ -12,6 +12,7 @@ import { LoadingProvider } from './context/LoadingContext';
 import { GlobalLoader } from './components/GlobalLoader';
 
 import * as Sentry from '@sentry/react';
+import { warmupBackend } from './utils/warmup';
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN || '',
@@ -19,6 +20,9 @@ Sentry.init({
   tracesSampleRate: 1.0,
   integrations: [Sentry.browserTracingIntegration()],
 });
+
+// Ping backend immediately to wake up Render from cold start
+warmupBackend();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
