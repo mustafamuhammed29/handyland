@@ -75,7 +75,24 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
 
     /** Get the primary spec text (CPU chip, storage, etc.) */
     const getPrimarySpec = (p: any): string => {
-        if (p.specs?.cpu) return p.specs.cpu;
+        const processorFallback: Record<string, string> = {
+            'Galaxy S24 Ultra':   'Snapdragon 8 Gen 3',
+            'Galaxy S23':         'Snapdragon 8 Gen 2',
+            'iPhone 15 Pro Max':  'Apple A17 Pro',
+            'iPhone 15':          'Apple A15 Bionic',
+            'Xiaomi 14':          'Dimensity 9300',
+            'OnePlus 12':         'Snapdragon 8 Gen 3',
+            'ThinkPad X1 Carbon': 'Intel Core i7-1365U',
+        };
+
+        let proc = p.specs?.cpu || p.processor;
+        if (!proc || proc === 'Standard') {
+            const name = p.model || p.name || '';
+            const matchingKey = Object.keys(processorFallback).find(k => name.includes(k));
+            if (matchingKey) proc = processorFallback[matchingKey];
+        }
+
+        if (proc && proc !== 'Standard') return proc;
         if (p.storage) return p.storage;
         if (p.ram) return p.ram;
         return p.brand || '';

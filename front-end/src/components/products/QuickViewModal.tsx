@@ -158,7 +158,26 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                                 <Cpu className="w-5 h-5 text-slate-400" />
                                 <div className="text-xs">
                                     <div className="text-slate-500 dark:text-slate-400">{t('product.processor', 'Processor')}</div>
-                                    <div className="font-bold text-slate-900 dark:text-slate-200 truncate">{product.specs?.cpu || 'Standard'}</div>
+                                    <div className="font-bold text-slate-900 dark:text-slate-200 truncate">
+                                        {(() => {
+                                            const processorFallback: Record<string, string> = {
+                                                'Galaxy S24 Ultra':   'Snapdragon 8 Gen 3',
+                                                'Galaxy S23':         'Snapdragon 8 Gen 2',
+                                                'iPhone 15 Pro Max':  'Apple A17 Pro',
+                                                'iPhone 15':          'Apple A15 Bionic',
+                                                'Xiaomi 14':          'Dimensity 9300',
+                                                'OnePlus 12':         'Snapdragon 8 Gen 3',
+                                                'ThinkPad X1 Carbon': 'Intel Core i7-1365U',
+                                            };
+                                            const name = product.model || (product as any).name || '';
+                                            const fallbackKey = Object.keys(processorFallback).find(k => name.includes(k));
+                                            let proc = product.specs?.cpu || (product as any).processor;
+                                            if (!proc || proc === 'Standard') {
+                                                proc = fallbackKey ? processorFallback[fallbackKey] : 'Standard';
+                                            }
+                                            return proc;
+                                        })()}
+                                    </div>
                                 </div>
                             </div>
                             <div className="bg-slate-100 dark:bg-slate-800/50 p-3 rounded-xl flex items-center gap-3">

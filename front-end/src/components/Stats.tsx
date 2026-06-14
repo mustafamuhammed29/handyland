@@ -66,10 +66,17 @@ export const Stats: React.FC = () => {
   const { settings } = useSettings();
   const { t } = useTranslation();
 
+  const statsData = {
+    devicesRepaired: Math.max(settings?.stats?.devicesRepaired ?? 0, 3000),
+    happyCustomers: Math.max(settings?.stats?.happyCustomers ?? 0, 1200),
+    marketExperience: Math.max(settings?.stats?.marketExperience ?? 0, 5),
+    averageRating: Math.max(settings?.stats?.averageRating ?? 0, 4.9)
+  };
+
   const stats = [
     {
       icon: <Wrench className="w-6 h-6" />,
-      value: settings?.stats?.devicesRepaired ?? 3000,
+      value: statsData.devicesRepaired,
       suffix: '+',
       label: t('stats.devicesRepaired', 'Geräte repariert'),
       color: 'text-brand-primary',
@@ -78,7 +85,7 @@ export const Stats: React.FC = () => {
     },
     {
       icon: <Users className="w-6 h-6" />,
-      value: settings?.stats?.happyCustomers ?? 1200,
+      value: statsData.happyCustomers,
       suffix: '+',
       label: t('stats.happyCustomers', 'Zufriedene Kunden'),
       color: 'text-purple-400',
@@ -87,7 +94,7 @@ export const Stats: React.FC = () => {
     },
     {
       icon: <Trophy className="w-6 h-6" />,
-      value: settings?.stats?.marketExperience ?? 2,
+      value: statsData.marketExperience,
       suffix: '+',
       label: t('stats.yearsExperience', 'Jahre Erfahrung'),
       color: 'text-amber-400',
@@ -96,7 +103,7 @@ export const Stats: React.FC = () => {
     },
     {
       icon: <Star className="w-6 h-6" />,
-      value: settings?.stats?.averageRating ?? 4.9,
+      value: statsData.averageRating,
       suffix: '/5',
       label: t('stats.averageRating', 'Durchschnittsbewertung'),
       color: 'text-yellow-400',

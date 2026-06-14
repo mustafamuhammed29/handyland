@@ -88,12 +88,28 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                     productData = data.product;
                 }
 
+                const processorFallback: Record<string, string> = {
+                    'Galaxy S24 Ultra':   'Snapdragon 8 Gen 3',
+                    'Galaxy S23':         'Snapdragon 8 Gen 2',
+                    'iPhone 15 Pro Max':  'Apple A17 Pro',
+                    'iPhone 15':          'Apple A15 Bionic',
+                    'Xiaomi 14':          'Dimensity 9300',
+                    'OnePlus 12':         'Snapdragon 8 Gen 3',
+                    'ThinkPad X1 Carbon': 'Intel Core i7-1365U',
+                };
+                const name = productData.name || productData.model || '';
+                const fallbackKey = Object.keys(processorFallback).find(k => name.includes(k));
+                let resolvedCpu = productData.processor || productData.chipset || productData.specs?.cpu;
+                if (!resolvedCpu || resolvedCpu === 'Standard') {
+                    resolvedCpu = fallbackKey ? processorFallback[fallbackKey] : 'Standard';
+                }
+
                 const formatted: PhoneListing = {
                     ...productData,
                     id: productData.id || productData._id || id,
                     model: productData.name || productData.model,
                     specs: {
-                        cpu: productData.processor || productData.chipset || productData.specs?.cpu || 'Standard',
+                        cpu: resolvedCpu,
                         battery: productData.battery || productData.specs?.battery || 'Standard Battery',
                         screen: productData.display || productData.specs?.screen || 'HD Display',
                         ram: productData.specs?.ram || 'N/A',
