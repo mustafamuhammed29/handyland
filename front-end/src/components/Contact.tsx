@@ -179,7 +179,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                     <Phone className="w-4 h-4 md:w-5 md:h-5" />
                                 </div>
                                 <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t('callUs', 'Call Us')}</div>
-                                <div className="text-slate-800 dark:text-white font-mono text-xs md:text-lg break-words">{settings.phone}</div>
+                                <div className="text-slate-800 dark:text-white font-mono text-xs md:text-lg">{settings.phone}</div>
                             </div>
 
                             <div className="p-4 md:p-6 rounded-2xl bg-white/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-brand-primary/50 transition-colors group flex flex-col items-center text-center">
@@ -190,7 +190,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                 <a 
                                     href="#" 
                                     onClick={(e) => { e.preventDefault(); window.location.href = `mailto:${settings.email}`; }}
-                                    className="text-slate-800 dark:text-white font-mono text-xs md:text-sm break-words hover:text-brand-primary dark:hover:text-brand-primary transition-colors"
+                                    className="text-slate-800 dark:text-white font-mono text-xs md:text-sm hover:text-brand-primary dark:hover:text-brand-primary transition-colors"
                                 >
                                     {settings.email?.replace('@', ' (at) ')}
                                 </a>
