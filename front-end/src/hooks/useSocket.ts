@@ -16,11 +16,10 @@ const getSocket = (): Socket => {
     if (!socket) {
         socket = io(SOCKET_URL, {
             autoConnect: false,
-            transports: ['polling', 'websocket'], // polling first for reliability
-            upgrade: true,                        // then upgrade to websocket
+            transports: ['websocket', 'polling'], // Prefer websocket, fallback to polling
             reconnection: true,
             reconnectionDelay: 2000,
-            reconnectionAttempts: 3,
+            reconnectionAttempts: 5,
             auth: { token },                      // sent in handshake for server-side JWT verification
         });
     } else if (token && socket.auth) {
