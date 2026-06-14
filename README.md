@@ -202,36 +202,34 @@ npm run test:admin-ui
 
 ---
 
-## 🚀 Production Deployment Guide
+## 🚀 Local-Only Development Guide
 
-HandyLand is designed to be easily deployed to high-availability platforms like **Render** (for the Express backend) and **Vercel** (for the frontend and admin React applications).
+This project is now strictly configured for **Local Development Only**. External cloud deployments (like Vercel or Render) are not supported in the current setup to ensure maximum privacy, speed, and ease of development.
 
-### 🖥️ Express Backend on Render
-1. Create a new **Web Service** on [Render](https://render.com).
-2. Connect your Git repository.
-3. Configure the following service settings:
-   - **Environment:** `Node`
-   - **Build Command:** `cd backend && npm install`
-   - **Start Command:** `cd backend && npm start`
-4. Add all production environment variables from `.env.example` under the service's **Environment** tab.
+### How to Run Locally
 
-### 🌐 Frontend and Admin Panel on Vercel
-Since both the Frontend and the Admin Panel are client-only React apps built using Vite, they can be deployed for free on [Vercel](https://vercel.com).
+You need to run three separate terminal instances to start the full stack:
 
-#### Deploying the Customer Frontend:
-1. Import your project into Vercel.
-2. Set the **Root Directory** to `front-end`.
-3. Select **Vite** as the Framework Preset.
-4. Configure environment variables (e.g., `VITE_API_URL` pointing to your backend URL on Render).
-5. Deploy!
+**1. Start the Backend API (Port 5000)**
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-#### Deploying the Admin Panel:
-1. Import the same project again to create a separate Vercel deployment.
-2. Set the **Root Directory** to `backend/admin`.
-3. Select **Vite** as the Framework Preset.
-4. Set the **Build Command** to: `npm install && npm run build`
-5. Configure environment variables (e.g., `VITE_API_URL` pointing to your Render backend).
-6. Deploy!
+**2. Start the Admin Dashboard (Port 5173/5174)**
+```bash
+cd backend/admin
+npm install
+npm run dev
+```
+
+**3. Start the Customer Frontend (Port 3000)**
+```bash
+cd front-end
+npm install
+npm run dev
+```
 
 ---
 
