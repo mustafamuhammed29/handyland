@@ -173,7 +173,7 @@ exports.getLatestPromo = async (req, res, next) => {
             .maybeSingle();
 
         if (error) throw error;
-        if (!data) return res.status(404).json({ success: false, message: 'No active promo found' });
+        if (!data) return res.status(200).json({ success: true, found: false, message: 'No active promo found' });
 
         return res.status(200).json({ found: true, code: data.code, discountType: data.discount_type, discountValue: data.discount_value, usageLimit: data.usage_limit, usedCount: data.used_count, validUntil: data.valid_until });
     } catch (error) { next(error); }
