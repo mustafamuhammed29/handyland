@@ -4,9 +4,16 @@ import { useSettings } from '../context/SettingsContext';
 export const WhatsAppWidget = () => {
     const { settings } = useSettings();
 
-    // Using global shop phone number or fallback
     const rawPhone = import.meta.env.VITE_WHATSAPP_PHONE || settings?.contactSection?.whatsappPhone || settings?.contactSection?.phone || '4915752908921';
-    const phoneNumber = rawPhone.replace(/\D/g, ''); // Extract only digits for wa.me link
+    
+    // Add validation for German numbers
+    const isValidGermanNumber = (phone: string) => 
+        /^(49|0)[0-9]{10,12}$/.test(phone.replace(/\D/g, ''));
+        
+    const extractedNumber = rawPhone.replace(/\D/g, '');
+    const phoneNumber = isValidGermanNumber(extractedNumber) 
+        ? extractedNumber 
+        : '4915752908921'; // fallback آمن دائماً
 
     const message = settings?.contactSection?.whatsappMessage || "Hallo, ich benötige Hilfe mit HandyLand-Services.";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
