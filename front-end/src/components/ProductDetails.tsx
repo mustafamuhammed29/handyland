@@ -403,7 +403,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                 >
                                     <ShoppingCart className="w-5 h-5" />
                                     {settings?.features?.whatsappOrders?.enabled 
-                                        ? t('product.reserveWhatsapp', 'احجز عبر الواتساب') 
+                                        ? t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp') 
                                         : (((product.stock || 0) > 0) ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Nicht vorrätig'))}
                                 </button>
                             </div>

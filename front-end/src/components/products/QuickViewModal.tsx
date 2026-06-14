@@ -199,7 +199,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                             >
                                 <ShoppingCart className="w-5 h-5" />
                                 {settings?.features?.whatsappOrders?.enabled 
-                                    ? t('product.reserveWhatsapp', 'احجز عبر الواتساب') 
+                                    ? t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp') 
                                     : (((product.stock || 0) > 0) ? t('product.addToCart', 'Add to Cart') : t('product.outOfStock', 'Out of Stock'))}
                             </button>
                             

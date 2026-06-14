@@ -414,7 +414,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                         disabled={cart.length === 0}
                         className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
-                        {settings?.features?.whatsappOrders?.enabled ? t('cart.reserveWhatsapp', 'Über WhatsApp reservieren') : t('cart.checkoutSecurely', 'Sicher bezahlen')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        {settings?.features?.whatsappOrders?.enabled ? t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp') : t('cart.checkoutSecurely', 'Sicher bezahlen')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
             </div>

@@ -15,21 +15,21 @@ export const generateWhatsAppLink = (config: WhatsAppOrderConfig): string => {
     // Example: +49 151 12345678 -> 4915112345678
     let phone = config.phoneNumber.replace(/[\s\+\-\(\)]/g, '');
     
-    let message = config.messageTemplate || 'Hallo, ich interessiere mich für:';
+    let message = config.messageTemplate || 'Hallo, ich habe eine Anfrage (Dies ist keine verbindliche Bestellung):';
 
     if (config.serviceName) {
-        message += `\n\nService: *${config.serviceName}*`;
+        message += `\n\nAngefragter Service: *${config.serviceName}*`;
     }
 
     if (config.items && config.items.length > 0) {
-        message += `\n\nProdukte:\n`;
+        message += `\n\nAngefragte Artikel:\n`;
         config.items.forEach(item => {
             message += `- ${item.quantity}x ${item.name} ${item.price ? `(€${item.price.toFixed(2)})` : ''}\n`;
         });
     }
 
     if (config.totalAmount) {
-        message += `\n*Ungefährer Gesamtbetrag: €${config.totalAmount.toFixed(2)}*`;
+        message += `\n*Ungefährer Wert der Anfrage: €${config.totalAmount.toFixed(2)}*`;
     }
 
     // Add current page URL as reference

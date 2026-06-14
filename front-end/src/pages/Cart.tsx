@@ -273,10 +273,12 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                         navigate('/checkout');
                                     }
                                 }}
-                                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white py-4 rounded-xl font-bold text-lg hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/30 transform hover:-translate-y-0.5"
+                                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white py-4 rounded-xl font-bold text-lg hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/30 transform hover:-translate-y-0.5 group"
                             >
-                                {features?.whatsappOrders?.enabled ? t('cart.reserveWhatsapp', 'Über WhatsApp reservieren') : t('cart.checkout', 'Proceed to Checkout')}
-                                <ArrowRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
+                                <span className="flex items-center gap-2">
+                                    {features?.whatsappOrders?.enabled ? t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp') : t('cart.checkout', 'Proceed to Checkout')}
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </span>
                             </button>
                             
                             <div className="mt-4 text-center">
