@@ -76,7 +76,7 @@ const corsMiddleware = cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-XSRF-Token', 'x-app-type', 'Cache-Control'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-XSRF-Token', 'x-app-type', 'Cache-Control', 'Pragma'],
     exposedHeaders: ['Set-Cookie'],
 });
 
