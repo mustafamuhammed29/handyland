@@ -66,6 +66,12 @@ const corsMiddleware = cors({
         if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com')) {
             return callback(null, true);
         }
+        
+        // Allow local network IP addresses for testing on mobile devices
+        if (/^http:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/.test(origin)) {
+            return callback(null, true);
+        }
+
         return callback(new Error('CORS: Origin not allowed: ' + origin), false);
     },
     credentials: true,
