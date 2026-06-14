@@ -276,7 +276,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white py-4 rounded-xl font-bold text-lg hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/30 transform hover:-translate-y-0.5 group"
                             >
                                 <span className="flex items-center gap-2">
-                                    {features?.whatsappOrders?.enabled ? t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp') : t('cart.checkout', 'Proceed to Checkout')}
+                                    {(features?.whatsappOrders?.enabled && features?.whatsappOrders?.phoneNumber) ? t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp') : t('cart.checkout', 'Proceed to Checkout')}
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </span>
                             </button>
