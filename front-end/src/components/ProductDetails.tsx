@@ -179,7 +179,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                 items: [{ name: product.model, quantity: quantity, price: product.price }],
                 totalAmount: product.price * quantity
             });
-            window.open(url, '_blank');
+            window.location.href = url;
             return;
         }
 

@@ -85,7 +85,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                     messageTemplate: whatsappMode.message,
                     serviceName: `${serviceLabel || 'General Diagnostic'} - ${deviceModel}`
                 });
-                window.open(url, '_blank');
+                window.location.href = url;
             });
             return;
         }

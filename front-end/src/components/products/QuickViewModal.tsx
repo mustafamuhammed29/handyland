@@ -51,7 +51,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                 items: [{ name: product.model, quantity: 1, price: product.price }],
                 totalAmount: product.price
             });
-            window.open(url, '_blank');
+            window.location.href = url;
             onClose();
             return;
         }

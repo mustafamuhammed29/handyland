@@ -112,7 +112,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                 items: cart.map(i => ({ name: i.title, quantity: i.quantity || 1, price: i.price })),
                 totalAmount: finalTotal
             });
-            window.open(url, '_blank');
+            window.location.href = url;
         } else {
             navigate('/checkout');
         }
