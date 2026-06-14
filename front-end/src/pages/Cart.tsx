@@ -258,28 +258,41 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 <p className="text-xs text-slate-500 mt-2 text-right">{t('cart.taxesIncluded', 'Taxes included if applicable')}</p>
                             </div>
 
-                            <button
-                                onClick={() => {
-                                    const whatsappMode = features?.whatsappOrders;
-                                    if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
-                                        const url = generateWhatsAppLink({
-                                            phoneNumber: whatsappMode.phoneNumber,
-                                            messageTemplate: whatsappMode.message,
-                                            items: cart.map(i => ({ name: i.title, quantity: i.quantity || 1, price: i.price })),
-                                            totalAmount: finalTotal
-                                        });
-                                        window.location.href = url;
-                                    } else {
-                                        navigate('/checkout');
-                                    }
-                                }}
-                                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white py-4 rounded-xl font-bold text-lg hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/30 transform hover:-translate-y-0.5 group"
-                            >
-                                <span className="flex items-center gap-2">
-                                    {(features?.whatsappOrders?.enabled && features?.whatsappOrders?.phoneNumber) ? t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp') : t('cart.checkout', 'Proceed to Checkout')}
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </span>
-                            </button>
+                            {(() => {
+                                const whatsappMode = features?.whatsappOrders;
+                                if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+                                    const url = generateWhatsAppLink({
+                                        phoneNumber: whatsappMode.phoneNumber,
+                                        messageTemplate: whatsappMode.message,
+                                        items: cart.map(i => ({ name: i.title, quantity: i.quantity || 1, price: i.price })),
+                                        totalAmount: finalTotal
+                                    });
+                                    return (
+                                        <a
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white py-4 rounded-xl font-bold text-lg hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/30 transform hover:-translate-y-0.5 group"
+                                        >
+                                            <span className="flex items-center gap-2">
+                                                {t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp')}
+                                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            </span>
+                                        </a>
+                                    );
+                                }
+                                return (
+                                    <button
+                                        onClick={() => navigate('/checkout')}
+                                        className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white py-4 rounded-xl font-bold text-lg hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/30 transform hover:-translate-y-0.5 group"
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            {t('cart.checkout', 'Proceed to Checkout')}
+                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                        </span>
+                                    </button>
+                                );
+                            })()}
                             
                             <div className="mt-4 text-center">
                                 <button

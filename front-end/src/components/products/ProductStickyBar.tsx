@@ -36,22 +36,47 @@ export const ProductStickyBar: React.FC<ProductStickyBarProps> = ({ product, han
                                 <div className="text-xs text-brand-primary font-bold">{formatPrice(product.price)}</div>
                             </div>
                         </div>
-                        <button
-                            onClick={handleAddToCart}
-                            disabled={!isWhatsapp && product.stock === 0}
-                            className={`px-6 md:px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 whitespace-nowrap
-                                ${product.stock > 0 || isWhatsapp
-                                    ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]'
-                                    : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
-                        >
-                            <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
-                            <span className="hidden sm:inline">
-                                {isWhatsapp ? t('product.reserveWhatsapp', 'احجز عبر الواتساب') : (product.stock > 0 ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Nicht vorrätig'))}
-                            </span>
-                            <span className="sm:hidden">
-                                {isWhatsapp ? t('product.reserveWhatsappShort', 'واتساب') : (product.stock > 0 ? t('product.addToCartShort', 'Kaufen') : t('product.outOfStockShort', 'Aus'))}
-                            </span>
-                        </button>
+                        {(() => {
+                            const whatsappMode = settings?.features?.whatsappOrders;
+                            if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+                                // Since we don't have access to generateWhatsAppLink directly here,
+                                // we rely on handleAddToCart to handle the redirection (as it did before).
+                                // Wait, actually it's better to render an <a> tag directly. Let's import generateWhatsAppLink.
+                                return (
+                                    <button
+                                        onClick={handleAddToCart}
+                                        className="px-6 md:px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 whitespace-nowrap bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                                    >
+                                        <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
+                                        <span className="hidden sm:inline">
+                                            {t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp')}
+                                        </span>
+                                        <span className="sm:hidden">
+                                            {t('product.reserveWhatsappShort', 'WhatsApp')}
+                                        </span>
+                                    </button>
+                                );
+                            }
+
+                            return (
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={product.stock === 0}
+                                    className={`px-6 md:px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 whitespace-nowrap
+                                        ${product.stock > 0
+                                            ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]'
+                                            : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
+                                >
+                                    <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
+                                    <span className="hidden sm:inline">
+                                        {product.stock > 0 ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Nicht vorrätig')}
+                                    </span>
+                                    <span className="sm:hidden">
+                                        {product.stock > 0 ? t('product.addToCartShort', 'Kaufen') : t('product.outOfStockShort', 'Aus')}
+                                    </span>
+                                </button>
+                            );
+                        })()}
                     </div>
                 </motion.div>
             )}

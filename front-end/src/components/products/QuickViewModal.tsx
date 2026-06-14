@@ -189,19 +189,43 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                                 {(product.stock || 0) > 0 ? t('product.inStock', 'In Stock') : t('product.outOfStock', 'Out of Stock')}
                             </div>
                             
-                            <button
-                                onClick={handleAction}
-                                disabled={!settings?.features?.whatsappOrders?.enabled && (!product.stock || product.stock <= 0)}
-                                className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 
-                                    ${(product.stock || 0) > 0 || settings?.features?.whatsappOrders?.enabled
-                                        ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-slate-900 shadow-xl'
-                                        : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed'}`}
-                            >
-                                <ShoppingCart className="w-5 h-5" />
-                                {(settings?.features?.whatsappOrders?.enabled && settings?.features?.whatsappOrders?.phoneNumber)
-                                    ? t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp') 
-                                    : (((product.stock || 0) > 0) ? t('product.addToCart', 'Add to Cart') : t('product.outOfStock', 'Out of Stock'))}
-                            </button>
+                            {(() => {
+                                const whatsappMode = settings?.features?.whatsappOrders;
+                                if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+                                    const url = generateWhatsAppLink({
+                                        phoneNumber: whatsappMode.phoneNumber,
+                                        messageTemplate: whatsappMode.message,
+                                        items: [{ name: product.model, quantity: 1, price: product.price }],
+                                        totalAmount: product.price
+                                    });
+                                    return (
+                                        <a
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={onClose}
+                                            className="w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-slate-900 shadow-xl"
+                                        >
+                                            <ShoppingCart className="w-5 h-5" />
+                                            {t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp')}
+                                        </a>
+                                    );
+                                }
+                                
+                                return (
+                                    <button
+                                        onClick={handleAction}
+                                        disabled={(!product.stock || product.stock <= 0)}
+                                        className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 
+                                            ${(product.stock || 0) > 0
+                                                ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-slate-900 shadow-xl'
+                                                : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed'}`}
+                                    >
+                                        <ShoppingCart className="w-5 h-5" />
+                                        {((product.stock || 0) > 0) ? t('product.addToCart', 'Add to Cart') : t('product.outOfStock', 'Out of Stock')}
+                                    </button>
+                                );
+                            })()}
                             
                             <div className="flex gap-3">
                                 <button

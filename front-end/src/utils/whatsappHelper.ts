@@ -11,9 +11,8 @@ export interface WhatsAppOrderConfig {
 }
 
 export const generateWhatsAppLink = (config: WhatsAppOrderConfig): string => {
-    // Ensure the phone number starts with country code and removes any +, spaces, or dashes.
-    // Example: +49 151 12345678 -> 4915112345678
-    let phone = config.phoneNumber.replace(/[\s\+\-\(\)]/g, '');
+    // Ensure the phone number starts with country code and removes any non-digits
+    let phone = config.phoneNumber.replace(/\D/g, '');
     
     let message = config.messageTemplate || 'Hallo, ich habe eine Anfrage (Dies ist keine verbindliche Bestellung):';
 

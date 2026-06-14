@@ -393,20 +393,42 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                 >
                                     <Heart className={`w-6 h-6 ${isInWishlist(product.id || (product as any)._id) ? 'fill-current' : ''}`} />
                                 </button>
-                                <button
-                                    onClick={handleAddToCart}
-                                    disabled={!settings?.features?.whatsappOrders?.enabled && (!product.stock || product.stock <= 0)}
-                                    className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 
-                                        ${(product.stock || 0) > 0 || settings?.features?.whatsappOrders?.enabled
-                                            ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]'
-                                            : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
-                                >
-                                    <ShoppingCart className="w-5 h-5" />
-                                    {(settings?.features?.whatsappOrders?.enabled && settings?.features?.whatsappOrders?.phoneNumber)
-                                        ? t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp') 
-                                        : (((product.stock || 0) > 0) ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Nicht vorrätig'))}
-                                </button>
-                            </div>
+                                    {(() => {
+                                        const whatsappMode = settings?.features?.whatsappOrders;
+                                        if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+                                            const url = generateWhatsAppLink({
+                                                phoneNumber: whatsappMode.phoneNumber,
+                                                messageTemplate: whatsappMode.message,
+                                                items: [{ name: product.title, quantity: 1, price: product.discountPrice || product.price }]
+                                            });
+                                            return (
+                                                <a
+                                                    href={url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex-1 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                                                >
+                                                    <ShoppingCart className="w-5 h-5" />
+                                                    {t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp')}
+                                                </a>
+                                            );
+                                        }
+                                        
+                                        return (
+                                            <button
+                                                onClick={handleAddToCart}
+                                                disabled={(!product.stock || product.stock <= 0)}
+                                                className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 
+                                                    ${(product.stock || 0) > 0
+                                                        ? 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]'
+                                                        : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
+                                            >
+                                                <ShoppingCart className="w-5 h-5" />
+                                                {((product.stock || 0) > 0) ? t('product.addToCart', 'In den Warenkorb') : t('product.outOfStock', 'Nicht vorrätig')}
+                                            </button>
+                                        );
+                                    })()}
+                                </div>
                             <div className="flex justify-center gap-6 text-xs text-slate-500">
                                 <span className="flex items-center gap-1"><Truck className="w-3 h-3" /> {t('product.freeShipping', 'Kostenloser Versand')}</span>
                                 <span className="flex items-center gap-1"><Check className="w-3 h-3" /> {t('product.verifiedAuthentic', 'Verifiziert Original')}</span>
