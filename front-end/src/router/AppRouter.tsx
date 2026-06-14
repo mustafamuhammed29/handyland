@@ -34,6 +34,11 @@ import { OfflineBanner } from '../components/OfflineBanner';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { PromoModal } from '../components/PromoModal';
 
+// Lazy-load new lightweight home components
+const FeaturedServices = React.lazy(() => import('../components/FeaturedServices').then(m => ({ default: m.FeaturedServices })));
+const FeaturedProducts = React.lazy(() => import('../components/FeaturedProducts').then(m => ({ default: m.FeaturedProducts })));
+const RepairPreview = React.lazy(() => import('../components/RepairPreview').then(m => ({ default: m.RepairPreview })));
+
 // FIXED M-1: Lazy-load heavy components to reduce initial bundle size
 const Hero = React.lazy(() => import('../components/Hero').then(m => ({ default: m.Hero })));
 const Accessories = React.lazy(() => import('../components/Accessories').then(m => ({ default: m.Accessories })));
@@ -82,36 +87,55 @@ const LegacyOrderRedirect = () => {
     return <Navigate to={`/orders/${id}`} replace />;
 };
 
-// Home Component to group Home-related sections
+// Home Component — lightweight, focused, fast
 const Home = ({ lang }: { lang: LanguageCode }) => {
     const { settings } = useSettings();
     const { t } = useTranslation();
-    const sections = settings?.sections || { hero: true, stats: true, repairGallery: true, marketplace: true, accessories: true, contact: true };
+    const sections = settings?.sections || { hero: true, stats: true };
 
     return (
         <>
             <SEO canonical="https://handyland.com" />
             {sections.hero && <Hero lang={lang} />}
             {sections.stats && <Stats />}
-            {sections.repairGallery && (
-                <div className="bg-slate-50 dark:bg-slate-950">
-                    <RepairGallery />
-                </div>
+
+            {/* 3 Core Services */}
+            <Suspense fallback={<div className="h-48" />}>
+                <FeaturedServices />
+            </Suspense>
+
+            {/* Featured Marketplace Products — 4 items preview */}
+            {sections.marketplace !== false && (
+                <Suspense fallback={<div className="h-48" />}>
+                    <FeaturedProducts
+                        type="marketplace"
+                        title={t('home.featuredProducts', 'Aktuelle Angebote')}
+                        seeAllLabel={t('home.seeAllProducts', 'Alle Produkte')}
+                        seeAllRoute="/marketplace"
+                        apiEndpoint="/api/products?limit=8&featured=true"
+                    />
+                </Suspense>
             )}
-            {sections.marketplace && (
-                <div className="bg-slate-50 dark:bg-slate-950 py-12 border-t border-slate-200 dark:border-slate-900">
-                    <div className="max-w-7xl mx-auto px-4">
-                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-8 pl-4 border-l-4 border-blue-600 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">
-                            {t('marketHighlights', 'Market Highlights')}
-                        </h3>
-                        <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="w-8 h-8 border-2 border-blue-500 rounded-full animate-spin border-t-transparent"></div></div>}>
-                            <Marketplace lang={lang} hideSEO={true} />
-                        </Suspense>
-                    </div>
-                </div>
+
+            {/* Repair Preview — brief CTA, no full catalog */}
+            {sections.repairPage !== false && (
+                <Suspense fallback={<div className="h-48" />}>
+                    <RepairPreview />
+                </Suspense>
             )}
-            {sections.accessories && <Accessories lang={lang} />}
-            {sections.contact && <Contact />}
+
+            {/* Featured Accessories — 4 items preview */}
+            {sections.accessories !== false && (
+                <Suspense fallback={<div className="h-48" />}>
+                    <FeaturedProducts
+                        type="accessories"
+                        title={t('home.featuredAccessories', 'Premium Zubehör')}
+                        seeAllLabel={t('home.seeAllAccessories', 'Alle Zubehör')}
+                        seeAllRoute="/accessories"
+                        apiEndpoint="/api/accessories?limit=8"
+                    />
+                </Suspense>
+            )}
         </>
     );
 };
@@ -147,8 +171,8 @@ export const AppRouter = () => {
                 });
                 
                 if (!cancelled) {
-                    setIsMaintenanceActive(data.maintenance === true);
-                    setIsAdminBypass(data.bypassActive === true);
+                    setIsMaintenanceActive((data as any).maintenance === true);
+                    setIsAdminBypass((data as any).bypassActive === true);
                 }
             } catch {
                 // If the endpoint itself fails, don't block the site
@@ -302,8 +326,10 @@ export const AppRouter = () => {
                 </AnimatePresence>
             </Suspense>
 
-            {location.pathname !== '/cart' && location.pathname !== '/checkout' && <CartDrawer />}
-            <WhatsAppWidget />
+            {/* CartDrawer: hide on cart, checkout, dashboard, seller pages */}
+            {!['/cart', '/checkout', '/dashboard', '/seller'].some(p => location.pathname.startsWith(p)) && <CartDrawer />}
+            {/* WhatsApp Widget: hide on dashboard and seller (clean admin-like UX) */}
+            {!['/dashboard', '/seller'].some(p => location.pathname.startsWith(p)) && <WhatsAppWidget />}
         </div>
     );
 };

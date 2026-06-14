@@ -142,7 +142,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     };
 
     return (
-        <div className="relative min-h-0 md:min-h-[100dvh] pt-32 page-container md:pb-20 overflow-hidden bg-slate-50 dark:bg-[#0a0f1c]">
+        <div className="relative min-h-0 md:min-h-[100dvh] pt-24 md:pt-32 page-container pb-16 md:pb-20 overflow-hidden bg-slate-50 dark:bg-[#0a0f1c]">
 
             {/* Abstract Background Tech Lines */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none"></div>
@@ -159,38 +159,33 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-4">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
-                            <Wrench className="w-6 h-6 text-blue-500" />
-                            <span className="text-blue-500 font-mono text-sm tracking-widest uppercase">{t('repair.title', 'Service Terminal')}</span>
+                            <Wrench className="w-5 h-5 text-blue-500" />
+                            <span className="text-blue-500 font-mono text-xs md:text-sm tracking-widest uppercase">{t('repair.title', 'Service Terminal')}</span>
                         </div>
-                        <h1 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white">
+                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white">
                             {settings?.content?.repairTitle || t('repair.title', 'Service Terminal')}
                         </h1>
-                        <p className="text-slate-600 dark:text-slate-400 mt-2 font-light border-l-2 border-blue-900 pl-4">
+                        <p className="text-slate-600 dark:text-slate-400 mt-2 font-light border-l-2 border-blue-900 pl-4 text-sm md:text-base">
                             {settings?.content?.repairSubtitle || t('repair.subtitle', 'Professionelle Reparaturen für alle Geräte')}
                         </p>
                     </div>
-
-                    {/* The Custom Diagnostics button has been removed based on user feedback */}
                 </div>
 
                 {/* Search & Interface Panel */}
-                <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-3xl p-1 mb-10 shadow-[0_0_50px_rgba(37,99,235,0.1)]">
+                <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-2xl md:rounded-3xl p-1 mb-8 md:mb-10 shadow-[0_0_50px_rgba(37,99,235,0.1)]">
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder={t('repair.searchPlaceholder', 'GERÄTEMODELL SUCHEN (z.B. iPhone 15, S24)...')}
-                            className="w-full pl-14 pr-6 py-3 md:py-5 bg-slate-100/50 dark:bg-black/50 border border-slate-200 dark:border-transparent rounded-2xl text-slate-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-lg font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
+                            placeholder={t('repair.searchPlaceholder', 'Gerätemodell suchen (z.B. iPhone 15, S24)...')}
+                            className="w-full pl-12 pr-6 py-3.5 md:py-5 bg-slate-100/50 dark:bg-black/50 border border-slate-200 dark:border-transparent rounded-xl md:rounded-2xl text-slate-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-base md:text-lg font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <div className="absolute left-5 top-5 text-slate-500">
-                            <Search className="w-6 h-6" />
-                        </div>
-
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none opacity-50 hidden md:flex">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                            <Search className="w-5 h-5" />
                         </div>
                     </div>
                 </div>

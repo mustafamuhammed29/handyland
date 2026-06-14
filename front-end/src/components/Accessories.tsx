@@ -115,12 +115,20 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
         ...dynamicCategories
     ];
 
-    const filteredProducts = products.filter(p => {
-        const catValue = typeof p.category === 'object' ? (p.category?.id || p.category?.name || '') : (p.category || '');
-        const matchesCategory = activeCategory === 'all' || catValue.toLowerCase() === activeCategory.toLowerCase();
-        const matchesSearch = (p.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    const filteredProducts = (() => {
+        const seen = new Set<string>();
+        return products.filter(p => {
+            const catValue = typeof p.category === 'object' ? (p.category?.id || p.category?.name || '') : (p.category || '');
+            const matchesCategory = activeCategory === 'all' || catValue.toLowerCase() === activeCategory.toLowerCase();
+            const matchesSearch = (p.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+            if (!matchesCategory || !matchesSearch) return false;
+            // Deduplicate by normalized name
+            const key = (p.name || '').toLowerCase().trim().replace(/\s+/g, ' ');
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    })();
 
 
     return (

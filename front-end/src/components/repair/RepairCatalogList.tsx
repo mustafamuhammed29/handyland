@@ -78,10 +78,14 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                             className="group relative bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm dark:shadow-none hover:border-blue-500/50 transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-left w-full"
                         >
                             {/* Status Light */}
-                            <div className="absolute top-6 right-6 flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase group-hover:text-blue-400 transition-colors">
-                                    {device.services?.length || 0} {t('repair.services', 'Dienste')}
-                                </span>
+                            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
+                                {(device.services?.length ?? 0) > 0 && (
+                                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase group-hover:text-blue-400 transition-colors">
+                                        {device.services!.length === 1
+                                            ? `1 ${t('repair.service', 'Service')}`
+                                            : `${device.services!.length} ${t('repair.servicesPlural', 'Services')}`}
+                                    </span>
+                                )}
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse"></div>
                             </div>
 

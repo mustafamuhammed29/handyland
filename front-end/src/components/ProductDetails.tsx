@@ -296,7 +296,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                         )}
 
                         <div className="flex items-center gap-4 mb-6">
-                            {(product.numReviews > 0 || (reviews && reviews.length > 0) || product.rating) ? (
+                            {((product.numReviews ?? 0) > 0 || (reviews && reviews.length > 0) || product.rating) ? (
                                 <div className="flex items-center gap-2 text-yellow-500">
                                     <span className="font-bold text-slate-900 dark:text-white text-lg">{product.rating ? Number(product.rating).toFixed(1) : '5.0'}</span>
                                     <div className="flex">
@@ -415,7 +415,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                                             const url = generateWhatsAppLink({
                                                 phoneNumber: whatsappMode.phoneNumber,
                                                 messageTemplate: whatsappMode.message,
-                                                items: [{ name: product.title, quantity: 1, price: product.discountPrice || product.price }]
+                                                items: [{ name: (product as any).title || (product as any).name || '', quantity: 1, price: (product as any).discountPrice || product.price }]
                                             });
                                             return (
                                                 <a
