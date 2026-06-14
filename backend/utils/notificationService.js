@@ -89,7 +89,7 @@ const buildDefaultEmailHtml = (name, message, link, type) => {
         </td></tr>
         <!-- Footer -->
         <tr><td style="padding:16px 32px;border-top:1px solid #334155;">
-          <p style="color:#475569;font-size:12px;margin:0;">You received this because you have notifications enabled for this category. <br>Manage your preferences in your <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard" style="color:#3b82f6;">account settings</a>.</p>
+          <p style="color:#475569;font-size:12px;margin:0;">You received this because you have notifications enabled for this category. <br>Manage your preferences in your <a href="${process.env.FRONTEND_URL || 'https://front-end-rho-five-94.vercel.app'}/dashboard" style="color:#3b82f6;">account settings</a>.</p>
         </td></tr>
         <!-- FIXED: [Dynamic frontend URL for dashboard link] -->
       </table>

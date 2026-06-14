@@ -263,7 +263,7 @@ const emailTemplates = {
                     <p style="color:#e2e8f0;margin:0;font-style:italic;">"${adminNote}"</p>
                 </div>` : ''}
 
-                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?tab=orders"
+                <a href="${process.env.FRONTEND_URL || 'https://front-end-rho-five-94.vercel.app'}/dashboard?tab=orders"
                    style="display:block;text-align:center;background:#3b82f6;color:#fff;padding:14px;border-radius:8px;text-decoration:none;font-weight:bold;">
                     View My Orders →
                 </a>

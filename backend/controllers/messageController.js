@@ -95,7 +95,7 @@ exports.createMessage = async (req, res, next) => {
             });
 
             // Send email to all admins
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            const frontendUrl = process.env.FRONTEND_URL || 'https://front-end-rho-five-94.vercel.app';
             for (const admin of admins) {
                 if (admin.email) {
                     sendEmail({
@@ -177,7 +177,7 @@ exports.replyToMessage = async (req, res, next) => {
             await supabaseAdmin.from('messages').update({ status: 'replied' }).eq('id', msg.id);
 
             // Send email to the user
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            const frontendUrl = process.env.FRONTEND_URL || 'https://front-end-rho-five-94.vercel.app';
             if (msg.email) {
                 sendEmail({
                     email: msg.email,

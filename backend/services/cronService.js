@@ -55,7 +55,7 @@ const startCartRecoveryJob = () => {
                     const sent = await sendTemplateEmail(user.email, 'cart_reminder', {
                         userName: user.name || user.email.split('@')[0],
                         itemCount: cart.cart_items.length,
-                        cartUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/cart`
+                        cartUrl: `${process.env.FRONTEND_URL || 'https://front-end-rho-five-94.vercel.app'}/cart`
                     });
 
                     if (!sent) {
@@ -69,7 +69,7 @@ const startCartRecoveryJob = () => {
                                     <p>You have left some premium items in your shopping cart at HandyLand.</p>
                                     <p>Don't miss out on completing your purchase!</p>
                                     <br />
-                                    <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/cart" style="background: #06b6d4; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Complete Your Order</a>
+                                    <a href="${process.env.FRONTEND_URL || 'https://front-end-rho-five-94.vercel.app'}/cart" style="background: #06b6d4; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Complete Your Order</a>
                                     <br /><br />
                                     <p>Best regards,<br/>The HandyLand Team</p>
                                 </div>
