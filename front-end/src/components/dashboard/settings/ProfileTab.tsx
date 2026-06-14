@@ -386,6 +386,34 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                     </select>
                     <p className="text-xs text-slate-500 mt-2">{t('settings.profile.language.description', 'This language will be used across the interface and for your personalized notifications.')}</p>
                 </div>
+
+                {/* System / Troubleshooting */}
+                <div className="pt-6 border-t border-slate-800/80">
+                    <h4 className="text-sm font-bold text-slate-300 mb-2">{t('settings.profile.troubleshooting.title', 'System & Fehlersuche')}</h4>
+                    <p className="text-xs text-slate-500 mb-4">
+                        {t('settings.profile.troubleshooting.desc', 'Wenn Fehler auftreten oder die Seite nicht aktualisiert wird, kannst du den App-Cache löschen (Hard Refresh).')}
+                    </p>
+                    <button
+                        onClick={() => {
+                            if ('serviceWorker' in navigator) {
+                                navigator.serviceWorker.getRegistrations().then(registrations => {
+                                    registrations.forEach(r => r.unregister());
+                                });
+                            }
+                            if ('caches' in window) {
+                                caches.keys().then(names => {
+                                    names.forEach(name => caches.delete(name));
+                                });
+                            }
+                            window.location.reload();
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-sm font-bold transition-colors border border-slate-700"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        {t('settings.profile.troubleshooting.clearCache', 'App-Cache löschen (Hard Refresh)')}
+                    </button>
+                </div>
+
             </div>
         </div>
     );
