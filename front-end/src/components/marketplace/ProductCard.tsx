@@ -7,6 +7,7 @@ import { PhoneListing } from '../../types';
 import { formatPrice } from '../../utils/formatPrice';
 import { getImageUrl } from '../../utils/imageUrl';
 import { cleanProductName, getConditionLabel } from '../../utils/cleanProductName';
+import { generateWhatsAppLink } from '../../utils/whatsappHelper';
 
 
 interface ProductCardProps {
@@ -18,6 +19,7 @@ interface ProductCardProps {
     onAddToCart: (product: PhoneListing) => void;
     onSelect: (product: PhoneListing) => void;
     onQuickView?: (product: PhoneListing) => void;
+    whatsappMode?: any;
 }
 
 const ProductCardComponent: React.FC<ProductCardProps> = ({
@@ -28,7 +30,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     onToggleWishlist,
     onAddToCart,
     onSelect,
-    onQuickView
+    onQuickView,
+    whatsappMode
 }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -126,13 +129,35 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     </div>
                     <p className="text-slate-400 text-sm line-clamp-2 mb-4">{product.description}</p>
                     <div className="flex gap-3 mt-auto">
-                        <button
-                            disabled={product.stock === 0}
-                            onClick={() => onAddToCart(product)}
-                            className={`px-6 py-2 font-bold rounded-lg transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${product.stock > 0 ? 'bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'}`}
-                        >
-                            {product.stock > 0 ? t('marketplace.addToCart') : t('marketplace.outOfStock')}
-                        </button>
+                        {(() => {
+                            if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+                                const url = generateWhatsAppLink({
+                                    phoneNumber: whatsappMode.phoneNumber,
+                                    messageTemplate: whatsappMode.message,
+                                    items: [{ name: product.model || (product as any).name, quantity: 1, price: product.price }],
+                                    totalAmount: product.price
+                                });
+                                return (
+                                    <a
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-6 py-2 font-bold rounded-lg transition-all text-sm flex items-center gap-2 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white"
+                                    >
+                                        {t('cart.inquiryWhatsapp', 'WhatsApp')}
+                                    </a>
+                                );
+                            }
+                            return (
+                                <button
+                                    disabled={product.stock === 0}
+                                    onClick={() => onAddToCart(product)}
+                                    className={`px-6 py-2 font-bold rounded-lg transition-all text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${product.stock > 0 ? 'bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'}`}
+                                >
+                                    {product.stock > 0 ? t('marketplace.addToCart') : t('marketplace.outOfStock')}
+                                </button>
+                            );
+                        })()}
                         <button
                             title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                             disabled={loadingWishlist}
@@ -241,14 +266,37 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         >
                             <BarChart2 className="w-4 h-4 md:w-5 md:h-5 transition-transform" />
                         </motion.button>
-                        <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => onAddToCart(product)}
-                            disabled={product.stock === 0}
-                            className={`p-2 flex-1 md:flex-none flex justify-center items-center md:p-3 rounded-lg md:rounded-xl font-bold transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-not-allowed ${product.stock > 0 ? 'bg-slate-100 border-slate-200 text-slate-900 hover:bg-brand-primary hover:text-white hover:border-brand-primary dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-brand-primary dark:hover:text-black dark:hover:border-brand-primary dark:text-white' : 'bg-slate-200 border-slate-300 text-slate-400 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-500'}`}
-                        >
-                            <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 transition-transform" />
-                        </motion.button>
+                        {(() => {
+                            if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+                                const url = generateWhatsAppLink({
+                                    phoneNumber: whatsappMode.phoneNumber,
+                                    messageTemplate: whatsappMode.message,
+                                    items: [{ name: product.model || (product as any).name, quantity: 1, price: product.price }],
+                                    totalAmount: product.price
+                                });
+                                return (
+                                    <motion.a
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        whileTap={{ scale: 0.9 }}
+                                        className="p-2 flex-1 md:flex-none flex justify-center items-center md:p-3 rounded-lg md:rounded-xl font-bold transition-all duration-300 group/btn border bg-brand-primary text-black hover:bg-brand-secondary dark:bg-brand-primary dark:text-black dark:border-transparent dark:hover:bg-brand-secondary"
+                                    >
+                                        <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 transition-transform" />
+                                    </motion.a>
+                                );
+                            }
+                            return (
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => onAddToCart(product)}
+                                    disabled={product.stock === 0}
+                                    className={`p-2 flex-1 md:flex-none flex justify-center items-center md:p-3 rounded-lg md:rounded-xl font-bold transition-all duration-300 group/btn border disabled:opacity-50 disabled:cursor-not-allowed ${product.stock > 0 ? 'bg-slate-100 border-slate-200 text-slate-900 hover:bg-brand-primary hover:text-white hover:border-brand-primary dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-brand-primary dark:hover:text-black dark:hover:border-brand-primary dark:text-white' : 'bg-slate-200 border-slate-300 text-slate-400 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-500'}`}
+                                >
+                                    <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 transition-transform" />
+                                </motion.button>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

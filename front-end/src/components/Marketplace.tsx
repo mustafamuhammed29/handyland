@@ -197,6 +197,7 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ lang, hideSEO }) => {
                         onAddToCart={handleAddToCart}
                         onSelect={(product) => navigate(`/marketplace/${product.id || (product as any)._id}`)}
                         onQuickView={setQuickViewProduct}
+                        whatsappMode={features?.whatsappOrders}
                         onClearFilters={() => {
                             mp.setSearchTerm('');
                             mp.setFilterBrand('All');

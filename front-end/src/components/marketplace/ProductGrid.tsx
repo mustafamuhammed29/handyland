@@ -15,8 +15,9 @@ interface ProductGridProps {
     onToggleWishlist: (e: React.MouseEvent, product: PhoneListing) => void;
     onAddToCart: (product: PhoneListing) => void;
     onSelect: (product: PhoneListing) => void;
-    onQuickView: (product: PhoneListing) => void;
+    onQuickView?: (product: PhoneListing) => void;
     onClearFilters: () => void;
+    whatsappMode?: any;
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
@@ -30,7 +31,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     onAddToCart,
     onSelect,
     onQuickView,
-    onClearFilters
+    onClearFilters,
+    whatsappMode
 }) => {
     if (loading) {
         return (
@@ -95,6 +97,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                     onAddToCart={onAddToCart}
                     onSelect={onSelect}
                     onQuickView={onQuickView}
+                    whatsappMode={whatsappMode}
                 />
             ))}
         </motion.div>
