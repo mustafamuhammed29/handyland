@@ -1,28 +1,9 @@
 import React, { useEffect, Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
-import PageTransition from '../components/PageTransition';
 import { CartDrawer } from '../components/CartDrawer';
-import { ProtectedRoute } from '../components/ProtectedRoute';
-import { PublicLayout } from '../components/layouts/PublicLayout';
-
-const PaymentSuccess = React.lazy(() => import('../pages/PaymentSuccess'));
-const NotFound = React.lazy(() => import('../pages/NotFound'));
-const MaintenancePage = React.lazy(() => import('../pages/MaintenancePage'));
-const PrivacyPolicy = React.lazy(() => import('../pages/PrivacyPolicy'));
-const TermsAndConditions = React.lazy(() => import('../pages/TermsAndConditions'));
-const InfoPage = React.lazy(() => import('../components/InfoPage').then(module => ({ default: module.InfoPage })));
-const VerifyEmail = React.lazy(() => import('../components/VerifyEmail').then(module => ({ default: module.VerifyEmail })));
-const ResetPassword = React.lazy(() => import('../pages/ResetPassword'));
-const Login = React.lazy(() => import('../pages/Login'));
-const Register = React.lazy(() => import('../pages/Register'));
-const VerifyEmailNotice = React.lazy(() => import('../pages/VerifyEmailNotice'));
-const ForgotPassword = React.lazy(() => import('../pages/ForgotPassword'));
-const SocialAuthCallback = React.lazy(() => import('../pages/SocialAuthCallback'));
-import { LanguageCode } from '../types';
 import { useLang } from '../context/LanguageContext';
-import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
@@ -32,114 +13,14 @@ import { SEO } from '../components/SEO';
 import { WhatsAppWidget } from '../components/WhatsAppWidget';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
 import { OfflineBanner } from '../components/OfflineBanner';
-import ErrorBoundary from '../components/ErrorBoundary';
 import { PromoModal } from '../components/PromoModal';
 
-// Lazy-load new lightweight home components
-const FeaturedServices = React.lazy(() => import('../components/FeaturedServices').then(m => ({ default: m.FeaturedServices })));
-const FeaturedProducts = React.lazy(() => import('../components/FeaturedProducts').then(m => ({ default: m.FeaturedProducts })));
-const RepairPreview = React.lazy(() => import('../components/RepairPreview').then(m => ({ default: m.RepairPreview })));
+import { getPublicRoutes } from './PublicRoutes';
+import { getProtectedRoutes } from './ProtectedRoutes';
+import { AdminRedirect } from './AdminRoutes';
 
-// FIXED M-1: Lazy-load heavy components to reduce initial bundle size
-const Hero = React.lazy(() => import('../components/Hero').then(m => ({ default: m.Hero })));
-const Accessories = React.lazy(() => import('../components/Accessories').then(m => ({ default: m.Accessories })));
-const Valuation = React.lazy(() => import('../components/Valuation').then(m => ({ default: m.Valuation })));
-const Contact = React.lazy(() => import('../components/Contact').then(m => ({ default: m.Contact })));
-const Stats = React.lazy(() => import('../components/Stats').then(m => ({ default: m.Stats })));
-const RepairGallery = React.lazy(() => import('../components/RepairGallery').then(m => ({ default: m.RepairGallery })));
-const SellDevice = React.lazy(() => import('../pages/SellDevice').then(m => ({ default: m.SellDevice })));
-const MyValuations = React.lazy(() => import('../pages/MyValuations').then(m => ({ default: m.MyValuations })));
-const SellerStudio = React.lazy(() => import('../components/SellerStudio').then(m => ({ default: m.SellerStudio })));
-const ComparePage = React.lazy(() => import('../pages/ComparePage').then(m => ({ default: m.ComparePage })));
-// Lazy Load Components
-const Marketplace = React.lazy(() => import('../components/Marketplace').then(module => ({ default: module.Marketplace })));
-const Repair = React.lazy(() => import('../components/Repair').then(module => ({ default: module.Repair })));
-const ProductDetails = React.lazy(() => import('../components/ProductDetails').then(module => ({ default: module.ProductDetails })));
-const AccessoryDetails = React.lazy(() => import('../components/AccessoryDetails').then(module => ({ default: module.AccessoryDetails })));
-const Checkout = React.lazy(() => import('../pages/Checkout').then(module => ({ default: module.Checkout })));
-const CartPage = React.lazy(() => import('../pages/Cart').then(module => ({ default: module.Cart })));
-const OrderDetails = React.lazy(() => import('../pages/OrderDetails').then(module => ({ default: module.OrderDetails })));
-const GuestTicketTracking = React.lazy(() => import('../pages/GuestTicketTracking').then(module => ({ default: module.GuestTicketTracking })));
-const Dashboard = React.lazy(() => import('../components/Dashboard').then(module => ({ default: module.Dashboard })));
-
-const AdminRedirect = () => {
-    const adminUrl = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174';
-    const location = useLocation();
-
-    useEffect(() => {
-        const subPath = location.pathname.startsWith('/admin') ? location.pathname.substring(6) : location.pathname;
-        window.location.href = `${adminUrl}${subPath}${location.search}${location.hash}`;
-    }, [adminUrl, location]);
-
-    return (
-        <div className="min-h-[100dvh] bg-slate-950 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4 text-center">
-                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-slate-400 text-sm animate-pulse">Redirecting to Admin Portal...</p>
-            </div>
-        </div>
-    );
-};
-
-// Legacy Redirect Helpers
-const LegacyOrderRedirect = () => {
-    const { id } = useParams();
-    if (!id || id === ':id') return <Navigate to="/dashboard?tab=orders" replace />;
-    return <Navigate to={`/orders/${id}`} replace />;
-};
-
-// Home Component — lightweight, focused, fast
-const Home = ({ lang }: { lang: LanguageCode }) => {
-    const { settings } = useSettings();
-    const { t } = useTranslation();
-    const sections = settings?.sections || { hero: true, stats: true };
-
-    return (
-        <>
-            <SEO canonical="https://handyland.com" />
-            {sections.hero && <Hero lang={lang} />}
-            {sections.stats && <Stats />}
-
-            {/* 3 Core Services */}
-            <Suspense fallback={<div className="h-48" />}>
-                <FeaturedServices />
-            </Suspense>
-
-            {/* Featured Marketplace Products — 4 items preview */}
-            {sections.marketplace !== false && (
-                <Suspense fallback={<div className="h-48" />}>
-                    <FeaturedProducts
-                        type="marketplace"
-                        title={t('home.featuredProducts', 'Aktuelle Angebote')}
-                        seeAllLabel={t('home.seeAllProducts', 'Alle Produkte')}
-                        seeAllRoute="/marketplace"
-                        apiEndpoint="/api/products?limit=8&featured=true"
-                    />
-                </Suspense>
-            )}
-
-            {/* Repair Preview — brief CTA, no full catalog */}
-            {sections.repairPage !== false && (
-                <Suspense fallback={<div className="h-48" />}>
-                    <RepairPreview />
-                </Suspense>
-            )}
-
-            {/* Featured Accessories — 4 items preview */}
-            {sections.accessories !== false && (
-                <Suspense fallback={<div className="h-48" />}>
-                    <FeaturedProducts
-                        type="accessories"
-                        title={t('home.featuredAccessories', 'Premium Zubehör')}
-                        seeAllLabel={t('home.seeAllAccessories', 'Alle Zubehör')}
-                        seeAllRoute="/accessories"
-                        apiEndpoint="/api/accessories?limit=8"
-                    />
-                </Suspense>
-            )}
-        </>
-    );
-};
+const NotFound = React.lazy(() => import('../pages/NotFound'));
+const MaintenancePage = React.lazy(() => import('../pages/MaintenancePage'));
 
 export const AppRouter = () => {
     const location = useLocation();
@@ -201,8 +82,6 @@ export const AppRouter = () => {
         return () => window.removeEventListener('handyland:navigate', handleNavigation);
     }, [navigate]);
 
-    // Document title is now purely handled by SEO.tsx and Helmet Provider
-
     // ── MAINTENANCE GATE: Block ALL routes if maintenance is active ──────
     if (isMaintenanceActive === null) {
         // Still checking maintenance status — show a brief loading state
@@ -215,7 +94,7 @@ export const AppRouter = () => {
 
     if (isMaintenanceActive) {
         // Maintenance is ON — show maintenance page on EVERY route
-        return <MaintenancePage />;
+        return <Suspense fallback={<GlobalLoader />}><MaintenancePage /></Suspense>;
     }
 
     if (settingsError) {
@@ -255,72 +134,10 @@ export const AppRouter = () => {
             <Suspense fallback={<GlobalLoader />}>
                 <AnimatePresence mode="wait">
                     <Routes location={location} key={location.pathname}>
-                        <Route path="/" element={<PublicLayout lang={lang} user={user} cartCount={cart.length} />}>
-                            <Route path="/" element={<PageTransition><Home lang={lang} /></PageTransition>} />
-
-                            {/* Core Module Protection */}
-                            <Route path="/marketplace" element={settings.sections?.marketplacePage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/marketplace/:id" element={settings.sections?.marketplacePage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/products/:id" element={settings.sections?.marketplacePage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/products" element={<Navigate to="/marketplace" replace />} />
-
-                            <Route path="/repair" element={settings.sections?.repairPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Repair lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/track-repair" element={settings.sections?.trackRepairPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><GuestTicketTracking /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-
-                            <Route path="/valuation" element={settings.sections?.valuationPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Valuation lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/sell/:quoteRef" element={settings.sections?.valuationPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><SellDevice /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-
-                            <Route path="/login" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Login /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/register" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Register /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/reset-password" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ResetPassword /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/forgot-password" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ForgotPassword /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/verify-email" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><VerifyEmail /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/verify-email-notice" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><VerifyEmailNotice /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/auth/callback" element={settings.sections?.authSystem !== false ? <Suspense fallback={<GlobalLoader />}><SocialAuthCallback /></Suspense> : <Navigate to="/" replace />} />
-
-                            {/* Standard Pages */}
-                            <Route path="/orders/:id" element={<ProtectedRoute><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
-                            <Route path="/accessories" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Accessories lang={lang} /></Suspense></PageTransition>} />
-                            <Route path="/accessories/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><AccessoryDetails /></Suspense></PageTransition>} />
-                            <Route path="/compare" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ComparePage /></Suspense></PageTransition>} />
-                            <Route path="/contact" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Contact /></Suspense></PageTransition>} />
-                            <Route path="/checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
-                            <Route path="/payment-success" element={<PageTransition><Suspense fallback={<GlobalLoader />}><PaymentSuccess /></Suspense></PageTransition>} />
-                            
-                            <Route path="/cart" element={<ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><CartPage lang={lang} /></Suspense></PageTransition></ErrorBoundary>} />
-                            <Route path="/about" element={<Navigate to="/uber-uns" replace />} />
-                            
-                            {/* Alias redirects for common URL patterns */}
-                            <Route path="/sell-device" element={<ProtectedRoute><Navigate to="/valuation" replace /></ProtectedRoute>} />
-                            <Route path="/privacy-policy" element={<Navigate to="/privacy" replace />} />
-                            <Route path="/terms" element={<Navigate to="/agb" replace />} />
-                            
-                            {/* Legacy Dashboard Redirects */}
-                            <Route path="/dashboard/orders/:id" element={<LegacyOrderRedirect />} />
-                            <Route path="/dashboard/repairs/:id" element={<Navigate to="/dashboard?tab=repairs" replace />} />
-                            <Route path="/dashboard/repairs" element={<Navigate to="/dashboard?tab=repairs" replace />} />
-                            <Route path="/dashboard/refunds/:id" element={<Navigate to="/dashboard?tab=orders" replace />} />
-                            
-                            <Route path="/admin/*" element={<AdminRedirect />} />
-
-                            <Route path="/info" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
-                            <Route path="/agb" element={<PageTransition><Suspense fallback={<GlobalLoader />}><TermsAndConditions /></Suspense></PageTransition>} />
-                            <Route path="/privacy" element={<PageTransition><Suspense fallback={<GlobalLoader />}><PrivacyPolicy /></Suspense></PageTransition>} />
-                            <Route path="/datenschutz" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
-                            <Route path="/service" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
-                            <Route path="/kundenservice" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
-                            <Route path="/impressum" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
-                            <Route path="/uber-uns" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
-                            <Route path="/page/:slug" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
-                        </Route>
-
-                        <Route element={<ProtectedRoute />}>
-                            <Route path="/dashboard" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Dashboard user={user} logout={logout} /></Suspense></PageTransition>} />
-                            <Route path="/dashboard/valuations" element={<PageTransition><Suspense fallback={<GlobalLoader />}><MyValuations /></Suspense></PageTransition>} />
-                            <Route path="/seller" element={<PageTransition><Suspense fallback={<GlobalLoader />}><SellerStudio lang={lang} /></Suspense></PageTransition>} />
-                        </Route>
-
-                        {/* Prevent access to maintenance page if maintenance is off */}
+                        {getPublicRoutes({ settings, lang, user, cartCount: cart.length })}
+                        {getProtectedRoutes({ user, logout, lang })}
+                        
+                        <Route path="/admin/*" element={<AdminRedirect />} />
                         <Route path="/maintenance" element={<Navigate to="/" replace />} />
                         <Route path="*" element={<Suspense fallback={<GlobalLoader />}><NotFound /></Suspense>} />
                     </Routes>
