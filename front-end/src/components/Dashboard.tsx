@@ -236,8 +236,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         { id: 'messages', label: 'Nachrichten', icon: <Mail className="w-4 h-4" />, badge: unreadCount > 0 && activeTab !== 'messages' ? unreadCount : 0 },
         { id: 'settings', label: 'Kontoeinstellungen', icon: <Settings className="w-4 h-4" /> },
     ];
-
-    const ADMIN_PANEL_URL = import.meta.env.VITE_ADMIN_URL || 'https://admin-silk-three-90.vercel.app';
+    const ADMIN_PANEL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174';
 
     // Handle initial tab from URL
     useEffect(() => {

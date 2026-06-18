@@ -62,7 +62,7 @@ const GuestTicketTracking = React.lazy(() => import('../pages/GuestTicketTrackin
 const Dashboard = React.lazy(() => import('../components/Dashboard').then(module => ({ default: module.Dashboard })));
 
 const AdminRedirect = () => {
-    const adminUrl = import.meta.env.VITE_ADMIN_URL || 'https://admin-silk-three-90.vercel.app';
+    const adminUrl = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174';
     const location = useLocation();
 
     useEffect(() => {
