@@ -4,21 +4,22 @@ import { AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
 import PageTransition from '../components/PageTransition';
 import { CartDrawer } from '../components/CartDrawer';
-import PaymentSuccess from '../pages/PaymentSuccess';
-import NotFound from '../pages/NotFound';
-import MaintenancePage from '../pages/MaintenancePage';
-import PrivacyPolicy from '../pages/PrivacyPolicy';
-import TermsAndConditions from '../pages/TermsAndConditions';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { PublicLayout } from '../components/layouts/PublicLayout';
-import { InfoPage } from '../components/InfoPage';
-import { VerifyEmail } from '../components/VerifyEmail';
-import ResetPassword from '../pages/ResetPassword';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
-import VerifyEmailNotice from '../pages/VerifyEmailNotice';
-import ForgotPassword from '../pages/ForgotPassword';
-import SocialAuthCallback from '../pages/SocialAuthCallback';
+
+const PaymentSuccess = React.lazy(() => import('../pages/PaymentSuccess'));
+const NotFound = React.lazy(() => import('../pages/NotFound'));
+const MaintenancePage = React.lazy(() => import('../pages/MaintenancePage'));
+const PrivacyPolicy = React.lazy(() => import('../pages/PrivacyPolicy'));
+const TermsAndConditions = React.lazy(() => import('../pages/TermsAndConditions'));
+const InfoPage = React.lazy(() => import('../components/InfoPage').then(module => ({ default: module.InfoPage })));
+const VerifyEmail = React.lazy(() => import('../components/VerifyEmail').then(module => ({ default: module.VerifyEmail })));
+const ResetPassword = React.lazy(() => import('../pages/ResetPassword'));
+const Login = React.lazy(() => import('../pages/Login'));
+const Register = React.lazy(() => import('../pages/Register'));
+const VerifyEmailNotice = React.lazy(() => import('../pages/VerifyEmailNotice'));
+const ForgotPassword = React.lazy(() => import('../pages/ForgotPassword'));
+const SocialAuthCallback = React.lazy(() => import('../pages/SocialAuthCallback'));
 import { LanguageCode } from '../types';
 import { useLang } from '../context/LanguageContext';
 import { useTranslation } from 'react-i18next';
@@ -269,13 +270,13 @@ export const AppRouter = () => {
                             <Route path="/valuation" element={settings.sections?.valuationPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Valuation lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
                             <Route path="/sell/:quoteRef" element={settings.sections?.valuationPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><SellDevice /></Suspense></PageTransition> : <Navigate to="/" replace />} />
 
-                            <Route path="/login" element={settings.sections?.authSystem !== false ? <PageTransition><Login /></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/register" element={settings.sections?.authSystem !== false ? <PageTransition><Register /></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/reset-password" element={settings.sections?.authSystem !== false ? <PageTransition><ResetPassword /></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/forgot-password" element={settings.sections?.authSystem !== false ? <PageTransition><ForgotPassword /></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/verify-email" element={settings.sections?.authSystem !== false ? <PageTransition><VerifyEmail /></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/verify-email-notice" element={settings.sections?.authSystem !== false ? <PageTransition><VerifyEmailNotice /></PageTransition> : <Navigate to="/" replace />} />
-                            <Route path="/auth/callback" element={settings.sections?.authSystem !== false ? <SocialAuthCallback /> : <Navigate to="/" replace />} />
+                            <Route path="/login" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Login /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/register" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Register /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/reset-password" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ResetPassword /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/forgot-password" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ForgotPassword /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/verify-email" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><VerifyEmail /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/verify-email-notice" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><VerifyEmailNotice /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+                            <Route path="/auth/callback" element={settings.sections?.authSystem !== false ? <Suspense fallback={<GlobalLoader />}><SocialAuthCallback /></Suspense> : <Navigate to="/" replace />} />
 
                             {/* Standard Pages */}
                             <Route path="/orders/:id" element={<ProtectedRoute><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
@@ -284,7 +285,7 @@ export const AppRouter = () => {
                             <Route path="/compare" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ComparePage /></Suspense></PageTransition>} />
                             <Route path="/contact" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Contact /></Suspense></PageTransition>} />
                             <Route path="/checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
-                            <Route path="/payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
+                            <Route path="/payment-success" element={<PageTransition><Suspense fallback={<GlobalLoader />}><PaymentSuccess /></Suspense></PageTransition>} />
                             
                             <Route path="/cart" element={<ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><CartPage lang={lang} /></Suspense></PageTransition></ErrorBoundary>} />
                             <Route path="/about" element={<Navigate to="/uber-uns" replace />} />
@@ -302,15 +303,15 @@ export const AppRouter = () => {
                             
                             <Route path="/admin/*" element={<AdminRedirect />} />
 
-                            <Route path="/info" element={<PageTransition><InfoPage /></PageTransition>} />
-                            <Route path="/agb" element={<PageTransition><TermsAndConditions /></PageTransition>} />
-                            <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
-                            <Route path="/datenschutz" element={<PageTransition><InfoPage /></PageTransition>} />
-                            <Route path="/service" element={<PageTransition><InfoPage /></PageTransition>} />
-                            <Route path="/kundenservice" element={<PageTransition><InfoPage /></PageTransition>} />
-                            <Route path="/impressum" element={<PageTransition><InfoPage /></PageTransition>} />
-                            <Route path="/uber-uns" element={<PageTransition><InfoPage /></PageTransition>} />
-                            <Route path="/page/:slug" element={<PageTransition><InfoPage /></PageTransition>} />
+                            <Route path="/info" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
+                            <Route path="/agb" element={<PageTransition><Suspense fallback={<GlobalLoader />}><TermsAndConditions /></Suspense></PageTransition>} />
+                            <Route path="/privacy" element={<PageTransition><Suspense fallback={<GlobalLoader />}><PrivacyPolicy /></Suspense></PageTransition>} />
+                            <Route path="/datenschutz" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
+                            <Route path="/service" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
+                            <Route path="/kundenservice" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
+                            <Route path="/impressum" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
+                            <Route path="/uber-uns" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
+                            <Route path="/page/:slug" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
                         </Route>
 
                         <Route element={<ProtectedRoute />}>
@@ -321,7 +322,7 @@ export const AppRouter = () => {
 
                         {/* Prevent access to maintenance page if maintenance is off */}
                         <Route path="/maintenance" element={<Navigate to="/" replace />} />
-                        <Route path="*" element={<NotFound />} />
+                        <Route path="*" element={<Suspense fallback={<GlobalLoader />}><NotFound /></Suspense>} />
                     </Routes>
                 </AnimatePresence>
             </Suspense>

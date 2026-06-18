@@ -33,7 +33,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                     textRef.current.style.transform = `translate(${x * -0.5}px, ${y * -0.5}px)`;
                 }
                 if (visualRef.current) {
-                    visualRef.current.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+                    visualRef.current.style.transform = `translateZ(50px) rotateY(${x}deg) rotateX(${-y}deg)`;
                 }
             });
         };
