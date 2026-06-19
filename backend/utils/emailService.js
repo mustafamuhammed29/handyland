@@ -1,124 +1,48 @@
 const nodemailer = require('nodemailer');
 
-// Cache DB config to avoid querying on every email
-let _dbSmtpConfig = null;
-let _dbSmtpLastFetch = 0;
-const DB_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-/**
- * Get SMTP config: DB first → .env fallback
- */
-const getSmtpConfig = async () => {
-    // Try DB config (cached)
-    const now = Date.now();
-    if (!_dbSmtpConfig || (now - _dbSmtpLastFetch) > DB_CACHE_TTL) {
-        try {
-            const { supabaseAdmin } = require('../config/supabase');
-            const { data, error } = await supabaseAdmin.from('settings')
-                .select('key, value')
-                .in('key', ['smtp_host', 'smtp_port', 'smtp_secure', 'smtp_user', 'smtp_pass', 'smtp_from_email', 'smtp_from_name']);
-            
-            if (!error && data && data.length > 0) {
-                const s = {};
-                data.forEach(item => { s[item.key] = item.value; });
-                
-                if (s.smtp_host && s.smtp_user && s.smtp_pass) {
-                    const { decrypt } = require('./encryption');
-                    
-                    // Automatically clean host if user entered http://
-                    let cleanHost = s.smtp_host.replace(/^https?:\/\//, '').replace(/\/$/, '');
-                    
-                    let portNum = parseInt(s.smtp_port) || 587;
-                    let isSecure = s.smtp_secure === 'true';
-                    if (portNum === 587) isSecure = false;
-                    if (portNum === 465) isSecure = true;
-                    
-                    _dbSmtpConfig = {
-                        host: cleanHost,
-                        port: portNum,
-                        secure: isSecure,
-                        user: s.smtp_user,
-                        pass: decrypt(s.smtp_pass),
-                        fromEmail: s.smtp_from_email || s.smtp_user,
-                        fromName: s.smtp_from_name || 'HandyLand',
-                        source: 'database'
-                    };
-                } else {
-                    _dbSmtpConfig = null;
-                }
-            } else {
-                _dbSmtpConfig = null;
-            }
-            _dbSmtpLastFetch = now;
-        } catch (e) {
-            console.error('Error fetching SMTP config from Supabase:', e);
-            // Silently fall through to .env
-            _dbSmtpConfig = null;
-        }
-    }
-
-    if (_dbSmtpConfig) return _dbSmtpConfig;
-
-    // Fallback to .env
-    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-        return {
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT || 587,
-            secure: false,
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-            fromEmail: process.env.FROM_EMAIL || process.env.SMTP_USER,
-            fromName: process.env.FROM_NAME || 'HandyLand',
-            source: 'env'
-        };
-    }
-
-    return null;
-};
-
-/** Clear cached SMTP config (call after admin updates settings) */
-const clearSmtpCache = () => {
-    _dbSmtpConfig = null;
-    _dbSmtpLastFetch = 0;
-};
+// Clear cached SMTP config (kept for backward compatibility)
+const clearSmtpCache = () => {};
 
 const sendEmail = async (options) => {
-    const config = await getSmtpConfig();
+    const apiKey = process.env.SENDGRID_API_KEY;
 
-    if (config) {
-        try {
-            const transporter = nodemailer.createTransport({
-                host: config.host,
-                port: config.port,
-                secure: config.secure,
-                auth: {
-                    user: config.user,
-                    pass: config.pass
-                },
-                connectionTimeout: 10000, // 10 seconds
-                greetingTimeout: 10000,
-                socketTimeout: 15000
-            });
+    if (!apiKey) {
+        console.error('❌ SENDGRID_API_KEY is missing. Email not sent.');
+        throw new Error('Email service not configured. SENDGRID_API_KEY missing.');
+    }
 
-            const message = {
-                from: `${config.fromName} <${config.fromEmail}>`,
-                to: options.email,
-                replyTo: options.replyTo, // Add replyTo support
-                subject: options.subject,
-                text: options.message, // Plain text body
-                html: options.html // HTML body
-            };
+    try {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.sendgrid.net',
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'apikey',
+                pass: apiKey
+            },
+            connectionTimeout: 10000, // 10 seconds
+            greetingTimeout: 10000,
+            socketTimeout: 15000
+        });
 
-            const info = await transporter.sendMail(message);
-            console.log('📧 Email sent successfully: %s (via %s)', info.messageId, config.source);
-        } catch (error) {
-            console.error('❌ Error sending email via SMTP:', error.message);
-            // Re-throw so the controller knows it failed
-            throw error;
-        }
-    } else {
-        console.warn('⚠️ No SMTP configuration found. Email not sent.');
-        throw new Error('Email service not configured');
+        const fromEmail = process.env.FROM_EMAIL || 'noreply@handyland.com';
+        const fromName = process.env.FROM_NAME || 'HandyLand';
+
+        const message = {
+            from: `${fromName} <${fromEmail}>`,
+            to: options.email,
+            replyTo: options.replyTo, // Add replyTo support
+            subject: options.subject,
+            text: options.message, // Plain text body
+            html: options.html // HTML body
+        };
+
+        const info = await transporter.sendMail(message);
+        console.log('📧 Email sent successfully via SendGrid: %s', info.messageId);
+    } catch (error) {
+        console.error('❌ Error sending email via SendGrid:', error.message);
+        // Re-throw so the controller knows it failed
+        throw error;
     }
 };
 

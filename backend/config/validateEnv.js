@@ -5,7 +5,8 @@ const requiredEnvVars = [
     'SUPABASE_SERVICE_KEY',
     'STRIPE_SECRET_KEY',
     'STRIPE_WEBHOOK_SECRET',
-    'FRONTEND_URL'
+    'FRONTEND_URL',
+    'SENDGRID_API_KEY'
 ];
 
 const validateEnv = () => {

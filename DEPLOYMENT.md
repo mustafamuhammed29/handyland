@@ -243,7 +243,6 @@ Suggested subdomain: `admin.handyland.com`
 
 1. Go to [SendGrid.com](https://sendgrid.com/)
 2. Sign up for free account (100 emails/day free)
-3. Verify email address
 
 ### Step 2: Create API Key
 
@@ -257,19 +256,14 @@ Suggested subdomain: `admin.handyland.com`
 ### Step 3: Verify Sender Identity
 
 1. Go to **Settings** → **Sender Authentication**
-2. Choose **Single Sender Verification** (easier)
-3. Fill in details:
-   - **From Name**: HandyLand
-   - **From Email**: `noreply@handyland.com` (or your email)
-4. Verify email
+2. Choose **Authenticate Your Domain**
+3. Add the DNS records (SPF, DKIM) provided by SendGrid to your domain
+   - *Note: DNS records must be added once and never changed again.*
 
 ### Step 4: Configure in Environment
 
 ```text
-SMTP_HOST=smtp.sendgrid.net
-SMTP_PORT=587
-SMTP_USER=apikey
-SMTP_PASS=SG.your_api_key_here
+SENDGRID_API_KEY=SG.your_api_key_here
 
 FROM_EMAIL=noreply@handyland.com
 FROM_NAME=HandyLand
