@@ -1,0 +1,3 @@
+src/components/InventoryManager/components/Pagination.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/InventoryManager/components/SalesTable.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/InventoryManager/components/StockTabs.tsx(1,1): error TS6133: 'React' is declared but its value is never read.

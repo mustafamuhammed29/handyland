@@ -21,7 +21,7 @@ const helmetMiddleware = helmet({
             scriptSrc: ["'self'", "js.stripe.com"],
             styleSrc: ["'self'", "fonts.googleapis.com"],
             fontSrc: ["'self'", "fonts.gstatic.com"],
-            imgSrc: ["'self'", "data:", "blob:", "res.cloudinary.com", "images.unsplash.com"],
+            imgSrc: ["'self'", "data:", "blob:", "res.cloudinary.com", "images.unsplash.com", "*.supabase.co", process.env.SUPABASE_URL ? process.env.SUPABASE_URL.replace('https://', '') : "*.supabase.co"],
             connectSrc: [
                 "'self'",
                 "api.stripe.com",

@@ -13,59 +13,28 @@ Before deploying, ensure you have:
 
 ---
 
-## Part 1: Database Setup (MongoDB Atlas)
+## Part 1: Database Setup (Supabase)
 
-### Step 1: Create MongoDB Cluster
+### Step 1: Create Supabase Project
 
-1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Create free account / Sign in
-3. Click **"Build a Database"**
-4. Select **FREE** tier (M0 Sandbox)
-5. Choose cloud provider and region (closest to your users)
-6. Cluster name: `handyland-prod`
-7. Click **"Create"**
+1. Go to [Supabase](https://supabase.com)
+2. Sign in with GitHub and click **"New Project"**
+3. Select your organization and name your project `handyland-prod`
+4. Generate a strong Database Password and save it.
+5. Select a region closest to your users (e.g., Frankfurt)
+6. Click **"Create new project"**
 
-### Step 2: Configure Network Access
+### Step 2: Get API Keys
 
-1. In Atlas dashboard, go to **Network Access**
-2. Click **"Add IP Address"**
-3. Select **"Allow Access from Anywhere"** (0.0.0.0/0)
-   - Note: In production, restrict to your server IPs
-4. Click **"Confirm"**
+1. Go to **Project Settings** → **API**
+2. Copy the **Project URL** (This is your `SUPABASE_URL`)
+3. Copy the **anon / public** key (This is your `SUPABASE_ANON_KEY` for frontend)
+4. Copy the **service_role** key (This is your `SUPABASE_SERVICE_ROLE_KEY` for backend - Keep it secret!)
 
-### Step 3: Create Database User
+### Step 3: Run Migrations
 
-1. Go to **Database Access**
-2. Click **"Add New Database User"**
-3. Authentication Method: **Password**
-4. Username: `handyland_admin`
-5. Password: **Generate secure password** (save it!)
-6. Database User Privileges: **Atlas admin**
-7. Click **"Add User"**
-
-### Step 4: Get Connection String
-
-1. Go to **Database** → Click **"Connect"**
-2. Select **"Connect your application"**
-3. Driver: **Node.js**, Version: **4.1 or later**
-4. Copy connection string:
-`mongodb+srv://handyland_admin:<password>@handyland-prod.xxxxx.mongodb.net/?retryWrites=true&w=majority`
-
-5. Replace `<password>` with your actual password
-6. Add database name at the end: `...mongodb.net/handyland?retryWrites...`
-
-### Step 5: Seed Initial Data
-
-```bash
-# Connect to your production database
-set MONGO_URI=mongodb+srv://handyland_admin:PASSWORD@handyland-prod.xxxxx.mongodb.net/handyland
-
-# Create admin user
-node createAdmin.js
-
-# Seed products (optional)
-node seedData.js
-```
+Ensure all SQL migrations have been executed in the Supabase SQL Editor.
+(Optional) If you have a migration CLI setup, run `supabase db push`.
 
 ## Part 2: Backend Deployment
 

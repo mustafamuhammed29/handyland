@@ -14,7 +14,7 @@ const {
     createInvoiceAction
 } = require('../controllers/orderController');
 const { protect, authorize, optionalProtect } = require('../middleware/auth');
-const upload = require('../utils/imageUpload');
+const { uploadSingle } = require('../middleware/upload');
 
 // Validation rules
 const createOrderRules = [

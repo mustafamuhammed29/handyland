@@ -30,16 +30,11 @@ const uploadLimiter = rateLimit({
     message: { success: false, message: 'Too many uploads, please try again later.' },
 });
 
-const upload = process.env.CLOUDINARY_URL
-    ? require('../utils/cloudinaryUpload')
-    : require('../utils/imageUpload');
+const { uploadSingle } = require('../middleware/upload');
 
-router.post('/upload', uploadLimiter, protect, upload.single('image'), (req, res) => {
-    if (!req.file) {return res.status(400).json({ success: false, message: 'No file uploaded' });}
-    const imageUrl = (req.file.path && req.file.path.startsWith('http'))
-        ? req.file.path
-        : `/uploads/${req.file.filename}`;
-    res.json({ success: true, imageUrl });
+router.post('/upload', uploadLimiter, protect, uploadSingle('products', 'image'), (req, res) => {
+    if (!req.fileUrl) {return res.status(400).json({ success: false, message: 'No file uploaded' });}
+    res.json({ success: true, imageUrl: req.fileUrl });
 });
 
 // ── Feature routes ─────────────────────────────────────────────────────────────
