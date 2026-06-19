@@ -20,7 +20,7 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
     const { t } = useTranslation();
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-300">
             <div className="relative w-full max-w-4xl bg-slate-900 border-4 border-blue-500/30 rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/50 flex flex-col md:flex-row max-h-[85vh]">
 
                 {/* Grid Overlay */}
@@ -30,7 +30,7 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                     type="button"
                     aria-label="Close Details"
                     onClick={() => setSelectedDevice(null)}
-                    className="absolute top-4 right-4 z-50 p-2 bg-slate-900 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors border border-slate-700"
+                    className="absolute top-4 right-4 z-[110] p-2 bg-slate-900 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors border border-slate-700"
                 >
                     <X className="w-6 h-6" />
                 </button>
@@ -70,9 +70,9 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                                 key={idx}
                                 className="group relative bg-black/40 border border-slate-800 hover:border-blue-500/50 rounded-xl p-4 transition-all duration-300 hover:bg-blue-900/5"
                             >
-                                <div className="flex justify-between items-start">
+                                <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 sm:gap-2">
                                     <div className="flex items-start gap-4">
-                                        <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-blue-400 group-hover:border-blue-500/30 transition-colors">
+                                        <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-blue-400 group-hover:border-blue-500/30 transition-colors shrink-0">
                                             {getServiceIcon(service.type)}
                                         </div>
                                         <div>
@@ -85,7 +85,7 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                                                  service.type === 'faceid' ? t('repair.faceId', 'Face ID') :
                                                  service.label}
                                             </div>
-                                            <div className="flex items-center gap-3 mt-1">
+                                            <div className="flex flex-wrap items-center gap-3 mt-1">
                                                 <span className="text-xs text-slate-500 flex items-center gap-1">
                                                     <Clock className="w-3 h-3" /> {service.duration}
                                                 </span>
@@ -95,7 +95,7 @@ export const RepairDeviceModal: React.FC<RepairDeviceModalProps> = ({
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="text-right flex flex-col items-end gap-2">
+                                    <div className="w-full sm:w-auto text-left sm:text-right flex sm:flex-col flex-row items-center sm:items-end justify-between sm:justify-end gap-2 border-t sm:border-t-0 border-slate-800 pt-3 sm:pt-0 mt-2 sm:mt-0">
                                         <div className="text-xl font-bold text-blue-400">
                                             {service.price && service.price > 0 ? `${service.price}€` : t('repair.na', 'On Request')}
                                         </div>

@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Users, Wrench, Star, History, Trophy, Activity } from 'lucide-react';
 
-// Helper component for animated numbers
 const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number, duration?: number, suffix?: string }) => {
   const [count, setCount] = useState(0);
-  const countRef = useRef<HTMLDivElement>(null);
+  const countRef = useRef<HTMLSpanElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -33,8 +32,17 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number, d
 
   useEffect(() => {
     if (!isVisible) return;
+    
+    // Safety check in case end is invalid
+    const finalEnd = isNaN(Number(end)) ? 0 : Number(end);
+    if (finalEnd <= 0) {
+      setCount(0);
+      return;
+    }
 
     let startTime: number | null = null;
+    let animationFrameId: number;
+
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
@@ -42,14 +50,22 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number, d
       // Easing function for smooth stop
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
 
-      setCount(Math.floor(easeOutQuart * end));
+      setCount(Math.floor(easeOutQuart * finalEnd));
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        setCount(finalEnd); // Ensure we end exactly on the target
       }
     };
 
-    requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, [isVisible, end, duration]);
 
   return (

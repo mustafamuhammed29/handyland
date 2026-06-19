@@ -14,8 +14,8 @@ i18n
     react: { useSuspense: false },
     interpolation: { escapeValue: false },
     detection: {
-      // FIX 3: extended order — querystring lets ?lang=ar override for testing
-      order: ['localStorage', 'querystring', 'navigator'],
+      // Always default to German unless explicitly set by user (localStorage) or URL
+      order: ['localStorage', 'querystring'],
       lookupLocalStorage: 'handyland_lang',
       lookupQuerystring: 'lang',
       caches: ['localStorage'],

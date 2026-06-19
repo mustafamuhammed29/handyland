@@ -92,41 +92,59 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-6 xl:grid-cols-12 gap-6 auto-rows-min">
                 
                 {/* 1. Hero Welcome Card (Span 8) */}
-                <div className="md:col-span-6 xl:col-span-8 relative overflow-hidden bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 p-6 sm:p-8 rounded-3xl group shadow-lg hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] transition-all duration-500">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-[80px] group-hover:bg-brand-primary/20 transition-all duration-700 -z-10 translate-x-1/2 -translate-y-1/2"></div>
+                <div className="md:col-span-6 xl:col-span-8 relative overflow-hidden bg-slate-950/80 backdrop-blur-xl border border-blue-500/20 p-5 sm:p-8 rounded-3xl group shadow-[0_0_30px_rgba(59,130,246,0.1)] hover:shadow-[0_0_40px_rgba(59,130,246,0.2)] transition-all duration-500">
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.05)_1px,transparent_1px)] bg-[size:20px_20px] sm:bg-[size:30px_30px] pointer-events-none"></div>
+                    <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-blue-500/10 rounded-full blur-[80px] group-hover:bg-blue-500/20 transition-all duration-700 -z-10 translate-x-1/2 -translate-y-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
                     
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 z-10 relative h-full">
-                        <div>
+                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 z-10 relative h-full">
+                        <div className="w-full xl:w-auto flex-1">
                             <div className="flex items-center gap-3 mb-2">
-                                {greeting.icon}
-                                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                                    {greeting.text}, {userName?.split(' ')[0] || t('common.member', 'Member')}!
+                                <div className="p-1.5 sm:p-2 bg-blue-900/30 rounded-xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                                    {React.cloneElement(greeting.icon, { className: "w-5 h-5 sm:w-6 sm:h-6 text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]" })}
+                                </div>
+                                <h2 className="text-xl sm:text-3xl font-black text-white tracking-tight uppercase font-mono leading-tight">
+                                    <span className="text-blue-400 hidden sm:inline">&gt;</span> {greeting.text}, <br className="sm:hidden" />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">
+                                        {userName?.split(' ')[0] || t('common.member', 'Member')}
+                                    </span>
                                 </h2>
                             </div>
-                            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md leading-relaxed">
+                            <p className="text-blue-200/60 text-[11px] sm:text-sm max-w-md leading-relaxed font-mono">
                                 {pendingOrders > 0 || activeRepairs > 0 
-                                    ? t('dashboard.hero.statusUpdate', { defaultValue: `Hier ist dein Status-Update: Du hast {{pendingOrders}} aktive Bestellungen und {{activeRepairs}} Geräte in Reparatur.`, pendingOrders, activeRepairs })
-                                    : t('dashboard.hero.allClear', 'Alles ist auf dem neuesten Stand. Entdecke unsere neuesten Angebote im Marktplatz oder nutze unsere Reparatur-Services.')}
+                                    ? t('dashboard.hero.statusUpdate', { defaultValue: `SYSTEM STATUS: {{pendingOrders}} ACTIVE ORDERS | {{activeRepairs}} REPAIRS IN PROGRESS`, pendingOrders, activeRepairs })
+                                    : t('dashboard.hero.allClear', 'SYSTEM STATUS: OPTIMAL. NO ACTIVE TASKS. EXPLORE MARKETPLACE OR INITIATE NEW REPAIR.')}
                             </p>
                             
-                            <div className="flex flex-wrap gap-3 mt-6">
-                                <button onClick={() => navigate('/marketplace')} className="px-5 py-2.5 bg-white text-slate-900 rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                            <div className="flex flex-col sm:flex-row gap-2.5 mt-5">
+                                <button onClick={() => navigate('/marketplace')} className="w-full sm:w-auto px-4 py-3 sm:px-5 sm:py-2.5 bg-blue-600/20 text-blue-400 rounded-xl font-bold text-xs sm:text-sm hover:bg-blue-600/30 border border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all uppercase tracking-wider font-mono flex items-center justify-center gap-2">
+                                    <Package className="w-4 h-4" />
                                     {t('dashboard.hero.marketplace', 'Marktplatz')}
                                 </button>
-                                <button onClick={() => navigate('/repair')} className="px-5 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-700 border border-slate-200 dark:border-white/5 transition-all">
-                                    {t('dashboard.hero.newRepair', 'Neuer Reparaturauftrag')}
+                                <button onClick={() => navigate('/repair')} className="w-full sm:w-auto px-4 py-3 sm:px-5 sm:py-2.5 bg-black/40 text-purple-400 rounded-xl font-bold text-xs sm:text-sm hover:bg-purple-900/30 border border-purple-500/30 hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all uppercase tracking-wider font-mono flex items-center justify-center gap-2">
+                                    <Wrench className="w-4 h-4" />
+                                    {t('dashboard.hero.newRepair', 'Neu Reparatur')}
                                 </button>
                             </div>
                         </div>
                         
-                        <div className="flex gap-4 sm:flex-col sm:w-auto w-full">
-                            <div className="bg-slate-100 dark:bg-black/20 border border-slate-200 dark:border-white/5 rounded-2xl p-4 flex-1 sm:w-48 backdrop-blur-md">
-                                <div className="flex items-center gap-2 text-brand-primary mb-1">
-                                    <Clock className="w-4 h-4" />
-                                    <span className="text-xs font-bold font-mono">{t('dashboard.hero.active', 'AKTIV')}</span>
+                        <div className="flex w-full xl:w-auto shrink-0 mt-2 xl:mt-0">
+                            <div className="bg-black/50 border border-blue-500/30 rounded-2xl p-4 flex-1 sm:w-48 backdrop-blur-md relative overflow-hidden group/hud cursor-default">
+                                <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/hud:opacity-100 transition-opacity"></div>
+                                <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-blue-400 m-1"></div>
+                                <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-blue-400 m-1"></div>
+                                
+                                <div className="flex items-center gap-2 text-blue-400 mb-1">
+                                    <Activity className="w-4 h-4 animate-pulse" />
+                                    <span className="text-[10px] font-bold font-mono tracking-widest">{t('dashboard.hero.active', 'ACTIVE TELEMETRY')}</span>
                                 </div>
-                                <p className="text-2xl font-black text-slate-900 dark:text-white">{pendingOrders + activeRepairs + pendingValuations}</p>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">{t('dashboard.hero.ongoing', 'Laufende Vorgänge')}</p>
+                                <div className="flex items-end gap-2">
+                                    <p className="text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] font-mono">{pendingOrders + activeRepairs + pendingValuations}</p>
+                                    <p className="text-xs text-blue-500 font-mono mb-1 animate-pulse">OBJ</p>
+                                </div>
+                                <div className="w-full h-1 bg-slate-900 mt-2 rounded-full overflow-hidden">
+                                    <div className="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] w-full animate-[scan_2s_ease-in-out_infinite]"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -134,39 +152,42 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 {/* 2. Stunning Loyalty & Rewards Card (Span 4) */}
                 {settings?.features?.loyalty?.enabled !== false && (
-                    <div className="md:col-span-6 xl:col-span-4 relative overflow-hidden bg-gradient-to-br from-indigo-900 to-slate-900 border border-white/10 p-6 sm:p-8 rounded-3xl group shadow-[0_0_30px_rgba(79,70,229,0.15)] hover:shadow-[0_0_40px_rgba(79,70,229,0.3)] transition-all duration-500">
-                        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-50"></div>
-                        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-primary/20 blur-[60px] rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-                        
+                    <div className="md:col-span-6 xl:col-span-4 relative overflow-hidden bg-gradient-to-br from-slate-900 to-black border border-blue-500/20 p-6 sm:p-8 rounded-3xl group shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] transition-all duration-500">
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent opacity-50"></div>
+                        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-600/20 blur-[60px] rounded-full group-hover:scale-150 transition-transform duration-700 pointer-events-none"></div>
+                        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
+
                         <div className="z-10 relative h-full flex flex-col justify-between">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <p className="text-white/70 text-[10px] font-bold tracking-widest uppercase mb-1">{t('dashboard.rewardsTier', 'Belohnungs-Stufe')}</p>
-                                    <h3 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-2">
-                                        <Trophy className="w-5 h-5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+                                    <p className="text-blue-400/70 text-[9px] font-mono font-bold tracking-widest uppercase mb-1">{t('dashboard.rewardsTier', 'SECURITY CLEARANCE')}</p>
+                                    <h3 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-2 font-mono uppercase">
+                                        <ShieldCheck className="w-5 h-5 text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
                                         {user?.membershipLevel === 4 ? t('dashboard.rewards.tier.platinum', 'Platinum') : user?.membershipLevel === 3 ? t('dashboard.rewards.tier.gold', 'Gold') : user?.membershipLevel === 2 ? t('dashboard.rewards.tier.silver', 'Silver') : t('dashboard.rewards.tier.member', 'Member')}
                                     </h3>
                                 </div>
-                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20">
-                                    <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-brand-primary" />
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-900/30 flex items-center justify-center backdrop-blur-md border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                                    <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                                 </div>
                             </div>
 
                             <div className="mt-4">
                                 <div className="flex justify-between items-end mb-2">
-                                    <span className="text-4xl sm:text-5xl font-black text-white drop-shadow-md tracking-tighter">{user?.loyaltyPoints || 0} <span className="text-sm font-bold text-white/50 tracking-normal">{t('dashboard.rewards.pts', 'PTS')}</span></span>
+                                    <span className="text-4xl sm:text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] tracking-tighter font-mono">
+                                        {user?.loyaltyPoints || 0} <span className="text-sm font-bold text-blue-500/80 tracking-widest">PTS</span>
+                                    </span>
                                 </div>
                                 
-                                <div className="w-full bg-black/40 rounded-full h-2.5 mb-2 overflow-hidden border border-slate-200 dark:border-white/5 relative">
-                                    <div className="absolute inset-0 bg-white/5"></div>
+                                <div className="w-full bg-slate-900 rounded-full h-2 mb-2 overflow-hidden border border-slate-800 relative">
+                                    <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_25%,rgba(255,255,255,0.1)_50%,transparent_75%)] w-[200%] animate-[shimmer_2s_infinite]"></div>
                                     {user?.membershipLevel === 4 ? (
-                                        <div className="bg-gradient-to-r from-brand-primary to-purple-500 h-full rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" style={{ width: '100%' }}></div>
+                                        <div className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full shadow-[0_0_10px_rgba(34,211,238,0.8)]" style={{ width: '100%' }}></div>
                                     ) : (
-                                        <div className="bg-gradient-to-r from-brand-primary to-purple-500 h-full rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]" style={{ width: `${Math.min(((user?.loyaltyPoints || 0) % 2000) / 2000 * 100, 100)}%` }}></div>
+                                        <div className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full shadow-[0_0_10px_rgba(34,211,238,0.8)]" style={{ width: `${Math.min(((user?.loyaltyPoints || 0) % 2000) / 2000 * 100, 100)}%` }}></div>
                                     )}
                                 </div>
-                                <p className="text-[11px] text-white/50 font-medium">
-                                    {user?.membershipLevel === 4 ? t('dashboard.rewards.maxTier', 'Max Tier Reached!') : t('dashboard.rewards.nextTier', { defaultValue: '{{pts}} pts to next tier update', pts: 2000 - ((user?.loyaltyPoints || 0) % 2000) })}
+                                <p className="text-[10px] text-blue-300/60 font-mono tracking-widest uppercase">
+                                    {user?.membershipLevel === 4 ? t('dashboard.rewards.maxTier', 'MAX TIER OVERRIDE ACTIVE') : t('dashboard.rewards.nextTier', { defaultValue: '{{pts}} PTS REQ. FOR UPGRADE', pts: 2000 - ((user?.loyaltyPoints || 0) % 2000) })}
                                 </p>
                             </div>
                         </div>

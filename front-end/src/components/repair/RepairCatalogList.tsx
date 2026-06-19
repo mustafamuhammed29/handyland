@@ -79,11 +79,11 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                         >
                             {/* Status Light */}
                             <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
-                                {(device.services?.length ?? 0) > 0 && (
+                                {(device.services?.length || 0) > 0 && (
                                     <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase group-hover:text-blue-400 transition-colors">
                                         {device.services!.length === 1
-                                            ? `1 ${t('repair.service', 'Service')}`
-                                            : `${device.services!.length} ${t('repair.servicesPlural', 'Services')}`}
+                                            ? `1 ${t('repair.service', 'Dienst')}`
+                                            : `${device.services!.length} ${t('repair.servicesPlural', 'Dienste')}`}
                                     </span>
                                 )}
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse"></div>
@@ -144,7 +144,7 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                                 })}
                             </div>
 
-                            <div className="mt-6 flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-4 group-hover:border-blue-500/20">
+                            <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 dark:border-slate-800 pt-4 group-hover:border-blue-500/20">
                                 <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{t('repair.statusServiceable', 'STATUS: VERFÜGBAR')}</span>
                                 <div className="flex items-center gap-1 text-blue-500 text-xs font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform">
                                     {t('repair.openDiagnostics', 'Diagnostik öffnen')} <ChevronRight className="w-3 h-3" />

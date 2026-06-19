@@ -128,9 +128,13 @@ export const AppRouter = () => {
                     Wartungsmodus ist AKTIV! Sie umgehen ihn als Admin. Kunden sehen die Wartungsseite.
                 </div>
             )}
-            <AnnouncementBanner />
+            {!['/dashboard', '/seller'].some(p => location.pathname.startsWith(p)) && (
+                <>
+                    <AnnouncementBanner />
+                    <PromoModal />
+                </>
+            )}
             <OfflineBanner />
-            <PromoModal />
             <Suspense fallback={<GlobalLoader />}>
                 <AnimatePresence mode="wait">
                     <Routes location={location} key={location.pathname}>

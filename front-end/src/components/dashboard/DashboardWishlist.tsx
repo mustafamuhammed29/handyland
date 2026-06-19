@@ -50,12 +50,12 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">{t('wishlist.title', 'Mein Wunschzettel')}</h2>
-                    <p className="text-slate-400 text-sm">{t('wishlist.saved', { count: wishlistItems.length })}</p>
+                    <h2 className="text-2xl font-bold text-white">{t('wishlist.title', 'Wunschliste')}</h2>
+                    <p className="text-slate-400 text-sm">{t('wishlist.savedCount', { count: wishlistItems.length, defaultValue: '{{count}} gesichert' })}</p>
                 </div>
             </div>
 
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4">
                 {wishlistItems.map(item => (
                     <div
                         key={item.id}
@@ -66,7 +66,7 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                                 <img
                                     src={getImageUrl(item.images[0])}
                                     alt={item.model}
-                                    className="w-full h-48 object-cover"
+                                    className="w-full h-32 sm:h-48 object-cover"
                                     onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }}
                                 />
                             )}
@@ -80,42 +80,43 @@ export const DashboardWishlist: React.FC<DashboardWishlistProps> = ({
                             </button>
                         </div>
 
-                        <div className="p-4">
-                            <h3 className="font-bold text-white mb-1">{item.model}</h3>
-                            <p className="text-sm text-slate-400 mb-3">
+                        <div className="p-3 sm:p-4">
+                            <h3 className="font-bold text-white mb-1 text-sm sm:text-base line-clamp-1">{item.model}</h3>
+                            <p className="text-xs sm:text-sm text-slate-400 mb-2 sm:mb-3 line-clamp-1">
                                 {item.brand}
                                 {item.storage ? ` • ${item.storage}` : ''}
                             </p>
 
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-xl font-bold text-white">{formatPrice(item.price)}</span>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-1 sm:gap-2">
+                                <span className="text-base sm:text-xl font-bold text-white">{formatPrice(item.price)}</span>
                                 {item.stock > 0 ? (
-                                    <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
+                                    <span className="text-[10px] sm:text-xs text-emerald-400 bg-emerald-500/10 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded w-fit">
                                         {t('wishlist.in_stock', 'Auf Lager')}
                                     </span>
                                 ) : (
-                                    <span className="text-xs text-red-400 bg-red-500/10 px-2 py-1 rounded">
+                                    <span className="text-[10px] sm:text-xs text-red-400 bg-red-500/10 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded w-fit">
                                         {t('common.outOfStock', 'Out of Stock')}
                                     </span>
                                 )}
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className="flex gap-1.5 sm:gap-2">
                                 <button
                                     onClick={() => handleAddToCart(item)}
                                     disabled={item.stock === 0}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-xl font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
                                 >
-                                    <ShoppingCart className="w-4 h-4" />
-                                    {t('wishlist.add_to_cart', 'In den Warenkorb')}
+                                    <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    <span className="hidden sm:inline">{t('wishlist.add_to_cart', 'In den Warenkorb')}</span>
+                                    <span className="sm:hidden text-[11px]">{t('wishlist.add_to_cart_short', 'Kaufen')}</span>
                                 </button>
                                 <button
                                     onClick={() => navigate(`/products/${item.id}`)}
                                     aria-label={t('wishlist.actions.view', 'View product details')}
                                     title={t('wishlist.actions.view', 'View product')}
-                                    className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors"
+                                    className="p-1.5 sm:p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg sm:rounded-xl transition-colors"
                                 >
-                                    <ExternalLink className="w-4 h-4" />
+                                    <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </button>
                             </div>
                         </div>

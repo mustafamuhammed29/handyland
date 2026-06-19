@@ -136,17 +136,17 @@ export const ComparePage: React.FC = () => {
         .slice(0, 4);
 
     return (
-        <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 pt-32 pb-24 text-slate-900 dark:text-white">
+        <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-950 pt-32 pb-32 md:pb-24 text-slate-900 dark:text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div className="mb-12 text-center">
                     <p className="text-sm font-mono text-brand-primary uppercase tracking-widest mb-3">
                         {t('compare.subtitle', 'Side-by-side Vergleich')}
                     </p>
-                    <h1 className="text-4xl md:text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-secondary">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-secondary leading-tight">
                         {t('compare.title', 'Geräte vergleichen')}
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-6">
+                    <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-6 px-2">
                         {t('compare.description', 'Wähle bis zu 3 Geräte aus und vergleiche Spezifikationen, Preise und Leistung auf einen Blick.')}
                     </p>
                     
@@ -171,9 +171,9 @@ export const ComparePage: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-row gap-4 overflow-x-auto snap-x snap-mandatory pb-8 md:grid md:grid-cols-3 md:gap-6 mb-12 md:overflow-x-visible -mx-4 px-4 md:mx-0 md:px-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+                <div className="flex flex-col gap-4 pb-8 md:grid md:grid-cols-3 md:gap-6 mb-12 w-full">
                     {slots.map((slotIndex) => (
-                        <div key={slotIndex} className="min-w-[65vw] sm:min-w-[280px] snap-center flex-shrink-0 md:min-w-0">
+                        <div key={slotIndex} className="w-full">
                             <CompareSlot 
                                 slotIndex={slotIndex}
                                 product={selectedProducts[slotIndex]}
@@ -202,10 +202,10 @@ export const ComparePage: React.FC = () => {
                                 <button
                                     key={p._id || p.id}
                                     onClick={() => handleSelectProduct(p, 0)}
-                                    className="flex items-center gap-3 bg-slate-900 border border-slate-800 hover:border-brand-primary/50 px-4 py-2 rounded-2xl transition-colors"
+                                    className="flex items-center gap-3 bg-slate-900 border border-slate-800 hover:border-brand-primary/50 px-4 py-3 rounded-2xl transition-colors w-full sm:w-auto max-w-full text-left"
                                 >
-                                    <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-8 h-8 object-contain bg-white rounded-md p-1" />
-                                    <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{stripInternalId(p.name || p.model)}</span>
+                                    <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-8 h-8 object-contain bg-white rounded-md p-1 shrink-0" />
+                                    <span className="font-bold text-sm text-slate-700 dark:text-slate-300 truncate">{stripInternalId(p.name || p.model)}</span>
                                 </button>
                             ))}
                         </div>

@@ -142,7 +142,8 @@ const authLimiterWrapper = isDevelopment
     : authLimiter;
 router.post('/admin/login', authLimiterWrapper, authController.adminLogin);
 router.get('/admin/users', protect, (req, res, next) => {
-    if (req.user.role !== 'admin') {
+    const role = req.user?.role?.toLowerCase();
+    if (role !== 'admin' && role !== 'administrator') {
         return res.status(403).json({ success: false, message: 'Access denied' });
     }
     next();

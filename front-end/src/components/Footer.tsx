@@ -105,10 +105,10 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
 
   return (
     <footer className="bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 mt-auto relative z-10 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] dark:shadow-none">
-      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 mb-12">
+      <div className="max-w-7xl mx-auto pt-12 pb-28 md:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-10 md:gap-12 mb-10 md:mb-12">
           {/* Company Info */}
-          <div className="sm:col-span-2 md:col-span-3 lg:col-span-2">
+          <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <Link to="/" className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase cursor-pointer inline-block">
               {settings.companyInfo.name.split('LAND')[0]}
               <span className="text-brand-primary">LAND</span>
@@ -131,11 +131,11 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
 
           {/* Dynamic Columns */}
           {finalColumns.map((column, index) => (
-            <div key={index}>
-              <h4 className="text-slate-900 dark:text-white font-bold mb-6 uppercase text-xs tracking-[0.2em]">
+            <div key={index} className="col-span-1">
+              <h4 className="text-slate-900 dark:text-white font-bold mb-4 md:mb-6 uppercase text-xs tracking-[0.2em]">
                 {column.title}
               </h4>
-              <ul className="space-y-4 text-sm text-slate-500">
+              <ul className="space-y-3 md:space-y-4 text-sm text-slate-500">
                 {column.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
                     <Link

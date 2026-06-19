@@ -440,6 +440,8 @@
   "repair": {
     "title": "Service Terminal",
     "subtitle": "Professionelle Reparaturen für alle Geräte",
+    "service": "Dienst",
+    "servicesPlural": "Dienste",
     "searchPlaceholder": "Gerätemodell suchen (z.B. iPhone 15, S24)...",
     "bookRepair": "Reparatur buchen",
     "allDevices": "Alle Geräte",

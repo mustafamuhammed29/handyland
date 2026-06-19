@@ -654,7 +654,9 @@ exports.adminLogin = async (req, res, next) => {
         }
 
         const { data: userProfile } = await supabaseAdmin.from('users').select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at').eq('id', data.user.id).single();
-        if (!userProfile || userProfile.role !== 'admin') {
+        const role = userProfile?.role?.toLowerCase();
+        if (!userProfile || (role !== 'admin' && role !== 'administrator')) {
+            console.error(`Admin Login Denied: User role is ${userProfile?.role}`);
             return res.status(403).json({ success: false, message: 'Access denied' });
         }
         

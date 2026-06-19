@@ -142,12 +142,12 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
 
             {/* Dropdown Panel */}
             {open && (
-                <div className={`absolute ${isNavbar ? 'right-0 top-[calc(100%+0.5rem)] origin-top-right' : 'left-[calc(100%+0.5rem)] bottom-0 origin-bottom-left'} w-[320px] sm:w-[380px] bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl shadow-black/60 z-[100] overflow-hidden animate-in fade-in zoom-in-95 duration-200`}>
+                <div className={`absolute ${isNavbar ? 'right-0 top-[calc(100%+0.5rem)] origin-top-right' : 'left-0 sm:left-[calc(100%+0.5rem)] bottom-[calc(100%+0.5rem)] sm:bottom-0 origin-bottom-left sm:origin-bottom-left'} w-[300px] sm:w-[380px] max-w-[calc(100vw-2rem)] bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl shadow-black/60 z-[100] overflow-hidden animate-in fade-in zoom-in-95 duration-200`}>
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
-                        <div className="flex items-center gap-2">
-                            <Bell className="w-4 h-4 text-blue-400" />
-                            <span className="text-white font-bold text-sm">{t('notifications.title', 'Notifications')}</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                            <Bell className="w-4 h-4 text-blue-400 shrink-0" />
+                            <span className="text-white font-bold text-sm truncate" title={t('notifications.title', 'Notifications')}>{t('notifications.title', 'Notifications')}</span>
                             {unread > 0 && (
                                 <span className="text-[10px] bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded-full font-bold border border-blue-500/20">
                                     {t('notifications.newCount', { count: unread, defaultValue: '{{count}} new' })}
@@ -204,8 +204,8 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${typeBg(n.type)}`}>
                                         {typeIcon(n.type)}
                                     </div>
-                                    <div className="flex-1 min-w-0 pr-4">
-                                        <p className={`text-sm leading-snug ${n.read ? 'text-slate-400' : 'text-white font-medium'}`}>
+                                    <div className="flex-1 min-w-0 pr-2 sm:pr-4">
+                                        <p className={`text-sm leading-snug break-words ${n.read ? 'text-slate-400' : 'text-white font-medium'}`}>
                                             {n.message}
                                         </p>
                                         <p className="text-[11px] text-slate-500 mt-1.5 font-medium">{timeAgo(n.createdAt)}</p>

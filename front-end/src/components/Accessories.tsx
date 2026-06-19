@@ -158,7 +158,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                     </div>
 
                     {/* Search & Categories */}
-                    <div className="flex flex-col md:flex-row gap-4 items-end w-full md:w-auto">
+                    <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-end w-full md:w-auto">
                         {/* Search Bar */}
                         <div className="relative group w-full md:w-64">
                             <Search className="absolute left-3 top-3 text-slate-500 w-4 h-4 group-focus-within:text-purple-400 transition-colors" />
@@ -192,10 +192,12 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
 
                 {/* Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
-                    {filteredProducts.slice(0, visibleCount).map((item) => (
+                    {filteredProducts.slice(0, visibleCount).map((item, index) => {
+                        const itemId = item._id || item.id || `acc-${index}`;
+                        return (
                         <div
-                            key={item.id}
-                            onMouseEnter={() => setHoveredId(item.id)}
+                            key={itemId}
+                            onMouseEnter={() => setHoveredId(itemId)}
                             onMouseLeave={() => setHoveredId(null)}
                             className="group relative bg-white/80 dark:bg-slate-900/30 rounded-2xl p-2 md:p-4 border border-slate-200 dark:border-slate-800 hover:border-purple-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] flex flex-col"
                         >
@@ -205,7 +207,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                             {/* Image Container with Float Effect */}
                             <div
                                 className="relative h-32 md:h-48 rounded-xl overflow-hidden bg-gradient-to-b from-slate-100 dark:from-slate-800 to-slate-200 dark:to-slate-900 mb-2 md:mb-4 cursor-pointer"
-                                onClick={() => navigate(`/accessories/${item.id || item._id}`)}
+                                onClick={() => navigate(`/accessories/${itemId}`)}
                             >
                                 <img
                                     src={(() => {
@@ -216,7 +218,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                     })()}
                                     alt={cleanAccessoryName(item.name)}
                                     onError={(e: any) => { e.target.src = getFallbackImage(item); }}
-                                    className={`w-full h-full object-cover transition-transform duration-700 ${hoveredId === item.id ? 'scale-110' : 'scale-100'
+                                    className={`w-full h-full object-cover transition-transform duration-700 ${hoveredId === itemId ? 'scale-110' : 'scale-100'
                                         }`}
                                 />
 
@@ -252,7 +254,8 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                 </div>
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Load More Button */}
