@@ -21,7 +21,7 @@ i18n
       caches: ['localStorage'],
     },
     backend: {
-      loadPath: `/api/translations/locales/{{lng}}?namespace={{ns}}`,
+      loadPath: `${import.meta.env.VITE_API_URL || ''}/api/translations/locales/{{lng}}?namespace={{ns}}`,
       parse: (data: string) => {
         try {
           const parsed = JSON.parse(data);
@@ -30,7 +30,7 @@ i18n
           return {};
         }
       },
-      addPath: `/api/translations/missing/{{lng}}/{{ns}}`,
+      addPath: `${import.meta.env.VITE_API_URL || ''}/api/translations/missing/{{lng}}/{{ns}}`,
     },
     saveMissing: import.meta.env.DEV,
   });
