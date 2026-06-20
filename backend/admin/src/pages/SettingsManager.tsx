@@ -20,6 +20,8 @@ import { AccessoryCategoriesTab } from './settings/AccessoryCategoriesTab';
 import { EmailSettingsTab } from './settings/EmailSettingsTab';
 import { CookieSettingsTab } from './settings/CookieSettingsTab';
 import { SEOTab } from './settings/SEOTab';
+import { RepairCardsTab } from './settings/RepairCardsTab';
+import { FeaturedServicesTab } from './settings/FeaturedServicesTab';
 
 interface HeroSettings {
     headline: string;
@@ -565,6 +567,8 @@ export default function SettingsManager() {
         { id: 'invoice', label: '🧾 Invoice Settings', icon: FileText },
         { id: 'cookie', label: '🍪 Cookie Consent', icon: Layers },
         { id: 'seo', label: 'SEO & Meta', icon: Globe },
+        { id: 'repair-cards', label: '🔧 Repair Cards', icon: Wrench },
+        { id: 'featured-services', label: '🌟 Featured Services', icon: Layers },
         { id: 'scripts', label: '💬 Support Scripts', icon: MessageSquare },
         { id: 'email-server', label: '📧 E-Mail Server', icon: Layers },
     ];
@@ -616,9 +620,11 @@ export default function SettingsManager() {
                     {activeTab === 'invoice' && <InvoiceSettingsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'faqs' && <ProductFaqsTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'categories' && <AccessoryCategoriesTab settings={settings} handleChange={handleChange} />}
-                    {activeTab === 'cookie' && <CookieSettingsTab settings={settings} handleChange={handleChange} />}
-                    {activeTab === 'seo' && <SEOTab settings={settings} handleChange={handleChange} />}
-                    {activeTab === 'email-server' && <EmailSettingsTab />}
+                    { activeTab === 'cookie' && <CookieSettingsTab settings={settings} handleChange={handleChange} /> }
+                    { activeTab === 'seo' && <SEOTab settings={settings} handleChange={handleChange} /> }
+                    { activeTab === 'repair-cards' && <RepairCardsTab settings={settings} handleChange={handleChange} /> }
+                    { activeTab === 'featured-services' && <FeaturedServicesTab settings={settings} handleChange={handleChange} /> }
+                    { activeTab === 'email-server' && <EmailSettingsTab /> }
 
                     {activeTab === 'suspension' && (
                         <div className="space-y-6">

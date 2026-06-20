@@ -132,6 +132,30 @@ export interface Settings {
             usedCount: number;
         };
     };
+    featuredServices?: {
+        tagline: string;
+        heading: string;
+        cards: {
+            id: string;
+            iconName: string;
+            title: string;
+            desc: string;
+            cta: string;
+            route: string;
+            gradient: string;
+            border: string;
+            iconColor: string;
+            ctaColor: string;
+        }[];
+    };
+
+    repairPreviewCards?: {
+        iconName: string;
+        label: string;
+        price: string;
+        color: string;
+        bg: string;
+    }[];
     accessoryCategories?: any[];
     accessoryFaqs?: { question: string; answer: string; }[];
     features?: {

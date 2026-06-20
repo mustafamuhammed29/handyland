@@ -31,34 +31,50 @@ export const EmailSettingsTab = () => {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-slate-400 text-sm font-bold mb-2">SMTP Host</label>
+                        <label htmlFor="smtp-host" className="block text-slate-400 text-sm font-bold mb-2">SMTP Host</label>
                         <input
+                            id="smtp-host"
                             disabled
                             value="smtp.sendgrid.net"
+                            title="SMTP Host"
+                            aria-label="SMTP Host"
+                            placeholder="smtp.sendgrid.net"
                             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed"
                         />
                     </div>
                     <div>
-                        <label className="block text-slate-400 text-sm font-bold mb-2">Port</label>
+                        <label htmlFor="smtp-port" className="block text-slate-400 text-sm font-bold mb-2">Port</label>
                         <input
+                            id="smtp-port"
                             disabled
                             value="587"
+                            title="SMTP Port"
+                            aria-label="SMTP Port"
+                            placeholder="587"
                             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed"
                         />
                     </div>
                     <div>
-                        <label className="block text-slate-400 text-sm font-bold mb-2">Benutzername</label>
+                        <label htmlFor="smtp-username" className="block text-slate-400 text-sm font-bold mb-2">Benutzername</label>
                         <input
+                            id="smtp-username"
                             disabled
                             value="apikey"
+                            title="SMTP Benutzername"
+                            aria-label="SMTP Benutzername"
+                            placeholder="apikey"
                             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed"
                         />
                     </div>
                     <div>
-                        <label className="block text-slate-400 text-sm font-bold mb-2">Passwort / API Key</label>
+                        <label htmlFor="smtp-password" className="block text-slate-400 text-sm font-bold mb-2">Passwort / API Key</label>
                         <input
+                            id="smtp-password"
                             disabled
                             value="Gesteuert durch SENDGRID_API_KEY in der .env-Datei"
+                            title="Passwort / API Key"
+                            aria-label="Passwort / API Key"
+                            placeholder="Gesteuert durch SENDGRID_API_KEY in der .env-Datei"
                             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed"
                         />
                     </div>

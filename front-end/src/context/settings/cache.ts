@@ -28,6 +28,54 @@ export const defaultSettings: Settings = {
         couponCode: '',
         delay: 5
     },
+    featuredServices: {
+        tagline: 'Was wir anbieten',
+        heading: 'Alles rund um dein Gerät',
+        cards: [
+            {
+                id: 'buy',
+                iconName: 'ShoppingBag',
+                title: 'Kaufen',
+                desc: 'Geprüfte Smartphones & Tablets zu fairen Preisen.',
+                cta: 'Zum Marktplatz',
+                route: '/marketplace',
+                gradient: 'from-cyan-500/20 to-blue-500/10',
+                border: 'hover:border-cyan-500/50',
+                iconColor: 'text-cyan-400',
+                ctaColor: 'text-cyan-400 group-hover:text-cyan-300',
+            },
+            {
+                id: 'sell',
+                iconName: 'Zap',
+                title: 'Verkaufen',
+                desc: 'Dein Gerät bewerten lassen und sofort ein Angebot erhalten.',
+                cta: 'Gerät bewerten',
+                route: '/valuation',
+                gradient: 'from-amber-500/20 to-orange-500/10',
+                border: 'hover:border-amber-500/50',
+                iconColor: 'text-amber-400',
+                ctaColor: 'text-amber-400 group-hover:text-amber-300',
+            },
+            {
+                id: 'repair',
+                iconName: 'Wrench',
+                title: 'Reparieren',
+                desc: 'Professionelle Reparaturen für alle Geräte — schnell & günstig.',
+                cta: 'Reparatur anfragen',
+                route: '/repair',
+                gradient: 'from-purple-500/20 to-indigo-500/10',
+                border: 'hover:border-purple-500/50',
+                iconColor: 'text-purple-400',
+                ctaColor: 'text-purple-400 group-hover:text-purple-300',
+            }
+        ]
+    },
+    repairPreviewCards: [
+        { iconName: 'Monitor', label: 'Displayreparatur', price: 'ab €49', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+        { iconName: 'Battery', label: 'Akkutausch', price: 'ab €39', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+        { iconName: 'Smartphone', label: 'Ladebuchse', price: 'ab €29', color: 'text-amber-400', bg: 'bg-amber-500/10' },
+        { iconName: 'Wrench', label: 'Diagnose', price: 'Kostenlos', color: 'text-purple-400', bg: 'bg-purple-500/10' }
+    ],
     valuation: {
         step1Title: 'Select Manufacturer'
     },
@@ -174,6 +222,8 @@ export const getCachedSettings = (): Settings => {
                 announcementBanner: { ...defaultSettings.announcementBanner, ...(parsed.announcementBanner || {}) },
                 promoPopup: { ...defaultSettings.promoPopup, ...(parsed.promoPopup || {}) },
                 cookieConsent: { ...defaultSettings.cookieConsent, ...(parsed.cookieConsent || {}) },
+                repairPreviewCards: parsed.repairPreviewCards || defaultSettings.repairPreviewCards,
+                featuredServices: parsed.featuredServices || defaultSettings.featuredServices,
                 seo: { ...(parsed.seo || {}) },
             };
         }

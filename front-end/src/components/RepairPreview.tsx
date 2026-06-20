@@ -1,42 +1,51 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Monitor, Battery, Wrench, Smartphone } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useSettings } from '../context/SettingsContext';
 
 export const RepairPreview: React.FC = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { settings } = useSettings();
 
-    const repairTypes = [
+    // Fallback to defaults if not present
+    const repairTypes = settings?.repairPreviewCards || [
         {
-            icon: <Monitor className="w-5 h-5" />,
-            label: t('repair.screenReplacement', 'Displayreparatur'),
-            price: t('repair.from', 'ab €49'),
+            iconName: 'Monitor',
+            label: 'Displayreparatur',
+            price: 'ab €49',
             color: 'text-cyan-400',
             bg: 'bg-cyan-500/10',
         },
         {
-            icon: <Battery className="w-5 h-5" />,
-            label: t('repair.batteryReplacement', 'Akkutausch'),
-            price: t('repair.from', 'ab €39'),
+            iconName: 'Battery',
+            label: 'Akkutausch',
+            price: 'ab €39',
             color: 'text-emerald-400',
             bg: 'bg-emerald-500/10',
         },
         {
-            icon: <Smartphone className="w-5 h-5" />,
-            label: t('repair.chargingPort', 'Ladebuchse'),
-            price: t('repair.from', 'ab €29'),
+            iconName: 'Smartphone',
+            label: 'Ladebuchse',
+            price: 'ab €29',
             color: 'text-amber-400',
             bg: 'bg-amber-500/10',
         },
         {
-            icon: <Wrench className="w-5 h-5" />,
-            label: t('repair.diagnostics', 'Diagnose'),
-            price: t('repair.free', 'Kostenlos'),
+            iconName: 'Wrench',
+            label: 'Diagnose',
+            price: 'Kostenlos',
             color: 'text-purple-400',
             bg: 'bg-purple-500/10',
         },
     ];
+
+    const getIcon = (iconName: string) => {
+        const IconComponent = (LucideIcons as any)[iconName] || LucideIcons.Monitor;
+        return <IconComponent className="w-5 h-5" />;
+    };
 
     return (
         <section className="py-12 md:py-16 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900">
@@ -67,7 +76,7 @@ export const RepairPreview: React.FC = () => {
                             key={i}
                             className={`flex flex-col items-center text-center p-4 md:p-5 rounded-2xl ${r.bg} border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all`}
                         >
-                            <span className={`${r.color} mb-3`}>{r.icon}</span>
+                            <span className={`${r.color} mb-3`}>{getIcon(r.iconName)}</span>
                             <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white mb-1">{r.label}</p>
                             <p className={`text-xs font-mono font-bold ${r.color}`}>{r.price}</p>
                         </div>

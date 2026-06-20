@@ -55,6 +55,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     announcementBanner: { ...defaultSettings.announcementBanner, ...(safeData.announcementBanner || {}) },
                     promoPopup: { ...defaultSettings.promoPopup, ...(safeData.promoPopup || {}) },
                     cookieConsent: { ...defaultSettings.cookieConsent, ...(safeData.cookieConsent || {}) },
+                    repairPreviewCards: safeData.repairPreviewCards || defaultSettings.repairPreviewCards,
+                    featuredServices: safeData.featuredServices || defaultSettings.featuredServices,
                     seo: { ...(safeData.seo || {}) },
                 };
 
@@ -128,6 +130,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 socialAuth: { ...prev.socialAuth, ...(freshData.socialAuth || {}) },
                 theme: { ...prev.theme, ...(freshData.theme || {}) },
                 cookieConsent: { ...prev.cookieConsent, ...(freshData.cookieConsent || {}) },
+                repairPreviewCards: freshData.repairPreviewCards || prev.repairPreviewCards,
+                featuredServices: freshData.featuredServices || prev.featuredServices,
                 seo: { ...(freshData.seo || {}) },
             }));
 

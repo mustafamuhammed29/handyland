@@ -13,7 +13,7 @@ export const AppearanceTab = ({ settings, handleChange }: any) => {
                     <p className="text-slate-400 text-sm">Main branding elements, global text, and localization settings.</p>
                 </div>
             </div>
-            <Input label="Site Name" value={settings.siteName} onChange={(v: string) => handleChange(null, 'siteName', v)} />
+            <Input label="Global Site Name" value={settings.siteName} onChange={(v: string) => handleChange(null, 'siteName', v)} placeholder="HANDYLAND" />
 
             <div className="p-4 border border-slate-700 rounded-xl bg-slate-900/50">
                 <h4 className="text-blue-400 font-bold mb-4">Navbar Configuration</h4>
@@ -32,8 +32,8 @@ export const AppearanceTab = ({ settings, handleChange }: any) => {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input label="Site Name (Title)" value={settings.siteName} onChange={(v: string) => handleChange(null, 'siteName', v)} placeholder="HANDYLAND" />
-                    <Input label="Contact Email" value={settings.contactEmail} onChange={(v: string) => handleChange(null, 'contactEmail', v)} placeholder="info@handyland.de" />
-                    <Input label="Global Footer Text" value={settings.footerText} onChange={(v: string) => handleChange(null, 'footerText', v)} placeholder="© 2026 HANDYLAND" />
+                    <Input label="Contact Email" value={settings.contactSection?.email} onChange={(v: string) => handleChange('contactSection', 'email', v)} placeholder="info@handyland.de" />
+                    <Input label="Global Footer Text (Copyright)" value={settings.footerSection?.copyright} onChange={(v: string) => handleChange('footerSection', 'copyright', v)} placeholder="© 2026 HANDYLAND" />
                 </div>
             </div>
 
