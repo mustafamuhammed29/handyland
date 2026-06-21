@@ -212,6 +212,14 @@ exports.login = async (req, res, next) => {
             return res.status(403).json({ success: false, message: 'Account is deactivated', accountDeactivated: true });
         }
 
+        if (!userProfile.is_verified && process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich einloggen.', 
+                emailNotVerified: true 
+            });
+        }
+
         // 2FA check
         if (userProfile.two_factor_enabled) {
             // Return partial success — frontend will prompt for OTP
@@ -674,6 +682,14 @@ exports.adminLogin = async (req, res, next) => {
         if (!userProfile || (role !== 'admin' && role !== 'administrator')) {
             console.error(`Admin Login Denied: User role is ${userProfile?.role}`);
             return res.status(403).json({ success: false, message: 'Access denied', debug: { userProfile, role, authId: data.user.id } });
+        }
+        
+        if (!userProfile.is_verified && process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich einloggen.', 
+                emailNotVerified: true 
+            });
         }
         
         const userData = sendTokenResponse(res, data.session, userProfile, 'admin');
