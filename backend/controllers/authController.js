@@ -662,14 +662,19 @@ exports.adminLogin = async (req, res, next) => {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
-        let { data: userProfile } = await supabaseAdmin.from('users').select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at').eq('id', data.user.id).single();
+        let { data: userProfile, error: dbError } = await supabaseAdmin.from('users').select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at').eq('id', data.user.id).single();
         
+        console.log(`[Admin Login Debug] auth.users ID: ${data.user.id}, dbError:`, dbError);
+        console.log(`[Admin Login Debug] userProfile fetched by ID:`, userProfile);
+
         // Fallback for ID mismatches (when auth.users ID differs from public.users ID)
         if (!userProfile) {
-            const { data: userByEmail } = await supabaseAdmin.from('users')
+            const { data: userByEmail, error: emailError } = await supabaseAdmin.from('users')
                 .select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at')
                 .eq('email', email)
                 .single();
+            
+            console.log(`[Admin Login Debug] userByEmail fetched:`, userByEmail, `emailError:`, emailError);
                 
             if (userByEmail) {
                 userProfile = userByEmail;
