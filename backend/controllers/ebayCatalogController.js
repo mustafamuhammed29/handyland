@@ -269,7 +269,6 @@ exports.importFromEbay = async (req, res) => {
                 body_sehr_gut: 0.95,
                 body_gut: 0.85,
                 body_beschadigt: 0.6,
-                body_beschadigt: 0.6,
                 functional_multiplier: 1.0,
                 non_functional_multiplier: 0.4,
                 base_price: 100, // Placeholder
