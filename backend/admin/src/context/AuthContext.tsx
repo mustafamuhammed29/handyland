@@ -51,7 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             
             // Read user directly from response data
-            const adminData = response.data.user;
             const data = response.data;
             
             if (!data.user) {
