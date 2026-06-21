@@ -40,7 +40,8 @@ const sendTokenResponse = (res, session, user, appType = 'frontend') => {
         loyaltyPoints: user.loyalty_points,
         membershipLevel: user.membership_level,
         twoFactorEnabled: user.two_factor_enabled,
-        isActive: user.is_active ?? true
+        isActive: user.is_active ?? true,
+        token: session.access_token
     };
 };
 

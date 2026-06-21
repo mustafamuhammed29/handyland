@@ -52,17 +52,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             // Read user directly from response data
             const adminData = response.data.user;
+            const data = response.data;
             
-            if (!adminData) {
+            if (!data.user) {
                 throw new Error('Invalid response from server');
             }
             
-            setUser(adminData);
-            setIsAuthenticated(true);
-            localStorage.setItem('adminUser', JSON.stringify(adminData));
-            // Store token for Socket.io auth (cross-origin — cookie not accessible)
-            const token = response.data?.token || (response as any).token;
-            if (token) sessionStorage.setItem('adminSocketToken', token);
+            if (data.success && data.user) {
+                // FIXED: Store token alongside user data to support environments where third-party cookies are blocked
+                if (data.user.token) {
+                    localStorage.setItem('token', data.user.token);
+                }
+                localStorage.setItem('adminUser', JSON.stringify(data.user));
+                setUser(data.user);
+                setIsAuthenticated(true);
+            }
             
         } catch (error: any) {
             // Ensure error message is shown to user
@@ -80,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setIsAuthenticated(false);
         localStorage.removeItem('adminUser');
-        sessionStorage.removeItem('adminSocketToken');
+        localStorage.removeItem('token');
 
         try {
             await api.post('/api/auth/logout');

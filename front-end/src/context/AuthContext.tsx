@@ -170,7 +170,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (data.success && data.user) {
 
-                // FIXED: [Removed localStorage.setItem for accessToken and refreshToken to prevent XSS vulnerability]
+                // FIXED: Store token alongside user data to support environments where third-party cookies are blocked
+                if (data.user.token) {
+                    localStorage.setItem('token', data.user.token);
+                }
 
                 localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(data.user)));
                 setUser(data.user);
@@ -209,6 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Clear state and navigate cleanly
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
         setIsVerified(false);
         setUser(null);
         
