@@ -14,7 +14,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // FIXED: Rate limiting active in all environments (FIX 6)
 const emailLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: isDevelopment ? 10 : 3, // Relaxed in dev, strict in production
+    max: isDevelopment ? 50 : 20, // Relaxed in dev, generous in production to account for proxy IPs
     message: {
         success: false,
         message: 'Too many requests. Please try again in 15 minutes.'

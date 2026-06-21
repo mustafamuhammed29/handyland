@@ -27,9 +27,9 @@ const ForgotPassword: React.FC = () => {
                 setStatus('error');
                 setMessage(data.message || t('forgotPassword.errorSending', 'Fehler beim Senden der E-Mail'));
             }
-        } catch (error) {
+        } catch (error: any) {
             setStatus('error');
-            setMessage(t('forgotPassword.errorServer', 'Verbindungsfehler zum Server'));
+            setMessage(error?.message || t('forgotPassword.errorServer', 'Verbindungsfehler zum Server'));
         }
     };
 

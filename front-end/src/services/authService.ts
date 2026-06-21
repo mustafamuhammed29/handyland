@@ -76,9 +76,9 @@ export const authService = {
             await api.get('/api/auth/csrf');
             const response = await api.post('/api/auth/forgot-password', { email });
             return response as any;
-        } catch (error) {
+        } catch (error: any) {
             devLog('Auth Service Forgot Password Error:', error);
-            throw error;
+            throw error.response?.data || { message: error.message || 'Forgot password request failed' };
         }
     },
 

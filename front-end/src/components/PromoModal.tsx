@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Tag, Copy, CheckCircle2, Clock, AlertCircle, Sparkles } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import api from '../utils/api';
 
 interface PromoCoupon {
     found: boolean;
@@ -39,8 +40,7 @@ export const PromoModal = () => {
         // Fetch latest active coupon from backend
         const fetchPromo = async () => {
             try {
-                const res = await fetch('/api/coupons/latest-promo');
-                const data: PromoCoupon = await res.json();
+                const data: PromoCoupon = await api.get('/api/coupons/latest-promo');
                 if (data.found && data.code) {
                     setCoupon(data);
                     // Use delay from settings (default 5 seconds)
