@@ -653,7 +653,22 @@ exports.adminLogin = async (req, res, next) => {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
-        const { data: userProfile } = await supabaseAdmin.from('users').select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at').eq('id', data.user.id).single();
+        let { data: userProfile } = await supabaseAdmin.from('users').select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at').eq('id', data.user.id).single();
+        
+        // Fallback for ID mismatches (when auth.users ID differs from public.users ID)
+        if (!userProfile) {
+            const { data: userByEmail } = await supabaseAdmin.from('users')
+                .select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at')
+                .eq('email', email)
+                .single();
+                
+            if (userByEmail) {
+                userProfile = userByEmail;
+                console.log(`[Admin Login] ID mismatch fixed for ${email}. Updating public.users to match auth.users ID.`);
+                // Auto-heal the database
+                await supabaseAdmin.from('users').update({ id: data.user.id }).eq('email', email);
+            }
+        }
         const role = userProfile?.role?.toLowerCase();
         if (!userProfile || (role !== 'admin' && role !== 'administrator')) {
             console.error(`Admin Login Denied: User role is ${userProfile?.role}`);
