@@ -10,6 +10,7 @@ const Stats = React.lazy(() => import('../components/Stats').then(m => ({ defaul
 const FeaturedServices = React.lazy(() => import('../components/FeaturedServices').then(m => ({ default: m.FeaturedServices })));
 const FeaturedProducts = React.lazy(() => import('../components/FeaturedProducts').then(m => ({ default: m.FeaturedProducts })));
 const RepairPreview = React.lazy(() => import('../components/RepairPreview').then(m => ({ default: m.RepairPreview })));
+const RepairGallery = React.lazy(() => import('../components/RepairGallery').then(m => ({ default: m.RepairGallery })));
 
 export const Home = ({ lang }: { lang: LanguageCode }) => {
     const { settings } = useSettings();
@@ -44,6 +45,13 @@ export const Home = ({ lang }: { lang: LanguageCode }) => {
             {sections.repairPage !== false && (
                 <Suspense fallback={<div className="h-48" />}>
                     <RepairPreview />
+                </Suspense>
+            )}
+
+            {/* Repair Gallery */}
+            {sections.repairGallery !== false && (
+                <Suspense fallback={<div className="h-48" />}>
+                    <RepairGallery />
                 </Suspense>
             )}
 
