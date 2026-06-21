@@ -197,11 +197,28 @@ exports.login = async (req, res, next) => {
         }
 
         // Fetch profile
-        const { data: userProfile, error: profileError } = await supabaseAdmin
+        let { data: userProfile, error: profileError } = await supabaseAdmin
             .from('users')
             .select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at')
             .eq('id', data.user.id)
             .single();
+
+        // Fallback for ID mismatch (auto-healing)
+        if (!userProfile) {
+            const { data: userByEmail } = await supabaseAdmin
+                .from('users')
+                .select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at')
+                .eq('email', email)
+                .single();
+
+            if (userByEmail) {
+                userProfile = userByEmail;
+                console.log(`[Login] ID mismatch fixed for ${email}. Updating public.users to match auth.users ID.`);
+                // Auto-heal the database
+                await supabaseAdmin.from('users').update({ id: data.user.id }).eq('email', email);
+                profileError = null;
+            }
+        }
 
         if (profileError || !userProfile) {
             console.error('Login Profile Error: User profile not found for ID', data?.user?.id, profileError);
