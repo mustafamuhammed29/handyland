@@ -672,7 +672,7 @@ exports.adminLogin = async (req, res, next) => {
         const role = userProfile?.role?.toLowerCase();
         if (!userProfile || (role !== 'admin' && role !== 'administrator')) {
             console.error(`Admin Login Denied: User role is ${userProfile?.role}`);
-            return res.status(403).json({ success: false, message: 'Access denied' });
+            return res.status(403).json({ success: false, message: 'Access denied', debug: { userProfile, role, authId: data.user.id } });
         }
         
         const userData = sendTokenResponse(res, data.session, userProfile, 'admin');
