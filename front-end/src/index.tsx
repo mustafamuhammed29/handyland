@@ -20,6 +20,32 @@ Sentry.init({
   integrations: [Sentry.browserTracingIntegration()],
 });
 
+// FIX: Prevent Google Translate from crashing React
+// Google Translate replaces text nodes with <font> tags, breaking React's Virtual DOM.
+// This intercepts those DOM mutations and suppresses the resulting errors.
+if (typeof Node === 'function' && Node.prototype) {
+  const originalRemoveChild = Node.prototype.removeChild;
+  Node.prototype.removeChild = function (child: Node) {
+    if (child.parentNode !== this) {
+      if (console) {
+        console.warn('Cannot remove a child from a different parent. This is usually caused by browser translation.', child, this);
+      }
+      return child;
+    }
+    return originalRemoveChild.apply(this, arguments as any);
+  };
+
+  const originalInsertBefore = Node.prototype.insertBefore;
+  Node.prototype.insertBefore = function (newNode: Node, referenceNode: Node | null) {
+    if (referenceNode && referenceNode.parentNode !== this) {
+      if (console) {
+        console.warn('Cannot insert before a reference node from a different parent. This is usually caused by browser translation.', referenceNode, this);
+      }
+      return newNode;
+    }
+    return originalInsertBefore.apply(this, arguments as any);
+  };
+}
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
