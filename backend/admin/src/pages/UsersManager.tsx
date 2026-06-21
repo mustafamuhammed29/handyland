@@ -214,10 +214,10 @@ const UsersManager: React.FC = () => {
             const response = await api.post(`/api/auth/resend-verification`, { email });
             const data = (response as any)?.data || response;
             if (data.success || response.status === 200) {
-                toast.success('تم إعادة إرسال رابط التحقق بنجاح');
+                toast.success('Verification link resent successfully');
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'فشل إرسال رابط التحقق');
+            toast.error(error.response?.data?.message || 'Failed to resend verification link');
         }
     };
 
@@ -457,19 +457,19 @@ const UsersManager: React.FC = () => {
                                                         <p className="text-xs text-slate-400 font-medium truncate max-w-[200px]">{user.email}</p>
                                                         {user.isVerified ? (
                                                             <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1" title="Email Verified">
-                                                                <UserCheck size={10} /> موثق
+                                                                <UserCheck size={10} /> Verified
                                                             </span>
                                                         ) : (
                                                             <div className="flex items-center gap-1">
                                                                 <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded-md border border-red-500/20 flex items-center gap-1" title="Email Not Verified">
-                                                                    <UserX size={10} /> غير موثق
+                                                                    <UserX size={10} /> Unverified
                                                                 </span>
                                                                 <button 
                                                                     onClick={() => resendVerification(user.email)}
                                                                     className="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded hover:bg-blue-500/20 transition-colors"
-                                                                    title="إعادة إرسال رابط التحقق"
+                                                                    title="Resend Verification Link"
                                                                 >
-                                                                    إرسال رابط التحقق
+                                                                    Resend Verification
                                                                 </button>
                                                             </div>
                                                         )}
