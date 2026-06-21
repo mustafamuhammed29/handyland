@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
 // Clear cached SMTP config (kept for backward compatibility)
 const clearSmtpCache = () => {};
@@ -12,36 +12,28 @@ const sendEmail = async (options) => {
     }
 
     try {
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.sendgrid.net',
-            port: 587,
-            secure: false,
-            auth: {
-                user: 'apikey',
-                pass: apiKey
-            },
-            connectionTimeout: 10000, // 10 seconds
-            greetingTimeout: 10000,
-            socketTimeout: 15000
-        });
+        sgMail.setApiKey(apiKey);
 
-        const fromEmail = process.env.FROM_EMAIL || 'noreply@handyland.com';
+        const fromEmail = process.env.FROM_EMAIL || 'mustafamuhammed665@gmail.com';
         const fromName = process.env.FROM_NAME || 'HandyLand';
 
-        const message = {
-            from: `${fromName} <${fromEmail}>`,
+        const msg = {
             to: options.email,
-            replyTo: options.replyTo, // Add replyTo support
-            subject: options.subject,
-            text: options.message, // Plain text body
-            html: options.html // HTML body
+            from: {
+                email: fromEmail,
+                name: fromName
+            },
+            subject: options.subject
         };
 
-        const info = await transporter.sendMail(message);
-        console.log('📧 Email sent successfully via SendGrid: %s', info.messageId);
+        if (options.replyTo) msg.replyTo = options.replyTo;
+        if (options.message) msg.text = options.message;
+        if (options.html) msg.html = options.html;
+
+        const [response] = await sgMail.send(msg);
+        console.log('📧 Email sent successfully via SendGrid REST API: %s', response.headers['x-message-id'] || 'OK');
     } catch (error) {
-        console.error('❌ Error sending email via SendGrid:', error.message);
-        // Re-throw so the controller knows it failed
+        console.error('❌ Error sending email via SendGrid REST API:', error.response?.body || error.message);
         throw error;
     }
 };
