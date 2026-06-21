@@ -15,6 +15,7 @@ interface User {
     loginAttempts?: number;
     lockUntil?: string | null;
     avatar?: string;
+    isVerified?: boolean;
 }
 
 interface UserStats {
@@ -205,6 +206,18 @@ const UsersManager: React.FC = () => {
             }
         } catch (error) {
             toast.error('Failed to unlock account');
+        }
+    };
+
+    const resendVerification = async (email: string) => {
+        try {
+            const response = await api.post(`/api/auth/resend-verification`, { email });
+            const data = (response as any)?.data || response;
+            if (data.success || response.status === 200) {
+                toast.success('تم إعادة إرسال رابط التحقق بنجاح');
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'فشل إرسال رابط التحقق');
         }
     };
 
@@ -440,7 +453,18 @@ const UsersManager: React.FC = () => {
                                                 <Avatar name={user.name} url={user.avatar} />
                                                 <div>
                                                     <p className="font-bold text-white text-sm truncate max-w-[200px]">{user.name}</p>
-                                                    <p className="text-xs text-slate-400 font-medium truncate max-w-[200px]">{user.email}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-xs text-slate-400 font-medium truncate max-w-[200px]">{user.email}</p>
+                                                        {user.isVerified === false && (
+                                                            <button 
+                                                                onClick={() => resendVerification(user.email)}
+                                                                className="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded hover:bg-blue-500/20 transition-colors"
+                                                                title="إعادة إرسال رابط التحقق"
+                                                            >
+                                                                اعادة ارسال رابط تحقق
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>

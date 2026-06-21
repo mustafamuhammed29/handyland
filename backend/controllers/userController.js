@@ -32,6 +32,7 @@ exports.getUsers = async (req, res, next) => {
             email: u.email,
             role: u.role,
             isActive: u.is_active,
+            isVerified: u.is_verified,
             balance: u.balance || 0,
             loyaltyPoints: u.loyalty_points || 0,
             membershipLevel: u.membership_level || 1,
