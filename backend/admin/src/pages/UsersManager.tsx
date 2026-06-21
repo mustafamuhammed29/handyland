@@ -453,16 +453,25 @@ const UsersManager: React.FC = () => {
                                                 <Avatar name={user.name} url={user.avatar} />
                                                 <div>
                                                     <p className="font-bold text-white text-sm truncate max-w-[200px]">{user.name}</p>
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-2 mt-1">
                                                         <p className="text-xs text-slate-400 font-medium truncate max-w-[200px]">{user.email}</p>
-                                                        {user.isVerified === false && (
-                                                            <button 
-                                                                onClick={() => resendVerification(user.email)}
-                                                                className="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded hover:bg-blue-500/20 transition-colors"
-                                                                title="إعادة إرسال رابط التحقق"
-                                                            >
-                                                                اعادة ارسال رابط تحقق
-                                                            </button>
+                                                        {user.isVerified ? (
+                                                            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1" title="Email Verified">
+                                                                <UserCheck size={10} /> موثق
+                                                            </span>
+                                                        ) : (
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded-md border border-red-500/20 flex items-center gap-1" title="Email Not Verified">
+                                                                    <UserX size={10} /> غير موثق
+                                                                </span>
+                                                                <button 
+                                                                    onClick={() => resendVerification(user.email)}
+                                                                    className="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded hover:bg-blue-500/20 transition-colors"
+                                                                    title="إعادة إرسال رابط التحقق"
+                                                                >
+                                                                    إرسال رابط التحقق
+                                                                </button>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
