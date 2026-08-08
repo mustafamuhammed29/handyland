@@ -11,7 +11,7 @@ import { api } from '../utils/api';
 import { RepairDevice } from './repair/types';
 import { RepairDeviceModal } from './repair/RepairDeviceModal';
 import { RepairCatalogList } from './repair/RepairCatalogList';
-import { RepairTicketModal } from './repair/RepairTicketModal';
+import { useCart } from '../context/CartContext';
 
 interface RepairProps {
     lang: LanguageCode;
@@ -22,23 +22,12 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
     const { settings } = useSettings();
     const { isAuthenticated, user } = useAuth();
     const { addToast } = useToast();
+    const { addToCart, setIsCartOpen } = useCart();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDevice, setSelectedDevice] = useState<RepairDevice | null>(null);
     const [repairCatalog, setRepairCatalog] = useState<RepairDevice[]>([]);
     const [loading, setLoading] = useState(true);
-
-    // Ticket Modal State
-    const [showTicketModal, setShowTicketModal] = useState(false);
-    const [selectedServiceForTicket, setSelectedServiceForTicket] = useState<{ device: string, service: string } | null>(null);
-    const [ticketForm, setTicketForm] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        notes: '',
-        appointmentDate: ''
-    });
-    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         const loadRepairs = async () => {
@@ -76,9 +65,14 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
 
     const filteredDevices = repairCatalog;
 
-    const handleOpenTicketModal = (deviceModel: string, serviceLabel?: string) => {
+    const handleBookRepair = (deviceModel: string, serviceLabel?: string, price?: number) => {
+        if (!isAuthenticated) {
+            navigate('/login?redirect=/repair');
+            return;
+        }
+
         const whatsappMode = settings?.features?.whatsappOrders;
-        if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
+        if (whatsappMode?.repairEnabled && whatsappMode?.phoneNumber) {
             import('../utils/whatsappHelper').then(({ generateWhatsAppLink }) => {
                 const url = generateWhatsAppLink({
                     phoneNumber: whatsappMode.phoneNumber,
@@ -90,55 +84,19 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
             return;
         }
 
-        setSelectedServiceForTicket({ device: deviceModel, service: serviceLabel || 'General Diagnostic' });
-        setShowTicketModal(true);
-    };
+        addToCart({
+            id: `repair_${Date.now()}`,
+            title: `Reparatur: ${deviceModel}`,
+            subtitle: serviceLabel || 'General Diagnostic',
+            price: price || 0,
+            image: '',
+            category: 'repair',
+            stock: 1,
+        });
 
-    const handleSubmitTicket = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedServiceForTicket) return;
-        setSubmitting(true);
-        try {
-            const payload: any = {
-                device: selectedServiceForTicket.device,
-                issue: selectedServiceForTicket.service,
-                notes: ticketForm.notes,
-                appointmentDate: ticketForm.appointmentDate,
-                serviceType: 'In-Store'
-            };
-
-            if (!isAuthenticated) {
-                payload.guestContact = {
-                    name: ticketForm.name,
-                    email: ticketForm.email,
-                    phone: ticketForm.phone
-                };
-            }
-
-            const response: any = await api.post('/api/repairs/tickets', payload);
-            if (response?.success) {
-                addToast('Reparatur-Ticket erfolgreich erstellt!', 'success');
-                setShowTicketModal(false);
-                setSelectedDevice(null);
-                setTicketForm({ name: '', email: '', phone: '', notes: '', appointmentDate: '' });
-                // Redirect user to track repair with their new ticket ID
-                setTimeout(() => {
-                    navigate('/track-repair', { 
-                        state: { 
-                            ticketId: response.ticket.ticketId, 
-                            email: isAuthenticated ? user?.email : ticketForm.email 
-                        } 
-                    });
-                }, 1500);
-            } else {
-                addToast(response?.message || 'Reparatur-Ticket konnte nicht erstellt werden. Bitte versuche es erneut.', 'error');
-            }
-        } catch (error) {
-            console.error('Ticket creation error', error);
-            addToast('Reparatur-Ticket konnte nicht erstellt werden. Bitte versuche es erneut.', 'error');
-        } finally {
-            setSubmitting(false);
-        }
+        addToast(t('repair.addedToCart', 'Service in den Warenkorb gelegt!'), 'success');
+        setSelectedDevice(null);
+        setIsCartOpen(true);
     };
 
     return (
@@ -152,7 +110,7 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 <RepairDeviceModal
                     selectedDevice={selectedDevice}
                     setSelectedDevice={setSelectedDevice}
-                    handleOpenTicketModal={handleOpenTicketModal}
+                    handleBookRepair={handleBookRepair}
                 />
             )}
 
@@ -198,18 +156,6 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
                 />
 
             </div>
-
-            {/* --- REPAIR TICKET MODAL --- */}
-            <RepairTicketModal
-                showTicketModal={showTicketModal}
-                selectedServiceForTicket={selectedServiceForTicket}
-                setShowTicketModal={setShowTicketModal}
-                handleSubmitTicket={handleSubmitTicket}
-                ticketForm={ticketForm}
-                setTicketForm={setTicketForm}
-                isAuthenticated={isAuthenticated}
-                submitting={submitting}
-            />
         </div>
     );
 };

@@ -68,20 +68,23 @@ export function AddRepairPartModal({ isOpen, onClose, handleAddPartSave }: AddRe
 
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sub-Category *</label>
-                        <select
+                        <input
+                            type="text"
                             required
+                            list="repair-part-categories"
+                            placeholder="Type or select category..."
                             className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
                             value={addPartForm.subCategory} onChange={e => setAddPartForm({ ...addPartForm, subCategory: e.target.value })}
                             title="Sub-Category"
                             aria-label="Sub-Category"
-                        >
-                            <option value="">Select Category</option>
-                            <option value="Screens">Screens & Displays</option>
+                        />
+                        <datalist id="repair-part-categories">
+                            <option value="Screens & Displays">Screens & Displays</option>
                             <option value="Batteries">Batteries</option>
                             <option value="Small Parts">Small Parts (Flex, Cameras, etc)</option>
-                            <option value="Housings">Housings & Back Glass</option>
-                            <option value="Tools">Repair Tools & Consumables</option>
-                        </select>
+                            <option value="Housings & Back Glass">Housings & Back Glass</option>
+                            <option value="Repair Tools & Consumables">Repair Tools & Consumables</option>
+                        </datalist>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

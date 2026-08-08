@@ -5,6 +5,7 @@ import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface Reply {
     _id: string;
@@ -37,6 +38,7 @@ export const DashboardMessages: React.FC = () => {
     const [newMsgContent, setNewMsgContent] = useState('');
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
     const { addToast } = useToast();
+    const { confirm } = useConfirm();
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -121,7 +123,12 @@ export const DashboardMessages: React.FC = () => {
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!window.confirm(t('messages.delete.confirm', 'Are you sure you want to delete this conversation?'))) return;
+        const isConfirmed = await confirm({
+            title: t('messages.delete.title', 'Delete Ticket'),
+            message: t('messages.delete.confirm', 'Are you sure you want to delete this conversation?'),
+            variant: 'danger'
+        });
+        if (!isConfirmed) return;
         try {
             await api.delete(`/api/messages/${id}`);
             setMessages(prev => prev.filter(msg => msg._id !== id));

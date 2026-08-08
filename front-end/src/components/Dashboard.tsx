@@ -227,7 +227,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         return null;
     }
 
-    const navItems = [
+    let navItems = [
         { id: 'overview', label: 'Übersicht', icon: <Activity className="w-4 h-4" /> },
         { id: 'orders', label: 'Meine Bestellungen', icon: <Package className="w-4 h-4" />, badge: orders.data?.filter((o: any) => ['pending','processing'].includes(o.status)).length || 0 },
         { id: 'repairs', label: 'Aktive Reparaturen', icon: <Wrench className="w-4 h-4" />, badge: repairs.data?.filter((r: any) => !['completed','cancelled','ready'].includes(r.status)).length || 0 },
@@ -237,6 +237,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
         { id: 'messages', label: 'Nachrichten', icon: <Mail className="w-4 h-4" />, badge: unreadCount > 0 && activeTab !== 'messages' ? unreadCount : 0 },
         { id: 'settings', label: 'Kontoeinstellungen', icon: <Settings className="w-4 h-4" /> },
     ];
+
+    if (settings.data?.sections?.wallet === false) {
+        navItems = navItems.filter(item => item.id !== 'wallet');
+    }
     const ADMIN_PANEL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174';
 
     // Handle initial tab from URL
@@ -253,13 +257,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
                 {/* --- SIDEBAR --- */}
                 <div className="w-full lg:w-80 shrink-0">
-                    <div className="bg-slate-950/80 backdrop-blur-xl border border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)] rounded-3xl p-4 lg:p-6 lg:sticky lg:top-28 z-40 relative">
-                        {/* Background Overlays - constrained to rounded corners */}
-                        <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
-                            {/* Sci-Fi Grid Overlay */}
-                            <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.05)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-[50px]"></div>
-                        </div>
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none rounded-3xl p-4 lg:p-6 lg:sticky lg:top-28 z-40 relative">
 
                         {/* Profile Summary & VIP Tier */}
                         <div className="flex flex-col gap-5 mb-8 relative z-10">
@@ -274,23 +272,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                         accept="image/jpeg, image/png, image/webp"
                                         onChange={handleAvatarUpload}
                                     />
-                                    <div className={`w-16 h-16 bg-slate-900 border-2 border-blue-500/50 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-[0_0_15px_rgba(59,130,246,0.4)] overflow-hidden relative ${isUploadingAvatar ? 'opacity-50' : ''}`}>
+                                    <div className={`w-16 h-16 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-2xl shadow-sm overflow-hidden relative ${isUploadingAvatar ? 'opacity-50' : ''}`}>
                                         {currentUser.avatar ? (
                                             <img src={getImageUrl(currentUser.avatar)} alt="Profile" className="w-full h-full object-cover" />
                                         ) : (
                                             (currentUser.name || '?').charAt(0).toUpperCase()
                                         )}
                                         {/* Hover Overlay */}
-                                        <div className="absolute inset-0 bg-blue-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                            <Camera className="w-6 h-6 text-blue-200" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <Camera className="w-6 h-6 text-white" />
                                         </div>
                                     </div>
-                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)] border-2 border-slate-950 rounded-full"></div>
+                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 shadow-sm border-2 border-white dark:border-slate-900 rounded-full"></div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="text-[9px] font-mono text-blue-400 mb-0.5 tracking-widest uppercase">ID: {currentUser._id?.substring(0,8) || 'SYSTEM'}</div>
-                                    <h3 className="text-white font-bold break-words leading-tight text-base sm:text-lg">{currentUser.name}</h3>
-                                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-blue-300/70 mt-1 font-mono">
+                                    <div className="text-[9px] font-semibold text-slate-400 mb-0.5 tracking-wider uppercase">ID: {currentUser._id?.substring(0,8) || 'SYSTEM'}</div>
+                                    <h3 className="text-slate-900 dark:text-white font-bold break-words leading-tight text-base sm:text-lg">{currentUser.name}</h3>
+                                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-slate-500 mt-1">
                                         <Shield className="w-3 h-3" /> {isAdmin ? t('dashboard.adminRole', 'Administrator') : (
                                             currentUser.createdAt
                                                 ? t('dashboard.memberSince', 'Mitglied seit {{date}}', { date: new Date(currentUser.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : (i18n.language === 'de' ? 'de-DE' : 'en-US'), { month: '2-digit', year: 'numeric' }) })
@@ -326,32 +324,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 const progress = Math.min((totalSpent / maxLimit) * 100, 100);
 
                                 return (
-                                    <div className="bg-black/40 rounded-2xl p-4 border border-blue-500/10 relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 relative overflow-hidden group mt-2">
                                         <div className="flex justify-between items-end mb-3 relative z-10">
                                             <div>
-                                                <p className="text-[9px] text-blue-400/60 uppercase tracking-widest font-bold mb-1">{t('dashboard.spendTier', 'Ausgaben-Level')}</p>
+                                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">{t('dashboard.spendTier', 'Ausgaben-Level')}</p>
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentTier.color} shadow-[0_0_8px_currentColor] animate-pulse`}></span>
                                                     <span className={`text-sm font-black text-transparent bg-clip-text bg-gradient-to-r ${currentTier.color} uppercase tracking-wider`}>
                                                         {currentTier.name}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[9px] text-blue-400/60 font-mono tracking-wider">{t('dashboard.totalSpent', 'TOTAL')}</p>
-                                                <p className="text-sm font-bold text-white font-mono">€{totalSpent.toFixed(2)}</p>
+                                                <p className="text-[10px] text-slate-500 font-semibold">{t('dashboard.totalSpent', 'TOTAL')}</p>
+                                                <p className="text-sm font-bold text-slate-900 dark:text-white">€{totalSpent.toFixed(2)}</p>
                                             </div>
                                         </div>
                                         
                                         <div className="relative z-10">
-                                            <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                                 <div 
-                                                    className={`h-full bg-gradient-to-r ${currentTier.color} relative`}
+                                                    className={`h-full bg-gradient-to-r ${currentTier.color} relative transition-all duration-1000`}
                                                     style={{ width: `${progress}%` }}
-                                                >
-                                                    <div className="absolute top-0 right-0 bottom-0 w-4 bg-white/30 animate-[scan_2s_linear_infinite]"></div>
-                                                </div>
+                                                ></div>
                                             </div>
                                         </div>
                                     </div>
@@ -363,17 +357,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                         <div className="lg:hidden mb-4">
                             <button 
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="w-full flex items-center justify-between px-4 py-3 bg-blue-900/20 border border-blue-500/30 text-blue-300 hover:text-blue-200 rounded-xl font-bold shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all"
+                                className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all"
                             >
                                 <div className="flex items-center gap-3">
                                     {navItems.find(i => i.id === activeTab)?.icon}
-                                    <span className="uppercase tracking-wider text-xs">
+                                    <span className="font-semibold text-sm">
                                         {navItems.find(i => i.id === activeTab)?.label}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {!isMobileMenuOpen && unreadCount > 0 && activeTab !== 'messages' && (
-                                        <span className="bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] px-2 py-0.5 rounded-full font-bold">
+                                        <span className="bg-red-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
                                             {unreadCount}
                                         </span>
                                     )}
@@ -384,8 +378,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                             </button>
                         </div>
 
-                        {/* Navigation - Cyber Pill Tabs */}
-                        <nav className={`flex-col gap-2 lg:flex pb-1 lg:pb-0 relative z-10 ${isMobileMenuOpen ? 'flex' : 'hidden lg:flex'}`}>
+                        {/* Navigation - Modern Tabs */}
+                        <nav className={`flex-col gap-1.5 lg:flex pb-1 lg:pb-0 relative z-10 ${isMobileMenuOpen ? 'flex' : 'hidden lg:flex'}`}>
                             {navItems.map((item) => (
                                 <button
                                     key={item.id}
@@ -393,47 +387,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                         setActiveTab(item.id);
                                         setIsMobileMenuOpen(false);
                                     }}
-                                    className={`w-full flex items-center justify-between px-4 py-3 lg:px-5 lg:py-3 rounded-xl transition-all duration-300 font-bold border text-sm ${activeTab === item.id
-                                        ? 'bg-blue-600/20 text-blue-400 border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
-                                        : 'bg-black/30 lg:bg-transparent border-slate-800/50 lg:border-transparent text-slate-400 hover:bg-slate-800/50 hover:text-blue-200 hover:border-slate-700'
+                                    className={`w-full flex items-center justify-between px-4 py-3 lg:px-4 lg:py-3 rounded-xl transition-all duration-300 font-bold text-sm border group relative overflow-hidden ${activeTab === item.id
+                                        ? 'bg-slate-900 text-white dark:bg-brand-primary/10 dark:text-brand-primary border-transparent dark:border-brand-primary/20 shadow-sm'
+                                        : 'border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200'
                                         }`}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`${activeTab === item.id ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]' : 'text-slate-500'}`}>
+                                    {activeTab === item.id && (
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-2/3 bg-brand-primary rounded-r-full hidden dark:block"></div>
+                                    )}
+                                    <div className="flex items-center gap-3 relative z-10">
+                                        <div className={`transition-all duration-300 ${activeTab === item.id ? 'text-white dark:text-brand-primary dark:drop-shadow-[0_0_8px_rgba(14,165,233,0.4)] scale-110' : 'text-slate-400 dark:text-slate-500 group-hover:scale-110'}`}>
                                             {item.icon}
                                         </div>
-                                        <span className="whitespace-nowrap uppercase tracking-wider text-xs">{item.label}</span>
+                                        <span>{item.label}</span>
                                     </div>
                                     {item.badge !== undefined && item.badge > 0 && (
-                                        <span className="bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(239,68,68,0.2)] ml-2">
+                                        <span className={`relative z-10 text-[10px] px-2 py-0.5 rounded-full font-black ${activeTab === item.id ? 'bg-white/20 text-white dark:bg-brand-primary/20 dark:text-brand-primary' : 'bg-red-500 text-white'}`}>
                                             {item.badge}
                                         </span>
                                     )}
                                 </button>
                             ))}
 
-                            <div className="hidden lg:block h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent my-4"></div>
+                            <div className="hidden lg:block h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
                             
-                            {isAdmin && (
-                                <a
-                                    href={ADMIN_PANEL_URL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full flex items-center justify-between px-4 py-3 lg:px-5 lg:py-3 rounded-xl transition-all duration-300 font-bold bg-blue-600/10 border border-blue-500/20 text-blue-400 hover:bg-blue-600/20 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] text-sm uppercase tracking-wider text-xs mt-2 lg:mt-0"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <ExternalLink className="w-4 h-4" />
-                                        <span className="whitespace-nowrap">{t('dashboard.adminPanel', 'Admin Panel')}</span>
-                                    </div>
-                                </a>
-                            )}
-
-                            <div className="flex items-center justify-between lg:justify-start gap-4 mt-4 lg:mt-4 px-2 lg:px-0 pt-4 lg:pt-0 border-t border-slate-800/50 lg:border-t-0">
+                            <div className="flex items-center justify-between lg:justify-start gap-4 mt-2 lg:mt-2 px-2 lg:px-0 pt-4 lg:pt-0 border-t border-slate-200 dark:border-slate-800 lg:border-t-0">
                                 <NotificationBell userId={currentUser?._id} />
                                 <button
                                     onClick={() => { logout(); navigate('/'); }}
                                     aria-label="Logout"
-                                    className="flex items-center justify-center flex-1 lg:flex-none lg:w-auto lg:h-auto px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] transition-all font-bold text-sm uppercase tracking-wider text-xs"
+                                    className="flex items-center justify-center flex-1 lg:flex-none lg:w-auto lg:h-auto px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-all font-semibold text-sm"
                                 >
                                     <LogOut className="w-4 h-4" />
                                     <span className="ml-2">{t('auth.logout', 'Logout')}</span>
@@ -443,63 +426,57 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
 
                         {/* Quick Actions Bar */}
                         {!isAdmin && (
-                            <div className="mt-6 pt-5 border-t border-slate-800/50">
-                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-3 px-1">
+                            <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">
                                     {t('dashboard.quickActions', 'Schnellzugriff')}
                                 </p>
                                 <div className="grid grid-cols-4 gap-2">
                                     <button
                                         onClick={() => navigate('/marketplace')}
                                         title="Marktplatz"
-                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/50 text-blue-400 transition-all group hover:scale-105 active:scale-95 shadow-[inset_0_0_10px_rgba(59,130,246,0.05)]"
+                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all group hover:scale-105 active:scale-95"
                                     >
-                                        <Package className="w-4 h-4 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-                                        <span className="text-[8px] font-bold uppercase tracking-wider">Shop</span>
+                                        <Package className="w-4 h-4 text-brand-primary" />
+                                        <span className="text-[8px] font-bold">Shop</span>
                                     </button>
                                     <button
                                         onClick={() => navigate('/repair')}
                                         title="Reparatur buchen"
-                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/50 text-purple-400 transition-all group hover:scale-105 active:scale-95 shadow-[inset_0_0_10px_rgba(168,85,247,0.05)]"
+                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all group hover:scale-105 active:scale-95"
                                     >
-                                        <Wrench className="w-4 h-4 group-hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-                                        <span className="text-[8px] font-bold uppercase tracking-wider">Repair</span>
+                                        <Wrench className="w-4 h-4 text-purple-500" />
+                                        <span className="text-[8px] font-bold">Repair</span>
                                     </button>
                                     <button
                                         onClick={() => navigate('/valuation')}
                                         title="Gerät verkaufen"
-                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/50 text-emerald-400 transition-all group hover:scale-105 active:scale-95 shadow-[inset_0_0_10px_rgba(16,185,129,0.05)]"
+                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all group hover:scale-105 active:scale-95"
                                     >
-                                        <BarChart3 className="w-4 h-4 group-hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                                        <span className="text-[8px] font-bold uppercase tracking-wider">Sell</span>
+                                        <BarChart3 className="w-4 h-4 text-emerald-500" />
+                                        <span className="text-[8px] font-bold">Sell</span>
                                     </button>
-                                    <button
-                                        onClick={() => setActiveTab('wallet')}
-                                        title="Wallet aufladen"
-                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/50 text-amber-400 transition-all group hover:scale-105 active:scale-95 shadow-[inset_0_0_10px_rgba(245,158,11,0.05)]"
-                                    >
-                                        <Wallet className="w-4 h-4 group-hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-                                        <span className="text-[8px] font-bold uppercase tracking-wider">Wallet</span>
-                                    </button>
+                                    {settings.data?.sections?.wallet !== false && (
+                                        <button
+                                            onClick={() => setActiveTab('wallet')}
+                                            title="Wallet aufladen"
+                                            className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all group hover:scale-105 active:scale-95"
+                                        >
+                                            <Wallet className="w-4 h-4 text-amber-500" />
+                                            <span className="text-[8px] font-bold">Wallet</span>
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => setActiveTab('messages')}
                                         title="Support kontaktieren"
-                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 transition-all group hover:scale-105 active:scale-95 shadow-[inset_0_0_10px_rgba(6,182,212,0.05)] relative"
+                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all group hover:scale-105 active:scale-95 relative hidden"
                                     >
-                                        <Mail className="w-4 h-4 group-hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                                        <span className="text-[8px] font-bold uppercase tracking-wider">Support</span>
+                                        <Mail className="w-4 h-4 text-cyan-500" />
+                                        <span className="text-[8px] font-bold">Support</span>
                                         {unreadCount > 0 && (
-                                            <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] font-black flex items-center justify-center animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]">
+                                            <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] font-black flex items-center justify-center shadow-sm">
                                                 {unreadCount}
                                             </span>
                                         )}
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('settings')}
-                                        title="Einstellungen"
-                                        className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl bg-slate-500/10 hover:bg-slate-500/20 border border-slate-500/20 hover:border-slate-500/50 text-slate-400 transition-all group hover:scale-105 active:scale-95 shadow-[inset_0_0_10px_rgba(148,163,184,0.05)]"
-                                    >
-                                        <Settings className="w-4 h-4 group-hover:drop-shadow-[0_0_8px_rgba(148,163,184,0.8)]" />
-                                        <span className="text-[8px] font-bold uppercase tracking-wider">Settings</span>
                                     </button>
                                 </div>
                             </div>
@@ -549,12 +526,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                     )}
 
                     {activeTab === 'wallet' && (
-                        <DashboardWallet
-                            balance={(wallet.data as any)?.balance || 0}
-                            transactions={(wallet.data as any)?.transactions || []}
-                            isLoading={wallet.isLoading}
-                            onAddFunds={handleAddFunds}
-                        />
+                        settings.data?.sections?.walletComingSoon ? (
+                            <div className="flex flex-col items-center justify-center p-12 mt-4 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm min-h-[400px]">
+                                <Wallet className="w-20 h-20 text-slate-300 dark:text-slate-700 mb-6" />
+                                <h2 className="text-3xl font-black mb-3 text-slate-900 dark:text-white">Digital Wallet</h2>
+                                <p className="text-slate-500 text-lg mb-6 max-w-md">Dieses Feature befindet sich aktuell in der Entwicklung und wird in Kürze freigeschaltet! 🚀</p>
+                                <span className="px-4 py-1.5 bg-brand-primary/10 text-brand-primary font-bold rounded-full text-sm uppercase tracking-wider">Coming Soon</span>
+                            </div>
+                        ) : (
+                            <DashboardWallet
+                                balance={(wallet.data as any)?.balance || 0}
+                                transactions={(wallet.data as any)?.transactions || []}
+                                isLoading={wallet.isLoading}
+                                onAddFunds={handleAddFunds}
+                            />
+                        )
                     )}
 
                     {activeTab === 'wishlist' && (

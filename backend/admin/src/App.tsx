@@ -7,6 +7,7 @@ import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, Scan
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ConfirmProvider } from './context/ConfirmContext';
 import { NotificationBell } from './components/NotificationBell';
 import { useAdminNotifications } from './hooks/useAdminNotifications';
 import { AdminErrorBoundary } from './components/AdminErrorBoundary';
@@ -338,14 +339,16 @@ function App() {
   return (
     <AdminErrorBoundary>
       <AuthProvider>
-        <Toaster 
-          position="top-right" 
-          toastOptions={{ 
-              style: { background: '#0f172a', color: '#fff', border: '1px solid #1e293b' },
-              success: { iconTheme: { primary: '#10b981', secondary: '#fff' } }
-          }} 
-        />
-        <AppContent />
+        <ConfirmProvider>
+          <Toaster 
+            position="top-right" 
+            toastOptions={{ 
+                style: { background: '#0f172a', color: '#fff', border: '1px solid #1e293b' },
+                success: { iconTheme: { primary: '#10b981', secondary: '#fff' } }
+            }} 
+          />
+          <AppContent />
+        </ConfirmProvider>
       </AuthProvider>
     </AdminErrorBoundary>
   );

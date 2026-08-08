@@ -89,18 +89,22 @@ export function AddDeviceModal({ isOpen, onClose, handleAddDeviceSave }: AddDevi
 
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Category *</label>
-                        <select
+                        <input
+                            type="text"
                             required
+                            list="device-categories"
+                            placeholder="Type or select category..."
                             className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                             value={addForm.category} onChange={e => setAddForm({ ...addForm, category: e.target.value })}
                             title="Category"
                             aria-label="Category"
-                        >
+                        />
+                        <datalist id="device-categories">
                             <option value="Smartphones">Smartphones</option>
                             <option value="Tablets">Tablets</option>
                             <option value="Laptops">Laptops</option>
                             <option value="Smartwatches">Smartwatches</option>
-                        </select>
+                        </datalist>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

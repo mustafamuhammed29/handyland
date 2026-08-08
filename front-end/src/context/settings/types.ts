@@ -52,10 +52,24 @@ export interface SectionSettings {
     accessories: boolean;
     contact: boolean;
     marketplacePage?: boolean;
+    marketplacePageComingSoon?: boolean;
     valuationPage?: boolean;
+    valuationPageComingSoon?: boolean;
     repairPage?: boolean;
+    repairPageComingSoon?: boolean;
     trackRepairPage?: boolean;
+    trackRepairPageComingSoon?: boolean;
+    accessoriesPage?: boolean;
+    accessoriesPageComingSoon?: boolean;
     authSystem?: boolean;
+    authSystemComingSoon?: boolean;
+}
+
+export interface WhatsAppSettings {
+  enabled: boolean;
+  repairEnabled?: boolean;
+  phoneNumber: string;
+  message: string;
 }
 
 export interface FooterSettings {

@@ -88,29 +88,29 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">{t('repairs.title', 'Aktive Reparaturen')}</h2>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{t('repairs.title', 'Aktive Reparaturen')}</h2>
 
             <div className="space-y-4">
                 {localRepairs.map((ticket) => (
                     <div
                         key={ticket.id || ticket._id}
-                        className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden"
+                        className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all"
                     >
                         <div className="p-6">
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center relative">
+                                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center relative shrink-0">
                                         <Wrench className="w-6 h-6 text-brand-primary" />
                                         {ticket.status === 'attention' && (
                                             <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
                                         )}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-white text-lg flex items-center gap-2">
+                                        <h3 className="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
                                             {ticket.device}
                                             <span className="text-xs font-normal text-slate-500 font-mono">#{ticket.ticketId || ticket._id}</span>
                                         </h3>
-                                        <p className="text-sm text-slate-400">{ticket.issue}</p>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">{ticket.issue}</p>
                                     </div>
                                 </div>
                                 <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${getStatusColor(ticket.status)}`}>
@@ -119,10 +119,10 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                             </div>
 
                             {/* Timeline */}
-                            <div className="relative px-2 mb-8">
-                                <div className="h-1 bg-slate-800 w-full absolute top-1/2 -translate-y-1/2 left-0 right-0 z-0 rounded-full"></div>
+                            <div className="relative px-2 mb-8 hidden sm:block">
+                                <div className="h-1 bg-slate-200 dark:bg-slate-800 w-full absolute top-1/2 -translate-y-1/2 left-0 right-0 z-0 rounded-full"></div>
                                 <div
-                                    className="h-1 bg-brand-primary shadow-[0_0_10px_#06b6d4] absolute top-1/2 -translate-y-1/2 left-0 z-0 transition-all duration-1000 rounded-full"
+                                    className="h-1 bg-brand-primary shadow-[0_0_10px_rgba(6,182,212,0.5)] absolute top-1/2 -translate-y-1/2 left-0 z-0 transition-all duration-1000 rounded-full"
                                     style={{ width: `${(getStatusStep(ticket.status) / 5) * 100}%` }}
                                 ></div>
 
@@ -139,10 +139,10 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                         return (
                                             <div key={step.key} className="flex flex-col items-center gap-2">
                                                 <div className={`w-3 h-3 rounded-full border-2 transition-colors ${active
-                                                    ? 'bg-brand-primary border-brand-primary shadow-[0_0_10px_#06b6d4]'
-                                                    : 'bg-slate-900 border-slate-700'
+                                                    ? 'bg-brand-primary border-brand-primary shadow-[0_0_10px_rgba(6,182,212,0.5)]'
+                                                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700'
                                                     }`}></div>
-                                                <span className={`text-[10px] font-bold uppercase ${active ? 'text-brand-primary' : 'text-slate-600'
+                                                <span className={`text-[10px] font-bold uppercase ${active ? 'text-brand-primary' : 'text-slate-400 dark:text-slate-600'
                                                     }`}>{step.label}</span>
                                             </div>
                                         );
@@ -151,19 +151,19 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                             </div>
 
                             {/* Footer */}
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center gap-4">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                                     {ticket.estimatedCompletion ? (
                                         <div className="text-xs text-slate-500">
                                             {t('repairs.item.estCompletion', 'Est. Completion')}:{' '}
-                                            <span className="text-white font-bold">
+                                            <span className="text-slate-900 dark:text-white font-bold">
                                                 {new Date(ticket.estimatedCompletion).toLocaleDateString(i18n.language, {
                                                     weekday: 'short', day: '2-digit', month: 'short'
                                                 })}
                                             </span>
                                         </div>
                                     ) : (
-                                        <div className="text-xs text-slate-600">{t('repairs.completion_tbd', 'Fertigstellung: Ausstehend')}</div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-600">{t('repairs.completion_tbd', 'Fertigstellung: Ausstehend')}</div>
                                     )}
                                     {((ticket as any).estimatedCost !== undefined || ticket.cost !== undefined) && (
                                         <div className="text-xs text-slate-500">
@@ -176,7 +176,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                         setExpandedRepairId(expandedRepairId === (ticket.id || ticket._id) ? null : (ticket.id || (ticket._id as string)));
                                         setNewNoteText('');
                                     }}
-                                    className="text-sm text-brand-primary font-bold hover:text-brand-primary flex items-center gap-1"
+                                    className="text-sm text-brand-primary font-bold hover:text-brand-secondary flex items-center gap-1 w-full sm:w-auto justify-between sm:justify-start bg-brand-primary/5 sm:bg-transparent px-3 py-2 sm:p-0 rounded-lg sm:rounded-none"
                                 >
                                     {expandedRepairId === (ticket.id || ticket._id) ? t('repairs.actions.hideDetails', 'Hide Details') : t('repairs.actions.viewDetails', 'View Details')}
                                     <ChevronRight className={`w-4 h-4 transition-transform ${expandedRepairId === (ticket.id || ticket._id) ? 'rotate-90' : ''}`} />
@@ -187,19 +187,19 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                         {/* Expanded Details */}
                         {expandedRepairId === (ticket.id || ticket._id) && (
                             <div className="px-6 pb-6 pt-0 animate-in slide-in-from-top-2">
-                                <div className="h-px bg-slate-800 mb-6"></div>
+                                <div className="h-px bg-slate-200 dark:bg-slate-800 mb-6"></div>
                                 <div className="flex flex-col h-[400px]">
                                     {/* Chat Header */}
-                                    <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
+                                    <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
                                         <MessageSquare className="w-4 h-4" /> {t('repairs.chat.title', 'Ticket Chat')}
                                     </h4>
                                     
                                     {/* Chat Window */}
-                                    <div className="flex-1 bg-slate-950/50 rounded-xl p-4 border border-slate-800/50 flex flex-col">
+                                    <div className="flex-1 bg-slate-50 dark:bg-slate-950/50 rounded-xl p-4 border border-slate-200 dark:border-slate-800/50 flex flex-col">
                                         <div className="flex-1 overflow-y-auto pr-2 space-y-4 mb-4 custom-scrollbar">
                                             {/* Legacy Notes Handling & Messages Map */}
                                             {(!ticket.messages || ticket.messages.length === 0) && !ticket.notes && !ticket.technicianNotes ? (
-                                                <div className="flex items-center justify-center h-full text-slate-600 text-sm italic">
+                                                <div className="flex items-center justify-center h-full text-slate-500 dark:text-slate-600 text-sm italic">
                                                     {t('repairs.chat.empty', 'Keine Nachrichten bisher. Sende die erste Nachricht!')}
                                                 </div>
                                             ) : (
@@ -207,14 +207,14 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                                     {/* Legacy string notes if messages array is empty/undefined */}
                                                     {(!ticket.messages || ticket.messages.length === 0) && ticket.notes && (
                                                         <div className="flex justify-end">
-                                                            <div className="bg-blue-600 text-white p-3 rounded-2xl rounded-br-sm max-w-[80%]">
+                                                            <div className="bg-brand-primary text-black p-3 rounded-2xl rounded-br-sm max-w-[85%] sm:max-w-[80%]">
                                                                 <p className="text-sm whitespace-pre-wrap">{ticket.notes}</p>
                                                             </div>
                                                         </div>
                                                     )}
                                                     {(!ticket.messages || ticket.messages.length === 0) && ticket.technicianNotes && (
                                                         <div className="flex justify-start">
-                                                            <div className="bg-slate-800 text-white p-3 rounded-2xl rounded-bl-sm max-w-[80%]">
+                                                            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white p-3 rounded-2xl rounded-bl-sm max-w-[85%] sm:max-w-[80%]">
                                                                 <p className="text-sm whitespace-pre-wrap">{ticket.technicianNotes}</p>
                                                             </div>
                                                         </div>
@@ -224,7 +224,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                                     {ticket.messages && ticket.messages.map((msg, index) => (
                                                         <div key={msg._id || index} className={`flex ${msg.role === 'customer' ? 'justify-end' : 'justify-start'}`}>
                                                             <div className="flex flex-col gap-1 max-w-[85%] sm:max-w-[75%]">
-                                                                <div className={`p-4 rounded-2xl shadow-sm ${msg.role === 'customer' ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-800 border border-slate-700 text-slate-200 rounded-bl-sm'}`}>
+                                                                <div className={`p-4 rounded-2xl shadow-sm ${msg.role === 'customer' ? 'bg-brand-primary text-black rounded-br-sm' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-200 rounded-bl-sm'}`}>
                                                                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                                                                 </div>
                                                                 <span className={`text-[10px] text-slate-500 font-mono ${msg.role === 'customer' ? 'text-right pr-1' : 'text-left pl-1'} `}>
@@ -243,7 +243,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                                 value={newNoteText}
                                                 onChange={(e) => setNewNoteText(e.target.value)}
                                                 placeholder={t('repairs.chat.placeholder', 'Schreibe eine Nachricht...')}
-                                                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 pr-12 text-sm text-white focus:border-blue-500 outline-none resize-none h-14 min-h-[56px] shadow-inner"
+                                                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 pr-12 text-sm text-slate-900 dark:text-white focus:border-brand-primary dark:focus:border-brand-primary outline-none resize-none h-14 min-h-[56px] shadow-sm"
                                                 disabled={isSubmittingNote === (ticket.id || ticket._id)}
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -255,7 +255,7 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                                             <button 
                                                 onClick={() => handleAddNote(ticket._id || ticket.id || '')}
                                                 disabled={!newNoteText.trim() || isSubmittingNote === (ticket.id || ticket._id)}
-                                                className="absolute right-2 top-2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                                                className="absolute right-2 top-2 p-2 bg-slate-900 text-white dark:bg-brand-primary dark:text-black rounded-lg hover:bg-slate-800 dark:hover:bg-brand-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
                                             >
                                                 {isSubmittingNote === (ticket.id || ticket._id) ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" /> }
                                             </button>
@@ -268,15 +268,15 @@ export const DashboardRepairs: React.FC<DashboardRepairsProps> = ({
                 ))}
 
                 {repairs.length === 0 && (
-                    <div className="text-center py-16 border-2 border-dashed border-slate-800 rounded-2xl">
-                        <Wrench className="w-16 h-16 mx-auto mb-4 text-slate-700" />
-                        <p className="text-lg font-bold text-white mb-1">{t('repairs.empty.title', 'Keine aktiven Reparaturen')}</p>
-                        <p className="text-sm text-slate-500 mb-6">
+                    <div className="text-center py-16 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-white/30 dark:bg-slate-900/20 backdrop-blur-sm">
+                        <Wrench className="w-16 h-16 mx-auto mb-4 text-slate-400 dark:text-slate-700" />
+                        <p className="text-lg font-bold text-slate-900 dark:text-white mb-1">{t('repairs.empty.title', 'Keine aktiven Reparaturen')}</p>
+                        <p className="text-sm text-slate-500 mb-6 px-4">
                             {t('repairs.empty.subtitle', 'Benötigen Sie eine Reparatur? Durchsuchen Sie unseren Servicekatalog.')}
                         </p>
                         <a
                             href="/repair"
-                            className="inline-block px-6 py-2.5 bg-brand-primary hover:bg-brand-primary text-white rounded-xl text-sm font-bold transition-colors"
+                            className="inline-block px-6 py-3 bg-slate-900 text-white dark:bg-brand-primary dark:text-black rounded-xl text-sm font-bold transition-all shadow-md hover:scale-105 active:scale-95"
                         >
                             {t('repairs.empty.cta', 'Reparaturdienste anzeigen')} →
                         </a>

@@ -4,6 +4,7 @@ import { ShoppingCart, User, Clock, Package, Mail, Trash2, Loader2, Euro, Activi
 import { api } from '../utils/api';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import { useConfirm } from '../context/ConfirmContext';
 
 interface CartItem {
     id: string;
@@ -33,6 +34,7 @@ interface UserCart {
 
 export const ActiveCarts = () => {
     const [carts, setCarts] = useState<UserCart[]>([]);
+    const { confirm } = useConfirm();
     const [loading, setLoading] = useState(true);
     const [sendingReminder, setSendingReminder] = useState<string | null>(null);
     const [clearingCart, setClearingCart] = useState<string | null>(null);
@@ -66,7 +68,8 @@ export const ActiveCarts = () => {
     };
 
     const handleSendReminder = async (cartId: string) => {
-        if (!window.confirm("Are you sure you want to send a manual reminder email to this customer?")) return;
+        const ok = await confirm({ message: "Are you sure you want to send a manual reminder email to this customer?", variant: "danger" });
+        if (!ok) return;
         
         setSendingReminder(cartId);
         try {
@@ -82,7 +85,8 @@ export const ActiveCarts = () => {
     };
 
     const handleClearCart = async (cartId: string) => {
-        if (!window.confirm("Are you sure you want to FORCE CLEAR this cart? This action cannot be undone.")) return;
+        const ok = await confirm({ message: "Are you sure you want to FORCE CLEAR this cart? This action cannot be undone.", variant: "danger" });
+        if (!ok) return;
         
         setClearingCart(cartId);
         try {

@@ -101,18 +101,27 @@ exports.createWarranty = async (req, res, next) => {
 // @route PUT /api/warranties/:id
 exports.updateWarranty = async (req, res, next) => {
     try {
-        const fields = ['customer_name','customer_phone','customer_email','status','notes','imei_or_serial'];
         const updateData = {};
-        fields.forEach(f => { if (req.body[f] !== undefined) updateData[f] = req.body[f]; });
+        
+        // Map frontend camelCase to db snake_case
+        if (req.body.customerName !== undefined) updateData.customer_name = req.body.customerName;
+        if (req.body.customerPhone !== undefined) updateData.customer_phone = req.body.customerPhone;
+        if (req.body.customerEmail !== undefined) updateData.customer_email = req.body.customerEmail;
+        if (req.body.status !== undefined) updateData.status = req.body.status;
+        if (req.body.notes !== undefined) updateData.notes = req.body.notes;
+        if (req.body.imeiOrSerial !== undefined) updateData.imei_or_serial = req.body.imeiOrSerial;
+        if (req.body.itemType !== undefined) updateData.item_type = req.body.itemType;
+        if (req.body.itemName !== undefined) updateData.item_name = req.body.itemName;
+        if (req.body.supplierName !== undefined) updateData.supplier_name = req.body.supplierName;
 
         // Recalculate end_date if duration changed
-        if (req.body.durationDays || req.body.startDate) {
+        if (req.body.durationDays !== undefined || req.body.startDate !== undefined) {
             const { data: existing } = await supabaseAdmin.from('warranties').select('start_date, duration_days').eq('id', req.params.id).single();
             const start = new Date(req.body.startDate || existing.start_date);
-            const days = req.body.durationDays || existing.duration_days;
+            const days = req.body.durationDays !== undefined ? req.body.durationDays : existing.duration_days;
             updateData.end_date = new Date(start.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
-            if (req.body.durationDays) updateData.duration_days = days;
-            if (req.body.startDate) updateData.start_date = start.toISOString();
+            if (req.body.durationDays !== undefined) updateData.duration_days = days;
+            if (req.body.startDate !== undefined) updateData.start_date = start.toISOString();
         }
 
         const { data, error } = await supabaseAdmin.from('warranties').update(updateData).eq('id', req.params.id).select().single();

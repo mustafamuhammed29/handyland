@@ -47,7 +47,7 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
     const { t } = useTranslation();
 
     const getScreenPrice = (device: RepairDevice) => {
-        const p = device.services?.find(s => s.type === 'screen')?.price;
+        const p = device.services?.find(s => s.type.includes('screen'))?.price;
         if (p && p > 0) return `${p}€`;
         const modelName = getCleanDeviceModel(device).toLowerCase();
         if (modelName.includes('15 pro max')) return '299€';
@@ -57,7 +57,7 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
     };
 
     const getBatteryPrice = (device: RepairDevice) => {
-        const p = device.services?.find(s => s.type === 'battery')?.price;
+        const p = device.services?.find(s => s.type.includes('battery'))?.price;
         if (p && p > 0) return `${p}€`;
         const modelName = getCleanDeviceModel(device).toLowerCase();
         if (modelName.includes('15')) return '89€';
@@ -123,7 +123,7 @@ export const RepairCatalogList: React.FC<RepairCatalogListProps> = ({ filteredDe
                                     </span>
                                 </div>
                                 {/* Render any additional services beyond screen & battery */}
-                                {device.services?.filter(s => s.type !== 'screen' && s.type !== 'battery').map((s, idx) => {
+                                {device.services?.filter(s => !s.type.includes('screen') && !s.type.includes('battery')).map((s, idx) => {
                                     const typeLabels: Record<string, string> = {
                                         charging: t('repair.chargingPort', 'Ladebuchse'),
                                         camera: t('repair.camera', 'Kamera'),

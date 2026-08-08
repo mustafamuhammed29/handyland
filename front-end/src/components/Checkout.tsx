@@ -246,12 +246,12 @@ export const Checkout: React.FC = () => {
                             
                             <div className="border-t border-slate-700 pt-3 space-y-2 text-sm">
                                 <div className="flex justify-between text-slate-400">
-                                    <span>Subtotal</span>
-                                    <span>{cartTotal.toFixed(2)}€</span>
+                                    <span>Subtotal (Net)</span>
+                                    <span>{(cartTotal / 1.19).toFixed(2)}€</span>
                                 </div>
                                 <div className="flex justify-between text-slate-400">
-                                    <span>VAT (19%)</span>
-                                    <span>{(cartTotal * 0.19).toFixed(2)}€</span>
+                                    <span>Incl. VAT (19%)</span>
+                                    <span>{(cartTotal - (cartTotal / 1.19)).toFixed(2)}€</span>
                                 </div>
                                 <div className="flex justify-between text-slate-400">
                                     <span>Shipping</span>
@@ -262,7 +262,7 @@ export const Checkout: React.FC = () => {
                                 <div className="flex justify-between text-white font-bold text-base border-t border-slate-700 pt-2">
                                     <span>Total</span>
                                     <span>
-                                        {(cartTotal * 1.19 + (cartTotal >= 100 ? 0 : 5.99)).toFixed(2)}€
+                                        {(cartTotal + (cartTotal >= 100 ? 0 : 5.99)).toFixed(2)}€
                                     </span>
                                 </div>
                             </div>

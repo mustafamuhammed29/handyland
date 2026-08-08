@@ -156,7 +156,7 @@ export const CheckoutPaymentSection: React.FC<Props> = ({
                 const orderRes = await api.post<any, any>('/api/orders', {
                     items: cart.map(item => ({
                         product: item.id,
-                        productType: (item as any).productType || (item.category?.toLowerCase() === 'accessory' ? 'Accessory' : 'Product'),
+                        productType: (item as any).productType || (item.category?.toLowerCase() === 'accessory' ? 'Accessory' : item.category?.toLowerCase() === 'repair' ? 'Repair' : 'Product'),
                         name: item.title,
                         price: item.price,
                         image: item.image,
@@ -265,6 +265,7 @@ export const CheckoutPaymentSection: React.FC<Props> = ({
             })),
             shippingAddress: { ...shippingDetails, street: shippingDetails.address },
             shippingFee,
+            shippingMethod: selectedMethod?.name || 'Standard',
             couponCode: coupon?.code,
             discountAmount: coupon?.discount,
         };

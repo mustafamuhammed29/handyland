@@ -59,18 +59,20 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
     const finalColumns = settings.columns.map(col => {
       let filteredLinks = col.links;
 
-      if (globalSettings?.sections?.marketplacePage === false) {
+      if (globalSettings?.sections?.marketplacePage === false && !globalSettings?.sections?.marketplacePageComingSoon) {
           filteredLinks = filteredLinks.filter(l => !l.url.includes('/market'));
       }
-      if (globalSettings?.sections?.valuationPage === false) {
+      if (globalSettings?.sections?.valuationPage === false && !globalSettings?.sections?.valuationPageComingSoon) {
           filteredLinks = filteredLinks.filter(l => !l.url.includes('/valuation'));
       }
-      if (globalSettings?.sections?.repairPage === false) {
+      if (globalSettings?.sections?.repairPage === false && !globalSettings?.sections?.repairPageComingSoon) {
           filteredLinks = filteredLinks.filter(l => !l.url.includes('/repair'));
       }
-      // Assuming track-repair is in services list too
-      if (globalSettings?.sections?.trackRepairPage === false) {
+      if (globalSettings?.sections?.trackRepairPage === false && !globalSettings?.sections?.trackRepairPageComingSoon) {
           filteredLinks = filteredLinks.filter(l => !l.url.includes('/track-repair'));
+      }
+      if (globalSettings?.sections?.accessoriesPage === false && !globalSettings?.sections?.accessoriesPageComingSoon) {
+          filteredLinks = filteredLinks.filter(l => !l.url.includes('/accessories'));
       }
 
       return { ...col, links: filteredLinks };
@@ -117,15 +119,30 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
               {settings.companyInfo.tagline}
             </p>
             <div className="flex gap-3 mt-6">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Visit our Facebook page" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Visit our Instagram page" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
-                <Instagram className="w-4 h-4" />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" title="Twitter" aria-label="Visit our Twitter page" className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm">
-                <Twitter className="w-4 h-4" />
-              </a>
+              {(Array.isArray(globalSettings?.contactSection?.socialLinks) ? globalSettings.contactSection.socialLinks : []).map((social: any, index: number) => {
+                  const iconMap: Record<string, React.ElementType> = {
+                      'Facebook': Facebook,
+                      'Instagram': Instagram,
+                      'Twitter': Twitter,
+                      'Linkedin': Linkedin,
+                      'Youtube': Youtube,
+                      'Send': Send,
+                  };
+                  const IconComponent = iconMap[social.iconName] || Facebook; // fallback
+                  return (
+                      <a
+                          key={index}
+                          href={social.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={social.platform || 'Social Media'}
+                          aria-label={`Visit our ${social.platform || 'social media'} page`}
+                          className="p-2 rounded-full bg-slate-200 hover:bg-brand-primary dark:bg-slate-900 dark:hover:bg-brand-primary hover:text-black text-slate-500 dark:text-slate-400 transition-colors shadow-sm"
+                      >
+                          <IconComponent className="w-4 h-4" />
+                      </a>
+                  );
+              })}
             </div>
           </div>
 

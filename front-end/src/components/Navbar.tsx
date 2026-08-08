@@ -75,9 +75,10 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
   });
 
   const activeNavItems = navItems.filter(item => {
-    if ((item.path === '/marketplace' || item.path === '/market') && settings.sections?.marketplacePage === false) return false;
-    if (item.path === '/repair' && settings.sections?.repairPage === false) return false;
-    if (item.path === '/valuation' && settings.sections?.valuationPage === false) return false;
+    if (item.path === '/marketplace' && settings.sections?.marketplacePage === false && !settings.sections?.marketplacePageComingSoon) return false;
+    if (item.path === '/repair' && settings.sections?.repairPage === false && !settings.sections?.repairPageComingSoon) return false;
+    if (item.path === '/valuation' && settings.sections?.valuationPage === false && !settings.sections?.valuationPageComingSoon) return false;
+    if (item.path === '/accessories' && settings.sections?.accessoriesPage === false && !settings.sections?.accessoriesPageComingSoon) return false;
     return true;
   });
 
@@ -135,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             );
           })}
           
-          {(!(settings as any).features || (settings as any).features.comparisonEngine !== false) && settings.sections?.marketplacePage !== false && (
+          {(!(settings as any).features || (settings as any).features.comparisonEngine !== false) && (settings.sections?.marketplacePage !== false || settings.sections?.marketplacePageComingSoon) && (
             <Link
               to="/compare"
               className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border transition-all duration-200 xl:mx-1 ${location.pathname === '/compare' ? 'bg-purple-500 text-white border-purple-500' : 'border-purple-500/50 text-purple-500 hover:bg-purple-500/10'}`}
@@ -145,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             </Link>
           )}
           
-          {settings.sections?.trackRepairPage !== false && (
+          {(settings.sections?.trackRepairPage !== false || settings.sections?.trackRepairPageComingSoon) && (
             <Link
               to="/track-repair"
               className="whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
@@ -195,14 +196,14 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
               {cart.length > 0 && <span className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 min-w-[18px] h-[18px] flex items-center justify-center bg-brand-primary text-black text-[10px] font-black rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)] px-1">{cart.length}</span>}
             </button>
 
-            {user && settings.sections?.authSystem !== false && (
+            {(settings.sections?.authSystem !== false || settings.sections?.authSystemComingSoon) && user && (
               <Link to="/dashboard?tab=wishlist"
                 className="relative flex items-center justify-center w-10 h-10 rounded-full bg-transparent transition-all group hidden md:flex outline-none hover:bg-black/5 dark:hover:bg-white/5">
                 <Heart className="w-5 h-5 text-slate-600 dark:text-slate-400 transition-colors group-hover:text-pink-400 drop-shadow-none group-hover:drop-shadow-[0_0_8px_rgba(244,114,182,0.5)]" />
               </Link>
             )}
 
-            {settings.sections?.authSystem !== false && (
+            {(settings.sections?.authSystem !== false || settings.sections?.authSystemComingSoon) && (
               <Link
                 to={user ? '/dashboard' : '/login'}
                 aria-label={user ? 'Go to dashboard' : 'Log in'}
@@ -215,7 +216,12 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
 
             </div>
 
-          <div className="flex xl:hidden items-center border-s border-black/10 dark:border-white/[0.05] ps-2 ms-1">
+          <div className="flex xl:hidden items-center gap-2 border-s border-black/10 dark:border-white/[0.05] ps-2 ms-1">
+            {user && (
+              <div className="block md:hidden">
+                <NotificationBell userId={user._id} variant="navbar" />
+              </div>
+            )}
             <button
                onClick={() => setIsOpen(!isOpen)}
                aria-label="Toggle navigation menu"
@@ -298,7 +304,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
               </Link>
             )}
 
-            {settings.sections?.trackRepairPage !== false && (
+            {(settings.sections?.trackRepairPage !== false || settings.sections?.trackRepairPageComingSoon) && (
               <Link
                 to="/track-repair"
                 onClick={() => setIsOpen(false)}
@@ -310,7 +316,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             )}
           </div>
 
-          {settings.sections?.authSystem !== false && (
+          {(settings.sections?.authSystem !== false || settings.sections?.authSystemComingSoon) && (
             <div className="mt-auto pt-4 border-t border-black/5 dark:border-white/[0.05] shrink-0 pb-2">
               <Link
                 to={user ? '/dashboard' : '/login'}

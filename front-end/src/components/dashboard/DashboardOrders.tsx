@@ -62,11 +62,11 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
             {/* Header & Filters */}
             <div className="flex flex-col md:flex-row gap-4 justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">{t('orders.title', 'Meine Bestellungen')}</h2>
-                    <p className="text-slate-400 text-sm">{t('orders.found', '{{count}} Bestellungen gefunden', { count: filteredOrders.length })}</p>
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{t('orders.title', 'Meine Bestellungen')}</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">{t('orders.found', '{{count}} Bestellungen gefunden', { count: filteredOrders.length })}</p>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                         <input
@@ -74,14 +74,14 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                             placeholder={t('orders.search', 'Bestellungen suchen...')}
                             value={orderSearch}
                             onChange={(e) => setOrderSearch(e.target.value)}
-                            className="pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
+                            className="w-full sm:w-auto pl-10 pr-4 py-2 bg-white/60 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary dark:focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all backdrop-blur-md shadow-sm"
                         />
                     </div>
                     <select
                         title="Filter orders by status"
                         value={orderFilter}
                         onChange={(e) => setOrderFilter(e.target.value)}
-                        className="px-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
+                        className="w-full sm:w-auto px-4 py-2 bg-white/60 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary dark:focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all backdrop-blur-md shadow-sm"
                     >
                         <option value="all">{t('orders.all_status', 'Alle Status')}</option>
                         <option value="pending">{t('orders.status.pending', 'Ausstehend')}</option>
@@ -100,25 +100,25 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                 {filteredOrders.map((order) => (
                     <div
                         key={order._id}
-                        className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition-all"
+                        className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden hover:border-brand-primary/30 dark:hover:border-brand-primary/30 transition-all shadow-sm hover:shadow-md dark:hover:shadow-brand-primary/5"
                     >
                         {/* Order Header */}
                         <div className="p-6">
                             <div className="flex flex-col md:flex-row justify-between gap-4">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center">
-                                        <Package className="w-6 h-6 text-blue-400" />
+                                    <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-brand-primary/10 flex items-center justify-center shrink-0 border border-slate-200 dark:border-brand-primary/20">
+                                        <Package className="w-6 h-6 text-slate-600 dark:text-brand-primary" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-white">{t('orders.orderLabel', 'Bestellung')} {order.orderNumber || `#${order._id?.slice(-8)}`}</h3>
-                                        <p className="text-sm text-slate-400">
+                                        <h3 className="font-bold text-slate-900 dark:text-white">{t('orders.orderLabel', 'Bestellung')} {order.orderNumber || `#${order._id?.slice(-8)}`}</h3>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">
                                             {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '---'} • {t('orders.items', '{{count}} Artikel', { count: order.items?.length || 0 })}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right">
-                                        <p className="text-white font-bold text-lg">{formatPrice(order.totalAmount || 0)}</p>
+                                <div className="flex items-center justify-between md:justify-end gap-4">
+                                    <div className="text-right flex-1 md:flex-initial">
+                                        <p className="text-slate-900 dark:text-white font-black text-lg">{formatPrice(order.totalAmount || 0)}</p>
                                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(order.status)}`}>
                                             {order.status === 'return_requested' && <RotateCcw className="w-3 h-3 inline mr-1" />}
                                             {t(`orders.status.${order.status}`, order.status)}
@@ -127,7 +127,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                     <button
                                         aria-label={expandedOrderId === order._id ? 'Collapse order' : 'Expand order'}
                                         onClick={() => setExpandedOrderId(expandedOrderId === order._id ? null : order._id)}
-                                        className="text-slate-400 hover:text-white transition-colors"
+                                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white transition-all shrink-0"
                                     >
                                         <ChevronRight className={`w-5 h-5 transition-transform ${expandedOrderId === order._id ? 'rotate-90' : ''}`} />
                                     </button>
@@ -138,34 +138,34 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         {/* Expanded Order Details */}
                         {expandedOrderId === order._id && (
                             <div className="px-6 pb-6 animate-in slide-in-from-top-2">
-                                <div className="h-px bg-slate-800 mb-4"></div>
+                                <div className="h-px bg-slate-200 dark:bg-slate-800 mb-6"></div>
 
-                                <div className="mb-6">
+                                <div className="mb-6 bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800">
                                     <VisualOrderTimeline currentStatus={order.status || 'pending'} type="order" />
                                 </div>
 
                                 {/* Order Items */}
-                                <div className="space-y-3 mb-4">
+                                <div className="space-y-3 mb-6">
                                     {order.items?.map((item, idx) => (
-                                        <div key={idx} className="flex items-center gap-4 p-3 bg-slate-800/30 rounded-xl">
+                                        <div key={idx} className="flex items-center gap-4 p-3 bg-white/50 dark:bg-slate-800/30 rounded-xl border border-slate-100 dark:border-slate-800/50">
                                             {item.image && (
-                                                <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg" />
+                                                <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700" />
                                             )}
                                             <div className="flex-1">
-                                                <p className="text-white font-medium">{item.name}</p>
-                                                <p className="text-sm text-slate-400">{t('orders.item.qty', 'Menge')}: {item.quantity} × {formatPrice(item.price || 0)}</p>
+                                                <p className="text-slate-900 dark:text-white font-bold text-sm sm:text-base">{item.name}</p>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400">{t('orders.item.qty', 'Menge')}: {item.quantity} × {formatPrice(item.price || 0)}</p>
                                             </div>
-                                            <p className="text-white font-bold">{formatPrice((item.price || 0) * (item.quantity || 1))}</p>
+                                            <p className="text-slate-900 dark:text-white font-black">{formatPrice((item.price || 0) * (item.quantity || 1))}</p>
                                         </div>
                                     ))}
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex flex-wrap gap-3">
+                                <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                                     {(order.paymentMethod === 'bank_transfer' && order.paymentStatus !== 'paid') && (
                                         <button
                                             onClick={() => navigate(`/orders/${order._id}`)}
-                                            className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-xl text-sm font-bold transition-colors"
+                                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary border border-brand-primary/30 rounded-xl text-sm font-bold transition-colors"
                                         >
                                             <Upload className="w-4 h-4" />
                                             {t('orders.actions.uploadReceipt', 'Beleg hochladen')}
@@ -174,7 +174,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                     {order.hasInvoice && (
                                         <button
                                             onClick={() => onDownloadInvoice(order._id)}
-                                            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition-colors"
+                                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium transition-colors"
                                         >
                                             <Download className="w-4 h-4" />
                                             {t('orders.actions.downloadInvoice', 'Rechnung herunterladen')}
@@ -182,7 +182,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                     )}
                                     <button
                                         onClick={() => navigate(`/orders/${order._id}`)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-colors"
+                                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-brand-primary dark:hover:bg-brand-secondary dark:text-black rounded-xl text-sm font-bold transition-colors ml-0 sm:ml-auto"
                                     >
                                         {t('orders.actions.viewDetails', 'Details anzeigen')}
                                         <ChevronRight className="w-4 h-4" />
@@ -194,14 +194,14 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                 ))}
 
                 {filteredOrders.length === 0 && (
-                    <div className="relative overflow-hidden text-center py-20 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl group transition-all duration-500 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-[60px] group-hover:bg-blue-500/20 transition-all duration-700 pointer-events-none"></div>
+                    <div className="relative overflow-hidden text-center py-20 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-3xl group transition-all duration-500 hover:shadow-xl hover:border-brand-primary/30 dark:hover:shadow-brand-primary/5">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-brand-primary/5 dark:bg-brand-primary/10 rounded-full blur-[60px] group-hover:bg-brand-primary/10 dark:group-hover:bg-brand-primary/20 transition-all duration-700 pointer-events-none"></div>
                         <div className="relative z-10 flex flex-col items-center">
-                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)] flex items-center justify-center mb-6 border border-white/5">
-                                <Package className="w-10 h-10 text-blue-400 opacity-80" />
+                            <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-brand-primary/20 shadow-inner dark:shadow-[0_0_30px_rgba(6,182,212,0.15)] flex items-center justify-center mb-6 border border-slate-200 dark:border-white/5">
+                                <Package className="w-10 h-10 text-slate-400 dark:text-brand-primary opacity-80" />
                             </div>
-                            <h3 className="text-2xl font-black text-white mb-2 tracking-tight">{t('orders.empty.title', 'Noch keine Bestellungen')}</h3>
-                            <p className="text-base text-slate-400 mb-8 max-w-sm mx-auto">
+                            <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">{t('orders.empty.title', 'Noch keine Bestellungen')}</h3>
+                            <p className="text-base text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto px-4">
                                 {orderSearch || orderFilter !== 'all' 
                                     ? t('orders.empty.noResults', 'Keine Ergebnisse für deine Suche. Bitte passe die Filter an.') 
                                     : t('orders.empty.newProfile', 'Dein Profil ist noch ganz neu. Entdecke erstklassige Premium-Geräte in unserem Marktplatz!')}
@@ -209,7 +209,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                             {!orderSearch && orderFilter === 'all' && (
                                 <button
                                     onClick={() => navigate('/marketplace')}
-                                    className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-brand-primary hover:scale-105 active:scale-95 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-900/30 w-full sm:w-auto flex items-center justify-center gap-2"
+                                    className="px-8 py-3.5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-gradient-to-r dark:from-brand-primary dark:to-brand-secondary dark:text-black dark:hover:scale-105 active:scale-95 rounded-xl text-sm font-bold transition-all shadow-lg dark:shadow-brand-primary/20 w-[90%] sm:w-auto flex items-center justify-center gap-2"
                                 >
                                     {t('orders.empty.cta', 'Zum Marktplatz')} <ChevronRight className="w-4 h-4" />
                                 </button>

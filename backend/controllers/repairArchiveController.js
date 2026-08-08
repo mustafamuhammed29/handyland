@@ -9,13 +9,17 @@ const { supabaseAdmin } = require('../config/supabase');
 // @route GET /api/repairs/archive
 exports.getAllCases = async (req, res, next) => {
     try {
-        const { page = 1, limit = 15, search } = req.query;
+        const { page = 1, limit = 15, search, category } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
 
         let query = supabaseAdmin.from('repair_cases').select('*', { count: 'exact' });
 
         if (search) {
-            query = query.or(`title.ilike.%${search}%,category.ilike.%${search}%`);
+            query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+        }
+        
+        if (category && category !== 'All') {
+            query = query.eq('category', category);
         }
 
         query = query.order('created_at', { ascending: false }).range(offset, offset + Number(limit) - 1);

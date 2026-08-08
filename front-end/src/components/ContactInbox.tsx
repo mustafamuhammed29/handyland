@@ -141,9 +141,9 @@ export const ContactInbox = () => {
     }
 
     return (
-        <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden flex flex-col" style={{ minHeight: '600px' }}>
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col shadow-sm transition-all duration-300" style={{ minHeight: '600px' }}>
             {/* Header */}
-            <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 backdrop-blur-sm">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/30 backdrop-blur-sm z-10 relative">
                 <AnimatePresence mode="wait">
                     {view !== 'list' ? (
                         <motion.button
@@ -152,7 +152,7 @@ export const ContactInbox = () => {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -10 }}
                             onClick={goBack}
-                            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+                            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors text-sm font-bold"
                         >
                             <ArrowLeft className="w-4 h-4" />
                             {t('common.back', 'Zurück')}
@@ -163,12 +163,12 @@ export const ContactInbox = () => {
                             initial={{ opacity: 0, x: 10 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 10 }}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-3"
                         >
-                            <MessageSquare className="w-5 h-5 text-blue-400" />
-                            <h3 className="text-white font-bold text-base">{t('messages.title', 'Support-Nachrichten')}</h3>
+                            <MessageSquare className="w-6 h-6 text-brand-primary" />
+                            <h3 className="text-slate-900 dark:text-white font-black text-xl">{t('messages.title', 'Support-Nachrichten')}</h3>
                             {messages.length > 0 && (
-                                <span className="bg-blue-600/20 text-blue-400 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-500/30">
+                                <span className="bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-500/30">
                                     {messages.length}
                                 </span>
                             )}
@@ -179,14 +179,14 @@ export const ContactInbox = () => {
                 {/* New Ticket Button or status indicator */}
                 {view === 'list' && (
                     hasActiveTicket ? (
-                        <div className="flex items-center gap-2 text-yellow-400 text-xs font-bold bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-xl">
-                            <Clock className="w-3 h-3" />
+                        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-bold bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 px-3.5 py-2 rounded-xl shadow-sm">
+                            <Clock className="w-3.5 h-3.5" />
                             {t('messages.active_ticket', 'Aktives Ticket offen')}
                         </div>
                     ) : (
                         <button
                             onClick={() => setView('new')}
-                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded-xl font-bold transition-all shadow-md shadow-blue-900/25"
+                            className="flex items-center gap-2 bg-brand-primary hover:bg-blue-600 text-white text-sm px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-blue-900/20 hover:-translate-y-0.5"
                         >
                             <Plus className="w-4 h-4" />
                             {t('messages.new_ticket', 'Neues Ticket')}
@@ -195,7 +195,7 @@ export const ContactInbox = () => {
                 )}
 
                 {view === 'thread' && selectedMessage && (
-                    <div className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border ${statusInfo(selectedMessage.status).bg} ${statusInfo(selectedMessage.status).text}`}>
+                    <div className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-xl border shadow-sm ${statusInfo(selectedMessage.status).bg} ${statusInfo(selectedMessage.status).text}`}>
                         {statusInfo(selectedMessage.status).icon}
                         {statusInfo(selectedMessage.status).label}
                     </div>
@@ -203,7 +203,7 @@ export const ContactInbox = () => {
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 overflow-hidden relative bg-slate-50/30 dark:bg-transparent">
                 <AnimatePresence mode="wait">
                     {/* ── LIST VIEW ── */}
                     {view === 'list' && (

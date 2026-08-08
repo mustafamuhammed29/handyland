@@ -83,6 +83,24 @@ exports.deleteNotification = async (req, res, next) => {
     }
 };
 
+// ── @route DELETE /api/notifications ──────────────────────────
+exports.deleteNotificationsBulk = async (req, res, next) => {
+    try {
+        const { ids } = req.body;
+        let query = supabaseAdmin.from('notifications').delete().eq('user_id', req.user.id);
+        
+        if (ids && Array.isArray(ids) && ids.length > 0) {
+            query = query.in('id', ids);
+        }
+
+        const { error } = await query;
+        if (error) throw error;
+        return res.status(200).json({ success: true });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // Internal helper — used by other controllers to create notifications
 exports.createNotification = async (userId, message, type = 'info', link = null) => {
     try {

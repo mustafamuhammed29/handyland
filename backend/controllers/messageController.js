@@ -17,8 +17,11 @@ exports.getMessages = async (req, res, next) => {
             .from('messages')
             .select('*, message_replies(*)', { count: 'exact' });
 
-        if (req.user.role !== 'admin') {
+        if (req.user.role !== 'admin' && req.user.role !== 'staff') {
             query = query.eq('user_id', req.user.id);
+        } else if (req.user.role === 'staff') {
+            // Staff can see unassigned and their own assigned tickets
+            query = query.or(`assigned_to.eq.${req.user.id},assigned_to.is.null`);
         }
 
         if (status) query = query.eq('status', status);
@@ -47,8 +50,8 @@ exports.getMessage = async (req, res, next) => {
             .from('messages').select('*, message_replies(*)').eq('id', req.params.id).single();
         if (error || !data) return res.status(404).json({ success: false, message: 'Message not found' });
         
-        // Auto mark as read if admin opens it
-        if (req.user.role === 'admin' && data.status === 'unread') {
+        // Auto mark as read if admin/staff opens it
+        if ((req.user.role === 'admin' || req.user.role === 'staff') && data.status === 'unread') {
             await supabaseAdmin.from('messages').update({ status: 'read' }).eq('id', data.id);
             data.status = 'read';
         }
@@ -82,7 +85,7 @@ exports.createMessage = async (req, res, next) => {
                 user_id: admin.id,
                 message: `Neue Nachricht von ${name}`,
                 type: 'new_message',
-                link: `/messages`
+                link: `/messages?id=${data.id}`
             }));
             await supabaseAdmin.from('notifications').insert(notifs);
 
@@ -91,7 +94,7 @@ exports.createMessage = async (req, res, next) => {
                 title: 'Neue Nachricht',
                 body: `${name}: ${message.substring(0, 50)}...`,
                 icon: '💬',
-                link: '/messages'
+                link: `/messages?id=${data.id}`
             });
 
             // Send email to all admins
@@ -145,10 +148,20 @@ exports.createMessage = async (req, res, next) => {
 // @route PUT /api/messages/:id/status
 exports.updateMessageStatus = async (req, res, next) => {
     try {
-        const { status, isArchived } = req.body;
+        const { status, isArchived, assigned_to, priority } = req.body;
         const updateData = {};
         if (status) updateData.status = status;
         if (isArchived !== undefined) updateData.is_archived = isArchived;
+        if (assigned_to !== undefined) updateData.assigned_to = assigned_to || null;
+        if (priority) updateData.priority = priority;
+
+        // Staff can only update if it's assigned to them or unassigned
+        if (req.user.role === 'staff') {
+            const { data: msg } = await supabaseAdmin.from('messages').select('assigned_to').eq('id', req.params.id).single();
+            if (msg && msg.assigned_to && msg.assigned_to !== req.user.id) {
+                return res.status(403).json({ success: false, message: 'Not allowed to modify this ticket' });
+            }
+        }
 
         const { data, error } = await supabaseAdmin.from('messages').update(updateData).eq('id', req.params.id).select().single();
         if (error) throw error;
@@ -159,21 +172,29 @@ exports.updateMessageStatus = async (req, res, next) => {
 // @route POST /api/messages/:id/reply
 exports.replyToMessage = async (req, res, next) => {
     try {
-        const { message } = req.body;
+        const { message, is_internal_note } = req.body;
         if (!message) return res.status(400).json({ success: false, message: 'Reply message is required' });
 
         const { data: msg } = await supabaseAdmin.from('messages').select('*').eq('id', req.params.id).single();
         if (!msg) return res.status(404).json({ success: false, message: 'Message not found' });
 
+        const isAdminOrStaff = req.user.role === 'admin' || req.user.role === 'staff';
+
         const { data: reply, error } = await supabaseAdmin
             .from('message_replies')
-            .insert({ message_id: msg.id, message, is_admin: req.user.role === 'admin' })
+            .insert({ 
+                message_id: msg.id, 
+                message, 
+                is_admin: isAdminOrStaff,
+                user_id: isAdminOrStaff ? req.user.id : null,
+                is_internal_note: is_internal_note || false
+            })
             .select().single();
 
         if (error) throw error;
 
         // Update status to replied and send email to user
-        if (req.user.role === 'admin') {
+        if (isAdminOrStaff && !is_internal_note) {
             await supabaseAdmin.from('messages').update({ status: 'replied' }).eq('id', msg.id);
 
             // Send email to the user
@@ -234,7 +255,9 @@ exports.sendSingleAdminMessage = async (req, res, next) => {
                 email, 
                 message, 
                 initiated_by_admin: true,
-                status: 'replied'
+                status: 'replied',
+                assigned_to: req.user.role === 'admin' || req.user.role === 'staff' ? req.user.id : null,
+                priority: 'normal'
             })
             .select().single();
 
@@ -274,7 +297,8 @@ exports.sendBulkAdminMessages = async (req, res, next) => {
             email: r.email,
             message,
             initiated_by_admin: true,
-            status: 'replied'
+            status: 'replied',
+            assigned_to: req.user.role === 'admin' || req.user.role === 'staff' ? req.user.id : null
         }));
 
         const { error } = await supabaseAdmin.from('messages').insert(inserts);

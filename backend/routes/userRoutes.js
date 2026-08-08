@@ -14,7 +14,7 @@ router.put('/notifications', protect, userController.updateNotificationPrefs);
 // router.delete('/addresses/:id', protect, userController.deleteAddress);
 
 // Admin Routes (Require Admin Role)
-router.get('/admin/all', protect, authorize('admin'), userController.getUsers);
+router.get('/admin/all', protect, authorize('admin', 'staff'), userController.getUsers);
 router.get('/admin/stats', protect, authorize('admin'), userController.getUserStats);
 router.get('/admin/:id', protect, authorize('admin'), userController.getUser);
 router.put('/admin/:id/status', protect, authorize('admin'), userController.updateUserStatus);

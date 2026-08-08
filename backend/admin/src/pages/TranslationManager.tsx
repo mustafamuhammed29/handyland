@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { Languages, Search, Plus, Save, Loader2, Trash2, Edit3, X, Sparkles, FolderOpen } from 'lucide-react';
 import { api } from '../utils/api';
 import useDebounce from '../hooks/useDebounce';
@@ -29,6 +30,7 @@ const SUPPORTED_LANGUAGES = [
 
 export default function TranslationManager() {
     const [translations, setTranslations] = useState<TranslationDoc[]>([]);
+    const { confirm } = useConfirm();
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const debouncedSearch = useDebounce(searchQuery, 300);
@@ -91,7 +93,8 @@ export default function TranslationManager() {
     };
 
     const handleDelete = async (id: string, key: string) => {
-        if (!window.confirm(`Are you sure you want to delete the key "${key}"?`)) return;
+        const ok = await confirm({ message: `Are you sure you want to delete the key "${key}"?`, variant: "danger" });
+        if (!ok) return;
         try {
             await api.delete(`/api/translations/${id}`);
             setTranslations(prev => prev.filter(t => t._id !== id));
@@ -166,7 +169,8 @@ export default function TranslationManager() {
             return;
         }
 
-        if (!window.confirm(`This will auto-translate ${missingRows.length} incomplete keys in "${currentTab}" using MyMemory (free API).\n\nContinue?`)) return;
+        const ok = await confirm({ message: `This will auto-translate ${missingRows.length} incomplete keys in "${currentTab}" using MyMemory (free API).\n\nContinue?`, variant: "danger" });
+        if (!ok) return;
 
         setBulkTranslating(true);
         setBulkProgress({ done: 0, total: missingRows.length });
@@ -229,7 +233,8 @@ export default function TranslationManager() {
             return;
         }
 
-        if (!window.confirm(`This will auto-translate ${missingRows.length} incomplete keys across ALL tabs.\n\nContinue?`)) return;
+        const ok = await confirm({ message: `This will auto-translate ${missingRows.length} incomplete keys across ALL tabs.\n\nContinue?`, variant: "danger" });
+        if (!ok) return;
 
         setBulkTranslating(true);
         setBulkProgress({ done: 0, total: missingRows.length });

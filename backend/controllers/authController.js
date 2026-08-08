@@ -41,7 +41,8 @@ const sendTokenResponse = (res, session, user, appType = 'frontend') => {
         membershipLevel: user.membership_level,
         twoFactorEnabled: user.two_factor_enabled,
         isActive: user.is_active ?? true,
-        token: session.access_token
+        token: session.access_token,
+        addresses: user.addresses || []
     };
 };
 
@@ -702,7 +703,8 @@ exports.adminLogin = async (req, res, next) => {
         }
         const role = userProfile?.role?.toLowerCase();
         if (!userProfile || (role !== 'admin' && role !== 'administrator')) {
-            console.error(`Admin Login Denied: User role is ${userProfile?.role}`);
+            console.error(`Admin Login Denied: userProfile exists? ${!!userProfile}, role: ${role}`);
+            console.error(`Full userProfile:`, userProfile);
             return res.status(403).json({ success: false, message: 'Access denied', debug: { userProfile, role, authId: data.user.id } });
         }
         

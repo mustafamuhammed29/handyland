@@ -6,6 +6,7 @@ import { api } from '../utils/api';
 import { orderService } from '../services/orderService';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { Order } from '../types';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { VisualOrderTimeline } from '../components/VisualOrderTimeline';
@@ -23,6 +24,7 @@ export const OrderDetails = () => {
     const navigate = useNavigate();
     const { addToast } = useToast();
     const { addToCart } = useCart();
+    const { confirm } = useConfirm();
     const { t } = useTranslation();
 
     const [order, setOrder] = useState<Order | null>(null);
@@ -102,7 +104,13 @@ export const OrderDetails = () => {
 
     const handleCancelRefundRequest = async () => {
         if (!activeRefund || activeRefund.status !== 'pending') return;
-        if (!window.confirm(t('orders.confirmCancelRefund', 'Möchten Sie diese Rückgabeanfrage wirklich stornieren?'))) return;
+        
+        const isConfirmed = await confirm({
+            title: t('orders.cancelRefundTitle', 'Cancel Refund?'),
+            message: t('orders.confirmCancelRefund', 'Möchten Sie diese Rückgabeanfrage wirklich stornieren?'),
+            variant: 'warning'
+        });
+        if (!isConfirmed) return;
         
         try {
             await api.delete(`/api/refunds/${activeRefund._id}`);

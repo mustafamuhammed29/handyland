@@ -155,21 +155,28 @@ exports.assignLoaner = async (req, res, next) => {
 // @route POST /api/loaners/:id/return
 exports.returnLoaner = async (req, res, next) => {
     try {
-        const { status } = req.body;
+        const { status, notes } = req.body;
         // Support Maintenance status from frontend
         const statusMap = { 'Maintenance': 'maintenance', 'Available': 'available' };
         const newStatus = statusMap[status] || status || 'available';
 
+        const updatePayload = {
+            status: newStatus,
+            loaned_to: null,
+            repair_ticket_id: null,
+            loaned_at: null,
+            expected_return: null,
+        };
+
+        if (newStatus === 'maintenance' && notes !== undefined) {
+            updatePayload.notes = notes;
+        } else if (newStatus === 'available') {
+            updatePayload.notes = null;
+        }
+
         const { data, error } = await supabaseAdmin
             .from('loaner_phones')
-            .update({
-                status: newStatus,
-                loaned_to: null,
-                repair_ticket_id: null,
-                loaned_at: null,
-                expected_return: null,
-                notes: null
-            })
+            .update(updatePayload)
             .eq('id', req.params.id)
             .select().single();
 

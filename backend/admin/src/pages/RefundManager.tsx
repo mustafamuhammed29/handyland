@@ -121,7 +121,7 @@ export default function RefundManager() {
         if (!selectedRefund) return;
         setActionLoading(true);
         try {
-            if (newStatus === 'approved') {
+            if (newStatus === 'processed') {
                 await api.put(`/api/refunds/${selectedRefund._id}/status`, {
                     status: newStatus,
                     refundAmount: refundAmount ? parseFloat(refundAmount) : undefined,
@@ -424,7 +424,7 @@ export default function RefundManager() {
                                     className="flex-1 min-w-[150px] py-4 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 disabled:opacity-40 transition-all">
                                     {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />} In Prüfung
                                 </button>
-                                <button onClick={() => handleChangeRefundStatus('approved')} disabled={actionLoading || selectedRefund.status === 'approved'}
+                                <button onClick={() => handleChangeRefundStatus('processed')} disabled={actionLoading || selectedRefund.status === 'processed'}
                                     className="flex-[1.5] min-w-[200px] py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-[0.1em] text-xs flex items-center justify-center gap-2 disabled:opacity-40 transition-all shadow-lg shadow-emerald-900/40 active:scale-[0.98]">
                                     {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />} Genehmigen & Erstatten
                                 </button>

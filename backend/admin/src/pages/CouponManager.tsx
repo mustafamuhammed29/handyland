@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { formatDate, formatDateTime } from '../utils/formatDate';
 import {
     Tag,
@@ -42,6 +43,7 @@ interface Coupon {
 
 export default function CouponManager() {
     const [coupons, setCoupons] = useState<Coupon[]>([]);
+    const { confirm } = useConfirm();
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [expandedCouponId, setExpandedCouponId] = useState<string | null>(null);
@@ -138,7 +140,8 @@ export default function CouponManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this coupon?')) return;
+        const ok = await confirm({ message: 'Are you sure you want to delete this coupon?', variant: "danger" });
+        if (!ok) return;
         try {
             await api.delete(`/api/coupons/${id}`);
             toast.success('Coupon deleted successfully');

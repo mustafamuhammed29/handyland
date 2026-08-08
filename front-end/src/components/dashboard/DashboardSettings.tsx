@@ -3,6 +3,7 @@ import { User, Bell, Shield, MapPin } from 'lucide-react';
 import { User as UserType, Address } from '../../types';
 import { api } from '../../utils/api';
 import { useTranslation } from 'react-i18next';
+import { useConfirm } from '../../context/ConfirmContext';
 
 import { ProfileTab } from './settings/ProfileTab';
 import { SecurityTab } from './settings/SecurityTab';
@@ -35,6 +36,7 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
 }) => {
     const { t } = useTranslation();
     const [tab, setTab] = useState<Tab>('profile');
+    const { confirm } = useConfirm();
 
     // ── Profile ──
     const [profileForm, setProfileForm] = useState({ 
@@ -182,7 +184,14 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({
         }
     };
 
-    const deleteAddr = (id: string) => { if (window.confirm(t('settings.addresses.confirmDelete', 'Delete this address?'))) onDeleteAddress(id); };
+    const deleteAddr = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: t('settings.addresses.deleteTitle', 'Delete Address?'),
+            message: t('settings.addresses.confirmDelete', 'Delete this address?'),
+            variant: 'danger'
+        });
+        if (isConfirmed) onDeleteAddress(id);
+    };
 
     const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
         { id: 'profile', label: t('settings.tabs.profile', 'Profile'), icon: <User className="w-4 h-4" /> },

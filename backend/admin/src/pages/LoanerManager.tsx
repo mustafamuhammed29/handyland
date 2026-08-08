@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { formatDate } from '../utils/formatDate';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PhoneForwarded, Plus, Search, Trash2, Smartphone, FileText, CheckCircle, Clock, Copy, Phone, MessageCircle, AlertTriangle, ChevronLeft, ChevronRight, Wrench } from 'lucide-react';
+import { PhoneForwarded, Plus, Search, Trash2, Smartphone, FileText, CheckCircle, Clock, Copy, Phone, MessageCircle, AlertTriangle, ChevronLeft, ChevronRight, Wrench, Printer, Edit2 } from 'lucide-react';
 import { api } from '../utils/api';
 import useDebounce from '../hooks/useDebounce';
 import toast from 'react-hot-toast';
+import { LoanPrintTemplate } from '../components/LoanerManager/components/LoanPrintTemplate';
+import { EditLoanerModal } from '../components/LoanerManager/components/EditLoanerModal';
+import { MaintenanceModal } from '../components/LoanerManager/components/MaintenanceModal';
 
 interface Loaner {
     _id: string;
@@ -27,6 +31,7 @@ interface Stats {
 
 const LoanerManager = () => {
     const [loaners, setLoaners] = useState<Loaner[]>([]);
+    const { confirm } = useConfirm();
     const [stats, setStats] = useState<Stats>({ Total: 0, Available: 0, Lent: 0, Maintenance: 0 });
     const [loading, setLoading] = useState(true);
     
@@ -45,6 +50,11 @@ const LoanerManager = () => {
     // Forms
     const [formData, setFormData] = useState({ name: '', imei: '', status: 'available', notes: '' });
     const [lendFormData, setLendFormData] = useState({ customerName: '', customerPhone: '', customerEmail: '', dueDate: '', notes: '' });
+
+    // Enhanced Modals
+    const [printingLoaner, setPrintingLoaner] = useState<Loaner | null>(null);
+    const [editingLoaner, setEditingLoaner] = useState<Loaner | null>(null);
+    const [maintenanceLoanerId, setMaintenanceLoanerId] = useState<string | null>(null);
 
     const fetchStats = async () => {
         try {
@@ -69,9 +79,28 @@ const LoanerManager = () => {
             const { data } = await api.get(`/api/loaners?${queryParams.toString()}`);
             if (data.success) {
                 const fetchedLoaners = data.loaners || data.data || [];
-                setLoaners(Array.isArray(fetchedLoaners) ? fetchedLoaners : []);
+                
+                // Parse customer info from notes for loaned devices
+                const mappedLoaners = fetchedLoaners.map((l: any) => {
+                    if (l.status === 'loaned' && !l.currentCustomer && l.notes) {
+                        const customer: any = { name: 'Unbekannt', phone: '-', email: '-' };
+                        const parts = l.notes.split(' | ');
+                        parts.forEach((p: string) => {
+                            if (p.startsWith('Name: ')) customer.name = p.replace('Name: ', '');
+                            else if (p.startsWith('Tel: ')) customer.phone = p.replace('Tel: ', '');
+                            else if (p.startsWith('Email: ')) customer.email = p.replace('Email: ', '');
+                        });
+                        l.currentCustomer = customer;
+                        
+                        const notePart = parts.find((p: string) => p.startsWith('Notizen: '));
+                        if (notePart) l.notes = notePart.replace('Notizen: ', '');
+                    }
+                    return l;
+                });
+                
+                setLoaners(Array.isArray(mappedLoaners) ? mappedLoaners : []);
                 setTotalPages(data.totalPages || data.pagination?.pages || 1);
-            } else if (Array.isArray(data)) { // Fallback for old API format
+            } else if (Array.isArray(data)) {
                 setLoaners(data);
             } else if (data && Array.isArray(data.data)) {
                 setLoaners(data.data);
@@ -126,7 +155,7 @@ const LoanerManager = () => {
     };
 
     const handleReturnPhone = async (id: string, isMaintenance = false) => {
-        if (!window.confirm(`Ist das Gerät wirklich ${isMaintenance ? 'in die Wartung gegangen' : 'zurückgegeben worden'}?`)) return;
+        if (!isMaintenance && !window.confirm('Ist das Gerät wirklich zurückgegeben worden?')) return;
         try {
             await api.post(`/api/loaners/${id}/return`, { status: isMaintenance ? 'Maintenance' : 'Available' });
             fetchLoaners();
@@ -137,8 +166,39 @@ const LoanerManager = () => {
         }
     };
 
+    const handleMaintenanceConfirm = async (id: string, notes: string) => {
+        try {
+            await api.post(`/api/loaners/${id}/return`, { status: 'Maintenance', notes });
+            fetchLoaners();
+            fetchStats();
+            toast.success('Gerät ist jetzt in Wartung.');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Fehler beim Setzen in Wartung');
+            throw error;
+        }
+    };
+
+    const handleUpdateLoaner = async (id: string, updateData: Partial<Loaner>) => {
+        try {
+            await api.put(`/api/loaners/${id}`, updateData);
+            fetchLoaners();
+            toast.success('Gerät aktualisiert.');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Fehler beim Aktualisieren');
+            throw error;
+        }
+    };
+
+    const handlePrint = (loaner: Loaner) => {
+        setPrintingLoaner(loaner);
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    };
+
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Leihtelefon wirklich löschen? Dieser Schritt kann nicht rückgängig gemacht werden.')) return;
+        const ok = await confirm({ message: 'Leihtelefon wirklich löschen? Dieser Schritt kann nicht rückgängig gemacht werden.', variant: "danger" });
+        if (!ok) return;
         try {
             await api.delete(`/api/loaners/${id}`);
             fetchLoaners();
@@ -361,7 +421,7 @@ const LoanerManager = () => {
                                 )}
                             </div>
 
-                            <div className="p-4 border-t border-white/5 flex gap-2 bg-slate-950/50 mt-auto">
+                            <div className="p-4 border-t border-white/5 flex gap-2 bg-slate-950/50 mt-auto flex-wrap">
                                 {loaner.status === 'available' && (
                                     <button
                                         onClick={() => setIsLendModalOpen({ open: true, loaner })}
@@ -371,12 +431,22 @@ const LoanerManager = () => {
                                     </button>
                                 )}
                                 {loaner.status === 'loaned' && (
-                                    <button
-                                        onClick={() => handleReturnPhone(loaner._id)}
-                                        className="flex-1 bg-emerald-600/20 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/30 hover:border-emerald-500 py-2.5 rounded-xl text-sm font-bold transition-all"
-                                    >
-                                        Zurücknehmen
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={() => handleReturnPhone(loaner._id)}
+                                            className="flex-1 bg-emerald-600/20 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/30 hover:border-emerald-500 py-2.5 rounded-xl text-sm font-bold transition-all"
+                                        >
+                                            Zurücknehmen
+                                        </button>
+                                        <button
+                                            onClick={() => handlePrint(loaner)}
+                                            className="px-3 py-2 text-blue-400 bg-blue-500/10 hover:bg-blue-500 hover:text-white border border-blue-500/20 rounded-xl transition-all"
+                                            title="Vertrag drucken"
+                                            aria-label="Vertrag drucken"
+                                        >
+                                            <Printer size={18} />
+                                        </button>
+                                    </>
                                 )}
                                 {loaner.status === 'maintenance' && (
                                     <button
@@ -388,7 +458,7 @@ const LoanerManager = () => {
                                 )}
                                 {loaner.status === 'available' && (
                                     <button
-                                        onClick={() => handleReturnPhone(loaner._id, true)}
+                                        onClick={() => setMaintenanceLoanerId(loaner._id)}
                                         className="px-3 py-2 text-amber-400 bg-amber-500/10 hover:bg-amber-500 hover:text-white border border-amber-500/20 rounded-xl transition-all"
                                         title="In Wartung setzen"
                                         aria-label="In Wartung setzen"
@@ -396,6 +466,14 @@ const LoanerManager = () => {
                                         <Wrench size={18} />
                                     </button>
                                 )}
+                                <button
+                                    onClick={() => setEditingLoaner(loaner)}
+                                    className="px-3 py-2 text-amber-400 bg-amber-500/10 hover:bg-amber-500 hover:text-white border border-amber-500/20 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                    title="Gerät bearbeiten"
+                                    aria-label="Gerät bearbeiten"
+                                >
+                                    <Edit2 size={18} />
+                                </button>
                                 <button 
                                     onClick={() => handleDelete(loaner._id)} 
                                     className="px-3 py-2 text-red-400 bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/20 rounded-xl transition-all opacity-0 group-hover:opacity-100" 
@@ -542,6 +620,22 @@ const LoanerManager = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <EditLoanerModal 
+                isOpen={!!editingLoaner} 
+                onClose={() => setEditingLoaner(null)} 
+                loaner={editingLoaner} 
+                onSave={handleUpdateLoaner} 
+            />
+
+            <MaintenanceModal 
+                isOpen={!!maintenanceLoanerId} 
+                onClose={() => setMaintenanceLoanerId(null)} 
+                loanerId={maintenanceLoanerId!} 
+                onConfirm={handleMaintenanceConfirm} 
+            />
+
+            {printingLoaner && <LoanPrintTemplate loaner={printingLoaner} />}
         </div>
     );
 };

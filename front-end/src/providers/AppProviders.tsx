@@ -9,6 +9,7 @@ import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { CookieProvider } from '../context/CookieContext';
+import { ConfirmProvider } from '../context/ConfirmContext';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -42,7 +43,9 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
                                     <AuthProvider>
                                         <WishlistProvider>
                                             <CartProvider>
-                                                {children}
+                                                <ConfirmProvider>
+                                                    {children}
+                                                </ConfirmProvider>
                                             </CartProvider>
                                         </WishlistProvider>
                                     </AuthProvider>

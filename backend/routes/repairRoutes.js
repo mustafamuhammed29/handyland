@@ -26,6 +26,7 @@ router.get('/tickets/:id', optionalProtect, repairTicketController.getTicket);
 // Admin routes (Catalog Management)
 router.get('/admin/stats', protect, authorize('admin'), repairController.getRepairCatalogStats);
 router.get('/admin/all', protect, authorize('admin'), repairTicketController.getTickets);
+router.post('/devices/bulk', protect, authorize('admin'), repairController.bulkCreateDevices);
 router.post('/devices', protect, authorize('admin'), repairController.createDevice);
 router.put('/devices/:id', protect, authorize('admin'), repairController.updateDevice);
 router.delete('/devices/:id', protect, authorize('admin'), repairController.deleteDevice);

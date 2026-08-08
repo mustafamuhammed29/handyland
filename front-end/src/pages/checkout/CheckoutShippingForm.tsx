@@ -24,6 +24,7 @@ interface ShippingFormData {
     state?: string;
     zipCode: string;
     country: string;
+    saveAddress?: boolean;
 }
 
 interface CheckoutShippingFormProps {
@@ -231,6 +232,26 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         {formErrors.country && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.country}</p>}
                     </div>
                 </div>
+
+                {user && (
+                    <div className="pt-2">
+                        <label className="flex items-center gap-3 cursor-pointer group w-fit">
+                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${formData.saveAddress ? 'bg-blue-500 border-blue-500' : 'border-slate-600 group-hover:border-blue-400'}`}>
+                                {formData.saveAddress && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                            </div>
+                            <input
+                                type="checkbox"
+                                name="saveAddress"
+                                checked={formData.saveAddress || false}
+                                onChange={(e) => onChange({ target: { name: 'saveAddress', value: e.target.checked } } as any)}
+                                className="hidden"
+                            />
+                            <span className="text-sm text-slate-400 group-hover:text-slate-300">
+                                {t('checkout.saveAddressForNextTime', 'Adresse für das nächste Mal in meinem Profil speichern')}
+                            </span>
+                        </label>
+                    </div>
+                )}
 
                 {/* Shipping Method Selection */}
                 <div className="pt-6 border-t border-slate-800">

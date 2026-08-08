@@ -25,7 +25,7 @@ export const FeaturesTab = ({ settings, handleChange }: any) => {
     };
 
     const updateWhatsapp = (key: string, value: any) => {
-        const currentWhatsapp = features.whatsappOrders || { enabled: false, phoneNumber: '', message: '' };
+        const currentWhatsapp = features.whatsappOrders || { enabled: false, repairEnabled: false, phoneNumber: '', message: '' };
         handleChange('features', 'whatsappOrders', { ...currentWhatsapp, [key]: value });
     };
 
@@ -60,20 +60,35 @@ export const FeaturesTab = ({ settings, handleChange }: any) => {
             </div>
 
             <div className="p-5 border border-emerald-900/40 rounded-xl bg-emerald-950/20 space-y-4">
-                <div className="flex justify-between items-center border-b border-emerald-900/50 pb-2">
-                    <h4 className="text-emerald-400 font-bold">WhatsApp & In-Store Only Mode</h4>
-                    <Toggle 
-                        label="" 
-                        value={features.whatsappOrders?.enabled ?? false} 
-                        onChange={(v: boolean) => updateWhatsapp('enabled', v)} 
-                    />
+                <div className="border-b border-emerald-900/50 pb-4 mb-4">
+                    <h4 className="text-emerald-400 font-bold mb-2">WhatsApp Routing Mode</h4>
+                    <p className="text-xs text-emerald-500 bg-emerald-900/20 p-3 rounded border border-emerald-900/50">
+                        Redirect users to WhatsApp for finalizing orders or booking repairs instead of using the online system.
+                    </p>
                 </div>
                 
-                {features.whatsappOrders?.enabled !== false && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="flex flex-col gap-2 bg-black/20 p-4 rounded-xl border border-emerald-900/30">
+                        <Toggle 
+                            label="Enable for Store / Marketplace" 
+                            value={features.whatsappOrders?.enabled ?? false} 
+                            onChange={(v: boolean) => updateWhatsapp('enabled', v)} 
+                        />
+                        <p className="text-xs text-slate-400 ml-14 -mt-2">Redirect checkout to WhatsApp.</p>
+                    </div>
+
+                    <div className="flex flex-col gap-2 bg-black/20 p-4 rounded-xl border border-emerald-900/30">
+                        <Toggle 
+                            label="Enable for Repairs" 
+                            value={features.whatsappOrders?.repairEnabled ?? false} 
+                            onChange={(v: boolean) => updateWhatsapp('repairEnabled', v)} 
+                        />
+                        <p className="text-xs text-slate-400 ml-14 -mt-2">Redirect repair bookings to WhatsApp.</p>
+                    </div>
+                </div>
+                
+                {(features.whatsappOrders?.enabled || features.whatsappOrders?.repairEnabled) && (
                     <div className="space-y-4 pt-2 animate-in slide-in-from-top-2">
-                        <p className="text-xs text-emerald-500 mb-4 bg-emerald-900/20 p-3 rounded border border-emerald-900/50">
-                            When enabled, standard checkout and repair bookings will be disabled. Users will be redirected to WhatsApp to reserve products or book services in-store.
-                        </p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input 
                                 label="WhatsApp Number (e.g., +4915123456789)" 

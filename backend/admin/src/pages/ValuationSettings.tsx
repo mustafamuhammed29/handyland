@@ -1,8 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit, Image as ImageIcon, LayoutGrid } from 'lucide-react';
+import { Plus, Trash2, Edit, Image as ImageIcon, LayoutGrid, Star, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
 import toast from 'react-hot-toast';
+import ImageUpload from '../components/ImageUpload';
+
+const COLORS = [
+    { name: 'blue', code: 'bg-blue-500' },
+    { name: 'emerald', code: 'bg-emerald-500' },
+    { name: 'purple', code: 'bg-purple-500' },
+    { name: 'rose', code: 'bg-rose-500' },
+    { name: 'amber', code: 'bg-amber-500' },
+    { name: 'slate', code: 'bg-slate-500' },
+];
 
 interface Category {
     id: string;
@@ -168,19 +178,23 @@ const ValuationSettings = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {categories.map((cat) => (
-                                <div key={cat.id} className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 flex justify-between items-center group hover:border-blue-500/30 transition-all">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-2xl">
+                                <div key={cat.id} className={`bg-slate-900/40 border-2 ${cat.is_active ? 'border-slate-800/60 hover:border-blue-500/30' : 'border-red-900/30 opacity-60'} rounded-2xl p-4 flex justify-between items-center group transition-all relative overflow-hidden`}>
+                                    <div className={`absolute top-0 left-0 w-1.5 h-full bg-${cat.color}-500`}></div>
+                                    <div className="flex items-center gap-4 pl-2">
+                                        <div className={`w-12 h-12 rounded-xl bg-${cat.color}-500/10 flex items-center justify-center text-2xl`}>
                                             {cat.emoji}
                                         </div>
                                         <div>
-                                            <div className="font-bold text-slate-100">{cat.label}</div>
-                                            <div className="text-[10px] text-slate-500 font-mono tracking-wider uppercase">{cat.name}</div>
+                                            <div className="font-bold text-slate-100 flex items-center gap-2">
+                                                {cat.label}
+                                                {!cat.is_active && <span className="text-[9px] px-1.5 py-0.5 bg-red-500/20 text-red-400 rounded uppercase tracking-widest">Inaktiv</span>}
+                                            </div>
+                                            <div className="text-[10px] text-slate-500 font-mono tracking-wider uppercase">Ord: {cat.display_order} | ID: {cat.name}</div>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => { setEditingCat(cat); setCatForm(cat); setIsCatModalOpen(true); }} className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg" title="Kategorie bearbeiten" aria-label="Kategorie bearbeiten"><Edit size={16} /></button>
-                                        <button onClick={() => handleDeleteCategory(cat.id)} className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg" title="Kategorie löschen" aria-label="Kategorie löschen"><Trash2 size={16} /></button>
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
+                                        <button onClick={() => { setEditingCat(cat); setCatForm(cat); setIsCatModalOpen(true); }} className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg" title="Kategorie bearbeiten"><Edit size={16} /></button>
+                                        <button onClick={() => handleDeleteCategory(cat.id)} className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg" title="Kategorie löschen"><Trash2 size={16} /></button>
                                     </div>
                                 </div>
                             ))}
@@ -201,8 +215,13 @@ const ValuationSettings = () => {
 
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             {brands.map((brand) => (
-                                <div key={brand.id} className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 flex flex-col items-center gap-3 group relative hover:border-blue-500/30 transition-all">
-                                    <div className="h-16 w-full flex items-center justify-center p-2 bg-white/90 rounded-xl backdrop-blur-sm">
+                                <div key={brand.id} className={`bg-slate-900/40 border-2 ${brand.is_popular ? 'border-amber-500/30 hover:border-amber-500/50' : 'border-slate-800/60 hover:border-blue-500/30'} rounded-2xl p-4 flex flex-col items-center gap-3 group relative transition-all`}>
+                                    {brand.is_popular && (
+                                        <div className="absolute -top-3 -right-3 bg-gradient-to-br from-amber-400 to-amber-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30 z-10" title="Beliebte Marke">
+                                            <Star size={14} fill="currentColor" />
+                                        </div>
+                                    )}
+                                    <div className="h-16 w-full flex items-center justify-center p-2 bg-white rounded-xl shadow-inner">
                                         {brand.logo_url ? (
                                             <img src={brand.logo_url} alt={brand.name} className="max-h-full max-w-full object-contain" />
                                         ) : (
@@ -213,9 +232,9 @@ const ValuationSettings = () => {
                                     </div>
                                     <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{brand.name}</div>
                                     
-                                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => { setEditingBrand(brand); setBrandForm(brand); setIsBrandModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-white bg-slate-800/80 rounded-lg" title="Marke bearbeiten" aria-label="Marke bearbeiten"><Edit size={14} /></button>
-                                        <button onClick={() => handleDeleteBrand(brand.id)} className="p-1.5 text-slate-400 hover:text-red-400 bg-slate-800/80 rounded-lg" title="Marke löschen" aria-label="Marke löschen"><Trash2 size={14} /></button>
+                                    <div className="absolute top-2 left-2 right-auto md:right-2 md:left-auto flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                        <button onClick={() => { setEditingBrand(brand); setBrandForm(brand); setIsBrandModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-white bg-slate-800/90 rounded-lg backdrop-blur" title="Marke bearbeiten"><Edit size={14} /></button>
+                                        <button onClick={() => handleDeleteBrand(brand.id)} className="p-1.5 text-slate-400 hover:text-red-400 bg-slate-800/90 rounded-lg backdrop-blur" title="Marke löschen"><Trash2 size={14} /></button>
                                     </div>
                                 </div>
                             ))}
@@ -242,6 +261,29 @@ const ValuationSettings = () => {
                                     <div><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Emoji</label><input type="text" className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2.5 mt-1 focus:border-blue-500 outline-none transition-all text-center text-xl" value={catForm.emoji} onChange={e => setCatForm({...catForm, emoji: e.target.value})} placeholder="📱" /></div>
                                     <div><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Icon Name (Lucide)</label><input type="text" className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2.5 mt-1 focus:border-blue-500 outline-none transition-all" value={catForm.icon_name} onChange={e => setCatForm({...catForm, icon_name: e.target.value})} placeholder="Smartphone" /></div>
                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Display Order</label><input type="number" className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2.5 mt-1 focus:border-blue-500 outline-none transition-all" value={catForm.display_order} onChange={e => setCatForm({...catForm, display_order: Number(e.target.value)})} /></div>
+                                    <div>
+                                        <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1 block">Status</label>
+                                        <button type="button" onClick={() => setCatForm({...catForm, is_active: !catForm.is_active})} className={`w-full py-2.5 rounded-xl text-sm font-bold transition-colors ${catForm.is_active ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}>
+                                            {catForm.is_active ? 'Aktiviert' : 'Deaktiviert'}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest block mb-2">Themenfarbe</label>
+                                    <div className="flex gap-2">
+                                        {COLORS.map(c => (
+                                            <button 
+                                                key={c.name} 
+                                                onClick={() => setCatForm({...catForm, color: c.name})}
+                                                className={`w-8 h-8 rounded-full ${c.code} flex items-center justify-center transition-all ${catForm.color === c.name ? 'ring-2 ring-white scale-110' : 'opacity-50 hover:opacity-100'}`}
+                                            >
+                                                {catForm.color === c.name && <Check size={14} className="text-white" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                             <div className="flex gap-3 mt-8">
                                 <button onClick={() => setIsCatModalOpen(false)} className="flex-1 px-4 py-3 bg-slate-800/50 hover:bg-slate-800 text-slate-300 rounded-2xl transition-all font-semibold">Abbrechen</button>
@@ -264,7 +306,23 @@ const ValuationSettings = () => {
                             </h3>
                             <div className="space-y-4">
                                 <div><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Markenname</label><input type="text" className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2.5 mt-1 focus:border-blue-500 outline-none transition-all" value={brandForm.name} onChange={e => setBrandForm({...brandForm, name: e.target.value})} placeholder="z.B. Apple" /></div>
-                                <div><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Logo URL</label><input type="text" className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2.5 mt-1 focus:border-blue-500 outline-none transition-all" value={brandForm.logo_url} onChange={e => setBrandForm({...brandForm, logo_url: e.target.value})} placeholder="https://..." /></div>
+                                <div>
+                                    <ImageUpload 
+                                        label="Logo" 
+                                        value={brandForm.logo_url || ''} 
+                                        onChange={(url) => setBrandForm({...brandForm, logo_url: url})} 
+                                    />
+                                </div>
+                                <div className="pt-2">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setBrandForm({...brandForm, is_popular: !brandForm.is_popular})} 
+                                        className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-colors ${brandForm.is_popular ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'}`}
+                                    >
+                                        <Star size={16} fill={brandForm.is_popular ? 'currentColor' : 'none'} />
+                                        {brandForm.is_popular ? 'Beliebte Marke (Hervorgehoben)' : 'Als "Beliebt" markieren'}
+                                    </button>
+                                </div>
                             </div>
                             <div className="flex gap-3 mt-8">
                                 <button onClick={() => setIsBrandModalOpen(false)} className="flex-1 px-4 py-3 bg-slate-800/50 hover:bg-slate-800 text-slate-300 rounded-2xl transition-all font-semibold">Abbrechen</button>

@@ -104,18 +104,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
 
     const handleCheckout = () => {
         setIsCartOpen(false);
-        const whatsappMode = settings?.features?.whatsappOrders;
-        if (whatsappMode?.enabled && whatsappMode?.phoneNumber) {
-            const url = generateWhatsAppLink({
-                phoneNumber: whatsappMode.phoneNumber,
-                messageTemplate: whatsappMode.message,
-                items: cart.map(i => ({ name: i.title, quantity: i.quantity || 1, price: i.price })),
-                totalAmount: finalTotal
-            });
-            window.location.href = url;
-        } else {
-            navigate('/checkout');
-        }
+        navigate('/checkout');
     };
 
     const handleApplyCoupon = async () => {
@@ -411,24 +400,42 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
 
                     {(() => {
                         const whatsappMode = settings?.features?.whatsappOrders;
-                        if (whatsappMode?.enabled && whatsappMode?.phoneNumber && cart.length > 0) {
-                            const url = generateWhatsAppLink({
-                                phoneNumber: whatsappMode.phoneNumber,
-                                messageTemplate: whatsappMode.message,
-                                items: cart.map(i => ({ name: i.title, quantity: i.quantity || 1, price: i.price })),
-                                totalAmount: finalTotal
-                            });
-                            return (
-                                <button
-                                    onClick={() => {
-                                        window.open(url, '_blank');
-                                        setIsCartOpen(false);
-                                    }}
-                                    className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary text-white font-bold rounded-xl shadow-lg shadow-cyan-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 group"
-                                >
-                                    {t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                </button>
-                            );
+                        const isWhatsappActive = whatsappMode?.enabled && whatsappMode?.phoneNumber;
+                        const hasRepair = cart.some(i => i.category === 'repair');
+                        const hasProduct = cart.some(i => i.category !== 'repair');
+                        
+                        if (isWhatsappActive && cart.length > 0) {
+                            if (hasRepair && hasProduct) {
+                                return (
+                                    <div className="text-center">
+                                        <p className="text-xs text-red-500 font-bold mb-3 border border-red-500/20 bg-red-500/10 p-2 rounded-lg">
+                                            {t('cart.mixedCartError', 'Reparaturen und Produkte können im WhatsApp-Modus nicht zusammen bestellt werden. Bitte trennen Sie Ihre Bestellungen.')}
+                                        </p>
+                                        <button disabled className="w-full py-4 bg-slate-300 dark:bg-slate-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-50">
+                                            {t('cart.checkoutSecurely', 'Sicher bezahlen')}
+                                        </button>
+                                    </div>
+                                );
+                            }
+                            if (hasProduct && !hasRepair) {
+                                const url = generateWhatsAppLink({
+                                    phoneNumber: whatsappMode.phoneNumber,
+                                    messageTemplate: whatsappMode.message,
+                                    items: cart.map(i => ({ name: i.title, quantity: i.quantity || 1, price: i.price })),
+                                    totalAmount: finalTotal
+                                });
+                                return (
+                                    <button
+                                        onClick={() => {
+                                            window.open(url, '_blank');
+                                            setIsCartOpen(false);
+                                        }}
+                                        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold rounded-xl shadow-lg shadow-green-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 group"
+                                    >
+                                        {t('cart.inquiryWhatsapp', 'Anfrage über WhatsApp')} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                );
+                            }
                         }
                         
                         return (

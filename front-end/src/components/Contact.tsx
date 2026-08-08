@@ -188,8 +188,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                 </div>
                                 <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t('emailUs', 'Email Us')}</div>
                                 <a 
-                                    href="#" 
-                                    onClick={(e) => { e.preventDefault(); window.location.href = `mailto:${settings.email}`; }}
+                                    href={`mailto:${settings.email}`}
                                     className="text-slate-800 dark:text-white font-mono text-xs md:text-sm hover:text-brand-primary dark:hover:text-brand-primary transition-colors"
                                 >
                                     {settings.email?.replace('@', ' (at) ')}

@@ -83,9 +83,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     // If we send an empty localItems array, the backend merge logic might
                     // not wipe it depending on implementation, but it's safer to just fetch 
                     // if local is empty to avoid overwriting the server's preserved cart.
-                    if (cart.length > 0) {
+                    // Separate repairs (local only) and products (syncable)
+                    const repairItems = cart.filter(i => i.category === 'repair' || (i as any).productType === 'Repair');
+                    const syncableItems = cart.filter(i => i.category !== 'repair' && (i as any).productType !== 'Repair');
+
+                    if (syncableItems.length > 0) {
                         const response = await api.post<CartItem[]>('/api/cart/sync', {
-                            localItems: cart.map(item => ({
+                            localItems: syncableItems.map(item => ({
                                 id: item.id,
                                 quantity: item.quantity || 1,
                                 category: item.category || (item as any).productType || 'Product'
@@ -93,14 +97,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         });
 
                         if (Array.isArray(response)) {
-                            setCart(response);
+                            setCart([...response, ...repairItems]);
                         }
                     } else {
-                        // Local is empty (e.g., fresh login or page refresh)
-                        // Fetch from server directly instead of syncing an empty array
+                        // Local is empty of products (e.g., fresh login or page refresh)
                         const response = await api.get<CartItem[]>('/api/cart');
-                        if (Array.isArray(response) && response.length > 0) {
-                            setCart(response);
+                        if (Array.isArray(response)) {
+                            setCart([...response, ...repairItems]);
                         }
                     }
                 } catch (error) {

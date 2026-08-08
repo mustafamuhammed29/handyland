@@ -113,6 +113,14 @@ check_*.js
 fix_*.js
 clear_cache.js
 resetAdmin.js
+fix_admin_confirm.cjs
+backend/set_admin.js
+backend/scripts/dump_emails.js
+backend/scripts/migrate_messages.js
+
+# Extra log files
+backend/*.txt
+*.txt.bak
 
 # OS files
 Thumbs.db

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { formatDateTime } from '../utils/formatDate';
 import { Search, CheckCircle, XCircle, Wallet, Edit, Loader2, AlertCircle, FileText, ExternalLink } from 'lucide-react';
 import { api } from '../utils/api';
@@ -30,6 +31,7 @@ interface User {
 
 const WalletManager: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'approvals' | 'balances'>('approvals');
+    const { confirm } = useConfirm();
 
     // Transactions State
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -81,7 +83,8 @@ const WalletManager: React.FC = () => {
     };
 
     const updateTxStatus = async (id: string, newStatus: string) => {
-        if (!window.confirm(`Mark this transaction as ${newStatus}?`)) return;
+        const ok = await confirm({ message: `Mark this transaction as ${newStatus}?`, variant: "danger" });
+        if (!ok) return;
         try {
             const response = await api.put(`/api/transactions/admin/${id}/status`, { status: newStatus });
             const data = (response as any)?.data || response;

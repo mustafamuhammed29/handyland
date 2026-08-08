@@ -6,6 +6,7 @@
 
 const { supabaseAdmin } = require('../config/supabase');
 const crypto = require('crypto');
+const { notify } = require('../utils/notificationService');
 
 const generateTicketId = () => {
     const year = new Date().getFullYear().toString().slice(-2);
@@ -169,11 +170,12 @@ exports.updateStatus = async (req, res, next) => {
 
         // Notify user
         if (data.user_id) {
-            await supabaseAdmin.from('notifications').insert({
-                user_id: data.user_id,
+            await notify({
+                userId: data.user_id,
                 message: `Ihr Reparatur-Ticket ${data.ticket_id} wurde aktualisiert: ${status}`,
                 type: 'info',
-                link: `/dashboard?tab=repairs`
+                link: `/dashboard?tab=repairs`,
+                category: 'repairStatus'
             });
         }
 

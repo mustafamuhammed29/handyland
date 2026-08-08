@@ -16,7 +16,7 @@ export function useInventoryActions(refreshData: () => void) {
 
     const handleUpdateItem = async (editForm: any) => {
         try {
-            const endpoint = `/api/inventory/${editingItem.itemType}/${editingItem._id}/stock`;
+            const endpoint = `/api/inventory/${editingItem.type}/${editingItem._id}/stock`;
             const payload: any = {
                 stock: editForm.stock,
                 price: editForm.price,
@@ -25,7 +25,7 @@ export function useInventoryActions(refreshData: () => void) {
                 notes: editForm.notes
             };
 
-            if (editingItem.itemType === 'Product') {
+            if (editingItem.type === 'Product') {
                 payload.isMarginScheme = editForm.isMarginScheme;
                 if (editForm.imeis !== undefined) {
                     const parsedImeis = editForm.imeis
@@ -53,7 +53,7 @@ export function useInventoryActions(refreshData: () => void) {
 
     const handleInlineUpdate = async (item: any, field: string, value: any) => {
         try {
-            const endpoint = `/api/inventory/${item.itemType}/${item._id}/stock`;
+            const endpoint = `/api/inventory/${item.type}/${item._id}/stock`;
             const payload: any = { reason: 'Inline Edit', notes: '' };
             payload[field] = value;
             
@@ -102,9 +102,29 @@ export function useInventoryActions(refreshData: () => void) {
         }
     };
 
+    const handleBulkDelete = async (itemsToDelete: any[]) => {
+        try {
+            await Promise.all(itemsToDelete.map(async (item) => {
+                let endpoint = '';
+                if (item.type === 'Product') endpoint = `/api/products/${item._id}`;
+                else if (item.type === 'Accessory') endpoint = `/api/accessories/${item._id}`;
+                else if (item.type === 'RepairPart') endpoint = `/api/repair-parts/${item._id}`;
+                
+                if (endpoint) {
+                    await api.delete(endpoint);
+                }
+            }));
+            refreshData();
+            return { success: true };
+        } catch (error) {
+            console.error("Bulk delete failed", error);
+            return { success: false, error: "Failed to delete some items" };
+        }
+    };
+
     return {
         isEditModalOpen, setIsEditModalOpen,
-        editingItem, handleEditClick, handleUpdateItem, handleInlineUpdate,
+        editingItem, handleEditClick, handleUpdateItem, handleInlineUpdate, handleBulkDelete,
         isAddPartModalOpen, setIsAddPartModalOpen, handleAddPartSave,
         isAddDeviceModalOpen, setIsAddDeviceModalOpen, handleAddDeviceSave,
         isAddAccessoryModalOpen, setIsAddAccessoryModalOpen, handleAddAccessorySave

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useConfirm } from '../../../context/ConfirmContext';
 import { ArrowUpDown, Box, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 import { Pagination } from './Pagination';
 
@@ -15,6 +16,7 @@ interface InventoryTableProps {
     setSearchTerm: (term: string) => void;
     setTypeFilter: (filter: any) => void;
     setStockFilter: (filter: any) => void;
+    handleBulkDelete: (items: any[]) => Promise<any>;
 }
 
 const InlineEditCell = ({ value, onSave, type = 'number', prefix = '' }: any) => {
@@ -79,10 +81,13 @@ export function InventoryTable({
     handleInlineUpdate,
     setSearchTerm,
     setTypeFilter,
-    setStockFilter
+    setStockFilter,
+    handleBulkDelete
 }: InventoryTableProps) {
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+    const { confirm } = useConfirm();
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [isDeleting, setIsDeleting] = useState(false);
     const tableRef = useRef<HTMLTableElement>(null);
 
     useEffect(() => {
@@ -113,6 +118,31 @@ export function InventoryTable({
         setSelectedIds(newSet);
     };
 
+    const handleDeleteSelected = async () => {
+        const ok = await confirm({ message: `Are you sure you want to delete ${selectedIds.size} items?`, variant: "danger" });
+        if (!ok) return;
+        setIsDeleting(true);
+        const itemsToDelete = itemsPageData.filter(item => selectedIds.has(item._id));
+        const res = await handleBulkDelete(itemsToDelete);
+        if (res.success) {
+            setSelectedIds(new Set());
+        } else {
+            alert('Error deleting items');
+        }
+        setIsDeleting(false);
+    };
+
+    const handleDeleteSingle = async (item: any) => {
+        const ok = await confirm({ message: `Are you sure you want to delete ${item.name}?`, variant: "danger" });
+        if (!ok) return;
+        setIsDeleting(true);
+        const res = await handleBulkDelete([item]);
+        if (!res.success) {
+            alert('Error deleting item');
+        }
+        setIsDeleting(false);
+    };
+
     return (
         <div className="w-full relative bg-slate-900/40 border border-slate-700/50 rounded-2xl overflow-hidden backdrop-blur-md">
             
@@ -127,8 +157,8 @@ export function InventoryTable({
                         <button onClick={() => { setSelectedIds(new Set()); alert('Bulk stock update coming in next phase!'); }} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-medium transition-colors border border-slate-600">
                             Bulk Update Stock
                         </button>
-                        <button className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
-                            <Trash2 size={14} /> Delete Selected
+                        <button disabled={isDeleting} onClick={handleDeleteSelected} className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50">
+                            <Trash2 size={14} /> {isDeleting ? 'Deleting...' : 'Delete Selected'}
                         </button>
                     </div>
                 </div>
@@ -197,11 +227,11 @@ export function InventoryTable({
                                     {item.barcode ? <span className="bg-slate-800 px-2 py-1 rounded border border-slate-700">{item.barcode}</span> : <span className="text-slate-600 italic">No Barcode</span>}
                                 </td>
                                 <td className="p-4">
-                                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider shadow-sm ${item.itemType === 'Product' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' :
-                                        item.itemType === 'RepairPart' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider shadow-sm ${item.type === 'Product' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' :
+                                        item.type === 'RepairPart' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
                                             'bg-pink-500/20 text-pink-400 border border-pink-500/30'
                                         }`}>
-                                        {item.itemType === 'Product' ? 'Device' : item.itemType === 'RepairPart' ? 'Repair Part' : 'Accessory'}
+                                        {item.type === 'Product' ? 'Device' : item.type === 'RepairPart' ? 'Repair Part' : 'Accessory'}
                                     </span>
                                 </td>
                                 <td className="p-4 text-sm font-medium">
@@ -237,6 +267,9 @@ export function InventoryTable({
                                             </button>
                                             <button onClick={() => { handleEditClick(item); setOpenDropdownId(null); }} className="w-full text-left px-4 py-2.5 text-sm text-emerald-400 hover:text-emerald-300 hover:bg-slate-700/50 flex items-center gap-2 transition-colors border-t border-slate-700/50">
                                                 <Box size={16} /> Advanced Stock
+                                            </button>
+                                            <button onClick={() => { setOpenDropdownId(null); handleDeleteSingle(item); }} className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-slate-700/50 flex items-center gap-2 transition-colors border-t border-slate-700/50">
+                                                <Trash2 size={16} /> Delete Item
                                             </button>
                                         </div>
                                     )}

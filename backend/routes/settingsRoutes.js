@@ -18,4 +18,7 @@ router.post('/smtp/test', protect, authorize('admin'), settingsController.testSm
 router.get('/social-auth', protect, authorize('admin'), settingsController.getSocialAuthSettings);
 router.put('/social-auth', protect, authorize('admin'), settingsController.updateSocialAuthSettings);
 
+// Test Invoice Generation (Admin only)
+router.post('/invoice/test', protect, authorize('admin'), settingsController.generateTestInvoice);
+
 module.exports = router;

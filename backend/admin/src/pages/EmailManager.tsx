@@ -77,6 +77,9 @@ const EmailManager: React.FC = () => {
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const [testEmailAddress, setTestEmailAddress] = useState('');
+    const [sendingTest, setSendingTest] = useState(false);
+
     useEffect(() => { fetchTemplates(); }, []);
 
     const fetchTemplates = async () => {
@@ -101,6 +104,7 @@ const EmailManager: React.FC = () => {
         setSelectedTemplate(template);
         setEditSubject(template.subject);
         setEditHtml(template.html);
+        setTestEmailAddress(''); // Reset test email
     };
 
     const cancelEdit = () => {
@@ -127,6 +131,31 @@ const EmailManager: React.FC = () => {
             showNotification('error', 'حدث خطأ أثناء الاتصال بالخادم');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const sendTestEmail = async () => {
+        if (!selectedTemplate || !testEmailAddress) {
+            showNotification('error', 'الرجاء إدخال البريد الإلكتروني للتجربة');
+            return;
+        }
+        setSendingTest(true);
+        try {
+            const response = await api.post(`/api/email-templates/${selectedTemplate._id}/test`, {
+                email: testEmailAddress,
+                subject: editSubject,
+                html: editHtml
+            });
+            const data = (response as any)?.data || response;
+            if (data.success) {
+                showNotification('success', '✉️ تم إرسال رسالة التجربة بنجاح!');
+            } else {
+                showNotification('error', data.message || 'فشل إرسال التجربة');
+            }
+        } catch (err) {
+            showNotification('error', 'حدث خطأ أثناء الاتصال بالخادم');
+        } finally {
+            setSendingTest(false);
         }
     };
 
@@ -186,8 +215,25 @@ const EmailManager: React.FC = () => {
                                 <p className="text-blue-400 text-xs font-bold uppercase tracking-widest">{selectedTemplate.description}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 w-full md:w-auto">
-                            <button
+                        <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+                            <div className="flex w-full md:w-auto bg-slate-950/50 rounded-2xl border border-slate-700/60 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all mr-0 md:mr-2">
+                                <input 
+                                    type="email" 
+                                    placeholder="Enter email to test..." 
+                                    className="bg-transparent text-white text-sm px-4 py-3 outline-none w-full md:w-48 placeholder-slate-500"
+                                    value={testEmailAddress}
+                                    onChange={e => setTestEmailAddress(e.target.value)}
+                                />
+                                <button 
+                                    onClick={sendTestEmail}
+                                    disabled={sendingTest}
+                                    className="bg-slate-800/80 hover:bg-slate-700 text-blue-400 font-bold px-4 text-xs uppercase tracking-wider transition-colors flex items-center shrink-0 border-l border-slate-700/50"
+                                >
+                                    {sendingTest ? 'Sending...' : 'Send Test'}
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-3 w-full md:w-auto">
+                                <button
                                 onClick={cancelEdit}
                                 className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-slate-800/80 hover:bg-slate-700 hover:text-white text-slate-300 rounded-2xl text-sm font-black uppercase tracking-wider transition-all border border-slate-600/50 hover:border-slate-500 hover:shadow-lg"
                             >
@@ -200,6 +246,7 @@ const EmailManager: React.FC = () => {
                             >
                                 <Save size={18} /> {saving ? 'Saving...' : 'Publish'}
                             </button>
+                            </div>
                         </div>
                     </div>
 

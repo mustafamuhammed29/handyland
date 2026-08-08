@@ -5,6 +5,7 @@ import { GlobalLoader } from '../components/GlobalLoader';
 import { PublicLayout } from '../components/layouts/PublicLayout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import ErrorBoundary from '../components/ErrorBoundary';
+import { ComingSoon } from '../components/ComingSoon';
 
 const PaymentSuccess = React.lazy(() => import('../pages/PaymentSuccess'));
 const PrivacyPolicy = React.lazy(() => import('../pages/PrivacyPolicy'));
@@ -52,30 +53,30 @@ export const getPublicRoutes = ({ settings, lang, user, cartCount }: PublicRoute
             <Route path="/" element={<PageTransition><Home lang={lang} /></PageTransition>} />
 
             {/* Core Module Protection */}
-            <Route path="/marketplace" element={settings.sections?.marketplacePage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/marketplace/:id" element={settings.sections?.marketplacePage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/products/:id" element={settings.sections?.marketplacePage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+            <Route path="/marketplace" element={settings.sections?.marketplacePage !== false && settings.sections?.marketplacePageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Marketplace lang={lang} /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Marktplatz" /></PageTransition>} />
+            <Route path="/marketplace/:id" element={settings.sections?.marketplacePage !== false && settings.sections?.marketplacePageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Produktdetails" /></PageTransition>} />
+            <Route path="/products/:id" element={settings.sections?.marketplacePage !== false && settings.sections?.marketplacePageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><ProductDetails /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Produktdetails" /></PageTransition>} />
             <Route path="/products" element={<Navigate to="/marketplace" replace />} />
 
-            <Route path="/repair" element={settings.sections?.repairPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Repair lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/track-repair" element={settings.sections?.trackRepairPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><GuestTicketTracking /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+            <Route path="/repair" element={settings.sections?.repairPage !== false && settings.sections?.repairPageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Repair lang={lang} /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Reparatur" /></PageTransition>} />
+            <Route path="/track-repair" element={settings.sections?.trackRepairPage !== false && settings.sections?.trackRepairPageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><GuestTicketTracking /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Reparatur verfolgen" /></PageTransition>} />
 
-            <Route path="/valuation" element={settings.sections?.valuationPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Valuation lang={lang} /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/sell/:quoteRef" element={settings.sections?.valuationPage !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><SellDevice /></Suspense></PageTransition> : <Navigate to="/" replace />} />
+            <Route path="/valuation" element={settings.sections?.valuationPage !== false && settings.sections?.valuationPageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Valuation lang={lang} /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Bewertung" /></PageTransition>} />
+            <Route path="/sell/:quoteRef" element={settings.sections?.valuationPage !== false && settings.sections?.valuationPageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><SellDevice /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Gerät verkaufen" /></PageTransition>} />
 
-            <Route path="/login" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Login /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/register" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><Register /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/reset-password" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ResetPassword /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/forgot-password" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><ForgotPassword /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/verify-email" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><VerifyEmail /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/verify-email-notice" element={settings.sections?.authSystem !== false ? <PageTransition><Suspense fallback={<GlobalLoader />}><VerifyEmailNotice /></Suspense></PageTransition> : <Navigate to="/" replace />} />
-            <Route path="/auth/callback" element={settings.sections?.authSystem !== false ? <Suspense fallback={<GlobalLoader />}><SocialAuthCallback /></Suspense> : <Navigate to="/" replace />} />
+            <Route path="/login" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Login /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Login" /></PageTransition>} />
+            <Route path="/register" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Register /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Registrieren" /></PageTransition>} />
+            <Route path="/reset-password" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><ResetPassword /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Passwort zurücksetzen" /></PageTransition>} />
+            <Route path="/forgot-password" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><ForgotPassword /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Passwort vergessen" /></PageTransition>} />
+            <Route path="/verify-email" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><VerifyEmail /></Suspense></PageTransition> : <PageTransition><ComingSoon title="E-Mail verifizieren" /></PageTransition>} />
+            <Route path="/verify-email-notice" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><VerifyEmailNotice /></Suspense></PageTransition> : <PageTransition><ComingSoon title="E-Mail Bestätigung" /></PageTransition>} />
+            <Route path="/auth/callback" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <Suspense fallback={<GlobalLoader />}><SocialAuthCallback /></Suspense> : <Navigate to="/" replace />} />
 
             {/* Standard Pages */}
             <Route path="/orders/:id" element={<ProtectedRoute><Suspense fallback={<GlobalLoader />}><OrderDetails /></Suspense></ProtectedRoute>} />
-            <Route path="/accessories" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Accessories lang={lang} /></Suspense></PageTransition>} />
-            <Route path="/accessories/:id" element={<PageTransition><Suspense fallback={<GlobalLoader />}><AccessoryDetails /></Suspense></PageTransition>} />
-            <Route path="/compare" element={<PageTransition><Suspense fallback={<GlobalLoader />}><ComparePage /></Suspense></PageTransition>} />
+            <Route path="/accessories" element={settings.sections?.accessoriesPage !== false && settings.sections?.accessoriesPageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Accessories lang={lang} /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Zubehör" /></PageTransition>} />
+            <Route path="/accessories/:id" element={settings.sections?.accessoriesPage !== false && settings.sections?.accessoriesPageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><AccessoryDetails /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Zubehör Details" /></PageTransition>} />
+            <Route path="/compare" element={settings.sections?.marketplacePage !== false && settings.sections?.marketplacePageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><ComparePage /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Vergleichen" /></PageTransition>} />
             <Route path="/contact" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Contact /></Suspense></PageTransition>} />
             <Route path="/checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
             <Route path="/payment-success" element={<PageTransition><Suspense fallback={<GlobalLoader />}><PaymentSuccess /></Suspense></PageTransition>} />

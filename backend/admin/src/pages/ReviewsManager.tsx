@@ -2,6 +2,7 @@ import { formatDate } from '../utils/formatDate';
 import { useState, useEffect } from 'react';
 import { Star, Trash2, Search, CheckCircle, AlertCircle, ShieldCheck, Filter } from 'lucide-react';
 import { api } from '../utils/api';
+import { useConfirm } from '../context/ConfirmContext';
 
 interface Review {
     _id: string;
@@ -27,6 +28,7 @@ const StarDisplay = ({ rating }: { rating: number }) => (
 
 export default function ReviewsManager() {
     const [reviews, setReviews] = useState<Review[]>([]);
+    const { confirm } = useConfirm();
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [ratingFilter, setRatingFilter] = useState<number | ''>('');
@@ -59,7 +61,8 @@ export default function ReviewsManager() {
     useEffect(() => { fetchReviews(); }, []);
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Delete this review? This will update the product rating.')) return;
+        const ok = await confirm({ message: 'Delete this review? This will update the product rating.', variant: "danger" });
+        if (!ok) return;
         try {
             await api.delete(`/api/reviews/${id}`);
             setReviews(prev => prev.filter(r => r._id !== id));

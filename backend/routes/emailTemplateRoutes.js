@@ -14,4 +14,7 @@ router.route('/:id')
     .get(emailTemplateController.getTemplate)
     .put(emailTemplateController.updateTemplate);
 
+router.route('/:id/test')
+    .post(emailTemplateController.sendTestEmail);
+
 module.exports = router;

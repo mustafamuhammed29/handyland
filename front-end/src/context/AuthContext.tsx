@@ -24,6 +24,7 @@ const getSafeUserForStorage = (user: User) => ({
     email: user.email,
     role: user.role,
     preferredLanguage: user.preferredLanguage,
+    addresses: user.addresses || [],
     isLoggedIn: true,
 });
 

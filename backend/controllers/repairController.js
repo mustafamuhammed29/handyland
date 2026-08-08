@@ -10,13 +10,17 @@ const { v4: uuidv4 } = require('uuid');
 // @route GET /api/repairs/catalog
 exports.getRepairCatalog = async (req, res, next) => {
     try {
-        const { page = 1, limit = 1000, search } = req.query;
+        const { page = 1, limit = 20, search, brand } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
 
         let query = supabaseAdmin.from('repair_devices').select('*', { count: 'exact' });
 
         if (search) {
             query = query.or(`brand.ilike.%${search}%,model.ilike.%${search}%`);
+        }
+        
+        if (brand && brand !== 'All') {
+            query = query.eq('brand', brand);
         }
 
         query = query.order('created_at', { ascending: false }).range(offset, offset + Number(limit) - 1);
@@ -83,6 +87,31 @@ exports.createDevice = async (req, res, next) => {
         const { data, error } = await supabaseAdmin.from('repair_devices').insert(insertData).select().single();
         if (error) throw error;
         return res.status(201).json(data);
+    } catch (error) { next(error); }
+};
+
+// @route POST /api/repairs/catalog/bulk
+exports.bulkCreateDevices = async (req, res, next) => {
+    try {
+        const { devices } = req.body;
+        
+        if (!devices || !Array.isArray(devices) || devices.length === 0) {
+            return res.status(400).json({ success: false, message: 'Invalid or empty devices array' });
+        }
+
+        const insertData = devices.map(d => ({
+            legacy_id: uuidv4(),
+            model: d.model,
+            brand: d.brand || 'Unknown',
+            image: d.image || '',
+            services: d.services || [],
+            is_visible: d.isVisible !== false
+        }));
+
+        const { data, error } = await supabaseAdmin.from('repair_devices').insert(insertData).select();
+        if (error) throw error;
+        
+        return res.status(201).json({ success: true, count: data.length, data });
     } catch (error) { next(error); }
 };
 

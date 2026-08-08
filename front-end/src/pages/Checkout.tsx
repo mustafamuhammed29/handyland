@@ -59,7 +59,8 @@ export const Checkout: React.FC = () => {
 
     React.useEffect(() => {
         const whatsappMode = settings?.features?.whatsappOrders;
-        if (whatsappMode?.enabled && whatsappMode?.phoneNumber && cart.length > 0) {
+        const hasRepair = cart.some(i => i.category === 'repair');
+        if (whatsappMode?.enabled && whatsappMode?.phoneNumber && cart.length > 0 && !hasRepair) {
             const url = generateWhatsAppLink({
                 phoneNumber: whatsappMode.phoneNumber,
                 messageTemplate: whatsappMode.message,

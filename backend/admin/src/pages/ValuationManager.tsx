@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { formatDate } from '../utils/formatDate';
 import { Plus, Search, Trash2, Edit, Save, X, Calculator, ClipboardList, Package, Banknote, TrendingUp, ChevronDown, ChevronUp, MessageSquare, Send, AlertCircle, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -77,6 +78,7 @@ const DEFAULT_FORM: Partial<DeviceBlueprint> = {
 
 const ValuationManager = () => {
     const [activeSection, setActiveSection] = useState<'blueprints' | 'quotes' | 'research'>('blueprints');
+    const { confirm } = useConfirm();
     const [isEbayModalOpen, setIsEbayModalOpen] = useState(false);
 
     // --- BLUEPRINTS STATE ---
@@ -254,6 +256,34 @@ const ValuationManager = () => {
         }
     };
 
+    const handleDeleteQuote = async (id: string) => {
+        const ok = await confirm({ message: 'Angebot wirklich löschen? Dies kann nicht rückgängig gemacht werden!', variant: "danger" });
+        if (!ok) return;
+        try {
+            await api.delete(`/api/valuation/admin/quotes/${id}`);
+            toast.success('Angebot gelöscht.');
+            fetchQuotes();
+        } catch (error) {
+            console.error('Error deleting quote:', error);
+            toast.error('Fehler beim Löschen des Angebots.');
+        }
+    };
+
+    const handleBulkDeleteQuotes = async () => {
+        const ok = await confirm({ message: `Wirklich alle Angebote löschen? Dies kann nicht rückgängig gemacht werden!`, variant: "danger" });
+        if (!ok) return;
+        try {
+            await api.delete('/api/valuation/admin/quotes', {
+                data: { deleteAll: true }
+            });
+            toast.success('Alle Angebote gelöscht.');
+            fetchQuotes();
+        } catch (error) {
+            console.error('Error bulk deleting quotes:', error);
+            toast.error('Fehler beim Löschen der Angebote.');
+        }
+    };
+
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -283,7 +313,8 @@ const ValuationManager = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this blueprint?')) return;
+        const ok = await confirm({ message: 'Are you sure you want to delete this blueprint?', variant: "danger" });
+        if (!ok) return;
         try {
             await api.delete(`/api/valuation/devices/${id}`);
             setSelectedIds(prev => prev.filter(i => i !== id));
@@ -295,7 +326,8 @@ const ValuationManager = () => {
 
     const handleBulkDelete = async (deleteAll = false) => {
         const count = deleteAll ? 'ALLE' : selectedIds.length;
-        if (!window.confirm(`Wirklich ${count} Gerät(e) löschen? Dies kann nicht rückgängig gemacht werden!`)) return;
+        const ok = await confirm({ message: `Wirklich ${count} Gerät(e) löschen? Dies kann nicht rückgängig gemacht werden!`, variant: "danger" });
+        if (!ok) return;
         try {
             await api.delete('/api/valuation/devices', {
                 data: deleteAll ? { deleteAll: true } : { ids: selectedIds }
@@ -308,7 +340,8 @@ const ValuationManager = () => {
     };
 
     const handleReseed = async () => {
-        if (!window.confirm('Alle Geräte mit aktuellen Marktpreisen aktualisieren? (seedDevices.js wird ausgeführt)')) return;
+        const ok = await confirm({ message: 'Alle Geräte mit aktuellen Marktpreisen aktualisieren? (seedDevices.js wird ausgeführt)', variant: "danger" });
+        if (!ok) return;
         setReseeding(true);
         try {
             await api.post('/api/valuation/devices/reseed', {});
@@ -655,6 +688,15 @@ const ValuationManager = () => {
                                 className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:ring-2 focus:ring-blue-500 focus:bg-slate-900 transition-colors"
                             />
                         </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => handleBulkDeleteQuotes()}
+                                title="Alle Angebote löschen"
+                                className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg"
+                            >
+                                <Trash2 size={16} /> Delete All
+                            </button>
+                        </div>
                         <div className="flex flex-wrap gap-2">
                             {[
                                 { value: 'All', label: 'Alle' },
@@ -687,13 +729,14 @@ const ValuationManager = () => {
                                         <th className="p-5">Angebotspreis</th>
                                         <th className="p-5">Status</th>
                                         <th className="p-5">Datum</th>
+                                        <th className="p-5 text-right">Aktionen</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {quotesLoading ? (
-                                        <tr><td colSpan={7} className="p-12 text-center text-slate-500"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>
+                                        <tr><td colSpan={8} className="p-12 text-center text-slate-500"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>
                                     ) : quotes.length === 0 ? (
-                                        <tr><td colSpan={7} className="p-12 text-center text-slate-500 font-medium bg-slate-900/20">No data found.</td></tr>
+                                        <tr><td colSpan={8} className="p-12 text-center text-slate-500 font-medium bg-slate-900/20">No data found.</td></tr>
                                     ) : (
                                         quotes.map((quote: any) => {
                                             const customerName = quote.user?.firstName ? `${quote.user.firstName} ${quote.user.lastName || ''}`.trim() : (quote.contact?.name || quote.user?.name || '—');
@@ -755,13 +798,18 @@ const ValuationManager = () => {
                                                         <td className="p-5 text-xs font-medium text-slate-400">
                                                             {formatDate(quote.createdAt)}
                                                         </td>
+                                                        <td className="p-5 text-right" onClick={(e) => e.stopPropagation()}>
+                                                            <button onClick={() => handleDeleteQuote(quote._id)} aria-label={`Delete ${quote.quoteReference}`} className="p-2 text-red-400 hover:bg-red-500/20 hover:text-red-300 rounded-lg transition-colors border border-transparent hover:border-red-500/30 opacity-0 group-hover:opacity-100">
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </td>
                                                     </tr>
 
                                                     {/* Expandable Details Row */}
                                                     <AnimatePresence>
                                                         {isExpanded && (
                                                             <tr>
-                                                                <td colSpan={7} className="p-0 border-0">
+                                                                <td colSpan={8} className="p-0 border-0">
                                                                     <motion.div
                                                                         initial={{ height: 0, opacity: 0 }}
                                                                         animate={{ height: 'auto', opacity: 1 }}

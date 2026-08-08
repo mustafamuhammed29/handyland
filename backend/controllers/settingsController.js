@@ -345,3 +345,36 @@ exports.updateTranslations = async (req, res, next) => {
         return res.status(200).json({ success: true, message: 'Translations updated' });
     } catch (error) { next(error); }
 };
+
+// ── @route POST /api/settings/invoice/test (Admin) ──────────────
+exports.generateTestInvoice = async (req, res, next) => {
+    try {
+        const { orderData, invoiceSettings } = req.body;
+        const PDFDocument = require('pdfkit');
+        
+        // Ensure required fields
+        if (!orderData || !invoiceSettings) {
+            return res.status(400).json({ success: false, message: 'Missing orderData or invoiceSettings' });
+        }
+
+        // Add dummy created_at and order_number if missing
+        if (!orderData.created_at) orderData.created_at = new Date().toISOString();
+        if (!orderData.order_number) orderData.order_number = 'TEST-9999';
+
+        const doc = new PDFDocument({ margin: 50, size: 'A4' });
+        
+        // Response headers
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=test-invoice.pdf`);
+        
+        doc.pipe(res);
+
+        // Generate PDF using professional template
+        const { generatePDF } = require('../utils/invoiceGenerator');
+        await generatePDF(doc, orderData, invoiceSettings);
+
+        doc.end();
+    } catch (error) {
+        next(error);
+    }
+};

@@ -66,12 +66,12 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
 }) => {
     const { t } = useTranslation();
     return (
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
-            <div className="p-6 border-b border-slate-800/60">
-                <h3 className="text-lg font-bold text-white">{t('settings.security.title', 'Change Password')}</h3>
-                <p className="text-slate-400 text-sm mt-0.5">{t('settings.security.subtitle', 'Use a strong, unique password for your account')}</p>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm transition-all duration-300">
+            <div className="p-6 sm:px-10 sm:py-8 border-b border-slate-100 dark:border-slate-800/80">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2"><Shield className="w-6 h-6 text-brand-primary" /> {t('settings.security.title', 'Change Password')}</h3>
+                <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">{t('settings.security.subtitle', 'Use a strong, unique password for your account')}</p>
             </div>
-            <form onSubmit={savePassword} className="p-6 space-y-5">
+            <form onSubmit={savePassword} className="p-6 sm:px-10 sm:py-8 space-y-6">
                 {pwMsg && (
                     <div className={`flex items-center gap-2 p-3 rounded-xl text-sm ${pwMsg.type === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                         {pwMsg.type === 'ok' ? <Check className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}

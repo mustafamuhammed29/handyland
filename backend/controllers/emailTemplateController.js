@@ -118,3 +118,53 @@ exports.deleteTemplate = async (req, res, next) => {
         return res.status(200).json({ success: true, message: 'Template deleted' });
     } catch (error) { next(error); }
 };
+
+// @route POST /api/email-templates/:id/test
+exports.sendTestEmail = async (req, res, next) => {
+    try {
+        const { email, subject, html } = req.body;
+        if (!email) return res.status(400).json({ success: false, message: 'Email address is required' });
+
+        let finalSubject = subject;
+        let finalHtml = html;
+
+        if (!finalSubject || !finalHtml) {
+            const { data, error } = await supabaseAdmin.from('email_templates').select('*').eq('id', req.params.id).single();
+            if (error || !data) return res.status(404).json({ success: false, message: 'Template not found' });
+            if (!finalSubject) finalSubject = data.subject;
+            if (!finalHtml) finalHtml = data.body_html;
+        }
+
+        const mockData = {
+            'user_name': 'Test User', 'userName': 'Test User', 'name': 'Test User', 'customerName': 'Test User',
+            'device': 'iPhone 15 Pro Max', 'price': '850', 'quoteRef': 'HV-170123-ABCD',
+            'bankName': 'Deutsche Bank', 'ibanSnippet': '1234',
+            'reset_url': 'https://handyland.com/reset-password/sample-token',
+            'verification_url': 'https://handyland.com/verify/sample-token',
+            'verificationUrl': 'https://handyland.com/verify/sample-token',
+            'resetUrl': 'https://handyland.com/reset-password/sample-token',
+            'amount': '€299.00', 'totalAmount': '299.00',
+            'order_id': '#HL-849201', 'orderNumber': '#HL-849201',
+            'date': new Date().toLocaleDateString('ar-EG'),
+            'cartUrl': 'https://handyland.com/cart', 'status': 'Shipped 🚚',
+            'trackingNumber': 'DHL-123456789', 'adminNote': 'This is a test admin note.',
+            'frontendUrl': 'https://handyland.com', 'quoteUrl': 'https://handyland.com/sell/HV-170123-ABCD',
+            'adminComments': 'Test admin comments.',
+        };
+
+        for (const [key, value] of Object.entries(mockData)) {
+            const regex = new RegExp(`{{${key}}}`, 'g');
+            if (finalHtml) finalHtml = finalHtml.replace(regex, value);
+            if (finalSubject) finalSubject = finalSubject.replace(regex, value);
+        }
+
+        const { sendEmail } = require('../utils/emailService');
+        await sendEmail({
+            email,
+            subject: `[TEST] ${finalSubject}`,
+            html: finalHtml
+        });
+
+        return res.status(200).json({ success: true, message: 'Test email sent successfully' });
+    } catch (error) { next(error); }
+};

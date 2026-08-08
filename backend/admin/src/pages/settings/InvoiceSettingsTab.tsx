@@ -1,7 +1,7 @@
-import React from 'react';
-import { FileText, Eye } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, Eye, Download, Beaker } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
-
+import { api } from '../../utils/api';
 interface InvoiceSettingsTabProps {
     settings: any;
     handleChange: (section: any, key: string, value: any) => void;
@@ -21,9 +21,60 @@ const Input = ({ label, value, onChange, placeholder = '' }: { label: string, va
 );
 
 export const InvoiceSettingsTab: React.FC<InvoiceSettingsTabProps> = ({ settings, handleChange }) => {
+    const [testCustomerName, setTestCustomerName] = useState('Max Mustermann');
+    const [testStreet, setTestStreet] = useState('Teststraße 123');
+    const [testCity, setTestCity] = useState('10115 Berlin');
+    const [testCountry, setTestCountry] = useState('Deutschland');
+    const [testItemName, setTestItemName] = useState('iPhone 13 Pro (Test)');
+    const [testItemPrice, setTestItemPrice] = useState('699.00');
+    const [testItemQty, setTestItemQty] = useState('1');
+    const [isGenerating, setIsGenerating] = useState(false);
+
     // Ensure invoice object exists
     const invoice = settings.invoice || {};
     const taxRate = settings.taxRate || 19;
+
+    const handleDownloadTestInvoice = async () => {
+        setIsGenerating(true);
+        try {
+            const orderData = {
+                shipping_full_name: testCustomerName,
+                shipping_street: testStreet,
+                shipping_zip: testCity.split(' ')[0] || '',
+                shipping_city: testCity.substring(testCity.indexOf(' ') + 1) || testCity,
+                shipping_country: testCountry,
+                total_amount: parseFloat(testItemPrice) * parseInt(testItemQty),
+                shipping_fee: 0,
+                discount_amount: 0,
+                order_items: [
+                    {
+                        name: testItemName,
+                        price: parseFloat(testItemPrice),
+                        quantity: parseInt(testItemQty),
+                        product_type: 'Test Product'
+                    }
+                ]
+            };
+            
+            const res = await api.post('/api/settings/invoice/test', {
+                orderData,
+                invoiceSettings: invoice
+            }, { responseType: 'blob' });
+            
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'test-invoice.pdf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            alert('Fehler beim Generieren der Testrechnung.');
+            console.error(err);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     // Dummy order data for preview
     const dummyDate = new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -204,6 +255,42 @@ export const InvoiceSettingsTab: React.FC<InvoiceSettingsTabProps> = ({ settings
                             <Input label="Drucken Button" value={invoice.printBtnLabel} onChange={(v) => handleChange('invoice', 'printBtnLabel', v)} placeholder="Drucken" />
                             <Input label="Schließen Button" value={invoice.closeBtnLabel} onChange={(v) => handleChange('invoice', 'closeBtnLabel', v)} placeholder="Schließen" />
                         </div>
+                    </div>
+                </div>
+
+                {/* Test Invoice Studio */}
+                <div className="p-5 border border-indigo-500/30 rounded-xl space-y-5 bg-indigo-900/10 relative overflow-hidden mt-6">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                        <Beaker size={100} />
+                    </div>
+                    <div className="relative z-10">
+                        <h4 className="text-indigo-400 font-bold mb-2 text-lg flex items-center gap-2">
+                            <Beaker size={20} />
+                            Test Invoice Studio
+                        </h4>
+                        <p className="text-slate-400 text-sm mb-4">Geben Sie Testdaten ein und laden Sie ein echtes PDF herunter, um Ihre ungespeicherten Einstellungen zu überprüfen.</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <Input label="Kundenname" value={testCustomerName} onChange={setTestCustomerName} placeholder="Max Mustermann" />
+                            <Input label="Straße" value={testStreet} onChange={setTestStreet} placeholder="Teststraße 123" />
+                            <Input label="PLZ & Stadt" value={testCity} onChange={setTestCity} placeholder="10115 Berlin" />
+                            <Input label="Land" value={testCountry} onChange={setTestCountry} placeholder="Deutschland" />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <Input label="Artikelname" value={testItemName} onChange={setTestItemName} placeholder="iPhone 13 Pro" />
+                            <Input label="Preis (€)" value={testItemPrice} onChange={setTestItemPrice} placeholder="699.00" />
+                            <Input label="Menge" value={testItemQty} onChange={setTestItemQty} placeholder="1" />
+                        </div>
+                        
+                        <button 
+                            onClick={handleDownloadTestInvoice}
+                            disabled={isGenerating}
+                            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                        >
+                            <Download size={18} />
+                            {isGenerating ? 'Generiere PDF...' : 'PDF-Test Herunterladen'}
+                        </button>
                     </div>
                 </div>
             </div>

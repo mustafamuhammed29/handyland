@@ -1,39 +1,37 @@
-const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
 
 // Clear cached SMTP config (kept for backward compatibility)
 const clearSmtpCache = () => {};
 
 const sendEmail = async (options) => {
-    const apiKey = process.env.SENDGRID_API_KEY;
-
-    if (!apiKey) {
-        console.error('❌ SENDGRID_API_KEY is missing. Email not sent.');
-        throw new Error('Email service not configured. SENDGRID_API_KEY missing.');
-    }
-
     try {
-        sgMail.setApiKey(apiKey);
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
 
-        const fromEmail = process.env.FROM_EMAIL || 'mustafamuhammed665@gmail.com';
+        const fromEmail = process.env.FROM_EMAIL || process.env.SMTP_USER || 'noreply@handyland.de';
         const fromName = process.env.FROM_NAME || 'HandyLand';
 
-        const msg = {
+        const mailOptions = {
+            from: `"${fromName}" <${fromEmail}>`,
             to: options.email,
-            from: {
-                email: fromEmail,
-                name: fromName
-            },
-            subject: options.subject
+            subject: options.subject,
         };
 
-        if (options.replyTo) msg.replyTo = options.replyTo;
-        if (options.message) msg.text = options.message;
-        if (options.html) msg.html = options.html;
+        if (options.replyTo) mailOptions.replyTo = options.replyTo;
+        if (options.message) mailOptions.text = options.message;
+        if (options.html) mailOptions.html = options.html;
 
-        const [response] = await sgMail.send(msg);
-        console.log('📧 Email sent successfully via SendGrid REST API: %s', response.headers['x-message-id'] || 'OK');
+        const info = await transporter.sendMail(mailOptions);
+        console.log('📧 Email sent successfully via SMTP: %s', info.messageId);
     } catch (error) {
-        console.error('❌ Error sending email via SendGrid REST API:', error.response?.body || error.message);
+        console.error('❌ Error sending email via SMTP:', error.message);
         throw error;
     }
 };
@@ -49,9 +47,39 @@ const sendOrderConfirmation = async (order) => {
         return;
     }
 
+    let bankTransferInstructions = '';
+    let bankTransferText = '';
+    if (order.paymentMethod === 'bank_transfer') {
+        try {
+            const { supabaseAdmin } = require('../config/supabase');
+            const { data } = await supabaseAdmin.from('settings').select('value').eq('key', 'payment').maybeSingle();
+            if (data && data.value) {
+                const p = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+                const bt = p.bankTransfer || {};
+                
+                bankTransferText = `Bitte überweisen Sie den Betrag auf folgendes Konto:\nBank: ${bt.bankName}\nKontoinhaber: ${bt.accountHolder}\nIBAN: ${bt.iban}\nBIC: ${bt.bic}\nVerwendungszweck: ${order.orderNumber || order._id}\n`;
+                
+                bankTransferInstructions = `
+                <div style="background:#1e293b;border-radius:8px;padding:20px;margin:24px 0;border:1px solid #f59e0b40;">
+                    <h3 style="color:#fcd34d;margin-top:0;">Zahlungsinformationen (Vorkasse)</h3>
+                    <p style="color:#94a3b8;font-size:14px;line-height:1.5;">Bitte überweisen Sie den Gesamtbetrag auf das folgende Konto. Geben Sie als Verwendungszweck Ihre Bestellnummer <strong>${order.orderNumber || order._id}</strong> an.</p>
+                    <table style="width:100%;color:#e2e8f0;font-size:14px;border-spacing:0;margin-top:16px;">
+                        ${bt.bankName ? `<tr><td style="padding:4px 0;color:#94a3b8;">Bank:</td><td style="padding:4px 0;text-align:right;">${bt.bankName}</td></tr>` : ''}
+                        ${bt.accountHolder ? `<tr><td style="padding:4px 0;color:#94a3b8;">Kontoinhaber:</td><td style="padding:4px 0;text-align:right;">${bt.accountHolder}</td></tr>` : ''}
+                        ${bt.iban ? `<tr><td style="padding:4px 0;color:#94a3b8;">IBAN:</td><td style="padding:4px 0;text-align:right;font-family:monospace;letter-spacing:1px;">${bt.iban}</td></tr>` : ''}
+                        ${bt.bic ? `<tr><td style="padding:4px 0;color:#94a3b8;">BIC:</td><td style="padding:4px 0;text-align:right;font-family:monospace;">${bt.bic}</td></tr>` : ''}
+                    </table>
+                </div>
+                `;
+            }
+        } catch (e) { console.error("Failed to fetch bank details for email", e); }
+    }
+
     const variablesContext = {
         orderNumber: order.orderNumber || order._id,
-        totalAmount: order.totalAmount
+        totalAmount: order.totalAmount,
+        bankTransferInstructions: bankTransferInstructions,
+        bankTransferText: bankTransferText
     };
 
     const sent = await sendTemplateEmail(email, 'order_confirmation', variablesContext);
@@ -62,12 +90,13 @@ const sendOrderConfirmation = async (order) => {
             <h1>Vielen Dank für Ihre Bestellung!</h1>
             <p>Ihre Bestellnummer lautet <strong>${variablesContext.orderNumber}</strong></p>
             <p>Gesamtsumme: <strong>${variablesContext.totalAmount}€</strong></p>
+            ${variablesContext.bankTransferInstructions}
             <p>Wir werden Sie benachrichtigen, sobald Ihre Bestellung versandt wird.</p>
         `;
         await sendEmail({
             email,
             subject: 'Bestellbestätigung - HandyLand',
-            message: html.replace(/<[^>]*>?/gm, ''),
+            message: html.replace(/<[^>]*>?/gm, '') + '\n' + variablesContext.bankTransferText,
             html
         });
     }
@@ -137,6 +166,7 @@ const emailTemplates = {
                         <strong style="color:#10b981;">€${order.totalAmount?.toFixed(2) || '0.00'}</strong>
                     </div>
                 </div>
+                ${order.paymentMethod === 'bank_transfer' ? order.bankTransferInstructions : ''}
             </div>
             <div style="padding:16px 32px;background:#1e293b;text-align:center;">
                 <p style="color:#64748b;font-size:12px;margin:0;">© HandyLand. Alle Rechte vorbehalten.</p>

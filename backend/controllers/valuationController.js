@@ -406,6 +406,30 @@ exports.completePurchase = async (req, res, next) => {
     } catch (error) { next(error); }
 };
 
+// @route DELETE /api/valuation/admin/quotes/:id
+exports.deleteValuation = async (req, res, next) => {
+    try {
+        const { error } = await supabaseAdmin.from('saved_valuations').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Angebot gelöscht' });
+    } catch (error) { next(error); }
+};
+
+// @route DELETE /api/valuation/admin/quotes (bulk)
+exports.bulkDeleteValuations = async (req, res, next) => {
+    try {
+        const { ids, deleteAll } = req.body;
+        if (deleteAll) {
+            const { error } = await supabaseAdmin.from('saved_valuations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            if (error) throw error;
+        } else if (ids && ids.length > 0) {
+            const { error } = await supabaseAdmin.from('saved_valuations').delete().in('id', ids);
+            if (error) throw error;
+        }
+        return res.status(200).json({ success: true, message: 'Angebote gelöscht' });
+    } catch (error) { next(error); }
+};
+
 // @route POST /api/valuations
 exports.createValuation = async (req, res, next) => {
     try {
@@ -541,6 +565,45 @@ exports.getQuoteByReference = async (req, res, next) => {
         };
 
         return res.status(200).json({ success: true, quote: quote });
+    } catch (error) { next(error); }
+};
+
+// @route PUT /api/valuation/quote/:reference/confirm
+exports.confirmQuote = async (req, res, next) => {
+    try {
+        const { reference } = req.params;
+        const { fullName, email, address, city, postalCode, iban, bankName } = req.body;
+
+        const { data: quote, error: findError } = await supabaseAdmin
+            .from('saved_valuations')
+            .select('*')
+            .eq('quote_reference', reference)
+            .single();
+
+        if (findError || !quote) {
+            return res.status(404).json({ success: false, message: 'Angebot nicht gefunden' });
+        }
+
+        // Update quote status and details
+        const updateData = {
+            contact_name: fullName || quote.contact_name,
+            contact_email: email || quote.contact_email,
+            status: 'pending_shipment',
+            updated_at: new Date().toISOString()
+            // In a real app you'd also save address, IBAN securely, etc.
+        };
+
+        const { error: updateError } = await supabaseAdmin
+            .from('saved_valuations')
+            .update(updateData)
+            .eq('quote_reference', reference);
+
+        if (updateError) {
+            console.error('Update Error:', updateError);
+            return res.status(500).json({ success: false, message: 'Fehler beim Bestätigen des Angebots' });
+        }
+
+        return res.status(200).json({ success: true, message: 'Angebot erfolgreich bestätigt' });
     } catch (error) { next(error); }
 };
 

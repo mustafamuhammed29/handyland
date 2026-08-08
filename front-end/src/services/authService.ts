@@ -106,7 +106,7 @@ export const authService = {
     updateProfile: async (data: Partial<User>): Promise<{ success: boolean; user: User }> => {
         try {
             await api.get('/api/auth/csrf');
-            const response = await api.put('/api/auth/update-profile', data);
+            const response = await api.put('/api/auth/updateprofile', data);
             return response as any;
         } catch (error) {
             devLog('Auth Service Update Profile Error:', error);
@@ -170,7 +170,7 @@ export const authService = {
 
     refreshToken: async (): Promise<{ token: string }> => {
         try {
-            const response = await api.post('/api/auth/refresh-token');
+            const response = await api.post('/api/auth/refresh');
             return response as any;
         } catch (error) {
             devLog('Auth Service Refresh Token Error:', error);

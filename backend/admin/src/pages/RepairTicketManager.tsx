@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { formatDate, formatDateTime } from '../utils/formatDate';
 import { Eye, Search, Filter, CheckCircle, XCircle, Clock, CheckSquare, Square, Plus, Wrench, Smartphone, FileText, Send, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../utils/api';
@@ -61,6 +62,7 @@ interface Stats {
 
 const RepairTicketManager: React.FC = () => {
     const [tickets, setTickets] = useState<RepairTicket[]>([]);
+    const { confirm } = useConfirm();
     const [stats, setStats] = useState<Stats>({ totalTickets: 0, pendingTickets: 0, inProgressTickets: 0, completedTickets: 0, totalEstimatedRevenue: 0 });
     
     // Pagination and Search
@@ -139,6 +141,26 @@ const RepairTicketManager: React.FC = () => {
     useEffect(() => {
         fetchTickets();
     }, [page, debouncedSearch, selectedStatus]);
+
+    // Handle Deep Linking
+    useEffect(() => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const ticketId = queryParams.get('id');
+        
+        if (ticketId && !loading) {
+            const foundTicket = tickets.find(t => t._id === ticketId);
+            if (foundTicket) {
+                setSelectedTicket(foundTicket);
+            } else {
+                api.get(`/api/repairs/tickets/${ticketId}`)
+                   .then(res => {
+                       if (res.data.success) setSelectedTicket(res.data.data);
+                   }).catch(err => console.error("Could not fetch specific ticket:", err));
+            }
+            // Clean URL
+            window.history.replaceState({}, '', '/repair-tickets');
+        }
+    }, [tickets, loading]);
 
     const openStatusModal = (ticket: RepairTicket) => {
         setStatusForm({ status: ticket.status, estimatedCost: ticket.estimatedCost?.toString() || '', adminNote: '' });
@@ -220,7 +242,8 @@ const RepairTicketManager: React.FC = () => {
     };
 
     const handleDeleteTicket = async (ticket: RepairTicket) => {
-        if (!window.confirm(`Delete ticket ${ticket.ticketId} (${ticket.device})? This cannot be undone.`)) return;
+        const ok = await confirm({ message: `Delete ticket ${ticket.ticketId} (${ticket.device})? This cannot be undone.`, variant: "danger" });
+        if (!ok) return;
         try {
             await api.delete(`/api/repairs/tickets/${ticket._id}`);
             toast.success(`Ticket ${ticket.ticketId} deleted.`);
@@ -234,7 +257,8 @@ const RepairTicketManager: React.FC = () => {
     };
 
     const handleBulkDelete = async () => {
-        if (!window.confirm(`Delete ${selectedTickets.length} tickets permanently?`)) return;
+        const ok = await confirm({ message: `Delete ${selectedTickets.length} tickets permanently?`, variant: "danger" });
+        if (!ok) return;
         try {
             await Promise.all(selectedTickets.map(id => api.delete(`/api/repairs/tickets/${id}`)));
             toast.success(`${selectedTickets.length} tickets deleted.`);

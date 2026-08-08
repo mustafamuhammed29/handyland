@@ -29,7 +29,7 @@ export const Home = ({ lang }: { lang: LanguageCode }) => {
             </Suspense>
 
             {/* Featured Marketplace Products — 4 items preview */}
-            {sections.marketplace !== false && (
+            {sections.marketplacePage !== false && sections.marketplacePageComingSoon !== true && (
                 <Suspense fallback={<div className="h-48" />}>
                     <FeaturedProducts
                         type="marketplace"
@@ -42,21 +42,21 @@ export const Home = ({ lang }: { lang: LanguageCode }) => {
             )}
 
             {/* Repair Preview — brief CTA, no full catalog */}
-            {sections.repairPage !== false && (
+            {sections.repairPage !== false && sections.repairPageComingSoon !== true && (
                 <Suspense fallback={<div className="h-48" />}>
                     <RepairPreview />
                 </Suspense>
             )}
 
             {/* Repair Gallery */}
-            {sections.repairGallery !== false && (
+            {sections.repairPage !== false && sections.repairPageComingSoon !== true && (
                 <Suspense fallback={<div className="h-48" />}>
                     <RepairGallery />
                 </Suspense>
             )}
 
             {/* Featured Accessories — 4 items preview */}
-            {sections.accessories !== false && (
+            {sections.accessoriesPage !== false && sections.accessoriesPageComingSoon !== true && (
                 <Suspense fallback={<div className="h-48" />}>
                     <FeaturedProducts
                         type="accessories"

@@ -101,9 +101,10 @@ const PaymentSuccess: React.FC = () => {
         if (method === 'bank_transfer') {
             const fetchSettings = async () => {
                 try {
-                    const data: any = await api.get('/api/settings');
-                    if (data && data.payment && data.payment.bankTransfer) {
-                        setPaymentConfig(data.payment.bankTransfer);
+                    const response: any = await api.get('/api/settings');
+                    const settings = response?.settings || response?.data || response;
+                    if (settings && settings.payment && settings.payment.bankTransfer) {
+                        setPaymentConfig(settings.payment.bankTransfer);
                     }
                 } catch (e) {
                     console.error("Error fetching settings", e);

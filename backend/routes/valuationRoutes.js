@@ -26,6 +26,7 @@ router.delete('/devices', protect, authorize('admin'), valuationController.bulkD
 router.post('/calculate', valuationLimiter, valuationController.calculatePrice);
 router.post('/saved', valuationLimiter, valuationController.saveValuationQuote);
 router.get('/quote/:reference', valuationController.getQuoteByReference);
+router.put('/quote/:reference/confirm', valuationController.confirmQuote);
 router.get('/my-valuations', protect, valuationController.getSavedValuations); // Alias for frontend
 router.get('/saved', protect, valuationController.getSavedValuations);
 
@@ -35,6 +36,8 @@ router.get('/saved', protect, valuationController.getSavedValuations);
 router.get('/admin/quotes', protect, authorize('admin'), valuationController.getValuations);
 router.put('/admin/quotes/:id/status', protect, authorize('admin'), valuationController.updateValuationStatus);
 router.post('/admin/quotes/:id/complete-purchase', protect, authorize('admin'), valuationController.completePurchase);
+router.delete('/admin/quotes/:id', protect, authorize('admin'), valuationController.deleteValuation);
+router.delete('/admin/quotes', protect, authorize('admin'), valuationController.bulkDeleteValuations);
 
 // ==========================================
 // CATEGORY & BRAND MANAGEMENT

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, X, Check, ShoppingBag, Wrench, MessageSquare, Info, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Bell, X, Check, ShoppingBag, Wrench, MessageSquare, Info, CheckCircle, AlertTriangle, AlertCircle, CheckSquare, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../utils/api';
@@ -24,6 +24,8 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(false);
+    const [isSelectMode, setIsSelectMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const { t } = useTranslation();
     const panelRef = useRef<HTMLDivElement>(null);
     const { onNotification } = useSocket(userId);
@@ -82,6 +84,16 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
         try {
             await api.put('/api/notifications/read-all', {});
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        } catch { /* silent */ }
+    };
+
+    const deleteSelected = async () => {
+        if (selectedIds.size === 0) return;
+        try {
+            await api.delete('/api/notifications', { data: { ids: Array.from(selectedIds) } });
+            setNotifications(prev => prev.filter(n => !selectedIds.has(n._id)));
+            setSelectedIds(new Set());
+            setIsSelectMode(false);
         } catch { /* silent */ }
     };
 
@@ -161,6 +173,10 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                                     <Check className="w-3 h-3" /> {t('notifications.allRead', 'All read')}
                                 </button>
                             )}
+                            <button onClick={() => { setIsSelectMode(!isSelectMode); setSelectedIds(new Set()); }} title="Select"
+                                className={`text-[11px] px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-medium ${isSelectMode ? 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+                                <CheckSquare className="w-3 h-3" /> Select
+                            </button>
                             <button onClick={() => setOpen(false)} title={t('common.close', 'Close')}
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-red-500/20 hover:text-red-400 transition-colors">
                                 <X className="w-4 h-4" />
@@ -183,7 +199,18 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                             notifications.map(n => (
                                 <button
                                     key={n._id}
-                                    onClick={() => { 
+                                    onClick={(e) => { 
+                                        if (isSelectMode) {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setSelectedIds(prev => {
+                                                const next = new Set(prev);
+                                                if (next.has(n._id)) next.delete(n._id);
+                                                else next.add(n._id);
+                                                return next;
+                                            });
+                                            return;
+                                        }
                                         markRead(n._id); 
                                         if (n.link) {
                                             if (n.link.startsWith('http')) {
@@ -196,10 +223,15 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                                             setOpen(false);
                                         }
                                     }}
-                                    className={`w-full text-left px-4 py-3.5 flex items-start gap-3 hover:bg-slate-800 transition-colors border-b border-slate-800/40 last:border-0 relative ${!n.read ? 'bg-slate-800/40' : 'bg-transparent'}`}
+                                    className={`w-full text-left px-4 py-3.5 flex items-start gap-3 hover:bg-slate-800 transition-colors border-b border-slate-800/40 last:border-0 relative ${!n.read && !isSelectMode ? 'bg-slate-800/40' : 'bg-transparent'} ${isSelectMode && selectedIds.has(n._id) ? 'bg-blue-900/20' : ''}`}
                                 >
-                                    {!n.read && (
+                                    {!n.read && !isSelectMode && (
                                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
+                                    )}
+                                    {isSelectMode && (
+                                        <div className={`w-4 h-4 rounded mt-1.5 flex items-center justify-center border flex-shrink-0 transition-colors ${selectedIds.has(n._id) ? 'bg-blue-500 border-blue-500 text-white' : 'border-slate-500 text-transparent'}`}>
+                                            <Check className="w-3 h-3" />
+                                        </div>
                                     )}
                                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${typeBg(n.type)}`}>
                                         {typeIcon(n.type)}
@@ -219,11 +251,19 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                     </div>
 
                     {notifications.length > 0 && (
-                        <div className="px-4 py-2 border-t border-slate-800 bg-slate-950/60 backdrop-blur-md flex justify-center">
-                            <button onClick={fetchNotifs}
-                                className="text-[11px] font-medium text-slate-400 hover:text-white transition-colors py-1">
-                                {t('notifications.refresh', 'Refresh notifications')}
-                            </button>
+                        <div className="px-4 py-2 border-t border-slate-800 bg-slate-950/60 backdrop-blur-md flex justify-between items-center">
+                            {isSelectMode ? (
+                                <>
+                                    <button onClick={() => setSelectedIds(new Set(notifications.map(n => n._id)))} className="text-[11px] text-blue-400 hover:text-blue-300 font-medium px-2 py-1">Select All</button>
+                                    <button onClick={deleteSelected} disabled={selectedIds.size === 0} className="text-[11px] bg-red-500/20 text-red-400 px-3 py-1.5 rounded hover:bg-red-500/30 disabled:opacity-50 flex items-center gap-1 font-medium transition-colors">
+                                        <Trash2 className="w-3 h-3" /> Delete ({selectedIds.size})
+                                    </button>
+                                </>
+                            ) : (
+                                <button onClick={fetchNotifs} className="text-[11px] font-medium text-slate-400 hover:text-white transition-colors py-1 mx-auto">
+                                    {t('notifications.refresh', 'Refresh notifications')}
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

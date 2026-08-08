@@ -7,6 +7,8 @@
 const { supabaseAdmin } = require('../config/supabase');
 const crypto = require('crypto');
 const PDFDocument = require('pdfkit');
+const { sendOrderConfirmation } = require('../utils/emailService');
+const { notify } = require('../utils/notificationService');
 
 const generateOrderNumber = () => {
     const now = new Date();
@@ -127,6 +129,20 @@ exports.createOrder = async (req, res, next) => {
         const orderItems = [];
 
         for (const item of items) {
+            if (item.productType === 'Repair') {
+                itemsTotal += item.price * item.quantity;
+                orderItems.push({
+                    product_id: null,
+                    accessory_id: null,
+                    product_type: 'Product', // Changed from 'Repair' to satisfy check constraint
+                    name: item.name || 'Repair Service',
+                    quantity: item.quantity,
+                    price: item.price,
+                    image: item.image || null
+                });
+                continue;
+            }
+
             const table = item.productType === 'Product' ? 'products' : 'accessories';
             const { data: product, error } = await supabaseAdmin
                 .from(table)
@@ -172,7 +188,7 @@ exports.createOrder = async (req, res, next) => {
 
         // Loyalty points discount
         let pointsDiscount = 0;
-        if (appliedPoints && appliedPoints > 0 && req.user.loyaltyPoints >= appliedPoints) {
+        if (appliedPoints && appliedPoints > 0 && req.user?.loyaltyPoints >= appliedPoints) {
             pointsDiscount = appliedPoints * 0.01; // 1 point = €0.01
         }
 
@@ -193,6 +209,8 @@ exports.createOrder = async (req, res, next) => {
         // Atomic stock decrement — reserve stock first before creating database records
         const decrementedItems = [];
         for (const item of items) {
+            if (item.productType === 'Repair') continue;
+            
             const table = item.productType === 'Product' ? 'products' : 'accessories';
             const { data: success, error: rpcError } = await supabaseAdmin.rpc('atomic_decrement_stock', {
                 p_table: table,
@@ -297,6 +315,22 @@ exports.createOrder = async (req, res, next) => {
             if (cart) await supabaseAdmin.from('cart_items').delete().eq('cart_id', cart.id);
         }
 
+        // Dispatch order confirmation email
+        try {
+            const orderForEmail = {
+                ...order,
+                _id: order.id,
+                orderNumber: order.order_number,
+                totalAmount: order.total_amount,
+                paymentMethod: paymentMethod || 'card',
+                shippingAddress: { email: shippingAddress.email, fullName: shippingAddress.fullName },
+                items: orderItems
+            };
+            sendOrderConfirmation(orderForEmail).catch(err => console.error("Email send error:", err));
+        } catch (emailErr) {
+            console.error("Failed to initiate order confirmation email", emailErr);
+        }
+
         const orderWithId = { ...order, _id: order.id };
         return res.status(201).json({ success: true, order: orderWithId, data: orderWithId });
     } catch (error) {
@@ -317,7 +351,7 @@ exports.updateOrderStatus = async (req, res, next) => {
             .update(updateData)
             .eq('id', req.params.id)
             .select()
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
         if (!data) return res.status(404).json({ success: false, message: 'Order not found' });
@@ -331,11 +365,12 @@ exports.updateOrderStatus = async (req, res, next) => {
 
         // Create notification for user
         if (data.user_id) {
-            await supabaseAdmin.from('notifications').insert({
-                user_id: data.user_id,
+            await notify({
+                userId: data.user_id,
                 message: `Ihr Auftrag #${data.order_number} wurde aktualisiert: ${status}`,
                 type: 'info',
-                link: `/orders/${data.id}`
+                link: `/orders/${data.id}`,
+                category: 'orderUpdates'
             });
         }
 
@@ -411,11 +446,15 @@ exports.deleteOrder = async (req, res, next) => {
         // Delete related items manually in case there is no cascade
         await supabaseAdmin.from('order_items').delete().eq('order_id', orderId);
         await supabaseAdmin.from('order_status_history').delete().eq('order_id', orderId);
+        await supabaseAdmin.from('refund_requests').delete().eq('order_id', orderId); // Prevent FK constraint issues
 
         // Delete the order itself
         const { error: deleteError } = await supabaseAdmin.from('orders').delete().eq('id', orderId);
 
-        if (deleteError) throw deleteError;
+        if (deleteError) {
+             console.error('Failed to delete order:', deleteError);
+             return res.status(400).json({ success: false, message: 'Cannot delete order due to associated data.', error: deleteError.message });
+        }
 
         return res.status(200).json({ success: true, message: 'Order deleted successfully' });
     } catch (error) {
@@ -495,7 +534,19 @@ exports.generateInvoice = async (req, res, next) => {
             return res.status(403).json({ success: false, message: 'Invoice not yet available' });
         }
 
-        const doc = new PDFDocument({ margin: 50 });
+        // Fetch invoice settings
+        const { data: settingsData } = await supabaseAdmin
+            .from('settings')
+            .select('value')
+            .eq('key', 'invoice')
+            .single();
+            
+        let invoiceSettings = {};
+        if (settingsData && settingsData.value) {
+            invoiceSettings = typeof settingsData.value === 'string' ? JSON.parse(settingsData.value) : settingsData.value;
+        }
+
+        const doc = new PDFDocument({ margin: 50, size: 'A4' });
         
         // Response headers
         res.setHeader('Content-Type', 'application/pdf');
@@ -503,60 +554,9 @@ exports.generateInvoice = async (req, res, next) => {
         
         doc.pipe(res);
 
-        // Header
-        doc.fontSize(20).text('HandyLand Invoice', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(10).text(`Bestellnummer: ${order.order_number}`, { align: 'right' });
-        doc.text(`Datum: ${new Date(order.created_at).toLocaleDateString()}`, { align: 'right' });
-        doc.moveDown();
-
-        // Customer Info
-        doc.fontSize(12).text('Rechnungsadresse:', { underline: true });
-        doc.fontSize(10).text(order.shipping_full_name);
-        doc.text(order.shipping_street);
-        doc.text(`${order.shipping_zip} ${order.shipping_city}`);
-        doc.text(order.shipping_country);
-        doc.moveDown();
-
-        // Table Header
-        const tableTop = 250;
-        doc.fontSize(10).font('Helvetica-Bold');
-        doc.text('Artikel', 50, tableTop);
-        doc.text('Menge', 300, tableTop, { width: 50, align: 'right' });
-        doc.text('Preis', 350, tableTop, { width: 80, align: 'right' });
-        doc.text('Gesamt', 450, tableTop, { width: 80, align: 'right' });
-        
-        doc.moveDown();
-        doc.font('Helvetica').lineWidth(1);
-        doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
-
-        // Items
-        let y = tableTop + 25;
-        (order.order_items || []).forEach(item => {
-            doc.text(item.name, 50, y);
-            doc.text(item.quantity.toString(), 300, y, { width: 50, align: 'right' });
-            doc.text(`${item.price.toFixed(2)} €`, 350, y, { width: 80, align: 'right' });
-            doc.text(`${(item.price * item.quantity).toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
-            y += 20;
-        });
-
-        doc.moveTo(50, y).lineTo(550, y).stroke();
-        y += 10;
-
-        // Totals
-        doc.text('Zwischensumme:', 350, y, { width: 100, align: 'right' });
-        doc.text(`${(order.total_amount - order.shipping_fee + order.discount_amount).toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
-        y += 15;
-        doc.text('Versand:', 350, y, { width: 100, align: 'right' });
-        doc.text(`${order.shipping_fee.toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
-        y += 15;
-        if (order.discount_amount > 0) {
-            doc.text('Rabatt:', 350, y, { width: 100, align: 'right' });
-            doc.text(`-${order.discount_amount.toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
-            y += 15;
-        }
-        doc.fontSize(12).font('Helvetica-Bold').text('Gesamtbetrag:', 350, y, { width: 100, align: 'right' });
-        doc.text(`${order.total_amount.toFixed(2)} €`, 450, y, { width: 80, align: 'right' });
+        // Generate PDF using professional template
+        const { generatePDF } = require('../utils/invoiceGenerator');
+        await generatePDF(doc, order, invoiceSettings);
 
         doc.end();
     } catch (error) {
@@ -581,6 +581,39 @@ exports.createInvoiceAction = async (req, res, next) => {
         if (!data) return res.status(404).json({ success: false, message: 'Order not found' });
 
         return res.status(200).json({ success: true, message: 'Invoice generated successfully', order: mapOrder(data) });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route POST /api/orders/:id/receipt ───────────────────────
+exports.uploadPaymentReceipt = async (req, res, next) => {
+    try {
+        if (!req.fileUrl) {
+            return res.status(400).json({ success: false, message: 'No receipt file uploaded' });
+        }
+
+        const { data: order, error: findError } = await supabaseAdmin
+            .from('orders')
+            .select('id')
+            .eq('id', req.params.id)
+            .single();
+
+        if (findError || !order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        const { error: updateError } = await supabaseAdmin
+            .from('orders')
+            .update({ receipt_url: req.fileUrl })
+            .eq('id', req.params.id);
+
+        if (updateError) {
+            console.error('Failed to update receipt URL in DB:', updateError);
+            throw updateError;
+        }
+
+        return res.status(200).json({ success: true, receiptUrl: req.fileUrl });
     } catch (error) {
         next(error);
     }

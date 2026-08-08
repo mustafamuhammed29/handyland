@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Truck, Loader2, Save, X, AlertCircle } from 'lucide-react';
 import { api } from '../utils/api';
+import { useConfirm } from '../context/ConfirmContext';
 
 interface ShippingMethod {
     _id: string;
@@ -14,6 +15,7 @@ interface ShippingMethod {
 
 export default function ShippingManager() {
     const [methods, setMethods] = useState<ShippingMethod[]>([]);
+    const { confirm } = useConfirm();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -94,7 +96,8 @@ export default function ShippingManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this shipping method?')) return;
+        const ok = await confirm({ message: 'Are you sure you want to delete this shipping method?', variant: "danger" });
+        if (!ok) return;
 
         try {
             setLoading(true);

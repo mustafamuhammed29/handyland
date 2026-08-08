@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { supabaseAdmin } = require('./config/supabase');
+const { supabaseAdmin } = require('../config/supabase');
 
 async function repairAdmin() {
     const email = 'admin@handyland.de';
@@ -14,6 +14,14 @@ async function repairAdmin() {
         .eq('email', email);
     
     if (delError) console.log('Note: No old profile found to delete or delete failed.');
+
+    // 1.5. Find and delete auth user
+    const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = userList.users.find(u => u.email === email);
+    if (existingUser) {
+        await supabaseAdmin.auth.admin.deleteUser(existingUser.id);
+        console.log('Deleted existing auth user.');
+    }
 
     // 2. Create in Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({

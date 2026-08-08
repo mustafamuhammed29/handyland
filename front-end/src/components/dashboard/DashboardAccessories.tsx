@@ -3,6 +3,7 @@ import { Package, Plus, Search, Edit2, Trash2, Save, X, CheckSquare, Square } fr
 import { useTranslation } from 'react-i18next';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface Accessory {
     _id: string;
@@ -23,6 +24,7 @@ export const DashboardAccessories: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const { t } = useTranslation();
     const { addToast } = useToast();
+    const { confirm } = useConfirm();
 
     useEffect(() => {
         fetchAccessories();
@@ -61,7 +63,12 @@ export const DashboardAccessories: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm(t('accessories.deleteConfirm', 'Delete this accessory?'))) return;
+        const isConfirmed = await confirm({
+            title: t('accessories.deleteTitle', 'Delete Accessory?'),
+            message: t('accessories.deleteConfirm', 'Delete this accessory?'),
+            variant: 'danger'
+        });
+        if (!isConfirmed) return;
         try {
             await api.delete(`/api/accessories/${id}`);
             setAccessories(prev => prev.filter(a => a._id !== id));
@@ -88,7 +95,12 @@ export const DashboardAccessories: React.FC = () => {
     };
 
     const handleBulkDelete = async () => {
-        if (!window.confirm(t('accessories.bulkDeleteConfirm', { defaultValue: 'Delete {{count}} selected accessories?', count: selectedAccessories.length }))) return;
+        const isConfirmed = await confirm({
+            title: t('accessories.bulkDeleteTitle', 'Delete Multiple?'),
+            message: t('accessories.bulkDeleteConfirm', { defaultValue: 'Delete {{count}} selected accessories?', count: selectedAccessories.length }),
+            variant: 'danger'
+        });
+        if (!isConfirmed) return;
         try {
             await Promise.all(selectedAccessories.map(id => api.delete(`/api/accessories/${id}`)));
             setAccessories(prev => prev.filter(a => !selectedAccessories.includes(a._id)));

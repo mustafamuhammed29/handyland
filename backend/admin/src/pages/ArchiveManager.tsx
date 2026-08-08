@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Trash2, Save, X, Edit, CheckSquare, Square, ChevronLeft, ChevronRight, Archive, Clock } from 'lucide-react';
+import { Plus, Search, Trash2, Save, X, Edit, CheckSquare, Square, ChevronLeft, ChevronRight, Archive, Clock, Activity, Target, Smartphone } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
+import ImageCompareSlider from '../components/ImageCompareSlider';
 import { api } from '../utils/api';
 import useDebounce from '../hooks/useDebounce';
 import toast from 'react-hot-toast';
@@ -22,16 +23,21 @@ const ArchiveManager = () => {
     const [cases, setCases] = useState<RepairCase[]>([]);
     const [loading, setLoading] = useState(true);
     
-    // Pagination & Search
+    // Pagination & Search & Filter
     const [search, setSearch] = useState('');
     const debouncedSearch = useDebounce(search, 500);
+    const [categoryFilter, setCategoryFilter] = useState('All');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const limit = 12;
 
     const [isEditing, setIsEditing] = useState(false);
+    const [viewCase, setViewCase] = useState<RepairCase | null>(null);
     const [selectedCases, setSelectedCases] = useState<string[]>([]);
     const [currentCase, setCurrentCase] = useState<Partial<RepairCase>>({});
+    
+    // Stats
+    const [stats, setStats] = useState({ total: 0, expert: 0, mostCommon: '-' });
 
     const fetchCases = async () => {
         setLoading(true);
@@ -39,17 +45,26 @@ const ArchiveManager = () => {
             const queryParams = new URLSearchParams({
                 page: page.toString(),
                 limit: limit.toString(),
-                search: debouncedSearch
+                search: debouncedSearch,
+                category: categoryFilter
             });
             const res = await api.get(`/api/repair-archive?${queryParams.toString()}`);
             if (res.data.success) {
                 setCases(res.data.cases);
                 setTotalPages(res.data.totalPages || 1);
-            } else {
-                // Fallback for legacy format if any
-                if (Array.isArray(res.data)) {
-                    setCases(res.data);
+                
+                // If it's page 1 and no filters, calculate some stats
+                if (page === 1 && !debouncedSearch && categoryFilter === 'All') {
+                    const allCases = res.data.cases; // We could fetch a distinct stats endpoint, but we'll approximate here
+                    const expertCount = allCases.filter((c: any) => c.difficulty === 'Expert').length;
+                    setStats({
+                        total: res.data.count || res.data.cases.length,
+                        expert: expertCount,
+                        mostCommon: 'Screen' // Placeholder
+                    });
                 }
+            } else {
+                if (Array.isArray(res.data)) setCases(res.data);
             }
         } catch (error) {
             console.error(error);
@@ -61,11 +76,11 @@ const ArchiveManager = () => {
 
     useEffect(() => {
         setPage(1);
-    }, [debouncedSearch]);
+    }, [debouncedSearch, categoryFilter]);
 
     useEffect(() => {
         fetchCases();
-    }, [page, debouncedSearch]);
+    }, [page, debouncedSearch, categoryFilter]);
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this case?')) return;
@@ -129,47 +144,95 @@ const ArchiveManager = () => {
         }
     };
 
+    const categories = ['All', 'screen', 'glass', 'water', 'camera', 'battery', 'other'];
+
     return (
         <div className="p-6">
-
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <h1 className="text-3xl font-black flex items-center gap-3 text-white">
-                    <div className="p-2.5 bg-purple-500/20 rounded-xl">
-                        <Archive className="w-8 h-8 text-purple-400" />
+                    <div className="p-2.5 bg-fuchsia-500/20 rounded-xl">
+                        <Archive className="w-8 h-8 text-fuchsia-400" />
                     </div>
-                    Repair Archive
+                    Portfolio & Archive
                 </h1>
                 <button
                     onClick={() => { setCurrentCase({}); setIsEditing(true); }}
-                    className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-purple-900/20"
+                    className="flex items-center gap-2 bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-fuchsia-900/20"
                 >
-                    <Plus size={20} /> Add New Case
+                    <Plus size={20} /> Add Transformation
                 </button>
             </div>
 
-            {/* Search and Controls */}
-            <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 p-4 rounded-2xl mb-6 flex flex-wrap items-center gap-4 shadow-lg">
-                <button
-                    onClick={handleSelectAll}
-                    className="bg-slate-950/50 border border-slate-700/50 hover:bg-slate-900 text-white px-4 py-3 rounded-xl flex items-center gap-2 transition-colors"
-                    aria-label={selectedCases.length === cases.length && cases.length > 0 ? "Deselect All" : "Select All"}
-                    title={selectedCases.length === cases.length && cases.length > 0 ? "Deselect All" : "Select All"}
-                >
-                    {selectedCases.length === cases.length && cases.length > 0 ? (
-                        <CheckSquare className="w-5 h-5 text-blue-500" />
-                    ) : (
-                        <Square className="w-5 h-5 text-slate-400" />
-                    )}
-                </button>
-                <div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                    <input
-                        type="text"
-                        placeholder="Search cases by title..."
-                        className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-purple-500 focus:bg-slate-900 transition-colors"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+            {/* Dashboard Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-6 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400">
+                        <Target size={24} />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Total Showcases</p>
+                        <p className="text-3xl font-black text-white">{stats.total}</p>
+                    </div>
+                </div>
+                <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-6 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center text-purple-400">
+                        <Activity size={24} />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Expert Repairs</p>
+                        <p className="text-3xl font-black text-white">{stats.expert}</p>
+                    </div>
+                </div>
+                <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-6 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400">
+                        <Smartphone size={24} />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Most Common</p>
+                        <p className="text-3xl font-black text-white">{stats.mostCommon}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Search and Filters */}
+            <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 p-4 rounded-2xl mb-6 shadow-lg">
+                <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <button
+                            onClick={handleSelectAll}
+                            className="bg-slate-950/50 border border-slate-700/50 hover:bg-slate-900 text-white px-4 py-3 rounded-xl flex items-center gap-2 transition-colors shrink-0"
+                            aria-label="Select All"
+                            title="Select All"
+                        >
+                            {selectedCases.length === cases.length && cases.length > 0 ? (
+                                <CheckSquare className="w-5 h-5 text-fuchsia-500" />
+                            ) : (
+                                <Square className="w-5 h-5 text-slate-400" />
+                            )}
+                        </button>
+                        <div className="relative flex-1 md:w-[300px]">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Search portfolio..."
+                                className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-fuchsia-500 focus:bg-slate-900 transition-colors"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 custom-scrollbar">
+                        {categories.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setCategoryFilter(cat)}
+                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap capitalize ${categoryFilter === cat ? 'bg-fuchsia-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'}`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -193,7 +256,7 @@ const ArchiveManager = () => {
             {/* List */}
             {loading ? (
                 <div className="flex justify-center items-center py-20">
-                    <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
             ) : cases.length === 0 ? (
                 <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-16 flex flex-col items-center justify-center text-center">
@@ -206,57 +269,51 @@ const ArchiveManager = () => {
                     {cases.map((item) => {
                         const isSelected = selectedCases.includes(item._id);
                         return (
-                            <div key={item._id} className={`bg-slate-900/40 backdrop-blur-xl border ${isSelected ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-white/5'} rounded-2xl overflow-hidden group hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-900/10 transition-all relative flex flex-col`}>
+                            <div key={item._id} className={`bg-slate-900/40 backdrop-blur-xl border ${isSelected ? 'border-fuchsia-500 ring-2 ring-fuchsia-500/20' : 'border-white/5'} rounded-2xl overflow-hidden group hover:border-fuchsia-500/50 hover:shadow-xl hover:shadow-fuchsia-900/10 transition-all relative flex flex-col`}>
                                 {/* Checkbox Overlay */}
-                                <div className="absolute top-3 left-3 z-20">
+                                <div className="absolute top-3 left-3 z-30">
                                     <button
                                         onClick={() => toggleSelectCase(item._id)}
                                         className="bg-slate-950/80 backdrop-blur-md p-2 rounded-xl text-slate-400 hover:text-white transition-colors border border-white/10 shadow-lg"
                                         aria-label={isSelected ? "Deselect Case" : "Select Case"}
-                                        title={isSelected ? "Deselect Case" : "Select Case"}
                                     >
-                                        {isSelected ? (
-                                            <CheckSquare className="w-5 h-5 text-purple-500" />
-                                        ) : (
-                                            <Square className="w-5 h-5" />
-                                        )}
+                                        {isSelected ? <CheckSquare className="w-5 h-5 text-fuchsia-500" /> : <Square className="w-5 h-5" />}
                                     </button>
                                 </div>
-                                <div className="relative h-48 bg-slate-950 flex-shrink-0">
-                                    <div className="absolute inset-0 flex">
-                                        <div className="w-1/2 relative border-r border-white/10 overflow-hidden">
-                                            <img src={item.imgBefore} className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity group-hover:scale-105 duration-500" alt="Before" />
-                                            <span className="absolute bottom-2 left-2 text-[10px] bg-red-500/90 text-white font-bold px-2 py-0.5 rounded shadow-sm backdrop-blur-sm uppercase">Before</span>
-                                        </div>
-                                        <div className="w-1/2 relative overflow-hidden">
-                                            <img src={item.imgAfter} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="After" />
-                                            <span className="absolute bottom-2 right-2 text-[10px] bg-emerald-500/90 text-white font-bold px-2 py-0.5 rounded shadow-sm backdrop-blur-sm uppercase">After</span>
-                                        </div>
+                                <div className="relative h-56 bg-slate-950 flex-shrink-0 cursor-pointer overflow-hidden" onClick={() => setViewCase(item)}>
+                                    {/* The Slider on card */}
+                                    <div className="pointer-events-none group-hover:pointer-events-auto w-full h-full">
+                                        <ImageCompareSlider 
+                                            imgBefore={item.imgBefore} 
+                                            imgAfter={item.imgAfter} 
+                                            labelBefore="Before" 
+                                            labelAfter="After"
+                                            interactive={true}
+                                        />
                                     </div>
-                                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-30">
                                         <button
-                                            onClick={() => { setCurrentCase(item); setIsEditing(true); }}
+                                            onClick={(e) => { e.stopPropagation(); setCurrentCase(item); setIsEditing(true); }}
                                             className="p-2 bg-slate-950/80 hover:bg-blue-600 text-white rounded-xl backdrop-blur-md border border-white/10 transition-colors shadow-lg"
-                                            aria-label="Edit Case"
                                             title="Edit Case"
                                         >
                                             <Edit size={16} />
                                         </button>
                                         <button
-                                            onClick={() => handleDelete(item._id)}
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(item._id); }}
                                             className="p-2 bg-slate-950/80 hover:bg-red-600 text-white rounded-xl backdrop-blur-md border border-white/10 transition-colors shadow-lg"
-                                            aria-label="Delete Case"
                                             title="Delete Case"
                                         >
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent pointer-events-none"></div>
                                 </div>
-                                <div className="p-5 flex-1 flex flex-col">
-                                    <h3 className="font-black text-lg text-white mb-2 line-clamp-1" title={item.title}>{item.title}</h3>
+                                <div className="p-5 flex-1 flex flex-col cursor-pointer" onClick={() => setViewCase(item)}>
+                                    <h3 className="font-black text-lg text-white mb-3 line-clamp-1 group-hover:text-fuchsia-400 transition-colors" title={item.title}>{item.title}</h3>
                                     <div className="flex gap-2 text-[11px] font-bold text-slate-400 mb-3 uppercase tracking-wider">
                                         <span className="bg-slate-800/80 px-2 py-1 rounded-md border border-white/5">{item.category}</span>
-                                        <span className="bg-slate-800/80 px-2 py-1 rounded-md border border-white/5 text-purple-400">LVL {item.difficulty}</span>
+                                        <span className="bg-slate-800/80 px-2 py-1 rounded-md border border-white/5 text-fuchsia-400">LVL {item.difficulty}</span>
                                         <span className="bg-slate-800/80 px-2 py-1 rounded-md border border-white/5 flex items-center gap-1"><Clock size={10} /> {item.time}</span>
                                     </div>
                                     <p className="text-sm text-slate-500 line-clamp-2 mt-auto">{item.description}</p>
@@ -277,8 +334,6 @@ const ArchiveManager = () => {
                         <button
                             onClick={() => setPage(p => Math.max(1, p - 1))}
                             disabled={page === 1}
-                            title="Previous Page"
-                            aria-label="Previous Page"
                             className="p-2 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-700 text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             <ChevronLeft size={18} />
@@ -294,7 +349,7 @@ const ArchiveManager = () => {
                                     <button
                                         key={i}
                                         onClick={() => setPage(pageNum)}
-                                        className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${page === pageNum ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-900/20' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 border border-white/5'}`}
+                                        className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${page === pageNum ? 'bg-gradient-to-r from-fuchsia-600 to-indigo-600 text-white shadow-lg shadow-fuchsia-900/20' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 border border-white/5'}`}
                                     >
                                         {pageNum}
                                     </button>
@@ -304,8 +359,6 @@ const ArchiveManager = () => {
                         <button
                             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                             disabled={page === totalPages}
-                            title="Next Page"
-                            aria-label="Next Page"
                             className="p-2 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-700 text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             <ChevronRight size={18} />
@@ -314,21 +367,76 @@ const ArchiveManager = () => {
                 </div>
             )}
 
-            {/* Modal */}
+            {/* Quick View Modal */}
+            {viewCase && (
+                <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4 z-[70] animate-in fade-in duration-300">
+                    <div className="bg-slate-900 border border-slate-700/50 rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col relative shadow-2xl animate-in zoom-in-95">
+                        <div className="absolute top-0 right-0 p-4 z-[80]">
+                            <button
+                                onClick={() => setViewCase(null)}
+                                className="w-12 h-12 flex items-center justify-center rounded-full bg-slate-950/80 hover:bg-slate-800 text-white backdrop-blur-md transition-colors"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="flex flex-col lg:flex-row h-full overflow-hidden">
+                            {/* Left: Slider */}
+                            <div className="w-full lg:w-3/5 h-[40vh] lg:h-full bg-black relative flex-shrink-0">
+                                <ImageCompareSlider 
+                                    imgBefore={viewCase.imgBefore} 
+                                    imgAfter={viewCase.imgAfter} 
+                                    labelBefore={viewCase.labelBefore || 'Damaged'}
+                                    labelAfter={viewCase.labelAfter || 'Repaired'}
+                                    interactive={true}
+                                />
+                            </div>
+                            {/* Right: Details */}
+                            <div className="w-full lg:w-2/5 p-8 lg:p-10 overflow-y-auto custom-scrollbar flex flex-col bg-gradient-to-b from-slate-900 to-slate-950">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="px-3 py-1.5 rounded-lg bg-fuchsia-500/20 text-fuchsia-400 text-xs font-black uppercase tracking-widest">
+                                        {viewCase.category}
+                                    </div>
+                                    <div className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-black uppercase tracking-widest border border-slate-700">
+                                        Level: {viewCase.difficulty}
+                                    </div>
+                                </div>
+                                <h2 className="text-3xl lg:text-4xl font-black text-white leading-tight mb-4">{viewCase.title}</h2>
+                                <div className="flex items-center gap-2 text-slate-400 font-medium mb-8">
+                                    <Clock size={16} />
+                                    <span>Time to repair: <strong className="text-white">{viewCase.time}</strong></span>
+                                </div>
+                                <div className="prose prose-invert prose-slate">
+                                    <h4 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-2">Repair Story</h4>
+                                    <p className="text-slate-300 leading-relaxed text-lg whitespace-pre-wrap">{viewCase.description}</p>
+                                </div>
+                                
+                                <div className="mt-auto pt-8 flex gap-3">
+                                    <button 
+                                        onClick={() => { setViewCase(null); setCurrentCase(viewCase); setIsEditing(true); }}
+                                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl transition-colors border border-white/5"
+                                    >
+                                        Edit Case
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Modal */}
             {isEditing && (
                 <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200">
                     <div className="bg-slate-900 border border-slate-700/50 rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col relative shadow-2xl animate-in zoom-in-95">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-blue-500"></div>
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fuchsia-500 to-indigo-500"></div>
                         <div className="p-6 border-b border-slate-800/50 flex justify-between items-center bg-slate-900/50 backdrop-blur-xl shrink-0">
                             <h2 className="text-2xl font-black text-white flex items-center gap-3">
-                                {currentCase._id ? <Edit className="w-6 h-6 text-blue-400" /> : <Plus className="w-6 h-6 text-purple-400" />}
+                                {currentCase._id ? <Edit className="w-6 h-6 text-blue-400" /> : <Plus className="w-6 h-6 text-fuchsia-400" />}
                                 {currentCase._id ? 'Edit Case Study' : 'New Case Study'}
                             </h2>
                             <button
                                 onClick={() => setIsEditing(false)}
                                 className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-                                aria-label="Close Modal"
-                                title="Close Modal"
                             >
                                 <X size={20} />
                             </button>
@@ -345,7 +453,7 @@ const ArchiveManager = () => {
                                                 <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase">Title</label>
                                                 <input
                                                     type="text"
-                                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-white focus:border-purple-500 outline-none transition-colors"
+                                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-white focus:border-fuchsia-500 outline-none transition-colors"
                                                     value={currentCase.title || ''}
                                                     onChange={e => setCurrentCase({ ...currentCase, title: e.target.value })}
                                                     placeholder="e.g. iPhone 14 Pro Max Screen Replacement"
@@ -355,7 +463,7 @@ const ArchiveManager = () => {
                                                 <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase">Time Estimate</label>
                                                 <input
                                                     type="text"
-                                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-white focus:border-purple-500 outline-none transition-colors"
+                                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-white focus:border-fuchsia-500 outline-none transition-colors"
                                                     value={currentCase.time || ''}
                                                     onChange={e => setCurrentCase({ ...currentCase, time: e.target.value })}
                                                     placeholder="e.g. 45m"
@@ -367,10 +475,9 @@ const ArchiveManager = () => {
                                             <div>
                                                 <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase">Category</label>
                                                 <select
-                                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-white focus:border-purple-500 outline-none transition-colors"
+                                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-white focus:border-fuchsia-500 outline-none transition-colors"
                                                     value={currentCase.category || 'other'}
                                                     onChange={e => setCurrentCase({ ...currentCase, category: e.target.value as any })}
-                                                    aria-label="Select Category"
                                                 >
                                                     <option value="screen">Screen</option>
                                                     <option value="glass">Rear Glass</option>
@@ -383,10 +490,9 @@ const ArchiveManager = () => {
                                             <div>
                                                 <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase">Difficulty Level</label>
                                                 <select
-                                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-white focus:border-purple-500 outline-none transition-colors"
+                                                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-white focus:border-fuchsia-500 outline-none transition-colors"
                                                     value={currentCase.difficulty || 'Med'}
                                                     onChange={e => setCurrentCase({ ...currentCase, difficulty: e.target.value as any })}
-                                                    aria-label="Select Difficulty"
                                                 >
                                                     <option value="Low">Low</option>
                                                     <option value="Med">Medium</option>
@@ -400,7 +506,7 @@ const ArchiveManager = () => {
 
                                 {/* Images */}
                                 <div className="space-y-4">
-                                    <h4 className="text-xs font-black text-slate-500 uppercase flex items-center gap-3 tracking-wider"><div className="w-2 h-2 rounded-full bg-purple-500"></div> Visual Evidence</h4>
+                                    <h4 className="text-xs font-black text-slate-500 uppercase flex items-center gap-3 tracking-wider"><div className="w-2 h-2 rounded-full bg-fuchsia-500"></div> Visual Evidence</h4>
                                     <div className="bg-slate-950/50 p-5 rounded-2xl border border-white/5 grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-3">
                                             <ImageUpload
@@ -437,7 +543,7 @@ const ArchiveManager = () => {
                                     <h4 className="text-xs font-black text-slate-500 uppercase flex items-center gap-3 tracking-wider"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Details</h4>
                                     <div className="bg-slate-950/50 p-5 rounded-2xl border border-white/5">
                                         <textarea
-                                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-white focus:border-purple-500 outline-none h-32 resize-none transition-colors"
+                                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-white focus:border-fuchsia-500 outline-none h-32 resize-none transition-colors"
                                             value={currentCase.description || ''}
                                             onChange={e => setCurrentCase({ ...currentCase, description: e.target.value })}
                                             placeholder="Write a compelling story about this repair..."
@@ -456,7 +562,7 @@ const ArchiveManager = () => {
                             </button>
                             <button
                                 onClick={handleSave}
-                                className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-black shadow-lg shadow-purple-900/20 flex items-center gap-2 transition-all"
+                                className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white font-black shadow-lg shadow-fuchsia-900/20 flex items-center gap-2 transition-all"
                             >
                                 <Save size={18} />
                                 {currentCase._id ? 'Save Changes' : 'Publish Case'}

@@ -47,7 +47,7 @@ export interface CartItem {
   subtitle: string;
   price: number;
   image: string;
-  category: 'device' | 'accessory';
+  category: 'device' | 'accessory' | 'repair';
   quantity?: number;
   stock?: number;
 }

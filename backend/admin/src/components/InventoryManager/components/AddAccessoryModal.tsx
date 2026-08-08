@@ -71,20 +71,23 @@ export function AddAccessoryModal({ isOpen, onClose, handleAddAccessorySave }: A
 
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Category *</label>
-                        <select
+                        <input
+                            type="text"
                             required
+                            list="accessory-categories"
+                            placeholder="Type or select category..."
                             className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all"
                             value={addForm.category} onChange={e => setAddForm({ ...addForm, category: e.target.value })}
                             title="Category"
                             aria-label="Category"
-                        >
-                            <option value="">Select Category</option>
-                            <option value="protection">Cases & Screen Protectors</option>
-                            <option value="power">Chargers & Cables</option>
-                            <option value="audio">Audio & Headphones</option>
-                            <option value="wearables">Smartwatch Bands & Accessories</option>
-                            <option value="other">Other Accessories</option>
-                        </select>
+                        />
+                        <datalist id="accessory-categories">
+                            <option value="Cases & Screen Protectors">Cases & Screen Protectors</option>
+                            <option value="Chargers & Cables">Chargers & Cables</option>
+                            <option value="Audio & Headphones">Audio & Headphones</option>
+                            <option value="Smartwatch Bands & Accessories">Smartwatch Bands & Accessories</option>
+                            <option value="Other Accessories">Other Accessories</option>
+                        </datalist>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

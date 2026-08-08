@@ -93,3 +93,45 @@
 .quill-container .ql-editor p {
   margin-bottom: 0.75rem;
 }
+
+/* =========================================
+   Global Print Styles
+   ========================================= */
+@media print {
+  /* Force A4 size and remove margins */
+  @page {
+    margin: 0;
+    size: A4;
+  }
+  
+  /* Hide the main React app completely */
+  #root {
+    display: none !important;
+  }
+
+  /* Reset body for printing */
+  html, body {
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    visibility: visible !important;
+  }
+
+  /* Any element portaled to body with print-container class will show */
+  .print-container {
+    display: block !important;
+    position: relative !important;
+    visibility: visible !important;
+    background: white !important;
+    width: 100% !important;
+  }
+}
+
+@media screen {
+  .print-container {
+    display: none !important;
+  }
+}

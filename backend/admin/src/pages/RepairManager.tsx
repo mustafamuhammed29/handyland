@@ -1,9 +1,12 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Save, ChevronRight, ArrowLeft, Plus, Trash2, Edit2, X, Search, FileSpreadsheet, Smartphone, Wrench, CircleDollarSign, EyeOff, CheckCircle } from 'lucide-react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { Save, ChevronRight, ArrowLeft, Plus, Trash2, Edit2, X, Search, FileSpreadsheet, Smartphone, Wrench, CircleDollarSign, EyeOff, CheckCircle, Download, Upload } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
+import { ServiceTypeDropdown } from '../components/ServiceTypeDropdown';
+import { CreatableDropdown } from '../components/CreatableDropdown';
 import { api } from '../utils/api';
 import toast from 'react-hot-toast';
 import useDebounce from '../hooks/useDebounce';
+import Papa from 'papaparse';
 
 interface RepairStats {
     totalDevices: number;
@@ -19,12 +22,34 @@ export default function RepairManager() {
     const [loading, setLoading] = useState(true);
     const [editedServices, setEditedServices] = useState<any[]>([]);
 
-    // Pagination & Search
+    // Pagination & Search & Filter
     const [page, setPage] = useState(1);
     const [limit] = useState(20);
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const [selectedBrand, setSelectedBrand] = useState('All');
+    const [customBrands, setCustomBrands] = useState<string[]>([]);
+    
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem('customDeviceBrands');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                setCustomBrands(parsed.map((p: any) => p.value));
+            } catch (e) {}
+        }
+    }, []);
+
+    const defaultServices = [
+        { type: 'screen', label: 'Screen Repair', price: 99, duration: '1h', warranty: '1 Year' },
+        { type: 'battery', label: 'Battery Replacement', price: 59, duration: '30 mins', warranty: '6 Months' },
+        { type: 'charging', label: 'Charging Port', price: 69, duration: '1h', warranty: '6 Months' },
+        { type: 'backglass', label: 'Back Glass', price: 89, duration: '2h', warranty: '1 Year' },
+        { type: 'camera', label: 'Camera Repair', price: 79, duration: '1h', warranty: '6 Months' }
+    ];
 
     // Config for adding/editing devices
     const [isDeviceModalOpen, setIsDeviceModalOpen] = useState(false);
@@ -42,6 +67,7 @@ export default function RepairManager() {
             setLoading(true);
             let url = `/api/repairs?page=${page}&limit=${limit}`;
             if (debouncedSearch) url += `&search=${encodeURIComponent(debouncedSearch)}`;
+            if (selectedBrand !== 'All') url += `&brand=${encodeURIComponent(selectedBrand)}`;
             
             const response = await api.get(url);
             const fetchedDevices = response.data?.devices || response.data?.data || [];
@@ -58,7 +84,11 @@ export default function RepairManager() {
         } finally {
             setLoading(false);
         }
-    }, [page, limit, debouncedSearch]);
+    }, [page, limit, debouncedSearch, selectedBrand]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, selectedBrand]);
 
     const fetchStats = async () => {
         try {
@@ -149,10 +179,105 @@ export default function RepairManager() {
         link.parentNode?.removeChild(link);
     };
 
+    const handleDownloadTemplate = () => {
+        const headers = "Brand,Model,ImageLink,Screen,Battery,Charging,BackGlass,Camera\n";
+        const example1 = '"Apple","iPhone 15 Pro Max","",350,120,99,150,110\n';
+        const example2 = '"Samsung","Galaxy S23 Ultra","",299,90,80,120,100\n';
+        const csv = headers + example1 + example2;
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `Handyland_Import_Template.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+    };
+
+    const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async (results) => {
+                try {
+                    setLoading(true);
+                    const newDevices = results.data.map((row: any) => {
+                        const services: any[] = [];
+                        const addService = (colName: string, type: string, label: string, duration: string, warranty: string) => {
+                            const price = parseFloat(row[colName]);
+                            if (!isNaN(price) && price > 0) {
+                                services.push({ type, label, price, duration, warranty });
+                            }
+                        };
+                        
+                        addService('Screen', 'screen', 'Screen Repair', '1h', '1 Year');
+                        addService('Battery', 'battery', 'Battery Replacement', '30 mins', '6 Months');
+                        addService('Charging', 'charging', 'Charging Port', '1h', '6 Months');
+                        addService('BackGlass', 'backglass', 'Back Glass', '2h', '1 Year');
+                        addService('Camera', 'camera', 'Camera Repair', '1h', '6 Months');
+                        
+                        return {
+                            brand: row.Brand || 'Unknown',
+                            model: row.Model,
+                            image: row.ImageLink || '',
+                            isVisible: true,
+                            services
+                        };
+                    }).filter(d => d.model); // Must have a model name
+
+                    if (newDevices.length === 0) {
+                        toast.error('No valid devices found in CSV. Please use the template.');
+                        setLoading(false);
+                        return;
+                    }
+                    
+                    const response = await api.post('/api/repairs/devices/bulk', { devices: newDevices });
+                    if (response.data.success) {
+                        toast.success(`Successfully imported ${response.data.count} devices!`);
+                        setPage(1);
+                        fetchDevices();
+                        fetchStats();
+                    }
+                } catch (error) {
+                    console.error('Import failed', error);
+                    toast.error('Failed to import devices');
+                } finally {
+                    setLoading(false);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                }
+            },
+            error: (error) => {
+                console.error('CSV Parsing Error', error);
+                toast.error('Failed to parse CSV file');
+            }
+        });
+    };
+
     // Service Editing Logic
     const handleServiceChange = (index: number, field: string, value: any) => {
         const updated = [...editedServices];
         updated[index] = { ...updated[index], [field]: value };
+        setEditedServices(updated);
+    };
+
+    const handleMoveService = (index: number, direction: 'up' | 'down') => {
+        if (direction === 'up' && index === 0) return;
+        if (direction === 'down' && index === editedServices.length - 1) return;
+        
+        const updated = [...editedServices];
+        const temp = updated[index];
+        updated[index] = updated[direction === 'up' ? index - 1 : index + 1];
+        updated[direction === 'up' ? index - 1 : index + 1] = temp;
+        setEditedServices(updated);
+    };
+
+    const handleDuplicateService = (index: number) => {
+        const updated = [...editedServices];
+        const duplicated = { ...updated[index], label: updated[index].label + ' (Copy)' };
+        updated.splice(index + 1, 0, duplicated);
         setEditedServices(updated);
     };
 
@@ -204,16 +329,36 @@ export default function RepairManager() {
                             </h1>
                             <p className="text-slate-400 mt-2">Manage supported devices and repair pricing</p>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-3">
+                            <input type="file" accept=".csv" className="hidden" ref={fileInputRef} onChange={handleImportCSV} />
+                            
+                            <button
+                                onClick={handleDownloadTemplate}
+                                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl transition-all shadow-sm font-medium text-sm"
+                                title="Download CSV Template"
+                            >
+                                <Download className="w-4 h-4 text-blue-400" />
+                                Template
+                            </button>
+                            
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl transition-all shadow-sm font-medium text-sm"
+                            >
+                                <Upload className="w-4 h-4 text-purple-400" />
+                                Import
+                            </button>
+
                             <button
                                 onClick={handleExportCSV}
                                 className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl transition-all shadow-sm font-medium text-sm"
                             >
                                 <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                                Export Catalog
+                                Export
                             </button>
+                            
                             <button
-                                onClick={() => { setDeviceForm({ id: '', model: '', brand: 'Apple', image: '', isVisible: true, services: [] }); setIsDeviceModalOpen(true); }}
+                                onClick={() => { setDeviceForm({ id: '', model: '', brand: selectedBrand !== 'All' ? selectedBrand : 'Apple', image: '', isVisible: true, services: JSON.parse(JSON.stringify(defaultServices)) }); setIsDeviceModalOpen(true); }}
                                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20 text-sm"
                             >
                                 <Plus size={18} /> Add Device
@@ -252,16 +397,27 @@ export default function RepairManager() {
                         </div>
                     )}
 
-                    {/* Filters */}
-                    <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 p-5 rounded-2xl mb-6 shadow-sm">
-                        <div className="relative max-w-md">
+                    {/* Filters & Tabs */}
+                    <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 p-5 rounded-2xl mb-6 shadow-sm flex flex-col md:flex-row gap-4 justify-between md:items-center">
+                        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar flex-1 w-full md:w-auto">
+                            {['All', 'Apple', 'Samsung', 'Google', 'Xiaomi', 'OnePlus', ...customBrands, 'Other'].filter((value, index, self) => self.indexOf(value) === index).map(brand => (
+                                <button
+                                    key={brand}
+                                    onClick={() => setSelectedBrand(brand)}
+                                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap ${selectedBrand === brand ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
+                                >
+                                    {brand}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="relative w-full md:max-w-md shrink-0">
                             <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                             <input
                                 type="text"
-                                placeholder="Search models or brands..."
+                                placeholder="Search models..."
                                 className="w-full pl-11 pr-4 py-2.5 bg-slate-950/50 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                                 value={searchTerm}
-                                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                     </div>
@@ -409,20 +565,15 @@ export default function RepairManager() {
                                     {editedServices.map((service, index) => (
                                         <tr key={index} className="hover:bg-slate-800/40 transition-colors group">
                                             <td className="px-6 py-4">
-                                                <select
+                                                <ServiceTypeDropdown 
                                                     title="Service Type"
-                                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none transition-colors appearance-none"
                                                     value={service.type}
-                                                    onChange={(e) => handleServiceChange(index, 'type', e.target.value)}
-                                                >
-                                                    <option value="screen">Screen Repair</option>
-                                                    <option value="battery">Battery Replacement</option>
-                                                    <option value="charging">Charging Port</option>
-                                                    <option value="camera">Camera Repair</option>
-                                                    <option value="backglass">Back Glass</option>
-                                                    <option value="faceid">Face ID Repair</option>
-                                                    <option value="other">Other Service</option>
-                                                </select>
+                                                    onChange={(val, label) => {
+                                                        const updated = [...editedServices];
+                                                        updated[index] = { ...updated[index], type: val, label: label };
+                                                        setEditedServices(updated);
+                                                    }}
+                                                />
                                             </td>
                                             <td className="px-6 py-4">
                                                 <input
@@ -448,30 +599,59 @@ export default function RepairManager() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <input
+                                                    list="duration-options"
                                                     title="Service Duration"
                                                     placeholder="e.g. 1-2 Hours"
-                                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none transition-colors"
+                                                    className="w-28 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none transition-colors"
                                                     value={service.duration}
                                                     onChange={(e) => handleServiceChange(index, 'duration', e.target.value)}
                                                 />
                                             </td>
                                             <td className="px-6 py-4">
                                                 <input
+                                                    list="warranty-options"
                                                     title="Warranty Period"
                                                     placeholder="e.g. 12 Months"
-                                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none transition-colors"
+                                                    className="w-28 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-blue-500 outline-none transition-colors"
                                                     value={service.warranty}
                                                     onChange={(e) => handleServiceChange(index, 'warranty', e.target.value)}
                                                 />
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <button 
-                                                    onClick={() => handleDeleteService(index)} 
-                                                    className="p-2.5 bg-slate-800/50 hover:bg-red-500/20 text-slate-500 hover:text-red-400 border border-slate-800 hover:border-red-500/30 rounded-lg transition-colors" 
-                                                    title="Remove Service"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
+                                                <div className="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                                                    <div className="flex flex-col mr-2">
+                                                        <button 
+                                                            onClick={() => handleMoveService(index, 'up')}
+                                                            disabled={index === 0}
+                                                            className="text-slate-500 hover:text-white disabled:opacity-30 disabled:hover:text-slate-500"
+                                                            title="Move Up"
+                                                        >
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleMoveService(index, 'down')}
+                                                            disabled={index === editedServices.length - 1}
+                                                            className="text-slate-500 hover:text-white disabled:opacity-30 disabled:hover:text-slate-500"
+                                                            title="Move Down"
+                                                        >
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                                        </button>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => handleDuplicateService(index)} 
+                                                        className="p-2 bg-slate-800/50 hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 border border-slate-800 hover:border-blue-500/30 rounded-lg transition-colors" 
+                                                        title="Duplicate Service"
+                                                    >
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDeleteService(index)} 
+                                                        className="p-2 bg-slate-800/50 hover:bg-red-500/20 text-slate-500 hover:text-red-400 border border-slate-800 hover:border-red-500/30 rounded-lg transition-colors" 
+                                                        title="Remove Service"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -487,6 +667,23 @@ export default function RepairManager() {
                                     </tr>
                                 </tbody>
                             </table>
+                            
+                            {/* Datalists for autocompletion */}
+                            <datalist id="duration-options">
+                                <option value="30 mins" />
+                                <option value="1h" />
+                                <option value="1-2h" />
+                                <option value="2-3h" />
+                                <option value="24h" />
+                                <option value="1-3 Days" />
+                            </datalist>
+                            <datalist id="warranty-options">
+                                <option value="No Warranty" />
+                                <option value="3 Months" />
+                                <option value="6 Months" />
+                                <option value="1 Year" />
+                                <option value="2 Years" />
+                            </datalist>
                         </div>
                     </div>
                 </div>
@@ -525,22 +722,31 @@ export default function RepairManager() {
 
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Brand</label>
-                                <input
+                                <CreatableDropdown 
                                     title="Brand"
-                                    list="brand-options"
-                                    placeholder="e.g. Apple, Samsung..."
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:border-blue-500 outline-none transition-colors"
                                     value={deviceForm.brand}
-                                    onChange={e => setDeviceForm({ ...deviceForm, brand: e.target.value })}
-                                    required
+                                    onChange={(val) => {
+                                        setDeviceForm({ ...deviceForm, brand: val });
+                                        // Reload custom brands if they added a new one
+                                        const saved = localStorage.getItem('customDeviceBrands');
+                                        if (saved) {
+                                            try { setCustomBrands(JSON.parse(saved).map((p: any) => p.value)); } catch(e){}
+                                        }
+                                    }}
+                                    defaultOptions={[
+                                        { value: 'Apple', label: 'Apple' },
+                                        { value: 'Samsung', label: 'Samsung' },
+                                        { value: 'Google', label: 'Google' },
+                                        { value: 'Xiaomi', label: 'Xiaomi' },
+                                        { value: 'OnePlus', label: 'OnePlus' },
+                                        { value: 'Huawei', label: 'Huawei' },
+                                        { value: 'Oppo', label: 'Oppo' },
+                                        { value: 'Motorola', label: 'Motorola' }
+                                    ]}
+                                    storageKey="customDeviceBrands"
+                                    placeholder="Select Brand..."
+                                    addLabel="Add Custom Brand"
                                 />
-                                <datalist id="brand-options">
-                                    <option value="Apple" />
-                                    <option value="Samsung" />
-                                    <option value="Google" />
-                                    <option value="Xiaomi" />
-                                    <option value="OnePlus" />
-                                </datalist>
                             </div>
 
                             <div className="bg-slate-950 p-4 border border-slate-800 rounded-xl">

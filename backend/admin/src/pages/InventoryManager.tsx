@@ -28,7 +28,7 @@ export default function InventoryManager() {
         itemsPage, setItemsPage,
         salesPage, setSalesPage,
         historyPage, setHistoryPage,
-        itemsPerPage,
+        itemsPerPage, setItemsPerPage,
         itemsPageData,
         salesPageData,
         historyPageData,
@@ -37,7 +37,7 @@ export default function InventoryManager() {
 
     const {
         isEditModalOpen, setIsEditModalOpen,
-        editingItem, handleEditClick, handleUpdateItem, handleInlineUpdate,
+        editingItem, handleEditClick, handleUpdateItem, handleInlineUpdate, handleBulkDelete,
         isAddPartModalOpen, setIsAddPartModalOpen, handleAddPartSave,
         isAddDeviceModalOpen, setIsAddDeviceModalOpen, handleAddDeviceSave,
         isAddAccessoryModalOpen, setIsAddAccessoryModalOpen, handleAddAccessorySave
@@ -139,6 +139,20 @@ export default function InventoryManager() {
                         </div>
 
                         <select
+                            title="Items per page"
+                            aria-label="Items per page"
+                            className="bg-slate-900/80 border border-slate-700/50 rounded-xl px-4 py-3 text-white text-sm font-bold appearance-none outline-none focus:border-blue-500 shadow-inner transition-all cursor-pointer"
+                            value={itemsPerPage}
+                            onChange={(e: any) => { setItemsPerPage(Number(e.target.value)); setItemsPage(1); }}
+                        >
+                            <option value={15}>15 / Page</option>
+                            <option value={30}>30 / Page</option>
+                            <option value={50}>50 / Page</option>
+                            <option value={100}>100 / Page</option>
+                            <option value={200}>200 / Page</option>
+                        </select>
+
+                        <select
                             title="Filter by Stock Status"
                             aria-label="Filter by Stock Status"
                             className="bg-slate-900/80 border border-slate-700/50 rounded-xl px-4 py-3 text-white text-sm font-bold appearance-none outline-none focus:border-blue-500 min-w-[140px] shadow-inner transition-all cursor-pointer"
@@ -176,6 +190,7 @@ export default function InventoryManager() {
                                 handleSort={handleSort}
                                 handleEditClick={handleEditClick}
                                 handleInlineUpdate={handleInlineUpdate}
+                                handleBulkDelete={handleBulkDelete}
                                 setSearchTerm={setSearchTerm}
                                 setTypeFilter={setTypeFilter}
                                 setStockFilter={setStockFilter}

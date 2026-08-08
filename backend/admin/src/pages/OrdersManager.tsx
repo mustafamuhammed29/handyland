@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { formatDate, formatDateTime, formatTime } from '../utils/formatDate';
-import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertTriangle, Send, Download, Printer, Copy, FileSpreadsheet, Calendar, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { Package, Eye, Search, Filter, Truck, CheckCircle, XCircle, Clock, CheckSquare, Square, AlertTriangle, Send, Download, Printer, Copy, FileSpreadsheet, Calendar, ChevronLeft, ChevronRight, FileText, Trash2 } from 'lucide-react';
 import { api } from '../utils/api';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
@@ -66,6 +67,7 @@ interface Stats {
 
 const OrdersManager: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
+    const { confirm } = useConfirm();
     const [stats, setStats] = useState<Stats | null>(null);
     const [selectedStatus, setSelectedStatus] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -142,6 +144,26 @@ const OrdersManager: React.FC = () => {
         fetchStats();
     }, [fetchOrders]);
 
+    // Handle Deep Linking (from notifications)
+    useEffect(() => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const orderId = queryParams.get('id');
+        
+        if (orderId && !loading) {
+            const foundOrder = orders.find(o => o._id === orderId);
+            if (foundOrder) {
+                setSelectedOrder(foundOrder);
+            } else {
+                api.get(`/api/orders/${orderId}`)
+                   .then(res => {
+                       if (res.data.success) setSelectedOrder(res.data.order || res.data.data);
+                   }).catch(err => console.error("Could not fetch specific order:", err));
+            }
+            // Clean URL so it doesn't persist
+            window.history.replaceState({}, '', '/orders');
+        }
+    }, [orders, loading]);
+
     // Socket.io Real-time connection
     useEffect(() => {
         const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
@@ -198,7 +220,8 @@ const OrdersManager: React.FC = () => {
     };
 
     const handleApprovePayment = async (orderId: string) => {
-        if (!window.confirm('Are you sure you want to approve this bank transfer and mark as paid?')) return;
+        const ok = await confirm({ message: 'Are you sure you want to approve this bank transfer and mark as paid?', variant: "danger" });
+        if (!ok) return;
         try {
             const response = await api.put(`/api/orders/admin/${orderId}/approve-bank-transfer`);
             if (response.data.success) {
@@ -230,36 +253,72 @@ const OrdersManager: React.FC = () => {
 
     const handleBulkStatusChange = async (newStatus: string) => {
         if (!newStatus) return;
-        if (!window.confirm(`Change status of ${selectedOrders.length} orders to ${newStatus}?`)) return;
+        const ok = await confirm({ message: `Change status of ${selectedOrders.length} orders to ${newStatus}?`, variant: "danger" });
+        if (!ok) return;
 
         try {
-            await Promise.all(selectedOrders.map(id =>
+            const results = await Promise.allSettled(selectedOrders.map(id =>
                 api.put(`/api/orders/admin/${id}/status`, { status: newStatus })
             ));
-            toast.success(`${selectedOrders.length} orders updated to "${STATUS_CONFIG[newStatus]?.label || newStatus}"`);
+            
+            const succeeded = results.filter(r => r.status === 'fulfilled').length;
+            const failed = results.filter(r => r.status === 'rejected').length;
+
+            if (failed > 0) {
+                toast.error(`Failed to update ${failed} orders.`);
+            }
+            if (succeeded > 0) {
+                toast.success(`${succeeded} orders updated to "${STATUS_CONFIG[newStatus]?.label || newStatus}"`);
+            }
+            
             fetchOrders();
             fetchStats();
             setSelectedOrders([]);
         } catch (error) {
-            toast.error('Error updating orders. Some may have failed.');
+            console.error(error);
         }
     };
 
     const handleDeleteSelectedOrders = async () => {
         if (selectedOrders.length === 0) return toast.error('No orders selected to delete.');
-        if (!window.confirm(`Are you sure you want to PERMANENTLY delete ${selectedOrders.length} orders? This cannot be undone.`)) return;
+        const ok = await confirm({ message: `Are you sure you want to PERMANENTLY delete ${selectedOrders.length} orders? This cannot be undone.`, variant: "danger" });
+        if (!ok) return;
 
         try {
-            await Promise.all(selectedOrders.map(id =>
+            const results = await Promise.allSettled(selectedOrders.map(id =>
                 api.delete(`/api/orders/admin/${id}`)
             ));
-            toast.success(`${selectedOrders.length} orders deleted successfully.`);
+            
+            const succeeded = results.filter(r => r.status === 'fulfilled').length;
+            const failed = results.filter(r => r.status === 'rejected').length;
+
+            if (failed > 0) {
+                toast.error(`Failed to delete ${failed} orders.`);
+            }
+            if (succeeded > 0) {
+                toast.success(`${succeeded} orders deleted successfully.`);
+            }
+            
             setSelectedOrders([]);
             fetchOrders();
             fetchStats();
         } catch (error) {
-            toast.error('Error deleting some orders.');
             console.error('❌ Error deleting orders:', error);
+        }
+    };
+
+    const handleDeleteSingleOrder = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const ok = await confirm({ message: 'Are you sure you want to PERMANENTLY delete this order? This cannot be undone.', variant: "danger" });
+        if (!ok) return;
+        try {
+            await api.delete(`/api/orders/admin/${id}`);
+            toast.success('Order deleted successfully');
+            fetchOrders();
+            fetchStats();
+            if (selectedOrder?._id === id) setSelectedOrder(null);
+        } catch (error) {
+            toast.error('Error deleting order');
         }
     };
 
@@ -397,20 +456,13 @@ const OrdersManager: React.FC = () => {
                     </h1>
                     <p className="text-slate-400 mt-2">Manage customer orders, update statuses, and download invoices.</p>
                 </div>
-                <div className="flex gap-3 relative group">
+                <div className="flex gap-3">
                     <button
                         onClick={handleExportCSV}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl transition-all shadow-sm font-medium text-sm relative z-10"
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl transition-all shadow-sm font-medium text-sm"
                     >
                         <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
                         Export CSV
-                    </button>
-                    <button
-                        onClick={handleDeleteSelectedOrders}
-                        className="opacity-0 absolute -bottom-7 right-0 z-0 w-full h-6 cursor-default text-transparent bg-transparent"
-                        aria-hidden="true"
-                    >
-                        .
                     </button>
                 </div>
             </div>
@@ -473,6 +525,13 @@ const OrdersManager: React.FC = () => {
                             <option value="delivered">Delivered</option>
                             <option value="cancelled">Cancelled</option>
                         </select>
+                        <button
+                            onClick={handleDeleteSelectedOrders}
+                            className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-colors border border-red-500/30 font-medium text-sm flex items-center gap-2"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Delete Selected
+                        </button>
                     </div>
                 </div>
             )}
@@ -628,13 +687,22 @@ const OrdersManager: React.FC = () => {
                                                 <div className="text-xs text-slate-500 mt-0.5">{formatTime(order.createdAt)}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right">
-                                                <button
-                                                    onClick={() => setSelectedOrder(order)}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300 rounded-lg font-medium text-sm transition-colors border border-indigo-500/20"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                    View
-                                                </button>
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => setSelectedOrder(order)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300 rounded-lg font-medium text-sm transition-colors border border-indigo-500/20"
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                        View
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDeleteSingleOrder(order._id, e)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 rounded-lg font-medium text-sm transition-colors border border-red-500/20"
+                                                        title="Delete Order"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );

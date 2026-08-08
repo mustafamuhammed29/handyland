@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const {
     createPaymentIntent,
-    stripeWebhook
+    stripeWebhook,
+    createPayPalOrder,
+    capturePayPalOrder
 } = require('../controllers/paymentController');
 const { protect, authorize, optionalProtect } = require('../middleware/auth');
 const { paymentLimiter } = require('../middleware/rateLimiter');
@@ -18,7 +20,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook
 // router.post('/refund', protect, authorize('admin', 'staff'), createRefund);
 
 // PayPal Routes
-// router.post('/paypal/create-order', optionalProtect, createPayPalOrder);
-// router.post('/paypal/capture-order', optionalProtect, capturePayPalOrder);
+router.post('/paypal/create-order', optionalProtect, createPayPalOrder);
+router.post('/paypal/capture-order', optionalProtect, capturePayPalOrder);
 
 module.exports = router;

@@ -16,6 +16,7 @@ export const shippingSchema = z.object({
     state: z.string().optional().or(z.literal('')),
     zipCode: z.string().regex(/^[0-9]{4,10}$/, "Invalid Zip/Postal Code (4-10 digits)"),
     country: z.string().min(2, "Country is required"),
+    saveAddress: z.boolean().optional(),
 });
 
 export type ShippingFormData = z.infer<typeof shippingSchema>;
@@ -62,7 +63,8 @@ export const useCheckoutLogic = () => {
         city: '',
         state: '',
         zipCode: '',
-        country: 'Germany'
+        country: 'Germany',
+        saveAddress: true // default to saving
     });
     const [formErrors, setFormErrors] = useState<Partial<Record<keyof ShippingFormData, string>>>({});
 
@@ -250,9 +252,19 @@ export const useCheckoutLogic = () => {
         setError(null);
 
         try {
-            await productService.validateStock(
-                cart.map(item => ({ id: item.id, quantity: item.quantity || 1, name: item.title, category: item.category }))
-            );
+            const hasMixedCart = cart.some(i => i.category === 'repair') && cart.some(i => i.category !== 'repair');
+            if (hasMixedCart) {
+                setError("عذراً، لا يمكن دمج طلبات الصيانة مع شراء المنتجات في طلب واحد. يرجى فصلها في طلبين مختلفين.");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setLoading(false);
+                return;
+            }
+
+            const itemsToValidate = cart.filter(i => i.category !== 'repair').map(item => ({ id: item.id, quantity: item.quantity || 1, name: item.title, category: item.category }));
+            
+            if (itemsToValidate.length > 0) {
+                await productService.validateStock(itemsToValidate);
+            }
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || "Some items are out of stock.");
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -269,7 +281,7 @@ export const useCheckoutLogic = () => {
         const commonOrderData = {
             items: cart.map(item => ({
                 product: item.id,
-                productType: (item as any).productType || (item.category?.toLowerCase() === 'accessory' ? 'Accessory' : 'Product'),
+                productType: (item as any).productType || (item.category?.toLowerCase() === 'accessory' ? 'Accessory' : item.category?.toLowerCase() === 'repair' ? 'Repair' : 'Product'),
                 name: item.title,
                 price: item.price,
                 image: item.image,
@@ -286,6 +298,25 @@ export const useCheckoutLogic = () => {
         };
 
         try {
+            // Save address if requested
+            if (shippingDetails.saveAddress && user) {
+                try {
+                    // Try to import authService or just rely on API directly if authService is not imported
+                    await api.post('/api/addresses', {
+                        name: shippingDetails.fullName,
+                        street: shippingDetails.address,
+                        city: shippingDetails.city,
+                        state: shippingDetails.state || '',
+                        zipCode: shippingDetails.zipCode,
+                        country: shippingDetails.country,
+                        phone: shippingDetails.phone,
+                        isDefault: true
+                    });
+                } catch (e) {
+                    console.error("Failed to save address", e);
+                }
+            }
+
             if (['cod', 'bank_transfer', 'wallet'].includes(selectedPaymentMethod)) {
                 const r = await orderService.createOrder({
                     ...commonOrderData,

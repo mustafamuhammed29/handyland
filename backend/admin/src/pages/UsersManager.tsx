@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { formatDate } from '../utils/formatDate';
 import { Search, Trash2, Lock, Unlock, Users, Shield, UserCheck, UserX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../utils/api';
@@ -77,6 +78,7 @@ const Pagination = ({ currentPage, totalPages, totalItems, itemsPerPage, setPage
 
 const UsersManager: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
+    const { confirm } = useConfirm();
     const [stats, setStats] = useState<UserStats | null>(null);
     const [loading, setLoading] = useState(true);
     
@@ -185,7 +187,8 @@ const UsersManager: React.FC = () => {
     };
 
     const deleteUser = async (userId: string) => {
-        if (!window.confirm('Are you absolutely sure you want to delete this user completely?')) return;
+        const ok = await confirm({ message: 'Are you absolutely sure you want to delete this user completely?', variant: "danger" });
+        if (!ok) return;
         try {
             await api.delete(`/api/users/admin/${userId}`);
             fetchUsers();
@@ -223,7 +226,8 @@ const UsersManager: React.FC = () => {
 
     // Bulk Actions
     const handleBulkDelete = async () => {
-        if (!window.confirm(`Delete ${selectedUsers.length} selected users? This action is irreversible.`)) return;
+        const ok = await confirm({ message: `Delete ${selectedUsers.length} selected users? This action is irreversible.`, variant: "danger" });
+        if (!ok) return;
         try {
             await Promise.all(selectedUsers.map(userId => api.delete(`/api/users/admin/${userId}`)));
             fetchUsers();
@@ -236,7 +240,8 @@ const UsersManager: React.FC = () => {
 
     const handleBulkRoleChange = async (newRole: string) => {
         if (!newRole) return;
-        if (!window.confirm(`Change the permissions of ${selectedUsers.length} users to [${newRole.toUpperCase()}]?`)) return;
+        const ok = await confirm({ message: `Change the permissions of ${selectedUsers.length} users to [${newRole.toUpperCase()}]?`, variant: "danger" });
+        if (!ok) return;
         try {
             await Promise.all(selectedUsers.map(userId => api.put(`/api/users/admin/${userId}/role`, { role: newRole })));
             fetchUsers();

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { User, Mail, Phone, Check, AlertCircle, Save, Loader2, Pencil, Camera, Trash2 } from 'lucide-react';
+import { User, Mail, Phone, Check, AlertCircle, Save, Loader2, Pencil, Camera, Trash2, Globe, ShieldCheck, Zap } from 'lucide-react';
 import { User as UserType } from '../../../types';
 import toast from 'react-hot-toast';
 import { api } from '../../../utils/api';
@@ -76,17 +76,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                 setShowOtpInput(true);
                 setResendCooldown(60);
                 toast.success(t('settings.profile.phone.otpSent', 'Verifizierungscode wurde gesendet! Bitte überprüfe dein Handy.'));
-                // In dev mode, let user know the code is in terminal
-                if (data.devCode) {
-                    console.log(`[Dev Mode] Verification code is: ${data.devCode}`);
-                }
             } else {
                 toast.error(data.message || t('settings.profile.phone.sendFailed', 'Fehler beim Senden des Codes.'));
             }
         } catch (error: any) {
             console.error('Error sending phone verification OTP:', error);
-            const errMsg = error.response?.data?.message || t('settings.profile.phone.sendError', 'Senden des Verifizierungscodes fehlgeschlagen.');
-            toast.error(errMsg);
+            toast.error(error.response?.data?.message || t('settings.profile.phone.sendError', 'Senden des Verifizierungscodes fehlgeschlagen.'));
         } finally {
             setIsSendingOtp(false);
         }
@@ -106,16 +101,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                 setShowOtpInput(false);
                 setOtpCode('');
                 toast.success(t('settings.profile.phone.verifiedSuccess', 'Telefonnummer erfolgreich verifiziert!'));
-                
-                // Instantly update local profile state
                 onUpdateProfile({ phone: profileForm.phone, is_verified: true });
             } else {
                 toast.error(data.message || t('settings.profile.phone.verifyFailed', 'Ungültiger Code. Bitte versuche es erneut.'));
             }
         } catch (error: any) {
             console.error('Error verifying phone OTP:', error);
-            const errMsg = error.response?.data?.message || t('settings.profile.phone.verifyError', 'Fehler beim Verifizieren des Codes.');
-            toast.error(errMsg);
+            toast.error(error.response?.data?.message || t('settings.profile.phone.verifyError', 'Fehler beim Verifizieren des Codes.'));
         } finally {
             setIsVerifyingOtp(false);
         }
@@ -124,35 +116,19 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
-
-        if (!file.type.startsWith('image/')) {
-            toast.error(t('settings.profile.avatar.invalidType', 'Bitte lade ein gültiges Bild hoch.'));
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error(t('settings.profile.avatar.tooLarge', 'Das Bild darf maximal 5MB groß sein.'));
-            return;
-        }
+        if (!file.type.startsWith('image/')) { toast.error(t('settings.profile.avatar.invalidType', 'Bitte lade ein gültiges Bild hoch.')); return; }
+        if (file.size > 5 * 1024 * 1024) { toast.error(t('settings.profile.avatar.tooLarge', 'Das Bild darf maximal 5MB groß sein.')); return; }
 
         setIsUploadingAvatar(true);
         const loadingToast = toast.loading(t('settings.profile.avatar.uploading', 'Profilbild wird hochgeladen...'));
-
         try {
-            const formData = new FormData();
-            formData.append('image', file);
-            
-            const uploadRes = await api.post('/api/upload', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const formData = new FormData(); formData.append('image', file);
+            const uploadRes = await api.post('/api/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             const data = (uploadRes as any)?.data || uploadRes;
-
             if (data.success && data.imageUrl) {
-                // Call parent's onUpdateProfile to make the PUT request and refetch
                 onUpdateProfile({ avatar: data.imageUrl });
                 toast.success(t('settings.profile.avatar.updated', 'Profilbild erfolgreich aktualisiert!'), { id: loadingToast });
-            } else {
-                throw new Error('Upload failed');
-            }
+            } else throw new Error('Upload failed');
         } catch (error) {
             console.error('Error uploading avatar:', error);
             toast.error(t('settings.profile.avatar.uploadError', 'Fehler beim Hochladen des Profilbilds.'), { id: loadingToast });
@@ -173,80 +149,80 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     };
 
     return (
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
-            <div className="p-6 border-b border-slate-800/60 flex items-center justify-between">
-                <div>
-                    <h3 className="text-lg font-bold text-white">{t('settings.profile.title', 'Profile Information')}</h3>
-                    <p className="text-slate-400 text-sm mt-0.5">{t('settings.profile.subtitle', 'Update your personal details')}</p>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm transition-all duration-300">
+            {/* Banner Area */}
+            <div className="h-32 sm:h-40 bg-gradient-to-r from-brand-primary via-blue-500 to-indigo-600 relative">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
+                
+                {/* Edit Controls Overlay */}
+                <div className="absolute top-4 right-4 flex gap-2">
+                    {!profileEditing ? (
+                        <button onClick={() => setProfileEditing(true)}
+                            className="flex items-center gap-2 text-sm bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-4 py-2 rounded-xl transition-all shadow-sm border border-white/20">
+                            <Pencil className="w-4 h-4" /> <span className="hidden sm:inline">{t('common.edit', 'Edit Profile')}</span>
+                        </button>
+                    ) : (
+                        <div className="flex gap-2">
+                            <button onClick={() => {
+                                setProfileEditing(false);
+                                setProfileForm({ name: user.name || '', email: user.email || '', phone: (user as any).phone || '', preferredLanguage: user.preferredLanguage || 'de' });
+                                setProfileMsg(null);
+                            }}
+                                className="px-4 py-2 text-sm rounded-xl bg-black/40 hover:bg-black/60 backdrop-blur-md text-white transition-all">
+                                {t('common.cancel', 'Cancel')}
+                            </button>
+                            <button onClick={saveProfile} disabled={profileSaving}
+                                className="flex items-center gap-2 px-5 py-2 text-sm rounded-xl bg-white text-brand-primary hover:bg-slate-50 font-bold disabled:opacity-70 transition-all shadow-md">
+                                {profileSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                {t('common.save', 'Save')}
+                            </button>
+                        </div>
+                    )}
                 </div>
-                {!profileEditing ? (
-                    <button onClick={() => setProfileEditing(true)}
-                        className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 bg-blue-400/5 hover:bg-blue-400/10 px-3 py-1.5 rounded-xl transition-colors border border-blue-400/20">
-                        <Pencil className="w-3.5 h-3.5" /> {t('common.edit', 'Edit')}
-                    </button>
-                ) : (
-                    <div className="flex gap-2">
-                        <button onClick={() => {
-                            setProfileEditing(false);
-                            setProfileForm({
-                                name: user.name || '',
-                                email: user.email || '',
-                                phone: (user as any).phone || '',
-                                preferredLanguage: user.preferredLanguage || 'de'
-                            });
-                            setProfileMsg(null);
-                        }}
-                            className="px-3 py-1.5 text-sm rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors">
-                            {t('common.cancel', 'Cancel')}
-                        </button>
-                        <button onClick={saveProfile} disabled={profileSaving}
-                            className="flex items-center gap-2 px-4 py-1.5 text-sm rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold disabled:opacity-50 transition-colors">
-                            {profileSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                            {t('common.save', 'Save')}
-                        </button>
-                    </div>
-                )}
             </div>
-            <div className="p-6 space-y-5">
-                {/* Avatar */}
-                <div className="flex items-center gap-4 mb-2">
-                    <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                        <input 
-                            type="file" 
-                            title="Upload Profile Picture"
-                            aria-label="Upload Profile Picture"
-                            ref={fileInputRef} 
-                            className="hidden" 
-                            accept="image/jpeg, image/png, image/webp"
-                            onChange={handleAvatarUpload}
-                        />
-                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-900/20 select-none overflow-hidden relative ${isUploadingAvatar ? 'opacity-50' : ''}`}>
+
+            {/* Profile Content */}
+            <div className="px-6 sm:px-10 pb-10 relative">
+                {/* Avatar Overlaying Banner */}
+                <div className="flex flex-col sm:flex-row gap-6 sm:items-end -mt-12 sm:-mt-16 mb-8 relative z-10">
+                    <div className="relative group cursor-pointer inline-block" onClick={() => fileInputRef.current?.click()}>
+                        <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg, image/png, image/webp" onChange={handleAvatarUpload} />
+                        <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-slate-800 border-4 border-white dark:border-slate-900 flex items-center justify-center text-white text-4xl font-black shadow-xl select-none overflow-hidden relative ${isUploadingAvatar ? 'opacity-50' : ''}`}>
                             {user.avatar ? (
                                 <img src={getImageUrl(user.avatar)} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
                                 (profileForm.name || user.name || '?').charAt(0).toUpperCase()
                             )}
                             
-                            {/* Hover Overlay */}
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                {isUploadingAvatar ? (
-                                    <Loader2 className="w-6 h-6 text-white animate-spin" />
-                                ) : (
-                                    <Camera className="w-6 h-6 text-white" />
-                                )}
+                                {isUploadingAvatar ? <Loader2 className="w-8 h-8 text-white animate-spin" /> : <Camera className="w-8 h-8 text-white" />}
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <p className="text-white font-bold">{user.name}</p>
-                        <p className="text-slate-400 text-sm">{user.email}</p>
-                        <div className="flex items-center gap-3 mt-1.5">
-                            <p className="text-blue-400/70 text-xs">{t('settings.profile.memberSince', 'Member since')} {new Date((user as any).createdAt || Date.now()).toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' })}</p>
-                            {user.avatar && (
-                                <button 
-                                    onClick={handleRemoveAvatar}
-                                    className="flex items-center gap-1 text-[10px] text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 px-2 py-0.5 rounded-md transition-colors border border-red-400/20"
-                                >
+                    
+                    <div className="flex-1 pb-2">
+                        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                            {user.name}
+                            {user.is_verified && (
+                                <span title="Verified User" className="flex items-center">
+                                    <ShieldCheck className="w-6 h-6 text-emerald-500" />
+                                </span>
+                            )}
+                        </h2>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 mt-1">
+                            <Mail className="w-4 h-4" /> {user.email}
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center gap-3 mt-3">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-lg border border-blue-100 dark:border-blue-800/50">
+                                <Zap className="w-3.5 h-3.5" /> Level {(user as any).membershipLevel || 1} Member
+                            </span>
+                            <span className="text-xs text-slate-400">
+                                {t('settings.profile.memberSince', 'Member since')} {new Date((user as any).createdAt || Date.now()).toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' })}
+                            </span>
+                            {user.avatar && profileEditing && (
+                                <button onClick={handleRemoveAvatar} className="text-xs text-red-500 hover:text-red-600 font-medium ml-auto flex items-center gap-1">
                                     <Trash2 className="w-3 h-3" /> {t('settings.profile.avatar.remove', 'Remove Photo')}
                                 </button>
                             )}
@@ -255,105 +231,102 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                 </div>
 
                 {profileMsg && (
-                    <div className={`flex items-center gap-2 p-3 rounded-xl text-sm ${profileMsg.type === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                        {profileMsg.type === 'ok' ? <Check className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+                    <div className={`flex items-center gap-3 p-4 mb-8 rounded-2xl text-sm font-medium animate-in fade-in slide-in-from-top-2 ${profileMsg.type === 'ok' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
+                        {profileMsg.type === 'ok' ? <Check className="w-5 h-5 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 flex-shrink-0" />}
                         {profileMsg.text}
                     </div>
                 )}
 
-                {[
-                    { id: 'name', label: t('settings.profile.fullName', 'Full Name'), icon: <User className="w-4 h-4" />, type: 'text', key: 'name' as const, placeholder: 'John Doe' },
-                    { id: 'email', label: t('settings.profile.email', 'Email Address'), icon: <Mail className="w-4 h-4" />, type: 'email', key: 'email' as const, placeholder: 'john@example.com', disabled: true },
-                    { id: 'phone', label: t('settings.profile.phoneNumber', 'Phone Number'), icon: <Phone className="w-4 h-4" />, type: 'tel', key: 'phone' as const, placeholder: '+1 234 567 890' },
-                ].map(f => (
-                    <div key={f.id}>
-                        <div className="flex items-center justify-between mb-2">
-                            <label htmlFor={`profile-${f.id}`} className="flex items-center gap-2 text-sm text-slate-400 font-medium">
-                                <span className="text-slate-500">{f.icon}</span> {f.label}
-                            </label>
-                            {f.id === 'phone' && user.is_verified && (
-                                <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full select-none">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    {/* Full Name */}
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
+                            <User className="w-4 h-4 text-brand-primary" /> {t('settings.profile.fullName', 'Full Name')}
+                        </label>
+                        <input
+                            type="text"
+                            value={profileForm.name}
+                            onChange={e => setProfileForm(p => ({ ...p, name: e.target.value }))}
+                            disabled={!profileEditing}
+                            className={`w-full px-4 py-3.5 rounded-xl text-slate-900 dark:text-white font-medium outline-none transition-all ${profileEditing
+                                ? 'bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 focus:border-brand-primary dark:focus:border-brand-primary'
+                                : 'bg-slate-50 dark:bg-slate-800/40 border-2 border-transparent text-slate-500 dark:text-slate-400 cursor-default'}`}
+                        />
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-2">
+                        <label className="flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-300">
+                            <span className="flex items-center gap-2"><Mail className="w-4 h-4 text-brand-primary" /> {t('settings.profile.email', 'Email Address')}</span>
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-slate-400"/> Primary</span>
+                        </label>
+                        <input
+                            type="email"
+                            value={profileForm.email}
+                            disabled
+                            className="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border-2 border-transparent text-slate-500 dark:text-slate-400 cursor-not-allowed font-medium"
+                        />
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="space-y-2 md:col-span-2 lg:col-span-1">
+                        <label className="flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-300">
+                            <span className="flex items-center gap-2"><Phone className="w-4 h-4 text-brand-primary" /> {t('settings.profile.phoneNumber', 'Phone Number')}</span>
+                            {user.is_verified ? (
+                                <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
                                     <Check className="w-3 h-3" /> {t('settings.profile.phone.verified', 'Verifiziert')}
                                 </span>
+                            ) : (
+                                <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10 px-2.5 py-0.5 rounded-full">
+                                    <AlertCircle className="w-3 h-3" /> Unverified
+                                </span>
                             )}
-                        </div>
+                        </label>
                         <input
-                            id={`profile-${f.id}`}
-                            type={f.type}
-                            value={profileForm[f.key as keyof typeof profileForm]}
-                            onChange={e => setProfileForm(p => ({ ...p, [f.key]: e.target.value }))}
-                            disabled={!profileEditing || f.disabled}
-                            placeholder={f.placeholder}
-                            className={`w-full px-4 py-3 rounded-xl text-white text-sm outline-none transition-all ${profileEditing && !f.disabled
-                                ? 'bg-slate-800 border border-slate-600 focus:border-blue-500 cursor-text'
-                                : 'bg-slate-800/40 border border-slate-800 cursor-default text-slate-300'}`}
+                            type="tel"
+                            value={profileForm.phone}
+                            onChange={e => setProfileForm(p => ({ ...p, phone: e.target.value }))}
+                            disabled={!profileEditing}
+                            placeholder="+49 123 456789"
+                            className={`w-full px-4 py-3.5 rounded-xl text-slate-900 dark:text-white font-medium outline-none transition-all ${profileEditing
+                                ? 'bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 focus:border-brand-primary dark:focus:border-brand-primary'
+                                : 'bg-slate-50 dark:bg-slate-800/40 border-2 border-transparent text-slate-500 dark:text-slate-400 cursor-default'}`}
                         />
                         
-                        {f.id === 'phone' && !user.is_verified && profileForm.phone && !profileEditing && (
-                            <div className="mt-2.5 flex flex-col gap-2 p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs text-slate-400 flex items-center gap-1.5">
-                                        <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-                                        {t('settings.profile.phone.notVerified', 'Telefonnummer ist noch nicht verifiziert.')}
-                                    </span>
+                        {/* OTP Verification Block */}
+                        {!user.is_verified && profileForm.phone && !profileEditing && (
+                            <div className="mt-3 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl animate-in fade-in">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div className="flex items-start gap-2 text-sm text-blue-800 dark:text-blue-300 font-medium">
+                                        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
+                                        <p>{t('settings.profile.phone.notVerified', 'Dein Konto ist sicherer mit einer verifizierten Telefonnummer.')}</p>
+                                    </div>
                                     {!showOtpInput ? (
-                                        <button
-                                            type="button"
-                                            onClick={handleSendOtp}
-                                            disabled={isSendingOtp || resendCooldown > 0}
-                                            className="text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-500/5 hover:bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20 transition-all disabled:opacity-50 flex items-center gap-1.5"
-                                        >
-                                            {isSendingOtp ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-                                            {resendCooldown > 0 
-                                                ? `${t('settings.profile.phone.resendIn', 'Erneut in')} ${resendCooldown}s`
-                                                : t('settings.profile.phone.verifyNow', 'Jetzt verifizieren')}
+                                        <button onClick={handleSendOtp} disabled={isSendingOtp || resendCooldown > 0}
+                                            className="whitespace-nowrap px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">
+                                            {isSendingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                                            {resendCooldown > 0 ? `${t('settings.profile.phone.resendIn', 'Erneut in')} ${resendCooldown}s` : t('settings.profile.phone.verifyNow', 'Jetzt verifizieren')}
                                         </button>
                                     ) : (
-                                        <div className="flex items-center gap-3">
-                                            <button
-                                                type="button"
-                                                onClick={handleSendOtp}
-                                                disabled={isSendingOtp || resendCooldown > 0}
-                                                className="text-xs font-bold text-blue-400 hover:text-blue-300 disabled:opacity-50 flex items-center gap-1"
-                                            >
-                                                {isSendingOtp ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-                                                {resendCooldown > 0 
-                                                    ? `${t('settings.profile.phone.resendIn', 'Erneut in')} ${resendCooldown}s`
-                                                    : t('settings.profile.phone.resendCode', 'Code erneut senden')}
-                                            </button>
-                                            <span className="text-slate-700">|</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowOtpInput(false)}
-                                                className="text-xs text-slate-500 hover:text-slate-400 font-medium"
-                                            >
-                                                {t('common.cancel', 'Abbrechen')}
-                                            </button>
-                                        </div>
+                                        <button onClick={() => setShowOtpInput(false)} className="text-sm font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                                            {t('common.cancel', 'Abbrechen')}
+                                        </button>
                                     )}
                                 </div>
 
                                 {showOtpInput && (
-                                    <div className="mt-2 pt-2.5 border-t border-slate-800/80 space-y-3">
-                                        <p className="text-[11px] text-slate-400">
-                                            {t('settings.profile.phone.otpSentDesc', 'Wir haben dir einen 6-stelligen Verifizierungscode per WhatsApp/SMS gesendet. Bitte gib ihn unten ein:')}
+                                    <div className="mt-4 pt-4 border-t border-blue-200/50 dark:border-blue-800/50">
+                                        <p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-2 uppercase tracking-wide">
+                                            {t('settings.profile.phone.otpSentDesc', '6-stelligen Code eingeben:')}
                                         </p>
                                         <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                maxLength={6}
-                                                value={otpCode}
-                                                onChange={e => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
-                                                placeholder="123456"
-                                                className="flex-1 px-4 py-2 rounded-lg bg-slate-950 border border-slate-800 text-white font-mono text-center tracking-[0.2em] text-sm focus:border-blue-500 outline-none"
+                                            <input type="text" maxLength={6} value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
+                                                placeholder="••••••"
+                                                className="flex-1 max-w-[200px] px-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border-2 border-blue-200 dark:border-blue-800 text-slate-900 dark:text-white font-mono text-center tracking-[0.5em] text-lg focus:border-brand-primary outline-none shadow-inner"
                                             />
-                                            <button
-                                                type="button"
-                                                onClick={handleVerifyOtp}
-                                                disabled={isVerifyingOtp || otpCode.length !== 6}
-                                                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5"
-                                            >
-                                                {isVerifyingOtp ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                                            <button onClick={handleVerifyOtp} disabled={isVerifyingOtp || otpCode.length !== 6}
+                                                className="px-6 py-2.5 rounded-xl bg-brand-primary hover:bg-cyan-600 text-white font-bold transition-all disabled:opacity-50 flex items-center gap-2 shadow-md">
+                                                {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                                                 {t('common.confirm', 'Bestätigen')}
                                             </button>
                                         </div>
@@ -362,58 +335,57 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                             </div>
                         )}
                     </div>
-                ))}
 
-                <div>
-                    <label htmlFor="profile-language" className="flex items-center gap-2 text-sm text-slate-400 font-medium mb-2">
-                        <span className="text-slate-500">🌍</span> {t('settings.profile.language.title', 'Preferred Language')}
-                    </label>
-                    <select
-                        id="profile-language"
-                        value={profileForm.preferredLanguage}
-                        onChange={(e) => setProfileForm(p => ({ ...p, preferredLanguage: e.target.value }))}
-                        disabled={!profileEditing}
-                        className={`w-full px-4 py-3 rounded-xl text-white text-sm outline-none transition-all ${profileEditing
-                            ? 'bg-slate-800 border border-slate-600 focus:border-blue-500 cursor-pointer'
-                            : 'bg-slate-800/40 border border-slate-800 cursor-default text-slate-300 opacity-80'}`}
-                    >
-                        <option value="de">German (Deutsch)</option>
-                        <option value="en">English</option>
-                        <option value="ar">Arabic (العربية)</option>
-                        <option value="tr">Turkish (Türkçe)</option>
-                        <option value="ru">Russian (Русский)</option>
-                        <option value="fa">Persian (فارسی)</option>
-                    </select>
-                    <p className="text-xs text-slate-500 mt-2">{t('settings.profile.language.description', 'This language will be used across the interface and for your personalized notifications.')}</p>
+                    {/* Language Preference */}
+                    <div className="space-y-2 md:col-span-2 lg:col-span-1">
+                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
+                            <Globe className="w-4 h-4 text-brand-primary" /> {t('settings.profile.language.title', 'Preferred Language')}
+                        </label>
+                        <select
+                            value={profileForm.preferredLanguage}
+                            onChange={(e) => setProfileForm(p => ({ ...p, preferredLanguage: e.target.value }))}
+                            disabled={!profileEditing}
+                            className={`w-full px-4 py-3.5 rounded-xl text-slate-900 dark:text-white font-medium outline-none transition-all appearance-none ${profileEditing
+                                ? 'bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 focus:border-brand-primary dark:focus:border-brand-primary cursor-pointer'
+                                : 'bg-slate-50 dark:bg-slate-800/40 border-2 border-transparent text-slate-500 dark:text-slate-400 cursor-default'}`}
+                            style={{ backgroundImage: profileEditing ? 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")' : 'none', backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.25rem' }}
+                        >
+                            <option value="de">German (Deutsch)</option>
+                            <option value="en">English</option>
+                            <option value="ar">Arabic (العربية)</option>
+                            <option value="tr">Turkish (Türkçe)</option>
+                            <option value="ru">Russian (Русский)</option>
+                            <option value="fa">Persian (فارسی)</option>
+                        </select>
+                        <p className="text-xs text-slate-500 mt-1 font-medium">{t('settings.profile.language.description', 'This language will be used across the interface and for your personalized notifications.')}</p>
+                    </div>
                 </div>
 
-                {/* System / Troubleshooting */}
-                <div className="pt-6 border-t border-slate-800/80">
-                    <h4 className="text-sm font-bold text-slate-300 mb-2">{t('settings.profile.troubleshooting.title', 'System & Fehlersuche')}</h4>
-                    <p className="text-xs text-slate-500 mb-4">
-                        {t('settings.profile.troubleshooting.desc', 'Wenn Fehler auftreten oder die Seite nicht aktualisiert wird, kannst du den App-Cache löschen (Hard Refresh).')}
-                    </p>
-                    <button
-                        onClick={() => {
-                            if ('serviceWorker' in navigator) {
-                                navigator.serviceWorker.getRegistrations().then(registrations => {
-                                    registrations.forEach(r => r.unregister());
-                                });
-                            }
-                            if ('caches' in window) {
-                                caches.keys().then(names => {
-                                    names.forEach(name => caches.delete(name));
-                                });
-                            }
-                            window.location.reload();
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-sm font-bold transition-colors border border-slate-700"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                        {t('settings.profile.troubleshooting.clearCache', 'App-Cache löschen (Hard Refresh)')}
-                    </button>
+                {/* System Troubleshooting */}
+                <div className="pt-8 border-t border-slate-200 dark:border-slate-800/80">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 dark:bg-slate-800/20 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+                        <div>
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4 text-slate-400" />
+                                {t('settings.profile.troubleshooting.title', 'System & Fehlersuche')}
+                            </h4>
+                            <p className="text-xs text-slate-500 max-w-md leading-relaxed">
+                                {t('settings.profile.troubleshooting.desc', 'Wenn Fehler auftreten oder die Seite nicht aktualisiert wird, kannst du den App-Cache löschen (Hard Refresh).')}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => {
+                                if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
+                                if ('caches' in window) caches.keys().then(n => n.forEach(name => caches.delete(name)));
+                                window.location.reload();
+                            }}
+                            className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold transition-all border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            {t('settings.profile.troubleshooting.clearCache', 'App-Cache löschen')}
+                        </button>
+                    </div>
                 </div>
-
             </div>
         </div>
     );

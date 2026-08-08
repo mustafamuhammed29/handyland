@@ -3,12 +3,14 @@ import { Archive, Plus, Trash2, Edit } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useConfirm } from '../../context/ConfirmContext';
 
 export const RepairArchiveManager: React.FC = () => {
     const { t } = useTranslation();
     const [cases, setCases] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { addToast } = useToast();
+    const { confirm } = useConfirm();
 
     useEffect(() => {
         fetchCases();
@@ -28,7 +30,12 @@ export const RepairArchiveManager: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm(t('repairArchive.confirmDelete', 'Are you sure you want to delete this case study?'))) return;
+        const isConfirmed = await confirm({
+            title: t('repairArchive.deleteTitle', 'Delete Case?'),
+            message: t('repairArchive.confirmDelete', 'Are you sure you want to delete this case study?'),
+            variant: 'danger'
+        });
+        if (!isConfirmed) return;
         try {
             await api.delete(`/api/repair-archive/${id}`);
             addToast(t('repairArchive.success.delete', 'Case deleted successfully'), 'success');

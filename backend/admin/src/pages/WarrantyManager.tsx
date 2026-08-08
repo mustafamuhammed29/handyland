@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { formatDate } from '../utils/formatDate';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Plus, Search, Trash2, FileText, Clock } from 'lucide-react';
+import { ShieldCheck, Plus, Search, Trash2, FileText, Clock, Edit2, Printer } from 'lucide-react';
 import { api } from '../utils/api';
+import { EditWarrantyModal } from '../components/WarrantyManager/components/EditWarrantyModal';
+import { WarrantyPrintTemplate } from '../components/WarrantyManager/components/WarrantyPrintTemplate';
 
 interface Warranty {
     _id: string;
@@ -24,12 +27,15 @@ interface Warranty {
 
 const WarrantyManager = () => {
     const [warranties, setWarranties] = useState<Warranty[]>([]);
+    const { confirm } = useConfirm();
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('All');
 
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editingWarranty, setEditingWarranty] = useState<Warranty | null>(null);
+    const [printingWarranty, setPrintingWarranty] = useState<Warranty | null>(null);
 
     // Forms
     const [formData, setFormData] = useState({
@@ -81,7 +87,8 @@ const WarrantyManager = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Garantie wirklich löschen?')) return;
+        const ok = await confirm({ message: 'Garantie wirklich löschen?', variant: "danger" });
+        if (!ok) return;
         try {
             await api.delete(`/api/warranties/${id}`);
             fetchWarranties();
@@ -90,13 +97,23 @@ const WarrantyManager = () => {
         }
     };
 
-    const handleUpdateStatus = async (id: string, newStatus: string) => {
+    const handleUpdateWarranty = async (id: string, updateData: Partial<Warranty>) => {
         try {
-            await api.put(`/api/warranties/${id}`, { status: newStatus });
+            await api.put(`/api/warranties/${id}`, updateData);
             fetchWarranties();
         } catch (error: any) {
             alert(error.response?.data?.message || 'Fehler beim Update');
+            throw error; // Rethrow to let modal handle it
         }
+    };
+
+
+
+    const handlePrint = (warranty: Warranty) => {
+        setPrintingWarranty(warranty);
+        setTimeout(() => {
+            window.print();
+        }, 500); // Wait for render
     };
 
     const StatusBadge = ({ status }: { status: string }) => {
@@ -143,6 +160,26 @@ const WarrantyManager = () => {
                 >
                     <Plus size={20} /> New Warranty
                 </button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 flex flex-col justify-center">
+                    <span className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Total Active</span>
+                    <span className="text-3xl font-black text-emerald-400">{warranties.filter(w => w.status === 'Active').length}</span>
+                </div>
+                <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 flex flex-col justify-center">
+                    <span className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Expired</span>
+                    <span className="text-3xl font-black text-slate-400">{warranties.filter(w => w.status === 'Expired').length}</span>
+                </div>
+                <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 flex flex-col justify-center">
+                    <span className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Claimed</span>
+                    <span className="text-3xl font-black text-blue-400">{warranties.filter(w => w.status === 'Claimed').length}</span>
+                </div>
+                <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 flex flex-col justify-center">
+                    <span className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Voided</span>
+                    <span className="text-3xl font-black text-red-400">{warranties.filter(w => w.status === 'Voided').length}</span>
+                </div>
             </div>
 
             {/* Controls */}
@@ -241,14 +278,20 @@ const WarrantyManager = () => {
                                 </div>
 
                                 <div className="p-4 border-t border-slate-800 flex gap-2 bg-slate-900/50 mt-auto">
-                                    {warranty.status === 'Active' && (
-                                        <button
-                                            onClick={() => handleUpdateStatus(warranty._id, 'Claimed')}
-                                            className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-xl text-sm font-bold transition-colors"
-                                        >
-                                            Als eingelöst mark.
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => handlePrint(warranty)}
+                                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-blue-400 py-2 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                                        title="Drucken"
+                                    >
+                                        <Printer size={16} /> Drucken
+                                    </button>
+                                    <button
+                                        onClick={() => setEditingWarranty(warranty)}
+                                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 py-2 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                                        title="Bearbeiten"
+                                    >
+                                        <Edit2 size={16} /> Bearbeiten
+                                    </button>
                                     <button onClick={() => handleDelete(warranty._id)} className="px-3 py-2 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors shrink-0" title="Löschen">
                                         <Trash2 size={16} />
                                     </button>
@@ -297,6 +340,15 @@ const WarrantyManager = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <EditWarrantyModal 
+                isOpen={!!editingWarranty} 
+                onClose={() => setEditingWarranty(null)} 
+                warranty={editingWarranty} 
+                onSave={handleUpdateWarranty} 
+            />
+
+            {printingWarranty && <WarrantyPrintTemplate warranty={printingWarranty} />}
         </div>
     );
 };

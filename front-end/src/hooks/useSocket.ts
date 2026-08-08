@@ -16,7 +16,7 @@ const getSocket = (): Socket => {
             transports: ['websocket', 'polling'], // Prefer websocket, fallback to polling
             reconnection: true,
             reconnectionDelay: 2000,
-            reconnectionAttempts: 5,
+            reconnectionAttempts: 1,
             withCredentials: true,
         });
     }

@@ -29,7 +29,7 @@ export function useInventoryData() {
     const [itemsPage, setItemsPage] = useState(1);
     const [salesPage, setSalesPage] = useState(1);
     const [historyPage, setHistoryPage] = useState(1);
-    const itemsPerPage = 15;
+    const [itemsPerPage, setItemsPerPage] = useState(15);
 
     // Use debounced search text for API calls
     const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -90,7 +90,7 @@ export function useInventoryData() {
 
     useEffect(() => {
         fetchItems();
-    }, [itemsPage, debouncedSearch, typeFilter, stockFilter, sortConfig]);
+    }, [itemsPage, itemsPerPage, debouncedSearch, typeFilter, stockFilter, sortConfig]);
 
     const processedItems = useMemo(() => {
         let result = [...items];
@@ -120,12 +120,12 @@ export function useInventoryData() {
     const salesPageData = useMemo(() => {
         const startIndex = (salesPage - 1) * itemsPerPage;
         return sales.slice(startIndex, startIndex + itemsPerPage);
-    }, [sales, salesPage]);
+    }, [sales, salesPage, itemsPerPage]);
 
     const historyPageData = useMemo(() => {
         const startIndex = (historyPage - 1) * itemsPerPage;
         return history.slice(startIndex, startIndex + itemsPerPage);
-    }, [history, historyPage]);
+    }, [history, historyPage, itemsPerPage]);
 
     const handleSort = (key: string) => {
         let direction: 'asc' | 'desc' = 'asc';
@@ -151,7 +151,7 @@ export function useInventoryData() {
         itemsPage, setItemsPage,
         salesPage, setSalesPage,
         historyPage, setHistoryPage,
-        itemsPerPage,
+        itemsPerPage, setItemsPerPage,
         processedItems,
         itemsPageData,
         salesPageData,
