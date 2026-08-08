@@ -13,21 +13,40 @@ const xss = require('xss');
 const csrfProtection = require('../middleware/csrf');
 
 // ── Helmet (HTTP security headers) ────────────────────────────────────────────
+const getSupabaseHost = () => {
+    try {
+        if (process.env.SUPABASE_URL) {
+            return new URL(process.env.SUPABASE_URL).host;
+        }
+    } catch (_) {}
+    return '*.supabase.co';
+};
+
+const getFrontendWsHost = () => {
+    try {
+        if (process.env.FRONTEND_URL) {
+            return `wss://${new URL(process.env.FRONTEND_URL).host}`;
+        }
+    } catch (_) {}
+    return null;
+};
+
+const wsFrontend = getFrontendWsHost();
+
 const helmetMiddleware = helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            // NOTE: If inline styles break, add a nonce-based approach — do not re-add unsafe-inline
             scriptSrc: ["'self'", "js.stripe.com"],
             styleSrc: ["'self'", "fonts.googleapis.com"],
             fontSrc: ["'self'", "fonts.gstatic.com"],
-            imgSrc: ["'self'", "data:", "blob:", "res.cloudinary.com", "images.unsplash.com", "*.supabase.co", process.env.SUPABASE_URL ? process.env.SUPABASE_URL.replace('https://', '') : "*.supabase.co"],
+            imgSrc: ["'self'", "data:", "blob:", "res.cloudinary.com", "images.unsplash.com", "*.supabase.co", getSupabaseHost()],
             connectSrc: [
                 "'self'",
                 "api.stripe.com",
-                // ARCH-01 fix: include ws/wss for Socket.io WebSocket connections
+                "*.supabase.co",
                 ...(process.env.NODE_ENV !== 'production' ? ["ws://localhost:*", "wss://localhost:*"] : []),
-                ...(process.env.FRONTEND_URL ? [`wss://${new URL(process.env.FRONTEND_URL).host}`] : [])
+                ...(wsFrontend ? [wsFrontend] : [])
             ],
             frameSrc: ["'self'", "js.stripe.com", "hooks.stripe.com"],
         },
@@ -88,9 +107,12 @@ const generalLimiter = rateLimit({
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
-    // BUG-NEW-02 fix: never skip rate limiting based on NODE_ENV.
-    // High dev limit (3000) makes it non-intrusive while still active.
-    skip: (req) => req.method === 'OPTIONS' || (isDevelopment && (req.ip.includes('127.0.0.1') || req.ip.includes('::1') || req.ip === '::ffff:127.0.0.1')),
+    // Production safety: NEVER skip rate limiting in production under any circumstance
+    skip: (req) => {
+        if (req.method === 'OPTIONS') return true;
+        if (!isDevelopment) return false;
+        return (req.ip.includes('127.0.0.1') || req.ip.includes('::1') || req.ip === '::ffff:127.0.0.1');
+    },
 });
 
 // ── XSS sanitization ────────────────────────────────────────────────────────
@@ -146,7 +168,7 @@ const applySecurityMiddleware = (app) => {
     });
 
     app.use(cookieParser());
-    app.use(csrfMiddleware);
+    app.use(csrfProtection);
 };
 
 module.exports = {

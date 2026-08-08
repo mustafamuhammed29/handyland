@@ -10,20 +10,24 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
 // ── Cookie helper ─────────────────────────────────────────────
-const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Must be true for sameSite 'none'
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+const getCookieOptions = (appType = 'frontend') => {
+    const isProd = process.env.NODE_ENV === 'production';
+    return {
+        httpOnly: true,
+        secure: isProd, // Must be true when sameSite is 'none'
+        sameSite: isProd ? (appType === 'admin' ? 'strict' : 'none') : 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    };
 };
 
 const sendTokenResponse = (res, session, user, appType = 'frontend') => {
     const cookieName = appType === 'admin' ? 'adminToken' : 'accessToken';
     const refreshName = appType === 'admin' ? 'adminRefreshToken' : 'refreshToken';
+    const currentCookieOptions = getCookieOptions(appType);
 
-    res.cookie(cookieName, session.access_token, cookieOptions);
+    res.cookie(cookieName, session.access_token, currentCookieOptions);
     res.cookie(refreshName, session.refresh_token, {
-        ...cookieOptions,
+        ...currentCookieOptions,
         maxAge: 90 * 24 * 60 * 60 * 1000 // 90 days
     });
 

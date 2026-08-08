@@ -39,8 +39,12 @@ const PORT = process.env.PORT || 5000;
 app.set('trust proxy', 1);
 
 // ── Environment ────────────────────────────────────────────────────────────────
-console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
-if (!process.env.NODE_ENV) {process.env.NODE_ENV = 'development';}
+if (!process.env.NODE_ENV) {
+    console.error('❌ FATAL SECURITY ERROR: NODE_ENV environment variable is not explicitly set.');
+    console.error('Server cannot start safely without an explicit NODE_ENV ("development", "production", or "test").');
+    process.exit(1);
+}
+console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
 
 // ── Security middleware (helmet, cors, rate limit, xss, csrf) ──────────────────
 const { applySecurityMiddleware } = require('./config/security');

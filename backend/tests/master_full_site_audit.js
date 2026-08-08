@@ -97,6 +97,7 @@ async function runMasterAudit() {
         inf('Step 2: Registering and verifying test user...');
         let res = await agent
             .post('/api/auth/register')
+            .set('x-app-type', 'frontend')
             .set('x-xsrf-token', csrfToken)
             .send({
                 name: 'E2E Master Auditor',
@@ -105,6 +106,7 @@ async function runMasterAudit() {
                 phone: '+491701234567'
             });
 
+        let userId = null;
         if (res.status === 201 || res.status === 200) {
             userId = res.body?._id || res.body?.user?._id || res.body?.data?.id || res.body?.user?.id;
             if (!userId) {
@@ -128,6 +130,7 @@ async function runMasterAudit() {
         inf('Step 3: Logging in with confirmed credentials...');
         const loginRes = await agent
             .post('/api/auth/login')
+            .set('x-app-type', 'frontend')
             .set('x-xsrf-token', csrfToken)
             .send({ email: testEmail, password: testPassword });
 
@@ -143,6 +146,7 @@ async function runMasterAudit() {
         const meRes = await agent
             .get('/api/auth/me')
             .set('Authorization', `Bearer ${userToken}`)
+            .set('x-app-type', 'frontend')
             .set('x-xsrf-token', csrfToken);
 
         if (meRes.status === 200) {
@@ -156,10 +160,12 @@ async function runMasterAudit() {
         await agent
             .post('/api/valuation/devices/reseed')
             .set('Authorization', `Bearer ${userToken}`)
+            .set('x-app-type', 'frontend')
             .set('x-xsrf-token', csrfToken);
 
         const calcRes = await agent
             .post('/api/valuation/calculate')
+            .set('x-app-type', 'frontend')
             .set('x-xsrf-token', csrfToken)
             .send({
                 model: 'iPhone 15 Pro Max',
@@ -179,6 +185,7 @@ async function runMasterAudit() {
         inf('Step 6: Saving valuation quote with customer contact...');
         const saveQuoteRes = await agent
             .post('/api/valuation/saved')
+            .set('x-app-type', 'frontend')
             .set('x-xsrf-token', csrfToken)
             .send({
                 contactName: 'Mustafa Tester',
@@ -200,6 +207,7 @@ async function runMasterAudit() {
         inf('Step 7: Creating repair booking and checking guest tracking...');
         const repairRes = await agent
             .post('/api/repairs/tickets')
+            .set('x-app-type', 'frontend')
             .set('x-xsrf-token', csrfToken)
             .send({
                 device: 'iPhone 15 Pro Max',
@@ -237,6 +245,7 @@ async function runMasterAudit() {
         const orderRes = await agent
             .post('/api/orders')
             .set('Authorization', `Bearer ${userToken}`)
+            .set('x-app-type', 'frontend')
             .set('x-xsrf-token', csrfToken)
             .send({
                 items: [
@@ -275,6 +284,7 @@ async function runMasterAudit() {
         const adminStatsRes = await agent
             .get('/api/orders/admin/stats')
             .set('Authorization', `Bearer ${userToken}`)
+            .set('x-app-type', 'frontend')
             .set('x-xsrf-token', csrfToken);
 
         if (adminStatsRes.status === 200) {

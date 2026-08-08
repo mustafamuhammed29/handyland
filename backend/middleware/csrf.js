@@ -1,21 +1,28 @@
 const crypto = require('crypto');
 
 /**
- * CSRF Protection Middleware (Double Submit Cookie Pattern)
- * 1. Generates a CSRF token for each session.
- * 2. Sends it in a cookie (readable by JS).
- * 3. Client sends it back in a custom header.
+ * Multi-Layered CSRF Protection Middleware
+ * Compatible with cross-origin deployments (Vercel Frontend <-> Render Backend).
+ *
+ * 1. Safe Methods (GET/HEAD/OPTIONS): Issues an XSRF-TOKEN companion cookie.
+ * 2. State-Changing Methods (POST/PUT/DELETE/PATCH):
+ *    - Bypasses public webhooks with dedicated crypto signatures (e.g. Stripe webhook).
+ *    - Validates presence of trusted custom headers ('x-app-type', 'x-requested-with', 'x-xsrf-token')
+ *      OR matching XSRF double-submit token OR Bearer Authorization header.
+ *    - Blocks simple cross-site form submissions (traditional CSRF attack vector).
  */
 const csrfProtection = (req, res, next) => {
-    if (process.env.NODE_ENV === 'test') return next();
+    // 1. Always bypass webhooks (Stripe webhook has cryptographic payload verification)
+    if (req.originalUrl && req.originalUrl.includes('/api/payment/webhook')) {
+        return next();
+    }
 
-    // Exclude GET, HEAD, OPTIONS from CSRF check
+    // 2. Safe read-only methods: issue companion cookie
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-        // Generate token if not exists (simplified for this context)
         if (!req.cookies || !req.cookies['XSRF-TOKEN']) {
             const token = crypto.randomBytes(32).toString('hex');
             res.cookie('XSRF-TOKEN', token, {
-                httpOnly: false, // JS needs to read this
+                httpOnly: false, // Accessible by legitimate client JS
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
                 path: '/'
@@ -24,13 +31,25 @@ const csrfProtection = (req, res, next) => {
         return next();
     }
 
-    const cookieToken = req.cookies['XSRF-TOKEN'];
+    // 3. State-changing requests: Verify custom anti-CSRF headers
+    const appTypeHeader = req.headers['x-app-type'];
+    const requestedWith = req.headers['x-requested-with'];
+    const authHeader = req.headers['authorization'];
     const headerToken = req.headers['x-xsrf-token'];
+    const cookieToken = req.cookies ? req.cookies['XSRF-TOKEN'] : null;
 
-    if (!cookieToken || !headerToken || cookieToken !== headerToken) {
+    // A valid custom header or double submit token protects against cross-origin ambient credential abuse
+    const hasTrustedCustomHeader = 
+        (appTypeHeader && (appTypeHeader === 'frontend' || appTypeHeader === 'admin')) ||
+        (requestedWith && requestedWith.toLowerCase() === 'xmlhttprequest') ||
+        (authHeader && authHeader.startsWith('Bearer ')) ||
+        (cookieToken && headerToken && cookieToken === headerToken);
+
+    if (!hasTrustedCustomHeader) {
         return res.status(403).json({
             success: false,
-            message: 'Invalid or missing CSRF token'
+            code: 'CSRF_VALIDATION_FAILED',
+            message: 'Cross-Site Request Forgery protection: Missing trusted custom header or anti-CSRF token.'
         });
     }
 
@@ -38,3 +57,4 @@ const csrfProtection = (req, res, next) => {
 };
 
 module.exports = csrfProtection;
+
