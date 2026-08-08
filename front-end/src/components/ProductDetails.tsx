@@ -313,16 +313,21 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                             <span className="text-slate-400 text-sm">{(product.numReviews || reviews?.length || 0)} {t('product.reviews', 'Bewertungen')}</span>
                         </div>
 
-                        <div className="flex items-end gap-3 mb-8">
-                            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">
-                                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(product.price)}
+                        <div className="flex flex-col mb-8">
+                            <div className="flex items-end gap-3">
+                                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">
+                                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(product.price)}
+                                </div>
+                                {/* Stock Indicator */}
+                                <div className={`text-sm mb-2 font-medium ${(product.stock || 0) > 0 ? ((product.stock || 0) < 5 ? 'text-orange-400' : 'text-green-400') : 'text-red-500'}`}>
+                                    {(product.stock || 0) > 0
+                                        ? ((product.stock || 0) < 5 ? t('product.onlyLeft', 'Nur noch {{count}} auf Lager!', { count: product.stock }) : t('product.inStock', 'Auf Lager'))
+                                        : t('product.outOfStock', 'Nicht vorrätig')
+                                    }
+                                </div>
                             </div>
-                            {/* Stock Indicator */}
-                            <div className={`text-sm mb-2 font-medium ${(product.stock || 0) > 0 ? ((product.stock || 0) < 5 ? 'text-orange-400' : 'text-green-400') : 'text-red-500'}`}>
-                                {(product.stock || 0) > 0
-                                    ? ((product.stock || 0) < 5 ? t('product.onlyLeft', 'Nur noch {{count}} auf Lager!', { count: product.stock }) : t('product.inStock', 'Auf Lager'))
-                                    : t('product.outOfStock', 'Nicht vorrätig')
-                                }
+                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                {t('checkout.inclVatText', 'Alle Preise inkl. gesetzl. Mehrwertsteuer, zzgl. Versandkosten')}
                             </div>
                         </div>
 

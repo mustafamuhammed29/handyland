@@ -99,11 +99,11 @@ const StripePaymentForm: React.FC<{
             <button
                 type="submit"
                 disabled={!stripe || submitting}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-900/20"
+                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-900/20 cursor-pointer"
             >
                 {submitting
                     ? <><Loader2 className="animate-spin w-5 h-5" /> {t('checkout.processing', 'Processing...')}</>
-                    : <><Lock className="w-4 h-4" /> {t('checkout.pay_now', 'Pay Now')} {formatPrice(total)} <ArrowRight className="w-4 h-4" /></>
+                    : <><Lock className="w-4 h-4" /> {t('checkout.pay_now', 'Zahlungspflichtig bestellen')} — {formatPrice(total)} <ArrowRight className="w-4 h-4" /></>
                 }
             </button>
         </form>
@@ -419,8 +419,8 @@ export const CheckoutPaymentSection: React.FC<Props> = ({
                                 {paymentConfig.bankTransfer.bic && <div className="flex justify-between"><span className="text-slate-400">BIC</span><span className="text-white">{paymentConfig.bankTransfer.bic}</span></div>}
                             </div>
                         )}
-                        <button onClick={handlePaymentSuccess} disabled={loading} className="w-full py-4 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
-                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <><CheckCircle2 className="w-5 h-5" /> {t('checkout.placeOrder', 'Place Order')} — {formatPrice(finalTotal)}</>}
+                        <button onClick={handlePaymentSuccess} disabled={loading} className="w-full py-4 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <><CheckCircle2 className="w-5 h-5" /> {t('checkout.placeOrder', 'Zahlungspflichtig bestellen')} — {formatPrice(finalTotal)}</>}
                         </button>
                     </div>
                 )}
@@ -429,8 +429,8 @@ export const CheckoutPaymentSection: React.FC<Props> = ({
                 {selectedPaymentMethod === 'cod' && (
                     <div className="space-y-4">
                         <p className="text-slate-300 text-sm">{t('checkout.cod_instructions', 'You will pay for your order directly to the courier upon delivery. Please have the exact amount ready.')}</p>
-                        <button onClick={handlePaymentSuccess} disabled={loading} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-900/20">
-                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <><Truck className="w-5 h-5" /> {t('checkout.placeOrder', 'Place Order')} — {formatPrice(finalTotal)}</>}
+                        <button onClick={handlePaymentSuccess} disabled={loading} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-900/20 cursor-pointer">
+                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <><Truck className="w-5 h-5" /> {t('checkout.placeOrder', 'Zahlungspflichtig bestellen')} — {formatPrice(finalTotal)}</>}
                         </button>
                     </div>
                 )}
@@ -439,8 +439,8 @@ export const CheckoutPaymentSection: React.FC<Props> = ({
                 {selectedPaymentMethod === 'wallet' && (
                     <div className="space-y-4">
                         <p className="text-slate-300 text-sm">{t('checkout.wallet_instructions', 'The total amount will be deducted directly from your HandyLand Wallet balance.')}</p>
-                        <button onClick={handlePaymentSuccess} disabled={loading} className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/20">
-                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <><Wallet className="w-5 h-5" /> {t('checkout.pay_now', 'Pay Now')} — {formatPrice(finalTotal)}</>}
+                        <button onClick={handlePaymentSuccess} disabled={loading} className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/20 cursor-pointer">
+                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <><Wallet className="w-5 h-5" /> {t('checkout.pay_now', 'Zahlungspflichtig bestellen')} — {formatPrice(finalTotal)}</>}
                         </button>
                     </div>
                 )}

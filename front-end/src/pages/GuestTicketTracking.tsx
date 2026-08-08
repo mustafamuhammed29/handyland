@@ -153,12 +153,41 @@ export const GuestTicketTracking: React.FC = () => {
                                 )}
                             </div>
 
+                            {/* 20-Point Technical Quality Check Badge */}
+                            <div className="p-4 bg-slate-950/80 border border-emerald-500/20 rounded-xl space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                                        <CheckCircle className="w-4 h-4 text-emerald-400" /> HandyLand 20-Punkte Qualitätsprüfung
+                                    </span>
+                                    <span className="text-[10px] text-slate-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-mono">Zertifiziert</span>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] text-slate-300">
+                                    <div className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-400" /> Display & Touch</div>
+                                    <div className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-400" /> Akku & Ladung</div>
+                                    <div className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-400" /> Kameras</div>
+                                    <div className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-400" /> Mikro & Lautsprecher</div>
+                                    <div className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-400" /> FaceID / TouchID</div>
+                                    <div className="flex items-center gap-1.5"><CheckCircle className="w-3 h-3 text-emerald-400" /> 12 Mon. Garantie</div>
+                                </div>
+                            </div>
+
                             {ticket.notes && (
                                 <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">{t('trackRepair.latestNotes', 'Neueste Notizen')}</label>
                                     <p className="text-slate-700 dark:text-slate-300 text-sm whitespace-pre-wrap">{ticket.notes}</p>
                                 </div>
                             )}
+
+                            {/* Print Action */}
+                            <div className="pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => window.print()}
+                                    className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-colors border border-slate-700 cursor-pointer"
+                                >
+                                    🖨️ {t('trackRepair.printReceipt', 'Reparaturbeleg & Garantiepass drucken')}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -189,6 +218,16 @@ export const GuestTicketTracking: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            <style>{`
+                @media print {
+                    body { background: white !important; color: black !important; }
+                    header, footer, nav, button, form { display: none !important; }
+                    .page-container { padding-top: 0 !important; background: white !important; }
+                    .bg-slate-900, .bg-slate-950 { background: white !important; color: black !important; border: 1px solid #ccc !important; box-shadow: none !important; }
+                    .text-white, .text-slate-300, .text-slate-400, .text-slate-700 { color: #111 !important; }
+                }
+            `}</style>
         </div>
     );
 };

@@ -155,12 +155,17 @@ export const AccessoryDetails: React.FC = () => {
                             </div>
                         )}
 
-                        <div className="flex items-end gap-3 mb-8">
-                            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">
-                                {accessory.price}{t('currency', '€')}
+                        <div className="flex flex-col mb-8">
+                            <div className="flex items-end gap-3">
+                                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">
+                                    {accessory.price}{t('currency', '€')}
+                                </div>
+                                <div className={`text-sm mb-2 font-medium ${(accessory.stock || 0) > 0 ? 'text-green-400' : 'text-red-500'}`}>
+                                    {(accessory.stock || 0) > 0 ? 'In Stock' : 'Out of Stock'}
+                                </div>
                             </div>
-                            <div className={`text-sm mb-2 font-medium ${(accessory.stock || 0) > 0 ? 'text-green-400' : 'text-red-500'}`}>
-                                {(accessory.stock || 0) > 0 ? 'In Stock' : 'Out of Stock'}
+                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                {t('checkout.inclVatText', 'Alle Preise inkl. gesetzl. Mehrwertsteuer, zzgl. Versandkosten')}
                             </div>
                         </div>
 

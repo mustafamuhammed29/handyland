@@ -223,7 +223,7 @@ export const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
                                 <span>{t('checkout.taxVATIncluded', `enthält {{rate}}% MwSt.`, { rate: taxRate })}</span>
                                 <span>{formatPrice(taxAmountIncluded)}</span>
                             </div>
-                            <p className="text-[10px] text-slate-500 text-right mt-1">{t('checkout.inclVatText', 'Alle Preise inkl. gesetzl. Mehrwertsteuer')}</p>
+                            <p className="text-[10px] text-slate-500 text-right mt-1">{t('checkout.inclVatText', 'Alle Preise inkl. gesetzl. Mehrwertsteuer, zzgl. Versandkosten')}</p>
                         </>
                     );
                 })()}

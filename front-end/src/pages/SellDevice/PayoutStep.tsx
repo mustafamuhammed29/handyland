@@ -20,14 +20,14 @@ export const PayoutStep: React.FC<PayoutStepProps> = ({ formData, errors, handle
                 <div className="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
                     <CreditCard className="w-7 h-7 text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Payout Details</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{t('sellDevice.checkBankDetails', 'Bankverbindung & Auszahlung')}</h3>
             </div>
             <div className="space-y-4">
                 <div>
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">Bank Name</label>
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">{t('sellDevice.bankName', 'Bankname')}</label>
                     <input
                         name="bankName"
-                        placeholder="e.g. Sparkasse, Deutsche Bank"
+                        placeholder="z.B. Sparkasse, Deutsche Bank, N26"
                         value={formData.bankName}
                         className={`w-full bg-slate-950/50 border ${errors.bankName ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}
                         onChange={handleChange}
@@ -35,11 +35,11 @@ export const PayoutStep: React.FC<PayoutStepProps> = ({ formData, errors, handle
                     {errors.bankName && <p className="text-red-400 text-xs mt-1">{errors.bankName}</p>}
                 </div>
                 <div>
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">IBAN</label>
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">{t('sellDevice.ibanLabel', 'IBAN')}</label>
                     <div className="relative">
                         <input
                             name="iban"
-                            placeholder="DEXX XXXX XXXX XXXX XXXX XX"
+                            placeholder="DE00 0000 0000 0000 0000 00"
                             value={formData.iban}
                             className={`w-full bg-slate-950/50 border ${errors.iban ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-slate-900 dark:text-white font-mono text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all uppercase`}
                             onChange={handleChange}
@@ -59,17 +59,17 @@ export const PayoutStep: React.FC<PayoutStepProps> = ({ formData, errors, handle
                     <Truck className="w-5 h-5 text-brand-primary" />
                 </div>
                 <div className="text-sm text-slate-500 dark:text-slate-400">
-                    <p className="text-slate-900 dark:text-white font-bold mb-0.5">{t('sellDevice.freeShipping')}</p>
+                    <p className="text-slate-900 dark:text-white font-bold mb-0.5">{t('sellDevice.freeShipping', 'Kostenloser versicherter DHL-Versand')}</p>
                     {t('sellDevice.freeShippingDesc', { hours: 48 })}
                 </div>
             </div>
 
             <div className="flex gap-4 mt-6">
-                <button type="button" onClick={onPrev} title={t('sellDevice.backBtn', 'Zurück')} className="py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white font-bold transition-all">
+                <button type="button" onClick={onPrev} title={t('sellDevice.backBtn', 'Zurück')} className="py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white font-bold transition-all cursor-pointer">
                     <ArrowLeft className="w-5 h-5" />
                 </button>
-                <button type="submit" className="flex-1 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-emerald-950 font-bold text-lg shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2">
-                    <ShieldCheck className="w-5 h-5" /> Order Confirm Details
+                <button type="submit" className="flex-1 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-emerald-950 font-bold text-lg shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <ShieldCheck className="w-5 h-5" /> {t('sellDevice.completeOrder', 'Verkauf verbindlich abschließen')}
                 </button>
             </div>
         </div>
