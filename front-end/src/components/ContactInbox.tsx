@@ -10,6 +10,8 @@ import { InboxListView } from './inbox/InboxListView';
 import { InboxThreadView } from './inbox/InboxThreadView';
 import { InboxNewTicketView } from './inbox/InboxNewTicketView';
 
+import { io } from 'socket.io-client';
+
 const getStatusStyles = (t: any): Record<string, { bg: string; text: string; label: string; icon: React.ReactNode }> => ({
     replied: {
         bg: 'bg-emerald-500/10 border-emerald-500/30',
@@ -51,16 +53,6 @@ export const ContactInbox = () => {
     const [submitting, setSubmitting] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        fetchMessages();
-    }, []);
-
-    useEffect(() => {
-        if (view === 'thread') {
-            setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-        }
-    }, [selectedMessage, view]);
-
     const fetchMessages = async () => {
         try {
             const res = await api.get('/api/messages/my-messages') as any;
@@ -73,6 +65,51 @@ export const ContactInbox = () => {
         }
     };
 
+    useEffect(() => {
+        fetchMessages();
+    }, []);
+
+    // Socket.io real-time connection for customer messages
+    useEffect(() => {
+        const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+        const socket = io(SOCKET_URL, {
+            withCredentials: true,
+            transports: ['websocket', 'polling'],
+        });
+
+        socket.on('connect', () => {
+            if (user?.id) socket.emit('join:user', user.id);
+            if (user?.email) socket.emit('join:user', user.email);
+        });
+
+        socket.on('message:reply', (data: any) => {
+            const updatedThread = data.thread;
+            if (updatedThread) {
+                const threadId = updatedThread._id || updatedThread.id;
+                setMessages(prev => {
+                    const exists = prev.some(m => (m._id || (m as any).id) === threadId);
+                    if (exists) {
+                        return prev.map(m => (m._id || (m as any).id) === threadId ? updatedThread : m);
+                    }
+                    return [updatedThread, ...prev];
+                });
+                setSelectedMessage(curr => {
+                    if (curr && (curr._id || (curr as any).id) === threadId) {
+                        return updatedThread;
+                    }
+                    return curr;
+                });
+            } else {
+                fetchMessages();
+            }
+            addToast('Neue Nachricht vom Support!', 'info');
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [user?.id, user?.email]);
+
     const hasActiveTicket = messages.some(m => m.status !== 'closed');
 
     const handleSendNew = async (e: React.FormEvent) => {
@@ -81,18 +118,23 @@ export const ContactInbox = () => {
         setSubmitting(true);
         try {
             const res = await api.post('/api/messages', {
-                name: user?.name,
+                name: user?.name || user?.email?.split('@')[0] || 'Kunde',
                 email: user?.email,
                 message: newMessageText
             }) as any;
-            const newMsg = res?.data || res;
-            setMessages(prev => [newMsg, ...prev]);
+            const updatedMsg = res?.data?.message || res?.data || res;
+            const threadId = updatedMsg._id || updatedMsg.id;
+            setMessages(prev => {
+                const exists = prev.some(m => (m._id || (m as any).id) === threadId);
+                if (exists) return prev.map(m => (m._id || (m as any).id) === threadId ? updatedMsg : m);
+                return [updatedMsg, ...prev];
+            });
             setNewMessageText('');
-            setSelectedMessage(newMsg);
+            setSelectedMessage(updatedMsg);
             setView('thread');
-            addToast('Support ticket created!', 'success');
+            addToast('Nachricht gesendet!', 'success');
         } catch (error) {
-            addToast('Failed to create ticket. Please try again.', 'error');
+            addToast('Fehler beim Senden der Nachricht.', 'error');
             console.error(error);
         } finally {
             setSubmitting(false);
@@ -101,18 +143,20 @@ export const ContactInbox = () => {
 
     const handleReply = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!replyText.trim() || !selectedMessage) return;
+        const targetId = selectedMessage?._id || (selectedMessage as any)?.id;
+        if (!replyText.trim() || !targetId) return;
         setSubmitting(true);
         try {
-            const res = await api.post(`/api/messages/${selectedMessage._id}/reply`, {
+            const res = await api.post(`/api/messages/${targetId}/reply`, {
                 message: replyText
             }) as any;
-            const updated = res?.data || res;
+            const updated = res?.data?.message || res?.data || res;
+            const threadId = updated._id || updated.id;
             setSelectedMessage(updated);
-            setMessages(prev => prev.map(m => m._id === selectedMessage._id ? updated : m));
+            setMessages(prev => prev.map(m => (m._id || (m as any).id) === threadId ? updated : m));
             setReplyText('');
         } catch (error) {
-            addToast('Failed to send message.', 'error');
+            addToast('Fehler beim Senden der Antwort.', 'error');
             console.error(error);
         } finally {
             setSubmitting(false);

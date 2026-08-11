@@ -55,8 +55,7 @@ export default function MessagesManager() {
 
     // --- SOCKET.IO FOR REAL-TIME ---
     useEffect(() => {
-        const token = sessionStorage.getItem('adminSocketToken');
-        if (!token) return;
+        const token = localStorage.getItem('token') || sessionStorage.getItem('adminSocketToken') || undefined;
 
         const socket = io(SOCKET_URL, {
             withCredentials: true,
@@ -126,13 +125,20 @@ export default function MessagesManager() {
                 message: payload.message,
                 is_internal_note: payload.is_internal_note
             }) as any;
-            return res?.data?.data || res?.data || res;
+            return res?.data || res;
         },
-        onSuccess: (updatedThread) => {
+        onSuccess: (resData) => {
             queryClient.invalidateQueries({ queryKey: ['messages'] });
-            setSelectedThread((prev: any) => ({ ...prev, replies: [...(prev?.replies || []), updatedThread] }));
+            const replyObj = resData?.reply;
+            const updatedThread = resData?.message || resData?.thread;
+            if (updatedThread) {
+                setSelectedThread(updatedThread);
+            } else if (replyObj) {
+                setSelectedThread((prev: any) => ({ ...prev, replies: [...(prev?.replies || []), replyObj] }));
+            }
             setReplyText('');
             setIsInternalNote(false);
+            toast.success('Antwort gesendet!');
         }
     });
 
@@ -246,20 +252,21 @@ export default function MessagesManager() {
             });
     }, [userGroups, filter, searchQuery]);
 
-    // Handle Deep Linking
+    // Handle Deep Linking (from notifications)
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
-        const threadId = queryParams.get('id');
+        const threadId = queryParams.get('id') || queryParams.get('ticketId');
         if (threadId && messages.length > 0 && userGroups.length > 0) {
-            const foundThread = messages.find((m: any) => m._id === threadId);
+            const foundThread = messages.find((m: any) => m._id === threadId || m.id === threadId);
             if (foundThread) {
                 setSelectedThread(foundThread);
-                const userKey = foundThread.email?.toLowerCase() || foundThread._id;
+                const userKey = foundThread.email?.toLowerCase() || foundThread._id || foundThread.id;
                 const group = userGroups.find(g => g.email === userKey);
                 if (group) setSelectedUser(group);
             }
-            // Clean URL
-            window.history.replaceState({}, '', '/messages');
+            setTimeout(() => {
+                window.history.replaceState({}, '', '/messages');
+            }, 1000);
         }
     }, [messages, userGroups]);
 

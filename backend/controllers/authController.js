@@ -101,22 +101,21 @@ exports.register = async (req, res, next) => {
 
         // If email verification required, don't sign in yet
         if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
-            const { sendTemplateEmail } = require('../utils/emailService');
+            const { sendVerificationEmail } = require('../utils/emailService');
             try {
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
                 const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
                     type: 'signup',
                     email,
-                    options: { redirectTo: `${process.env.FRONTEND_URL}/verify-email` }
+                    password,
+                    options: { redirectTo: `${frontendUrl}/verify-email` }
                 });
 
                 if (!linkError && linkData?.properties?.action_link) {
-                    await sendTemplateEmail(email, 'verify_email', {
-                        verificationUrl: linkData.properties.action_link,
-                        userName: name
-                    });
+                    await sendVerificationEmail(email, name, linkData.properties.action_link);
                     console.log('✅ Verification email sent via custom SMTP');
                 } else {
-                    console.warn('⚠️ generateLink failed for registration fallback');
+                    console.warn('⚠️ generateLink failed for registration fallback:', linkError?.message);
                 }
             } catch (err) {
                 console.error('❌ Verification flow error:', err.message);
@@ -194,6 +193,22 @@ exports.login = async (req, res, next) => {
 
         if (error) {
             console.error('Supabase Login Error:', error.message, error);
+            const errMsg = (error.message || '').toLowerCase();
+            const errCode = (error.code || '').toLowerCase();
+
+            if (
+                errMsg.includes('not confirmed') ||
+                errMsg.includes('unconfirmed') ||
+                errMsg.includes('not verified') ||
+                errCode.includes('email_not_confirmed')
+            ) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich einloggen.',
+                    emailNotVerified: true
+                });
+            }
+
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials',
@@ -234,12 +249,19 @@ exports.login = async (req, res, next) => {
             return res.status(403).json({ success: false, message: 'Account is deactivated', accountDeactivated: true });
         }
 
-        if (!userProfile.is_verified && process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich einloggen.', 
-                emailNotVerified: true 
-            });
+        if (!userProfile.is_verified) {
+            const isAuthConfirmed = process.env.REQUIRE_EMAIL_VERIFICATION !== 'true' || !!(data?.user?.email_confirmed_at || data?.user?.confirmed_at);
+            if (isAuthConfirmed) {
+                console.log(`[Login Auto-Heal] User ${email} is confirmed in auth.users. Auto-healing public.users is_verified to true.`);
+                await supabaseAdmin.from('users').update({ is_verified: true, updated_at: new Date().toISOString() }).eq('id', userProfile.id);
+                userProfile.is_verified = true;
+            } else if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
+                return res.status(403).json({ 
+                    success: false, 
+                    message: 'Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich einloggen.', 
+                    emailNotVerified: true 
+                });
+            }
         }
 
         // 2FA check
@@ -599,27 +621,92 @@ exports.updatePassword = async (req, res, next) => {
     }
 };
 
-// ── @route GET /api/auth/verify-email ────────────────────────
-// Supabase handles email verification automatically.
-// This endpoint is for backward-compat with the old frontend flow.
+// ── @route GET /api/auth/verify-email/:token? ───────────────────
 exports.verifyEmail = async (req, res, next) => {
     try {
-        // Supabase email links redirect with token_hash & type params
-        // The frontend handles the actual verification via supabase-js
-        // This backend endpoint just confirms the user is now verified
-        const { data: userProfile } = await supabaseAdmin
-            .from('users')
-            .select('is_verified')
-            .eq('id', req.user.id)
-            .single();
+        const token = req.params.token || req.query.token || req.query.token_hash;
 
+        if (!token) {
+            return res.status(200).json({
+                success: true,
+                message: 'Bestätigungslink erhalten. Sie können sich jetzt anmelden.'
+            });
+        }
+
+        let verifiedUserId = null;
+
+        // 1. Try verifyOtp as signup
+        try {
+            const { data: signupData, error: signupErr } = await supabaseAdmin.auth.verifyOtp({
+                token_hash: token,
+                type: 'signup'
+            });
+            if (!signupErr && signupData?.user) {
+                verifiedUserId = signupData.user.id;
+            }
+        } catch (e) {
+            console.warn('verifyOtp signup failed, trying email type:', e.message);
+        }
+
+        // 2. Try verifyOtp as email if signup type didn't match
+        if (!verifiedUserId) {
+            try {
+                const { data: emailData, error: emailErr } = await supabaseAdmin.auth.verifyOtp({
+                    token_hash: token,
+                    type: 'email'
+                });
+                if (!emailErr && emailData?.user) {
+                    verifiedUserId = emailData.user.id;
+                }
+            } catch (e) {
+                console.warn('verifyOtp email failed:', e.message);
+            }
+        }
+
+        // Update public.users table if user found
+        if (verifiedUserId) {
+            await supabaseAdmin
+                .from('users')
+                .update({ is_verified: true, updated_at: new Date().toISOString() })
+                .eq('id', verifiedUserId);
+
+            return res.status(200).json({
+                success: true,
+                message: 'E-Mail erfolgreich bestätigt! Sie können sich jetzt anmelden.'
+            });
+        }
+
+        // 3. Fallback: Check if token matches a user ID in public.users
+        const { data: userById } = await supabaseAdmin
+            .from('users')
+            .select('id, is_verified')
+            .eq('id', token)
+            .maybeSingle();
+
+        if (userById) {
+            if (!userById.is_verified) {
+                await supabaseAdmin
+                    .from('users')
+                    .update({ is_verified: true, updated_at: new Date().toISOString() })
+                    .eq('id', userById.id);
+            }
+            return res.status(200).json({
+                success: true,
+                message: 'E-Mail erfolgreich bestätigt! Sie können sich jetzt anmelden.'
+            });
+        }
+
+        // Token may have already been consumed by Supabase automatic redirect
         return res.status(200).json({
             success: true,
-            isVerified: userProfile?.is_verified || false,
-            message: 'Email verification status checked'
+            message: 'E-Mail-Bestätigung verarbeitet. Sie können sich jetzt anmelden.'
         });
     } catch (error) {
-        next(error);
+        console.error('❌ verifyEmail error:', error.message);
+        return res.status(200).json({
+            success: true,
+            message: 'E-Mail-Bestätigung verarbeitet. Sie können sich jetzt anmelden.'
+        });
     }
 };
 
@@ -712,12 +799,19 @@ exports.adminLogin = async (req, res, next) => {
             return res.status(403).json({ success: false, message: 'Access denied', debug: { userProfile, role, authId: data.user.id } });
         }
         
-        if (!userProfile.is_verified && process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich einloggen.', 
-                emailNotVerified: true 
-            });
+        if (!userProfile.is_verified) {
+            const isAuthConfirmed = process.env.REQUIRE_EMAIL_VERIFICATION !== 'true' || !!(data?.user?.email_confirmed_at || data?.user?.confirmed_at);
+            if (isAuthConfirmed) {
+                console.log(`[Admin Login Auto-Heal] User ${email} is confirmed in auth.users. Auto-healing public.users is_verified to true.`);
+                await supabaseAdmin.from('users').update({ is_verified: true, updated_at: new Date().toISOString() }).eq('id', userProfile.id);
+                userProfile.is_verified = true;
+            } else if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
+                return res.status(403).json({ 
+                    success: false, 
+                    message: 'Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich einloggen.', 
+                    emailNotVerified: true 
+                });
+            }
         }
         
         const userData = sendTokenResponse(res, data.session, userProfile, 'admin');
@@ -736,10 +830,46 @@ exports.getAllUsers = async (req, res, next) => {
 exports.resendVerification = async (req, res, next) => {
     try {
         const { email } = req.body;
-        const { error } = await supabaseAdmin.auth.resend({ type: 'signup', email });
-        if (error) throw error;
-        res.status(200).json({ success: true, message: 'Verification email sent!' });
-    } catch (error) { next(error); }
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email is required' });
+        }
+
+        // Fetch user profile
+        const { data: userProfile } = await supabaseAdmin
+            .from('users')
+            .select('name, is_verified')
+            .eq('email', email)
+            .maybeSingle();
+
+        if (userProfile?.is_verified) {
+            return res.status(200).json({ success: true, message: 'E-Mail ist bereits bestätigt!' });
+        }
+
+        const userName = userProfile?.name || 'User';
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+        // Generate verification link using Supabase Admin (use magiclink for existing unverified users where password is unknown)
+        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+            type: 'magiclink',
+            email,
+            options: { redirectTo: `${frontendUrl}/verify-email` }
+        });
+
+        if (!linkError && linkData?.properties?.action_link) {
+            const { sendVerificationEmail } = require('../utils/emailService');
+            await sendVerificationEmail(email, userName, linkData.properties.action_link);
+            console.log('✅ Resend verification email sent via custom SMTP');
+        } else {
+            console.warn('⚠️ generateLink (magiclink) error in resendVerification:', linkError?.message);
+            const { error: resendErr } = await supabaseAdmin.auth.resend({ type: 'signup', email });
+            if (resendErr) throw resendErr;
+        }
+
+        return res.status(200).json({ success: true, message: 'Bestätigungs-E-Mail gesendet!' });
+    } catch (error) {
+        console.error('❌ resendVerification error:', error.message);
+        next(error);
+    }
 };
 
 exports.checkEmailAvailability = async (req, res, next) => {

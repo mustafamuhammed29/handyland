@@ -39,7 +39,8 @@
     "signIn": "Anmelden",
     "noAccount": "Sie haben noch kein Konto?",
     "resetPassword": "Passwort zurücksetzen",
-    "verifyEmail": "E-Mail überprüfen"
+    "verifyEmail": "E-Mail überprüfen",
+    "emailNotVerified": "Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich einloggen."
   },
   "cart": {
     "title": "Einkaufswagen",

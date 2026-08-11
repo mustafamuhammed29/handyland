@@ -59,28 +59,35 @@ export const useAdminNotifications = (isAuthenticated: boolean) => {
             api.get('/api/notifications?unreadOnly=true').then((res: any) => {
                 const data = res?.data || res;
                 if (data && data.data && Array.isArray(data.data)) {
-                    const mapped = data.data.map((n: any) => ({
-                        id: n.id,
-                        type: n.type || 'new_message',
-                        title: n.type === 'new_order' ? 'Neue Bestellung' : 'System Benachrichtigung',
-                        body: n.message,
-                        icon: n.type === 'new_order' ? '📦' : '🔔',
-                        link: n.link,
-                        timestamp: n.created_at,
-                        read: n.read
-                    }));
+                    const mapped = data.data.map((n: any) => {
+                        const msgLower = (n.message || '').toLowerCase();
+                        const isMsg = n.type === 'new_message' || msgLower.includes('nachricht') || msgLower.includes('message');
+                        const isOrder = n.type === 'new_order' || msgLower.includes('bestellung') || msgLower.includes('order');
+                        const isRepair = n.type === 'new_repair' || msgLower.includes('reparatur') || msgLower.includes('repair');
+
+                        return {
+                            id: n.id,
+                            type: (isMsg ? 'new_message' : isOrder ? 'new_order' : isRepair ? 'new_repair' : 'new_message') as NotificationType,
+                            title: isMsg ? 'Neue Nachricht' : isOrder ? 'Neue Bestellung' : isRepair ? 'Neue Reparatur' : 'System Benachrichtigung',
+                            body: n.message,
+                            icon: isMsg ? '💬' : isOrder ? '📦' : isRepair ? '🔧' : '🔔',
+                            link: n.link || (isMsg ? '/messages' : isOrder ? '/orders' : isRepair ? '/repair-tickets' : '/messages'),
+                            timestamp: n.created_at,
+                            read: n.read
+                        };
+                    });
                     setNotifications(mapped);
                 }
             }).catch(console.error);
         });
 
+        const authToken = localStorage.getItem('token') || sessionStorage.getItem('adminSocketToken') || undefined;
+
         const socket = io(SOCKET_URL, {
             withCredentials: true,
             transports: ['websocket', 'polling'],
             auth: {
-                // Send the admin JWT so the server can verify role === 'admin'
-                // and permit the socket to join the 'admin' notification room
-                token: sessionStorage.getItem('adminSocketToken') || undefined,
+                token: authToken,
             },
         });
 
@@ -95,18 +102,33 @@ export const useAdminNotifications = (isAuthenticated: boolean) => {
             setIsConnected(false);
         });
 
-        socket.on('admin:notification', (payload: Omit<AdminNotification, 'read'>) => {
-            const notification: AdminNotification = { ...payload, read: false };
+        socket.on('admin:notification', (payload: any) => {
+            const msgLower = (payload.body || payload.message || '').toLowerCase();
+            const isMsg = payload.type === 'new_message' || msgLower.includes('nachricht') || msgLower.includes('message');
+            const isOrder = payload.type === 'new_order' || msgLower.includes('bestellung') || msgLower.includes('order');
+            const isRepair = payload.type === 'new_repair' || msgLower.includes('reparatur') || msgLower.includes('repair');
+
+            const notification: AdminNotification = {
+                id: payload.id || Date.now(),
+                type: (isMsg ? 'new_message' : isOrder ? 'new_order' : isRepair ? 'new_repair' : 'new_message') as NotificationType,
+                title: isMsg ? 'Neue Nachricht' : isOrder ? 'Neue Bestellung' : isRepair ? 'Neue Reparatur' : (payload.title || 'System Benachrichtigung'),
+                body: payload.body || payload.message || 'Neue Benachrichtigung',
+                icon: isMsg ? '💬' : isOrder ? '📦' : isRepair ? '🔧' : (payload.icon || '🔔'),
+                link: payload.link || (isMsg ? '/messages' : isOrder ? '/orders' : isRepair ? '/repair-tickets' : '/messages'),
+                timestamp: payload.timestamp || new Date().toISOString(),
+                read: false
+            };
 
             setNotifications(prev => {
+                if (prev.some(n => n.id === notification.id)) return prev;
                 const updated = [notification, ...prev];
                 return updated.slice(0, MAX_NOTIFICATIONS);
             });
 
             // Browser Notification (if permission granted)
             if (Notification.permission === 'granted') {
-                new Notification(`${payload.icon} ${payload.title}`, {
-                    body: payload.body,
+                new Notification(`${notification.icon} ${notification.title}`, {
+                    body: notification.body,
                     icon: '/favicon.ico',
                 });
             }

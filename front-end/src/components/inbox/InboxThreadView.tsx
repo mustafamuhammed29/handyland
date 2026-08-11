@@ -30,66 +30,90 @@ export const InboxThreadView: React.FC<InboxThreadViewProps> = ({
         >
             {/* Messages scroll area */}
             <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4 flex flex-col">
-                {/* Original message — show on the right if customer wrote it, left if admin initiated */}
-                {selectedMessage.initiatedByAdmin ? (
-                    // Admin initiated: show on LEFT as Support Team message
-                    <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="self-start max-w-[82%]"
-                    >
-                        <div className="text-xs text-slate-500 text-left mb-1">
-                            <Clock className="w-3 h-3 inline mr-1" />
-                            {new Date(selectedMessage.createdAt).toLocaleString()}
-                        </div>
-                        <div className="bg-slate-700/70 text-slate-100 rounded-2xl rounded-tl-sm p-4 border border-slate-600/50 shadow-sm">
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedMessage.message}</p>
-                        </div>
-                        <div className="text-[10px] text-slate-500 text-left mt-1 font-medium">🤝 Support Team</div>
-                    </motion.div>
-                ) : (
-                    // Customer initiated: show on RIGHT as customer's opening message
-                    <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="self-end max-w-[82%]"
-                    >
-                        <div className="text-xs text-slate-500 text-right mb-1">
-                            <Clock className="w-3 h-3 inline mr-1" />
-                            {new Date(selectedMessage.createdAt).toLocaleString()}
-                        </div>
-                        <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm p-4 shadow-lg shadow-blue-900/20">
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedMessage.message}</p>
-                        </div>
-                        <div className="text-[10px] text-slate-500 text-right mt-1 font-medium">You</div>
-                    </motion.div>
-                )}
+                {/* Helper for safe date formatting */}
+                {(() => {
+                    const formatDateSafe = (dateVal: any) => {
+                        if (!dateVal) return '';
+                        const d = new Date(dateVal);
+                        return isNaN(d.getTime()) ? '' : d.toLocaleString();
+                    };
 
-                {/* Replies */}
-                {selectedMessage.replies?.map((reply, idx) => (
-                    <motion.div
-                        key={reply._id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.03 }}
-                        className={`max-w-[82%] ${reply.isAdmin ? 'self-start' : 'self-end'}`}
-                    >
-                        <div className={`text-xs text-slate-500 mb-1 ${reply.isAdmin ? 'text-left' : 'text-right'}`}>
-                            <Clock className="w-3 h-3 inline mr-1" />
-                            {new Date(reply.createdAt).toLocaleString()}
-                        </div>
-                        <div className={
-                            reply.isAdmin
-                                ? 'bg-slate-700/70 text-slate-100 rounded-2xl rounded-tl-sm p-4 border border-slate-600/50 shadow-sm'
-                                : 'bg-blue-600 text-white rounded-2xl rounded-tr-sm p-4 shadow-lg shadow-blue-900/20'
-                        }>
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{reply.message}</p>
-                        </div>
-                        <div className={`text-[10px] text-slate-500 mt-1 font-medium ${reply.isAdmin ? 'text-left' : 'text-right'}`}>
-                            {reply.isAdmin ? '🤝 Support Team' : 'You'}
-                        </div>
-                    </motion.div>
-                ))}
+                    const mainDate = formatDateSafe(selectedMessage.created_at || selectedMessage.createdAt);
+                    const repliesList = selectedMessage.replies || (selectedMessage as any).message_replies || [];
+
+                    return (
+                        <>
+                            {/* Original message */}
+                            {selectedMessage.initiatedByAdmin ? (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="self-start max-w-[82%]"
+                                >
+                                    {mainDate && (
+                                        <div className="text-xs text-slate-500 text-left mb-1">
+                                            <Clock className="w-3 h-3 inline mr-1" />
+                                            {mainDate}
+                                        </div>
+                                    )}
+                                    <div className="bg-slate-700/70 text-slate-100 rounded-2xl rounded-tl-sm p-4 border border-slate-600/50 shadow-sm">
+                                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedMessage.message}</p>
+                                    </div>
+                                    <div className="text-[10px] text-slate-500 text-left mt-1 font-medium">🤝 Support Team</div>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="self-end max-w-[82%]"
+                                >
+                                    {mainDate && (
+                                        <div className="text-xs text-slate-500 text-right mb-1">
+                                            <Clock className="w-3 h-3 inline mr-1" />
+                                            {mainDate}
+                                        </div>
+                                    )}
+                                    <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm p-4 shadow-lg shadow-blue-900/20">
+                                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedMessage.message}</p>
+                                    </div>
+                                    <div className="text-[10px] text-slate-500 text-right mt-1 font-medium">You</div>
+                                </motion.div>
+                            )}
+
+                            {/* Replies */}
+                            {repliesList.map((reply: any, idx: number) => {
+                                const isFromAdmin = reply.is_admin || reply.isAdmin;
+                                const replyDate = formatDateSafe(reply.created_at || reply.createdAt);
+                                return (
+                                    <motion.div
+                                        key={reply._id || reply.id || idx}
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.03 }}
+                                        className={`max-w-[82%] ${isFromAdmin ? 'self-start' : 'self-end'}`}
+                                    >
+                                        {replyDate && (
+                                            <div className={`text-xs text-slate-500 mb-1 ${isFromAdmin ? 'text-left' : 'text-right'}`}>
+                                                <Clock className="w-3 h-3 inline mr-1" />
+                                                {replyDate}
+                                            </div>
+                                        )}
+                                        <div className={
+                                            isFromAdmin
+                                                ? 'bg-slate-700/70 text-slate-100 rounded-2xl rounded-tl-sm p-4 border border-slate-600/50 shadow-sm'
+                                                : 'bg-blue-600 text-white rounded-2xl rounded-tr-sm p-4 shadow-lg shadow-blue-900/20'
+                                        }>
+                                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{reply.message}</p>
+                                        </div>
+                                        <div className={`text-[10px] text-slate-500 mt-1 font-medium ${isFromAdmin ? 'text-left' : 'text-right'}`}>
+                                            {isFromAdmin ? '🤝 Support Team' : 'You'}
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </>
+                    );
+                })()}
                 <div ref={messagesEndRef} />
             </div>
 

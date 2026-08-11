@@ -13,7 +13,7 @@ const API_URL = ENV.API_URL;
 const SocialButton: React.FC<{ provider: 'google' | 'facebook'; disabled?: boolean }> = ({ provider, disabled }) => {
     const isGoogle = provider === 'google';
     const label = isGoogle ? 'Mit Google fortfahren' : 'Mit Facebook fortfahren';
-    const bg = isGoogle ? 'bg-white hover:bg-gray-50 text-gray-800 border border-gray-300' : 'bg-[#1877F2] hover:bg-[#166FE5] text-slate-900 dark:text-white';
+    const bg = isGoogle ? 'bg-white hover:bg-gray-50 text-gray-800 border border-gray-300' : 'bg-[#1877F2] hover:bg-[#166FE5] text-white';
     const href = `${API_URL}/api/auth/${provider}`;
 
     return (
@@ -76,16 +76,19 @@ const Login: React.FC = () => {
             const redirectPath = location.state?.from?.pathname;
             await login(email, password, redirectPath);
         } catch (err: any) {
-            const errorMessage = err.message || t('auth.invalidCredentials', 'Ungültige E-Mail oder Passwort');
+            const isEmailNotVerified = err.emailNotVerified || err.data?.emailNotVerified || (err.data && err.data.isVerified === false);
+            const rawMessage = err.message || '';
+            const isVerifyMsg = rawMessage.toLowerCase().includes('verify') || rawMessage.toLowerCase().includes('confirm') || rawMessage.toLowerCase().includes('bestätigen');
+
             // Check if account is blocked
             if (err.isBlocked || err.data?.isBlocked) {
                 setIsBlocked(true);
-                setError(errorMessage);
+                setError(rawMessage || t('auth.accountSuspended', 'Konto gesperrt'));
+            } else if (isEmailNotVerified || isVerifyMsg) {
+                setError(t('auth.emailNotVerified', 'Bitte bestätige deine E-Mail-Adresse, bevor du dich anmeldest.'));
+                setShowResend(true);
             } else {
-                setError(errorMessage);
-                if (errorMessage.toLowerCase().includes('verify') || (err.data && err.data.isVerified === false)) {
-                    setShowResend(true);
-                }
+                setError(rawMessage || t('auth.invalidCredentials', 'Ungültige E-Mail oder Passwort'));
             }
         } finally {
             setLoading(false);

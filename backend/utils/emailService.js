@@ -222,10 +222,51 @@ const emailTemplates = {
     }
 };
 
+const sendVerificationEmail = async (email, userName, verificationUrl) => {
+    const variablesContext = {
+        userName: userName || 'User',
+        verificationUrl: verificationUrl
+    };
+
+    const sent = await sendTemplateEmail(email, 'verify_email', variablesContext);
+
+    if (!sent) {
+        // Fallback HTML if DB template is missing or inactive
+        const html = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0f172a;color:#e2e8f0;border-radius:12px;overflow:hidden;">
+            <div style="background:#1e293b;padding:32px;text-align:center;">
+                <h1 style="margin:0;font-size:24px;color:#fff;">HandyLand</h1>
+                <p style="color:#94a3b8;margin:8px 0 0;">Bestätige deine E-Mail-Adresse</p>
+            </div>
+            <div style="padding:32px;">
+                <h2 style="color:#fff;margin:0 0 16px;">Hallo ${userName || 'Kunde'} 👋</h2>
+                <p style="color:#94a3b8;line-height:1.6;">Vielen Dank für deine Registrierung bei HandyLand! Bitte klicke auf den folgenden Button, um deine E-Mail-Adresse zu bestätigen und dein Konto zu aktivieren:</p>
+                <div style="text-align:center;margin:32px 0;">
+                    <a href="${verificationUrl}" style="background:linear-gradient(to right, #06b6d4, #3b82f6);color:#ffffff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">E-Mail jetzt bestätigen →</a>
+                </div>
+                <p style="color:#64748b;font-size:13px;line-height:1.5;">Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:<br/><a href="${verificationUrl}" style="color:#38bdf8;">${verificationUrl}</a></p>
+            </div>
+            <div style="padding:16px 32px;background:#1e293b;text-align:center;">
+                <p style="color:#64748b;font-size:12px;margin:0;">© HandyLand. Alle Rechte vorbehalten.</p>
+            </div>
+        </div>
+        `;
+
+        await sendEmail({
+            email,
+            subject: 'Bestätige deine E-Mail-Adresse - HandyLand',
+            message: `Hallo ${userName},\n\nBitte bestätige deine E-Mail-Adresse: ${verificationUrl}`,
+            html
+        });
+    }
+    return true;
+};
+
 module.exports = {
     sendEmail,
     sendOrderConfirmation,
     sendTemplateEmail,
+    sendVerificationEmail,
     emailTemplates,
     clearSmtpCache
 };

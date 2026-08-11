@@ -130,7 +130,10 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
         if (link) {
             // Remove /admin prefix if present because React routes are rooted at /
             let cleanLink = link.startsWith('/admin') ? link.replace('/admin', '') : link;
-            navigate(cleanLink || '/');
+            if (!cleanLink || cleanLink === '/') cleanLink = '/messages';
+            navigate(cleanLink);
+        } else {
+            navigate('/messages');
         }
     };
 

@@ -2,8 +2,14 @@ import { api } from '../utils/api';
 import { User } from '../types';
 
 // Only log auth errors in development — avoids leaking stack traces / API details in production
-const devLog = (...args: unknown[]) => {
-    if (import.meta.env.DEV) console.error(...args);
+const devLog = (message: string, error: any) => {
+    if (!import.meta.env.DEV) return;
+    const status = error?.response?.status;
+    if (status === 401 || status === 403) {
+        console.warn(`${message} (${status}):`, error?.response?.data?.message || error.message);
+    } else {
+        console.error(message, error);
+    }
 };
 
 interface LoginResponse {
@@ -25,7 +31,7 @@ export const authService = {
             const response = await api.post('/api/auth/login', { email, password });
             return response as any;
         } catch (error: any) {
-            devLog('Auth Service Login Error:', error);
+            devLog('Auth Service Login Result', error);
             throw error.response?.data || { message: error.message || 'Login failed' };
         }
     },

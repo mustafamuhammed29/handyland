@@ -39,7 +39,8 @@
     "signIn": "Sign In",
     "noAccount": "Don't have an account?",
     "resetPassword": "Reset Password",
-    "verifyEmail": "Verify Email"
+    "verifyEmail": "Verify Email",
+    "emailNotVerified": "Please verify your email address before signing in."
   },
   "cart": {
     "title": "Shopping Cart",

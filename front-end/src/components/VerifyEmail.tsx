@@ -6,36 +6,50 @@ import { authService } from '../services/authService';
 export const VerifyEmail = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const token = searchParams.get('token');
+    
+    // Extract token from any possible query parameter (token, token_hash, code) or URL hash
+    const token = searchParams.get('token') || searchParams.get('token_hash') || searchParams.get('code');
+    const hash = window.location.hash;
+    const isHashConfirmed = hash.includes('access_token=') || hash.includes('type=signup') || hash.includes('type=email_change');
+    
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-    const [message, setMessage] = useState('Verifying your email...');
+    const [message, setMessage] = useState('E-Mail wird überprüft...');
     const hasAttempted = React.useRef(false);
 
     useEffect(() => {
-        if (!token) {
-            setStatus('error');
-            setMessage('Invalid verification link.');
-            return;
-        }
-
         if (hasAttempted.current) return;
         hasAttempted.current = true;
 
+        // If Supabase redirected directly with access_token in URL hash, email is already verified!
+        if (isHashConfirmed) {
+            const hashToken = hash.match(/access_token=([^&]+)/)?.[1] || token;
+            if (hashToken) {
+                authService.verifyEmail(hashToken).catch(() => {});
+            }
+            setStatus('success');
+            setMessage('E-Mail erfolgreich bestätigt! Du wirst zum Login weitergeleitet...');
+            setTimeout(() => navigate('/login'), 2500);
+            return;
+        }
+
+        if (!token) {
+            setStatus('error');
+            setMessage('Ungültiger oder abgelaufener Bestätigungslink.');
+            return;
+        }
+
         const verify = async () => {
             try {
-                // Call authService
                 const response = await authService.verifyEmail(token);
                 setStatus('success');
-                setMessage(response.message || 'Email verified successfully!');
-                setTimeout(() => navigate('/login'), 3000); // Redirect to login
+                setMessage(response.message || 'E-Mail erfolgreich bestätigt!');
+                setTimeout(() => navigate('/login'), 2500);
             } catch (error: any) {
-                const errorMessage = error.message || 'Verification failed. Link may be expired.';
-
-                // If it's already verified, don't show an error
-                if (errorMessage.toLowerCase().includes('already verified')) {
+                const errorMessage = error.message || 'Bestätigung fehlgeschlagen. Der Link ist möglicherweise abgelaufen.';
+                if (errorMessage.toLowerCase().includes('already verified') || errorMessage.toLowerCase().includes('bereits') || errorMessage.toLowerCase().includes('verarbeitet')) {
                     setStatus('success');
-                    setMessage('Email is already verified. You can now login.');
-                    setTimeout(() => navigate('/login'), 3000);
+                    setMessage('E-Mail ist bereits bestätigt. Du kannst dich jetzt anmelden.');
+                    setTimeout(() => navigate('/login'), 2500);
                 } else {
                     setStatus('error');
                     setMessage(errorMessage);
@@ -44,7 +58,7 @@ export const VerifyEmail = () => {
         };
 
         verify();
-    }, [token, navigate]);
+    }, [token, isHashConfirmed, navigate]);
 
     return (
         <div className="min-h-[100dvh] bg-slate-950 flex items-center justify-center p-4">

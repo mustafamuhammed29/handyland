@@ -18,9 +18,8 @@ exports.getMessages = async (req, res, next) => {
             .select('*, message_replies(*)', { count: 'exact' });
 
         if (req.user.role !== 'admin' && req.user.role !== 'staff') {
-            query = query.eq('user_id', req.user.id);
+            query = query.or(`user_id.eq.${req.user.id},email.eq.${req.user.email}`);
         } else if (req.user.role === 'staff') {
-            // Staff can see unassigned and their own assigned tickets
             query = query.or(`assigned_to.eq.${req.user.id},assigned_to.is.null`);
         }
 
@@ -33,7 +32,12 @@ exports.getMessages = async (req, res, next) => {
         const { data, error, count } = await query;
         if (error) throw error;
 
-        const messagesWithId = (data || []).map(m => ({ ...m, _id: m.id }));
+        const messagesWithId = (data || []).map(m => ({
+            ...m,
+            _id: m.id,
+            replies: (m.message_replies || []).map(r => ({ ...r, _id: r.id }))
+        }));
+
         return res.status(200).json({
             success: true, count,
             pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
@@ -55,7 +59,11 @@ exports.getMessage = async (req, res, next) => {
             await supabaseAdmin.from('messages').update({ status: 'read' }).eq('id', data.id);
             data.status = 'read';
         }
-        const messageWithId = { ...data, _id: data.id };
+        const messageWithId = {
+            ...data,
+            _id: data.id,
+            replies: (data.message_replies || []).map(r => ({ ...r, _id: r.id }))
+        };
         return res.status(200).json({ success: true, message: messageWithId, data: messageWithId });
     } catch (error) { next(error); }
 };
@@ -68,79 +76,99 @@ exports.createMessage = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Name, email and message are required' });
         }
 
-        const { data, error } = await supabaseAdmin
-            .from('messages')
-            .insert({ user_id: req.user?.id || null, name, email, message })
-            .select().single();
+        const userId = req.user?.id || null;
 
-        if (error) {
-            console.error('DB_ERROR in createMessage:', JSON.stringify(error));
-            throw error;
+        // Continuity check: Look for an existing non-closed message thread for this user/email
+        let existingThreadQuery = supabaseAdmin
+            .from('messages')
+            .select('id, user_id, email, status')
+            .neq('status', 'closed');
+
+        if (userId) {
+            existingThreadQuery = existingThreadQuery.or(`user_id.eq.${userId},email.eq.${email}`);
+        } else {
+            existingThreadQuery = existingThreadQuery.eq('email', email);
         }
 
-        // Notify admins
+        const { data: existingThreads } = await existingThreadQuery.order('created_at', { ascending: false }).limit(1);
+        const activeThread = existingThreads && existingThreads.length > 0 ? existingThreads[0] : null;
+
+        let targetMessageId;
+        let finalThreadData;
+
+        if (activeThread) {
+            targetMessageId = activeThread.id;
+
+            // Sync user_id if previously null
+            if (userId && !activeThread.user_id) {
+                await supabaseAdmin.from('messages').update({ user_id: userId }).eq('id', activeThread.id);
+            }
+
+            await supabaseAdmin.from('messages').update({ status: 'unread', updated_at: new Date().toISOString() }).eq('id', activeThread.id);
+
+            const { error: replyErr } = await supabaseAdmin
+                .from('message_replies')
+                .insert({
+                    message_id: activeThread.id,
+                    message,
+                    is_admin: false,
+                    user_id: userId,
+                    is_internal_note: false
+                });
+
+            if (replyErr) throw replyErr;
+
+            const { data: updatedThread } = await supabaseAdmin
+                .from('messages')
+                .select('*, message_replies(*)')
+                .eq('id', activeThread.id)
+                .single();
+
+            finalThreadData = updatedThread;
+        } else {
+            const { data: newMsg, error } = await supabaseAdmin
+                .from('messages')
+                .insert({ user_id: userId, name, email, message, status: 'unread' })
+                .select('*, message_replies(*)').single();
+
+            if (error) throw error;
+            finalThreadData = newMsg;
+            targetMessageId = newMsg.id;
+        }
+
+        const messageWithId = {
+            ...finalThreadData,
+            _id: finalThreadData.id,
+            replies: (finalThreadData.message_replies || []).map(r => ({ ...r, _id: r.id }))
+        };
+
+        // Notify admins via socket
+        const { emitAdminNotification, emitUserMessage } = require('../utils/socket');
+        emitAdminNotification('new_message', {
+            title: 'Neue Nachricht',
+            body: `${name}: ${message.substring(0, 50)}...`,
+            icon: '💬',
+            link: `/messages?id=${targetMessageId}`
+        });
+
+        // Notify customer socket room
+        if (userId) emitUserMessage(userId, { type: 'customer_sent', thread: messageWithId });
+        if (email) emitUserMessage(email, { type: 'customer_sent', thread: messageWithId });
+
+        // Save DB notification for admins
         const { data: admins } = await supabaseAdmin.from('users').select('id, email').eq('role', 'admin');
         if (admins) {
             const notifs = admins.map(admin => ({
                 user_id: admin.id,
-                message: `Neue Nachricht von ${name}`,
-                type: 'new_message',
-                link: `/messages?id=${data.id}`
+                message: `Neue Nachricht von ${name}: ${message.substring(0, 40)}...`,
+                type: 'info',
+                link: `/messages?id=${targetMessageId}`
             }));
-            await supabaseAdmin.from('notifications').insert(notifs);
-
-            // Send real-time socket notification
-            emitAdminNotification('new_message', {
-                title: 'Neue Nachricht',
-                body: `${name}: ${message.substring(0, 50)}...`,
-                icon: '💬',
-                link: `/messages?id=${data.id}`
+            supabaseAdmin.from('notifications').insert(notifs).then(({ error: nErr }) => {
+                if (nErr) console.error('❌ Notification DB insert warning:', nErr.message);
             });
-
-            // Send email to all admins
-            const frontendUrl = process.env.FRONTEND_URL || 'https://front-end-rho-five-94.vercel.app';
-            for (const admin of admins) {
-                if (admin.email) {
-                    sendEmail({
-                        email: admin.email,
-                        replyTo: email,
-                        subject: `Neue Kontaktanfrage von ${name}`,
-                        html: `
-                            <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8fafc;padding:24px;border-radius:12px;color:#0f172a;">
-                                <h2 style="margin-top:0;">Neue Kontaktanfrage</h2>
-                                <p><strong>Name:</strong> ${name}</p>
-                                <p><strong>E-Mail:</strong> ${email}</p>
-                                <div style="background:#fff;padding:16px;border-radius:8px;border:1px solid #e2e8f0;margin:16px 0;">
-                                    ${message.replace(/\n/g, '<br>')}
-                                </div>
-                                <a href="${frontendUrl}/admin/messages/${data.id}" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;font-weight:bold;">Im Admin-Panel ansehen</a>
-                            </div>
-                        `,
-                        message: `Neue Nachricht von ${name} (${email}):\n\n${message}`
-                    }).catch(err => console.error('Failed to send admin email:', err.message));
-                }
-            }
         }
 
-        // Send confirmation to the user
-        sendEmail({
-            email: email,
-            subject: 'Wir haben Ihre Nachricht erhalten',
-            html: `
-                <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8fafc;padding:24px;border-radius:12px;color:#0f172a;">
-                    <h2 style="margin-top:0;">Hallo ${name},</h2>
-                    <p>Vielen Dank für Ihre Kontaktaufnahme. Wir haben Ihre Nachricht erhalten und werden uns so schnell wie möglich bei Ihnen melden.</p>
-                    <div style="background:#fff;padding:16px;border-radius:8px;border:1px solid #e2e8f0;margin:16px 0;color:#64748b;">
-                        <strong>Ihre Nachricht:</strong><br/><br/>
-                        ${message.replace(/\n/g, '<br>')}
-                    </div>
-                    <p>Mit freundlichen Grüßen,<br/>Ihr HandyLand-Team</p>
-                </div>
-            `,
-            message: `Hallo ${name},\n\nVielen Dank für Ihre Nachricht. Wir melden uns in Kürze bei Ihnen.\n\nIhre Nachricht:\n${message}\n\nViele Grüße,\nIhr HandyLand-Team`
-        }).catch(err => console.error('Failed to send user confirmation email:', err.message));
-
-        const messageWithId = { ...data, _id: data.id };
         return res.status(201).json({ success: true, msg: 'Message sent successfully', message: messageWithId, data: messageWithId });
     } catch (error) { next(error); }
 };
@@ -155,7 +183,6 @@ exports.updateMessageStatus = async (req, res, next) => {
         if (assigned_to !== undefined) updateData.assigned_to = assigned_to || null;
         if (priority) updateData.priority = priority;
 
-        // Staff can only update if it's assigned to them or unassigned
         if (req.user.role === 'staff') {
             const { data: msg } = await supabaseAdmin.from('messages').select('assigned_to').eq('id', req.params.id).single();
             if (msg && msg.assigned_to && msg.assigned_to !== req.user.id) {
@@ -193,11 +220,37 @@ exports.replyToMessage = async (req, res, next) => {
 
         if (error) throw error;
 
-        // Update status to replied and send email to user
+        let updatedThread = msg;
         if (isAdminOrStaff && !is_internal_note) {
-            await supabaseAdmin.from('messages').update({ status: 'replied' }).eq('id', msg.id);
+            await supabaseAdmin.from('messages').update({ status: 'replied', updated_at: new Date().toISOString() }).eq('id', msg.id);
 
-            // Send email to the user
+            const { data: freshThread } = await supabaseAdmin
+                .from('messages')
+                .select('*, message_replies(*)')
+                .eq('id', msg.id)
+                .single();
+
+            if (freshThread) updatedThread = freshThread;
+
+            // Emit real-time Socket.io push to customer
+            const { emitUserMessage, emitNotification } = require('../utils/socket');
+            const threadWithId = {
+                ...updatedThread,
+                _id: updatedThread.id,
+                replies: (updatedThread.message_replies || []).map(r => ({ ...r, _id: r.id }))
+            };
+
+            const replyWithId = { ...reply, _id: reply.id };
+
+            if (msg.user_id) {
+                emitUserMessage(msg.user_id, { type: 'admin_reply', message: replyWithId, thread: threadWithId });
+                emitNotification(msg.user_id, { message: `Neue Support-Antwort`, type: 'info', link: `/dashboard?tab=messages` });
+            }
+            if (msg.email) {
+                emitUserMessage(msg.email, { type: 'admin_reply', message: replyWithId, thread: threadWithId });
+            }
+
+            // Send email to user as fallback
             const frontendUrl = process.env.FRONTEND_URL || 'https://front-end-rho-five-94.vercel.app';
             if (msg.email) {
                 sendEmail({
@@ -210,14 +263,7 @@ exports.replyToMessage = async (req, res, next) => {
                             <div style="background:#fff;padding:16px;border-radius:8px;border:1px solid #e2e8f0;margin:16px 0;color:#0f172a;">
                                 ${message.replace(/\n/g, '<br>')}
                             </div>
-                            <p style="color:#64748b;font-size:14px;"><strong>Ihre ursprüngliche Nachricht:</strong></p>
-                            <div style="background:#f1f5f9;padding:12px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:16px;color:#64748b;font-size:14px;font-style:italic;">
-                                ${msg.message.replace(/\n/g, '<br>')}
-                            </div>
                             <p>Mit freundlichen Grüßen,<br/>Ihr HandyLand Support-Team</p>
-                            <div style="margin-top:24px;text-align:center;">
-                                <a href="${frontendUrl}/dashboard" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;font-weight:bold;">Zum Kundenportal</a>
-                            </div>
                         </div>
                     `,
                     message: `Hallo ${msg.name},\n\nUnser Support-Team hat geantwortet:\n\n${message}\n\nViele Grüße,\nIhr HandyLand Support-Team`
@@ -226,7 +272,13 @@ exports.replyToMessage = async (req, res, next) => {
         }
 
         const replyWithId = { ...reply, _id: reply.id };
-        return res.status(201).json({ success: true, reply: replyWithId, data: replyWithId });
+        const threadWithId = {
+            ...updatedThread,
+            _id: updatedThread.id,
+            replies: (updatedThread.message_replies || []).map(r => ({ ...r, _id: r.id }))
+        };
+
+        return res.status(201).json({ success: true, reply: replyWithId, message: threadWithId, data: threadWithId });
     } catch (error) { next(error); }
 };
 

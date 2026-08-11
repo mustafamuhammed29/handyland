@@ -12,8 +12,8 @@ const crypto = require('crypto');
  *    - Blocks simple cross-site form submissions (traditional CSRF attack vector).
  */
 const csrfProtection = (req, res, next) => {
-    // 1. Always bypass webhooks (Stripe webhook has cryptographic payload verification)
-    if (req.originalUrl && req.originalUrl.includes('/api/payment/webhook')) {
+    // 1. Always bypass webhooks & public translation missing endpoint
+    if (req.originalUrl && (req.originalUrl.includes('/api/payment/webhook') || req.originalUrl.includes('/api/translations/missing'))) {
         return next();
     }
 
