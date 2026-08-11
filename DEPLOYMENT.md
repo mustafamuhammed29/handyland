@@ -1,413 +1,214 @@
-# 🚀 HandyLand Deployment Guide
+# 🚀 HandyLand Deployment & Production Operations Guide
 
-## Prerequisites
-
-Before deploying, ensure you have:
-
-- [ ] Node.js 16+ installed
-- [ ] MongoDB Atlas account (or MongoDB server)
-- [ ] Stripe account with live API keys
-- [ ] SMTP email service (SendGrid/Mailgun/AWS SES)
-- [ ] Domain name (optional but recommended)
-- [ ] SSL certificate (Let's Encrypt or platform-provided)
+This guide provides complete, step-by-step instructions for deploying and operating the **HandyLand** platform across both **Local Development** and **Production Cloud Environments** (Supabase + Vercel / Render / Railway).
 
 ---
 
-## Part 1: Database Setup (Supabase)
+## 📋 System Prerequisites
+
+Before starting deployment, ensure you have:
+
+- **Node.js**: `v18.x` or `v20.x` LTS installed
+- **NPM**: `v9.x` or higher
+- **Supabase Account**: Remote PostgreSQL database console or local Docker setup
+- **SendGrid Account**: For transactional emails and security alerts (`SENDGRID_API_KEY`)
+- **Stripe Account**: Live/Test API keys & Webhook signing secret (`STRIPE_WEBHOOK_SECRET`)
+- **Domain Name & SSL**: Managed via Vercel, Netlify, or custom DNS provider
+
+---
+
+## 🔑 Environment Configuration Matrix
+
+The application relies on the following unified environment variables across all services:
+
+| Variable Name | Environment | Description | Example / Format |
+|---|---|---|---|
+| `PORT` | Backend | Express HTTP Port | `5000` |
+| `NODE_ENV` | All | Environment mode | `production` / `development` |
+| `SUPABASE_URL` | All | Supabase project URL | `https://xyz.supabase.co` |
+| `SUPABASE_ANON_KEY` | All | Supabase public anon key | `eyJhbGciOi...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Backend | Supabase administrative bypass key | `eyJhbGciOi...` *(Secret)* |
+| `JWT_SECRET` | Backend | Encryption secret for session tokens | `random_64char_string` |
+| `SENDGRID_API_KEY` | Backend | SendGrid API key for emails | `SG.xxxxxxxx...` |
+| `FROM_EMAIL` | Backend | Official sender email address | `noreply@handyland.de` |
+| `FROM_NAME` | Backend | Official sender name | `HandyLand Support` |
+| `STRIPE_PUBLISHABLE_KEY` | Frontend / Admin | Public Stripe API key | `pk_test_...` / `pk_live_...` |
+| `STRIPE_SECRET_KEY` | Backend | Private Stripe API key | `sk_test_...` / `sk_live_...` |
+| `STRIPE_WEBHOOK_SECRET` | Backend | Signature key for webhook verification | `whsec_...` |
+| `FRONTEND_URL` | Backend | Customer portal public URL | `https://handyland.de` |
+| `ADMIN_URL` | Backend | Admin dashboard public URL | `https://admin.handyland.de` |
+
+---
+
+## 🗄️ Part 1: Supabase Database Setup
+
+HandyLand uses a **100% Supabase (PostgreSQL)** database backend.
 
 ### Step 1: Create Supabase Project
+1. Log in to [Supabase Console](https://supabase.com).
+2. Click **New Project** and name it `handyland-production`.
+3. Set a strong Database Password and select your closest hosting region (e.g. `eu-central-1` Frankfurt).
 
-1. Go to [Supabase](https://supabase.com)
-2. Sign in with GitHub and click **"New Project"**
-3. Select your organization and name your project `handyland-prod`
-4. Generate a strong Database Password and save it.
-5. Select a region closest to your users (e.g., Frankfurt)
-6. Click **"Create new project"**
+### Step 2: Retrieve Credentials
+Navigate to **Project Settings → API**:
+- **Project URL**: Use for `SUPABASE_URL`
+- **anon / public**: Use for `SUPABASE_ANON_KEY`
+- **service_role**: Use for `SUPABASE_SERVICE_ROLE_KEY` (Backend only, never expose to clients)
 
-### Step 2: Get API Keys
+### Step 3: Run Database Migrations
+Execute the SQL files located in `/supabase/migrations/` in numerical sequence inside the **Supabase SQL Editor**:
 
-1. Go to **Project Settings** → **API**
-2. Copy the **Project URL** (This is your `SUPABASE_URL`)
-3. Copy the **anon / public** key (This is your `SUPABASE_ANON_KEY` for frontend)
-4. Copy the **service_role** key (This is your `SUPABASE_SERVICE_ROLE_KEY` for backend - Keep it secret!)
+1. `001_initial_schema.sql` (Tables, enums, & relations)
+2. `002_rls_policies.sql` (Row-Level Security & access control)
+3. `003_indexes_and_triggers.sql` (Performance indexes & automated triggers)
+4. `004_storage_buckets.sql` (Object storage for receipts & invoices)
+5. `005_inventory_optimization.sql` (Stock & catalog rules)
+6. `006_atomic_stock_and_coupon.sql` (Atomic transaction RPCs)
+7. `007_valuation_dynamic_settings.sql` (Device valuation algorithms)
 
-### Step 3: Run Migrations
+---
 
-Ensure all SQL migrations have been executed in the Supabase SQL Editor.
-(Optional) If you have a migration CLI setup, run `supabase db push`.
+## 💻 Part 2: Local Development Workflow
 
-## Part 2: Backend Deployment
+To run HandyLand locally for testing and development:
 
-### Option A: Deploy to Railway (Recommended - Easy)
-
-#### Step 1: Prepare Repository
-
-```bash
-# Make sure everything is committed
-git add .
-git commit -m "Production ready"
-git push origin main
-```
-
-#### Step 2: Deploy to Railway
-
-1. Go to [Railway.app](https://railway.app/)
-2. Sign up with GitHub
-3. Click "New Project"
-4. Select "Deploy from GitHub repo"
-5. Choose `handyland` repository
-6. Railway will auto-detect Node.js
-
-#### Step 3: Configure Environment Variables
-
-In Railway dashboard, go to **Variables** tab:
-
-```text
-NODE_ENV=production
+### 1. Configure Backend Environment
+Copy `/backend/.env.example` to `/backend/.env` and update values:
+```env
 PORT=5000
-
-MONGO_URI=mongodb+srv://handyland_admin:PASSWORD@handyland-prod.xxxxx.mongodb.net/handyland
-
-JWT_SECRET=your-super-secret-jwt-key-change-this
-REFRESH_TOKEN_SECRET=another-super-secret-key
-
-STRIPE_SECRET_KEY=sk_live_YOUR_LIVE_KEY
-STRIPE_PUBLISHABLE_KEY=pk_live_YOUR_LIVE_KEY
-STRIPE_WEBHOOK_SECRET=whsec_YOUR_WEBHOOK_SECRET
-
-SMTP_HOST=smtp.sendgrid.net
-SMTP_PORT=587
-SMTP_USER=apikey
-SMTP_PASS=YOUR_SENDGRID_API_KEY
-
-FROM_EMAIL=noreply@handyland.com
-FROM_NAME=HandyLand
-
-FRONTEND_URL=https://your-frontend-url.vercel.app
-ADMIN_URL=https://admin-your-domain.vercel.app
-BACKEND_URL=https://your-backend.up.railway.app
-
-ALLOWED_ORIGINS=https://your-frontend-url.vercel.app,https://admin-your-domain.vercel.app
+NODE_ENV=development
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+JWT_SECRET=dev_secret_key_123
+SENDGRID_API_KEY=SG.your_sendgrid_key
+FROM_EMAIL=noreply@handyland.de
+FROM_NAME="HandyLand Local"
+FRONTEND_URL=http://localhost:3000
+ADMIN_URL=http://localhost:5173
 ```
 
-#### Step 4: Configure Start Command
+### 2. Launch Concurrent Terminals
 
-In **Settings** → **Deploy**:
-
-- **Root Directory**: `backend`
-- **Start Command**: `node server.js`
-
-#### Step 5: Deploy
-
-Click "Deploy" → Railway will build and deploy.  
-Your backend URL: `https://your-project.up.railway.app`
-
-### Option B: Deploy to Render
-
-1. Go to [Render.com](https://render.com/)
-2. Sign up / Sign in
-3. **New** → **Web Service**
-4. Connect GitHub repository
-5. Configure:
-   - **Name**: `handyland-backend`
-   - **Environment**: Node
-   - **Build Command**: `cd backend && npm install`
-   - **Start Command**: `cd backend && node server.js`
-6. Add environment variables (same as Railway)
-7. Click "Create Web Service"
-
-### Option C: Deploy to Heroku
-
+**Terminal 1: Express Backend API**
 ```bash
-# Install Heroku CLI
-# https://devcenter.heroku.com/articles/heroku-cli
-
-# Login
-heroku login
-
-# Create app
-heroku create handyland-backend
-
-# Add MongoDB addon (or use Atlas)
-heroku addons:create mongolab:sandbox
-
-# Set environment variables
-heroku config:set NODE_ENV=production
-heroku config:set JWT_SECRET=your-secret
-# ... (set all env vars)
-
-# Deploy
-git push heroku main
-
-# Open app
-heroku open
+cd backend
+npm install
+npm run dev
+# Running on http://localhost:5000
 ```
 
-## Part 3: Frontend Deployment
-
-### Option A: Deploy to Vercel (Recommended)
-
-#### Step 1: Install Vercel CLI
-
-```bash
-npm install -g vercel
-```
-
-#### Step 2: Deploy Frontend
-
+**Terminal 2: Customer Frontend**
 ```bash
 cd front-end
-vercel
+npm install
+npm run dev
+# Running on http://localhost:3000
 ```
 
-Follow prompts:
-
-- **Project name**: `handyland-frontend`
-- **Framework**: React (auto-detected)
-- **Build command**: `npm run build`
-- **Output directory**: `dist` or `build`
-
-#### Step 3: Configure Environment Variables
-
-In Vercel dashboard:
-
-```text
-VITE_API_URL=https://your-backend.up.railway.app/api
-VITE_STRIPE_PUBLISHABLE_KEY=pk_live_YOUR_KEY
-```
-
-#### Step 4: Set Custom Domain (Optional)
-
-In Vercel dashboard → **Domains**
-
-1. Add `handyland.com`
-2. Configure DNS (Vercel will provide instructions)
-
-### Option B: Deploy to Netlify
-
-```bash
-cd front-end
-npm run build
-
-# Install Netlify CLI
-npm install -g netlify-cli
-
-# Deploy
-netlify deploy --prod
-```
-
-## Part 4: Admin Panel Deployment
-
-Same process as frontend, but with different environment variables:
-
+**Terminal 3: Admin Dashboard**
 ```bash
 cd backend/admin
-vercel
+npm install
+npm run dev
+# Running on http://localhost:5173
 ```
 
-**Environment variables:**
+---
 
-```text
-VITE_API_URL=https://your-backend.up.railway.app/api
-```
+## ☁️ Part 3: Production Cloud Deployment
 
-Suggested subdomain: `admin.handyland.com`
+### A. Backend API Deployment (Render / Railway)
 
-## Part 5: Stripe Configuration
+#### Deploying to Render
+1. Create a **Web Service** on [Render](https://render.com).
+2. Connect your GitHub repository `handyland`.
+3. Set build and start commands:
+   - **Root Directory**: `backend`
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
+4. Add Environment Variables (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SENDGRID_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NODE_ENV=production`).
 
-### Step 1: Get Live API Keys
+#### Deploying to Railway
+1. Create a **New Project** on [Railway](https://railway.app).
+2. Select **Deploy from GitHub Repo** → `handyland`.
+3. Set root directory to `/backend` and command to `node server.js`.
+4. Configure variables in the Railway Variables panel.
 
-1. Go to Stripe Dashboard
-2. Switch to **Live Mode** (toggle in sidebar)
-3. Go to **Developers** → **API Keys**
-4. Copy:
-   - Publishable key: `pk_live_...`
-   - Secret key: `sk_live_...`
+---
 
-### Step 2: Configure Webhooks
+### B. Customer Frontend Deployment (Vercel)
 
-1. In Stripe dashboard → **Developers** → **Webhooks**
-2. Click "Add endpoint"
-3. Endpoint URL: `https://your-backend.up.railway.app/api/payment/webhook`
-4. Select events to listen for:
+1. Connect your GitHub repository to [Vercel](https://vercel.com).
+2. Select **Root Directory**: `front-end`.
+3. **Framework Preset**: Vite / React.
+4. **Build Command**: `npm run build`
+5. **Output Directory**: `dist`
+6. Set Environment Variables:
+   ```text
+   VITE_API_URL=https://your-backend-api.onrender.com/api
+   VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
+   ```
+
+---
+
+### C. Admin Dashboard Deployment (Vercel)
+
+1. Create a second project on Vercel connected to the same repository.
+2. Select **Root Directory**: `backend/admin`.
+3. **Build Command**: `npm run build`
+4. **Output Directory**: `dist`
+5. Set Environment Variables:
+   ```text
+   VITE_API_URL=https://your-backend-api.onrender.com/api
+   ```
+6. Set custom subdomain (e.g. `admin.handyland.de`).
+
+---
+
+## 📧 Part 4: SendGrid Email Service Setup
+
+1. Sign up at [SendGrid.com](https://sendgrid.com).
+2. Go to **Settings → API Keys** and click **Create API Key**.
+3. Grant **Full Access** or **Mail Send** permissions.
+4. Copy the API key starting with `SG.` into `SENDGRID_API_KEY`.
+5. Go to **Settings → Sender Authentication** and authenticate your domain (`handyland.de`).
+
+---
+
+## 💳 Part 5: Stripe Webhook Configuration
+
+1. In Stripe Dashboard, switch to **Live Mode**.
+2. Navigate to **Developers → Webhooks** and click **Add Endpoint**.
+3. **Endpoint URL**: `https://your-backend-api.onrender.com/api/payment/webhook`
+4. **Select Events**:
    - `payment_intent.succeeded`
    - `payment_intent.payment_failed`
    - `charge.refunded`
-5. Click "Add endpoint"
-6. Copy Signing secret: `whsec_...`
-7. Add to environment variables as `STRIPE_WEBHOOK_SECRET`
+5. Copy **Signing Secret** (`whsec_...`) into `STRIPE_WEBHOOK_SECRET` in backend environment variables.
 
-## Part 6: Email Service Setup (SendGrid)
+---
 
-### Step 1: Create SendGrid Account
+## 🧪 Part 6: Post-Deployment Verification Checklist
 
-1. Go to [SendGrid.com](https://sendgrid.com/)
-2. Sign up for free account (100 emails/day free)
-
-### Step 2: Create API Key
-
-1. Go to **Settings** → **API Keys**
-2. Click "Create API Key"
-3. Name: `HandyLand Production`
-4. Permissions: **Full Access**
-5. Click "Create & View"
-6. Copy API key (starts with `SG.`)
-
-### Step 3: Verify Sender Identity
-
-1. Go to **Settings** → **Sender Authentication**
-2. Choose **Authenticate Your Domain**
-3. Add the DNS records (SPF, DKIM) provided by SendGrid to your domain
-   - *Note: DNS records must be added once and never changed again.*
-
-### Step 4: Configure in Environment
-
-```text
-SENDGRID_API_KEY=SG.your_api_key_here
-
-FROM_EMAIL=noreply@handyland.com
-FROM_NAME=HandyLand
-```
-
-## Part 7: DNS & Domain Configuration
-
-If using custom domain:
-
-**For Frontend (`handyland.com`):**
-
-```text
-Type: A
-Name: @
-Value: [Vercel/Netlify IP]
-
-Type: CNAME
-Name: www
-Value: cname.vercel-dns.com
-```
-
-**For Admin (`admin.handyland.com`):**
-
-```text
-Type: CNAME
-Name: admin
-Value: cname.vercel-dns.com
-```
-
-**For Backend (`api.handyland.com`):**
-
-```text
-Type: CNAME
-Name: api
-Value: your-app.up.railway.app
-```
-
-## Part 8: SSL/HTTPS Configuration
-
-- **Vercel/Netlify**: SSL is automatic and free. No configuration needed.
-- **Railway**: SSL is automatic. Custom domains get Let's Encrypt certificates.
-
-**Manual SSL (if self-hosting):**
+Run the automated master test lab against the server:
 
 ```bash
-# Install certbot
-sudo apt-get install certbot
-
-# Get certificate
-sudo certbot certonly --standalone -d handyland.com -d www.handyland.com
-
-# Configure in server.js
-const https = require('https');
-const fs = require('fs');
-
-const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/handyland.com/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/handyland.com/fullchain.pem')
-};
-
-https.createServer(options, app).listen(443);
+cd backend
+node tests/master_site_test_lab.js
 ```
 
-## Part 9: Final Verification Checklist
+Verify that all 5 pillars achieve **100% PASS**:
+- [x] **Registration & Auth Auto-Healing**
+- [x] **Support Messaging & WhatsApp Thread Continuity**
+- [x] **Order Lifecycle & Invoicing**
+- [x] **Password Reset & Security Links**
+- [x] **Notifications & Real-Time Socket Events**
 
-**Pre-Launch Checklist:**
+---
 
-- [ ] **Database**
-  - [ ] MongoDB Atlas cluster created
-  - [ ] Admin user created in database
-  - [ ] Connection string tested
-  - [ ] Backup strategy configured
+## 🛡️ Support & Troubleshooting
 
-- [ ] **Backend**
-  - [ ] Deployed and accessible
-  - [ ] All environment variables set
-  - [ ] `NODE_ENV=production`
-  - [ ] CORS origins correct
-  - [ ] Rate limiting active (strict)
-  - [ ] Health check endpoint working
-
-- [ ] **Frontend**
-  - [ ] Deployed and accessible
-  - [ ] `API_URL` pointing to backend
-  - [ ] Stripe publishable key set (live)
-  - [ ] All pages loading correctly
-
-- [ ] **Admin Panel**
-  - [ ] Deployed and accessible
-  - [ ] `API_URL` pointing to backend
-  - [ ] Admin login working
-  - [ ] All CRUD operations working
-
-- [ ] **Stripe**
-  - [ ] Live mode enabled
-  - [ ] Webhook configured
-  - [ ] Test payment successful
-
-- [ ] **Email**
-  - [ ] SMTP configured
-  - [ ] Sender verified
-  - [ ] Test email sent successfully
-
-- [ ] **Security**
-  - [ ] HTTPS enabled on all domains
-  - [ ] Cookies have Secure flag
-  - [ ] Rate limiting tested
-  - [ ] No sensitive data in logs
-  - [ ] Error messages don't expose internals
-
-- [ ] **Performance**
-  - [ ] Database indexes created
-  - [ ] Image optimization enabled
-  - [ ] Gzip compression enabled
-  - [ ] CDN configured (if needed)
-
-## Part 10: Post-Deployment
-
-### Monitor Your Application
-
-- Set up monitoring (Sentry, LogRocket, etc.)
-- Check logs regularly
-- Monitor server resources
-- Set up uptime monitoring (UptimeRobot, Pingdom)
-
-### Common Issues
-
-**Issue: CORS errors**
-
-- Check `ALLOWED_ORIGINS` includes your frontend URLs
-- Verify frontend is sending `credentials: true`
-
-**Issue: Stripe webhook not working**
-
-- Check webhook URL is correct
-- Verify `STRIPE_WEBHOOK_SECRET` is set
-- Check Stripe dashboard for webhook delivery logs
-
-**Issue: Emails not sending**
-
-- Verify SMTP credentials
-- Check SendGrid dashboard for blocked sends
-- Ensure sender email is verified
-
-**Issue: Rate limiting too strict**
-
-- Increase limits in `backend/middleware/rateLimiter.js` if legitimate users are blocked.
+- **CORS Errors**: Verify `FRONTEND_URL` and `ADMIN_URL` are included in backend CORS allowed origins.
+- **Socket Disconnects**: Ensure websocket transport is enabled on cloud provider proxies.
+- **Webhook Failure**: Verify raw body parser is enabled for `/api/payment/webhook` route.

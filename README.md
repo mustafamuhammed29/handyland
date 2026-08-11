@@ -202,9 +202,11 @@ npm run test:admin-ui
 
 ---
 
-## 🚀 Local-Only Development Guide
+## 🚀 Deployment & Operations Guide
 
-This project is now strictly configured for **Local Development Only**. External cloud deployments (like Vercel or Render) are not supported in the current setup to ensure maximum privacy, speed, and ease of development.
+HandyLand supports both **Local Development Workflow** and **Production Cloud Deployment** (Supabase + Vercel / Render / Railway).
+
+For complete step-by-step deployment instructions, refer to [DEPLOYMENT.md](file:///c:/Users/musta/Desktop/handyland/DEPLOYMENT.md).
 
 ### How to Run Locally
 

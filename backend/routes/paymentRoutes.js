@@ -10,17 +10,11 @@ const { protect, authorize, optionalProtect } = require('../middleware/auth');
 const { paymentLimiter } = require('../middleware/rateLimiter');
 
 // Stripe Routes
-router.post('/create-payment-intent', paymentLimiter, optionalProtect, createPaymentIntent); // Stripe Elements (embedded)
-// router.post('/create-checkout-session', optionalProtect, createCheckoutSession); // Stripe Checkout (redirect)
-// BUG-NEW-01 fix: optionalProtect captures req.user when a cookie exists;
-// full 'protect' would break Stripe server-side callbacks that have no user token.
-// router.post('/success', optionalProtect, handlePaymentSuccess);
+router.post('/create-payment-intent', paymentLimiter, protect, createPaymentIntent); // Stripe Elements (embedded)
 router.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
-// router.get('/:sessionId', protect, getPaymentDetails);
-// router.post('/refund', protect, authorize('admin', 'staff'), createRefund);
 
 // PayPal Routes
-router.post('/paypal/create-order', optionalProtect, createPayPalOrder);
-router.post('/paypal/capture-order', optionalProtect, capturePayPalOrder);
+router.post('/paypal/create-order', paymentLimiter, protect, createPayPalOrder);
+router.post('/paypal/capture-order', paymentLimiter, protect, capturePayPalOrder);
 
 module.exports = router;

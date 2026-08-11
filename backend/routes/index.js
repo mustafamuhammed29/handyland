@@ -39,7 +39,7 @@ router.post('/upload', uploadLimiter, protect, uploadSingle('products', 'image')
 
 // ── Feature routes ─────────────────────────────────────────────────────────────
 router.use('/auth', require('./authRoutes'));
-// Removed twoFactorRoutes as Supabase handles MFA
+router.use('/2fa', require('./twoFactorRoutes'));
 router.use('/reviews', require('./reviewRoutes'));
 router.use('/cart', require('./cartRoutes'));
 router.use('/settings', require('./settingsRoutes'));

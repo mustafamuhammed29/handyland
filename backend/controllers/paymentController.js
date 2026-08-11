@@ -47,12 +47,19 @@ exports.createPaymentIntent = async (req, res, next) => {
 // @route POST /api/payments/webhook
 exports.stripeWebhook = async (req, res, next) => {
     const sig = req.headers['stripe-signature'];
-    let event;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+    if (!sig || !webhookSecret) {
+        console.warn('⚠️ Webhook rejected: Missing stripe-signature header or STRIPE_WEBHOOK_SECRET configuration');
+        return res.status(400).json({ success: false, message: 'Webhook signature or secret missing' });
+    }
+
+    let event;
     try {
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
     } catch (err) {
-        return res.status(400).send(`Webhook Error: ${err.message}`);
+        console.error('❌ Stripe Webhook Signature Verification Failed:', err.message);
+        return res.status(400).send(`Webhook Signature Verification Error: ${err.message}`);
     }
 
     try {
