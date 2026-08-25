@@ -18,7 +18,9 @@ const getSupabaseHost = () => {
         if (process.env.SUPABASE_URL) {
             return new URL(process.env.SUPABASE_URL).host;
         }
-    } catch (_) {}
+    } catch (_) {
+        // Fallback to wildcard on invalid SUPABASE_URL
+    }
     return '*.supabase.co';
 };
 
@@ -27,7 +29,9 @@ const getFrontendWsHost = () => {
         if (process.env.FRONTEND_URL) {
             return `wss://${new URL(process.env.FRONTEND_URL).host}`;
         }
-    } catch (_) {}
+    } catch (_) {
+        // Fallback to null on invalid FRONTEND_URL
+    }
     return null;
 };
 
