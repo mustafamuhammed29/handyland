@@ -62,3 +62,44 @@ jest.mock('../config/supabase', () => {
         })
     };
 });
+
+// Global teardown hook for defense-in-depth
+afterAll(async () => {
+    try {
+        const { stopCronJobs } = require('../services/cronService');
+        if (typeof stopCronJobs === 'function') {
+            stopCronJobs();
+        }
+    } catch (e) {
+        // cronService was not loaded during this test suite; safe to ignore
+    }
+
+    try {
+        const cron = require('node-cron');
+        if (cron && typeof cron.getTasks === 'function') {
+            const tasks = cron.getTasks();
+            if (tasks && typeof tasks.forEach === 'function') {
+                tasks.forEach(task => {
+                    try {
+                        if (task && typeof task.stop === 'function') {
+                            task.stop();
+                        }
+                    } catch (err) {
+                        // Task was already stopped
+                    }
+                });
+            }
+        }
+    } catch (e) {
+        // node-cron was not loaded
+    }
+
+    try {
+        const { closeSocket } = require('../utils/socket');
+        if (typeof closeSocket === 'function') {
+            await closeSocket();
+        }
+    } catch (e) {
+        // socket module was not loaded
+    }
+});

@@ -9,6 +9,8 @@ const { supabaseAdmin } = require('../config/supabase');
 const { sendTemplateEmail, sendEmail } = require('../utils/emailService');
 const logger = require('../utils/logger');
 
+let activeTasks = [];
+
 /**
  * Cart Recovery Job
  * Runs every day at 10:00 AM to search for abandoned shopping carts
@@ -16,7 +18,7 @@ const logger = require('../utils/logger');
  */
 const startCartRecoveryJob = () => {
     // '0 10 * * *' = Every day at 10:00 AM
-    cron.schedule('0 10 * * *', async () => {
+    const task = cron.schedule('0 10 * * *', async () => {
         logger.info('⏳ [Cron] Running Abandoned Cart Recovery Job...');
         try {
             const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -89,6 +91,7 @@ const startCartRecoveryJob = () => {
             logger.error(`❌ [Cron] Cart recovery error: ${err.message}`);
         }
     });
+    activeTasks.push(task);
 };
 
 /**
@@ -97,7 +100,7 @@ const startCartRecoveryJob = () => {
  */
 const startDataCleanupJob = () => {
     // '0 3 * * 0' = Every Sunday at 3:00 AM
-    cron.schedule('0 3 * * 0', async () => {
+    const task = cron.schedule('0 3 * * 0', async () => {
         logger.info('🧹 [Cron] Running Weekly Stale Data Cleanup Job...');
         try {
             // Fetch all carts
@@ -126,6 +129,7 @@ const startDataCleanupJob = () => {
             logger.error(`❌ [Cron] Stale data cleanup error: ${err.message}`);
         }
     });
+    activeTasks.push(task);
 };
 
 /**
@@ -137,6 +141,23 @@ const initCronJobs = () => {
     startDataCleanupJob();
 };
 
+/**
+ * Stops all running cron jobs (idempotent, used during graceful teardown and testing).
+ */
+const stopCronJobs = () => {
+    activeTasks.forEach(task => {
+        try {
+            if (task && typeof task.stop === 'function') {
+                task.stop();
+            }
+        } catch (err) {
+            logger.warn(`[Cron] Warning during task teardown: ${err.message}`);
+        }
+    });
+    activeTasks = [];
+};
+
 module.exports = {
-    initCronJobs
+    initCronJobs,
+    stopCronJobs
 };

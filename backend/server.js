@@ -130,14 +130,15 @@ app.get('/api/status', protect, authorize('admin'), (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-// ── Socket.io ─────────────────────────────────────────────────────────────────
+// ── Socket.io & Background Jobs ───────────────────────────────────────────────
 const server = http.createServer(app);
 const { initSocket } = require('./utils/socket');
-initSocket(server);
-
-// ── Background Jobs (Cron) ───────────────────────────────────────────────────
 const { initCronJobs } = require('./services/cronService');
-initCronJobs();
+
+if (process.env.NODE_ENV !== 'test') {
+    initSocket(server);
+    initCronJobs();
+}
 
 // ── Graceful Shutdown ─────────────────────────────────────────────────────────
 const gracefulShutdown = (signal) => {

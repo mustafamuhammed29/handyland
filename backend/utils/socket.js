@@ -178,4 +178,18 @@ const emitAdminNotification = (type, payload) => {
     });
 };
 
-module.exports = { initSocket, getIO, emitOrderUpdate, emitNewOrder, emitNotification, emitAdminNotification, emitUserMessage };
+/**
+ * Safely closes the Socket.IO instance and resets reference (idempotent, used in tests/teardown).
+ */
+const closeSocket = async () => {
+    if (io) {
+        const currentIo = io;
+        io = null;
+        try {
+            await new Promise((resolve) => currentIo.close(resolve));
+        } catch (err) {
+            console.warn(`[Socket.IO] Warning during server close: ${err.message}`);
+        }
+    }
+};
+module.exports = { initSocket, getIO, closeSocket, emitOrderUpdate, emitNewOrder, emitNotification, emitAdminNotification, emitUserMessage };
