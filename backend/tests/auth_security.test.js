@@ -236,4 +236,477 @@ describe('Auth & Authorization Security Tests', () => {
             expect(res.body.message).toBe('2FA disabled');
         });
     });
+
+    describe('4. Dedicated Refresh Endpoints & Session Isolation', () => {
+        beforeEach(() => {
+            supabaseAdmin.auth.refreshSession.mockReset();
+        });
+
+        const setupMockAdminProfile = (role = 'admin', isActive = true) => {
+            supabaseAdmin.from.mockImplementation((table) => {
+                if (table === 'users') {
+                    return {
+                        select: jest.fn().mockReturnThis(),
+                        eq: jest.fn().mockReturnThis(),
+                        single: jest.fn().mockResolvedValue({
+                            data: {
+                                id: 'admin-user-id',
+                                role: role,
+                                is_active: isActive
+                            },
+                            error: null
+                        })
+                    };
+                }
+                return {
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({ data: {}, error: null })
+                };
+            });
+        };
+
+        describe('A. Customer Refresh (POST /api/auth/refresh)', () => {
+            it('1. Valid refreshToken refreshes customer session and sets accessToken & refreshToken cookies', async () => {
+                supabaseAdmin.auth.refreshSession.mockResolvedValueOnce({
+                    data: {
+                        session: {
+                            user: { id: 'cust-user-123' },
+                            access_token: 'new-cust-access-123',
+                            refresh_token: 'new-cust-refresh-456'
+                        }
+                    },
+                    error: null
+                });
+
+                const res = await request(app)
+                    .post('/api/auth/refresh')
+                    .set('Cookie', ['refreshToken=valid-cust-refresh'])
+                    .set('x-app-type', 'frontend');
+
+                expect(res.status).toBe(200);
+                expect(res.body.success).toBe(true);
+                expect(res.body.accessToken).toBe('new-cust-access-123');
+
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.startsWith('accessToken='))).toBe(true);
+                expect(cookies.some(c => c.startsWith('refreshToken='))).toBe(true);
+                expect(cookies.some(c => c.startsWith('adminToken='))).toBe(false);
+                expect(cookies.some(c => c.startsWith('adminRefreshToken='))).toBe(false);
+            });
+
+            it('2. POST /api/auth/refresh ignores adminRefreshToken and returns 401 if refreshToken is missing', async () => {
+                const res = await request(app)
+                    .post('/api/auth/refresh')
+                    .set('Cookie', ['adminRefreshToken=some-admin-refresh'])
+                    .set('x-app-type', 'frontend');
+
+                expect(res.status).toBe(401);
+                expect(res.body.success).toBe(false);
+                expect(res.body.message).toBe('No customer refresh token');
+                expect(supabaseAdmin.auth.refreshSession).not.toHaveBeenCalled();
+            });
+
+            it('3. Dual cookies present: POST /api/auth/refresh consumes only refreshToken and sets only customer cookies', async () => {
+                supabaseAdmin.auth.refreshSession.mockResolvedValueOnce({
+                    data: {
+                        session: {
+                            user: { id: 'cust-user-123' },
+                            access_token: 'new-cust-access-999',
+                            refresh_token: 'new-cust-refresh-999'
+                        }
+                    },
+                    error: null
+                });
+
+                const res = await request(app)
+                    .post('/api/auth/refresh')
+                    .set('Cookie', ['refreshToken=cust-tok', 'adminRefreshToken=admin-tok'])
+                    .set('x-app-type', 'frontend');
+
+                expect(res.status).toBe(200);
+                expect(res.body.success).toBe(true);
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.startsWith('accessToken='))).toBe(true);
+                expect(cookies.some(c => c.startsWith('refreshToken='))).toBe(true);
+                expect(cookies.some(c => c.startsWith('adminToken='))).toBe(false);
+                expect(cookies.some(c => c.startsWith('adminRefreshToken='))).toBe(false);
+            });
+
+            it('4. Invalid/expired refreshToken returns 401 and clears customer cookies only', async () => {
+                supabaseAdmin.auth.refreshSession.mockResolvedValueOnce({
+                    data: { session: null },
+                    error: { message: 'Invalid refresh token' }
+                });
+
+                const res = await request(app)
+                    .post('/api/auth/refresh')
+                    .set('Cookie', ['refreshToken=bad-refresh-tok'])
+                    .set('x-app-type', 'frontend');
+
+                expect(res.status).toBe(401);
+                expect(res.body.success).toBe(false);
+                expect(res.body.message).toBe('Refresh token expired');
+
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.includes('accessToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('refreshToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('adminToken=;'))).toBe(false);
+            });
+            it('5. POST /api/auth/refresh never queries public.users table during valid customer refresh', async () => {
+                supabaseAdmin.auth.refreshSession.mockResolvedValueOnce({
+                    data: {
+                        session: {
+                            user: { id: 'cust-user-123' },
+                            access_token: 'new-cust-access',
+                            refresh_token: 'new-cust-refresh'
+                        }
+                    },
+                    error: null
+                });
+
+                const res = await request(app)
+                    .post('/api/auth/refresh')
+                    .set('Cookie', ['refreshToken=valid-cust-refresh'])
+                    .set('x-app-type', 'frontend');
+
+                expect(res.status).toBe(200);
+                // Users table must not be queried for standard customer refresh
+                expect(supabaseAdmin.from).not.toHaveBeenCalledWith('users');
+            });
+        });
+
+        describe('B. Admin Refresh (POST /api/auth/admin/refresh)', () => {
+            it('1. Valid adminRefreshToken + admin role refreshes admin session and sets admin cookies', async () => {
+                setupMockAdminProfile('admin', true);
+                supabaseAdmin.auth.refreshSession.mockResolvedValueOnce({
+                    data: {
+                        session: {
+                            user: { id: 'admin-user-id' },
+                            access_token: 'new-admin-access-111',
+                            refresh_token: 'new-admin-refresh-222'
+                        }
+                    },
+                    error: null
+                });
+
+                const res = await request(app)
+                    .post('/api/auth/admin/refresh')
+                    .set('Cookie', ['adminRefreshToken=valid-admin-refresh'])
+                    .set('x-app-type', 'admin');
+
+                expect(res.status).toBe(200);
+                expect(res.body.success).toBe(true);
+                expect(res.body.accessToken).toBe('new-admin-access-111');
+
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.startsWith('adminToken='))).toBe(true);
+                expect(cookies.some(c => c.startsWith('adminRefreshToken='))).toBe(true);
+                expect(cookies.some(c => c.startsWith('accessToken='))).toBe(false);
+                expect(cookies.some(c => c.startsWith('refreshToken='))).toBe(false);
+            });
+
+            it('2. POST /api/auth/admin/refresh ignores customer refreshToken and returns 401 if adminRefreshToken is missing', async () => {
+                const res = await request(app)
+                    .post('/api/auth/admin/refresh')
+                    .set('Cookie', ['refreshToken=cust-refresh'])
+                    .set('x-app-type', 'admin');
+
+                expect(res.status).toBe(401);
+                expect(res.body.success).toBe(false);
+                expect(res.body.message).toBe('No admin refresh token');
+                expect(supabaseAdmin.auth.refreshSession).not.toHaveBeenCalled();
+            });
+
+            it('3. POST /api/auth/admin/refresh with non-admin role returns 403 and clears admin cookies', async () => {
+                setupMockAdminProfile('user', true); // User role instead of admin
+                supabaseAdmin.auth.refreshSession.mockResolvedValueOnce({
+                    data: {
+                        session: {
+                            user: { id: 'admin-user-id' },
+                            access_token: 'token-xyz',
+                            refresh_token: 'refresh-xyz'
+                        }
+                    },
+                    error: null
+                });
+
+                const res = await request(app)
+                    .post('/api/auth/admin/refresh')
+                    .set('Cookie', ['adminRefreshToken=user-trying-admin-refresh'])
+                    .set('x-app-type', 'admin');
+
+                expect(res.status).toBe(403);
+                expect(res.body.success).toBe(false);
+                expect(res.body.message).toBe('Access denied: Admin role required');
+
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.includes('adminToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('adminRefreshToken=;'))).toBe(true);
+                expect(cookies.some(c => c.startsWith('accessToken='))).toBe(false);
+            });
+
+            it('4. Dual cookies present: POST /api/auth/admin/refresh consumes only adminRefreshToken and sets only admin cookies', async () => {
+                setupMockAdminProfile('administrator', true);
+                supabaseAdmin.auth.refreshSession.mockResolvedValueOnce({
+                    data: {
+                        session: {
+                            user: { id: 'admin-user-id' },
+                            access_token: 'new-admin-acc-555',
+                            refresh_token: 'new-admin-ref-555'
+                        }
+                    },
+                    error: null
+                });
+
+                const res = await request(app)
+                    .post('/api/auth/admin/refresh')
+                    .set('Cookie', ['refreshToken=cust-tok', 'adminRefreshToken=admin-tok'])
+                    .set('x-app-type', 'admin');
+
+                expect(res.status).toBe(200);
+                expect(res.body.success).toBe(true);
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.startsWith('adminToken='))).toBe(true);
+                expect(cookies.some(c => c.startsWith('adminRefreshToken='))).toBe(true);
+                expect(cookies.some(c => c.startsWith('accessToken='))).toBe(false);
+                expect(cookies.some(c => c.startsWith('refreshToken='))).toBe(false);
+            });
+
+            it('5. Invalid/expired adminRefreshToken returns 401 and clears admin cookies only', async () => {
+                supabaseAdmin.auth.refreshSession.mockResolvedValueOnce({
+                    data: { session: null },
+                    error: { message: 'Invalid refresh token' }
+                });
+
+                const res = await request(app)
+                    .post('/api/auth/admin/refresh')
+                    .set('Cookie', ['adminRefreshToken=expired-admin-tok'])
+                    .set('x-app-type', 'admin');
+
+                expect(res.status).toBe(401);
+                expect(res.body.success).toBe(false);
+                expect(res.body.message).toBe('Refresh token expired');
+
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.includes('adminToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('adminRefreshToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('accessToken=;'))).toBe(false);
+            });
+
+            it('6. Database profile lookup failure safely returns 403 and clears admin cookies', async () => {
+                // Simulate DB error when querying public.users
+                supabaseAdmin.auth.refreshSession.mockResolvedValueOnce({
+                    data: {
+                        session: {
+                            user: { id: 'admin-user-id' },
+                            access_token: 'token-xyz',
+                            refresh_token: 'refresh-xyz'
+                        }
+                    },
+                    error: null
+                });
+                supabaseAdmin.from.mockImplementationOnce(() => ({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({ data: null, error: { message: 'DB connection error' } })
+                }));
+
+                const res = await request(app)
+                    .post('/api/auth/admin/refresh')
+                    .set('Cookie', ['adminRefreshToken=valid-tok'])
+                    .set('x-app-type', 'admin');
+
+                expect(res.status).toBe(403);
+                expect(res.body.success).toBe(false);
+                expect(res.body.message).toBe('Access denied: Admin role required');
+
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.includes('adminToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('adminRefreshToken=;'))).toBe(true);
+                expect(cookies.some(c => c.startsWith('accessToken='))).toBe(false);
+            });
+        });
+
+        describe('C. Logout Namespace Isolation (POST /api/auth/logout)', () => {
+            it('1. Customer logout with x-app-type: frontend clears only accessToken and refreshToken', async () => {
+                const res = await request(app)
+                    .post('/api/auth/logout')
+                    .set('Cookie', ['accessToken=cust-tok', 'adminToken=admin-tok'])
+                    .set('x-app-type', 'frontend');
+
+                expect(res.status).toBe(200);
+                expect(res.body.success).toBe(true);
+
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.includes('accessToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('refreshToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('adminToken=;'))).toBe(false);
+                expect(cookies.some(c => c.includes('adminRefreshToken=;'))).toBe(false);
+            });
+
+            it('2. Admin logout with x-app-type: admin clears only adminToken and adminRefreshToken', async () => {
+                const res = await request(app)
+                    .post('/api/auth/logout')
+                    .set('Cookie', ['accessToken=cust-tok', 'adminToken=admin-tok'])
+                    .set('x-app-type', 'admin');
+
+                expect(res.status).toBe(200);
+                expect(res.body.success).toBe(true);
+
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.includes('adminToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('adminRefreshToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('accessToken=;'))).toBe(false);
+                expect(cookies.some(c => c.includes('refreshToken=;'))).toBe(false);
+            });
+
+            it('3. Universal logout without x-app-type header clears both cookie namespaces', async () => {
+                const res = await request(app)
+                    .post('/api/auth/logout')
+                    .set('x-requested-with', 'XMLHttpRequest'); // CSRF header
+
+                expect(res.status).toBe(200);
+                expect(res.body.success).toBe(true);
+
+                const cookies = res.headers['set-cookie'] || [];
+                expect(cookies.some(c => c.includes('accessToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('refreshToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('adminToken=;'))).toBe(true);
+                expect(cookies.some(c => c.includes('adminRefreshToken=;'))).toBe(true);
+            });
+        });
+    });
+
+    describe('5. Role Normalization & Case Insensitivity on Admin Routes', () => {
+        const setupMockAdminUser = (roleValue) => {
+            supabaseAdmin.auth.getUser.mockResolvedValueOnce({
+                data: { user: { id: 'admin-user-id', email: 'admin@handyland.com' } },
+                error: null
+            });
+            supabaseAdmin.from.mockImplementation((table) => {
+                if (table === 'users') {
+                    return {
+                        select: jest.fn().mockReturnThis(),
+                        eq: jest.fn().mockReturnThis(),
+                        single: jest.fn().mockResolvedValue({
+                            data: {
+                                id: 'admin-user-id',
+                                name: 'Admin Person',
+                                email: 'admin@handyland.com',
+                                role: roleValue,
+                                is_active: true,
+                                is_verified: true
+                            },
+                            error: null
+                        }),
+                        order: jest.fn().mockResolvedValue({ data: [], error: null, count: 0 }),
+                        then: function(resolve) { resolve({ data: [], error: null, count: 0 }); }
+                    };
+                }
+                return {
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    in: jest.fn().mockReturnThis(),
+                    gte: jest.fn().mockReturnThis(),
+                    lte: jest.fn().mockReturnThis(),
+                    order: jest.fn().mockReturnThis(),
+                    limit: jest.fn().mockReturnThis(),
+                    range: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({ data: {}, error: null }),
+                    maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+                    then: function(resolve) { resolve({ data: [], error: null, count: 0 }); }
+                };
+            });
+        };
+
+        it('GET /api/auth/admin/users accepts uppercase "ADMIN"', async () => {
+            setupMockAdminUser('ADMIN');
+            const res = await request(app)
+                .get('/api/auth/admin/users')
+                .set('Authorization', 'Bearer valid-token');
+
+            expect(res.status).toBe(200);
+            expect(res.body.success).toBe(true);
+        });
+
+        it('GET /api/auth/admin/users accepts "administrator"', async () => {
+            setupMockAdminUser('administrator');
+            const res = await request(app)
+                .get('/api/auth/admin/users')
+                .set('Authorization', 'Bearer valid-token');
+
+            expect(res.status).toBe(200);
+            expect(res.body.success).toBe(true);
+        });
+
+        it('GET /api/auth/admin/users accepts uppercase "ADMINISTRATOR"', async () => {
+            setupMockAdminUser('ADMINISTRATOR');
+            const res = await request(app)
+                .get('/api/auth/admin/users')
+                .set('Authorization', 'Bearer valid-token');
+
+            expect(res.status).toBe(200);
+            expect(res.body.success).toBe(true);
+        });
+
+        it('GET /api/auth/admin/users rejects non-admin roles like "staff" or "user"', async () => {
+            setupMockAdminUser('staff');
+            const res = await request(app)
+                .get('/api/auth/admin/users')
+                .set('Authorization', 'Bearer valid-token');
+
+            expect(res.status).toBe(403);
+            expect(res.body.success).toBe(false);
+        });
+
+        it('GET /api/stats with authorize("admin") strictly requires exact "admin" role in current middleware', async () => {
+            setupMockAdminUser('admin');
+            const res = await request(app)
+                .get('/api/stats')
+                .set('Authorization', 'Bearer valid-token');
+
+            expect(res.status).toBe(200);
+            expect(res.body.success).toBe(true);
+        });
+    });
+
+    describe('6. Phone Verification devCode Environment Gating', () => {
+        const phoneVerificationService = require('../services/phoneVerificationService');
+
+        beforeEach(() => {
+            jest.spyOn(phoneVerificationService, 'sendWhatsAppOTP').mockResolvedValue(true);
+            jest.spyOn(phoneVerificationService, 'sendTwilioSMS').mockResolvedValue(true);
+            jest.spyOn(console, 'log').mockImplementation(() => {});
+        });
+
+        afterEach(() => {
+            jest.restoreAllMocks();
+        });
+
+        it('sendOTP should NEVER return devCode when NODE_ENV is production', async () => {
+            const originalEnv = process.env.NODE_ENV;
+            try {
+                process.env.NODE_ENV = 'production';
+                const result = await phoneVerificationService.sendOTP('+4915123456789');
+                expect(result.success).toBe(true);
+                expect(result.devCode).toBeUndefined();
+            } finally {
+                process.env.NODE_ENV = originalEnv;
+            }
+        });
+
+        it('sendOTP may return devCode in development mode for unconfigured SMS gateway', async () => {
+            const originalEnv = process.env.NODE_ENV;
+            try {
+                process.env.NODE_ENV = 'development';
+                const result = await phoneVerificationService.sendOTP('+4915123456789');
+                expect(result.success).toBe(true);
+                expect(result.devCode).toBeDefined();
+                expect(result.devCode).toMatch(/^\d{6}$/);
+            } finally {
+                process.env.NODE_ENV = originalEnv;
+            }
+        });
+    });
 });

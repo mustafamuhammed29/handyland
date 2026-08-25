@@ -141,6 +141,7 @@ const authLimiterWrapper = isDevelopment
     }
     : authLimiter;
 router.post('/admin/login', authLimiterWrapper, authController.adminLogin);
+router.post('/admin/refresh', authController.adminRefreshToken);
 router.get('/admin/users', protect, (req, res, next) => {
     const role = req.user?.role?.toLowerCase();
     if (role !== 'admin' && role !== 'administrator') {

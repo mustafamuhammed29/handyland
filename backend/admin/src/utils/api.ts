@@ -64,7 +64,7 @@ api.interceptors.response.use(
         const originalRequest = error.config;
         console.error(`[API Interceptor] Error on ${originalRequest?.url}:`, error?.response?.status);
 
-        if (originalRequest?.url?.includes('/auth/refresh')) {
+        if (originalRequest?.url?.includes('/auth/admin/refresh') || originalRequest?.url?.includes('/auth/refresh')) {
             console.error("[API Interceptor] Session expired! Redirecting to login...");
             localStorage.removeItem('adminUser');
             localStorage.removeItem('token');
@@ -73,7 +73,7 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        if (error.response && error.response.status === 401) {
             // Prevent infinite loop: do not dispatch auth:unauthorized if the request was to /logout
             if (originalRequest && originalRequest.url && originalRequest.url.includes('/logout')) {
                 return Promise.reject(error);
@@ -81,12 +81,12 @@ api.interceptors.response.use(
 
             const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') || originalRequest?.url?.includes('/admin/login');
 
-            if (error.response.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+            if (!originalRequest._retry && !isAuthEndpoint) {
                 console.error(`[API Interceptor] Attempting refresh for ${originalRequest.url}`);
                 originalRequest._retry = true;
                 try {
-                    // Attempt to refresh token
-                    await api.post('/api/auth/refresh');
+                    // Attempt to refresh token via dedicated admin refresh endpoint
+                    await api.post('/api/auth/admin/refresh');
                     console.error(`[API Interceptor] Refresh successful! Retrying request.`);
                     // Retry original request
                     return api.request(originalRequest);
@@ -100,12 +100,14 @@ api.interceptors.response.use(
                 }
             }
             
-            // If it's a 403, or it's an auth endpoint, just logout
-            console.error("[API Interceptor] Unauthorized fallback! Redirecting to login...");
-            localStorage.removeItem('adminUser');
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.dispatchEvent(new Event('auth:unauthorized'));
+            // Only logout on unhandled 401 for non-auth endpoints
+            if (!isAuthEndpoint) {
+                console.error("[API Interceptor] Unauthorized fallback! Redirecting to login...");
+                localStorage.removeItem('adminUser');
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.dispatchEvent(new Event('auth:unauthorized'));
+            }
         }
         return Promise.reject(error);
     }

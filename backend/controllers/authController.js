@@ -336,17 +336,34 @@ exports.logout = async (req, res, next) => {
             }
         }
 
-        // Must pass the same options used when setting the cookie (minus maxAge)
-        // or modern browsers will silently refuse to delete the cookie
-        const clearOpts = {
+        // Must pass the exact same options used when setting each cookie
+        // (sameSite: 'strict' for admin in prod, 'none' for customer in prod)
+        const isProd = process.env.NODE_ENV === 'production';
+        const appType = req.headers['x-app-type'];
+
+        const clearFrontendOpts = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+            secure: isProd,
+            sameSite: isProd ? 'none' : 'lax'
         };
-        res.clearCookie('accessToken', clearOpts);
-        res.clearCookie('refreshToken', clearOpts);
-        res.clearCookie('adminToken', clearOpts);
-        res.clearCookie('adminRefreshToken', clearOpts);
+        const clearAdminOpts = {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? 'strict' : 'lax'
+        };
+
+        if (appType === 'admin') {
+            res.clearCookie('adminToken', clearAdminOpts);
+            res.clearCookie('adminRefreshToken', clearAdminOpts);
+        } else if (appType === 'frontend') {
+            res.clearCookie('accessToken', clearFrontendOpts);
+            res.clearCookie('refreshToken', clearFrontendOpts);
+        } else {
+            res.clearCookie('accessToken', clearFrontendOpts);
+            res.clearCookie('refreshToken', clearFrontendOpts);
+            res.clearCookie('adminToken', clearAdminOpts);
+            res.clearCookie('adminRefreshToken', clearAdminOpts);
+        }
 
         return res.status(200).json({ success: true, message: 'Logged out successfully' });
     } catch (error) {
@@ -354,31 +371,108 @@ exports.logout = async (req, res, next) => {
     }
 };
 
-// ── @route POST /api/auth/refresh-token ──────────────────────
+// ── Safe Role Helper ──────────────────────────────────────────
+const normalizeRole = (role) => (typeof role === 'string' ? role.trim().toLowerCase() : '');
+const isAdminRole = (role) => {
+    const r = normalizeRole(role);
+    return r === 'admin' || r === 'administrator';
+};
+
+// ── @route POST /api/auth/refresh (Customer Refresh) ──────────
 exports.refreshToken = async (req, res, next) => {
     try {
-        const refreshToken = req.cookies?.refreshToken || req.cookies?.adminRefreshToken;
+        const refreshToken = req.cookies?.refreshToken;
 
         if (!refreshToken) {
-            return res.status(401).json({ success: false, message: 'No refresh token', requireAuth: true });
+            return res.status(401).json({ success: false, message: 'No customer refresh token', requireAuth: true });
         }
 
-        const { data, error } = await supabaseAdmin.auth.refreshSession({ refresh_token: refreshToken });
+        const refreshResult = await supabaseAdmin.auth.refreshSession({ refresh_token: refreshToken });
+        const data = refreshResult?.data;
+        const error = refreshResult?.error;
 
-        if (error || !data.session) {
-            const clearOpts = {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-            };
+        const isProd = process.env.NODE_ENV === 'production';
+        const clearOpts = {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? 'none' : 'lax'
+        };
+
+        if (error || !data?.session) {
             res.clearCookie('accessToken', clearOpts);
             res.clearCookie('refreshToken', clearOpts);
             return res.status(401).json({ success: false, message: 'Refresh token expired', requireAuth: true });
         }
 
-        const appType = req.headers['x-app-type'] || 'frontend';
-        const cookieName = appType === 'admin' ? 'adminToken' : 'accessToken';
-        res.cookie(cookieName, data.session.access_token, cookieOptions);
+        const cookieOpts = getCookieOptions('frontend');
+        res.cookie('accessToken', data.session.access_token, cookieOpts);
+        if (data.session.refresh_token) {
+            res.cookie('refreshToken', data.session.refresh_token, {
+                ...cookieOpts,
+                maxAge: 90 * 24 * 60 * 60 * 1000
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            accessToken: data.session.access_token
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route POST /api/auth/admin/refresh (Admin Refresh) ───────
+exports.adminRefreshToken = async (req, res, next) => {
+    try {
+        const adminRefreshToken = req.cookies?.adminRefreshToken;
+
+        if (!adminRefreshToken) {
+            return res.status(401).json({ success: false, message: 'No admin refresh token', requireAuth: true });
+        }
+
+        const refreshResult = await supabaseAdmin.auth.refreshSession({ refresh_token: adminRefreshToken });
+        const data = refreshResult?.data;
+        const error = refreshResult?.error;
+
+        const isProd = process.env.NODE_ENV === 'production';
+        const clearOpts = {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? 'strict' : 'lax'
+        };
+
+        if (error || !data?.session) {
+            res.clearCookie('adminToken', clearOpts);
+            res.clearCookie('adminRefreshToken', clearOpts);
+            return res.status(401).json({ success: false, message: 'Refresh token expired', requireAuth: true });
+        }
+
+        // Authoritative Database Role & Status Verification
+        const { data: userProfile, error: profileError } = await supabaseAdmin
+            .from('users')
+            .select('id, role, is_active')
+            .eq('id', data.session.user.id)
+            .single();
+
+        if (profileError || !userProfile || !isAdminRole(userProfile.role) || userProfile.is_active === false) {
+            res.clearCookie('adminToken', clearOpts);
+            res.clearCookie('adminRefreshToken', clearOpts);
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied: Admin role required',
+                requireAuth: true
+            });
+        }
+
+        const cookieOpts = getCookieOptions('admin');
+        res.cookie('adminToken', data.session.access_token, cookieOpts);
+        if (data.session.refresh_token) {
+            res.cookie('adminRefreshToken', data.session.refresh_token, {
+                ...cookieOpts,
+                maxAge: 90 * 24 * 60 * 60 * 1000
+            });
+        }
 
         return res.status(200).json({
             success: true,
@@ -772,9 +866,6 @@ exports.adminLogin = async (req, res, next) => {
         }
 
         let { data: userProfile, error: dbError } = await supabaseAdmin.from('users').select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at').eq('id', data.user.id).single();
-        
-        console.log(`[Admin Login Debug] auth.users ID: ${data.user.id}, dbError:`, dbError);
-        console.log(`[Admin Login Debug] userProfile fetched by ID:`, userProfile);
 
         // Fallback for ID mismatches (when auth.users ID differs from public.users ID)
         if (!userProfile) {
@@ -782,8 +873,6 @@ exports.adminLogin = async (req, res, next) => {
                 .select('id, name, email, role, is_active, is_verified, avatar, preferred_language, balance, loyalty_points, membership_level, two_factor_enabled, notif_order_updates, notif_repair_status, notif_promotions, notif_newsletter, phone, created_at, updated_at')
                 .eq('email', email)
                 .single();
-            
-            console.log(`[Admin Login Debug] userByEmail fetched:`, userByEmail, `emailError:`, emailError);
                 
             if (userByEmail) {
                 userProfile = userByEmail;
