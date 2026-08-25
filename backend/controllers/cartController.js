@@ -6,6 +6,23 @@
 
 const { supabaseAdmin } = require('../config/supabase');
 
+const findCartByUserId = async (userId) => {
+    const { data: cart, error } = await supabaseAdmin
+        .from('carts')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+
+    if (error) {
+        if (error.code === 'PGRST116') {
+            return null;
+        }
+        throw error;
+    }
+
+    return cart;
+};
+
 const getCart = async (userId) => {
     // Get or create cart
     let { data: cart } = await supabaseAdmin
@@ -205,12 +222,24 @@ exports.syncCart = async (req, res, next) => {
 // ── @route DELETE /api/cart/:itemId ───────────────────────────
 exports.removeFromCart = async (req, res, next) => {
     try {
-        const { error } = await supabaseAdmin
+        const cart = await findCartByUserId(req.user.id);
+        if (!cart) {
+            return res.status(404).json({ success: false, message: 'Cart item not found' });
+        }
+
+        const { data, error } = await supabaseAdmin
             .from('cart_items')
             .delete()
-            .eq('id', req.params.itemId);
+            .eq('id', req.params.itemId)
+            .eq('cart_id', cart.id)
+            .select();
 
         if (error) throw error;
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({ success: false, message: 'Cart item not found' });
+        }
+
         return exports.getCart(req, res, next);
     } catch (error) {
         next(error);

@@ -207,14 +207,22 @@ exports.replyToMessage = async (req, res, next) => {
 
         const isAdminOrStaff = req.user.role === 'admin' || req.user.role === 'staff';
 
+        // Security Check: Non-admin/non-staff requester must own the message thread
+        if (!isAdminOrStaff) {
+            const isOwner = Boolean(msg.user_id && msg.user_id === req.user.id);
+            if (!isOwner) {
+                return res.status(403).json({ success: false, message: 'Not authorized to reply to this message' });
+            }
+        }
+
         const { data: reply, error } = await supabaseAdmin
             .from('message_replies')
             .insert({ 
                 message_id: msg.id, 
                 message, 
                 is_admin: isAdminOrStaff,
-                user_id: isAdminOrStaff ? req.user.id : null,
-                is_internal_note: is_internal_note || false
+                user_id: req.user.id,
+                is_internal_note: isAdminOrStaff ? (is_internal_note || false) : false
             })
             .select().single();
 
