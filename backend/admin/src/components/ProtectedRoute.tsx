@@ -8,6 +8,14 @@ interface ProtectedRouteProps {
     requireAdmin?: boolean;
 }
 
+const normalizeRole = (role: unknown): string =>
+    typeof role === 'string' ? role.trim().toLowerCase() : '';
+
+const isAdminRole = (role: unknown): boolean => {
+    const normalized = normalizeRole(role);
+    return normalized === 'admin' || normalized === 'administrator';
+};
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     children,
     requireAdmin = true
@@ -29,11 +37,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                 // Verify with backend
                 // This ensures the token is valid and not expired
                 const response = await api.get('/api/auth/me'); // Ensure we use /api to hit the proxy
-                const userRole = response.data?.user?.role;
+                const isServerAdmin = isAdminRole(response.data?.user?.role);
 
                 // If this is an admin route, enforce admin role strictly from the server response
-                if (requireAdmin && userRole !== 'admin') {
-                    console.error('Session verification failed: User is not an admin', userRole);
+                if (requireAdmin && !isServerAdmin) {
+                    console.error('Session verification failed: User is not an admin');
                     logout();
                     setIsVerified(false);
                     return;
@@ -64,7 +72,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
-    if (requireAdmin && user?.role !== 'admin') {
+    const isCurrentAdmin = isAdminRole(user?.role);
+
+    if (requireAdmin && !isCurrentAdmin) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white">
                 <div className="bg-slate-900 p-8 rounded-lg shadow-md max-w-md border border-slate-800 text-center">
@@ -73,7 +83,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                         You don't have admin privileges to access this page.
                     </p>
                     <p className="text-sm text-slate-500 mb-6">
-                        Current role: <strong className="text-slate-300">{user?.role}</strong>
+                        Current role: <strong className="text-slate-300">{user?.role || 'Guest'}</strong>
                     </p>
                     <button
                         onClick={logout}
