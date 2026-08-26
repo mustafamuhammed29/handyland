@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 // ── Auth rate limiter ──────────────────────────────────────────────────────────
 const rawAuthLimiter = rateLimit({
@@ -30,11 +30,19 @@ const uploadLimiter = rateLimit({
     message: { success: false, message: 'Too many uploads, please try again later.' },
 });
 
-const { uploadSingle } = require('../middleware/upload');
+const { uploadSingle, uploadHeroVideo } = require('../middleware/upload');
 
 router.post('/upload', uploadLimiter, protect, uploadSingle('products', 'image'), (req, res) => {
     if (!req.fileUrl) {return res.status(400).json({ success: false, message: 'No file uploaded' });}
     res.json({ success: true, imageUrl: req.fileUrl });
+});
+
+// Admin-only Hero Video Upload
+router.post('/admin/uploads/hero-video', uploadLimiter, protect, authorize('admin'), uploadHeroVideo('video'), (req, res) => {
+    if (!req.fileUrl) {
+        return res.status(400).json({ success: false, message: 'No video file uploaded' });
+    }
+    res.json({ success: true, videoUrl: req.fileUrl });
 });
 
 // ── Feature routes ─────────────────────────────────────────────────────────────

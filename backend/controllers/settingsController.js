@@ -73,6 +73,176 @@ exports.getPaymentConfig = async (req, res, next) => {
     }
 };
 
+const normalizeHostname = (hostname) => {
+    if (typeof hostname !== 'string') return '';
+    let normalized = hostname.trim().toLowerCase();
+    if (!normalized) return '';
+    // Strip surrounding brackets for IPv6 if present
+    if (normalized.startsWith('[') && normalized.endsWith(']')) {
+        normalized = normalized.slice(1, -1);
+    }
+    // Remove exactly one trailing dot if present
+    if (normalized.endsWith('.')) {
+        normalized = normalized.slice(0, -1);
+    }
+    return normalized;
+};
+
+exports.normalizeHostname = normalizeHostname;
+
+const getApprovedMediaHosts = () => {
+    const hosts = new Set();
+    if (process.env.SUPABASE_URL) {
+        try {
+            const host = normalizeHostname(new URL(process.env.SUPABASE_URL).hostname);
+            if (host) hosts.add(host);
+        } catch (_e) {
+            // Ignore invalid SUPABASE_URL string
+        }
+    }
+    // In test/development environment only, allow localhost and 127.0.0.1
+    if (process.env.NODE_ENV !== 'production') {
+        hosts.add('localhost');
+        hosts.add('127.0.0.1');
+    }
+    if (process.env.ALLOWED_MEDIA_HOSTS) {
+        process.env.ALLOWED_MEDIA_HOSTS.split(',')
+            .map(h => normalizeHostname(h))
+            .filter(Boolean)
+            .forEach(h => hosts.add(h));
+    }
+    return hosts;
+};
+
+// Allowed relative media path prefixes
+const ALLOWED_RELATIVE_MEDIA_PREFIXES = ['/media/hero/', '/media/uploads/', '/media/'];
+
+const isPrivateOrLoopbackHost = (rawHostname) => {
+    const hostname = normalizeHostname(rawHostname);
+    if (!hostname) return true;
+
+    if (hostname === 'localhost' || hostname.endsWith('.local') || hostname.endsWith('.internal')) {
+        return true;
+    }
+
+    // Helper to test IPv4 string
+    const isPrivateIpv4 = (ipStr) => {
+        const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+        const match = ipStr.match(ipv4Regex);
+        if (!match) return false;
+        const [_, b0, b1, b2, b3] = match.map(Number);
+        if ([b0, b1, b2, b3].some(b => b < 0 || b > 255)) return true; // Malformed octet
+
+        if (b0 === 0) return true; // Current network (0.0.0.0/8)
+        if (b0 === 10) return true; // 10.0.0.0/8
+        if (b0 === 127) return true; // 127.0.0.0/8 Loopback
+        if (b0 === 169 && b1 === 254) return true; // 169.254.0.0/16 Link-local
+        if (b0 === 172 && b1 >= 16 && b1 <= 31) return true; // 172.16.0.0/12
+        if (b0 === 192 && b1 === 168) return true; // 192.168.0.0/16
+        return false;
+    };
+
+    // Check direct IPv4
+    if (isPrivateIpv4(hostname)) {
+        return true;
+    }
+
+    // IPv6 checks
+    const lower = hostname.toLowerCase();
+
+    // Loopback ::1 or 0:0:0:0:0:0:0:1
+    if (lower === '::1' || lower === '0:0:0:0:0:0:0:1' || lower === '::') {
+        return true;
+    }
+
+    // IPv4-mapped IPv6: ::ffff:a.b.c.d or ::ffff:7f00:1 (hex format)
+    if (lower.startsWith('::ffff:') || lower.startsWith('0:0:0:0:0:ffff:')) {
+        const mappedPart = lower.split(':ffff:')[1];
+        if (mappedPart) {
+            // Check if dotted decimal: e.g. 127.0.0.1
+            if (isPrivateIpv4(mappedPart)) {
+                return true;
+            }
+            // Check if hex: e.g. 7f00:0001
+            const hexParts = mappedPart.split(':');
+            if (hexParts.length === 2) {
+                const high = parseInt(hexParts[0], 16);
+                const low = parseInt(hexParts[1], 16);
+                if (!isNaN(high) && !isNaN(low)) {
+                    const b0 = (high >> 8) & 0xff;
+                    const b1 = high & 0xff;
+                    const b2 = (low >> 8) & 0xff;
+                    const b3 = low & 0xff;
+                    if (isPrivateIpv4(`${b0}.${b1}.${b2}.${b3}`)) {
+                        return true;
+                    }
+                }
+            }
+            return true; // Any unrecognized mapped IP is rejected for safety
+        }
+    }
+
+    // Unique Local Addresses (fc00::/7 -> prefix fc or fd)
+    if (lower.startsWith('fc') || lower.startsWith('fd')) {
+        return true;
+    }
+
+    // Link-Local Unicast (fe80::/10 -> prefixes fe8, fe9, fea, feb)
+    if (lower.startsWith('fe8') || lower.startsWith('fe9') || lower.startsWith('fea') || lower.startsWith('feb')) {
+        return true;
+    }
+
+    return false;
+};
+
+exports.isPrivateOrLoopbackHost = isPrivateOrLoopbackHost;
+
+const isValidMediaUrl = (urlStr) => {
+    if (typeof urlStr !== 'string') return false;
+    const trimmed = urlStr.trim();
+    if (!trimmed) return false;
+
+    // Check relative path: must start with an allowed media prefix, no traversal, no double slashes
+    if (trimmed.startsWith('/')) {
+        if (trimmed.startsWith('//') || trimmed.includes('/../') || trimmed.includes('/..') || /[<>"'`\s]/.test(trimmed)) {
+            return false;
+        }
+        return ALLOWED_RELATIVE_MEDIA_PREFIXES.some(prefix => trimmed.startsWith(prefix));
+    }
+
+    try {
+        const parsed = new URL(trimmed);
+
+        // Reject dangerous/unsupported protocols
+        const protocol = parsed.protocol.toLowerCase();
+        if (protocol !== 'http:' && protocol !== 'https:') {
+            return false;
+        }
+
+        // In production, strictly enforce https:
+        if (process.env.NODE_ENV === 'production' && protocol !== 'https:') {
+            return false;
+        }
+
+        const hostname = normalizeHostname(parsed.hostname);
+        if (!hostname) return false;
+
+        // In production, reject private/loopback/link-local addresses (even if in ALLOWED_MEDIA_HOSTS)
+        if (process.env.NODE_ENV === 'production' && isPrivateOrLoopbackHost(hostname)) {
+            return false;
+        }
+
+        const approvedHosts = getApprovedMediaHosts();
+
+        // Exact match required — NO generic wildcard matching
+        return approvedHosts.has(hostname);
+    } catch (err) {
+        return false;
+    }
+};
+
+exports.isValidMediaUrl = isValidMediaUrl;
+
 // ── @route PUT /api/settings (Admin) ──────────────────────────
 exports.updateSettings = async (req, res, next) => {
     try {
@@ -90,6 +260,79 @@ exports.updateSettings = async (req, res, next) => {
         delete updates.success;
         delete updates.data;
         delete updates.settings;
+
+        // Validate and merge Hero Media settings if present
+        if (updates.hero) {
+            let heroObj = updates.hero;
+            if (typeof heroObj === 'string') {
+                try {
+                    heroObj = JSON.parse(heroObj);
+                } catch (e) {
+                    return res.status(400).json({ success: false, message: 'Invalid hero settings payload' });
+                }
+            }
+
+            if (heroObj && typeof heroObj === 'object') {
+                if (heroObj.media) {
+                    const { mode, videoUrl, posterUrl } = heroObj.media;
+                    if (mode !== undefined) {
+                        if (mode !== 'content' && mode !== 'video') {
+                            return res.status(400).json({
+                                success: false,
+                                message: 'Invalid Hero media mode. Mode must be either "content" or "video".'
+                            });
+                        }
+
+                        if (mode === 'video') {
+                            if (!videoUrl || typeof videoUrl !== 'string' || !videoUrl.trim()) {
+                                return res.status(400).json({
+                                    success: false,
+                                    message: 'A valid video URL is required when Hero media mode is set to video.'
+                                });
+                            }
+
+                            if (!isValidMediaUrl(videoUrl)) {
+                                return res.status(400).json({
+                                    success: false,
+                                    message: 'Video URL must be a valid relative path (/media/hero/...) or hosted on an approved storage domain.'
+                                });
+                            }
+                        }
+
+                        if (posterUrl && typeof posterUrl === 'string' && posterUrl.trim()) {
+                            if (!isValidMediaUrl(posterUrl)) {
+                                return res.status(400).json({
+                                    success: false,
+                                    message: 'Poster URL must be a valid relative path (/media/hero/...) or hosted on an approved storage domain.'
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // Preserve existing hero fields if partial updates are provided
+                const { data: existingHeroRow } = await supabaseAdmin.from('settings').select('value').eq('key', 'hero').maybeSingle();
+                if (existingHeroRow && existingHeroRow.value) {
+                    try {
+                        const existingHero = typeof existingHeroRow.value === 'string' ? JSON.parse(existingHeroRow.value) : existingHeroRow.value;
+                        if (existingHero && typeof existingHero === 'object') {
+                            heroObj = {
+                                ...existingHero,
+                                ...heroObj,
+                                media: {
+                                    ...(existingHero.media || {}),
+                                    ...(heroObj.media || {})
+                                }
+                            };
+                        }
+                    } catch (err) {
+                        // fallback to provided heroObj
+                    }
+                }
+
+                updates.hero = heroObj;
+            }
+        }
 
         // Preserve payment secrets if they are not provided
         if (updates.payment) {

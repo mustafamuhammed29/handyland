@@ -64,7 +64,10 @@ jest.mock('../config/supabase', () => {
                 };
             }
             return global.__mockAuthClient;
-        })
+        }),
+        uploadImage: jest.fn().mockResolvedValue('https://test.supabase.co/storage/v1/object/public/products/test.webp'),
+        deleteImage: jest.fn().mockResolvedValue(),
+        uploadHeroVideoFile: jest.fn().mockResolvedValue('https://test.supabase.co/storage/v1/object/public/media/hero/test.mp4')
     };
 });
 

@@ -106,11 +106,37 @@ const createAuthClient = () => {
     });
 };
 
+/**
+ * Upload a hero video file directly to Supabase Storage (media bucket).
+ * Restricted to fixed media/hero destination.
+ * @param {string} path - Storage path inside 'media' bucket (e.g. 'hero/xyz.mp4')
+ * @param {Buffer} fileBuffer - Video file buffer
+ * @param {string} mimeType - Video MIME type ('video/mp4' or 'video/webm')
+ * @returns {Promise<string>} Public URL
+ */
+const uploadHeroVideoFile = async (path, fileBuffer, mimeType) => {
+    const { error } = await supabaseAdmin.storage
+        .from('media')
+        .upload(path, fileBuffer, {
+            contentType: mimeType,
+            upsert: true
+        });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabaseAdmin.storage
+        .from('media')
+        .getPublicUrl(path);
+
+    return publicUrl;
+};
+
 module.exports = {
     supabaseAdmin,
     supabasePublic,
     getAuthenticatedClient,
     createAuthClient,
     uploadImage,
-    deleteImage
+    deleteImage,
+    uploadHeroVideoFile
 };

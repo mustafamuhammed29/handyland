@@ -8,7 +8,8 @@
 const multer = require('multer');
 const sharp = require('sharp');
 const path = require('path');
-const { uploadImage } = require('../config/supabase');
+const crypto = require('crypto');
+const { uploadImage, uploadHeroVideoFile } = require('../config/supabase');
 
 // Use memory storage — we process with sharp before uploading
 const storage = multer.memoryStorage();
@@ -155,10 +156,108 @@ const uploadFields = (bucket, fields = [], folder = '') => {
     ];
 };
 
+/**
+ * Validate video magic bytes / signatures for MP4 and WebM.
+ * @param {Buffer} buffer
+ * @param {string} mimeType
+ * @returns {boolean}
+ */
+const isValidVideoSignature = (buffer, mimeType) => {
+    if (!buffer || buffer.length < 8) return false;
+
+    // WebM EBML header starts with 1A 45 DF A3
+    const isWebM = buffer[0] === 0x1a && buffer[1] === 0x45 && buffer[2] === 0xdf && buffer[3] === 0xa3;
+
+    // MP4 contains 'ftyp' at bytes 4..7
+    const isMP4 = buffer.toString('latin1', 4, 8) === 'ftyp' ||
+                  buffer.toString('utf8', 4, 8) === 'ftyp';
+
+    if (mimeType === 'video/webm' && isWebM) return true;
+    if (mimeType === 'video/mp4' && isMP4) return true;
+
+    return isWebM || isMP4;
+};
+
+const heroVideoFileFilter = (req, file, cb) => {
+    const allowedMimes = ['video/mp4', 'video/webm'];
+    const allowedExts = ['.mp4', '.webm'];
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (allowedMimes.includes(file.mimetype) && allowedExts.includes(ext)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only MP4 and WebM video files are allowed'), false);
+    }
+};
+
+const heroVideoUpload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter: heroVideoFileFilter,
+    limits: { fileSize: 25 * 1024 * 1024 } // 25 MB maximum
+});
+
+/**
+ * Dedicated admin middleware for uploading Hero video.
+ * Enforces fixed server-side destination: media bucket, hero/ folder.
+ */
+const uploadHeroVideo = (fieldName = 'video') => {
+    return [
+        (req, res, next) => {
+            heroVideoUpload.single(fieldName)(req, res, (err) => {
+                if (err instanceof multer.MulterError) {
+                    if (err.code === 'LIMIT_FILE_SIZE') {
+                        return res.status(400).json({ success: false, message: 'Video file exceeds 25 MB limit' });
+                    }
+                    return res.status(400).json({ success: false, message: err.message });
+                } else if (err) {
+                    return res.status(400).json({ success: false, message: err.message });
+                }
+                next();
+            });
+        },
+        async (req, res, next) => {
+            try {
+                if (!req.file) {
+                    return res.status(400).json({ success: false, message: 'No video file provided' });
+                }
+
+                if (!isValidVideoSignature(req.file.buffer, req.file.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Invalid video file content signature'
+                    });
+                }
+
+                const ext = path.extname(req.file.originalname).toLowerCase() === '.webm' ? '.webm' : '.mp4';
+                const randomId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
+                const filename = `${randomId}${ext}`;
+                const storagePath = `hero/${filename}`;
+
+                const publicUrl = await uploadHeroVideoFile(
+                    storagePath,
+                    req.file.buffer,
+                    req.file.mimetype
+                );
+
+                req.fileUrl = publicUrl;
+                next();
+            } catch (err) {
+                console.error('[UploadHeroVideo] Storage upload failed:', err?.message || err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Video upload processing failed. Please try again later.'
+                });
+            }
+        }
+    ];
+};
+
 module.exports = {
     upload,
     uploadSingle,
     uploadMultiple,
     uploadFields,
+    uploadHeroVideo,
+    isValidVideoSignature,
     processAndUpload
 };
