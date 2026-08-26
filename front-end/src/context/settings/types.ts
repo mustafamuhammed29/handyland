@@ -1,3 +1,11 @@
+export interface HeroMediaSettings {
+    mode: 'content' | 'video';
+    videoUrl?: string;
+    posterUrl?: string;
+    altText?: string;
+    updatedAt?: string;
+}
+
 export interface HeroSettings {
     bgStart: string;
     bgEnd: string;
@@ -19,6 +27,7 @@ export interface HeroSettings {
     stat1Value?: string;
     stat2Title?: string;
     stat2Value?: string;
+    media?: HeroMediaSettings;
 }
 
 export interface ContentSettings {
