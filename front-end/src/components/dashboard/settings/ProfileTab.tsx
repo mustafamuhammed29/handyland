@@ -62,6 +62,17 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         return () => clearTimeout(timer);
     }, [resendCooldown]);
 
+    interface OtpResponse {
+        success: boolean;
+        message?: string;
+        devCode?: string;
+        data?: {
+            success?: boolean;
+            message?: string;
+            devCode?: string;
+        };
+    }
+
     const handleSendOtp = async () => {
         if (!profileForm.phone) {
             toast.error(t('settings.profile.phone.required', 'Bitte gib eine gültige Telefonnummer ein.'));
@@ -70,18 +81,22 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
 
         setIsSendingOtp(true);
         try {
-            const res = await api.post('/api/auth/phone/send-otp', { phone: profileForm.phone });
-            const data = (res as any)?.data || res;
+            const res = await api.post<OtpResponse>('/api/auth/phone/send-otp', { phone: profileForm.phone });
+            const data = (res as OtpResponse)?.data || res;
             if (data.success) {
                 setShowOtpInput(true);
                 setResendCooldown(60);
-                toast.success(t('settings.profile.phone.otpSent', 'Verifizierungscode wurde gesendet! Bitte überprüfe dein Handy.'));
+                if (data.devCode) {
+                    toast.success(`[Dev Mode] Code: ${data.devCode} (SMS Gateway not configured)`, { duration: 10000 });
+                } else {
+                    toast.success(t('settings.profile.phone.otpSent', 'Verifizierungscode wurde gesendet! Bitte überprüfe dein Handy.'));
+                }
             } else {
                 toast.error(data.message || t('settings.profile.phone.sendFailed', 'Fehler beim Senden des Codes.'));
             }
-        } catch (error: any) {
-            console.error('Error sending phone verification OTP:', error);
-            toast.error(error.response?.data?.message || t('settings.profile.phone.sendError', 'Senden des Verifizierungscodes fehlgeschlagen.'));
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error(err.response?.data?.message || t('settings.profile.phone.sendError', 'Senden des Verifizierungscodes fehlgeschlagen.'));
         } finally {
             setIsSendingOtp(false);
         }
@@ -95,8 +110,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
 
         setIsVerifyingOtp(true);
         try {
-            const res = await api.post('/api/auth/phone/verify-otp', { phone: profileForm.phone, otp: otpCode });
-            const data = (res as any)?.data || res;
+            const res = await api.post<OtpResponse>('/api/auth/phone/verify-otp', { phone: profileForm.phone, otp: otpCode });
+            const data = (res as OtpResponse)?.data || res;
             if (data.success) {
                 setShowOtpInput(false);
                 setOtpCode('');
@@ -105,13 +120,22 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             } else {
                 toast.error(data.message || t('settings.profile.phone.verifyFailed', 'Ungültiger Code. Bitte versuche es erneut.'));
             }
-        } catch (error: any) {
-            console.error('Error verifying phone OTP:', error);
-            toast.error(error.response?.data?.message || t('settings.profile.phone.verifyError', 'Fehler beim Verifizieren des Codes.'));
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error(err.response?.data?.message || t('settings.profile.phone.verifyError', 'Fehler beim Verifizieren des Codes.'));
         } finally {
             setIsVerifyingOtp(false);
         }
     };
+
+    interface UploadResponse {
+        success?: boolean;
+        imageUrl?: string;
+        data?: {
+            success?: boolean;
+            imageUrl?: string;
+        };
+    }
 
     const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -123,8 +147,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         const loadingToast = toast.loading(t('settings.profile.avatar.uploading', 'Profilbild wird hochgeladen...'));
         try {
             const formData = new FormData(); formData.append('image', file);
-            const uploadRes = await api.post('/api/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-            const data = (uploadRes as any)?.data || uploadRes;
+            const uploadRes = await api.post<UploadResponse>('/api/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            const data = (uploadRes as UploadResponse)?.data || uploadRes;
             if (data.success && data.imageUrl) {
                 onUpdateProfile({ avatar: data.imageUrl });
                 toast.success(t('settings.profile.avatar.updated', 'Profilbild erfolgreich aktualisiert!'), { id: loadingToast });
@@ -166,7 +190,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                         <div className="flex gap-2">
                             <button onClick={() => {
                                 setProfileEditing(false);
-                                setProfileForm({ name: user.name || '', email: user.email || '', phone: (user as any).phone || '', preferredLanguage: user.preferredLanguage || 'de' });
+                                setProfileForm({ name: user.name || '', email: user.email || '', phone: user.phone || '', preferredLanguage: user.preferredLanguage || 'de' });
                                 setProfileMsg(null);
                             }}
                                 className="px-4 py-2 text-sm rounded-xl bg-black/40 hover:bg-black/60 backdrop-blur-md text-white transition-all">
@@ -216,10 +240,10 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                         
                         <div className="flex flex-wrap items-center gap-3 mt-3">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-lg border border-blue-100 dark:border-blue-800/50">
-                                <Zap className="w-3.5 h-3.5" /> Level {(user as any).membershipLevel || 1} Member
+                                <Zap className="w-3.5 h-3.5" /> Level {user.membershipLevel || 1} Member
                             </span>
                             <span className="text-xs text-slate-400">
-                                {t('settings.profile.memberSince', 'Member since')} {new Date((user as any).createdAt || Date.now()).toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' })}
+                                {t('settings.profile.memberSince', 'Member since')} {new Date(user.createdAt || Date.now()).toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' })}
                             </span>
                             {user.avatar && profileEditing && (
                                 <button onClick={handleRemoveAvatar} className="text-xs text-red-500 hover:text-red-600 font-medium ml-auto flex items-center gap-1">

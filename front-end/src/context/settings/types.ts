@@ -175,11 +175,7 @@ export interface Settings {
     features?: {
         comparisonEngine?: boolean;
         cartUpselling?: boolean;
-        whatsappOrders?: {
-            enabled: boolean;
-            phoneNumber: string;
-            message: string;
-        };
+        whatsappOrders?: WhatsAppSettings;
         loyalty?: {
             enabled: boolean;
             earnRate: number;

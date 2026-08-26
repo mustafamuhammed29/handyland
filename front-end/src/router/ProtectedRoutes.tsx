@@ -4,14 +4,16 @@ import PageTransition from '../components/PageTransition';
 import { GlobalLoader } from '../components/GlobalLoader';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 
+import { LanguageCode, User } from '../types';
+
 const Dashboard = React.lazy(() => import('../components/Dashboard').then(module => ({ default: module.Dashboard })));
 const MyValuations = React.lazy(() => import('../pages/MyValuations').then(m => ({ default: m.MyValuations })));
 const SellerStudio = React.lazy(() => import('../components/SellerStudio').then(m => ({ default: m.SellerStudio })));
 
 interface ProtectedRoutesProps {
-    user: any;
+    user: User | null;
     logout: () => void;
-    lang: string;
+    lang: LanguageCode;
 }
 
 export const getProtectedRoutes = ({ user, logout, lang }: ProtectedRoutesProps) => {

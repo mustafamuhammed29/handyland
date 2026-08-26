@@ -37,8 +37,17 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
 
                 // Axios returns the data in the .data property, but interceptor already unwraps it.
                 // The new backend returns { devices, currentPage, totalPages, totalDevices }
-                const responseData: any = response;
-                let repairsData = [];
+                interface PaginatedRepairsResponse {
+                    devices?: RepairDevice[];
+                    currentPage?: number;
+                    totalPages?: number;
+                    totalDevices?: number;
+                    data?: {
+                        devices?: RepairDevice[];
+                    };
+                }
+                const responseData = response as unknown as PaginatedRepairsResponse | RepairDevice[];
+                let repairsData: RepairDevice[] = [];
                 
                 if (Array.isArray(responseData)) {
                     repairsData = responseData; // old backend
@@ -72,10 +81,17 @@ export const Repair: React.FC<RepairProps> = ({ lang }) => {
         }
 
         const whatsappMode = settings?.features?.whatsappOrders;
-        if (whatsappMode?.repairEnabled && whatsappMode?.phoneNumber) {
+        const isWhatsAppRepair = Boolean(
+            whatsappMode &&
+            (whatsappMode.repairEnabled === true || whatsappMode.enabled === true) &&
+            whatsappMode.phoneNumber &&
+            whatsappMode.phoneNumber.trim().length > 0
+        );
+
+        if (isWhatsAppRepair && whatsappMode?.phoneNumber) {
             import('../utils/whatsappHelper').then(({ generateWhatsAppLink }) => {
                 const url = generateWhatsAppLink({
-                    phoneNumber: whatsappMode.phoneNumber,
+                    phoneNumber: whatsappMode.phoneNumber.trim(),
                     messageTemplate: whatsappMode.message,
                     serviceName: `${serviceLabel || 'General Diagnostic'} - ${deviceModel}`
                 });
