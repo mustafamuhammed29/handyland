@@ -1,8 +1,26 @@
 import { Input } from '../SettingsManager';
-import { Type, Smartphone, Activity, Palette, ShieldCheck, Gamepad2 } from 'lucide-react';
+import { Type, Smartphone, Activity, Palette, ShieldCheck, Gamepad2, Video, Sparkles, HelpCircle } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
+import { HeroVideoUpload } from '../../components/HeroVideoUpload';
 
 export const HeroSettingsTab = ({ settings, handleChange }: any) => {
+    const heroMedia = settings.hero?.media || {
+        mode: 'content',
+        videoUrl: '',
+        posterUrl: '',
+        altText: ''
+    };
+
+    const updateMedia = (updates: Record<string, any>) => {
+        handleChange('hero', 'media', {
+            ...heroMedia,
+            ...updates,
+            updatedAt: new Date().toISOString()
+        });
+    };
+
+    const isVideoMode = heroMedia.mode === 'video';
+
     return (
         <div className="space-y-8">
             <div className="flex items-center gap-3 mb-6">
@@ -10,10 +28,124 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
                     <Gamepad2 className="text-fuchsia-400" size={24} />
                 </div>
                 <div>
-                    <h3 className="text-xl font-bold text-white">Hero 3D Section Configuration</h3>
-                    <p className="text-slate-400 text-sm">Control the interactive Wow-Effect header showcased to all visitors on the home page.</p>
+                    <h3 className="text-xl font-bold text-white">Hero Section Configuration</h3>
+                    <p className="text-slate-400 text-sm">Control the interactive header showcase (3D device card or video showcase) seen by all landing page visitors.</p>
                 </div>
             </div>
+
+            {/* Media Mode Selector */}
+            <div className="p-5 border border-slate-700 rounded-xl space-y-4 bg-slate-900/60 shadow-lg">
+                <div className="flex items-center justify-between">
+                    <h4 className="text-cyan-400 font-bold flex items-center gap-2 px-1">
+                        <Sparkles size={18} /> Hero Visual Display Mode
+                    </h4>
+                    <span className="text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-slate-800 text-cyan-400 border border-cyan-500/20">
+                        Current: {isVideoMode ? 'Video Mode' : 'Content Mode'}
+                    </span>
+                </div>
+                <p className="text-xs text-slate-400 px-1">Choose whether the right side of the landing page hero displays the interactive 3D phone mockup or a video showcase.</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    {/* Content Mode Card */}
+                    <button
+                        type="button"
+                        onClick={() => updateMedia({ mode: 'content' })}
+                        className={`p-4 rounded-xl border text-left transition-all flex items-start gap-4 ${
+                            !isVideoMode
+                                ? 'bg-cyan-950/40 border-cyan-500 shadow-md shadow-cyan-950/30'
+                                : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 opacity-70 hover:opacity-100'
+                        }`}
+                    >
+                        <div className={`p-3 rounded-xl ${!isVideoMode ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-800 text-slate-400'}`}>
+                            <Smartphone size={22} />
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm text-white">Content Mode</span>
+                                {!isVideoMode && <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">Active</span>}
+                            </div>
+                            <p className="text-xs text-slate-400 leading-relaxed">
+                                Interactive 3D phone mockup with parallax mouse rotation, promoted device card, and floating statistics badges.
+                            </p>
+                        </div>
+                    </button>
+
+                    {/* Video Mode Card */}
+                    <button
+                        type="button"
+                        onClick={() => updateMedia({ mode: 'video' })}
+                        className={`p-4 rounded-xl border text-left transition-all flex items-start gap-4 ${
+                            isVideoMode
+                                ? 'bg-fuchsia-950/40 border-fuchsia-500 shadow-md shadow-fuchsia-950/30'
+                                : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 opacity-70 hover:opacity-100'
+                        }`}
+                    >
+                        <div className={`p-3 rounded-xl ${isVideoMode ? 'bg-fuchsia-500/20 text-fuchsia-400' : 'bg-slate-800 text-slate-400'}`}>
+                            <Video size={22} />
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm text-white">Video Mode</span>
+                                {isVideoMode && <span className="text-[10px] px-2 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-300 font-bold">Active</span>}
+                            </div>
+                            <p className="text-xs text-slate-400 leading-relaxed">
+                                Upload a video showcase (MP4/WebM) with auto-play, accessible play controls, poster fallback, and reduced-motion support.
+                            </p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            {/* Video Mode Configuration Section */}
+            {isVideoMode && (
+                <div className="p-5 border border-fuchsia-500/40 rounded-xl space-y-6 bg-slate-900/70 shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-fuchsia-400 font-bold flex items-center gap-2 px-1">
+                            <Video size={18} /> Hero Video Settings & Asset
+                        </h4>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                            <HelpCircle size={14} />
+                            <span>Fallback to Content Mode if video is missing or fails</span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-5 px-1">
+                        <HeroVideoUpload
+                            value={heroMedia.videoUrl}
+                            onChange={(url: string) => updateMedia({ videoUrl: url })}
+                            posterUrl={heroMedia.posterUrl || settings.hero?.heroImage}
+                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                            <div>
+                                <ImageUpload
+                                    label="Video Poster / Fallback Image (Optional)"
+                                    value={heroMedia.posterUrl || ''}
+                                    onChange={(url: string) => updateMedia({ posterUrl: url })}
+                                />
+                                <p className="text-[11px] text-slate-500 mt-1">Displayed while video is loading or if user prefers reduced motion.</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <Input
+                                    label="Video Accessibility Description (Alt Text)"
+                                    value={heroMedia.altText || ''}
+                                    onChange={(v: string) => updateMedia({ altText: v })}
+                                    placeholder="HandyLand high-tech repair showcase"
+                                />
+                                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5 text-xs text-slate-400">
+                                    <span className="font-bold text-slate-200 block">Accessibility & Performance Rules:</span>
+                                    <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-400">
+                                        <li>Videos start muted and loop smoothly.</li>
+                                        <li>Users with <code>prefers-reduced-motion</code> will see the video paused by default.</li>
+                                        <li>Interactive play/pause toggle is provided on customer UI.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Typography & Messaging */}
             <div className="p-5 border border-slate-700 rounded-xl space-y-5 bg-slate-900/50">
@@ -37,12 +169,23 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
                 </div>
             </div>
 
-            {/* 3D Mockup Screen content */}
-            <div className="p-5 border border-slate-700 rounded-xl space-y-5 bg-slate-900/50">
-                <h4 className="text-blue-400 font-bold mb-2 flex items-center gap-2 px-1">
-                    <Smartphone size={18} /> 3D Device Screen Preview
-                </h4>
-                <p className="text-xs text-slate-500 mb-4 px-1">This fills the interactive floating phone mockup on the right side of the screen.</p>
+            {/* 3D Mockup Screen content (Shown in Content Mode, or as secondary config in Video Mode) */}
+            <div className={`p-5 border rounded-xl space-y-5 transition-all ${
+                !isVideoMode ? 'border-slate-700 bg-slate-900/50' : 'border-slate-800 bg-slate-900/30'
+            }`}>
+                <div className="flex items-center justify-between">
+                    <h4 className="text-blue-400 font-bold flex items-center gap-2 px-1">
+                        <Smartphone size={18} /> 3D Device Screen Preview & Promoted Item
+                    </h4>
+                    {isVideoMode && (
+                        <span className="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Used as Content fallback</span>
+                    )}
+                </div>
+                <p className="text-xs text-slate-500 mb-4 px-1">
+                    {!isVideoMode
+                        ? 'This fills the interactive floating phone mockup on the right side of the screen.'
+                        : 'Configures the fallback 3D phone mockup used if video is removed or unavailable.'}
+                </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-1">
                     <div>

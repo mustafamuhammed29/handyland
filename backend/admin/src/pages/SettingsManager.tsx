@@ -23,9 +23,18 @@ import { SEOTab } from './settings/SEOTab';
 import { RepairCardsTab } from './settings/RepairCardsTab';
 import { FeaturedServicesTab } from './settings/FeaturedServicesTab';
 
+export interface HeroMediaSettings {
+    mode: 'content' | 'video';
+    videoUrl?: string;
+    posterUrl?: string;
+    altText?: string;
+    updatedAt?: string;
+}
+
 interface HeroSettings {
     headline: string;
     subheadline: string;
+    subheadlineAr?: string;
     bgStart: string;
     bgEnd: string;
     accentColor: string;
@@ -42,6 +51,7 @@ interface HeroSettings {
     stat1Value: string;
     stat2Title: string;
     stat2Value: string;
+    media?: HeroMediaSettings;
 }
 
 interface ValuationSettings {
@@ -290,10 +300,11 @@ export default function SettingsManager() {
         language: 'de',
         navbar: { logoText: 'HANDY', logoAccentText: 'LAND', showLanguageSwitcher: true },
         hero: {
-            headline: '', subheadline: '', bgStart: '', bgEnd: '', accentColor: '',
+            headline: '', subheadline: '', subheadlineAr: '', bgStart: '', bgEnd: '', accentColor: '',
             buttonMarket: '', buttonValuation: '', trustBadge1: '', trustBadge2: '', trustBadge3: '',
             heroImage: '', productName: '', productPrice: '', productLabel: '',
-            stat1Title: '', stat1Value: '', stat2Title: '', stat2Value: ''
+            stat1Title: '', stat1Value: '', stat2Title: '', stat2Value: '',
+            media: { mode: 'content', videoUrl: '', posterUrl: '', altText: '' }
         },
         valuation: {
             step1Title: '', step1Subtitle: '', step1ModelTitle: '',
