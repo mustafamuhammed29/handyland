@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, Cpu, Plus, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,7 @@ import { PhoneListing } from '../../types';
 import { formatPrice } from '../../utils/formatPrice';
 import { getImageUrl } from '../../utils/imageUrl';
 import { getConditionLabel } from '../../utils/cleanProductName';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface ProductDetailModalProps {
     product: PhoneListing | null;
@@ -22,11 +23,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 }) => {
     const { t } = useTranslation();
 
-    // Lock body scroll when modal is open
-    useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => { document.body.style.overflow = ''; };
-    }, []);
+    useBodyScrollLock(true);
 
     if (!product) return null;
 
