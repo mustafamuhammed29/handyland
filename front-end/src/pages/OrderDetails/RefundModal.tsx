@@ -39,7 +39,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({ orderId, totalAmount, 
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[90dvh] overflow-y-auto">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, ArrowRight, Smartphone, Compass, Clock, TerminalSquare, AlertCircle } from 'lucide-react';
@@ -148,10 +149,12 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
         }
     };
 
-    return (
+    if (typeof document === 'undefined') return null;
+
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 sm:pt-32 px-4 shadow-[0_0_100vw_100vw_rgba(0,0,0,0.5)]">
+                <div className="fixed inset-0 z-[140] flex items-start justify-center pt-20 sm:pt-32 px-4 shadow-[0_0_100vw_100vw_rgba(0,0,0,0.5)]">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -301,6 +304,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };

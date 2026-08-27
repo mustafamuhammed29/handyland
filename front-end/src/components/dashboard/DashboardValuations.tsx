@@ -264,7 +264,7 @@ export const DashboardValuations: React.FC<DashboardValuationsProps> = ({
 
             {/* Details Modal */}
             {selectedDetails && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/80 backdrop-blur-md animate-in fade-in">
+                <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/80 backdrop-blur-md animate-in fade-in">
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
                         <div className="flex justify-between items-center p-6 border-b border-slate-200 dark:border-slate-800">
                             <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">

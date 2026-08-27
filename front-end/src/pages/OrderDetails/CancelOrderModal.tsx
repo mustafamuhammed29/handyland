@@ -32,7 +32,7 @@ export const CancelOrderModal: React.FC<CancelOrderModalProps> = ({ orderId, onC
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
                 <div className="flex items-center gap-2 text-amber-400 mb-4">
                     <AlertTriangle className="w-5 h-5" />

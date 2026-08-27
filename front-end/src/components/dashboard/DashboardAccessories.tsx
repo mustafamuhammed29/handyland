@@ -250,7 +250,7 @@ export const DashboardAccessories: React.FC = () => {
 
             {/* Edit Modal */}
             {isEditing && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[140] flex items-center justify-center p-4">
                     <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden">
                         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
                             <h3 className="text-xl font-bold text-white">

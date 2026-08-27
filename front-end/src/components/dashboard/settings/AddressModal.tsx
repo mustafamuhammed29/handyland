@@ -26,7 +26,7 @@ export const AddressModal: React.FC<AddressModalProps> = ({
     if (!showAddrModal) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[90vh]">
                 <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
                     <h4 className="text-white font-bold">{editingAddr ? t('settings.addresses.modal.editTitle', 'Edit Address') : t('settings.addresses.modal.addTitle', 'Add New Address')}</h4>

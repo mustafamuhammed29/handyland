@@ -240,7 +240,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
             {/* Lightbox Modal */}
             {isLightboxOpen && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200"
+                    className="fixed inset-0 z-[140] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200"
                     onClick={() => setIsLightboxOpen(false)}
                 >
                     <button onClick={() => setIsLightboxOpen(false)} aria-label="Close lightbox" className="absolute top-8 right-8 text-white hover:text-brand-primary transition-colors">
