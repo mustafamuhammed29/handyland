@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useConfirm } from '../context/ConfirmContext';
 import { formatDate } from '../utils/formatDate';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PhoneForwarded, Plus, Search, Trash2, Smartphone, FileText, CheckCircle, Clock, Copy, Phone, MessageCircle, AlertTriangle, ChevronLeft, ChevronRight, Wrench, Printer, Edit2 } from 'lucide-react';
+import { PhoneForwarded, Plus, Search, Trash2, Smartphone, FileText, CheckCircle, Clock, Copy, Phone, MessageCircle, AlertTriangle, Wrench, Printer, Edit2 } from 'lucide-react';
 import { api } from '../utils/api';
 import useDebounce from '../hooks/useDebounce';
 import toast from 'react-hot-toast';
+import AdminPagination from '../components/AdminPagination';
 import { LoanPrintTemplate } from '../components/LoanerManager/components/LoanPrintTemplate';
 import { EditLoanerModal } from '../components/LoanerManager/components/EditLoanerModal';
 import { MaintenanceModal } from '../components/LoanerManager/components/MaintenanceModal';
@@ -489,50 +490,13 @@ const LoanerManager = () => {
             </div>
 
             {/* Pagination Controls */}
-            {totalPages > 1 && !loading && (
-                <div className="flex items-center justify-between px-6 py-4 mt-8 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl shadow-lg">
-                    <div className="text-sm font-medium text-slate-400">
-                        Seite <span className="text-white">{page}</span> von <span className="text-white">{totalPages}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                            title="Vorherige Seite"
-                            aria-label="Vorherige Seite"
-                            className="p-2 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-700 text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            <ChevronLeft size={18} />
-                        </button>
-                        <div className="flex items-center gap-1 hidden sm:flex">
-                            {[...Array(totalPages)].map((_, i) => {
-                                const pageNum = i + 1;
-                                if (totalPages > 7 && Math.abs(page - pageNum) > 2 && pageNum !== 1 && pageNum !== totalPages) {
-                                    if (pageNum === 2 || pageNum === totalPages - 1) return <span key={i} className="text-slate-500 px-2">...</span>;
-                                    return null;
-                                }
-                                return (
-                                    <button
-                                        key={i}
-                                        onClick={() => setPage(pageNum)}
-                                        className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${page === pageNum ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-900/20' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 border border-white/5'}`}
-                                    >
-                                        {pageNum}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <button
-                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                            disabled={page === totalPages}
-                            title="Nächste Seite"
-                            aria-label="Nächste Seite"
-                            className="p-2 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-700 text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            <ChevronRight size={18} />
-                        </button>
-                    </div>
-                </div>
+            {!loading && (
+                <AdminPagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                    className="mt-8 rounded-2xl border border-white/5 shadow-lg backdrop-blur-xl"
+                />
             )}
 
             {/* ADD DEVICE MODAL */}

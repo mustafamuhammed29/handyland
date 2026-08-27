@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square, Star, QrCode, Printer, Search, Filter, FileSpreadsheet, Box, AlertTriangle, CheckCircle, Package, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, CheckSquare, Square, Star, QrCode, Printer, Search, Filter, FileSpreadsheet, Box, AlertTriangle, CheckCircle, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
 import { api } from '../utils/api';
 import { QRCodeSVG } from 'qrcode.react';
 import useDebounce from '../hooks/useDebounce';
+import AdminPagination from '../components/AdminPagination';
 
 interface ProductStats {
     totalProducts: number;
@@ -592,44 +593,11 @@ export default function ProductsManager() {
                     </table>
                     
                     {/* Pagination Controls */}
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800/80 bg-slate-900/50">
-                            <div className="text-sm text-slate-400">
-                                Showing page {page} of {totalPages}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                                    disabled={page === 1}
-                                    title="Previous Page"
-                                    aria-label="Previous Page"
-                                    className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <ChevronLeft size={18} />
-                                </button>
-                                <div className="flex items-center gap-1">
-                                    {[...Array(totalPages)].map((_, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => setPage(i + 1)}
-                                            className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${page === i + 1 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700'}`}
-                                        >
-                                            {i + 1}
-                                        </button>
-                                    ))}
-                                </div>
-                                <button
-                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                    disabled={page === totalPages}
-                                    title="Next Page"
-                                    aria-label="Next Page"
-                                    className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <ChevronRight size={18} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    <AdminPagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                    />
                 </div>
             </div>
 

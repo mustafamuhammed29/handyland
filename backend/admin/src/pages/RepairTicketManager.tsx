@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useConfirm } from '../context/ConfirmContext';
 import { formatDate, formatDateTime } from '../utils/formatDate';
-import { Eye, Search, Filter, CheckCircle, XCircle, Clock, CheckSquare, Square, Plus, Wrench, Smartphone, FileText, Send, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, Search, Filter, CheckCircle, XCircle, Clock, CheckSquare, Square, Plus, Wrench, Smartphone, FileText, Send, Trash2 } from 'lucide-react';
 import { api } from '../utils/api';
 import useDebounce from '../hooks/useDebounce';
 import toast from 'react-hot-toast';
+import AdminPagination from '../components/AdminPagination';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: React.ReactNode; description: string }> = {
     pending: { label: 'Pending', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', icon: <Clock className="w-4 h-4" />, description: 'Ticket created, waiting for device.' },
@@ -473,51 +474,11 @@ const RepairTicketManager: React.FC = () => {
                 </div>
                 
                 {/* Pagination Controls */}
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800/50 bg-slate-900/30">
-                        <div className="text-sm text-slate-400">
-                            Showing page {page} of {totalPages}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setPage(p => Math.max(1, p - 1))}
-                                disabled={page === 1}
-                                title="Previous Page"
-                                aria-label="Previous Page"
-                                className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <ChevronLeft size={18} />
-                            </button>
-                            <div className="flex items-center gap-1">
-                                {[...Array(totalPages)].map((_, i) => {
-                                    const pageNum = i + 1;
-                                    if (totalPages > 7 && Math.abs(page - pageNum) > 2 && pageNum !== 1 && pageNum !== totalPages) {
-                                        if (pageNum === 2 || pageNum === totalPages - 1) return <span key={i} className="text-slate-500 px-1">...</span>;
-                                        return null;
-                                    }
-                                    return (
-                                        <button
-                                            key={i}
-                                            onClick={() => setPage(pageNum)}
-                                            className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${page === pageNum ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700'}`}
-                                        >
-                                            {pageNum}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                            <button
-                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                disabled={page === totalPages}
-                                title="Next Page"
-                                aria-label="Next Page"
-                                className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <ChevronRight size={18} />
-                            </button>
-                        </div>
-                    </div>
-                )}
+                <AdminPagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                />
             </div>
 
             {/* View/Update Ticket Modal */}
