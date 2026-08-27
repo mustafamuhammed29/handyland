@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getImageUrl } from '../../utils/imageUrl';
@@ -14,7 +14,20 @@ interface ProductStickyBarProps {
 export const ProductStickyBar: React.FC<ProductStickyBarProps> = ({ product, handleAddToCart }) => {
     const { t } = useTranslation();
     const { settings } = useSettings();
-    const isWhatsapp = settings?.features?.whatsappOrders?.enabled;
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const shouldShow = window.scrollY > 600;
+            setIsVisible(prev => (prev !== shouldShow ? shouldShow : prev));
+        };
+
+        // Initialize state once on mount
+        handleScroll();
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     return (
         <AnimatePresence>
@@ -23,10 +36,11 @@ export const ProductStickyBar: React.FC<ProductStickyBarProps> = ({ product, han
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 100, opacity: 0 }}
-                    className="fixed bottom-0 md:top-0 md:bottom-auto left-0 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-lg border-t md:border-t-0 md:border-b border-slate-200 dark:border-slate-800 p-4 z-40 transform translate-y-full md:-translate-y-full transition-transform duration-300"
-                    style={{
-                        transform: `translateY(${window.scrollY > 600 ? '0' : (window.innerWidth < 768 ? '100%' : '-100%')})`
-                    }}
+                    className={`fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] md:top-0 md:bottom-auto left-0 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-lg border-t md:border-t-0 md:border-b border-slate-200 dark:border-slate-800 p-3 sm:p-4 z-40 transition-all duration-300 ${
+                        isVisible
+                            ? 'translate-y-0 opacity-100 pointer-events-auto'
+                            : 'translate-y-[200%] md:-translate-y-full opacity-0 pointer-events-none'
+                    }`}
                 >
                     <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4 flex-1">

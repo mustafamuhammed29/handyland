@@ -44,9 +44,14 @@
   background: rgba(148, 163, 184, 0.5); /* Darkens slightly on hover */
 }
 
-/* Global focus outline removal for cleaner look */
+/* Global accessible focus indication */
 *:focus {
   outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
 }
 
 /* Glassmorphism utilities */
