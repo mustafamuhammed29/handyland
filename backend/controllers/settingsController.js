@@ -243,6 +243,241 @@ const isValidMediaUrl = (urlStr) => {
 
 exports.isValidMediaUrl = isValidMediaUrl;
 
+// ── Service Terminal Validation Helpers ───────────────────────
+const isPlainObject = (obj) => obj !== null && typeof obj === 'object' && !Array.isArray(obj);
+
+const isSafeServiceTerminalUrl = (urlStr) => {
+    if (typeof urlStr !== 'string') return false;
+    const trimmed = urlStr.trim();
+    if (!trimmed) return false;
+
+    // Reject control characters, spaces, quotes, angle brackets
+    if (/[\s<>"'`\x00-\x1F\x7F]/.test(trimmed)) {
+        return false;
+    }
+
+    // Relative path check: must start with a single '/', cannot be '//', cannot contain '/..' or '/../'
+    if (trimmed.startsWith('/')) {
+        if (trimmed.startsWith('//') || trimmed.includes('/../') || trimmed.includes('/..') || trimmed === '/..') {
+            return false;
+        }
+        return true;
+    }
+
+    // Absolute URL check: must strictly be https://
+    if (trimmed.startsWith('https://')) {
+        try {
+            const parsed = new URL(trimmed);
+            if (parsed.protocol !== 'https:') return false;
+            if (!parsed.hostname || parsed.hostname.trim() === '') return false;
+            return true;
+        } catch (_e) {
+            return false;
+        }
+    }
+
+    // Reject all other protocols (http:, javascript:, data:, vbscript:, etc.)
+    return false;
+};
+
+const isValidHexColor = (colorStr) => {
+    if (typeof colorStr !== 'string') return false;
+    const trimmed = colorStr.trim();
+    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(trimmed);
+};
+
+const ALLOWED_SERVICE_ICONS = new Set([
+    'monitor',
+    'battery',
+    'smartphone',
+    'wrench',
+    'camera',
+    'zap',
+    'shield',
+    'headphones'
+]);
+
+const SERVICE_ID_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+const validateLocalizedText = (loc, fieldName, maxLength, isRequiredForAtLeastOneLang = false) => {
+    if (loc === undefined || loc === null) {
+        if (isRequiredForAtLeastOneLang) {
+            return `${fieldName} is required.`;
+        }
+        return null;
+    }
+
+    if (!isPlainObject(loc)) {
+        return `${fieldName} must be an object with language keys (de, en, ar).`;
+    }
+
+    const keys = Object.keys(loc);
+    for (const key of keys) {
+        if (!['de', 'en', 'ar'].includes(key)) {
+            return `${fieldName} contains unsupported language key "${key}". Allowed keys: de, en, ar.`;
+        }
+    }
+
+    for (const lang of ['de', 'en', 'ar']) {
+        if (loc[lang] !== undefined) {
+            if (typeof loc[lang] !== 'string') {
+                return `${fieldName}.${lang} must be a string.`;
+            }
+            if (loc[lang].length > maxLength) {
+                return `${fieldName}.${lang} exceeds maximum length of ${maxLength} characters.`;
+            }
+        }
+    }
+
+    if (isRequiredForAtLeastOneLang) {
+        const hasAtLeastOne = ['de', 'en', 'ar'].some(
+            k => typeof loc[k] === 'string' && loc[k].trim().length > 0
+        );
+        if (!hasAtLeastOne) {
+            return `${fieldName} must have at least one non-empty localized value (de, en, or ar).`;
+        }
+    }
+
+    return null;
+};
+
+const validateServiceTerminalSettings = (st) => {
+    if (!isPlainObject(st)) {
+        return 'serviceTerminal must be an object.';
+    }
+
+    if (st.enabled !== undefined && typeof st.enabled !== 'boolean') {
+        return 'serviceTerminal.enabled must be a boolean.';
+    }
+
+    if (st.eyebrow !== undefined) {
+        const err = validateLocalizedText(st.eyebrow, 'serviceTerminal.eyebrow', 80);
+        if (err) return err;
+    }
+
+    if (st.title !== undefined) {
+        const err = validateLocalizedText(st.title, 'serviceTerminal.title', 160);
+        if (err) return err;
+    }
+
+    if (st.servicesLinkLabel !== undefined) {
+        const err = validateLocalizedText(st.servicesLinkLabel, 'serviceTerminal.servicesLinkLabel', 80);
+        if (err) return err;
+    }
+
+    if (st.servicesLinkUrl !== undefined) {
+        if (typeof st.servicesLinkUrl !== 'string' || !isSafeServiceTerminalUrl(st.servicesLinkUrl)) {
+            return 'serviceTerminal.servicesLinkUrl must be a safe relative path (/...) or an absolute https:// URL.';
+        }
+    }
+
+    if (st.services !== undefined) {
+        if (!Array.isArray(st.services)) {
+            return 'serviceTerminal.services must be an array.';
+        }
+        if (st.services.length > 8) {
+            return 'serviceTerminal.services cannot contain more than 8 services.';
+        }
+
+        const seenIds = new Set();
+        for (let i = 0; i < st.services.length; i++) {
+            const svc = st.services[i];
+            const prefix = `serviceTerminal.services[${i}]`;
+
+            if (!isPlainObject(svc)) {
+                return `${prefix} must be an object.`;
+            }
+
+            if (typeof svc.id !== 'string' || !svc.id.trim()) {
+                return `${prefix}.id is required and must be a non-empty string.`;
+            }
+
+            const trimmedId = svc.id.trim();
+            if (trimmedId.length > 80 || !SERVICE_ID_REGEX.test(trimmedId)) {
+                return `${prefix}.id must be a URL-safe slug containing only lowercase alphanumeric characters and hyphens (max 80 chars).`;
+            }
+
+            if (seenIds.has(trimmedId)) {
+                return `${prefix}.id "${trimmedId}" is a duplicate. All service IDs must be unique.`;
+            }
+            seenIds.add(trimmedId);
+
+            if (svc.enabled !== undefined && typeof svc.enabled !== 'boolean') {
+                return `${prefix}.enabled must be a boolean.`;
+            }
+
+            if (svc.order !== undefined && (!Number.isInteger(svc.order) || svc.order < 0)) {
+                return `${prefix}.order must be a non-negative integer.`;
+            }
+
+            if (svc.icon !== undefined) {
+                if (typeof svc.icon !== 'string' || !ALLOWED_SERVICE_ICONS.has(svc.icon.trim())) {
+                    return `${prefix}.icon must be one of: monitor, battery, smartphone, wrench, camera, zap, shield, headphones.`;
+                }
+            }
+
+            if (svc.iconColor !== undefined) {
+                if (typeof svc.iconColor !== 'string' || !isValidHexColor(svc.iconColor.trim())) {
+                    return `${prefix}.iconColor must be a valid hexadecimal color code (#RGB, #RRGGBB, #RGBA, or #RRGGBBAA).`;
+                }
+            }
+
+            if (svc.cardBackground !== undefined) {
+                if (typeof svc.cardBackground !== 'string' || !isValidHexColor(svc.cardBackground.trim())) {
+                    return `${prefix}.cardBackground must be a valid hexadecimal color code (#RGB, #RRGGBB, #RGBA, or #RRGGBBAA).`;
+                }
+            }
+
+            const titleErr = validateLocalizedText(svc.title, `${prefix}.title`, 100, true);
+            if (titleErr) return titleErr;
+
+            if (svc.priceLabel !== undefined) {
+                const priceErr = validateLocalizedText(svc.priceLabel, `${prefix}.priceLabel`, 80);
+                if (priceErr) return priceErr;
+            }
+        }
+    }
+
+    if (st.cta !== undefined) {
+        if (!isPlainObject(st.cta)) {
+            return 'serviceTerminal.cta must be an object.';
+        }
+
+        if (st.cta.enabled !== undefined && typeof st.cta.enabled !== 'boolean') {
+            return 'serviceTerminal.cta.enabled must be a boolean.';
+        }
+
+        if (st.cta.title !== undefined) {
+            const err = validateLocalizedText(st.cta.title, 'serviceTerminal.cta.title', 160);
+            if (err) return err;
+        }
+
+        if (st.cta.description !== undefined) {
+            const err = validateLocalizedText(st.cta.description, 'serviceTerminal.cta.description', 500);
+            if (err) return err;
+        }
+
+        if (st.cta.buttonLabel !== undefined) {
+            const err = validateLocalizedText(st.cta.buttonLabel, 'serviceTerminal.cta.buttonLabel', 80);
+            if (err) return err;
+        }
+
+        if (st.cta.buttonUrl !== undefined) {
+            if (typeof st.cta.buttonUrl !== 'string' || !isSafeServiceTerminalUrl(st.cta.buttonUrl)) {
+                return 'serviceTerminal.cta.buttonUrl must be a safe relative path (/...) or an absolute https:// URL.';
+            }
+        }
+    }
+
+    return null;
+};
+
+exports.isPlainObject = isPlainObject;
+exports.isSafeServiceTerminalUrl = isSafeServiceTerminalUrl;
+exports.isValidHexColor = isValidHexColor;
+exports.validateLocalizedText = validateLocalizedText;
+exports.validateServiceTerminalSettings = validateServiceTerminalSettings;
+
 // ── @route PUT /api/settings (Admin) ──────────────────────────
 exports.updateSettings = async (req, res, next) => {
     try {
@@ -260,6 +495,25 @@ exports.updateSettings = async (req, res, next) => {
         delete updates.success;
         delete updates.data;
         delete updates.settings;
+
+        // Validate Service Terminal settings if present
+        if (updates.serviceTerminal !== undefined) {
+            let stObj = updates.serviceTerminal;
+            if (typeof stObj === 'string') {
+                try {
+                    stObj = JSON.parse(stObj);
+                } catch (e) {
+                    return res.status(400).json({ success: false, message: 'Invalid serviceTerminal payload' });
+                }
+            }
+
+            const validationError = validateServiceTerminalSettings(stObj);
+            if (validationError) {
+                return res.status(400).json({ success: false, message: validationError });
+            }
+
+            updates.serviceTerminal = stObj;
+        }
 
         // Validate and merge Hero Media settings if present
         if (updates.hero) {
