@@ -1,4 +1,170 @@
-import { Settings } from './types';
+import { Settings, ServiceTerminalSettings, ServiceTerminalService, LocalizedText, ServiceTerminalIcon } from './types';
+
+export const DEFAULT_SERVICE_TERMINAL: ServiceTerminalSettings = {
+    enabled: true,
+    eyebrow: {
+        de: 'SERVICE TERMINAL',
+        en: 'SERVICE TERMINAL',
+        ar: 'محطة الخدمات',
+    },
+    title: {
+        de: 'Professionelle Reparaturen',
+        en: 'Professional Repairs',
+        ar: 'إصلاحات احترافية',
+    },
+    servicesLinkLabel: {
+        de: 'Alle Services',
+        en: 'All Services',
+        ar: 'كل الخدمات',
+    },
+    servicesLinkUrl: '/repair',
+    services: [
+        {
+            id: 'display',
+            enabled: true,
+            title: {
+                de: 'Displayreparatur',
+                en: 'Screen Repair',
+                ar: 'إصلاح الشاشة',
+            },
+            priceLabel: {
+                de: 'ab €149',
+                en: 'from €149',
+                ar: 'ابتداءً من 149€',
+            },
+            icon: 'monitor',
+            iconColor: '#22d3ee',
+            cardBackground: '#062033',
+            order: 1,
+        },
+        {
+            id: 'battery',
+            enabled: true,
+            title: {
+                de: 'Akkutausch',
+                en: 'Battery Replacement',
+                ar: 'تبديل البطارية',
+            },
+            priceLabel: {
+                de: 'ab €39',
+                en: 'from €39',
+                ar: 'ابتداءً من 39€',
+            },
+            icon: 'battery',
+            iconColor: '#34d399',
+            cardBackground: '#06252a',
+            order: 2,
+        },
+        {
+            id: 'charging-port',
+            enabled: true,
+            title: {
+                de: 'Ladebuchse',
+                en: 'Charging Port',
+                ar: 'منفذ الشحن',
+            },
+            priceLabel: {
+                de: 'ab €29',
+                en: 'from €29',
+                ar: 'ابتداءً من 29€',
+            },
+            icon: 'smartphone',
+            iconColor: '#fbbf24',
+            cardBackground: '#211817',
+            order: 3,
+        },
+        {
+            id: 'diagnosis',
+            enabled: true,
+            title: {
+                de: 'Diagnose',
+                en: 'Diagnostics',
+                ar: 'تشخيص',
+            },
+            priceLabel: {
+                de: 'Kostenlos',
+                en: 'Free',
+                ar: 'مجاناً',
+            },
+            icon: 'wrench',
+            iconColor: '#c084fc',
+            cardBackground: '#160d35',
+            order: 4,
+        },
+    ],
+    cta: {
+        enabled: true,
+        title: {
+            de: 'Kostenlose Diagnose für dein Gerät',
+            en: 'Free diagnosis for your device',
+            ar: 'تشخيص مجاني لجهازك',
+        },
+        description: {
+            de: 'Wir reparieren alle Marken – iPhone, Samsung, Huawei & mehr.',
+            en: 'We repair all brands – iPhone, Samsung, Huawei & more.',
+            ar: 'نصلح جميع العلامات التجارية – iPhone وSamsung وHuawei والمزيد.',
+        },
+        buttonLabel: {
+            de: 'Jetzt buchen',
+            en: 'Book now',
+            ar: 'احجز الآن',
+        },
+        buttonUrl: '/repair',
+    },
+};
+
+const mergeLocalizedText = (def: LocalizedText, incoming?: Partial<LocalizedText>): LocalizedText => ({
+    de: typeof incoming?.de === 'string' && incoming.de.trim() !== '' ? incoming.de : def.de,
+    en: typeof incoming?.en === 'string' && incoming.en.trim() !== '' ? incoming.en : def.en,
+    ar: typeof incoming?.ar === 'string' && incoming.ar.trim() !== '' ? incoming.ar : def.ar,
+});
+
+export const mergeServiceTerminalSettings = (
+    defaults: ServiceTerminalSettings,
+    incoming?: any
+): ServiceTerminalSettings => {
+    if (!incoming || typeof incoming !== 'object') {
+        return defaults;
+    }
+
+    const mergedServices: ServiceTerminalService[] = Array.isArray(incoming.services)
+        ? incoming.services.map((item: any, index: number) => {
+            const fallbackDef = defaults.services.find(s => s.id === item?.id) || defaults.services[index] || defaults.services[0];
+            return {
+                id: typeof item?.id === 'string' && item.id.trim() ? item.id : `service-${index + 1}`,
+                enabled: typeof item?.enabled === 'boolean' ? item.enabled : true,
+                title: mergeLocalizedText(fallbackDef.title, item?.title),
+                priceLabel: mergeLocalizedText(fallbackDef.priceLabel, item?.priceLabel),
+                icon: (['monitor', 'battery', 'smartphone', 'wrench', 'camera', 'zap', 'shield', 'headphones'].includes(item?.icon)
+                    ? item.icon
+                    : fallbackDef.icon) as ServiceTerminalIcon,
+                iconColor: typeof item?.iconColor === 'string' && item.iconColor.trim() ? item.iconColor : fallbackDef.iconColor,
+                cardBackground: typeof item?.cardBackground === 'string' && item.cardBackground.trim() ? item.cardBackground : fallbackDef.cardBackground,
+                order: typeof item?.order === 'number' ? item.order : index + 1,
+            };
+        })
+        : defaults.services;
+
+    return {
+        enabled: typeof incoming.enabled === 'boolean' ? incoming.enabled : defaults.enabled,
+        eyebrow: mergeLocalizedText(defaults.eyebrow, incoming.eyebrow),
+        title: mergeLocalizedText(defaults.title, incoming.title),
+        servicesLinkLabel: mergeLocalizedText(defaults.servicesLinkLabel, incoming.servicesLinkLabel),
+        servicesLinkUrl: typeof incoming.servicesLinkUrl === 'string' && incoming.servicesLinkUrl.trim()
+            ? incoming.servicesLinkUrl
+            : defaults.servicesLinkUrl,
+        services: mergedServices,
+        cta: {
+            enabled: typeof incoming.cta?.enabled === 'boolean' ? incoming.cta.enabled : defaults.cta.enabled,
+            title: mergeLocalizedText(defaults.cta.title, incoming.cta?.title),
+            description: mergeLocalizedText(defaults.cta.description, incoming.cta?.description),
+            buttonLabel: mergeLocalizedText(defaults.cta.buttonLabel, incoming.cta?.buttonLabel),
+            buttonUrl: typeof incoming.cta?.buttonUrl === 'string' && incoming.cta.buttonUrl.trim()
+                ? incoming.cta.buttonUrl
+                : defaults.cta.buttonUrl,
+        },
+    };
+};
 
 export const defaultSettings: Settings = {
     hero: {
@@ -76,6 +242,7 @@ export const defaultSettings: Settings = {
         { iconName: 'Smartphone', label: 'Ladebuchse', price: 'ab €29', color: 'text-amber-400', bg: 'bg-amber-500/10' },
         { iconName: 'Wrench', label: 'Diagnose', price: 'Kostenlos', color: 'text-purple-400', bg: 'bg-purple-500/10' }
     ],
+    serviceTerminal: DEFAULT_SERVICE_TERMINAL,
     valuation: {
         step1Title: 'Select Manufacturer'
     },
@@ -223,6 +390,7 @@ export const getCachedSettings = (): Settings => {
                 promoPopup: { ...defaultSettings.promoPopup, ...(parsed.promoPopup || {}) },
                 cookieConsent: { ...defaultSettings.cookieConsent, ...(parsed.cookieConsent || {}) },
                 repairPreviewCards: parsed.repairPreviewCards || defaultSettings.repairPreviewCards,
+                serviceTerminal: mergeServiceTerminalSettings(DEFAULT_SERVICE_TERMINAL, parsed.serviceTerminal),
                 featuredServices: parsed.featuredServices || defaultSettings.featuredServices,
                 seo: { ...(parsed.seo || {}) },
             };

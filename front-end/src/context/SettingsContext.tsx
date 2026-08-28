@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from './ToastContext';
 import { api, clearCache } from '../utils/api';
 import { Settings, SettingsContextType, FooterSettings } from './settings/types';
-import { defaultSettings, getCachedSettings, hasFreshCache } from './settings/cache';
+import { defaultSettings, getCachedSettings, hasFreshCache, DEFAULT_SERVICE_TERMINAL, mergeServiceTerminalSettings } from './settings/cache';
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
@@ -56,6 +56,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     promoPopup: { ...defaultSettings.promoPopup, ...(safeData.promoPopup || {}) },
                     cookieConsent: { ...defaultSettings.cookieConsent, ...(safeData.cookieConsent || {}) },
                     repairPreviewCards: safeData.repairPreviewCards || defaultSettings.repairPreviewCards,
+                    serviceTerminal: mergeServiceTerminalSettings(DEFAULT_SERVICE_TERMINAL, safeData.serviceTerminal),
                     featuredServices: safeData.featuredServices || defaultSettings.featuredServices,
                     seo: { ...(safeData.seo || {}) },
                 };
@@ -131,6 +132,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 theme: { ...prev.theme, ...(freshData.theme || {}) },
                 cookieConsent: { ...prev.cookieConsent, ...(freshData.cookieConsent || {}) },
                 repairPreviewCards: freshData.repairPreviewCards || prev.repairPreviewCards,
+                serviceTerminal: freshData.serviceTerminal
+                    ? mergeServiceTerminalSettings(prev.serviceTerminal || DEFAULT_SERVICE_TERMINAL, freshData.serviceTerminal)
+                    : prev.serviceTerminal,
                 featuredServices: freshData.featuredServices || prev.featuredServices,
                 seo: { ...(freshData.seo || {}) },
             }));

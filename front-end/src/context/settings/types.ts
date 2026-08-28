@@ -93,6 +93,49 @@ export interface FooterSettings {
     bottomLinks?: { label: string; url: string }[];
 }
 
+export type LocalizedText = {
+    de: string;
+    en: string;
+    ar: string;
+};
+
+export type ServiceTerminalIcon =
+    | 'monitor'
+    | 'battery'
+    | 'smartphone'
+    | 'wrench'
+    | 'camera'
+    | 'zap'
+    | 'shield'
+    | 'headphones';
+
+export interface ServiceTerminalService {
+    id: string;
+    enabled: boolean;
+    title: LocalizedText;
+    priceLabel: LocalizedText;
+    icon: ServiceTerminalIcon;
+    iconColor: string;
+    cardBackground: string;
+    order: number;
+}
+
+export interface ServiceTerminalSettings {
+    enabled: boolean;
+    eyebrow: LocalizedText;
+    title: LocalizedText;
+    servicesLinkLabel: LocalizedText;
+    servicesLinkUrl: string;
+    services: ServiceTerminalService[];
+    cta: {
+        enabled: boolean;
+        title: LocalizedText;
+        description: LocalizedText;
+        buttonLabel: LocalizedText;
+        buttonUrl: string;
+    };
+}
+
 export interface Settings {
     siteName?: string;
     contactEmail?: string;
@@ -179,6 +222,7 @@ export interface Settings {
         color: string;
         bg: string;
     }[];
+    serviceTerminal?: ServiceTerminalSettings;
     accessoryCategories?: any[];
     accessoryFaqs?: { question: string; answer: string; }[];
     features?: {
