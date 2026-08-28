@@ -248,7 +248,7 @@ exports.updateSettings = async (req, res, next) => {
     try {
         let updates = req.body;
         if (!updates || typeof updates !== 'object') {
-            return res.status(400).json({ success: false, error: 'Invalid body' });
+            return res.status(400).json({ success: false, message: 'Invalid body', error: 'Invalid body' });
         }
         
         // If the frontend accidentally sends the GET response format back
@@ -273,6 +273,28 @@ exports.updateSettings = async (req, res, next) => {
             }
 
             if (heroObj && typeof heroObj === 'object') {
+                // Preserve existing hero fields if partial updates are provided
+                const { data: existingHeroRow } = await supabaseAdmin.from('settings').select('value').eq('key', 'hero').maybeSingle();
+                let existingHero = null;
+                if (existingHeroRow && existingHeroRow.value) {
+                    try {
+                        existingHero = typeof existingHeroRow.value === 'string' ? JSON.parse(existingHeroRow.value) : existingHeroRow.value;
+                    } catch (err) {
+                        existingHero = null;
+                    }
+                }
+
+                if (existingHero && typeof existingHero === 'object') {
+                    heroObj = {
+                        ...existingHero,
+                        ...heroObj,
+                        media: heroObj.media ? {
+                            ...(existingHero.media || {}),
+                            ...(heroObj.media || {})
+                        } : existingHero.media
+                    };
+                }
+
                 if (heroObj.media) {
                     const { mode, videoUrl, posterUrl } = heroObj.media;
                     if (mode !== undefined) {
@@ -297,36 +319,16 @@ exports.updateSettings = async (req, res, next) => {
                                     message: 'Video URL must be a valid relative path (/media/hero/...) or hosted on an approved storage domain.'
                                 });
                             }
-                        }
 
-                        if (posterUrl && typeof posterUrl === 'string' && posterUrl.trim()) {
-                            if (!isValidMediaUrl(posterUrl)) {
-                                return res.status(400).json({
-                                    success: false,
-                                    message: 'Poster URL must be a valid relative path (/media/hero/...) or hosted on an approved storage domain.'
-                                });
+                            if (posterUrl && typeof posterUrl === 'string' && posterUrl.trim()) {
+                                if (!isValidMediaUrl(posterUrl)) {
+                                    return res.status(400).json({
+                                        success: false,
+                                        message: 'Poster URL must be a valid relative path (/media/hero/...) or hosted on an approved storage domain.'
+                                    });
+                                }
                             }
                         }
-                    }
-                }
-
-                // Preserve existing hero fields if partial updates are provided
-                const { data: existingHeroRow } = await supabaseAdmin.from('settings').select('value').eq('key', 'hero').maybeSingle();
-                if (existingHeroRow && existingHeroRow.value) {
-                    try {
-                        const existingHero = typeof existingHeroRow.value === 'string' ? JSON.parse(existingHeroRow.value) : existingHeroRow.value;
-                        if (existingHero && typeof existingHero === 'object') {
-                            heroObj = {
-                                ...existingHero,
-                                ...heroObj,
-                                media: {
-                                    ...(existingHero.media || {}),
-                                    ...(heroObj.media || {})
-                                }
-                            };
-                        }
-                    } catch (err) {
-                        // fallback to provided heroObj
                     }
                 }
 
