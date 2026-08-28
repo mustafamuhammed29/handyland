@@ -6,8 +6,8 @@ import { io } from 'socket.io-client';
 import { api } from '../utils/api';
 import {
     Loader2, Send, Clock, MessageSquare, Search,
-    SquarePen, X, Users, CheckSquare, Megaphone, Lock, 
-    AlertCircle, Info, ChevronDown, Flag, UserPlus, FileText
+    SquarePen, X, Users, CheckSquare, Megaphone, Lock,
+    AlertCircle, Info, ChevronDown, Flag, UserPlus, FileText, ArrowLeft
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -28,7 +28,7 @@ interface UserGroup {
 
 export default function MessagesManager() {
     const queryClient = useQueryClient();
-    
+
     // --- STATE ---
     const [selectedUser, setSelectedUser] = useState<UserGroup | null>(null);
     const { confirm } = useConfirm();
@@ -37,6 +37,7 @@ export default function MessagesManager() {
     const [isInternalNote, setIsInternalNote] = useState(false);
     const [filter, setFilter] = useState('all'); // all, assigned, unassigned, unread, closed
     const [searchQuery, setSearchQuery] = useState('');
+    const [mobileView, setMobileView] = useState<'users' | 'tickets' | 'thread'>('users');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Current logged in admin info
@@ -121,7 +122,7 @@ export default function MessagesManager() {
     // --- MUTATIONS ---
     const replyMutation = useMutation({
         mutationFn: async (payload: { id: string, message: string, is_internal_note: boolean }) => {
-            const res = await api.post(`/api/messages/${payload.id}/reply`, { 
+            const res = await api.post(`/api/messages/${payload.id}/reply`, {
                 message: payload.message,
                 is_internal_note: payload.is_internal_note
             }) as any;
@@ -177,10 +178,10 @@ export default function MessagesManager() {
     });
 
     const toggleBulkUser = (id: string) => {
-        setSelectedBulkUsers(prev => { 
-            const n = new Set(prev); 
-            n.has(id) ? n.delete(id) : n.add(id); 
-            return n; 
+        setSelectedBulkUsers(prev => {
+            const n = new Set(prev);
+            n.has(id) ? n.delete(id) : n.add(id);
+            return n;
         });
     };
 
@@ -215,11 +216,11 @@ export default function MessagesManager() {
         messages.forEach((msg: any) => {
             const key = msg.email?.toLowerCase() || msg._id;
             if (!map.has(key)) {
-                map.set(key, { 
-                    email: key, 
-                    name: msg.name, 
-                    threads: [], 
-                    lastActivity: msg.createdAt, 
+                map.set(key, {
+                    email: key,
+                    name: msg.name,
+                    threads: [],
+                    lastActivity: msg.createdAt,
                     hasUnread: false,
                     assignedToMe: false,
                     hasHighPriority: false
@@ -263,6 +264,7 @@ export default function MessagesManager() {
                 const userKey = foundThread.email?.toLowerCase() || foundThread._id || foundThread.id;
                 const group = userGroups.find(g => g.email === userKey);
                 if (group) setSelectedUser(group);
+                setMobileView('thread');
             }
             setTimeout(() => {
                 window.history.replaceState({}, '', '/messages');
@@ -292,9 +294,10 @@ export default function MessagesManager() {
         if (!selectedThread) return;
         updateTicketMutation.mutate({ id: selectedThread._id, priority });
     };
-    
+
     const handleSelectThread = (thread: any) => {
         setSelectedThread(thread);
+        setMobileView('thread');
         if (thread.status === 'unread') {
             updateTicketMutation.mutate({ id: thread._id, status: 'read' });
         }
@@ -354,19 +357,19 @@ export default function MessagesManager() {
     return (
         <div className="space-y-6 flex flex-col h-[calc(100vh-120px)] animate-in fade-in duration-500">
             {/* ── HEADER ── */}
-            <div className="flex justify-between items-end flex-shrink-0">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 flex-shrink-0">
                 <div>
-                    <h1 className="text-3xl font-extrabold mb-1 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">Tickets & Messages</h1>
-                    <p className="text-slate-400 text-sm">Advanced Ticketing System & Customer Support Hub</p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold mb-1 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">Tickets & Messages</h1>
+                    <p className="text-slate-400 text-xs sm:text-sm">Advanced Ticketing System & Customer Support Hub</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                     <button onClick={() => openComposeModal('single')} title="Send to one customer"
-                        className="flex items-center gap-2 bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20 text-sm border border-blue-400/50">
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20 text-xs sm:text-sm border border-blue-400/50 focus-visible:ring-2 focus-visible:ring-blue-500">
                         <SquarePen className="w-4 h-4" /> Direct Message
                     </button>
                     {isAdmin && (
                         <button onClick={() => openComposeModal('bulk')} title="Send bulk message"
-                            className="flex items-center gap-2 bg-gradient-to-b from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-purple-900/20 text-sm border border-purple-400/50">
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-b from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-purple-900/20 text-xs sm:text-sm border border-purple-400/50 focus-visible:ring-2 focus-visible:ring-blue-500">
                             <Megaphone className="w-4 h-4" /> Bulk Message
                         </button>
                     )}
@@ -374,11 +377,11 @@ export default function MessagesManager() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
-                
+
                 {/* ── COLUMN 1: FILTERS & USERS (Span 3) ── */}
-                <div className="lg:col-span-3 glass-panel border border-slate-700/50 bg-[#0B1120]/80 rounded-3xl flex flex-col overflow-hidden shadow-2xl backdrop-blur-xl relative">
+                <div className={`${mobileView === 'users' ? 'flex' : 'hidden'} lg:flex lg:col-span-3 glass-panel border border-slate-700/50 bg-[#0B1120]/80 rounded-3xl flex-col overflow-hidden shadow-2xl backdrop-blur-xl relative`}>
                     <div className="absolute top-0 left-0 w-full h-32 bg-blue-500/10 blur-[80px] pointer-events-none" />
-                    
+
                     <div className="p-5 border-b border-slate-700/50 space-y-4 relative z-10">
                         <div className="relative group">
                             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-400 transition-colors pointer-events-none" />
@@ -391,17 +394,17 @@ export default function MessagesManager() {
                                 </button>
                             )}
                         </div>
-                        
+
                         {/* Filter Chips */}
                         <div className="flex flex-wrap gap-2">
                             {[
-                                { id: 'all', label: 'All' }, 
-                                { id: 'assigned', label: 'Assigned to Me' }, 
-                                { id: 'unassigned', label: 'Unassigned' }, 
+                                { id: 'all', label: 'All' },
+                                { id: 'assigned', label: 'Assigned to Me' },
+                                { id: 'unassigned', label: 'Unassigned' },
                                 { id: 'unread', label: 'Unread' }
                             ].map(f => (
                                 <button key={f.id} onClick={() => setFilter(f.id)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 ${filter === f.id
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 focus-visible:ring-2 focus-visible:ring-blue-500 ${filter === f.id
                                         ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-[0_0_10px_rgba(59,130,246,0.1)]'
                                         : 'bg-slate-800/40 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 border border-transparent'}`}>
                                     {f.label}
@@ -420,8 +423,8 @@ export default function MessagesManager() {
                             </div>
                         ) : (
                             filteredGroups.map(group => (
-                                <button key={group.email} onClick={() => { setSelectedUser(group); setSelectedThread(null); }}
-                                    className={`w-full text-left p-3 rounded-xl border transition-all duration-200 group relative overflow-hidden ${selectedUser?.email === group.email
+                                <button key={group.email} onClick={() => { setSelectedUser(group); setSelectedThread(null); setMobileView('tickets'); }}
+                                    className={`w-full text-left p-3 rounded-xl border transition-all duration-200 group relative overflow-hidden focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedUser?.email === group.email
                                         ? 'bg-gradient-to-r from-blue-900/40 to-indigo-900/20 border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
                                         : 'bg-transparent border-transparent hover:border-slate-700/50 hover:bg-slate-800/40'}`}
                                 >
@@ -468,35 +471,54 @@ export default function MessagesManager() {
                 </div>
 
                 {/* ── COLUMN 2: TICKETS LIST (Span 4) ── */}
-                <div className="lg:col-span-4 glass-panel border border-slate-700/50 bg-[#0B1120]/80 rounded-3xl flex flex-col overflow-hidden shadow-2xl backdrop-blur-xl relative">
+                <div className={`${mobileView === 'tickets' ? 'flex' : 'hidden'} lg:flex lg:col-span-4 glass-panel border border-slate-700/50 bg-[#0B1120]/80 rounded-3xl flex-col overflow-hidden shadow-2xl backdrop-blur-xl relative`}>
                     {!selectedUser ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4">
+                        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4 p-6 text-center">
                             <Users className="w-12 h-12 opacity-20 text-slate-400" />
                             <p className="text-sm font-medium">Select a user to view their tickets</p>
+                            <button
+                                type="button"
+                                onClick={() => setMobileView('users')}
+                                className="lg:hidden flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500"
+                                aria-label="Go back to customer list"
+                            >
+                                <ArrowLeft className="w-4 h-4" /> Go to Users List
+                            </button>
                         </div>
                     ) : (
                         <>
-                            <div className="p-5 border-b border-slate-700/50 bg-slate-900/40 backdrop-blur-sm">
-                                <h3 className="text-white font-bold tracking-tight mb-1">Customer Tickets</h3>
-                                <div className="text-xs text-slate-400">Tickets for <span className="text-blue-400 font-semibold">{selectedUser.name}</span></div>
+                            <div className="p-5 border-b border-slate-700/50 bg-slate-900/40 backdrop-blur-sm flex items-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => { setMobileView('users'); setSelectedUser(null); }}
+                                    className="lg:hidden p-2 -ml-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 shrink-0"
+                                    aria-label="Back to customer list"
+                                    title="Back to customer list"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="text-white font-bold tracking-tight mb-1 truncate">Customer Tickets</h3>
+                                    <div className="text-xs text-slate-400 truncate">Tickets for <span className="text-blue-400 font-semibold">{selectedUser.name}</span></div>
+                                </div>
                             </div>
                             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
                                 {selectedUser.threads.map((thread) => {
                                     const isSelected = selectedThread?._id === thread._id;
-                                    const assignedToName = thread.assigned_to 
+                                    const assignedToName = thread.assigned_to
                                         ? adminsAndStaff.find((u: any) => u._id === thread.assigned_to || u.id === thread.assigned_to)?.name || 'Staff'
                                         : 'Unassigned';
 
                                     return (
                                         <button key={thread._id} onClick={() => handleSelectThread(thread)}
-                                            className={`w-full text-left rounded-2xl p-4 transition-all duration-300 relative overflow-hidden border
-                                                ${isSelected 
-                                                    ? 'bg-blue-900/20 border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
+                                            className={`w-full text-left rounded-2xl p-4 transition-all duration-300 relative overflow-hidden border focus-visible:ring-2 focus-visible:ring-blue-500
+                                                ${isSelected
+                                                    ? 'bg-blue-900/20 border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.1)]'
                                                     : 'bg-slate-900/40 hover:bg-slate-800/60 border-slate-700/50 hover:border-slate-500/40 shadow-sm'
                                                 }`}>
-                                            
+
                                             {thread.status === 'unread' && <div className="absolute left-0 top-0 bottom-0 w-1 bg-rose-500" />}
-                                            
+
                                             <div className="flex justify-between items-start mb-2">
                                                 <div className="flex items-center gap-2">
                                                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border flex items-center gap-1 ${getPriorityColor(thread.priority)}`}>
@@ -532,44 +554,63 @@ export default function MessagesManager() {
                 </div>
 
                 {/* ── COLUMN 3: TICKET DETAIL & REPLY (Span 5) ── */}
-                <div className="lg:col-span-5 glass-panel border border-slate-700/50 bg-[#0B1120]/80 rounded-3xl flex flex-col overflow-hidden shadow-2xl backdrop-blur-xl relative">
+                <div className={`${mobileView === 'thread' ? 'flex' : 'hidden'} lg:flex lg:col-span-5 glass-panel border border-slate-700/50 bg-[#0B1120]/80 rounded-3xl flex-col overflow-hidden shadow-2xl backdrop-blur-xl relative`}>
                     {!selectedThread ? (
-                         <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4">
+                         <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4 p-6 text-center">
                             <FileText className="w-16 h-16 opacity-10 text-slate-400" />
                             <p className="text-sm font-medium">Select a ticket to view details and reply</p>
+                            <button
+                                type="button"
+                                onClick={() => setMobileView(selectedUser ? 'tickets' : 'users')}
+                                className="lg:hidden flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500"
+                                aria-label="Go back"
+                            >
+                                <ArrowLeft className="w-4 h-4" /> {selectedUser ? 'Go to Tickets List' : 'Go to Users List'}
+                            </button>
                         </div>
                     ) : (
                         <>
                             {/* Toolbar (Admins can assign, change priority) */}
-                            <div className="p-4 border-b border-slate-700/50 bg-slate-900/60 backdrop-blur-md flex justify-between items-center z-20 shadow-sm relative">
+                            <div className="p-4 border-b border-slate-700/50 bg-slate-900/60 backdrop-blur-md flex flex-wrap sm:flex-nowrap justify-between items-center gap-3 z-20 shadow-sm relative">
                                 <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
-                                <div className="flex flex-col">
-                                    <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-                                        Ticket #{selectedThread._id.substring(0,8)}
-                                        {statusBadge(selectedThread.status)}
-                                    </h2>
-                                    <div className="text-[11px] text-slate-400 flex items-center gap-2">
-                                        <Clock className="w-3 h-3" /> {formatDateTime(selectedThread.createdAt)}
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setMobileView('tickets'); setSelectedThread(null); }}
+                                        className="lg:hidden p-2 -ml-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 shrink-0"
+                                        aria-label="Back to ticket list"
+                                        title="Back to ticket list"
+                                    >
+                                        <ArrowLeft className="w-5 h-5" />
+                                    </button>
+                                    <div className="flex flex-col min-w-0">
+                                        <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2 truncate">
+                                            <span>Ticket #{selectedThread._id.substring(0,8)}</span>
+                                            {statusBadge(selectedThread.status)}
+                                        </h2>
+                                        <div className="text-[11px] text-slate-400 flex items-center gap-2">
+                                            <Clock className="w-3 h-3 shrink-0" /> {formatDateTime(selectedThread.createdAt)}
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div className="flex gap-2 items-center">
+
+                                <div className="flex gap-2 items-center flex-wrap sm:flex-nowrap">
                                     {isAdmin && (
                                         <>
-                                            <select 
+                                            <select
                                                 value={selectedThread.priority || 'normal'}
                                                 onChange={(e) => handlePriorityChange(e.target.value as Priority)}
-                                                className="bg-slate-950 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1.5 outline-none focus:border-blue-500 shadow-inner"
+                                                className="bg-slate-950 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1.5 outline-none focus:border-blue-500 shadow-inner focus-visible:ring-2 focus-visible:ring-blue-500"
                                             >
                                                 <option value="low">Low Priority</option>
                                                 <option value="normal">Normal Priority</option>
                                                 <option value="high">High Priority</option>
                                             </select>
 
-                                            <select 
+                                            <select
                                                 value={selectedThread.assigned_to || ''}
                                                 onChange={(e) => handleAssign(e.target.value)}
-                                                className="bg-slate-950 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1.5 outline-none focus:border-blue-500 shadow-inner"
+                                                className="bg-slate-950 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1.5 outline-none focus:border-blue-500 shadow-inner focus-visible:ring-2 focus-visible:ring-blue-500"
                                             >
                                                 <option value="">Unassigned</option>
                                                 {adminsAndStaff.map((u: any) => (
@@ -583,7 +624,7 @@ export default function MessagesManager() {
 
                                     {selectedThread.status !== 'closed' && (
                                         <button onClick={handleCloseTicket} disabled={updateTicketMutation.isPending}
-                                            className="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors border border-emerald-500/30 flex items-center gap-1.5 ml-2 shadow-sm">
+                                            className="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors border border-emerald-500/30 flex items-center gap-1.5 ml-auto sm:ml-2 shadow-sm focus-visible:ring-2 focus-visible:ring-blue-500">
                                             {updateTicketMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckSquare className="w-3.5 h-3.5" />}
                                             Resolve
                                         </button>
@@ -592,7 +633,7 @@ export default function MessagesManager() {
                             </div>
 
                             {/* Conversation Thread */}
-                            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 flex flex-col bg-[#0B1120]/40">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-6 flex flex-col bg-[#0B1120]/40">
                                 {/* Original message */}
                                 <div className={`max-w-[85%] ${selectedThread.initiatedByAdmin ? 'self-end' : 'self-start'}`}>
                                     <div className={`flex items-center gap-2 mb-1.5 ${selectedThread.initiatedByAdmin ? 'justify-end' : 'justify-start'}`}>
@@ -623,10 +664,10 @@ export default function MessagesManager() {
                                                 </span>
                                                 <div className="text-[10px] text-slate-500 font-medium">{formatDateTime(reply.createdAt)}</div>
                                             </div>
-                                            
+
                                             <div className={`rounded-2xl p-4 shadow-md text-sm leading-relaxed whitespace-pre-wrap ${
-                                                isMine 
-                                                    ? (isInternal 
+                                                isMine
+                                                    ? (isInternal
                                                         ? 'bg-amber-500/10 text-amber-100 border border-amber-500/30 rounded-tr-sm backdrop-blur-md' // Internal Note Style
                                                         : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-sm border border-blue-500/20') // Normal Reply Style
                                                     : 'bg-slate-800/80 text-slate-200 rounded-tl-sm border border-slate-700/50 backdrop-blur-sm' // Customer Reply Style
@@ -642,26 +683,26 @@ export default function MessagesManager() {
                             {/* Reply Box */}
                             {selectedThread.status !== 'closed' ? (
                                 <div className="border-t border-slate-700/50 bg-slate-900/60 backdrop-blur-xl flex flex-col p-4 relative z-20">
-                                    <div className="flex justify-between items-center mb-3">
+                                    <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2 mb-3">
                                         {/* Internal Note Toggle */}
-                                        <button 
-                                            type="button" 
+                                        <button
+                                            type="button"
                                             onClick={() => setIsInternalNote(!isInternalNote)}
-                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                                                isInternalNote 
-                                                ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]' 
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                                                isInternalNote
+                                                ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
                                                 : 'bg-slate-800/50 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200'
                                             }`}
                                         >
-                                            <Info className="w-3.5 h-3.5" />
-                                            {isInternalNote ? 'Internal Note Mode (Hidden from Customer)' : 'Public Reply'}
+                                            <Info className="w-3.5 h-3.5 shrink-0" />
+                                            <span className="truncate">{isInternalNote ? 'Internal Note Mode (Hidden)' : 'Public Reply'}</span>
                                         </button>
 
                                         {/* Quick Replies */}
-                                        <div className="flex gap-2 overflow-x-auto custom-scrollbar items-center justify-end max-w-[50%]">
+                                        <div className="flex gap-2 overflow-x-auto custom-scrollbar items-center justify-start sm:justify-end max-w-full sm:max-w-[50%] py-1">
                                             {!isInternalNote && quickReplies.map((resp: string, idx: number) => (
                                                 <button key={idx} onClick={() => setReplyText(resp)}
-                                                    className="shrink-0 px-3 py-1 bg-slate-800/50 hover:bg-blue-900/30 hover:text-blue-300 border border-slate-700/50 rounded-lg text-[10px] font-medium text-slate-300 transition-colors whitespace-nowrap shadow-sm hover:border-blue-500/30">
+                                                    className="shrink-0 px-3 py-1 bg-slate-800/50 hover:bg-blue-900/30 hover:text-blue-300 border border-slate-700/50 rounded-lg text-[10px] font-medium text-slate-300 transition-colors whitespace-nowrap shadow-sm hover:border-blue-500/30 focus-visible:ring-2 focus-visible:ring-blue-500">
                                                     {resp.length > 25 ? resp.substring(0, 25) + '…' : resp}
                                                 </button>
                                             ))}
@@ -669,21 +710,21 @@ export default function MessagesManager() {
                                     </div>
 
                                     <form onSubmit={handleReply} className="flex gap-3 relative">
-                                        <textarea 
-                                            value={replyText} 
+                                        <textarea
+                                            value={replyText}
                                             onChange={e => setReplyText(e.target.value)}
                                             placeholder={isInternalNote ? "Write a private note for the team..." : "Write a reply to the customer..."}
                                             rows={3}
-                                            className={`flex-1 bg-slate-950/60 border rounded-2xl pl-4 pr-16 py-3 text-white focus:outline-none transition-all text-sm shadow-inner resize-none
-                                                ${isInternalNote 
-                                                    ? 'border-amber-500/50 focus:border-amber-400 focus:bg-amber-900/10 placeholder:text-amber-700/50' 
+                                            className={`w-full bg-slate-950/60 border rounded-2xl pl-4 pr-16 py-3 text-white focus:outline-none transition-all text-sm shadow-inner resize-none focus-visible:ring-2 focus-visible:ring-blue-500
+                                                ${isInternalNote
+                                                    ? 'border-amber-500/50 focus:border-amber-400 focus:bg-amber-900/10 placeholder:text-amber-700/50'
                                                     : 'border-slate-700/50 focus:border-blue-500/60 focus:bg-slate-900/80 placeholder:text-slate-500'
-                                                }`} 
+                                                }`}
                                         />
                                         <button disabled={replyMutation.isPending || !replyText.trim()} title="Send"
-                                            className={`absolute right-3 bottom-3 w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40 transition-all flex-shrink-0 shadow-lg
-                                                ${isInternalNote 
-                                                    ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-amber-900/30' 
+                                            className={`absolute right-3 bottom-3 w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40 transition-all flex-shrink-0 shadow-lg focus-visible:ring-2 focus-visible:ring-blue-500
+                                                ${isInternalNote
+                                                    ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-amber-900/30'
                                                     : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/30'
                                                 }`}>
                                             {replyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 ml-0.5" />}
@@ -701,14 +742,13 @@ export default function MessagesManager() {
             </div>
 
             {/* ── Compose Modal (Retained with glassmorphism) ── */}
-            {/* (Omitted to keep file size reasonable, it is already implemented well, I will keep it same but ensure its there) */}
             {showCompose && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#060B19]/80 backdrop-blur-md">
                     <div className="glass-panel bg-[#0B1120]/95 border border-slate-700/60 rounded-3xl w-full max-w-lg shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
                         {/* Header */}
                         <div className="px-6 py-5 border-b border-slate-700/50 flex justify-between items-center bg-slate-900/60">
                             <h2 className="text-white font-bold text-lg">{composeMode === 'single' ? 'Direct Message' : 'Bulk Broadcast'}</h2>
-                            <button onClick={() => setShowCompose(false)} className="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-xl transition-colors">
+                            <button onClick={() => setShowCompose(false)} className="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-blue-500">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -718,13 +758,13 @@ export default function MessagesManager() {
                                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                 <input type="text" value={userSearch} onChange={e => setUserSearch(e.target.value)}
                                     placeholder="Search customer..." autoFocus
-                                    className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none" />
+                                    className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl pl-10 pr-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none focus-visible:ring-2 focus-visible:ring-blue-500" />
                             </div>
-                            
+
                             <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1 border border-slate-700/50 rounded-xl p-2 bg-slate-950/30">
                                 {allUsers.filter((u:any) => u.name?.toLowerCase().includes(userSearch.toLowerCase()) || u.email?.toLowerCase().includes(userSearch.toLowerCase())).map((u: any) => (
                                     <button key={u._id} onClick={() => composeMode === 'single' ? setSelectedComposeUser(selectedComposeUser?._id === u._id ? null : u) : toggleBulkUser(u._id)}
-                                        className={`w-full text-left p-2.5 rounded-lg border flex items-center gap-3 ${
+                                        className={`w-full text-left p-2.5 rounded-lg border flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-blue-500 ${
                                             (composeMode === 'single' && selectedComposeUser?._id === u._id) || (composeMode === 'bulk' && selectedBulkUsers.has(u._id))
                                                 ? 'border-blue-500/40 bg-blue-500/10' : 'border-transparent hover:bg-slate-800/60'
                                         }`}>
@@ -739,11 +779,11 @@ export default function MessagesManager() {
 
                             <textarea value={composeText} onChange={e => setComposeText(e.target.value)}
                                 placeholder="Message..." rows={4}
-                                className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-4 text-white text-sm focus:border-blue-500/50 outline-none resize-none" />
-                            
+                                className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-4 text-white text-sm focus:border-blue-500/50 outline-none resize-none focus-visible:ring-2 focus-visible:ring-blue-500" />
+
                             <button onClick={handleComposeSend}
                                 disabled={sendSingleMutation.isPending || sendBulkMutation.isPending || !composeText.trim()}
-                                className="w-full py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50">
+                                className="w-full py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-blue-500">
                                 Send Message
                             </button>
                         </div>
