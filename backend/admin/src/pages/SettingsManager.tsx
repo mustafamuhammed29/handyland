@@ -500,12 +500,18 @@ export default function SettingsManager() {
     };
 
     const handleSave = async () => {
+        if (settings.hero?.media?.mode === 'video' && !settings.hero?.media?.videoUrl?.trim()) {
+            showSaveToast('error', 'A valid video URL is required in Video Mode. Please upload a video file or switch to Content Mode before saving.');
+            return;
+        }
+
         try {
             await api.put('/api/settings', settings);
             showSaveToast('success', 'Settings saved successfully!');
-        } catch (error) {
-            console.error('Failed to save settings:', error);
-            showSaveToast('error', 'Failed to save settings.');
+        } catch (error: any) {
+            console.error('Failed to save settings:', error?.response?.data || error);
+            const serverMsg = error?.response?.data?.message || error?.response?.data?.error || 'Failed to save settings.';
+            showSaveToast('error', serverMsg);
         }
     };
 
@@ -602,25 +608,58 @@ export default function SettingsManager() {
             </div>
 
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                {/* Tabs */}
-                <div className="w-full lg:w-64 shrink-0 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 custom-scrollbar snap-x">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all shrink-0 snap-start lg:w-full ${activeTab === tab.id
-                                ? 'bg-blue-600/20 text-blue-400 border border-blue-500/50'
-                                : 'text-slate-400 hover:bg-slate-800'
-                                }`}
+                {/* Tabs Selector */}
+                <div className="sticky top-0 z-20 bg-slate-950/85 backdrop-blur-md py-2 -mx-4 px-4 sm:mx-0 sm:px-0 lg:static lg:bg-transparent lg:p-0 w-full lg:w-64 shrink-0">
+                    {/* Mobile Quick-Jump Dropdown */}
+                    <div className="lg:hidden mb-3">
+                        <select
+                            value={activeTab}
+                            onChange={(e) => setActiveTab(e.target.value)}
+                            aria-label="Select settings category"
+                            className="bg-slate-900 border border-slate-700 text-white rounded-xl p-3.5 w-full font-bold focus:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 outline-none transition-all shadow-inner"
                         >
-                            <tab.icon size={18} className="shrink-0" />
-                            <span className="font-bold whitespace-nowrap">{tab.label}</span>
-                        </button>
-                    ))}
+                            {tabs.map(tab => (
+                                <option key={tab.id} value={tab.id}>
+                                    {tab.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Horizontal / Sidebar Tab Bar */}
+                    <div
+                        role="tablist"
+                        aria-label="Settings categories"
+                        className="w-full flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 custom-scrollbar snap-x"
+                    >
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                id={`tab-${tab.id}`}
+                                role="tab"
+                                type="button"
+                                aria-selected={activeTab === tab.id}
+                                aria-controls={`panel-${tab.id}`}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl transition-all shrink-0 snap-start lg:w-full focus-visible:ring-2 focus-visible:ring-blue-500 ${activeTab === tab.id
+                                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/50 shadow-sm'
+                                    : 'text-slate-400 hover:bg-slate-800 border border-transparent'
+                                    }`}
+                            >
+                                <tab.icon size={18} className="shrink-0" />
+                                <span className="font-bold whitespace-nowrap">{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-8">
+                <div
+                    role="tabpanel"
+                    id={`panel-${activeTab}`}
+                    aria-labelledby={`tab-${activeTab}`}
+                    className="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-8"
+                >
                     {activeTab === 'general' && <AppearanceTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'features' && <FeaturesTab settings={settings} handleChange={handleChange} />}
                     {activeTab === 'financials' && <FinancialSettingsTab settings={settings} handleChange={handleChange} />}
