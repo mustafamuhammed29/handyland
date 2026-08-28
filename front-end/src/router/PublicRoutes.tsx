@@ -99,8 +99,8 @@ export const getPublicRoutes = ({ settings, lang, user, cartCount }: PublicRoute
             <Route path="/agb" element={<PageTransition><Suspense fallback={<GlobalLoader />}><TermsAndConditions /></Suspense></PageTransition>} />
             <Route path="/privacy" element={<PageTransition><Suspense fallback={<GlobalLoader />}><PrivacyPolicy /></Suspense></PageTransition>} />
             <Route path="/datenschutz" element={<Navigate to="/privacy" replace />} />
-            <Route path="/service" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
-            <Route path="/kundenservice" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
+            <Route path="/service" element={<Navigate to="/contact" replace />} />
+            <Route path="/kundenservice" element={<Navigate to="/contact" replace />} />
             <Route path="/impressum" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
             <Route path="/uber-uns" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
             <Route path="/page/:slug" element={<PageTransition><Suspense fallback={<GlobalLoader />}><InfoPage /></Suspense></PageTransition>} />
