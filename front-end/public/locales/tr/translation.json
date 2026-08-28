@@ -533,5 +533,51 @@
     "noProducts": "Ürün bulunamadı",
     "loading": "Ürünler yükleniyor...",
     "error": "Ürünler yüklenirken hata oluştu"
+  },
+  "promo": {
+    "exclusiveOffer": "Özel Teklif",
+    "title": "{{discount}} İndirim Kazanın!",
+    "message": "Ödeme sırasında aşağıdaki kodu kullanın ve siparişinizde {{discount}} indirim kazanın!",
+    "yourCode": "SİZE ÖZEL KOD",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı!",
+    "validUntil": "Geçerlilik tarihi:",
+    "couponsLeft": "Kalan kupon:",
+    "decline": "Hayır teşekkürler, siteye devam et",
+    "closeAria": "Kampanya penceresini kapat",
+    "copyCodeAria": "Kupon kodunu kopyala: {{code}}"
+  },
+  "cookieConsent": {
+    "title": "Gizliliğiniz Bizim İçin Önemli",
+    "message": "Analiz, kişiselleştirilmiş içerik ve reklam amaçlarıyla çerezler kullanıyoruz. Lütfen kabul etmek istediğiniz çerezleri seçin.",
+    "strictlyNecessaryTitle": "Zorunlu Teknik Çerezler",
+    "strictlyNecessaryDesc": "Web sitesinin güvenli ve düzgün çalışması için gereklidir. Bu çerezler devre dışı bırakılamaz.",
+    "functionalTitle": "İşlevsel Çerezler",
+    "functionalDesc": "Web sitesinin gelişmiş işlevler ve kişiselleştirme sunmasını sağlar.",
+    "analyticsTitle": "Analiz ve Performans Çerezleri",
+    "analyticsDesc": "Performansı artırmak için ziyaretçilerin siteyle nasıl etkileşim kurduğunu anlamamıza yardımcı olur.",
+    "marketingTitle": "Pazarlama ve Reklam Çerezleri",
+    "marketingDesc": "Size özel reklamlar ve kampanyalar sunmak amacıyla kullanılır.",
+    "acceptAll": "Tümünü Kabul Et",
+    "rejectAll": "Tümünü Reddet",
+    "savePreferences": "Tercihleri Kaydet",
+    "managePreferences": "Ayarları Yönet",
+    "closeAria": "Çerez bildirimini kapat",
+    "toggleAria": "Çerez ayarını değiştir"
+  },
+  "whatsapp": {
+    "tooltip": "Yardım mı lazım? Bizimle sohbet edin!",
+    "defaultMessage": "Merhaba, HandyLand hizmetleri hakkında yardıma ihtiyacım var.",
+    "ariaLabel": "WhatsApp üzerinden sohbet et"
+  },
+  "offline": {
+    "title": "İnternet Bağlantısı Yok",
+    "description": "Yeniden bağlanana kadar bazı özellikler çalışmayabilir."
+  },
+  "errorBoundary": {
+    "title": "Sistem Hatası",
+    "description": "Beklenmeyen bir hata oluştu. Sorun günlüğe kaydedildi ve teknik ekibimize bildirildi.",
+    "reload": "Sistemi Yeniden Yükle",
+    "returnHome": "Ana Sayfaya Dön"
   }
 }

@@ -712,5 +712,51 @@
     "noProducts": "Keine Produkte verfügbar",
     "loading": "Produkte werden geladen...",
     "error": "Fehler beim Laden der Produkte"
+  },
+  "promo": {
+    "exclusiveOffer": "Exklusives Angebot",
+    "title": "{{discount}} Rabatt sichern!",
+    "message": "Nutze den Code unten beim Checkout und spare {{discount}} auf deine Bestellung!",
+    "yourCode": "DEIN EXKLUSIVER CODE",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "validUntil": "Gültig bis:",
+    "couponsLeft": "Gutscheine übrig:",
+    "decline": "Nein danke, weiter zur Seite",
+    "closeAria": "Aktionsfenster schließen",
+    "copyCodeAria": "Gutscheincode kopieren: {{code}}"
+  },
+  "cookieConsent": {
+    "title": "Ihre Privatsphäre ist uns wichtig",
+    "message": "Wir verwenden Cookies für eine Reihe von Auswertungen, personalisierte Inhalte und Werbung. Bitte wählen Sie, welche Cookies Sie akzeptieren möchten.",
+    "strictlyNecessaryTitle": "Technisch notwendige Cookies",
+    "strictlyNecessaryDesc": "Erforderlich für die sichere und einwandfreie Funktion der Website. Diese können nicht deaktiviert werden.",
+    "functionalTitle": "Funktionale Cookies",
+    "functionalDesc": "Ermöglicht der Website erweiterte Funktionen und Personalisierung bereitzustellen.",
+    "analyticsTitle": "Tracking und Performance Cookies",
+    "analyticsDesc": "Helfen uns zu verstehen, wie Besucher mit der Website interagieren, um die Leistung zu verbessern.",
+    "marketingTitle": "Targeting und Werbung Cookies",
+    "marketingDesc": "Werden verwendet, um Ihnen relevante Werbung und Kampagnen anzuzeigen.",
+    "acceptAll": "Alle akzeptieren",
+    "rejectAll": "Ich lehne ab",
+    "savePreferences": "Einstellungen speichern",
+    "managePreferences": "Einstellungen ändern",
+    "closeAria": "Cookie-Hinweis schließen",
+    "toggleAria": "Cookie-Einstellung umschalten"
+  },
+  "whatsapp": {
+    "tooltip": "Hilfe benötigt? Chatte mit uns!",
+    "defaultMessage": "Hallo, ich benötige Hilfe mit HandyLand-Services.",
+    "ariaLabel": "Über WhatsApp chatten"
+  },
+  "offline": {
+    "title": "Keine Internetverbindung",
+    "description": "Einige Funktionen stehen möglicherweise nicht zur Verfügung, bis die Verbindung wiederhergestellt ist."
+  },
+  "errorBoundary": {
+    "title": "Systemfehler",
+    "description": "Ein unerwarteter Fehler ist aufgetreten. Das Problem wurde protokolliert und unser Team wurde benachrichtigt.",
+    "reload": "System neu laden",
+    "returnHome": "Zur Startseite"
   }
 }

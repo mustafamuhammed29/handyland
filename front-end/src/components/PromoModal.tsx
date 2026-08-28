@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Tag, Copy, CheckCircle2, Clock, AlertCircle, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
 import api from '../utils/api';
 
@@ -15,6 +16,10 @@ interface PromoCoupon {
 
 export const PromoModal = () => {
     const { settings } = useSettings();
+    const { t, i18n } = useTranslation();
+    const language = (i18n.language || 'de').split('-')[0];
+    const isRtl = language === 'ar' || language === 'fa';
+
     const [isOpen, setIsOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const [coupon, setCoupon] = useState<PromoCoupon | null>(null);
@@ -137,8 +142,8 @@ export const PromoModal = () => {
         ? `${coupon.discountValue}%`
         : `${coupon.discountValue}€`;
 
-    const title = discountLabel + ' Rabatt sichern!';
-    const message = 'Nutze den Code unten beim Checkout und spare ' + discountLabel + ' auf deine Bestellung!';
+    const title = t('promo.title', { discount: discountLabel, defaultValue: `${discountLabel} Rabatt sichern!` });
+    const message = t('promo.message', { discount: discountLabel, defaultValue: `Nutze den Code unten beim Checkout und spare ${discountLabel} auf deine Bestellung!` });
 
     const couponsLeft = coupon.usageLimit ? Math.max(0, coupon.usageLimit - coupon.usedCount) : null;
 
@@ -153,6 +158,7 @@ export const PromoModal = () => {
             {/* Modal Content */}
             <div
                 ref={modalRef}
+                dir={isRtl ? 'rtl' : 'ltr'}
                 className="relative w-full max-w-md bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300 focus:outline-none"
                 tabIndex={-1}
                 role="dialog"
@@ -166,8 +172,8 @@ export const PromoModal = () => {
 
                 <button
                     onClick={handleClose}
-                    className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-colors z-20 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    aria-label="Close Promo Modal"
+                    className="absolute top-4 right-4 rtl:right-auto rtl:left-4 p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-colors z-20 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    aria-label={t('promo.closeAria', 'Aktionsfenster schließen')}
                 >
                     <X className="w-5 h-5" />
                 </button>
@@ -181,7 +187,7 @@ export const PromoModal = () => {
                         <div className="flex items-center justify-center gap-2">
                             <Sparkles className="w-5 h-5 text-amber-400" />
                             <span className="text-xs font-black uppercase tracking-widest text-amber-400">
-                                Exklusives Angebot
+                                {t('promo.exclusiveOffer', 'Exklusives Angebot')}
                             </span>
                             <Sparkles className="w-5 h-5 text-amber-400" />
                         </div>
@@ -195,7 +201,7 @@ export const PromoModal = () => {
 
                     <div className="pt-2">
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                            DEIN EXKLUSIVER CODE
+                            {t('promo.yourCode', 'DEIN EXKLUSIVER CODE')}
                         </p>
                         <div
                             onClick={handleCopy}
@@ -208,9 +214,9 @@ export const PromoModal = () => {
                             role="button"
                             tabIndex={0}
                             className="group relative bg-black/40 border border-slate-700 hover:border-blue-500 rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            aria-label={`Copy coupon code: ${coupon.code}`}
+                            aria-label={t('promo.copyCodeAria', { code: coupon.code, defaultValue: `Gutscheincode kopieren: ${coupon.code}` })}
                         >
-                            <span className="font-mono font-bold text-lg text-white tracking-widest pl-2">
+                            <span className="font-mono font-bold text-lg text-white tracking-widest pl-2 rtl:pl-0 rtl:pr-2">
                                 {coupon.code}
                             </span>
                             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${copied
@@ -220,12 +226,12 @@ export const PromoModal = () => {
                                 {copied ? (
                                     <>
                                         <CheckCircle2 className="w-4 h-4" />
-                                        Kopiert!
+                                        {t('promo.copied', 'Kopiert!')}
                                     </>
                                 ) : (
                                     <>
                                         <Copy className="w-4 h-4" />
-                                        Kopieren
+                                        {t('promo.copy', 'Kopieren')}
                                     </>
                                 )}
                             </div>
@@ -235,12 +241,12 @@ export const PromoModal = () => {
                         <div className="mt-4 flex flex-col gap-2 text-sm text-slate-400 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
                             <div className="flex items-center justify-center gap-2">
                                 <Clock className="w-4 h-4 text-blue-400" />
-                                <span>Gültig bis: <span className="text-white font-medium">{new Date(coupon.validUntil).toLocaleDateString('de-DE')}</span></span>
+                                <span>{t('promo.validUntil', 'Gültig bis:')} <span className="text-white font-medium">{new Date(coupon.validUntil).toLocaleDateString(language === 'de' ? 'de-DE' : language === 'en' ? 'en-US' : language === 'tr' ? 'tr-TR' : language === 'ru' ? 'ru-RU' : language === 'ar' ? 'ar-SA' : 'fa-IR')}</span></span>
                             </div>
                             {couponsLeft !== null && (
                                 <div className="flex items-center justify-center gap-2">
                                     <AlertCircle className="w-4 h-4 text-emerald-400" />
-                                    <span>Gutscheine übrig: <span className="text-white font-medium">{couponsLeft}</span></span>
+                                    <span>{t('promo.couponsLeft', 'Gutscheine übrig:')} <span className="text-white font-medium">{couponsLeft}</span></span>
                                 </div>
                             )}
                         </div>
@@ -248,9 +254,9 @@ export const PromoModal = () => {
 
                     <button
                         onClick={handleClose}
-                        className="text-xs font-medium text-slate-500 hover:text-slate-300 underline-offset-4 hover:underline transition-colors mt-4 block mx-auto focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1"
+                        className="text-xs font-medium text-slate-500 hover:text-slate-300 underline-offset-4 hover:underline transition-colors mt-4 block mx-auto focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 cursor-pointer"
                     >
-                        Nein danke, weiter zur Seite
+                        {t('promo.decline', 'Nein danke, weiter zur Seite')}
                     </button>
                 </div>
             </div>

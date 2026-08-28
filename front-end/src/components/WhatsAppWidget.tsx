@@ -1,8 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
 
 export const WhatsAppWidget = () => {
     const { settings } = useSettings();
+    const { t, i18n } = useTranslation();
+    const language = (i18n.language || 'de').split('-')[0];
+    const isRtl = language === 'ar' || language === 'fa';
 
     const rawPhone = import.meta.env.VITE_WHATSAPP_PHONE || settings?.contactSection?.whatsappPhone || settings?.contactSection?.phone || '4915752908921';
     
@@ -13,9 +17,11 @@ export const WhatsAppWidget = () => {
     const extractedNumber = rawPhone.replace(/\D/g, '');
     const phoneNumber = isValidGermanNumber(extractedNumber) 
         ? extractedNumber 
-        : '4915752908921'; // fallback آمن دائماً
+        : '4915752908921'; // fallback safe default
 
-    const message = settings?.contactSection?.whatsappMessage || "Hallo, ich benötige Hilfe mit HandyLand-Services.";
+    const message = language === 'de' && settings?.contactSection?.whatsappMessage
+        ? settings.contactSection.whatsappMessage
+        : t('whatsapp.defaultMessage', 'Hallo, ich benötige Hilfe mit HandyLand-Services.');
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
     return (
@@ -23,12 +29,13 @@ export const WhatsAppWidget = () => {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-6 right-4 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 hover:scale-110 hover:bg-green-400 transition-all z-40 group cursor-pointer"
-            aria-label="Chat on WhatsApp"
+            dir={isRtl ? 'rtl' : 'ltr'}
+            className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-6 right-4 rtl:right-auto rtl:left-4 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 hover:scale-110 hover:bg-green-400 transition-all z-40 group cursor-pointer"
+            aria-label={t('whatsapp.ariaLabel', 'Chat on WhatsApp')}
         >
-            <div className="absolute right-16 px-4 py-2 bg-slate-900 border border-slate-700 text-white text-sm font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
-                Hilfe benötigt? Chatte mit uns!
-                <div className="absolute top-1/2 -right-1 -mt-1 border-t-4 border-b-4 border-l-4 border-transparent border-l-slate-700"></div>
+            <div className="absolute right-16 rtl:right-auto rtl:left-16 px-4 py-2 bg-slate-900 border border-slate-700 text-white text-sm font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
+                {t('whatsapp.tooltip', 'Hilfe benötigt? Chatte mit uns!')}
+                <div className="absolute top-1/2 -right-1 rtl:-right-auto rtl:-left-1 -mt-1 border-t-4 border-b-4 border-l-4 rtl:border-l-0 rtl:border-r-4 border-transparent border-l-slate-700 rtl:border-r-slate-700"></div>
             </div>
             <svg
                 viewBox="0 0 24 24"

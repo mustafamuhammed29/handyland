@@ -547,5 +547,51 @@
     "noProducts": "No products available",
     "loading": "Loading products...",
     "error": "Error loading products"
+  },
+  "promo": {
+    "exclusiveOffer": "Exclusive Offer",
+    "title": "Get {{discount}} Off!",
+    "message": "Use the code below at checkout and save {{discount}} on your order!",
+    "yourCode": "YOUR EXCLUSIVE CODE",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "validUntil": "Valid until:",
+    "couponsLeft": "Coupons left:",
+    "decline": "No thanks, continue to site",
+    "closeAria": "Close promo modal",
+    "copyCodeAria": "Copy coupon code: {{code}}"
+  },
+  "cookieConsent": {
+    "title": "Your privacy is important to us",
+    "message": "We use cookies for a variety of analytics, personalized content, and advertising. Please select which cookies you wish to accept.",
+    "strictlyNecessaryTitle": "Strictly Necessary Cookies",
+    "strictlyNecessaryDesc": "Required for the secure and proper functioning of the website. These cannot be disabled.",
+    "functionalTitle": "Functional Cookies",
+    "functionalDesc": "Enables enhanced functionality and personalization on the website.",
+    "analyticsTitle": "Analytics & Performance Cookies",
+    "analyticsDesc": "Helps us understand how visitors interact with the site to improve performance.",
+    "marketingTitle": "Targeting & Advertising Cookies",
+    "marketingDesc": "Used to deliver relevant advertisements and marketing campaigns.",
+    "acceptAll": "Accept All",
+    "rejectAll": "Decline All",
+    "savePreferences": "Save Preferences",
+    "managePreferences": "Manage Preferences",
+    "closeAria": "Close cookie notice",
+    "toggleAria": "Toggle cookie setting"
+  },
+  "whatsapp": {
+    "tooltip": "Need help? Chat with us!",
+    "defaultMessage": "Hello, I need help with HandyLand services.",
+    "ariaLabel": "Chat on WhatsApp"
+  },
+  "offline": {
+    "title": "No Internet Connection",
+    "description": "Some features may not work until you reconnect."
+  },
+  "errorBoundary": {
+    "title": "System Error",
+    "description": "An unexpected error has occurred. The issue has been logged and our tech team notified.",
+    "reload": "Reload System",
+    "returnHome": "Return Home"
   }
 }
