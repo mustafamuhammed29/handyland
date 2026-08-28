@@ -1,109 +1,206 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { Link } from 'react-router-dom';
+import {
+    Monitor,
+    Battery,
+    Smartphone,
+    Wrench,
+    Camera,
+    Zap,
+    Shield,
+    Headphones,
+    ArrowRight,
+    ArrowLeft
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
+import { DEFAULT_SERVICE_TERMINAL } from '../context/settings/cache';
+import { LocalizedText, ServiceTerminalIcon, ServiceTerminalSettings } from '../context/settings/types';
+
+const SERVICE_ICONS = {
+    monitor: Monitor,
+    battery: Battery,
+    smartphone: Smartphone,
+    wrench: Wrench,
+    camera: Camera,
+    zap: Zap,
+    shield: Shield,
+    headphones: Headphones,
+} as const;
+
+const getLocalizedText = (
+    value: LocalizedText | { de?: string; en?: string; ar?: string } | undefined,
+    language: string
+): string => {
+    if (!value) return '';
+    const langKey = language as 'de' | 'en' | 'ar';
+    return value[langKey] || value.de || value.en || value.ar || '';
+};
+
+const sanitizeUrl = (url: string | undefined, fallback: string = '/repair'): string => {
+    if (!url || typeof url !== 'string') return fallback;
+    const trimmed = url.trim();
+    const lower = trimmed.toLowerCase();
+    if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:')) {
+        return fallback;
+    }
+    return trimmed || fallback;
+};
+
+const isExternalUrl = (url: string): boolean => {
+    const lower = url.toLowerCase();
+    return lower.startsWith('http://') || lower.startsWith('https://');
+};
 
 export const RepairPreview: React.FC = () => {
-    const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { i18n } = useTranslation();
     const { settings } = useSettings();
 
-    // Fallback to defaults if not present
-    const repairTypes = settings?.repairPreviewCards || [
-        {
-            iconName: 'Monitor',
-            label: 'Displayreparatur',
-            price: 'ab €49',
-            color: 'text-cyan-400',
-            bg: 'bg-cyan-500/10',
-        },
-        {
-            iconName: 'Battery',
-            label: 'Akkutausch',
-            price: 'ab €39',
-            color: 'text-emerald-400',
-            bg: 'bg-emerald-500/10',
-        },
-        {
-            iconName: 'Smartphone',
-            label: 'Ladebuchse',
-            price: 'ab €29',
-            color: 'text-amber-400',
-            bg: 'bg-amber-500/10',
-        },
-        {
-            iconName: 'Wrench',
-            label: 'Diagnose',
-            price: 'Kostenlos',
-            color: 'text-purple-400',
-            bg: 'bg-purple-500/10',
-        },
-    ];
+    const rawLang = (i18n.language || 'de').toLowerCase().split('-')[0];
+    const lang: 'de' | 'en' | 'ar' = rawLang === 'ar' ? 'ar' : rawLang === 'en' ? 'en' : 'de';
+    const isRtl = lang === 'ar';
 
-    const getIcon = (iconName: string) => {
-        const IconComponent = (LucideIcons as any)[iconName] || LucideIcons.Monitor;
-        return <IconComponent className="w-5 h-5" />;
-    };
+    const terminal: ServiceTerminalSettings = settings?.serviceTerminal || DEFAULT_SERVICE_TERMINAL;
+
+    // If section is explicitly disabled, do not render
+    if (terminal.enabled === false) {
+        return null;
+    }
+
+    const eyebrow = getLocalizedText(terminal.eyebrow, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.eyebrow, lang);
+    const title = getLocalizedText(terminal.title, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.title, lang);
+    const linkLabel = getLocalizedText(terminal.servicesLinkLabel, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.servicesLinkLabel, lang);
+    const linkUrl = sanitizeUrl(terminal.servicesLinkUrl, '/repair');
+
+    const hasExplicitServices = Array.isArray(terminal?.services);
+
+    const displayServices = hasExplicitServices
+        ? terminal.services
+            .filter(s => Boolean(s?.enabled))
+            .sort((a, b) => (a.order || 0) - (b.order || 0))
+            .slice(0, 8)
+        : DEFAULT_SERVICE_TERMINAL.services;
+
+    const ctaEnabled = terminal.cta?.enabled !== false;
+    const ctaTitle = getLocalizedText(terminal.cta?.title, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.cta.title, lang);
+    const ctaDesc = getLocalizedText(terminal.cta?.description, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.cta.description, lang);
+    const ctaBtnLabel = getLocalizedText(terminal.cta?.buttonLabel, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.cta.buttonLabel, lang);
+    const ctaBtnUrl = sanitizeUrl(terminal.cta?.buttonUrl, '/repair');
+
+    const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
 
     return (
-        <section className="py-12 md:py-16 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900">
+        <section
+            dir={isRtl ? 'rtl' : 'ltr'}
+            className="py-12 md:py-16 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 transition-colors"
+        >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6 md:mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
                     <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-400 mb-1">
-                            {t('repair.previewTagline', 'Service Terminal')}
+                        <p className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-500 dark:text-cyan-400 mb-1">
+                            {eyebrow}
                         </p>
                         <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white">
-                            {t('repair.previewTitle', 'Professionelle Reparaturen')}
+                            {title}
                         </h2>
                     </div>
-                    <button
-                        onClick={() => navigate('/repair')}
-                        className="flex items-center gap-1.5 text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors group shrink-0 ml-4"
-                    >
-                        {t('repair.seeAll', 'Alle Services')}
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </button>
+
+                    {isExternalUrl(linkUrl) ? (
+                        <a
+                            href={linkUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors group shrink-0 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-lg"
+                        >
+                            <span>{linkLabel}</span>
+                            <ArrowIcon className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+                        </a>
+                    ) : (
+                        <Link
+                            to={linkUrl}
+                            className="inline-flex items-center gap-1.5 text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors group shrink-0 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-lg"
+                        >
+                            <span>{linkLabel}</span>
+                            <ArrowIcon className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+                        </Link>
+                    )}
                 </div>
 
                 {/* Repair Types Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-                    {repairTypes.map((r, i) => (
-                        <div
-                            key={i}
-                            className={`flex flex-col items-center text-center p-4 md:p-5 rounded-2xl ${r.bg} border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all`}
-                        >
-                            <span className={`${r.color} mb-3`}>{getIcon(r.iconName)}</span>
-                            <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white mb-1">{r.label}</p>
-                            <p className={`text-xs font-mono font-bold ${r.color}`}>{r.price}</p>
-                        </div>
-                    ))}
-                </div>
+                {displayServices.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+                        {displayServices.map((service, index) => {
+                            const IconComponent = SERVICE_ICONS[service.icon as ServiceTerminalIcon] || Wrench;
+                            const serviceTitle = getLocalizedText(service.title, lang) || service.id;
+                            const servicePrice = getLocalizedText(service.priceLabel, lang) || '';
+
+                            return (
+                                <div
+                                    key={service.id || `service-card-${index}`}
+                                    style={{
+                                        backgroundColor: service.cardBackground || '#062033',
+                                    }}
+                                    className="flex flex-col items-center text-center p-4 md:p-5 rounded-2xl border border-white/10 dark:border-white/[0.08] shadow-sm hover:shadow-md hover:border-white/20 transition-all"
+                                >
+                                    <span
+                                        aria-hidden="true"
+                                        style={{ color: service.iconColor || '#22d3ee' }}
+                                        className="mb-3 p-2.5 rounded-xl bg-black/20"
+                                    >
+                                        <IconComponent className="w-5 h-5" />
+                                    </span>
+                                    <p className="text-xs sm:text-sm font-bold text-white mb-1 truncate w-full">
+                                        {serviceTitle}
+                                    </p>
+                                    <p
+                                        style={{ color: service.iconColor || '#22d3ee' }}
+                                        className="text-xs font-mono font-bold"
+                                    >
+                                        {servicePrice}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
                 {/* CTA Banner */}
-                <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 md:p-8 overflow-hidden">
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
-                    <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div>
-                            <h3 className="text-lg md:text-xl font-black text-white mb-1">
-                                {t('repair.ctaTitle', 'Kostenlose Diagnose für dein Gerät')}
-                            </h3>
-                            <p className="text-sm text-blue-200">
-                                {t('repair.ctaDesc', 'Wir reparieren alle Marken — iPhone, Samsung, Huawei & mehr.')}
-                            </p>
+                {ctaEnabled && (
+                    <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 md:p-8 overflow-hidden shadow-lg">
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
+                        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                                <h3 className="text-lg md:text-xl font-black text-white mb-1">
+                                    {ctaTitle}
+                                </h3>
+                                <p className="text-sm text-blue-200">
+                                    {ctaDesc}
+                                </p>
+                            </div>
+
+                            {isExternalUrl(ctaBtnUrl) ? (
+                                <a
+                                    href={ctaBtnUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="shrink-0 inline-flex items-center gap-2 bg-white text-blue-600 font-black px-5 py-3 rounded-xl hover:bg-blue-50 transition-all shadow-lg min-h-[44px] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                >
+                                    <span>{ctaBtnLabel}</span>
+                                    <ArrowIcon className="w-4 h-4" />
+                                </a>
+                            ) : (
+                                <Link
+                                    to={ctaBtnUrl}
+                                    className="shrink-0 inline-flex items-center gap-2 bg-white text-blue-600 font-black px-5 py-3 rounded-xl hover:bg-blue-50 transition-all shadow-lg min-h-[44px] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                >
+                                    <span>{ctaBtnLabel}</span>
+                                    <ArrowIcon className="w-4 h-4" />
+                                </Link>
+                            )}
                         </div>
-                        <button
-                            onClick={() => navigate('/repair')}
-                            className="shrink-0 flex items-center gap-2 bg-white text-blue-600 font-black px-5 py-3 rounded-xl hover:bg-blue-50 transition-all shadow-lg min-h-[44px] text-sm"
-                        >
-                            {t('repair.bookNow', 'Jetzt buchen')}
-                            <ArrowRight className="w-4 h-4" />
-                        </button>
                     </div>
-                </div>
+                )}
             </div>
         </section>
     );
