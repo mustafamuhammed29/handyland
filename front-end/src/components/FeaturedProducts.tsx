@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ShoppingCart, Star } from 'lucide-react';
+import { ArrowRight, ArrowLeft, ShoppingCart, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api';
 import { useCart } from '../context/CartContext';
@@ -26,7 +26,11 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
     isComingSoon = false,
 }) => {
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const language = (i18n.language || 'de').split('-')[0];
+    const isRtl = language === 'ar' || language === 'fa';
+    const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
+
     const { addToCart } = useCart();
     const { addToast } = useToast();
     const [items, setItems] = useState<any[]>([]);
@@ -73,7 +77,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
     };
 
     return (
-        <section className="py-12 md:py-16 bg-slate-50 dark:bg-slate-950/80">
+        <section dir={isRtl ? 'rtl' : 'ltr'} className="py-12 md:py-16 bg-slate-50 dark:bg-slate-950/80">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6 md:mb-8">
@@ -82,10 +86,10 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                     </h2>
                     <button
                         onClick={() => navigate(seeAllRoute)}
-                        className="flex items-center gap-1.5 text-sm font-bold text-brand-primary hover:text-brand-secondary transition-colors group shrink-0 ml-4"
+                        className="flex items-center gap-1.5 text-sm font-bold text-brand-primary hover:text-brand-secondary transition-colors group shrink-0 ml-4 rtl:ml-0 rtl:mr-4 cursor-pointer"
                     >
                         {seeAllLabel}
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <ArrowIcon className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
                     </button>
                 </div>
 
@@ -96,7 +100,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                     </div>
                 ) : items.length === 0 ? (
                     <div className="text-center py-12 text-slate-400 dark:text-slate-600">
-                        <p className="text-sm">{t('home.featured.empty', 'Keine Produkte verfügbar')}</p>
+                        <p className="text-sm">{t('featuredProducts.noProducts', 'Keine Produkte verfügbar')}</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
@@ -152,12 +156,12 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                                                     isComingSoon ? navigate(detailRoute) : handleAddToCart(item);
                                                 }}
                                                 disabled={item.stock === 0 && !isComingSoon}
-                                                aria-label={isComingSoon ? "Bald verfügbar" : `${name} in den Warenkorb`}
-                                                className="flex items-center justify-center gap-1 px-2 py-1.5 md:px-3 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-primary text-slate-600 dark:text-slate-300 hover:text-black transition-all text-[10px] md:text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed min-w-[36px] min-h-[36px]"
+                                                aria-label={isComingSoon ? t('featuredProducts.comingSoon', 'Bald verfügbar') : `${name} ${t('featuredProducts.addToCart', 'in den Warenkorb')}`}
+                                                className="flex items-center justify-center gap-1 px-2 py-1.5 md:px-3 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-primary text-slate-600 dark:text-slate-300 hover:text-black transition-all text-[10px] md:text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed min-w-[36px] min-h-[36px] cursor-pointer"
                                             >
                                                 <ShoppingCart className="w-3.5 h-3.5" />
                                                 <span className="hidden sm:inline">
-                                                    {isComingSoon ? "Bald verfügbar" : (item.stock === 0 ? t('accessories.out', 'Ausverkauft') : t('cart.add', 'Kaufen'))}
+                                                    {isComingSoon ? t('featuredProducts.comingSoon', 'Bald verfügbar') : (item.stock === 0 ? t('accessories.out', 'Ausverkauft') : t('cart.add', 'Kaufen'))}
                                                 </span>
                                             </button>
                                         </div>
@@ -172,10 +176,10 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                 <div className="mt-8 text-center">
                     <button
                         onClick={() => navigate(seeAllRoute)}
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold text-sm hover:border-brand-primary/50 hover:text-brand-primary transition-all hover:shadow-md"
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold text-sm hover:border-brand-primary/50 hover:text-brand-primary transition-all hover:shadow-md cursor-pointer"
                     >
                         {seeAllLabel}
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowIcon className="w-4 h-4" />
                     </button>
                 </div>
             </div>

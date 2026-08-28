@@ -9,7 +9,7 @@ const CATEGORIES_KEYS = [
     { id: 'all', labelKey: 'repairGallery.allCases', labelFallback: 'Alle Fälle', icon: <Filter className="w-4 h-4" /> },
     { id: 'screen', labelKey: 'repairGallery.screens', labelFallback: 'Displays', icon: <Monitor className="w-4 h-4" /> },
     { id: 'glass', labelKey: 'repairGallery.rearGlass', labelFallback: 'Rückglas', icon: <Smartphone className="w-4 h-4" /> },
-    { id: 'water', labelKey: 'repairGallery.waterDmg', labelFallback: 'Wasserschaden', icon: <Droplets className="w-4 h-4" /> },
+    { id: 'water', labelKey: 'repairGallery.waterDamage', labelFallback: 'Wasserschaden', icon: <Droplets className="w-4 h-4" /> },
     { id: 'camera', labelKey: 'repairGallery.camera', labelFallback: 'Kamera', icon: <ScanLine className="w-4 h-4" /> },
 ];
 
@@ -86,7 +86,10 @@ const getCleanArchiveImage = (url: string, category: string, isAfter: boolean): 
 export const RepairGallery: React.FC<RepairGalleryProps> = () => {
     const navigate = useNavigate();
     const { settings: globalSettings } = useSettings();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const language = (i18n.language || 'de').split('-')[0];
+    const isRtl = language === 'ar' || language === 'fa';
+
     const [sliderPosition, setSliderPosition] = useState(50);
     const [selectedId, setSelectedId] = useState<any>(null);
     const [filter, setFilter] = useState('all');
@@ -118,20 +121,24 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
         }
     };
 
-    // Use global settings for text
+    // Use global settings for text with German CMS precedence
     const settings = {
-        title: globalSettings.repairArchive?.title || 'Digital Repair Archive',
-        subtitle: globalSettings.repairArchive?.subtitle || 'Archive_System_V2.0',
-        buttonText: globalSettings.repairArchive?.buttonText || 'View All Repairs',
+        title: language === 'de' && globalSettings.repairArchive?.title
+            ? globalSettings.repairArchive.title
+            : t('repairGallery.title', 'Digitales Reparaturarchiv'),
+        subtitle: language === 'de' && globalSettings.repairArchive?.subtitle
+            ? globalSettings.repairArchive.subtitle
+            : t('repairGallery.subtitle', 'Archive_System_V2.0'),
+        buttonText: language === 'de' && globalSettings.repairArchive?.buttonText
+            ? globalSettings.repairArchive.buttonText
+            : t('repairGallery.viewAll', 'Alle Fälle ansehen'),
         totalRepairs: globalSettings.repairArchive?.totalRepairs || 1240,
         isEnabled: true
     };
 
-    // ... (keep rest of logic)
-
     if (loading) {
         return (
-            <section className="py-24 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+            <section dir={isRtl ? 'rtl' : 'ltr'} className="py-24 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
                 <div className="flex items-center justify-center">
                     <div className="w-8 h-8 border-2 border-slate-200 dark:border-slate-800 border-t-brand-primary rounded-full animate-spin"></div>
                 </div>
@@ -141,7 +148,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
     if (comparisons.length === 0) {
         return (
-            <section className="py-24 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+            <section dir={isRtl ? 'rtl' : 'ltr'} className="py-24 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
                 <div className="max-w-7xl mx-auto px-4 text-center">
                     <p className="text-slate-500">{t('repairGallery.noCases', 'Noch keine verifizierten Fallstudien.')}</p>
                 </div>
@@ -174,7 +181,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
     };
 
     return (
-        <section id="repair" className="py-24 relative bg-slate-50 dark:bg-slate-900">
+        <section id="repair" dir={isRtl ? 'rtl' : 'ltr'} className="py-24 relative bg-slate-50 dark:bg-slate-900">
             {/* Grid Pattern Background */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(13,148,136,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(13,148,136,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
@@ -232,9 +239,9 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                         alt="After"
                                         className="w-full h-full object-cover"
                                     />
-                                    <div className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm flex items-center gap-2 shadow-lg z-40">
+                                    <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 bg-emerald-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm flex items-center gap-2 shadow-lg z-40">
                                         <CheckCircle className="w-4 h-4" />
-                                        {activeProject.labelAfter}
+                                        {activeProject.labelAfter || t('repairGallery.after', 'NACHHER')}
                                     </div>
                                 </div>
 
@@ -248,8 +255,8 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                         alt="Before"
                                         className="w-full h-full object-cover"
                                     />
-                                    <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg z-40">
-                                        {activeProject.labelBefore}
+                                    <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4 bg-red-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg z-40">
+                                        {activeProject.labelBefore || t('repairGallery.before', 'VORHER')}
                                     </div>
                                 </div>
 
@@ -292,7 +299,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                 <div className="flex flex-wrap items-center gap-4 text-xs font-bold mt-2">
                                     <div className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
                                         <Activity className="w-3 h-3" />
-                                        SAVED UP TO 65% VS NEW
+                                        {t('repairGallery.savedVsNew', 'Bis zu 65% Ersparnis vs. Neukauf')}
                                     </div>
                                     <div className="flex items-center gap-1 text-slate-400 bg-slate-800/50 px-2 py-1 rounded border border-slate-700">
                                         <Clock className="w-3 h-3" />
@@ -306,7 +313,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                         <div className="mt-4 grid grid-cols-2 gap-4">
                             <button
                                 onClick={handleScan}
-                                className="w-full py-4 bg-slate-900 border-2 border-slate-800 hover:border-brand-primary/50 text-slate-300 font-bold rounded-xl transition-all flex items-center justify-center gap-2 group"
+                                className="w-full py-4 bg-slate-900 border-2 border-slate-800 hover:border-brand-primary/50 text-slate-300 font-bold rounded-xl transition-all flex items-center justify-center gap-2 group cursor-pointer"
                             >
                                 <ScanLine className="w-5 h-5 group-hover:text-brand-primary" />
                                 <span>{t('repairGallery.diagnosticScan', 'DIAGNOSESCAN')}</span>
@@ -314,7 +321,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                             
                             <button
                                 onClick={() => navigate('/repair')}
-                                className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-cyan-400 hover:to-blue-500 text-slate-900 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] font-black rounded-xl transition-all flex items-center justify-center gap-2 group"
+                                className="w-full py-4 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-cyan-400 hover:to-blue-500 text-slate-900 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] font-black rounded-xl transition-all flex items-center justify-center gap-2 group cursor-pointer"
                             >
                                 <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                 <span>{t('repairGallery.bookRepair', 'ÄHNLICHE REPARATUR BUCHEN')}</span>
@@ -328,7 +335,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-2">
                                     <Activity className="w-5 h-5 text-brand-primary" />
-                                    <h3 className="text-white font-bold uppercase tracking-wider text-sm">{t('repairGallery.caseFiles', 'Fallakten')} ({filteredProjects.length})</h3>
+                                    <h3 className="text-slate-900 dark:text-white font-bold uppercase tracking-wider text-sm">{t('repairGallery.caseFiles', 'Fallakten')} ({filteredProjects.length})</h3>
                                 </div>
                             </div>
 
@@ -338,7 +345,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                     <button
                                         key={project.id}
                                         onClick={() => setSelectedId(project.id)}
-                                        className="w-full text-left group"
+                                        className="w-full text-left rtl:text-right group cursor-pointer"
                                     >
                                         <div className={`relative rounded-xl overflow-hidden border-2 transition-all ${selectedId === project.id
                                             ? 'border-brand-primary shadow-[0_0_20px_rgba(6,182,212,0.4)]'
@@ -353,7 +360,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                                 />
 
                                                 {/* Icons overlay */}
-                                                <div className="absolute top-2 right-2">
+                                                <div className="absolute top-2 right-2 rtl:right-auto rtl:left-2">
                                                     {project.category === 'water' && <Droplets className="w-3 h-3 text-blue-400" />}
                                                     {project.category === 'screen' && <Monitor className="w-3 h-3 text-purple-400" />}
                                                     {project.category === 'glass' && <Hammer className="w-3 h-3 text-red-400" />}
@@ -375,13 +382,13 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                             </div>
 
                             {/* Upload/CTA Area */}
-                            <div className="mt-4 pt-4 border-t border-slate-800">
+                            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
                                 <button
                                     onClick={() => setShowAllModal(true)}
-                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border border-brand-primary/30 text-brand-primary text-sm font-bold hover:bg-cyan-900/70 transition-all flex items-center justify-center gap-2 group"
+                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border border-brand-primary/30 text-brand-primary text-sm font-bold hover:bg-cyan-900/70 transition-all flex items-center justify-center gap-2 group cursor-pointer"
                                 >
                                     <Smartphone className="w-4 h-4 group-hover:animate-bounce" />
-                                    {settings.buttonText} {comparisons.length}
+                                    {settings.buttonText} ({comparisons.length})
                                 </button>
                             </div>
                         </div>
@@ -393,7 +400,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
 
             {/* View All Modal */}
             {showAllModal && (
-                <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+                <div dir={isRtl ? 'rtl' : 'ltr'} className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
                     <div className="relative w-full max-w-6xl bg-slate-900 rounded-3xl border-4 border-blue-500/30 overflow-hidden shadow-2xl shadow-blue-900/50 max-h-[90vh] flex flex-col">
                         {/* Modal Header */}
                         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
@@ -403,8 +410,8 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                             </div>
                             <button
                                 onClick={() => setShowAllModal(false)}
-                                aria-label="Close modal"
-                                className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
+                                aria-label={t('common.close', 'Schließen')}
+                                className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
                             >
                                 <X className="w-6 h-6" />
                             </button>
@@ -422,11 +429,11 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                             // Optional: scroll into view
                                             document.getElementById('repair')?.scrollIntoView({ behavior: 'smooth' });
                                         }}
-                                        className="w-full text-left group flex flex-col"
+                                        className="w-full text-left rtl:text-right group flex flex-col cursor-pointer"
                                     >
                                         <div className={`relative w-full aspect-[4/5] rounded-xl overflow-hidden border-2 mb-2 transition-all ${selectedId === item.id ? 'border-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'border-slate-800 group-hover:border-slate-600'}`}>
                                             <img src={getImageUrl(getCleanArchiveImage(item.imgAfter, item.category, true))} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                                            <div className="absolute top-2 right-2 bg-slate-900/80 backdrop-blur-sm p-1 rounded-md">
+                                            <div className="absolute top-2 right-2 rtl:right-auto rtl:left-2 bg-slate-900/80 backdrop-blur-sm p-1 rounded-md">
                                                 {item.category === 'water' && <Droplets className="w-3 h-3 text-blue-400" />}
                                                 {item.category === 'screen' && <Monitor className="w-3 h-3 text-purple-400" />}
                                                 {item.category === 'glass' && <Hammer className="w-3 h-3 text-red-400" />}
