@@ -18,7 +18,18 @@
     "subtitle": "The global standard for premium device trading and repair.",
     "shopNow": "Shop Now",
     "sellDevice": "Sell Device",
-    "trackRepair": "Track Repair"
+    "trackRepair": "Track Repair",
+    "tagline": "Germany's #1 Tech Hub",
+    "headline": "HandyLand Premium Tech Hub",
+    "subheadline": "Discover the future of mobile commerce. Buy, sell, and repair with German precision.",
+    "trustBadge1": "Verified Dealers",
+    "trustBadge2": "24/7 Support",
+    "trustBadge3": "4.9★ Rated",
+    "salesStatLabel": "Devices Sold",
+    "salesStatValue": "+24% this week",
+    "ratingStatLabel": "Customer Rating",
+    "ratingStatValue": "4.9/5.0 Excellent",
+    "featuredDeviceLabel": "Featured Device"
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -331,7 +342,20 @@
     "deviceSold": "Devices Sold",
     "thisWeek": "+24% this week",
     "customerRating": "Customer Rating",
-    "excellent": "4.9/5.0 Excellent"
+    "excellent": "4.9/5.0 Excellent",
+    "services": {
+      "tagline": "What We Offer",
+      "heading": "Everything for Your Device",
+      "buyTitle": "Buy",
+      "buyDescription": "Certified smartphones and tablets at fair prices.",
+      "buyCta": "Go to Marketplace",
+      "sellTitle": "Sell",
+      "sellDescription": "Get a fair instant offer for your used device.",
+      "sellCta": "Value Device",
+      "repairTitle": "Repair",
+      "repairDescription": "Professional repairs with premium-quality parts.",
+      "repairCta": "Request Repair"
+    }
   },
   "footer": {
     "shop": "SHOP",
@@ -466,5 +490,17 @@
     "backBtn": "Back",
     "confirmBtn": "Confirm",
     "processing": "Processing..."
+  },
+  "repairPreview": {
+    "title": "Professional Repairs",
+    "viewAll": "View All Services",
+    "displayRepair": "Display Repair",
+    "displayRepairPrice": "from €149",
+    "batteryReplacement": "Battery Replacement",
+    "batteryReplacementPrice": "from €39",
+    "chargingPort": "Charging Port",
+    "chargingPortPrice": "from €29",
+    "diagnosis": "Diagnostics",
+    "diagnosisPrice": "Free"
   }
 }

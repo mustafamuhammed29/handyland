@@ -122,7 +122,7 @@ export const AppRouter = () => {
     }
 
     return (
-        <div className={`min-h-[100dvh] font-sans bg-transparent selection:bg-brand-primary/30 selection:text-brand-primary ${lang === 'ar' ? 'dir-rtl' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div className={`min-h-[100dvh] font-sans bg-transparent selection:bg-brand-primary/30 selection:text-brand-primary ${(lang === 'ar' || lang === 'fa') ? 'dir-rtl' : ''}`} dir={(lang === 'ar' || lang === 'fa') ? 'rtl' : 'ltr'}>
             <SEO />
             {isAdminBypass && (
                 <div className="bg-amber-500 text-slate-900 px-4 py-2.5 text-center font-bold relative z-[9999] shadow-lg flex items-center justify-center gap-3">

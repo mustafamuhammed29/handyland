@@ -28,13 +28,31 @@ const SERVICE_ICONS = {
     headphones: Headphones,
 } as const;
 
-const getLocalizedText = (
-    value: LocalizedText | { de?: string; en?: string; ar?: string } | undefined,
-    language: string
-): string => {
-    if (!value) return '';
-    const langKey = language as 'de' | 'en' | 'ar';
-    return value[langKey] || value.de || value.en || value.ar || '';
+const SERVICE_TRANSLATION_MAP: Record<string, { titleKey: string; priceKey: string; defaultTitle: string; defaultPrice: string }> = {
+    screen: {
+        titleKey: 'repairPreview.displayRepair',
+        priceKey: 'repairPreview.displayRepairPrice',
+        defaultTitle: 'Displayreparatur',
+        defaultPrice: 'ab 149 €',
+    },
+    battery: {
+        titleKey: 'repairPreview.batteryReplacement',
+        priceKey: 'repairPreview.batteryReplacementPrice',
+        defaultTitle: 'Akkutausch',
+        defaultPrice: 'ab 39 €',
+    },
+    charging: {
+        titleKey: 'repairPreview.chargingPort',
+        priceKey: 'repairPreview.chargingPortPrice',
+        defaultTitle: 'Ladebuchse',
+        defaultPrice: 'ab 29 €',
+    },
+    diagnosis: {
+        titleKey: 'repairPreview.diagnosis',
+        priceKey: 'repairPreview.diagnosisPrice',
+        defaultTitle: 'Diagnose',
+        defaultPrice: 'Kostenlos',
+    },
 };
 
 const sanitizeUrl = (url: string | undefined, fallback: string = '/repair'): string => {
@@ -53,12 +71,31 @@ const isExternalUrl = (url: string): boolean => {
 };
 
 export const RepairPreview: React.FC = () => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { settings } = useSettings();
 
-    const rawLang = (i18n.language || 'de').toLowerCase().split('-')[0];
-    const lang: 'de' | 'en' | 'ar' = rawLang === 'ar' ? 'ar' : rawLang === 'en' ? 'en' : 'de';
-    const isRtl = lang === 'ar';
+    const language = (i18n.language || 'de').toLowerCase().split('-')[0];
+    const isRtl = language === 'ar' || language === 'fa';
+
+    const getLocalizedText = (
+        value: LocalizedText | Record<string, string> | undefined,
+        fallbackKey?: string,
+        defaultFallback: string = ''
+    ): string => {
+        if (!value) return fallbackKey ? t(fallbackKey, defaultFallback) : defaultFallback;
+        if (typeof value === 'string') return value;
+        const localized = (value as Record<string, string>)[language];
+        if (localized && typeof localized === 'string' && localized.trim()) {
+            return localized;
+        }
+        if (language === 'de' && (value as Record<string, string>).de) {
+            return (value as Record<string, string>).de;
+        }
+        if (fallbackKey) {
+            return t(fallbackKey, (value as Record<string, string>).de || defaultFallback);
+        }
+        return (value as Record<string, string>).de || defaultFallback;
+    };
 
     const terminal: ServiceTerminalSettings = settings?.serviceTerminal || DEFAULT_SERVICE_TERMINAL;
 
@@ -67,9 +104,9 @@ export const RepairPreview: React.FC = () => {
         return null;
     }
 
-    const eyebrow = getLocalizedText(terminal.eyebrow, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.eyebrow, lang);
-    const title = getLocalizedText(terminal.title, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.title, lang);
-    const linkLabel = getLocalizedText(terminal.servicesLinkLabel, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.servicesLinkLabel, lang);
+    const eyebrow = getLocalizedText(terminal.eyebrow, 'hero.tagline', 'Deutschlands #1 Tech-Hub');
+    const title = getLocalizedText(terminal.title, 'repairPreview.title', 'Professionelle Reparaturen');
+    const linkLabel = getLocalizedText(terminal.servicesLinkLabel, 'repairPreview.viewAll', 'Alle Services ansehen');
     const linkUrl = sanitizeUrl(terminal.servicesLinkUrl, '/repair');
 
     const hasExplicitServices = Array.isArray(terminal?.services);
@@ -82,9 +119,9 @@ export const RepairPreview: React.FC = () => {
         : DEFAULT_SERVICE_TERMINAL.services;
 
     const ctaEnabled = terminal.cta?.enabled !== false;
-    const ctaTitle = getLocalizedText(terminal.cta?.title, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.cta.title, lang);
-    const ctaDesc = getLocalizedText(terminal.cta?.description, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.cta.description, lang);
-    const ctaBtnLabel = getLocalizedText(terminal.cta?.buttonLabel, lang) || getLocalizedText(DEFAULT_SERVICE_TERMINAL.cta.buttonLabel, lang);
+    const ctaTitle = getLocalizedText(terminal.cta?.title, 'home.services.repairTitle', 'Reparieren');
+    const ctaDesc = getLocalizedText(terminal.cta?.description, 'home.services.repairDescription', 'Professionelle Reparaturen mit hochwertigen Ersatzteilen.');
+    const ctaBtnLabel = getLocalizedText(terminal.cta?.buttonLabel, 'home.services.repairCta', 'Reparatur anfragen');
     const ctaBtnUrl = sanitizeUrl(terminal.cta?.buttonUrl, '/repair');
 
     const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
@@ -132,8 +169,13 @@ export const RepairPreview: React.FC = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
                         {displayServices.map((service, index) => {
                             const IconComponent = SERVICE_ICONS[service.icon as ServiceTerminalIcon] || Wrench;
-                            const serviceTitle = getLocalizedText(service.title, lang) || service.id;
-                            const servicePrice = getLocalizedText(service.priceLabel, lang) || '';
+                            const mapping = SERVICE_TRANSLATION_MAP[service.id];
+                            const serviceTitle = mapping
+                                ? getLocalizedText(service.title, mapping.titleKey, mapping.defaultTitle)
+                                : getLocalizedText(service.title, undefined, service.id);
+                            const servicePrice = mapping
+                                ? getLocalizedText(service.priceLabel, mapping.priceKey, mapping.defaultPrice)
+                                : getLocalizedText(service.priceLabel, undefined, '');
 
                             return (
                                 <div

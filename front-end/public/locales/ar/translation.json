@@ -21,7 +21,18 @@
     "subtitle": "المعيار العالمي لتجارة الأجهزة المتميزة وإصلاحها.",
     "shopNow": "تسوق الآن",
     "sellDevice": "بيع جهاز",
-    "trackRepair": "تتبع الإصلاح"
+    "trackRepair": "تتبع الإصلاح",
+    "tagline": "المركز التقني الأول في ألمانيا",
+    "headline": "HandyLand المركز التقني المتميز",
+    "subheadline": "اكتشف مستقبل تجارة الهواتف الذكية. الشراء والبيع والإصلاح بدقة ألمانية.",
+    "trustBadge1": "تجار معتمدون",
+    "trustBadge2": "دعم 24/7",
+    "trustBadge3": "تقييم 4.9★",
+    "salesStatLabel": "أجهزة بيعت",
+    "salesStatValue": "+24% هذا الأسبوع",
+    "ratingStatLabel": "تقييم العملاء",
+    "ratingStatValue": "4.9/5.0 ممتاز",
+    "featuredDeviceLabel": "جهاز مميز"
   },
   "auth": {
     "loginTitle": "تسجيل الدخول إلى حسابك",
@@ -319,7 +330,20 @@
     "this_week": "هذا الأسبوع",
     "special_offers": "عروض خاصة",
     "spring_deals": "عروض الربيع",
-    "explore_now": "استكشف الآن"
+    "explore_now": "استكشف الآن",
+    "services": {
+      "tagline": "ماذا نقدم",
+      "heading": "كل ما يخص جهازك",
+      "buyTitle": "شراء",
+      "buyDescription": "هواتف وأجهزة لوحية مفحوصة ومضمونة بأسعار عادلة.",
+      "buyCta": "إلى السوق",
+      "sellTitle": "بيع",
+      "sellDescription": "احصل على عرض سعر فوري وعادل لجهازك المستعمل.",
+      "sellCta": "تقييم الجهاز",
+      "repairTitle": "إصلاح",
+      "repairDescription": "إصلاحات احترافية باستخدام قطع غيار عالية الجودة.",
+      "repairCta": "طلب إصلاح"
+    }
   },
   "footer": {
     "shop": "تسوق",
@@ -453,5 +477,17 @@
     "backBtn": "رجوع",
     "confirmBtn": "تأكيد",
     "processing": "جاري المعالجة..."
+  },
+  "repairPreview": {
+    "title": "إصلاحات احترافية",
+    "viewAll": "عرض جميع الخدمات",
+    "displayRepair": "إصلاح الشاشة",
+    "displayRepairPrice": "من 149 €",
+    "batteryReplacement": "استبدال البطارية",
+    "batteryReplacementPrice": "من 39 €",
+    "chargingPort": "منفذ الشحن",
+    "chargingPortPrice": "من 29 €",
+    "diagnosis": "فحص وتشخيص",
+    "diagnosisPrice": "مجاناً"
   }
 }

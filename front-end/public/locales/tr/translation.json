@@ -21,7 +21,18 @@
     "subtitle": "Premium cihaz ticareti ve onarımı için küresel standart.",
     "shopNow": "Şimdi Alışveriş Yap",
     "sellDevice": "Cihaz Sat",
-    "trackRepair": "Tamir Takip"
+    "trackRepair": "Tamir Takip",
+    "tagline": "Almanya'nın 1 Numaralı Teknoloji Merkezi",
+    "headline": "HandyLand Premium Teknoloji Merkezi",
+    "subheadline": "Mobil ticaretin geleceğini keşfedin. Alman hassasiyetiyle alım, satım ve onarım.",
+    "trustBadge1": "Doğrulanmış Satıcılar",
+    "trustBadge2": "7/24 Destek",
+    "trustBadge3": "4,9★ Puan",
+    "salesStatLabel": "Satılan Cihazlar",
+    "salesStatValue": "Bu hafta +%24",
+    "ratingStatLabel": "Müşteri Değerlendirmesi",
+    "ratingStatValue": "4,9/5,0 Mükemmel",
+    "featuredDeviceLabel": "Öne Çıkan Cihaz"
   },
   "auth": {
     "loginTitle": "Hesabınıza Giriş Yapın",
@@ -318,7 +329,20 @@
     "this_week": "bu hafta",
     "special_offers": "Özel Teklifler",
     "spring_deals": "Bahar Fırsatları",
-    "explore_now": "Şimdi Keşfet"
+    "explore_now": "Şimdi Keşfet",
+    "services": {
+      "tagline": "Neler Sunuyoruz",
+      "heading": "Cihazınız İçin Her Şey",
+      "buyTitle": "Satın Al",
+      "buyDescription": "Uygun fiyatlarla test edilmiş akıllı telefon ve tabletler.",
+      "buyCta": "Pazara Git",
+      "sellTitle": "Sat",
+      "sellDescription": "Kullanılmış cihazınız için hemen adil bir teklif alın.",
+      "sellCta": "Cihaz Değerle",
+      "repairTitle": "Tamir",
+      "repairDescription": "Yüksek kaliteli yedek parçalarla profesyonel onarım.",
+      "repairCta": "Tamir Talebi Oluştur"
+    }
   },
   "footer": {
     "shop": "MAĞAZA",
@@ -452,5 +476,17 @@
     "backBtn": "Geri",
     "confirmBtn": "Onayla",
     "processing": "İşleniyor..."
+  },
+  "repairPreview": {
+    "title": "Profesyonel Tamir Hizmetleri",
+    "viewAll": "Tüm Hizmetleri Gör",
+    "displayRepair": "Ekran Tamiri",
+    "displayRepairPrice": "149 €'dan başlayan",
+    "batteryReplacement": "Batarya Değişimi",
+    "batteryReplacementPrice": "39 €'dan başlayan",
+    "chargingPort": "Şarj Soketi Tamiri",
+    "chargingPortPrice": "29 €'dan başlayan",
+    "diagnosis": "Arıza Tespiti",
+    "diagnosisPrice": "Ücretsiz"
   }
 }

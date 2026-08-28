@@ -10,10 +10,11 @@ export const FeaturedServices: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { settings } = useSettings();
 
-    const isRtl = (i18n.language || 'de').startsWith('ar');
+    const language = (i18n.language || 'de').split('-')[0];
+    const isRtl = language === 'ar' || language === 'fa';
     const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
 
-    const featuredConfig = settings?.featuredServices || {
+    const defaultServices = {
         tagline: t('home.services.tagline', 'Was wir anbieten'),
         heading: t('home.services.heading', 'Alles rund um dein Gerät'),
         cards: [
@@ -21,7 +22,7 @@ export const FeaturedServices: React.FC = () => {
                 id: 'buy',
                 iconName: 'ShoppingBag',
                 title: t('home.services.buyTitle', 'Kaufen'),
-                desc: t('home.services.buyDesc', 'Geprüfte Smartphones & Tablets zu fairen Preisen.'),
+                desc: t('home.services.buyDescription', 'Geprüfte Smartphones und Tablets zu fairen Preisen.'),
                 cta: t('home.services.buyCta', 'Zum Marktplatz'),
                 route: '/marketplace',
                 gradient: 'from-cyan-500/20 to-blue-500/10',
@@ -33,7 +34,7 @@ export const FeaturedServices: React.FC = () => {
                 id: 'sell',
                 iconName: 'Zap',
                 title: t('home.services.sellTitle', 'Verkaufen'),
-                desc: t('home.services.sellDesc', 'Dein Gerät bewerten lassen und sofort ein Angebot erhalten.'),
+                desc: t('home.services.sellDescription', 'Erhalte ein faires Angebot für dein gebrauchtes Gerät.'),
                 cta: t('home.services.sellCta', 'Gerät bewerten'),
                 route: '/valuation',
                 gradient: 'from-amber-500/20 to-orange-500/10',
@@ -45,7 +46,7 @@ export const FeaturedServices: React.FC = () => {
                 id: 'repair',
                 iconName: 'Wrench',
                 title: t('home.services.repairTitle', 'Reparieren'),
-                desc: t('home.services.repairDesc', 'Professionelle Reparaturen für alle Geräte — schnell & günstig.'),
+                desc: t('home.services.repairDescription', 'Professionelle Reparaturen mit hochwertigen Ersatzteilen.'),
                 cta: t('home.services.repairCta', 'Reparatur anfragen'),
                 route: '/repair',
                 gradient: 'from-purple-500/20 to-indigo-500/10',
@@ -55,6 +56,10 @@ export const FeaturedServices: React.FC = () => {
             },
         ]
     };
+
+    const featuredConfig = (language === 'de' && settings?.featuredServices)
+        ? settings.featuredServices
+        : defaultServices;
 
     const getIcon = (iconName: string) => {
         const IconComponent = (LucideIcons as any)[iconName] || LucideIcons.Layers;

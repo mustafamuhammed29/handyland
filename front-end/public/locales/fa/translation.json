@@ -21,7 +21,18 @@
     "subtitle": "استاندارد جهانی برای تجارت و تعمیر دستگاه‌های هوشمند پرمیوم.",
     "shopNow": "همین الان خرید کنید",
     "sellDevice": "فروش دستگاه",
-    "trackRepair": "پیگیری تعمیر"
+    "trackRepair": "پیگیری تعمیر",
+    "tagline": "مرکز فناوری شماره ۱ آلمان",
+    "headline": "HandyLand مرکز فناوری پیشرفته",
+    "subheadline": "آینده تجارت موبایل را کشف کنید. خرید، فروش و تعمیر با دقت و مهندسی آلمانی.",
+    "trustBadge1": "فروشندگان تایید شده",
+    "trustBadge2": "پشتیبانی ۲۴/۷",
+    "trustBadge3": "امتیاز ۴.۹★",
+    "salesStatLabel": "دستگاه‌های فروخته شده",
+    "salesStatValue": "+۲۴٪ این هفته",
+    "ratingStatLabel": "رضایت مشتریان",
+    "ratingStatValue": "۴.۹/۵.۰ عالی",
+    "featuredDeviceLabel": "دستگاه پیشنهادی"
   },
   "auth": {
     "loginTitle": "ورود به حساب کاربری",
@@ -318,7 +329,20 @@
     "this_week": "در این هفته",
     "special_offers": "پیشنهادات ویژه",
     "spring_deals": "تخفیف‌های بهاری",
-    "explore_now": "مشاهده محصولات"
+    "explore_now": "مشاهده محصولات",
+    "services": {
+      "tagline": "خدمات ما",
+      "heading": "همه چیز برای دستگاه شما",
+      "buyTitle": "خرید",
+      "buyDescription": "گوشی‌ها و تبلت‌های بررسی‌شده و مطمئن با قیمت‌های منصفانه.",
+      "buyCta": "ورود به بازار",
+      "sellTitle": "فروش",
+      "sellDescription": "ارزیابی فوری و دریافت قیمت منصفانه برای دستگاه کارکرده شما.",
+      "sellCta": "ارزیابی دستگاه",
+      "repairTitle": "تعمیرات",
+      "repairDescription": "تعمیرات تخصصی با استفاده از قطعات یدکی باکیفیت و استاندارد.",
+      "repairCta": "درخواست تعمیر"
+    }
   },
   "footer": {
     "shop": "فروشگاه",
@@ -452,5 +476,17 @@
     "backBtn": "بازگشت",
     "confirmBtn": "تایید نهایی",
     "processing": "در حال پردازش..."
+  },
+  "repairPreview": {
+    "title": "تعمیرات تخصصی و حرفه‌ای",
+    "viewAll": "مشاهده تمامی خدمات",
+    "displayRepair": "تعمیر و تعویض ال‌سی‌دی",
+    "displayRepairPrice": "از ۱۴۹ €",
+    "batteryReplacement": "تعویض باتری",
+    "batteryReplacementPrice": "از ۳۹ €",
+    "chargingPort": "تعمیر سوکت شارژ",
+    "chargingPortPrice": "از ۲۹ €",
+    "diagnosis": "عیب‌یابی و تست",
+    "diagnosisPrice": "رایگان"
   }
 }

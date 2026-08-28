@@ -21,7 +21,18 @@
     "subtitle": "Мировой стандарт премиальной торговли и ремонта устройств.",
     "shopNow": "Купить сейчас",
     "sellDevice": "Продать устройство",
-    "trackRepair": "Отследить ремонт"
+    "trackRepair": "Отследить ремонт",
+    "tagline": "Технологический хаб №1 в Германии",
+    "headline": "HandyLand Премиум Тех-Хаб",
+    "subheadline": "Откройте для себя будущее мобильной коммерции. Покупка, продажа и ремонт с немецкой точностью.",
+    "trustBadge1": "Проверенные продавцы",
+    "trustBadge2": "Поддержка 24/7",
+    "trustBadge3": "Оценка 4,9★",
+    "salesStatLabel": "Продано устройств",
+    "salesStatValue": "+24% на этой неделе",
+    "ratingStatLabel": "Оценка клиентов",
+    "ratingStatValue": "4,9/5,0 Отлично",
+    "featuredDeviceLabel": "Рекомендуемое устройство"
   },
   "auth": {
     "loginTitle": "Войти в свой аккаунт",
@@ -318,7 +329,20 @@
     "this_week": "на этой неделе",
     "special_offers": "Спецпредложения",
     "spring_deals": "Весенние скидки",
-    "explore_now": "Узнать больше"
+    "explore_now": "Узнать больше",
+    "services": {
+      "tagline": "Что мы предлагаем",
+      "heading": "Все для вашего устройства",
+      "buyTitle": "Купить",
+      "buyDescription": "Проверенные смартфоны и планшеты по честным ценам.",
+      "buyCta": "В маркетплейс",
+      "sellTitle": "Продать",
+      "sellDescription": "Получите выгодное предложение за ваше подержанное устройство.",
+      "sellCta": "Оценить устройство",
+      "repairTitle": "Ремонт",
+      "repairDescription": "Профессиональный ремонт с использованием качественных запчастей.",
+      "repairCta": "Заказать ремонт"
+    }
   },
   "footer": {
     "shop": "МАГАЗИН",
@@ -452,5 +476,17 @@
     "backBtn": "Назад",
     "confirmBtn": "Подтвердить",
     "processing": "Обработка..."
+  },
+  "repairPreview": {
+    "title": "Профессиональный ремонт",
+    "viewAll": "Все услуги",
+    "displayRepair": "Замена дисплея",
+    "displayRepairPrice": "от 149 €",
+    "batteryReplacement": "Замена аккумулятора",
+    "batteryReplacementPrice": "от 39 €",
+    "chargingPort": "Разъем зарядки",
+    "chargingPortPrice": "от 29 €",
+    "diagnosis": "Диагностика",
+    "diagnosisPrice": "Бесплатно"
   }
 }

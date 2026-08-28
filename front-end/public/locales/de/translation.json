@@ -18,7 +18,18 @@
     "subtitle": "Der globale Standard für Premium-Gerätehandel und Reparatur.",
     "shopNow": "Jetzt einkaufen",
     "sellDevice": "Gerät verkaufen",
-    "trackRepair": "Reparatur verfolgen"
+    "trackRepair": "Reparatur verfolgen",
+    "tagline": "Deutschlands #1 Tech-Hub",
+    "headline": "HandyLand Premium Tech Hub",
+    "subheadline": "Entdecke die Zukunft des mobilen Handels. Kaufen, Verkaufen und Reparieren mit deutscher Präzision.",
+    "trustBadge1": "Verifizierte Händler",
+    "trustBadge2": "24/7 Support",
+    "trustBadge3": "4,9★ bewertet",
+    "salesStatLabel": "Geräte verkauft",
+    "salesStatValue": "+24% diese Woche",
+    "ratingStatLabel": "Kundenbewertung",
+    "ratingStatValue": "4,9/5,0 Ausgezeichnet",
+    "featuredDeviceLabel": "Empfohlenes Gerät"
   },
   "auth": {
     "loginTitle": "Anmeldung zu Ihrem Konto",
@@ -496,7 +507,20 @@
     "deviceSold": "Geräte verkauft",
     "thisWeek": "+24% diese Woche",
     "customerRating": "Kundenbewertung",
-    "excellent": "4.9/5.0 Ausgezeichnet"
+    "excellent": "4.9/5.0 Ausgezeichnet",
+    "services": {
+      "tagline": "Was wir anbieten",
+      "heading": "Alles rund um dein Gerät",
+      "buyTitle": "Kaufen",
+      "buyDescription": "Geprüfte Smartphones und Tablets zu fairen Preisen.",
+      "buyCta": "Zum Marktplatz",
+      "sellTitle": "Verkaufen",
+      "sellDescription": "Erhalte ein faires Angebot für dein gebrauchtes Gerät.",
+      "sellCta": "Gerät bewerten",
+      "repairTitle": "Reparieren",
+      "repairDescription": "Professionelle Reparaturen mit hochwertigen Ersatzteilen.",
+      "repairCta": "Reparatur anfragen"
+    }
   },
   "footer": {
     "shop": "SHOP",
@@ -631,5 +655,17 @@
     "backBtn": "Zurück",
     "confirmBtn": "Bestätigen",
     "processing": "Wird bearbeitet..."
+  },
+  "repairPreview": {
+    "title": "Professionelle Reparaturen",
+    "viewAll": "Alle Services ansehen",
+    "displayRepair": "Displayreparatur",
+    "displayRepairPrice": "ab 149 €",
+    "batteryReplacement": "Akkutausch",
+    "batteryReplacementPrice": "ab 39 €",
+    "chargingPort": "Ladebuchse",
+    "chargingPortPrice": "ab 29 €",
+    "diagnosis": "Diagnose",
+    "diagnosisPrice": "Kostenlos"
   }
 }
