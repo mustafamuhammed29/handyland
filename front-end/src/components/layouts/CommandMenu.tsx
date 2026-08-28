@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Loader2, ArrowRight, Smartphone, Compass, Clock, TerminalSquare, AlertCircle } from 'lucide-react';
+import { Search, Loader2, ArrowRight, Smartphone, Compass, TerminalSquare, AlertCircle } from 'lucide-react';
 import { api } from '../../utils/api';
 import { getImageUrl } from '../../utils/imageUrl';
 import { formatPrice } from '../../utils/formatPrice';
 import { getConditionLabel } from '../../utils/cleanProductName';
+import { useTranslation } from 'react-i18next';
 
 interface SearchResult {
     id: string;
@@ -27,6 +28,7 @@ interface CommandMenuProps {
 
 export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -36,10 +38,10 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
 
     // Default suggestions when empty
     const defaultSuggestions = [
-        { icon: Smartphone, label: 'Search iPhones', action: () => navigate('/marketplace?brand=apple') },
-        { icon: Smartphone, label: 'Search Samsungs', action: () => navigate('/marketplace?brand=samsung') },
-        { icon: Compass, label: 'Browse Marketplace', action: () => navigate('/marketplace') },
-        { icon: TerminalSquare, label: 'Sell Your Device', action: () => navigate('/sell') },
+        { icon: Smartphone, label: t('command.searchIphones', 'iPhones durchsuchen'), action: () => navigate('/marketplace?brand=apple') },
+        { icon: Smartphone, label: t('command.searchSamsungs', 'Samsung Smartphones durchsuchen'), action: () => navigate('/marketplace?brand=samsung') },
+        { icon: Compass, label: t('command.browseMarketplace', 'Marktplatz durchstöbern'), action: () => navigate('/marketplace') },
+        { icon: TerminalSquare, label: t('command.sellDevice', 'Gerät verkaufen & bewerten'), action: () => navigate('/valuation') },
     ];
 
     // Handle Keyboard Shortcuts (Cmd+K)
@@ -182,7 +184,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                             <input
                                 ref={inputRef}
                                 type="text"
-                                placeholder="Search products, brands, or commands..."
+                                placeholder={t('command.placeholder', 'Produkte, Marken oder Aktionen suchen...')}
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 className="flex-1 bg-transparent border-none outline-none text-lg text-slate-900 dark:text-white placeholder:text-slate-400"
@@ -197,7 +199,9 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                             {!query ? (
                                 // Default Suggestions
                                 <div className="p-2">
-                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-2">Suggestions</h3>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-2">
+                                        {t('command.suggestions', 'Vorschläge')}
+                                    </h3>
                                     <ul ref={listRef} className="space-y-1">
                                         {defaultSuggestions.map((item, idx) => {
                                             const Icon = item.icon;
@@ -222,7 +226,9 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                             ) : (
                                 // Search Results
                                 <div className="p-2">
-                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-2">Products</h3>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-2">
+                                        {t('command.products', 'Produkte')}
+                                    </h3>
                                     
                                     {results.length > 0 ? (
                                         <ul ref={listRef} className="space-y-1">
@@ -268,7 +274,9 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                                                                 </div>
                                                             ) : (
                                                                 <div className="flex items-center gap-2 text-xs text-slate-500 truncate">
-                                                                    <span className="px-1.5 rounded-sm bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Accessory</span>
+                                                                    <span className="px-1.5 rounded-sm bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                                                        {t('command.accessory', 'Zubehör')}
+                                                                    </span>
                                                                     {(product as any).type && <span>• {(product as any).type}</span>}
                                                                     {(product as any).brand && <span>• {(product as any).brand}</span>}
                                                                 </div>
@@ -283,8 +291,12 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                                             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 mb-4 text-slate-400">
                                                 <AlertCircle className="w-6 h-6" />
                                             </div>
-                                            <h4 className="text-slate-900 dark:text-white font-bold mb-1">No results found</h4>
-                                            <p className="text-slate-500 text-sm">We couldn't find anything matching "{query}"</p>
+                                            <h4 className="text-slate-900 dark:text-white font-bold mb-1">
+                                                {t('command.noResults', 'Keine Ergebnisse gefunden')}
+                                            </h4>
+                                            <p className="text-slate-500 text-sm">
+                                                {t('command.noResultsDesc', 'Wir konnten leider nichts passendes zu „{{query}}“ finden.', { query })}
+                                            </p>
                                         </div>
                                     ) : null}
                                 </div>
@@ -294,11 +306,15 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                         {/* Footer Tips */}
                         <div className="p-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
                             <div className="flex gap-4">
-                                <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">↑↓</kbd> to navigate</span>
-                                <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">↵</kbd> to select</span>
+                                <span className="flex items-center gap-1">
+                                    <kbd className="px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">↑↓</kbd> {t('command.toNavigate', 'zum Navigieren')}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <kbd className="px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">↵</kbd> {t('command.toSelect', 'zum Auswählen')}
+                                </span>
                             </div>
                             <div className="flex items-center gap-1">
-                                <span>Search by</span> <span className="font-bold text-slate-700 dark:text-slate-300">HandyLand</span>
+                                <span>{t('command.searchBy', 'Suche über')}</span> <span className="font-bold text-slate-700 dark:text-slate-300">HandyLand</span>
                             </div>
                         </div>
                     </motion.div>
