@@ -3,16 +3,22 @@ import { NavLink } from 'react-router-dom';
 import { Home, Search, ShoppingCart, User, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
+import { useSettings } from '../context/SettingsContext';
 
 export const BottomNav = () => {
     const { t } = useTranslation();
     const { cart, setIsCartOpen } = useCart();
+    const { settings } = useSettings();
     const cartCount = cart.length;
 
     const navItems = [
         { to: '/', icon: <Home className="w-5 h-5" />, label: t('nav.home', 'Home') },
-        { to: '/marketplace', icon: <Search className="w-5 h-5" />, label: t('nav.marketplace', 'Market') },
-        { to: '/repair', icon: <Wrench className="w-5 h-5" />, label: t('nav.repair', 'Repair') },
+        ...(settings.sections?.marketplacePage !== false && !settings.sections?.marketplacePageComingSoon ? [
+            { to: '/marketplace', icon: <Search className="w-5 h-5" />, label: t('nav.marketplace', 'Market') }
+        ] : []),
+        ...(settings.sections?.repairPage !== false && !settings.sections?.repairPageComingSoon ? [
+            { to: '/repair', icon: <Wrench className="w-5 h-5" />, label: t('nav.repair', 'Repair') }
+        ] : []),
         { 
             to: '#', 
             action: () => setIsCartOpen(true),

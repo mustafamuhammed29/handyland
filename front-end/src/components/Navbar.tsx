@@ -75,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
   });
 
   const activeNavItems = navItems.filter(item => {
-    if (item.path === '/marketplace' && settings.sections?.marketplacePage === false && !settings.sections?.marketplacePageComingSoon) return false;
+    if ((item.path === '/marketplace' || item.path === '/market') && (settings.sections?.marketplacePage === false || settings.sections?.marketplacePageComingSoon)) return false;
     if (item.path === '/repair' && settings.sections?.repairPage === false && !settings.sections?.repairPageComingSoon) return false;
     if (item.path === '/valuation' && settings.sections?.valuationPage === false && !settings.sections?.valuationPageComingSoon) return false;
     if (item.path === '/accessories' && settings.sections?.accessoriesPage === false && !settings.sections?.accessoriesPageComingSoon) return false;
@@ -136,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
             );
           })}
           
-          {(!(settings as any).features || (settings as any).features.comparisonEngine !== false) && (settings.sections?.marketplacePage !== false || settings.sections?.marketplacePageComingSoon) && (
+          {(!(settings as any).features || (settings as any).features.comparisonEngine !== false) && (
             <Link
               to="/compare"
               className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border transition-all duration-200 xl:mx-1 ${location.pathname === '/compare' ? 'bg-purple-500 text-white border-purple-500' : 'border-purple-500/50 text-purple-500 hover:bg-purple-500/10'}`}
