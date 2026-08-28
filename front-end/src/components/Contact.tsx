@@ -91,13 +91,13 @@ export const Contact: React.FC<ContactProps> = () => {
                 <div className="text-center mb-16">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/30 border border-brand-primary/30 text-brand-primary text-xs font-mono mb-4 animate-pulse">
                         <Radio className="w-3 h-3" />
-                        <span>SIGNALSTÄRKE: 100%</span>
+                        <span>{t('contact.signalStrength', 'SIGNALSTÄRKE: 100%')}</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
-                        {t('contactTitle', 'Contact Us')}
+                        {t('contact.title', 'Kontaktieren Sie uns')}
                     </h2>
                     <p className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto">
-                        {t('contactSubtitle', "We're here to help")}
+                        {t('contact.subtitle', 'Wir sind gerne für Sie da')}
                     </p>
                 </div>
 
@@ -178,7 +178,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                 <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-2 md:mb-4 text-purple-400 group-hover:scale-110 transition-transform">
                                     <Phone className="w-4 h-4 md:w-5 md:h-5" />
                                 </div>
-                                <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t('callUs', 'Call Us')}</div>
+                                <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t('contact.callUs', 'Rufen Sie uns an')}</div>
                                 <div className="text-slate-800 dark:text-white font-mono text-xs md:text-lg">{settings.phone}</div>
                             </div>
 
@@ -186,7 +186,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                 <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-2 md:mb-4 text-emerald-400 group-hover:scale-110 transition-transform">
                                     <Mail className="w-4 h-4 md:w-5 md:h-5" />
                                 </div>
-                                <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t('emailUs', 'Email Us')}</div>
+                                <div className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mb-1">{t('contact.emailUs', 'E-Mail senden')}</div>
                                 <a 
                                     href={`mailto:${settings.email}`}
                                     className="text-slate-800 dark:text-white font-mono text-xs md:text-sm hover:text-brand-primary dark:hover:text-brand-primary transition-colors"
@@ -249,7 +249,7 @@ export const Contact: React.FC<ContactProps> = () => {
 
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 <div className="space-y-2">
-                                    <label className="text-xs text-slate-400 font-bold ml-1 uppercase">{t('fullName', 'Full Name')}</label>
+                                    <label className="text-xs text-slate-400 font-bold ml-1 uppercase">{t('contact.fullName', 'Vollständiger Name')}</label>
                                     <div className="relative group">
                                         <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                                         <input
@@ -263,7 +263,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs text-slate-400 font-bold ml-1 uppercase">{t('email', 'Email Address')}</label>
+                                    <label className="text-xs text-slate-400 font-bold ml-1 uppercase">{t('contact.email', 'E-Mail-Adresse')}</label>
                                     <div className="relative group">
                                         <AtSign className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                                         <input
@@ -277,7 +277,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs text-slate-400 font-bold ml-1 uppercase">{t('yourMessage', 'Your Message')}</label>
+                                    <label className="text-xs text-slate-400 font-bold ml-1 uppercase">{t('contact.message', 'Ihre Nachricht')}</label>
                                     <textarea
                                         name="message"
                                         required
@@ -304,13 +304,13 @@ export const Contact: React.FC<ContactProps> = () => {
                                     {formState === 'sending' && (
                                         <>
                                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                            <span>{t('sending', 'Sending...')}</span>
+                                            <span>{t('contact.sending', 'Wird gesendet...')}</span>
                                         </>
                                     )}
                                     {formState === 'success' && (
                                         <>
                                             <CheckCircle2 className="w-5 h-5" />
-                                            <span>{t('successMsg', 'Successfully sent!')}</span>
+                                            <span>{t('contact.successMsg', 'Erfolgreich gesendet!')}</span>
                                         </>
                                     )}
                                 </button>
