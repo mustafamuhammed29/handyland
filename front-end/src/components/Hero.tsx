@@ -304,6 +304,10 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                                 src={settings.hero.heroImage || "https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=600&auto=format&fit=crop"}
                                 className="absolute inset-0 w-full h-full object-cover opacity-80"
                                 alt="App Screen"
+                                fetchPriority="high"
+                                decoding="async"
+                                width={320}
+                                height={480}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
 

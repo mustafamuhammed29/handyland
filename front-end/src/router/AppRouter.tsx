@@ -2,7 +2,6 @@ import React, { useEffect, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
-import { CartDrawer } from '../components/CartDrawer';
 import { useLang } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
@@ -10,10 +9,12 @@ import { useAuth } from '../context/AuthContext';
 import { GlobalError } from '../components/GlobalError';
 import { GlobalLoader } from '../components/GlobalLoader';
 import { SEO } from '../components/SEO';
-import { WhatsAppWidget } from '../components/WhatsAppWidget';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
 import { OfflineBanner } from '../components/OfflineBanner';
-import { PromoModal } from '../components/PromoModal';
+
+const CartDrawer = React.lazy(() => import('../components/CartDrawer').then(m => ({ default: m.CartDrawer })));
+const WhatsAppWidget = React.lazy(() => import('../components/WhatsAppWidget').then(m => ({ default: m.WhatsAppWidget })));
+const PromoModal = React.lazy(() => import('../components/PromoModal').then(m => ({ default: m.PromoModal })));
 
 import { getPublicRoutes } from './PublicRoutes';
 import { getProtectedRoutes } from './ProtectedRoutes';
@@ -131,7 +132,9 @@ export const AppRouter = () => {
             {!['/dashboard', '/seller'].some(p => location.pathname.startsWith(p)) && (
                 <>
                     <AnnouncementBanner />
-                    <PromoModal />
+                    <Suspense fallback={null}>
+                        <PromoModal />
+                    </Suspense>
                 </>
             )}
             <OfflineBanner />
@@ -149,9 +152,17 @@ export const AppRouter = () => {
             </Suspense>
 
             {/* CartDrawer: hide on cart, checkout, dashboard, seller pages */}
-            {!['/cart', '/checkout', '/dashboard', '/seller'].some(p => location.pathname.startsWith(p)) && <CartDrawer />}
+            {!['/cart', '/checkout', '/dashboard', '/seller'].some(p => location.pathname.startsWith(p)) && (
+                <Suspense fallback={null}>
+                    <CartDrawer />
+                </Suspense>
+            )}
             {/* WhatsApp Widget: hide on dashboard and seller (clean admin-like UX) */}
-            {!['/dashboard', '/seller'].some(p => location.pathname.startsWith(p)) && <WhatsAppWidget />}
+            {!['/dashboard', '/seller'].some(p => location.pathname.startsWith(p)) && (
+                <Suspense fallback={null}>
+                    <WhatsAppWidget />
+                </Suspense>
+            )}
         </div>
     );
 };
