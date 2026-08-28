@@ -123,7 +123,7 @@ export const authService = {
     updatePassword: async (passwords: { oldPassword: string, newPassword: string }): Promise<{ success: boolean; message: string }> => {
         try {
             await api.get('/api/auth/csrf');
-            const response = await api.put('/api/auth/update-password', { currentPassword: passwords.oldPassword, newPassword: passwords.newPassword });
+            const response = await api.put('/api/auth/changepassword', { currentPassword: passwords.oldPassword, newPassword: passwords.newPassword });
             return response as any;
         } catch (error) {
             devLog('Auth Service Update Password Error:', error);
