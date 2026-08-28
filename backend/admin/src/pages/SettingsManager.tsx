@@ -267,6 +267,8 @@ interface Settings {
         marketingTitle: string;
         marketingDesc: string;
     };
+    repairPreviewCards?: any[];
+    serviceTerminal?: any;
 }
 
 interface EmailTemplateData {
@@ -584,7 +586,7 @@ export default function SettingsManager() {
         { id: 'invoice', label: '🧾 Invoice Settings', icon: FileText },
         { id: 'cookie', label: '🍪 Cookie Consent', icon: Layers },
         { id: 'seo', label: 'SEO & Meta', icon: Globe },
-        { id: 'repair-cards', label: '🔧 Repair Cards', icon: Wrench },
+        { id: 'repair-cards', label: '🔧 Service Terminal', icon: Wrench },
         { id: 'featured-services', label: '🌟 Featured Services', icon: Layers },
         { id: 'scripts', label: '💬 Support Scripts', icon: MessageSquare },
         { id: 'email-server', label: '📧 E-Mail Server', icon: Layers },
