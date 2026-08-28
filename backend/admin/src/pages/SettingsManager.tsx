@@ -293,6 +293,58 @@ const EMAIL_TEMPLATE_ICONS: Record<string, string> = {
     order_confirmation: '🛒',
 };
 
+const PERMISSION_ERROR_PATTERNS = ['row-level security', 'permission denied', 'not authorized', 'rls'];
+const SAFE_PERMISSION_MESSAGE = 'Speichern nicht möglich. Bitte prüfen Sie die Server-Berechtigungen und versuchen Sie es erneut.';
+
+export const getErrorMessage = (error: unknown, fallback = 'Failed to save settings.'): string => {
+    if (!error) return fallback;
+
+    if (typeof error === 'string') {
+        const trimmed = error.trim();
+        if (!trimmed) return fallback;
+        const lower = trimmed.toLowerCase();
+        if (PERMISSION_ERROR_PATTERNS.some(p => lower.includes(p))) {
+            return SAFE_PERMISSION_MESSAGE;
+        }
+        return trimmed;
+    }
+
+    let extracted: string | null = null;
+
+    if (typeof error === 'object' && error !== null) {
+        const errObj = error as Record<string, any>;
+        const respData = errObj.response?.data;
+
+        // a. response.data.message as a non-empty string
+        if (typeof respData?.message === 'string' && respData.message.trim()) {
+            extracted = respData.message.trim();
+        }
+        // b. response.data.error.message as a non-empty string
+        else if (typeof respData?.error?.message === 'string' && respData.error.message.trim()) {
+            extracted = respData.error.message.trim();
+        }
+        // c. response.data.error as a non-empty string
+        else if (typeof respData?.error === 'string' && respData.error.trim()) {
+            extracted = respData.error.trim();
+        }
+        // d. error.message as a non-empty string
+        else if (typeof errObj.message === 'string' && errObj.message.trim()) {
+            extracted = errObj.message.trim();
+        }
+    }
+
+    if (!extracted) {
+        return fallback;
+    }
+
+    const lower = extracted.toLowerCase();
+    if (PERMISSION_ERROR_PATTERNS.some(p => lower.includes(p))) {
+        return SAFE_PERMISSION_MESSAGE;
+    }
+
+    return extracted;
+};
+
 export default function SettingsManager() {
     const [settings, setSettings] = useState<Settings>({
         siteName: '',
@@ -446,9 +498,12 @@ export default function SettingsManager() {
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(true);
 
-    const showSaveToast = (type: 'success' | 'error', text: string) => {
-        if (type === 'success') toast.success(text);
-        else toast.error(text);
+    const showSaveToast = (type: 'success' | 'error', text: unknown) => {
+        const safeText = typeof text === 'string' && text.trim()
+            ? text.trim()
+            : getErrorMessage(text, 'Failed to save settings.');
+        if (type === 'success') toast.success(safeText);
+        else toast.error(safeText);
     };
 
     // Email Templates State
@@ -510,9 +565,9 @@ export default function SettingsManager() {
         try {
             await api.put('/api/settings', settings);
             showSaveToast('success', 'Settings saved successfully!');
-        } catch (error: any) {
-            console.error('Failed to save settings:', error?.response?.data || error);
-            const serverMsg = error?.response?.data?.message || error?.response?.data?.error || 'Failed to save settings.';
+        } catch (error: unknown) {
+            console.error('Failed to save settings:', (error as any)?.response?.data || error);
+            const serverMsg = getErrorMessage(error, 'Failed to save settings.');
             showSaveToast('error', serverMsg);
         }
     };
