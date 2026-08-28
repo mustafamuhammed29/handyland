@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingCart, Heart, Cpu, Battery, Smartphone, Shield, Star, BarChart2 } from 'lucide-react';
@@ -13,6 +13,7 @@ import { generateWhatsAppLink } from '../../utils/whatsappHelper';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import { useWishlist } from '../../hooks/useWishlist';
+import { useDialogAccessibility } from '../../hooks/useDialogAccessibility';
 
 interface QuickViewModalProps {
     product: PhoneListing | null;
@@ -30,6 +31,17 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
 
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [mounted, setMounted] = useState(false);
+
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+    useDialogAccessibility({
+        isOpen,
+        onClose,
+        dialogRef,
+        initialFocusRef: closeButtonRef,
+        closeOnEscape: true,
+    });
 
     useEffect(() => {
         setMounted(true);
@@ -82,12 +94,18 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                 />
                 
                 <motion.div
+                    ref={dialogRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="quickview-title"
+                    tabIndex={-1}
                     initial={{ opacity: 0, scale: 0.95, y: 50 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 50 }}
                     className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-t-3xl md:rounded-3xl shadow-2xl overflow-y-auto md:overflow-hidden max-h-[90vh] flex flex-col md:flex-row"
                 >
                     <button
+                        ref={closeButtonRef}
                         onClick={onClose}
                         title={t('common.close', 'Close')}
                         className="absolute top-4 right-4 z-10 p-2 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 rounded-full backdrop-blur-md transition-colors text-slate-900 dark:text-white"
@@ -133,7 +151,10 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                         <div className="text-xs text-brand-primary font-mono uppercase tracking-widest mb-2">
                             {product.brand || 'Smartphone'}
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-2 leading-tight">
+                        <h2
+                            id="quickview-title"
+                            className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-2 leading-tight"
+                        >
                             {cleanProductName(product.model, product.brand)}
                         </h2>
                         
