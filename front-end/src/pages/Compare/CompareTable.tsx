@@ -15,11 +15,21 @@ export const CompareTable: React.FC<CompareTableProps> = ({ slots, selectedProdu
     const { t } = useTranslation();
     return (
         <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700 mb-12">
+            <div className="sm:hidden px-4 py-2 text-center text-[11px] text-slate-400 bg-slate-950/60 border-b border-slate-800">
+                {t('compare.swipeHint', 'Wische horizontal, um alle Geräte zu vergleichen')}
+            </div>
             <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse table-fixed">
+                <table
+                    className="w-full min-w-[640px] text-left border-collapse table-fixed"
+                    aria-label={t('compare.tableAriaLabel', 'Gerätevergleichstabelle')}
+                >
                     <thead>
                         <tr>
-                            <th className="w-1/4 p-4"></th>
+                            <th className="w-1/4 p-4">
+                                <span className="sr-only">
+                                    {t('compare.specifications', 'Spezifikationen')}
+                                </span>
+                            </th>
                             {slots.map(i => (
                                 <th key={i} className="w-1/4 p-4 text-center">
                                     {selectedProducts[i] && (
@@ -75,7 +85,7 @@ export const CompareTable: React.FC<CompareTableProps> = ({ slots, selectedProdu
                                     const rawValues = slots.map(i => {
                                         const p = selectedProducts[i];
                                         if (!p) return undefined;
-                                        
+
                                         if (category === 'Stammdaten') {
                                             if (specKey === 'Marke') return p.brand;
                                             if (specKey === 'Modell') return stripInternalId(p.model || p.name);
@@ -89,7 +99,7 @@ export const CompareTable: React.FC<CompareTableProps> = ({ slots, selectedProdu
                                             if (lowerKey === 'battery') return p.battery || p.specs?.battery || p.specs?.Battery;
                                             if (lowerKey === 'os') return p.specs?.os || p.specs?.OS || p.specs?.Os;
                                             if (lowerKey === 'ram') return p.specs?.ram || p.specs?.RAM || p.specs?.Ram;
-                                            
+
                                             return p.specs?.[lowerKey] || p.specs?.[specKey] || p.specs?.[specKey.toLowerCase()];
                                         } else {
                                             return p.specs?.[category]?.[specKey];
