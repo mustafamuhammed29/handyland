@@ -13,10 +13,10 @@ export const BottomNav = () => {
 
     const navItems = [
         { to: '/', icon: <Home className="w-5 h-5" />, label: t('nav.home', 'Home') },
-        ...(settings.sections?.marketplacePage !== false && !settings.sections?.marketplacePageComingSoon ? [
+        ...(settings.sections?.marketplacePage !== false || settings.sections?.marketplacePageComingSoon ? [
             { to: '/marketplace', icon: <Search className="w-5 h-5" />, label: t('nav.marketplace', 'Market') }
         ] : []),
-        ...(settings.sections?.repairPage !== false && !settings.sections?.repairPageComingSoon ? [
+        ...(settings.sections?.repairPage !== false || settings.sections?.repairPageComingSoon ? [
             { to: '/repair', icon: <Wrench className="w-5 h-5" />, label: t('nav.repair', 'Repair') }
         ] : []),
         { 
