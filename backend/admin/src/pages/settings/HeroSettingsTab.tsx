@@ -1,5 +1,5 @@
 import { Input } from '../SettingsManager';
-import { Type, Smartphone, Activity, Palette, ShieldCheck, Gamepad2, Video, Sparkles, HelpCircle } from 'lucide-react';
+import { Type, Smartphone, Activity, Palette, ShieldCheck, Gamepad2, Video, Sparkles, HelpCircle, AlertCircle } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 import { HeroVideoUpload } from '../../components/HeroVideoUpload';
 
@@ -35,11 +35,11 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
 
             {/* Media Mode Selector */}
             <div className="p-5 border border-slate-700 rounded-xl space-y-4 bg-slate-900/60 shadow-lg">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <h4 className="text-cyan-400 font-bold flex items-center gap-2 px-1">
                         <Sparkles size={18} /> Hero Visual Display Mode
                     </h4>
-                    <span className="text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-slate-800 text-cyan-400 border border-cyan-500/20">
+                    <span className="text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-slate-800 text-cyan-400 border border-cyan-500/20 w-fit">
                         Current: {isVideoMode ? 'Video Mode' : 'Content Mode'}
                     </span>
                 </div>
@@ -49,8 +49,10 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
                     {/* Content Mode Card */}
                     <button
                         type="button"
+                        role="button"
+                        aria-pressed={!isVideoMode}
                         onClick={() => updateMedia({ mode: 'content' })}
-                        className={`p-4 rounded-xl border text-left transition-all flex items-start gap-4 ${
+                        className={`p-4 rounded-xl border text-left transition-all flex items-start gap-4 min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                             !isVideoMode
                                 ? 'bg-cyan-950/40 border-cyan-500 shadow-md shadow-cyan-950/30'
                                 : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 opacity-70 hover:opacity-100'
@@ -73,8 +75,10 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
                     {/* Video Mode Card */}
                     <button
                         type="button"
+                        role="button"
+                        aria-pressed={isVideoMode}
                         onClick={() => updateMedia({ mode: 'video' })}
-                        className={`p-4 rounded-xl border text-left transition-all flex items-start gap-4 ${
+                        className={`p-4 rounded-xl border text-left transition-all flex items-start gap-4 min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
                             isVideoMode
                                 ? 'bg-fuchsia-950/40 border-fuchsia-500 shadow-md shadow-fuchsia-950/30'
                                 : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 opacity-70 hover:opacity-100'
@@ -99,7 +103,7 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
             {/* Video Mode Configuration Section */}
             {isVideoMode && (
                 <div className="p-5 border border-fuchsia-500/40 rounded-xl space-y-6 bg-slate-900/70 shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <h4 className="text-fuchsia-400 font-bold flex items-center gap-2 px-1">
                             <Video size={18} /> Hero Video Settings & Asset
                         </h4>
@@ -110,6 +114,13 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
                     </div>
 
                     <div className="space-y-5 px-1">
+                        {!heroMedia.videoUrl && (
+                            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2 text-amber-300 text-xs">
+                                <AlertCircle size={16} className="shrink-0 text-amber-400" />
+                                <span>Please upload an MP4/WebM video file below. A valid video is required to save in Video Mode.</span>
+                            </div>
+                        )}
+
                         <HeroVideoUpload
                             value={heroMedia.videoUrl}
                             onChange={(url: string) => updateMedia({ videoUrl: url })}
@@ -186,13 +197,13 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
                         ? 'This fills the interactive floating phone mockup on the right side of the screen.'
                         : 'Configures the fallback 3D phone mockup used if video is removed or unavailable.'}
                 </p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-1">
                     <div>
-                        <ImageUpload 
-                            label="App Screen Background" 
-                            value={settings.hero?.heroImage} 
-                            onChange={(v: string) => handleChange('hero', 'heroImage', v)} 
+                        <ImageUpload
+                            label="App Screen Background"
+                            value={settings.hero?.heroImage}
+                            onChange={(v: string) => handleChange('hero', 'heroImage', v)}
                         />
                     </div>
                     <div className="space-y-4">
@@ -208,7 +219,7 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
                 <h4 className="text-emerald-400 font-bold mb-2 flex items-center gap-2 px-1">
                     <Activity size={18} /> Floating Elements & Badges
                 </h4>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-950/50 p-4 border border-slate-800 rounded-lg">
                     <div>
                         <h5 className="text-slate-400 text-xs font-bold uppercase mb-3">Floating Stat Box (Right)</h5>
@@ -240,23 +251,44 @@ export const HeroSettingsTab = ({ settings, handleChange }: any) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-1">
                     <div>
                         <label className="block text-slate-400 text-sm font-bold mb-2">Accent Color</label>
-                        <div className="flex items-center gap-2">
-                            <input type="color" value={settings.hero?.accentColor || '#0ea5e9'} onChange={(e) => handleChange('hero', 'accentColor', e.target.value)} className="w-10 h-10 rounded cursor-pointer bg-transparent border-none p-0" title="Accent Color" />
-                            <span className="text-slate-300">{settings.hero?.accentColor}</span>
+                        <div className="flex items-center gap-3 min-h-[44px]">
+                            <input
+                                type="color"
+                                value={settings.hero?.accentColor || '#0ea5e9'}
+                                onChange={(e) => handleChange('hero', 'accentColor', e.target.value)}
+                                className="w-11 h-11 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0.5 focus-visible:ring-2 focus-visible:ring-blue-500"
+                                title="Accent Color"
+                                aria-label="Accent color picker"
+                            />
+                            <span className="text-slate-300 font-mono text-sm">{settings.hero?.accentColor || '#0ea5e9'}</span>
                         </div>
                     </div>
                     <div>
                         <label className="block text-slate-400 text-sm font-bold mb-2">Dark Mode Bg Start</label>
-                        <div className="flex items-center gap-2">
-                            <input type="color" value={settings.hero?.bgStart || '#0f172a'} onChange={(e) => handleChange('hero', 'bgStart', e.target.value)} className="w-10 h-10 rounded cursor-pointer bg-transparent border-none p-0" title="Dark Mode Background Start" />
-                            <span className="text-slate-300">{settings.hero?.bgStart}</span>
+                        <div className="flex items-center gap-3 min-h-[44px]">
+                            <input
+                                type="color"
+                                value={settings.hero?.bgStart || '#0f172a'}
+                                onChange={(e) => handleChange('hero', 'bgStart', e.target.value)}
+                                className="w-11 h-11 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0.5 focus-visible:ring-2 focus-visible:ring-blue-500"
+                                title="Dark Mode Background Start"
+                                aria-label="Dark mode start background picker"
+                            />
+                            <span className="text-slate-300 font-mono text-sm">{settings.hero?.bgStart || '#0f172a'}</span>
                         </div>
                     </div>
                     <div>
                         <label className="block text-slate-400 text-sm font-bold mb-2">Dark Mode Bg End</label>
-                        <div className="flex items-center gap-2">
-                            <input type="color" value={settings.hero?.bgEnd || '#020617'} onChange={(e) => handleChange('hero', 'bgEnd', e.target.value)} className="w-10 h-10 rounded cursor-pointer bg-transparent border-none p-0" title="Dark Mode Background End" />
-                            <span className="text-slate-300">{settings.hero?.bgEnd}</span>
+                        <div className="flex items-center gap-3 min-h-[44px]">
+                            <input
+                                type="color"
+                                value={settings.hero?.bgEnd || '#020617'}
+                                onChange={(e) => handleChange('hero', 'bgEnd', e.target.value)}
+                                className="w-11 h-11 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0.5 focus-visible:ring-2 focus-visible:ring-blue-500"
+                                title="Dark Mode Background End"
+                                aria-label="Dark mode end background picker"
+                            />
+                            <span className="text-slate-300 font-mono text-sm">{settings.hero?.bgEnd || '#020617'}</span>
                         </div>
                     </div>
                 </div>
