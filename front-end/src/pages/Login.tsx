@@ -77,18 +77,22 @@ const Login: React.FC = () => {
             await login(email, password, redirectPath);
         } catch (err: any) {
             const isEmailNotVerified = err.emailNotVerified || err.data?.emailNotVerified || (err.data && err.data.isVerified === false);
-            const rawMessage = err.message || '';
-            const isVerifyMsg = rawMessage.toLowerCase().includes('verify') || rawMessage.toLowerCase().includes('confirm') || rawMessage.toLowerCase().includes('bestätigen');
+            const rawMessage = (err.message || '').toLowerCase();
+            const isVerifyMsg = rawMessage.includes('verify') || rawMessage.includes('confirm') || rawMessage.includes('bestätigen');
 
             // Check if account is blocked
-            if (err.isBlocked || err.data?.isBlocked) {
+            if (err.isBlocked || err.data?.isBlocked || rawMessage.includes('blocked') || rawMessage.includes('gesperrt') || rawMessage.includes('suspended')) {
                 setIsBlocked(true);
-                setError(rawMessage || t('auth.accountSuspended', 'Konto gesperrt'));
+                setError(t('auth.accountSuspended', 'Ihr Konto wurde vorübergehend gesperrt. Bitte kontaktieren Sie den Support.'));
             } else if (isEmailNotVerified || isVerifyMsg) {
                 setError(t('auth.emailNotVerified', 'Bitte bestätige deine E-Mail-Adresse, bevor du dich anmeldest.'));
                 setShowResend(true);
+            } else if (rawMessage.includes('rate limit') || rawMessage.includes('too many requests') || rawMessage.includes('zu viele anfragen')) {
+                setError(t('auth.tooManyRequests', 'Zu viele Fehlversuche. Bitte versuche es in wenigen Minuten erneut.'));
+            } else if (rawMessage.includes('network') || rawMessage.includes('timeout') || rawMessage.includes('verbindung')) {
+                setError(t('auth.networkError', 'Verbindungsfehler. Bitte überprüfe deine Internetverbindung.'));
             } else {
-                setError(rawMessage || t('auth.invalidCredentials', 'Ungültige E-Mail oder Passwort'));
+                setError(t('auth.invalidCredentials', 'Ungültige E-Mail-Adresse oder Passwort'));
             }
         } finally {
             setLoading(false);
@@ -104,10 +108,10 @@ const Login: React.FC = () => {
                 setResendSuccess(true);
                 setShowResend(false);
             } else {
-                setError(data.message);
+                setError(t('auth.resendFailed', 'Senden der E-Mail fehlgeschlagen. Bitte versuche es später erneut.'));
             }
-        } catch (err: any) {
-            setError(err.message || t('auth.resendFailed', 'Senden der E-Mail fehlgeschlagen'));
+        } catch {
+            setError(t('auth.resendFailed', 'Senden der E-Mail fehlgeschlagen. Bitte versuche es später erneut.'));
         } finally {
             setLoading(false);
         }
