@@ -58,6 +58,15 @@ export const FeaturedServices: React.FC = () => {
         return <IconComponent className="w-7 h-7" />;
     };
 
+    const availableCards = (featuredConfig.cards || []).filter(s => {
+        if (s.route === '/marketplace' && (settings?.sections?.marketplacePage === false || settings?.sections?.marketplacePageComingSoon)) return false;
+        if (s.route === '/valuation' && (settings?.sections?.valuationPage === false || settings?.sections?.valuationPageComingSoon)) return false;
+        if (s.route === '/repair' && (settings?.sections?.repairPage === false || settings?.sections?.repairPageComingSoon)) return false;
+        return true;
+    });
+
+    if (availableCards.length === 0) return null;
+
     return (
         <section className="py-16 md:py-20 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -72,8 +81,8 @@ export const FeaturedServices: React.FC = () => {
                 </div>
 
                 {/* Service Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-                    {featuredConfig.cards.map(s => (
+                <div className={`grid grid-cols-1 ${availableCards.length === 2 ? 'sm:grid-cols-2 max-w-4xl mx-auto' : 'sm:grid-cols-3'} gap-4 md:gap-6`}>
+                    {availableCards.map(s => (
                         <button
                             key={s.id}
                             onClick={() => navigate(s.route)}

@@ -76,9 +76,9 @@ export const Navbar: React.FC<NavbarProps> = ({ user, cartCount, lang }) => {
 
   const activeNavItems = navItems.filter(item => {
     if ((item.path === '/marketplace' || item.path === '/market') && (settings.sections?.marketplacePage === false || settings.sections?.marketplacePageComingSoon)) return false;
-    if (item.path === '/repair' && settings.sections?.repairPage === false && !settings.sections?.repairPageComingSoon) return false;
-    if (item.path === '/valuation' && settings.sections?.valuationPage === false && !settings.sections?.valuationPageComingSoon) return false;
-    if (item.path === '/accessories' && settings.sections?.accessoriesPage === false && !settings.sections?.accessoriesPageComingSoon) return false;
+    if (item.path === '/repair' && (settings.sections?.repairPage === false || settings.sections?.repairPageComingSoon)) return false;
+    if ((item.path === '/valuation' || item.path === '/sell') && (settings.sections?.valuationPage === false || settings.sections?.valuationPageComingSoon)) return false;
+    if (item.path === '/accessories' && (settings.sections?.accessoriesPage === false || settings.sections?.accessoriesPageComingSoon)) return false;
     return true;
   });
 
