@@ -7,7 +7,6 @@ import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
 import { GlobalError } from '../components/GlobalError';
-import { GlobalLoader } from '../components/GlobalLoader';
 import { SEO } from '../components/SEO';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
 import { OfflineBanner } from '../components/OfflineBanner';
@@ -23,6 +22,12 @@ import { AdminRedirect } from './AdminRoutes';
 const NotFound = React.lazy(() => import('../pages/NotFound'));
 const MaintenancePage = React.lazy(() => import('../pages/MaintenancePage'));
 
+const RouteFallback = () => (
+    <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-slate-300 dark:border-slate-700 border-t-brand-primary rounded-full animate-spin"></div>
+    </div>
+);
+
 export const AppRouter = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -37,20 +42,24 @@ export const AppRouter = () => {
         window.scrollTo(0, 0);
     }, [location.pathname]);
 
-    // ── Global Maintenance Gate ─────────────────────────────────────────────
-    // This runs INDEPENDENTLY of settings and checks the always-available
-    // /api/maintenance-info endpoint. If maintenance is active, ALL routes
-    // are blocked and MaintenancePage is shown regardless of URL.
-    const [isMaintenanceActive, setIsMaintenanceActive] = React.useState<boolean | null>(null);
+    // ── Global Maintenance Gate (Fail-Open) ──────────────────────────────────
+    // Initializes to false so routes render immediately without blocking.
+    // Checks /api/maintenance-info with a ≤ 2.5s timeout.
+    const [isMaintenanceActive, setIsMaintenanceActive] = React.useState<boolean>(false);
     const [isAdminBypass, setIsAdminBypass] = React.useState<boolean>(false);
 
     useEffect(() => {
         let cancelled = false;
         const checkMaintenance = async () => {
+            const controller = new AbortController();
+            const timeoutTimer = setTimeout(() => controller.abort(), 2500);
+
             try {
                 // Use the custom api instance to ensure the correct base URL is used
                 const data = await api.get('/api/maintenance-info', {
-                    headers: { 'Cache-Control': 'no-store', 'Pragma': 'no-cache' }
+                    headers: { 'Cache-Control': 'no-store', 'Pragma': 'no-cache' },
+                    signal: controller.signal,
+                    timeout: 2500
                 });
                 
                 if (!cancelled) {
@@ -58,11 +67,13 @@ export const AppRouter = () => {
                     setIsAdminBypass((data as any).bypassActive === true);
                 }
             } catch {
-                // If the endpoint itself fails, don't block the site
+                // If the endpoint itself fails or times out, fail open
                 if (!cancelled) {
                     setIsMaintenanceActive(false);
                     setIsAdminBypass(false);
                 }
+            } finally {
+                clearTimeout(timeoutTimer);
             }
         };
         checkMaintenance();
@@ -83,19 +94,9 @@ export const AppRouter = () => {
         return () => window.removeEventListener('handyland:navigate', handleNavigation);
     }, [navigate]);
 
-    // ── MAINTENANCE GATE: Block ALL routes if maintenance is active ──────
-    if (isMaintenanceActive === null) {
-        // Still checking maintenance status — show a brief loading state
-        return (
-            <div className="min-h-[100dvh] bg-slate-950 flex items-center justify-center">
-                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        );
-    }
-
     if (isMaintenanceActive) {
         // Maintenance is ON — show maintenance page on EVERY route
-        return <Suspense fallback={<GlobalLoader />}><MaintenancePage /></Suspense>;
+        return <Suspense fallback={<RouteFallback />}><MaintenancePage /></Suspense>;
     }
 
     if (settingsError) {
@@ -138,7 +139,7 @@ export const AppRouter = () => {
                 </>
             )}
             <OfflineBanner />
-            <Suspense fallback={<GlobalLoader />}>
+            <Suspense fallback={<RouteFallback />}>
                 <AnimatePresence mode="wait">
                     <Routes location={location} key={location.pathname}>
                         {getPublicRoutes({ settings, lang, user, cartCount: cart.length })}
@@ -146,7 +147,7 @@ export const AppRouter = () => {
                         
                         <Route path="/admin/*" element={<AdminRedirect />} />
                         <Route path="/maintenance" element={<Navigate to="/" replace />} />
-                        <Route path="*" element={<Suspense fallback={<GlobalLoader />}><NotFound /></Suspense>} />
+                        <Route path="*" element={<Suspense fallback={<RouteFallback />}><NotFound /></Suspense>} />
                     </Routes>
                 </AnimatePresence>
             </Suspense>
