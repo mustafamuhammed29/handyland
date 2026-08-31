@@ -14,12 +14,10 @@ const devLog = (message: string, error: any) => {
 
 interface LoginResponse {
     success: boolean;
-    token: string;
     user: User & { deviceInfo?: any };
 }
 interface RegisterResponse {
     success: boolean;
-    token: string;
     user: User;
 }
 
@@ -174,7 +172,7 @@ export const authService = {
         }
     },
 
-    refreshToken: async (): Promise<{ token: string }> => {
+    refreshToken: async (): Promise<{ success: boolean }> => {
         try {
             const response = await api.post('/api/auth/refresh');
             return response as any;

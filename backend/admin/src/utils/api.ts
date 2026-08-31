@@ -45,11 +45,6 @@ api.interceptors.request.use(
             config.headers['X-XSRF-Token'] = csrfToken;
         }
 
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
-        }
-
         return config;
     },
     (error) => {
@@ -67,7 +62,6 @@ api.interceptors.response.use(
         if (originalRequest?.url?.includes('/auth/admin/refresh') || originalRequest?.url?.includes('/auth/refresh')) {
             console.error("[API Interceptor] Session expired! Redirecting to login...");
             localStorage.removeItem('adminUser');
-            localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.dispatchEvent(new Event('auth:unauthorized'));
             return Promise.reject(error);
@@ -93,7 +87,6 @@ api.interceptors.response.use(
                 } catch (refreshError) {
                     console.error("[API Interceptor] Refresh failed! Redirecting to login...");
                     localStorage.removeItem('adminUser');
-                    localStorage.removeItem('token');
                     localStorage.removeItem('user');
                     window.dispatchEvent(new Event('auth:unauthorized'));
                     return Promise.reject(refreshError);
@@ -104,7 +97,6 @@ api.interceptors.response.use(
             if (!isAuthEndpoint) {
                 console.error("[API Interceptor] Unauthorized fallback! Redirecting to login...");
                 localStorage.removeItem('adminUser');
-                localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 window.dispatchEvent(new Event('auth:unauthorized'));
             }

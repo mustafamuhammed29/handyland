@@ -170,11 +170,6 @@ const OrdersManager: React.FC = () => {
         const socket = io(SOCKET_URL, {
             withCredentials: true,
             transports: ['websocket', 'polling'],
-            auth: { token: localStorage.getItem('token') || sessionStorage.getItem('adminSocketToken') || undefined },
-        });
-
-        socket.on('connect', () => {
-            socket.emit('join:admin');
         });
 
         socket.on('admin:notification', (payload: any) => {

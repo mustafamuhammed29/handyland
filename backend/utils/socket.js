@@ -1,31 +1,15 @@
 const { Server } = require('socket.io');
 const { supabaseAdmin } = require('../config/supabase');
+const { isOriginAllowed } = require('../config/originSecurity');
 
 let io;
 
 const initSocket = (httpServer) => {
-    const defaultOrigins = [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:3002',
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://127.0.0.1:3000',
-        'http://127.0.0.1:3001',
-        'http://127.0.0.1:3002',
-        'http://127.0.0.1:5173',
-        'http://127.0.0.1:5174'
-    ];
-
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
-        ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-        : defaultOrigins;
-
     io = new Server(httpServer, {
         cors: {
             origin: (origin, callback) => {
                 if (!origin) return callback(null, true);
-                if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com')) {
+                if (isOriginAllowed(origin)) {
                     return callback(null, true);
                 }
                 return callback(new Error('CORS: Origin not allowed: ' + origin), false);

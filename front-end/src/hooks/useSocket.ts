@@ -23,21 +23,17 @@ const getSocket = (): Socket => {
     return socket;
 };
 
-export const useSocket = (userId?: string) => {
+export const useSocket = (_userId?: string) => {
     const socketRef = useRef<Socket>(getSocket());
 
     useEffect(() => {
         const s = socketRef.current;
         s.connect();
 
-        if (userId) {
-            s.emit('join', userId);
-        }
-
         return () => {
             s.disconnect();
         };
-    }, [userId]);
+    }, []);
 
     const onOrderUpdate = useCallback((callback: (data: any) => void) => {
         socketRef.current.on('order:updated', callback);
@@ -54,9 +50,5 @@ export const useSocket = (userId?: string) => {
         return () => { socketRef.current.off('notification', callback); };
     }, []);
 
-    const joinAdmin = useCallback(() => {
-        socketRef.current.emit('join:admin');
-    }, []);
-
-    return { socket: socketRef.current, onOrderUpdate, onNewOrder, onNotification, joinAdmin };
+    return { socket: socketRef.current, onOrderUpdate, onNewOrder, onNotification };
 };

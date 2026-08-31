@@ -56,16 +56,9 @@ export default function MessagesManager() {
 
     // --- SOCKET.IO FOR REAL-TIME ---
     useEffect(() => {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('adminSocketToken') || undefined;
-
         const socket = io(SOCKET_URL, {
             withCredentials: true,
             transports: ['websocket', 'polling'],
-            auth: { token }
-        });
-
-        socket.on('connect', () => {
-            socket.emit('join:admin');
         });
 
         socket.on('admin:notification', (payload: any) => {

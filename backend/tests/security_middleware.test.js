@@ -11,9 +11,10 @@ const { supabaseAdmin } = require('../config/supabase');
 describe('Security Middleware & Policy Verification', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        process.env.ALLOWED_ORIGINS = 'https://handyland.de,https://www.handyland.de,https://admin.handyland.de';
     });
 
-    describe('1. CSRF Protection Middleware (Double-Submit & Custom Header Model)', () => {
+    describe('1. CSRF Protection Middleware (Strict Origin Policy)', () => {
         it('Safe read-only methods (GET) should succeed without CSRF headers and issue XSRF-TOKEN cookie', async () => {
             const res = await request(app).get('/health');
             expect(res.status).toBe(200);
@@ -22,64 +23,47 @@ describe('Security Middleware & Policy Verification', () => {
             expect(xsrfCookie).toBeDefined();
         });
 
-        it('State-changing POST should return 403 CSRF_VALIDATION_FAILED when missing trusted headers and tokens', async () => {
+        it('Cookie-authenticated state-changing POST should return 403 when missing Origin header', async () => {
             const res = await request(app)
-                .post('/api/auth/login')
-                .send({ email: 'test@user.com', password: 'password123' });
+                .post('/api/auth/logout')
+                .set('Cookie', ['accessToken=some-cookie-session']);
 
             expect(res.status).toBe(403);
             expect(res.body.success).toBe(false);
             expect(res.body.code).toBe('CSRF_VALIDATION_FAILED');
         });
 
-        it('State-changing POST should succeed CSRF check with "x-app-type: frontend"', async () => {
-            const res = await request(app)
-                .post('/api/auth/login')
-                .set('x-app-type', 'frontend')
-                .send({ email: 'test@user.com', password: 'password123' });
-
-            // Will pass CSRF, and hit auth controller (status 200 or 400 validation, but NOT 403 CSRF)
-            expect(res.status).not.toBe(403);
-        });
-
-        it('State-changing POST should succeed CSRF check with "x-app-type: admin"', async () => {
-            const res = await request(app)
-                .post('/api/auth/admin/login')
-                .set('x-app-type', 'admin')
-                .send({ email: 'admin@test.com', password: 'password123' });
-
-            expect(res.status).not.toBe(403);
-        });
-
-        it('State-changing POST should succeed CSRF check with "x-requested-with: XMLHttpRequest"', async () => {
-            const res = await request(app)
-                .post('/api/auth/login')
-                .set('x-requested-with', 'XMLHttpRequest')
-                .send({ email: 'test@user.com', password: 'password123' });
-
-            expect(res.status).not.toBe(403);
-        });
-
-        it('State-changing POST should succeed CSRF check with "Authorization: Bearer <token>"', async () => {
+        it('Cookie-authenticated state-changing POST should return 403 with disallowed Origin even if x-app-type is set', async () => {
             const res = await request(app)
                 .post('/api/auth/logout')
-                .set('Authorization', 'Bearer dummy-token');
+                .set('Cookie', ['accessToken=some-cookie-session'])
+                .set('Origin', 'https://attacker.vercel.app')
+                .set('x-app-type', 'frontend');
 
-            expect(res.status).not.toBe(403);
+            expect(res.status).toBe(403);
+            expect(res.body.success).toBe(false);
+            expect(res.body.code).toBe('CSRF_VALIDATION_FAILED');
         });
 
-        it('State-changing POST should succeed CSRF check with matching double-submit cookie and x-xsrf-token', async () => {
-            const token = 'test-xsrf-token-double-submit-12345';
+        it('Cookie-authenticated state-changing POST should succeed CSRF check with approved Origin', async () => {
             const res = await request(app)
-                .post('/api/auth/login')
-                .set('Cookie', [`XSRF-TOKEN=${token}`])
-                .set('x-xsrf-token', token)
-                .send({ email: 'test@user.com', password: 'password123' });
+                .post('/api/auth/logout')
+                .set('Cookie', ['accessToken=some-cookie-session'])
+                .set('Origin', 'https://handyland.de');
+
+            // Passes CSRF middleware and hits controller (status 200)
+            expect(res.status).toBe(200);
+        });
+
+        it('State-changing POST with non-browser Bearer token and no cookies succeeds without Origin', async () => {
+            const res = await request(app)
+                .post('/api/auth/logout')
+                .set('Authorization', 'Bearer dummy-cli-token');
 
             expect(res.status).not.toBe(403);
         });
 
-        it('Bypassed webhook route /api/payment/webhook should skip CSRF check without headers', async () => {
+        it('Bypassed webhook route /api/payment/webhook should skip CSRF check without Origin', async () => {
             const res = await request(app)
                 .post('/api/payment/webhook')
                 .send({ type: 'payment_intent.succeeded' });
@@ -88,36 +72,57 @@ describe('Security Middleware & Policy Verification', () => {
             expect(res.status).toBe(400);
             expect(res.body.code).not.toBe('CSRF_VALIDATION_FAILED');
         });
-
-        it('Bypassed missing translations route /api/translations/missing should skip CSRF check', async () => {
-            supabaseAdmin.from.mockReturnValueOnce({
-                insert: jest.fn().mockResolvedValue({ data: [], error: null })
-            });
-
-            const res = await request(app)
-                .post('/api/translations/missing')
-                .send({ key: 'test.missing.key', lang: 'de' });
-
-            expect(res.status).not.toBe(403);
-        });
     });
 
-    describe('2. CORS Origin Verification Policy', () => {
-        it('Permitted frontend origin (e.g. http://localhost:3000) receives Access-Control-Allow-Origin', async () => {
+    describe('2. CORS Origin Verification Policy (Exact Match Only)', () => {
+        it('Permitted production origin https://handyland.de receives Access-Control-Allow-Origin', async () => {
+            const res = await request(app)
+                .get('/health')
+                .set('Origin', 'https://handyland.de');
+
+            expect(res.headers['access-control-allow-origin']).toBe('https://handyland.de');
+            expect(res.headers['access-control-allow-credentials']).toBe('true');
+        });
+
+        it('Permitted production origin https://admin.handyland.de receives Access-Control-Allow-Origin', async () => {
+            const res = await request(app)
+                .get('/health')
+                .set('Origin', 'https://admin.handyland.de');
+
+            expect(res.headers['access-control-allow-origin']).toBe('https://admin.handyland.de');
+            expect(res.headers['access-control-allow-credentials']).toBe('true');
+        });
+
+        it('Permitted dev origin http://localhost:3000 receives Access-Control-Allow-Origin in non-prod', async () => {
             const res = await request(app)
                 .get('/health')
                 .set('Origin', 'http://localhost:3000');
 
             expect(res.headers['access-control-allow-origin']).toBe('http://localhost:3000');
-            expect(res.headers['access-control-allow-credentials']).toBe('true');
         });
 
-        it('Vercel deployment pattern *.vercel.app is accepted under current documented CORS configuration', async () => {
+        it('Wildcard Vercel subdomains (e.g. https://attacker.vercel.app) are REJECTED', async () => {
             const res = await request(app)
                 .get('/health')
-                .set('Origin', 'https://handyland-preview.vercel.app');
+                .set('Origin', 'https://attacker.vercel.app');
 
-            expect(res.headers['access-control-allow-origin']).toBe('https://handyland-preview.vercel.app');
+            expect(res.headers['access-control-allow-origin']).toBeUndefined();
+        });
+
+        it('Wildcard Render subdomains (e.g. https://attacker.onrender.com) are REJECTED', async () => {
+            const res = await request(app)
+                .get('/health')
+                .set('Origin', 'https://attacker.onrender.com');
+
+            expect(res.headers['access-control-allow-origin']).toBeUndefined();
+        });
+
+        it('Wildcard Railway subdomains (e.g. https://attacker.up.railway.app) are REJECTED', async () => {
+            const res = await request(app)
+                .get('/health')
+                .set('Origin', 'https://attacker.up.railway.app');
+
+            expect(res.headers['access-control-allow-origin']).toBeUndefined();
         });
 
         it('Untrusted external origin does NOT receive Access-Control-Allow-Origin', async () => {

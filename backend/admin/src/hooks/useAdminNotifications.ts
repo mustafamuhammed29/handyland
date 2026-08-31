@@ -81,21 +81,15 @@ export const useAdminNotifications = (isAuthenticated: boolean) => {
             }).catch(console.error);
         });
 
-        const authToken = localStorage.getItem('token') || sessionStorage.getItem('adminSocketToken') || undefined;
-
         const socket = io(SOCKET_URL, {
             withCredentials: true,
             transports: ['websocket', 'polling'],
-            auth: {
-                token: authToken,
-            },
         });
 
         socketRef.current = socket;
 
         socket.on('connect', () => {
             setIsConnected(true);
-            socket.emit('join:admin'); // Join the admin room
         });
 
         socket.on('disconnect', () => {

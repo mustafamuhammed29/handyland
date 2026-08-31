@@ -77,11 +77,6 @@ export const ContactInbox = () => {
             transports: ['websocket', 'polling'],
         });
 
-        socket.on('connect', () => {
-            if (user?.id) socket.emit('join:user', user.id);
-            if (user?.email) socket.emit('join:user', user.email);
-        });
-
         socket.on('message:reply', (data: any) => {
             const updatedThread = data.thread;
             if (updatedThread) {

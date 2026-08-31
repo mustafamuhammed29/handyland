@@ -6,16 +6,19 @@
 'use strict';
 
 const { supabaseAdmin, createAuthClient } = require('../config/supabase');
+const { getValidatedSameSitePolicy } = require('../config/originSecurity');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
 // ── Cookie helper ─────────────────────────────────────────────
 const getCookieOptions = (appType = 'frontend') => {
     const isProd = process.env.NODE_ENV === 'production';
+    const sameSite = getValidatedSameSitePolicy();
     return {
         httpOnly: true,
-        secure: isProd, // Must be true when sameSite is 'none'
-        sameSite: isProd ? (appType === 'admin' ? 'strict' : 'none') : 'lax',
+        secure: isProd || sameSite === 'none',
+        sameSite: sameSite,
+        path: '/',
         maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     };
 };
@@ -45,7 +48,6 @@ const sendTokenResponse = (res, session, user, appType = 'frontend') => {
         membershipLevel: user.membership_level,
         twoFactorEnabled: user.two_factor_enabled,
         isActive: user.is_active ?? true,
-        token: session.access_token,
         addresses: user.addresses || []
     };
 };
@@ -270,7 +272,6 @@ exports.login = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 twoFactorRequired: true,
-                tempToken: data.session.access_token,
                 userId: data.user.id
             });
         }
@@ -337,32 +338,28 @@ exports.logout = async (req, res, next) => {
         }
 
         // Must pass the exact same options used when setting each cookie
-        // (sameSite: 'strict' for admin in prod, 'none' for customer in prod)
         const isProd = process.env.NODE_ENV === 'production';
+        const sameSite = getValidatedSameSitePolicy();
         const appType = req.headers['x-app-type'];
 
-        const clearFrontendOpts = {
+        const clearOpts = {
             httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? 'none' : 'lax'
-        };
-        const clearAdminOpts = {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? 'strict' : 'lax'
+            secure: isProd || sameSite === 'none',
+            sameSite: sameSite,
+            path: '/'
         };
 
         if (appType === 'admin') {
-            res.clearCookie('adminToken', clearAdminOpts);
-            res.clearCookie('adminRefreshToken', clearAdminOpts);
+            res.clearCookie('adminToken', clearOpts);
+            res.clearCookie('adminRefreshToken', clearOpts);
         } else if (appType === 'frontend') {
-            res.clearCookie('accessToken', clearFrontendOpts);
-            res.clearCookie('refreshToken', clearFrontendOpts);
+            res.clearCookie('accessToken', clearOpts);
+            res.clearCookie('refreshToken', clearOpts);
         } else {
-            res.clearCookie('accessToken', clearFrontendOpts);
-            res.clearCookie('refreshToken', clearFrontendOpts);
-            res.clearCookie('adminToken', clearAdminOpts);
-            res.clearCookie('adminRefreshToken', clearAdminOpts);
+            res.clearCookie('accessToken', clearOpts);
+            res.clearCookie('refreshToken', clearOpts);
+            res.clearCookie('adminToken', clearOpts);
+            res.clearCookie('adminRefreshToken', clearOpts);
         }
 
         return res.status(200).json({ success: true, message: 'Logged out successfully' });
@@ -392,10 +389,12 @@ exports.refreshToken = async (req, res, next) => {
         const error = refreshResult?.error;
 
         const isProd = process.env.NODE_ENV === 'production';
+        const sameSite = getValidatedSameSitePolicy();
         const clearOpts = {
             httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? 'none' : 'lax'
+            secure: isProd || sameSite === 'none',
+            sameSite: sameSite,
+            path: '/'
         };
 
         if (error || !data?.session) {
@@ -415,7 +414,7 @@ exports.refreshToken = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            accessToken: data.session.access_token
+            message: 'Session refreshed'
         });
     } catch (error) {
         next(error);
@@ -436,10 +435,12 @@ exports.adminRefreshToken = async (req, res, next) => {
         const error = refreshResult?.error;
 
         const isProd = process.env.NODE_ENV === 'production';
+        const sameSite = getValidatedSameSitePolicy();
         const clearOpts = {
             httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? 'strict' : 'lax'
+            secure: isProd || sameSite === 'none',
+            sameSite: sameSite,
+            path: '/'
         };
 
         if (error || !data?.session) {
@@ -476,7 +477,7 @@ exports.adminRefreshToken = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            accessToken: data.session.access_token
+            message: 'Admin session refreshed'
         });
     } catch (error) {
         next(error);

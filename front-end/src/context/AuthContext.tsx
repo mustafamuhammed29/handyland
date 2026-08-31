@@ -170,12 +170,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const data = await authService.login(email, password);
 
             if (data.success && data.user) {
-
-                // FIXED: Store token alongside user data to support environments where third-party cookies are blocked
-                if (data.user.token) {
-                    localStorage.setItem('token', data.user.token);
-                }
-
                 localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(data.user)));
                 setUser(data.user);
                 setIsVerified(true); // Login confirmed directly by backend
@@ -213,7 +207,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Clear state and navigate cleanly
         localStorage.removeItem('user');
-        localStorage.removeItem('token');
         setIsVerified(false);
         setUser(null);
         

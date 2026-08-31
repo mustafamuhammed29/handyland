@@ -61,23 +61,12 @@ const helmetMiddleware = helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
 });
 
-// ── CORS ───────────────────────────────────────────────────────────────────────
-const defaultOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-    'http://127.0.0.1:3002',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174',
-];
-
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-    : defaultOrigins;
+// ── CORS & Origin Configuration ───────────────────────────────────────────────
+const {
+    validateAndGetAllowedOrigins,
+    isOriginAllowed,
+    getValidatedSameSitePolicy
+} = require('./originSecurity');
 
 const corsMiddleware = cors({
     origin: (origin, callback) => {
@@ -85,17 +74,11 @@ const corsMiddleware = cors({
         if (!origin) {
             return callback(null, true);
         }
-        // Allow specific origins or any vercel.app subdomain
-        if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com')) {
-            return callback(null, true);
-        }
-        
-        // Allow local network IP addresses for testing on mobile devices
-        if (/^http:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/.test(origin)) {
+        if (isOriginAllowed(origin)) {
             return callback(null, true);
         }
 
-        return callback(new Error('CORS: Origin not allowed: ' + origin), false);
+        return callback(null, false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -147,6 +130,10 @@ const csrfMiddleware = (req, res, next) => next();
  * @param {import('express').Application} app
  */
 const applySecurityMiddleware = (app) => {
+    // Fail-closed startup validation in production
+    validateAndGetAllowedOrigins();
+    getValidatedSameSitePolicy();
+
     app.use(helmetMiddleware);
     app.use(compression());
     app.use(corsMiddleware);
@@ -179,4 +166,7 @@ module.exports = {
     applySecurityMiddleware,
     corsMiddleware,
     generalLimiter,
+    validateAndGetAllowedOrigins,
+    isOriginAllowed,
+    getValidatedSameSitePolicy,
 };

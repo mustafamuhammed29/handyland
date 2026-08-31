@@ -11,6 +11,7 @@ const { supabaseAdmin, createAuthClient } = require('../config/supabase');
 describe('Auth & Authorization Security Tests', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        process.env.ALLOWED_ORIGINS = 'https://handyland.de,https://www.handyland.de,https://admin.handyland.de';
     });
 
     describe('1. Unauthenticated Route Protection (HTTP 401)', () => {
@@ -282,11 +283,12 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/refresh')
                     .set('Cookie', ['refreshToken=valid-cust-refresh'])
+                    .set('Origin', 'https://handyland.de')
                     .set('x-app-type', 'frontend');
 
                 expect(res.status).toBe(200);
                 expect(res.body.success).toBe(true);
-                expect(res.body.accessToken).toBe('new-cust-access-123');
+                expect(res.body.accessToken).toBeUndefined();
 
                 const cookies = res.headers['set-cookie'] || [];
                 expect(cookies.some(c => c.startsWith('accessToken='))).toBe(true);
@@ -299,6 +301,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/refresh')
                     .set('Cookie', ['adminRefreshToken=some-admin-refresh'])
+                    .set('Origin', 'https://handyland.de')
                     .set('x-app-type', 'frontend');
 
                 expect(res.status).toBe(401);
@@ -322,6 +325,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/refresh')
                     .set('Cookie', ['refreshToken=cust-tok', 'adminRefreshToken=admin-tok'])
+                    .set('Origin', 'https://handyland.de')
                     .set('x-app-type', 'frontend');
 
                 expect(res.status).toBe(200);
@@ -342,6 +346,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/refresh')
                     .set('Cookie', ['refreshToken=bad-refresh-tok'])
+                    .set('Origin', 'https://handyland.de')
                     .set('x-app-type', 'frontend');
 
                 expect(res.status).toBe(401);
@@ -368,6 +373,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/refresh')
                     .set('Cookie', ['refreshToken=valid-cust-refresh'])
+                    .set('Origin', 'https://handyland.de')
                     .set('x-app-type', 'frontend');
 
                 expect(res.status).toBe(200);
@@ -393,11 +399,12 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/admin/refresh')
                     .set('Cookie', ['adminRefreshToken=valid-admin-refresh'])
+                    .set('Origin', 'https://admin.handyland.de')
                     .set('x-app-type', 'admin');
 
                 expect(res.status).toBe(200);
                 expect(res.body.success).toBe(true);
-                expect(res.body.accessToken).toBe('new-admin-access-111');
+                expect(res.body.accessToken).toBeUndefined();
 
                 const cookies = res.headers['set-cookie'] || [];
                 expect(cookies.some(c => c.startsWith('adminToken='))).toBe(true);
@@ -410,6 +417,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/admin/refresh')
                     .set('Cookie', ['refreshToken=cust-refresh'])
+                    .set('Origin', 'https://admin.handyland.de')
                     .set('x-app-type', 'admin');
 
                 expect(res.status).toBe(401);
@@ -434,6 +442,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/admin/refresh')
                     .set('Cookie', ['adminRefreshToken=user-trying-admin-refresh'])
+                    .set('Origin', 'https://admin.handyland.de')
                     .set('x-app-type', 'admin');
 
                 expect(res.status).toBe(403);
@@ -462,6 +471,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/admin/refresh')
                     .set('Cookie', ['refreshToken=cust-tok', 'adminRefreshToken=admin-tok'])
+                    .set('Origin', 'https://admin.handyland.de')
                     .set('x-app-type', 'admin');
 
                 expect(res.status).toBe(200);
@@ -482,6 +492,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/admin/refresh')
                     .set('Cookie', ['adminRefreshToken=expired-admin-tok'])
+                    .set('Origin', 'https://admin.handyland.de')
                     .set('x-app-type', 'admin');
 
                 expect(res.status).toBe(401);
@@ -515,6 +526,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/admin/refresh')
                     .set('Cookie', ['adminRefreshToken=valid-tok'])
+                    .set('Origin', 'https://admin.handyland.de')
                     .set('x-app-type', 'admin');
 
                 expect(res.status).toBe(403);
@@ -533,6 +545,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/logout')
                     .set('Cookie', ['accessToken=cust-tok', 'adminToken=admin-tok'])
+                    .set('Origin', 'https://handyland.de')
                     .set('x-app-type', 'frontend');
 
                 expect(res.status).toBe(200);
@@ -549,6 +562,7 @@ describe('Auth & Authorization Security Tests', () => {
                 const res = await request(app)
                     .post('/api/auth/logout')
                     .set('Cookie', ['accessToken=cust-tok', 'adminToken=admin-tok'])
+                    .set('Origin', 'https://admin.handyland.de')
                     .set('x-app-type', 'admin');
 
                 expect(res.status).toBe(200);
@@ -564,7 +578,7 @@ describe('Auth & Authorization Security Tests', () => {
             it('3. Universal logout without x-app-type header clears both cookie namespaces', async () => {
                 const res = await request(app)
                     .post('/api/auth/logout')
-                    .set('x-requested-with', 'XMLHttpRequest'); // CSRF header
+                    .set('Origin', 'https://handyland.de');
 
                 expect(res.status).toBe(200);
                 expect(res.body.success).toBe(true);
@@ -580,7 +594,7 @@ describe('Auth & Authorization Security Tests', () => {
 
     describe('5. Role Normalization & Case Insensitivity on Admin Routes', () => {
         const setupMockAdminUser = (roleValue) => {
-            supabaseAdmin.auth.getUser.mockResolvedValueOnce({
+            supabaseAdmin.auth.getUser.mockResolvedValue({
                 data: { user: { id: 'admin-user-id', email: 'admin@handyland.com' } },
                 error: null
             });

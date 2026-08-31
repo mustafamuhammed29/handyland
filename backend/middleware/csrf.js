@@ -1,59 +1,92 @@
 const crypto = require('crypto');
+const { isOriginAllowed, getValidatedSameSitePolicy } = require('../config/originSecurity');
 
 /**
- * Multi-Layered CSRF Protection Middleware
- * Compatible with cross-origin deployments (Vercel Frontend <-> Render Backend).
+ * Strict Origin-Based Anti-CSRF Protection Middleware
  *
- * 1. Safe Methods (GET/HEAD/OPTIONS): Issues an XSRF-TOKEN companion cookie.
- * 2. State-Changing Methods (POST/PUT/DELETE/PATCH):
- *    - Bypasses public webhooks with dedicated crypto signatures (e.g. Stripe webhook).
- *    - Validates presence of trusted custom headers ('x-app-type', 'x-requested-with', 'x-xsrf-token')
- *      OR matching XSRF double-submit token OR Bearer Authorization header.
- *    - Blocks simple cross-site form submissions (traditional CSRF attack vector).
+ * Security Model:
+ * 1. Safe Read-Only Methods (GET, HEAD, OPTIONS): Bypass mutation checks and issue companion XSRF-TOKEN cookie.
+ * 2. Dedicated Webhooks (/api/payment/webhook): Bypassed (cryptographically verified by Stripe signature).
+ * 3. State-Changing Methods (POST, PUT, DELETE, PATCH):
+ *    a. If browser authentication cookies (accessToken, adminToken, refreshToken, adminRefreshToken) are present:
+ *       - The Origin header MUST be present and MUST strictly match the exact allowed origins allowlist.
+ *       - Client-selected headers (x-app-type, x-requested-with) CANNOT bypass this verification.
+ *       - If both cookies and Authorization: Bearer are present, it is treated as cookie-authenticated and requires a valid Origin.
+ *    b. If NO authentication cookies are present:
+ *       - If an Origin header is provided, it MUST match the allowed origins allowlist.
+ *       - If Origin is absent, requests are allowed ONLY for non-browser Bearer callers (CLI, scripts, test runners)
+ *         or unauthenticated non-browser requests without cookies.
  */
+
 const csrfProtection = (req, res, next) => {
-    // 1. Always bypass webhooks & public translation missing endpoint
-    if (req.originalUrl && (req.originalUrl.includes('/api/payment/webhook') || req.originalUrl.includes('/api/translations/missing'))) {
+    // 1. Dedicated webhooks bypass (e.g. Stripe webhook with signature verification)
+    if (req.originalUrl && req.originalUrl.includes('/api/payment/webhook')) {
         return next();
     }
+
+    const isProd = process.env.NODE_ENV === 'production';
+    const sameSite = getValidatedSameSitePolicy();
 
     // 2. Safe read-only methods: issue companion cookie
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
         if (!req.cookies || !req.cookies['XSRF-TOKEN']) {
             const token = crypto.randomBytes(32).toString('hex');
             res.cookie('XSRF-TOKEN', token, {
-                httpOnly: false, // Accessible by legitimate client JS
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                httpOnly: false,
+                secure: isProd || sameSite === 'none',
+                sameSite: sameSite,
                 path: '/'
             });
         }
         return next();
     }
 
-    // 3. State-changing requests: Verify custom anti-CSRF headers
-    const appTypeHeader = req.headers['x-app-type'];
-    const requestedWith = req.headers['x-requested-with'];
+    // 3. State-changing requests: Evaluate Origin and Cookie presence
+    const hasAuthCookies = !!(
+        req.cookies?.accessToken ||
+        req.cookies?.adminToken ||
+        req.cookies?.refreshToken ||
+        req.cookies?.adminRefreshToken
+    );
+
+    const origin = req.headers['origin'];
     const authHeader = req.headers['authorization'];
-    const headerToken = req.headers['x-xsrf-token'];
-    const cookieToken = req.cookies ? req.cookies['XSRF-TOKEN'] : null;
+    const hasBearer = typeof authHeader === 'string' && authHeader.startsWith('Bearer ');
 
-    // A valid custom header or double submit token protects against cross-origin ambient credential abuse
-    const hasTrustedCustomHeader = 
-        (appTypeHeader && (appTypeHeader === 'frontend' || appTypeHeader === 'admin')) ||
-        (requestedWith && requestedWith.toLowerCase() === 'xmlhttprequest') ||
-        (authHeader && authHeader.startsWith('Bearer ')) ||
-        (cookieToken && headerToken && cookieToken === headerToken);
-
-    if (!hasTrustedCustomHeader) {
-        return res.status(403).json({
-            success: false,
-            code: 'CSRF_VALIDATION_FAILED',
-            message: 'Cross-Site Request Forgery protection: Missing trusted custom header or anti-CSRF token.'
-        });
+    // Rule A: Cookie-authenticated requests MUST have a valid matching Origin
+    if (hasAuthCookies) {
+        if (!origin || !isOriginAllowed(origin)) {
+            return res.status(403).json({
+                success: false,
+                code: 'CSRF_VALIDATION_FAILED',
+                message: 'Cross-Site Request Forgery protection: Invalid or missing Origin header for cookie-authenticated request.'
+            });
+        }
+        return next();
     }
 
-    next();
+    // Rule B: Requests without cookies
+    if (origin) {
+        if (!isOriginAllowed(origin)) {
+            return res.status(403).json({
+                success: false,
+                code: 'CSRF_VALIDATION_FAILED',
+                message: 'Cross-Site Request Forgery protection: Origin not allowed.'
+            });
+        }
+        return next();
+    }
+
+    // Rule C: No cookies and no Origin — allow non-browser Bearer callers or unauthenticated CLI requests
+    if (hasBearer || !hasAuthCookies) {
+        return next();
+    }
+
+    return res.status(403).json({
+        success: false,
+        code: 'CSRF_VALIDATION_FAILED',
+        message: 'Cross-Site Request Forgery protection: Request rejected.'
+    });
 };
 
 module.exports = csrfProtection;
