@@ -35,7 +35,7 @@ const initSocket = (httpServer) => {
         }
     });
 
-    // ── JWT Authentication Middleware ─────────────────────────────────────────
+    // ── Strict JWT Authentication Middleware ─────────────────────────────────
     io.use(async (socket, next) => {
         let token = socket.handshake.auth?.token;
 
@@ -47,54 +47,70 @@ const initSocket = (httpServer) => {
             try {
                 const cookies = socket.handshake.headers.cookie.split(';').reduce((res, c) => {
                     const [key, val] = c.trim().split('=').map(decodeURIComponent);
-                    res[key] = val;
+                    if (key) res[key] = val;
                     return res;
                 }, {});
                 token = cookies['adminToken'] || cookies['accessToken'] || cookies['token'];
             } catch (e) {
-                console.error('Socket cookie parsing error:', e);
+                console.error('[Socket.IO] Cookie parsing error:', e.message);
             }
         }
 
         if (!token) {
-            socket.verifiedUser = null;
-            return next();
+            const err = new Error('AUTHENTICATION_REQUIRED');
+            err.data = { code: 'UNAUTHORIZED', message: 'Authentication token is required to connect to Socket.IO' };
+            return next(err);
         }
+
         try {
             const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-            if (error || !user) throw new Error('Invalid token');
+            if (error || !user) {
+                const err = new Error('INVALID_TOKEN');
+                err.data = { code: 'UNAUTHORIZED', message: 'Provided token is invalid or expired' };
+                return next(err);
+            }
             
-            const { data: userProfile } = await supabaseAdmin.from('users').select('id, role').eq('id', user.id).single();
+            const { data: userProfile, error: profileError } = await supabaseAdmin
+                .from('users')
+                .select('id, email, role, is_active')
+                .eq('id', user.id)
+                .single();
 
-            socket.verifiedUser = userProfile || null; // { id, role }
+            if (profileError || !userProfile || userProfile.is_active === false) {
+                const err = new Error('USER_NOT_FOUND_OR_INACTIVE');
+                err.data = { code: 'FORBIDDEN', message: 'User account not found or deactivated' };
+                return next(err);
+            }
+
+            socket.verifiedUser = userProfile; // { id, email, role, is_active }
             next();
-        } catch {
-            socket.verifiedUser = null;
-            next(); // Still allow connection
+        } catch (err) {
+            const authErr = new Error('AUTHENTICATION_FAILED');
+            authErr.data = { code: 'UNAUTHORIZED', message: 'Socket authentication failed' };
+            return next(authErr);
         }
     });
 
     io.on('connection', (socket) => {
-        // Join user-specific room (supports userId or email)
-        socket.on('join', (userId) => {
-            if (!userId) return;
-            const cleanId = String(userId).trim().toLowerCase();
-            socket.join(`user:${cleanId}`);
-            socket.join(`user:${userId}`);
-        });
+        const user = socket.verifiedUser;
+        if (!user) {
+            socket.disconnect(true);
+            return;
+        }
 
-        socket.on('join:user', (identifier) => {
-            if (!identifier) return;
-            const cleanId = String(identifier).trim().toLowerCase();
-            socket.join(`user:${cleanId}`);
-            socket.join(`user:${identifier}`);
-        });
+        // Automatically join user's own private rooms derived server-side
+        socket.join(`user:${user.id}`);
+        if (user.email) {
+            socket.join(`user:${user.email.toLowerCase().trim()}`);
+        }
 
-        // Join admin room
-        socket.on('join:admin', () => {
+        // Automatically join admin room ONLY if verified role is admin
+        if (user.role === 'admin') {
             socket.join('admin');
-            console.log(`[Socket.IO] Socket ${socket.id} joined admin room successfully`);
-        });
+        }
+
+        // Client-controlled room join handlers ('join', 'join:user', 'join:admin')
+        // are permanently removed to eliminate room spoofing and unauthorized snooping.
 
         socket.on('disconnect', () => {
             // Silent disconnect — no log needed in production
@@ -192,4 +208,5 @@ const closeSocket = async () => {
         }
     }
 };
+
 module.exports = { initSocket, getIO, closeSocket, emitOrderUpdate, emitNewOrder, emitNotification, emitAdminNotification, emitUserMessage };

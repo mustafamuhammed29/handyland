@@ -2,24 +2,26 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/repairArchiveController');
 const { uploadFields } = require('../middleware/upload');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
-// Public or Protected routes? Archive is usually public to view, protected to create
+// Public read: Archive cases are public to browse
 router.get('/', controller.getAllCases);
 
-// Protected routes (Admin only logic usually handled in controller or via another middleware)
+// Admin-only mutation routes
 router.post('/', 
     protect, 
+    authorize('admin'),
     uploadFields('repairs', ['imgBefore', 'imgAfter']), 
     controller.createCase
 );
 
 router.put('/:id', 
     protect, 
+    authorize('admin'),
     uploadFields('repairs', ['imgBefore', 'imgAfter']), 
     controller.updateCase
 );
 
-router.delete('/:id', protect, controller.deleteCase);
+router.delete('/:id', protect, authorize('admin'), controller.deleteCase);
 
 module.exports = router;
