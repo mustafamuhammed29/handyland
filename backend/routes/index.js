@@ -82,5 +82,6 @@ router.use('/suppliers', require('./supplierRoutes'));
 router.use('/purchase-orders', require('./purchaseOrderRoutes'));
 router.use('/refunds', require('./refundRoutes'));
 router.use('/ebay-catalog', require('./ebayCatalogRoutes'));
+router.use('/warehouse', require('./warehouseRoutes'));
 
 module.exports = router;

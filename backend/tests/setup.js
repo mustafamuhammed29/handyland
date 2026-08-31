@@ -31,6 +31,7 @@ jest.mock('../config/supabase', () => {
                 getUser: jest.fn(),
                 signInWithPassword: jest.fn().mockResolvedValue({ data: { session: { access_token: 'fake-token' }, user: { id: 'test-id' } }, error: null })
             },
+            rpc: jest.fn().mockResolvedValue({ data: null, error: null }),
             from: jest.fn(() => ({
                 select: jest.fn().mockReturnThis(),
                 insert: jest.fn().mockReturnThis(),
