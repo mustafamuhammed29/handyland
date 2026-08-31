@@ -54,7 +54,7 @@ SET search_path = public, pg_temp
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role IN ('admin', 'administrator')
+    WHERE id = auth.uid() AND role = 'admin'
   );
 $$;
 
