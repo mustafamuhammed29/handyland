@@ -27,18 +27,18 @@ export const WarehouseTabs: React.FC<WarehouseTabsProps> = ({
     }> = [
         {
             id: 'parts',
-            label: 'قطع الصيانة',
+            label: 'Ersatzteilkatalog',
             icon: Boxes,
             count: partsCount
         },
         {
             id: 'movements',
-            label: 'حركات المخزون',
+            label: 'Lagerbewegungen',
             icon: History
         },
         {
             id: 'locations',
-            label: 'المواقع والتخزين',
+            label: 'Lagerorte',
             icon: MapPin,
             count: locationsCount
         }

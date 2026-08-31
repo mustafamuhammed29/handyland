@@ -1,6 +1,6 @@
 /**
  * backend/admin/src/components/WarehouseManager/components/EditLocationModal.tsx
- * Modal dialog for updating physical warehouse location metadata (Phase 2B).
+ * Modal dialog for updating physical warehouse location metadata (German).
  */
 import React, { useState, useEffect } from 'react';
 import { X, Edit2, CheckCircle2, AlertTriangle, Lock } from 'lucide-react';
@@ -50,7 +50,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
 
         const trimmedZone = zone.trim();
         if (!trimmedZone) {
-            setFormError('المنطقة (Zone) إلزامية ولا يمكن تركها فارغة');
+            setFormError('Zone ist erforderlich.');
             return;
         }
 
@@ -66,14 +66,14 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
         try {
             const res = await api.patch(`/api/warehouse/locations/${location.id}`, payload);
             if (res.data?.success) {
-                toast.success('تم تحديث بيانات الموقع بنجاح');
+                toast.success('Lagerort-Daten wurden erfolgreich aktualisiert.');
                 onSuccess();
                 onClose();
             } else {
-                setFormError(res.data?.message || 'فشل تحديث بيانات الموقع');
+                setFormError(res.data?.message || 'Fehler beim Aktualisieren des Lagerorts.');
             }
         } catch (err: any) {
-            setFormError(err.response?.data?.message || 'حدث خطأ أثناء تحديث الموقع. تحقق من المدخلات.');
+            setFormError(err.response?.data?.message || 'Fehler beim Aktualisieren des Lagerorts. Bitte Eingaben prüfen.');
         } finally {
             setIsSubmitting(false);
         }
@@ -89,8 +89,8 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
                             <Edit2 size={18} />
                         </div>
                         <div>
-                            <h3 className="text-base font-bold text-white">تعديل بيانات الموقع</h3>
-                            <p className="text-xs text-slate-400">تحديث البيانات الوصفية لموقع التخزين</p>
+                            <h3 className="text-base font-bold text-white">Lagerort bearbeiten</h3>
+                            <p className="text-xs text-slate-400">Metadaten des Lagerplatzes aktualisieren</p>
                         </div>
                     </div>
                     <button
@@ -115,7 +115,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
                     <div>
                         <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
                             <Lock size={12} className="text-slate-500" />
-                            <span>كود الموقع (ثابت غير قابل للتعديل)</span>
+                            <span>Lagerort-Code (Unveränderlich)</span>
                         </label>
                         <div className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-cyan-400 font-bold select-none cursor-not-allowed">
                             {location.locationCode}
@@ -125,7 +125,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
                     {/* Zone */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            المنطقة (Zone) <span className="text-red-400">*</span>
+                            Zone <span className="text-red-400">*</span>
                         </label>
                         <input
                             type="text"
@@ -139,7 +139,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
                     {/* Rack, Shelf, Bin */}
                     <div className="grid grid-cols-3 gap-2.5">
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">الرف (Rack)</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Regal (Rack)</label>
                             <input
                                 type="text"
                                 value={rack}
@@ -149,7 +149,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
                             />
                         </div>
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">المستوى (Shelf)</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Ebene (Shelf)</label>
                             <input
                                 type="text"
                                 value={shelf}
@@ -159,7 +159,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
                             />
                         </div>
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">الصندوق (Bin)</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Fach (Bin)</label>
                             <input
                                 type="text"
                                 value={bin}
@@ -172,7 +172,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
 
                     {/* Description */}
                     <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1.5">الوصف (اختياري)</label>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1.5">Beschreibung (Optional)</label>
                         <input
                             type="text"
                             value={description}
@@ -190,7 +190,7 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
                             disabled={isSubmitting}
                             className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                         >
-                            إلغاء
+                            Abbrechen
                         </button>
                         <button
                             type="submit"
@@ -198,11 +198,11 @@ export const EditLocationModal: React.FC<EditLocationModalProps> = ({
                             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)] disabled:opacity-50"
                         >
                             {isSubmitting ? (
-                                <span>جاري الحفظ...</span>
+                                <span>Speichern läuft …</span>
                             ) : (
                                 <>
                                     <CheckCircle2 size={15} />
-                                    <span>حفظ التعديلات</span>
+                                    <span>Änderungen speichern</span>
                                 </>
                             )}
                         </button>

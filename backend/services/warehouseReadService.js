@@ -192,8 +192,11 @@ async function getWarehouseParts(query = {}) {
     // 2. Query balances from part_stock_locations joined with warehouse_locations
     let stockQuery = supabaseAdmin
         .from('part_stock_locations')
-        .select('repair_part_id, warehouse_location_id, quantity_on_hand, quantity_reserved, quantity_defective, quantity_inspection, warehouse_locations(id, is_active)')
-        .in('repair_part_id', partIds);
+        .select('repair_part_id, warehouse_location_id, quantity_on_hand, quantity_reserved, quantity_defective, quantity_inspection, warehouse_locations(id, is_active)');
+
+    if (partIds.length <= 50) {
+        stockQuery = stockQuery.in('repair_part_id', partIds);
+    }
 
     if (locationId) {
         stockQuery = stockQuery.eq('warehouse_location_id', locationId);
@@ -437,11 +440,10 @@ async function getWarehouseMovements(query = {}) {
     let q = supabaseAdmin
         .from('part_stock_movements')
         .select(
-            `id, movement_type, quantity, reason, created_at,
+            `id, movement_type, quantity, reason, performed_by, created_at,
              repair_parts(id, name, sku, barcode),
              source_location:warehouse_locations!part_stock_movements_source_location_id_fkey(id, location_code),
-             destination_location:warehouse_locations!part_stock_movements_destination_location_id_fkey(id, location_code),
-             actor:users!part_stock_movements_performed_by_fkey(id, name)`,
+             destination_location:warehouse_locations!part_stock_movements_destination_location_id_fkey(id, location_code)`,
             { count: 'exact' }
         );
 
@@ -475,11 +477,35 @@ async function getWarehouseMovements(query = {}) {
         throw new WarehouseServiceError(503, 'WAREHOUSE_SERVICE_UNAVAILABLE', 'Failed to retrieve warehouse movements history');
     }
 
+    // Safely resolve actor display names without cross-schema foreign key hints
+    let actorMap = new Map();
+    const missingActorIds = Array.from(new Set(
+        (rows || [])
+            .filter(r => r.performed_by && (!r.actor || !r.actor.name))
+            .map(r => r.performed_by)
+            .filter(Boolean)
+    ));
+
+    if (missingActorIds.length > 0) {
+        try {
+            const userQuery = supabaseAdmin
+                .from('users')
+                .select('id, name');
+            if (typeof userQuery.in === 'function') {
+                const { data: users } = await userQuery.in('id', missingActorIds);
+                (users || []).forEach(u => actorMap.set(u.id, u.name));
+            }
+        } catch (_) {
+            // Graceful fallback if user resolution fails
+        }
+    }
+
     let sanitizedData = (rows || []).map(row => {
         const part = row.repair_parts || {};
         const srcLoc = row.source_location || null;
         const dstLoc = row.destination_location || null;
-        const actor = row.actor || null;
+        const actorId = row.performed_by || (row.actor && row.actor.id) || null;
+        const actorName = actorId ? (actorMap.get(actorId) || (row.actor && row.actor.name) || null) : null;
 
         return {
             id: row.id,
@@ -494,7 +520,7 @@ async function getWarehouseMovements(query = {}) {
             },
             sourceLocation: srcLoc ? { id: srcLoc.id, locationCode: srcLoc.location_code } : null,
             destinationLocation: dstLoc ? { id: dstLoc.id, locationCode: dstLoc.location_code } : null,
-            performedBy: actor ? { id: actor.id, displayName: actor.name || null } : null,
+            performedBy: actorId ? { id: actorId, displayName: actorName } : null,
             reason: row.reason || null
         };
     });
@@ -568,11 +594,11 @@ async function getWarehouseStats(query = {}) {
     let totalInspectionQuantity = 0;
     let lowStockPartCount = 0;
 
-    if (activePartIds.length > 0 && activeLocationIds.length > 0) {
+    if (activePartCount > 0 && activeLocationIds.length > 0) {
+        const activePartIdSet = new Set(activePartIds);
         const { data: stockBalances, error: stockError } = await supabaseAdmin
             .from('part_stock_locations')
             .select('repair_part_id, warehouse_location_id, quantity_on_hand, quantity_reserved, quantity_defective, quantity_inspection')
-            .in('repair_part_id', activePartIds)
             .in('warehouse_location_id', activeLocationIds);
 
         if (stockError) {
@@ -583,6 +609,9 @@ async function getWarehouseStats(query = {}) {
 
         if (stockBalances) {
             for (const row of stockBalances) {
+                if (!activePartIdSet.has(row.repair_part_id)) {
+                    continue;
+                }
                 const onHand = Number(row.quantity_on_hand) || 0;
                 const reserved = Number(row.quantity_reserved) || 0;
                 const defective = Number(row.quantity_defective) || 0;

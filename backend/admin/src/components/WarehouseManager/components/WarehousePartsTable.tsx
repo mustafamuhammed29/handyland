@@ -1,6 +1,6 @@
 /**
  * backend/admin/src/components/WarehouseManager/components/WarehousePartsTable.tsx
- * Paginated repair parts table with comprehensive filters, search, and catalog controls (Phase 2C).
+ * Paginated repair parts table with comprehensive filters, search, and catalog controls (German).
  */
 import React, { useState } from 'react';
 import {
@@ -110,10 +110,10 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
 
     const handleDiscontinue = async (part: WarehousePart) => {
         const isConfirmed = await confirm({
-            title: 'إيقاف قطعة الصيانة',
-            message: `هل أنت متأكد من رغبتك في إيقاف القطعة (${part.name})؟ لا يمكن إيقاف القطع التي تحتوي على أرصدة غير صفرية في المستودع. بعد الإيقاف، لن تتمكن من استلام كميات جديدة لهذه القطعة.`,
-            confirmLabel: 'إيقاف القطعة',
-            cancelLabel: 'إلغاء',
+            title: 'Ersatzteil ausmustern?',
+            message: `Möchten Sie das Ersatzteil (${part.name}) wirklich ausmustern? Es können keine neuen Bestände mehr dafür eingebucht werden. Artikel mit aktiven Beständen können nicht ausgemustert werden.`,
+            confirmLabel: 'Ausmustern',
+            cancelLabel: 'Abbrechen',
             variant: 'danger'
         });
 
@@ -123,16 +123,16 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
         try {
             const res = await api.post(`/api/warehouse/parts/${part.id}/discontinue`);
             if (res.data?.success) {
-                toast.success(`تم إيقاف القطعة ${part.name} بنجاح`);
+                toast.success(`Ersatzteil ${part.name} wurde erfolgreich ausgemustert.`);
                 if (onRefresh) onRefresh();
                 else onRetry();
             }
         } catch (err: any) {
             const errorCode = err.response?.data?.error;
             if (errorCode === 'WAREHOUSE_PART_HAS_STOCK') {
-                toast.error('لا يمكن إيقاف القطعة لأنها ما زالت تحتوي على مخزون. انقل أو سوِّ الكمية أولاً.');
+                toast.error('Ausmustern nicht möglich: Das Ersatzteil hat noch aktiven Lagerbestand.');
             } else {
-                toast.error(err.response?.data?.message || 'فشل إيقاف القطعة');
+                toast.error(err.response?.data?.message || 'Fehler beim Ausmustern des Ersatzteils.');
             }
         } finally {
             setDiscontinuingId(null);
@@ -148,7 +148,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                     <div className="relative flex-1">
                         <input
                             type="text"
-                            placeholder="ابحث بالاسم أو SKU أو الباركود أو الموديل..."
+                            placeholder="Nach Bezeichnung, SKU, Barcode oder Modell suchen …"
                             value={search}
                             onChange={(e) => {
                                 onSearchChange(e.target.value);
@@ -174,7 +174,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                             }`}
                         >
                             <AlertTriangle size={15} className={lowStock ? 'text-amber-400' : 'text-slate-400'} />
-                            <span>مخزون منخفض فقط</span>
+                            <span>Nur niedriger Bestand</span>
                         </button>
 
                         <button
@@ -187,7 +187,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                             }`}
                         >
                             <SlidersHorizontal size={15} />
-                            <span>فلاتر متقدمة</span>
+                            <span>Erweiterte Filter</span>
                             {hasActiveFilters && (
                                 <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
                             )}
@@ -202,10 +202,10 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                             }}
                             className="bg-slate-950/70 border border-slate-700/60 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer"
                         >
-                            <option value={15}>15 سطر</option>
-                            <option value={25}>25 سطر</option>
-                            <option value={50}>50 سطر</option>
-                            <option value={100}>100 سطر</option>
+                            <option value={15}>15 Zeilen</option>
+                            <option value={25}>25 Zeilen</option>
+                            <option value={50}>50 Zeilen</option>
+                            <option value={100}>100 Zeilen</option>
                         </select>
 
                         <button
@@ -214,7 +214,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)]"
                         >
                             <Plus size={16} />
-                            <span>إضافة قطعة صيانة</span>
+                            <span>Ersatzteil anlegen</span>
                         </button>
                     </div>
                 </div>
@@ -224,7 +224,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                     <div className="pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                         {/* Brand Filter */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">الماركة (Brand)</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Marke (Brand)</label>
                             <select
                                 value={brand}
                                 onChange={(e) => {
@@ -233,7 +233,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                 }}
                                 className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
                             >
-                                <option value="">الكل (All Brands)</option>
+                                <option value="">Alle Marken</option>
                                 {brandsList.map((b) => (
                                     <option key={b} value={b}>
                                         {b}
@@ -244,7 +244,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
 
                         {/* Part Type Filter */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">نوع القطعة (Part Type)</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Teiletyp (Part Type)</label>
                             <select
                                 value={partType}
                                 onChange={(e) => {
@@ -253,7 +253,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                 }}
                                 className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
                             >
-                                <option value="">الكل (All Types)</option>
+                                <option value="">Alle Typen</option>
                                 {partTypesList.map((t) => (
                                     <option key={t} value={t}>
                                         {t}
@@ -264,7 +264,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
 
                         {/* Quality Filter */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">درجة الجودة (Quality)</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Qualität (Quality)</label>
                             <select
                                 value={quality}
                                 onChange={(e) => {
@@ -273,7 +273,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                 }}
                                 className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
                             >
-                                <option value="">الكل (All Qualities)</option>
+                                <option value="">Alle Qualitäten</option>
                                 {qualitiesList.map((q) => (
                                     <option key={q} value={q}>
                                         {q}
@@ -284,7 +284,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
 
                         {/* Location Filter */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">الموقع الفيزيائي</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Lagerort</label>
                             <select
                                 value={locationId}
                                 onChange={(e) => {
@@ -293,7 +293,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                 }}
                                 className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
                             >
-                                <option value="">كافة المواقع</option>
+                                <option value="">Alle Lagerorte</option>
                                 {locations.map((loc) => (
                                     <option key={loc.id} value={loc.id}>
                                         {loc.locationCode} ({loc.zone})
@@ -304,10 +304,10 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
 
                         {/* Device Family */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">عائلة الجهاز</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Gerätefamilie</label>
                             <input
                                 type="text"
-                                placeholder="مثال: iPhone 13, Galaxy S22"
+                                placeholder="z.B. iPhone 14 Series"
                                 value={deviceFamily}
                                 onChange={(e) => {
                                     onDeviceFamilyChange(e.target.value);
@@ -319,7 +319,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
 
                         {/* Status Filter */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">حالة التوفر</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Status</label>
                             <select
                                 value={status}
                                 onChange={(e) => {
@@ -328,9 +328,9 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                 }}
                                 className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
                             >
-                                <option value="">النشطة والموقوفة</option>
-                                <option value="active">نشطة فقط (Active)</option>
-                                <option value="discontinued">موقوفة (Discontinued)</option>
+                                <option value="">Alle (Aktiv & Ausgemustert)</option>
+                                <option value="active">Nur aktive Artikel</option>
+                                <option value="discontinued">Nur ausgemusterte Artikel</option>
                             </select>
                         </div>
 
@@ -342,7 +342,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                     onClick={clearAllFilters}
                                     className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors"
                                 >
-                                    إعادة ضبط كافة الفلاتر
+                                    Filter zurücksetzen
                                 </button>
                             </div>
                         )}
@@ -363,26 +363,26 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                         className="flex items-center gap-1 px-3 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 rounded-lg text-xs font-semibold"
                     >
                         <RefreshCw size={12} />
-                        <span>إعادة المحاولة</span>
+                        <span>Erneut versuchen</span>
                     </button>
                 </div>
             )}
 
             {/* Table Area */}
             <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-right text-sm">
+                <table className="w-full text-left text-sm">
                     <thead>
                         <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 text-xs uppercase font-semibold">
-                            <th className="py-3.5 px-4">رمز SKU</th>
-                            <th className="py-3.5 px-4">اسم القطعة</th>
-                            <th className="py-3.5 px-4">الماركة والنوع</th>
-                            <th className="py-3.5 px-4">الجودة</th>
-                            <th className="py-3.5 px-4">الأجهزة المتوافقة</th>
-                            <th className="py-3.5 px-4 text-center">المتاح</th>
-                            <th className="py-3.5 px-4 text-center">المحجوز</th>
-                            <th className="py-3.5 px-4 text-center">الحد الأدنى</th>
-                            <th className="py-3.5 px-4 text-center">الحالة</th>
-                            <th className="py-3.5 px-4 text-center">الإجراءات</th>
+                            <th className="py-3.5 px-4">SKU</th>
+                            <th className="py-3.5 px-4">Ersatzteil</th>
+                            <th className="py-3.5 px-4">Marke & Typ</th>
+                            <th className="py-3.5 px-4">Qualität</th>
+                            <th className="py-3.5 px-4">Kompatibilität</th>
+                            <th className="py-3.5 px-4 text-center">Verfügbar</th>
+                            <th className="py-3.5 px-4 text-center">Reserviert</th>
+                            <th className="py-3.5 px-4 text-center">Min-Bestand</th>
+                            <th className="py-3.5 px-4 text-center">Status</th>
+                            <th className="py-3.5 px-4 text-center">Aktionen</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
@@ -398,8 +398,8 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                             <tr>
                                 <td colSpan={10} className="py-16 text-center text-slate-500">
                                     <Boxes className="mx-auto mb-3 opacity-40" size={40} />
-                                    <p className="font-semibold text-slate-400">لا توجد قطع صيانة تطابق المعايير</p>
-                                    <p className="text-xs text-slate-600 mt-1">جرّب تغيير عبارة البحث أو تفريغ الفلاتر</p>
+                                    <p className="font-semibold text-slate-400">Keine Ersatzteile gefunden</p>
+                                    <p className="text-xs text-slate-600 mt-1">Prüfen Sie den Suchbegriff oder setzen Sie die Filter zurück</p>
                                 </td>
                             </tr>
                         ) : (
@@ -494,9 +494,9 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                                 {isLowStock && (
                                                     <span
                                                         className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-bold"
-                                                        title="مخزون منخفض: المتاح أقل من أو يساوي الحد الأدنى"
+                                                        title="Niedriger Bestand: Verfügbare Menge <= Mindestbestand"
                                                     >
-                                                        منخفض
+                                                        Niedrig
                                                     </span>
                                                 )}
                                             </div>
@@ -523,12 +523,12 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                             {part.status === 'active' && part.isActive ? (
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold">
                                                     <CheckCircle size={10} />
-                                                    <span>نشط</span>
+                                                    <span>Aktiv</span>
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-semibold">
                                                     <XCircle size={10} />
-                                                    <span>موقوف</span>
+                                                    <span>Ausgemustert</span>
                                                 </span>
                                             )}
                                         </td>
@@ -540,7 +540,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                                     type="button"
                                                     onClick={() => setEditingPart(part)}
                                                     className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs transition-colors"
-                                                    title="تعديل بيانات القطعة"
+                                                    title="Ersatzteil bearbeiten"
                                                 >
                                                     <Edit2 size={13} />
                                                 </button>
@@ -550,7 +550,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                                         onClick={() => handleDiscontinue(part)}
                                                         disabled={discontinuingId === part.id}
                                                         className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 hover:text-rose-300 border border-rose-800/40 rounded-lg text-xs transition-colors disabled:opacity-50"
-                                                        title="إيقاف القطعة"
+                                                        title="Ersatzteil ausmustern"
                                                     >
                                                         <PowerOff size={13} />
                                                     </button>

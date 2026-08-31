@@ -64,7 +64,7 @@ export const WarehouseStatCards: React.FC<WarehouseStatCardsProps> = ({
                 <div className="flex items-center gap-3">
                     <AlertTriangle className="text-red-400" size={24} />
                     <div>
-                        <h4 className="text-sm font-semibold text-red-300">خطأ في جلب مؤشرات المستودع</h4>
+                        <h4 className="text-sm font-semibold text-red-300">Fehler beim Laden der Lagerkennzahlen</h4>
                         <p className="text-xs text-red-400/80 mt-0.5">{error}</p>
                     </div>
                 </div>
@@ -73,7 +73,7 @@ export const WarehouseStatCards: React.FC<WarehouseStatCardsProps> = ({
                     className="flex items-center gap-2 px-3 py-1.5 bg-red-900/40 hover:bg-red-800/60 border border-red-700/50 text-red-200 rounded-xl text-xs font-semibold transition-colors"
                 >
                     <RefreshCw size={14} />
-                    <span>إعادة المحاولة</span>
+                    <span>Erneut versuchen</span>
                 </button>
             </div>
         );
@@ -81,76 +81,76 @@ export const WarehouseStatCards: React.FC<WarehouseStatCardsProps> = ({
 
     const statList: StatConfig[] = [
         {
-            label: 'القطع النشطة',
+            label: 'Aktive Ersatzteile',
             value: stats?.activePartCount ?? 0,
             icon: Boxes,
             color: 'text-blue-400',
             bgColor: 'bg-blue-500/10',
             borderColor: 'border-blue-500/20',
-            description: 'أنواع قطع الصيانة المعتمدة'
+            description: 'Freigegebene Artikel im Katalog'
         },
         {
-            label: 'إجمالي المخزون الفعلي',
+            label: 'Gesamtlagerbestand',
             value: stats?.totalOnHandQuantity ?? 0,
             icon: PackageCheck,
             color: 'text-sky-400',
             bgColor: 'bg-sky-500/10',
             borderColor: 'border-sky-500/20',
-            description: 'الكميات الفيزيائية في الرفوف'
+            description: 'Physische Stückzahl in den Regalen'
         },
         {
-            label: 'المتاح للصيانة',
+            label: 'Verfügbar',
             value: stats?.totalAvailableQuantity ?? 0,
             icon: CheckCircle2,
             color: 'text-emerald-400',
             bgColor: 'bg-emerald-500/10',
             borderColor: 'border-emerald-500/20',
-            description: 'جاهز للاستخدام الفوري'
+            description: 'Sofort für Reparaturen einsatzbereit'
         },
         {
-            label: 'المخزون المحجوز',
+            label: 'Reserviert',
             value: stats?.totalReservedQuantity ?? 0,
             icon: Lock,
             color: 'text-amber-400',
             bgColor: 'bg-amber-500/10',
             borderColor: 'border-amber-500/20',
-            description: 'مخصص لتذاكر صيانة قيد التنفيذ'
+            description: 'Für laufende Tickets blockiert'
         },
         {
-            label: 'القطع التالفة',
+            label: 'Defekt',
             value: stats?.totalDefectiveQuantity ?? 0,
             icon: AlertOctagon,
             color: 'text-rose-400',
             bgColor: 'bg-rose-500/10',
             borderColor: 'border-rose-500/20',
-            description: 'معزولة بانتظار الإرجاع/الإتلاف'
+            description: 'Aussortiert / wartet auf Retoure'
         },
         {
-            label: 'قيد الفحص المخبري',
+            label: 'In Prüfung',
             value: stats?.totalInspectionQuantity ?? 0,
             icon: Eye,
             color: 'text-purple-400',
             bgColor: 'bg-purple-500/10',
             borderColor: 'border-purple-500/20',
-            description: 'تخضع لاختبارات الجودة'
+            description: 'In Qualitäts- und Wareneingangsprüfung'
         },
         {
-            label: 'مخزون منخفض',
+            label: 'Niedriger Bestand',
             value: stats?.lowStockPartCount ?? 0,
             icon: AlertTriangle,
             color: (stats?.lowStockPartCount ?? 0) > 0 ? 'text-amber-400' : 'text-slate-400',
             bgColor: (stats?.lowStockPartCount ?? 0) > 0 ? 'bg-amber-500/10' : 'bg-slate-800/40',
             borderColor: (stats?.lowStockPartCount ?? 0) > 0 ? 'border-amber-500/30' : 'border-slate-800',
-            description: 'وصلت لحد إعادة الطلب'
+            description: 'Mindestbestand unterschritten'
         },
         {
-            label: 'مواقع التخزين النشطة',
+            label: 'Aktive Lagerorte',
             value: stats?.activeLocationCount ?? 0,
             icon: MapPin,
             color: 'text-cyan-400',
             bgColor: 'bg-cyan-500/10',
             borderColor: 'border-cyan-500/20',
-            description: 'الرفوف والصناديق المفعلة'
+            description: 'Freigegebene Regale und Fächer'
         }
     ];
 

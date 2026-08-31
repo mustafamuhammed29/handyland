@@ -1,6 +1,6 @@
 /**
  * backend/admin/src/components/WarehouseManager/components/CreateMovementModal.tsx
- * Modal dialog for recording safe atomic warehouse movements (Phase 1B).
+ * Modal dialog for recording safe atomic warehouse movements (German).
  */
 import React, { useState, useEffect } from 'react';
 import {
@@ -112,33 +112,33 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
 
         // Validation
         if (!selectedPart) {
-            setFormError('يرجى اختيار قطعة الصيانة أولاً');
+            setFormError('Bitte wählen Sie zuerst ein Ersatzteil aus.');
             return;
         }
 
         const qtyNum = Number(quantity);
         if (!Number.isInteger(qtyNum) || qtyNum < 1 || qtyNum > 100000) {
-            setFormError('الكمية يجب أن تكون عدداً صحيحاً موجباً بين 1 و 100,000');
+            setFormError('Die Menge muss eine positive ganze Zahl zwischen 1 und 100.000 sein.');
             return;
         }
 
         if (needsSource && !sourceLocationId) {
-            setFormError('يرجى تحديد الموقع المصدر للحركة');
+            setFormError('Bitte wählen Sie den Ausgangslagerort aus.');
             return;
         }
 
         if (needsDestination && !destinationLocationId) {
-            setFormError('يرجى تحديد الموقع الوجهة للحركة');
+            setFormError('Bitte wählen Sie den Ziellagerort aus.');
             return;
         }
 
         if (movementType === 'TRANSFER' && sourceLocationId === destinationLocationId) {
-            setFormError('لا يمكن النقل بين نفس الموقع (المصدر والوجهة متطابقان)');
+            setFormError('Ausgangs- und Ziellagerort dürfen nicht identisch sein.');
             return;
         }
 
         if (reasonRequired && (!reason.trim() || reason.trim().length < 3)) {
-            setFormError('سبب الحركة إلزامي لهذا النوع (3 أحرف على الأقل)');
+            setFormError('Für diese Bewegungsart ist ein Grund erforderlich (mind. 3 Zeichen).');
             return;
         }
 
@@ -157,22 +157,22 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
         try {
             const res = await api.post('/api/warehouse/movements', payload);
             if (res.data?.success) {
-                toast.success('تم تسجيل الحركة بنجاح وتحديث أرصدة المستودع');
+                toast.success('Lagerbewegung erfolgreich erfasst und Bestände aktualisiert.');
                 onSuccess();
                 onClose();
             } else {
-                setFormError(res.data?.message || 'فشل تسجيل الحركة');
+                setFormError(res.data?.message || 'Fehler beim Erfassen der Lagerbewegung.');
             }
         } catch (err: any) {
             const backendError = err.response?.data?.error;
             const backendMessage = err.response?.data?.message;
 
             if (backendError === 'WAREHOUSE_INSUFFICIENT_STOCK') {
-                setFormError('الرصيد المتاح في الموقع المصدر غير كافٍ لتنفيذ هذه الحركة');
+                setFormError('Der verfügbare Bestand am Ausgangsort reicht für diese Bewegung nicht aus.');
             } else if (backendError === 'WAREHOUSE_DATA_INTEGRITY_ERROR') {
-                setFormError('تعذر تسجيل الحركة بسبب فحص سلامة وتناسق بيانات المخزون');
+                setFormError('Lagerbewegung aufgrund der Datenintegritätsprüfung abgelehnt.');
             } else {
-                setFormError(backendMessage || 'حدث خطأ أثناء تنفيذ الحركة. يرجى التحقق من المدخلات.');
+                setFormError(backendMessage || 'Fehler beim Ausführen der Lagerbewegung. Bitte Eingaben prüfen.');
             }
         } finally {
             setIsSubmitting(false);
@@ -189,8 +189,8 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                             <Boxes size={20} />
                         </div>
                         <div>
-                            <h3 className="text-base font-bold text-white">تسجيل حركة مخزون جديدة</h3>
-                            <p className="text-xs text-slate-400">تسجيل حركة ذرية في دفتر أستاذ المستودع</p>
+                            <h3 className="text-base font-bold text-white">Neue Lagerbewegung erfassen</h3>
+                            <p className="text-xs text-slate-400">Unveränderliche Transaktion im Lagerjournal buchen</p>
                         </div>
                     </div>
                     <button
@@ -215,12 +215,12 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                     {/* 1. Part Search and Selection */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            قطعة الصيانة <span className="text-red-400">*</span>
+                            Ersatzteil <span className="text-red-400">*</span>
                         </label>
                         <div className="relative">
                             <input
                                 type="text"
-                                placeholder="ابحث باسم القطعة أو SKU أو الباركود..."
+                                placeholder="Nach Ersatzteil, SKU oder Barcode suchen …"
                                 value={selectedPart ? `${selectedPart.name} (${selectedPart.sku})` : partSearch}
                                 onChange={(e) => {
                                     setSelectedPart(null);
@@ -251,11 +251,11 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                                 <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-slate-950 border border-slate-700 rounded-xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto custom-scrollbar">
                                     {searchLoading ? (
                                         <div className="p-3 text-center text-xs text-slate-400 animate-pulse">
-                                            جاري البحث...
+                                            Suche läuft …
                                         </div>
                                     ) : searchResults.length === 0 ? (
                                         <div className="p-3 text-center text-xs text-slate-500">
-                                            {partSearch.trim() ? 'لا توجد قطع مطابقة' : 'اكتب للبحث عن قطعة'}
+                                            {partSearch.trim() ? 'Keine Ersatzteile gefunden' : 'Tippen Sie zur Suche'}
                                         </div>
                                     ) : (
                                         searchResults.map((part) => (
@@ -267,7 +267,7 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                                                     setPartSearch('');
                                                     setIsDropdownOpen(false);
                                                 }}
-                                                className="w-full text-right p-2.5 hover:bg-slate-800 flex items-center justify-between border-b border-slate-800/50 last:border-0"
+                                                className="w-full text-left p-2.5 hover:bg-slate-800 flex items-center justify-between border-b border-slate-800/50 last:border-0"
                                             >
                                                 <div>
                                                     <div className="font-semibold text-xs text-white">
@@ -277,9 +277,9 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                                                         {part.sku}
                                                     </div>
                                                 </div>
-                                                <div className="text-left">
+                                                <div className="text-right">
                                                     <span className="text-[11px] font-bold text-emerald-400">
-                                                        متاح: {part.availableQuantity}
+                                                        Verfügbar: {part.availableQuantity}
                                                     </span>
                                                 </div>
                                             </button>
@@ -290,9 +290,9 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                         </div>
                         {selectedPart && (
                             <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
-                                <span>الماركة: {selectedPart.brand || '—'}</span>
+                                <span>Marke: {selectedPart.brand || '—'}</span>
                                 <span className="text-emerald-400 font-semibold">
-                                    الرصيد المتاح الحالي: {selectedPart.availableQuantity}
+                                    Aktuell verfügbar: {selectedPart.availableQuantity} Stk.
                                 </span>
                             </div>
                         )}
@@ -301,26 +301,26 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                     {/* 2. Movement Type */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            نوع الحركة <span className="text-red-400">*</span>
+                            Bewegungsart <span className="text-red-400">*</span>
                         </label>
                         <select
                             value={movementType}
                             onChange={(e) => setMovementType(e.target.value as MovementType)}
                             className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 cursor-pointer"
                         >
-                            <option value="RECEIVE">استلام بضاعة جديدة (RECEIVE)</option>
-                            <option value="TRANSFER">نقل موقعي داخلي (TRANSFER)</option>
-                            <option value="ADJUSTMENT_IN">تسوية جردية - إضافة (ADJUSTMENT_IN)</option>
-                            <option value="ADJUSTMENT_OUT">تسوية جردية - خصم (ADJUSTMENT_OUT)</option>
-                            <option value="DAMAGE">إتلاف قطعة معطوبة (DAMAGE)</option>
-                            <option value="SUPPLIER_RETURN">إرجاع بضاعة لمورد (SUPPLIER_RETURN)</option>
+                            <option value="RECEIVE">Wareneingang (RECEIVE)</option>
+                            <option value="TRANSFER">Interne Umlagerung (TRANSFER)</option>
+                            <option value="ADJUSTMENT_IN">Inventurkorrektur - Zubuchung (ADJUSTMENT_IN)</option>
+                            <option value="ADJUSTMENT_OUT">Inventurkorrektur - Abbuchung (ADJUSTMENT_OUT)</option>
+                            <option value="DAMAGE">Ausschuss / Beschädigung (DAMAGE)</option>
+                            <option value="SUPPLIER_RETURN">Lieferantenrücksendung (SUPPLIER_RETURN)</option>
                         </select>
                     </div>
 
                     {/* 3. Quantity */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            الكمية <span className="text-red-400">*</span>
+                            Menge <span className="text-red-400">*</span>
                         </label>
                         <input
                             type="number"
@@ -339,14 +339,14 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                         {needsSource && (
                             <div>
                                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                                    الموقع المصدر <span className="text-red-400">*</span>
+                                    Ausgangslagerort <span className="text-red-400">*</span>
                                 </label>
                                 <select
                                     value={sourceLocationId}
                                     onChange={(e) => setSourceLocationId(e.target.value)}
                                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 cursor-pointer"
                                 >
-                                    <option value="">اختر الموقع المصدر</option>
+                                    <option value="">Ausgangsort wählen</option>
                                     {locations.map((loc) => (
                                         <option key={loc.id} value={loc.id}>
                                             {loc.locationCode} ({loc.zone})
@@ -360,14 +360,14 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                         {needsDestination && (
                             <div>
                                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                                    الموقع الوجهة <span className="text-red-400">*</span>
+                                    Ziellagerort <span className="text-red-400">*</span>
                                 </label>
                                 <select
                                     value={destinationLocationId}
                                     onChange={(e) => setDestinationLocationId(e.target.value)}
                                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 cursor-pointer"
                                 >
-                                    <option value="">اختر الموقع الوجهة</option>
+                                    <option value="">Zielort wählen</option>
                                     {locations.map((loc) => (
                                         <option key={loc.id} value={loc.id}>
                                             {loc.locationCode} ({loc.zone})
@@ -381,11 +381,11 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                     {/* 5. Reason / Justification */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            السبب أو المبرر {reasonRequired ? <span className="text-red-400">*</span> : <span className="text-slate-500">(اختياري)</span>}
+                            Grund / Referenz {reasonRequired ? <span className="text-red-400">*</span> : <span className="text-slate-500">(Optional)</span>}
                         </label>
                         <input
                             type="text"
-                            placeholder={reasonRequired ? 'يرجى كتابة سبب التسوية أو الإتلاف أو الإرجاع...' : 'ملاحظة توضيحية لسبب الحركة...'}
+                            placeholder={reasonRequired ? 'Grund für Korrektur, Ausschuss oder Retoure …' : 'Optionale Notiz zur Bewegung …'}
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             maxLength={500}
@@ -401,7 +401,7 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                             disabled={isSubmitting}
                             className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                         >
-                            إلغاء
+                            Abbrechen
                         </button>
 
                         <button
@@ -412,12 +412,12 @@ export const CreateMovementModal: React.FC<CreateMovementModalProps> = ({
                             {isSubmitting ? (
                                 <>
                                     <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                                    <span>جاري المعالجة...</span>
+                                    <span>Verarbeitung läuft …</span>
                                 </>
                             ) : (
                                 <>
                                     <CheckCircle2 size={15} />
-                                    <span>تأكيد وتسجيل الحركة</span>
+                                    <span>Lagerbewegung buchen</span>
                                 </>
                             )}
                         </button>

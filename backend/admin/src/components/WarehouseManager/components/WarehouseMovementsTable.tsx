@@ -1,6 +1,6 @@
 /**
  * backend/admin/src/components/WarehouseManager/components/WarehouseMovementsTable.tsx
- * Paginated append-only movement ledger table with filters, search, and date bounds.
+ * Paginated append-only movement ledger table with filters, search, and date bounds (German).
  */
 import React from 'react';
 import {
@@ -75,52 +75,52 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
         { label: string; icon: React.ElementType; colorClass: string }
     > = {
         RECEIVE: {
-            label: 'استلام بضاعة',
+            label: 'Wareneingang (RECEIVE)',
             icon: ArrowDownLeft,
             colorClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
         },
         ADJUSTMENT_IN: {
-            label: 'تسوية إضافة (+)',
+            label: 'Korrekturzubuchung (+)',
             icon: ArrowDownLeft,
             colorClass: 'bg-teal-500/10 text-teal-400 border-teal-500/30'
         },
         ADJUSTMENT_OUT: {
-            label: 'تسوية خصم (-)',
+            label: 'Korrekturabbuchung (-)',
             icon: ArrowUpRight,
             colorClass: 'bg-amber-500/10 text-amber-400 border-amber-500/30'
         },
         TRANSFER: {
-            label: 'نقل موقعي',
+            label: 'Umlagerung (TRANSFER)',
             icon: ArrowRightLeft,
             colorClass: 'bg-blue-500/10 text-blue-400 border-blue-500/30'
         },
         DAMAGE: {
-            label: 'إتلاف قطعة',
+            label: 'Ausschuss / Schaden',
             icon: AlertOctagon,
             colorClass: 'bg-rose-500/10 text-rose-400 border-rose-500/30'
         },
         SUPPLIER_RETURN: {
-            label: 'إرجاع لمورد',
+            label: 'Lieferantenrücksendung',
             icon: RotateCcw,
             colorClass: 'bg-purple-500/10 text-purple-400 border-purple-500/30'
         },
         RESERVE: {
-            label: 'حجز لصيانة',
+            label: 'Reservierung Reparatur',
             icon: ArrowRightLeft,
             colorClass: 'bg-amber-500/10 text-amber-300 border-amber-500/20'
         },
         RELEASE: {
-            label: 'إلغاء حجز',
+            label: 'Freigabe Reservierung',
             icon: RotateCcw,
             colorClass: 'bg-slate-500/10 text-slate-300 border-slate-500/20'
         },
         CONSUME: {
-            label: 'استهلاك صيانة',
+            label: 'Verbrauch Reparatur',
             icon: ArrowUpRight,
             colorClass: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
         },
         RETURN_FROM_REPAIR: {
-            label: 'مسترجع من صيانة',
+            label: 'Rückgabe aus Reparatur',
             icon: ArrowDownLeft,
             colorClass: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20'
         }
@@ -148,7 +148,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                     <div className="relative flex-1">
                         <input
                             type="text"
-                            placeholder="ابحث باسم القطعة أو SKU أو الباركود..."
+                            placeholder="Nach Ersatzteil, SKU oder Barcode suchen …"
                             value={search}
                             onChange={(e) => {
                                 onSearchChange(e.target.value);
@@ -169,13 +169,13 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                             }}
                             className="bg-slate-950/70 border border-slate-700/60 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer"
                         >
-                            <option value="">كافة أنواع الحركات</option>
-                            <option value="RECEIVE">استلام بضاعة (RECEIVE)</option>
-                            <option value="TRANSFER">نقل موقعي (TRANSFER)</option>
-                            <option value="ADJUSTMENT_IN">تسوية إضافة (ADJUSTMENT_IN)</option>
-                            <option value="ADJUSTMENT_OUT">تسوية خصم (ADJUSTMENT_OUT)</option>
-                            <option value="DAMAGE">إتلاف قطعة (DAMAGE)</option>
-                            <option value="SUPPLIER_RETURN">إرجاع لمورد (SUPPLIER_RETURN)</option>
+                            <option value="">Alle Bewegungsarten</option>
+                            <option value="RECEIVE">Wareneingang (RECEIVE)</option>
+                            <option value="TRANSFER">Umlagerung (TRANSFER)</option>
+                            <option value="ADJUSTMENT_IN">Korrekturzubuchung (+)</option>
+                            <option value="ADJUSTMENT_OUT">Korrekturabbuchung (-)</option>
+                            <option value="DAMAGE">Ausschuss / Schaden</option>
+                            <option value="SUPPLIER_RETURN">Lieferantenrücksendung</option>
                         </select>
 
                         <button
@@ -188,7 +188,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                             }`}
                         >
                             <SlidersHorizontal size={15} />
-                            <span>تصفية متقدمة</span>
+                            <span>Erweiterte Filter</span>
                             {hasActiveFilters && (
                                 <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
                             )}
@@ -203,10 +203,10 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                             }}
                             className="bg-slate-950/70 border border-slate-700/60 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer"
                         >
-                            <option value={15}>15 سطر</option>
-                            <option value={25}>25 سطر</option>
-                            <option value={50}>50 سطر</option>
-                            <option value={100}>100 سطر</option>
+                            <option value={15}>15 Zeilen</option>
+                            <option value={25}>25 Zeilen</option>
+                            <option value={50}>50 Zeilen</option>
+                            <option value={100}>100 Zeilen</option>
                         </select>
                     </div>
                 </div>
@@ -216,7 +216,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                     <div className="pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                         {/* Source Location */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">الموقع المصدر</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Ausgangslagerort</label>
                             <select
                                 value={sourceLocationId}
                                 onChange={(e) => {
@@ -225,7 +225,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                                 }}
                                 className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
                             >
-                                <option value="">كافة المواقع المصدر</option>
+                                <option value="">Alle Ausgangsorte</option>
                                 {locations.map((loc) => (
                                     <option key={loc.id} value={loc.id}>
                                         {loc.locationCode} ({loc.zone})
@@ -236,7 +236,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
 
                         {/* Destination Location */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">الموقع الوجهة</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Ziellagerort</label>
                             <select
                                 value={destinationLocationId}
                                 onChange={(e) => {
@@ -245,7 +245,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                                 }}
                                 className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
                             >
-                                <option value="">كافة المواقع الوجهة</option>
+                                <option value="">Alle Zielorte</option>
                                 {locations.map((loc) => (
                                     <option key={loc.id} value={loc.id}>
                                         {loc.locationCode} ({loc.zone})
@@ -256,7 +256,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
 
                         {/* From Date */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">من تاريخ</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Von Datum</label>
                             <input
                                 type="date"
                                 value={fromDate}
@@ -270,7 +270,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
 
                         {/* To Date */}
                         <div>
-                            <label className="block text-[11px] font-medium text-slate-400 mb-1">إلى تاريخ</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-1">Bis Datum</label>
                             <input
                                 type="date"
                                 value={toDate}
@@ -290,7 +290,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                                     onClick={clearAllFilters}
                                     className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors"
                                 >
-                                    إعادة ضبط فلاتر الحركات
+                                    Filter zurücksetzen
                                 </button>
                             </div>
                         )}
@@ -311,24 +311,24 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                         className="flex items-center gap-1 px-3 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 rounded-lg text-xs font-semibold"
                     >
                         <RefreshCw size={12} />
-                        <span>إعادة المحاولة</span>
+                        <span>Erneut versuchen</span>
                     </button>
                 </div>
             )}
 
             {/* Movements Table */}
             <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-right text-sm">
+                <table className="w-full text-left text-sm">
                     <thead>
                         <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 text-xs uppercase font-semibold">
-                            <th className="py-3.5 px-4">التاريخ والوقت</th>
-                            <th className="py-3.5 px-4">نوع الحركة</th>
-                            <th className="py-3.5 px-4">القطعة (SKU / الاسم)</th>
-                            <th className="py-3.5 px-4 text-center">الكمية</th>
-                            <th className="py-3.5 px-4">المصدر</th>
-                            <th className="py-3.5 px-4">الوجهة</th>
-                            <th className="py-3.5 px-4">المنفذ</th>
-                            <th className="py-3.5 px-4">السبب / المبرر</th>
+                            <th className="py-3.5 px-4">Datum & Zeit</th>
+                            <th className="py-3.5 px-4">Bewegungsart</th>
+                            <th className="py-3.5 px-4">Ersatzteil (SKU / Name)</th>
+                            <th className="py-3.5 px-4 text-center">Menge</th>
+                            <th className="py-3.5 px-4">Ausgangsort</th>
+                            <th className="py-3.5 px-4">Zielort</th>
+                            <th className="py-3.5 px-4">Mitarbeiter</th>
+                            <th className="py-3.5 px-4">Grund / Referenz</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
@@ -344,8 +344,8 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                             <tr>
                                 <td colSpan={8} className="py-16 text-center text-slate-500">
                                     <History className="mx-auto mb-3 opacity-40" size={40} />
-                                    <p className="font-semibold text-slate-400">لا توجد حركات مخزنية مطابقة</p>
-                                    <p className="text-xs text-slate-600 mt-1">سجل دفتر الأستاذ لحركات قطع الصيانة فارغ أو لا يطابق الفلاتر المحددة</p>
+                                    <p className="font-semibold text-slate-400">Keine passenden Lagerbewegungen gefunden</p>
+                                    <p className="text-xs text-slate-600 mt-1">Das Transaktionsjournal enthält keine Einträge für die aktuellen Filter</p>
                                 </td>
                             </tr>
                         ) : (
@@ -383,14 +383,14 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
                                                 {m.repairPart?.sku || '—'}
                                             </div>
                                             <div className="text-xs text-white truncate" title={m.repairPart?.name || ''}>
-                                                {m.repairPart?.name || 'قطعة محذوفة'}
+                                                {m.repairPart?.name || 'Unbekanntes Teil'}
                                             </div>
                                         </td>
 
                                         {/* Quantity */}
                                         <td className="py-3.5 px-4 text-center">
                                             <span className="font-bold text-sm text-white bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/50">
-                                                {m.quantity}
+                                                {m.quantity} Stk.
                                             </span>
                                         </td>
 
@@ -418,7 +418,7 @@ export const WarehouseMovementsTable: React.FC<WarehouseMovementsTableProps> = (
 
                                         {/* Performed By */}
                                         <td className="py-3.5 px-4 text-xs text-slate-300">
-                                            {m.performedBy?.displayName || 'المسؤول'}
+                                            {m.performedBy?.displayName || 'Administrator'}
                                         </td>
 
                                         {/* Reason */}

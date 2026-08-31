@@ -7,7 +7,7 @@ import { Plus, Boxes, RefreshCw } from 'lucide-react';
 import { useWarehouseData } from '../components/WarehouseManager/hooks/useWarehouseData';
 import { WarehouseStatCards } from '../components/WarehouseManager/components/WarehouseStatCards';
 import { WarehouseTabs } from '../components/WarehouseManager/components/WarehouseTabs';
-import { WarehousePartsTable } from '../components/WarehouseManager/components/WarehousePartsTable';
+import { WarehouseCatalogManager } from '../components/WarehouseManager/components/WarehouseCatalogManager';
 import { WarehouseMovementsTable } from '../components/WarehouseManager/components/WarehouseMovementsTable';
 import { WarehouseLocationsList } from '../components/WarehouseManager/components/WarehouseLocationsList';
 import { CreateMovementModal } from '../components/WarehouseManager/components/CreateMovementModal';
@@ -90,7 +90,7 @@ export default function WarehouseManager() {
                         </div>
                         <div>
                             <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                                مستودع قطع الصيانة
+                                Lager für Reparaturteile
                             </h2>
                             <p className="text-xs text-blue-400/90 font-mono">
                                 Repair Parts Warehouse & Physical Ledger
@@ -98,7 +98,7 @@ export default function WarehouseManager() {
                         </div>
                     </div>
                     <p className="text-slate-400 text-xs sm:text-sm mt-1">
-                        إدارة المخزون الفيزيائي لقطع الغيار والصيانة، وسجل الحركات الذرية ومواقع التخزين
+                        Verwaltung physischer Ersatzteilbestände, geführter Modellkatalog und unveränderliches Transaktionsjournal
                     </p>
                 </div>
 
@@ -106,11 +106,11 @@ export default function WarehouseManager() {
                     <button
                         type="button"
                         onClick={refreshAll}
-                        title="تحديث البيانات"
+                        title="Daten aktualisieren"
                         className="p-2.5 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5"
                     >
                         <RefreshCw size={15} />
-                        <span className="hidden sm:inline">تحديث</span>
+                        <span className="hidden sm:inline">Aktualisieren</span>
                     </button>
 
                     <button
@@ -119,7 +119,7 @@ export default function WarehouseManager() {
                         className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-[0_0_20px_rgba(37,99,235,0.35)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]"
                     >
                         <Plus size={18} />
-                        <span>تسجيل حركة مخزون</span>
+                        <span>Lagerbewegung erfassen</span>
                     </button>
                 </div>
             </div>
@@ -142,7 +142,7 @@ export default function WarehouseManager() {
 
             {/* Tab Views */}
             {activeTab === 'parts' && (
-                <WarehousePartsTable
+                <WarehouseCatalogManager
                     parts={parts}
                     locations={locations}
                     pagination={partsPagination}

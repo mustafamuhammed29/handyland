@@ -1,6 +1,6 @@
 /**
  * backend/admin/src/components/WarehouseManager/components/EditPartModal.tsx
- * Modal dialog for updating repair part catalog metadata (Phase 2C).
+ * Modal dialog for updating repair part catalog metadata (German).
  */
 import React, { useState, useEffect } from 'react';
 import { X, Edit2, CheckCircle2, AlertTriangle, Lock } from 'lucide-react';
@@ -58,13 +58,13 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
 
         const trimmedName = name.trim();
         if (!trimmedName) {
-            setFormError('اسم قطعة الصيانة إلزامي');
+            setFormError('Ersatzteilbezeichnung ist erforderlich.');
             return;
         }
 
         const parsedMinStock = parseInt(minStock, 10);
         if (Number.isNaN(parsedMinStock) || parsedMinStock < 0) {
-            setFormError('الحد الأدنى للمخزون يجب أن يكون رقماً صحيحاً موجباً أو صفراً');
+            setFormError('Mindestbestand muss eine positive ganze Zahl oder 0 sein.');
             return;
         }
 
@@ -89,18 +89,18 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
         try {
             const res = await api.patch(`/api/warehouse/parts/${part.id}`, payload);
             if (res.data?.success) {
-                toast.success('تم تحديث بيانات قطعة الصيانة بنجاح');
+                toast.success('Ersatzteil wurde erfolgreich aktualisiert.');
                 onSuccess();
                 onClose();
             } else {
-                setFormError(res.data?.message || 'فشل تحديث بيانات القطعة');
+                setFormError(res.data?.message || 'Fehler beim Aktualisieren des Ersatzteils.');
             }
         } catch (err: any) {
             const errorCode = err.response?.data?.error;
             if (errorCode === 'WAREHOUSE_PART_BARCODE_EXISTS') {
-                setFormError('رمز الباركود مستخدم مسبقاً لقطعة أخرى.');
+                setFormError('Dieser Barcode wird bereits für ein anderes Ersatzteil verwendet.');
             } else {
-                setFormError(err.response?.data?.message || 'حدث خطأ أثناء تحديث القطعة. تحقق من المدخلات.');
+                setFormError(err.response?.data?.message || 'Fehler beim Aktualisieren des Ersatzteils. Bitte Eingaben prüfen.');
             }
         } finally {
             setIsSubmitting(false);
@@ -117,8 +117,8 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                             <Edit2 size={18} />
                         </div>
                         <div>
-                            <h3 className="text-base font-bold text-white">تعديل بيانات قطعة الصيانة</h3>
-                            <p className="text-xs text-slate-400">تحديث البيانات الوصفية لقطعة الغيار في الكتالوج</p>
+                            <h3 className="text-base font-bold text-white">Ersatzteil bearbeiten</h3>
+                            <p className="text-xs text-slate-400">Metadaten des Reparaturteils im Katalog aktualisieren</p>
                         </div>
                     </div>
                     <button
@@ -143,7 +143,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                     <div>
                         <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
                             <Lock size={12} className="text-slate-500" />
-                            <span>رمز SKU (ثابت غير قابل للتعديل)</span>
+                            <span>SKU-Code (Unveränderlich)</span>
                         </label>
                         <div className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-cyan-400 font-bold select-none cursor-not-allowed">
                             {part.sku}
@@ -153,7 +153,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                     {/* Name */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            اسم قطعة الصيانة <span className="text-red-400">*</span>
+                            Ersatzteilbezeichnung <span className="text-red-400">*</span>
                         </label>
                         <input
                             type="text"
@@ -167,7 +167,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                     {/* Barcode */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            الباركود (اختياري)
+                            Barcode (Optional)
                         </label>
                         <input
                             type="text"
@@ -181,7 +181,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                     {/* Brand & Device Family */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">الماركة (Brand)</label>
+                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Marke (Brand)</label>
                             <input
                                 type="text"
                                 value={brand}
@@ -191,7 +191,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">عائلة الجهاز (Device Family)</label>
+                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Gerätefamilie (Device Family)</label>
                             <input
                                 type="text"
                                 value={deviceFamily}
@@ -205,7 +205,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                     {/* Part Type, Quality, Category */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">نوع القطعة (Part Type)</label>
+                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Teiletyp (Part Type)</label>
                             <input
                                 type="text"
                                 value={partType}
@@ -215,7 +215,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">الجودة (Quality)</label>
+                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Qualität (Quality)</label>
                             <input
                                 type="text"
                                 value={quality}
@@ -225,7 +225,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">الفئة (Category)</label>
+                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Kategorie (Category)</label>
                             <input
                                 type="text"
                                 value={category}
@@ -239,7 +239,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                     {/* Compatible Devices */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            الأجهزة المتوافقة (مفصولة بفواصل أو أسطر)
+                            Kompatible Modelle (Kommagetrennt oder pro Zeile)
                         </label>
                         <textarea
                             rows={2}
@@ -252,7 +252,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                     {/* Min Stock */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            الحد الأدنى لتنبيه نقص المخزون (Min Stock)
+                            Mindestbestand für Benachrichtigung (Min Stock)
                         </label>
                         <input
                             type="number"
@@ -272,7 +272,7 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                             disabled={isSubmitting}
                             className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                         >
-                            إلغاء
+                            Abbrechen
                         </button>
                         <button
                             type="submit"
@@ -280,11 +280,11 @@ export const EditPartModal: React.FC<EditPartModalProps> = ({
                             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)] disabled:opacity-50"
                         >
                             {isSubmitting ? (
-                                <span>جاري الحفظ...</span>
+                                <span>Speichern läuft …</span>
                             ) : (
                                 <>
                                     <CheckCircle2 size={15} />
-                                    <span>حفظ التعديلات</span>
+                                    <span>Änderungen speichern</span>
                                 </>
                             )}
                         </button>

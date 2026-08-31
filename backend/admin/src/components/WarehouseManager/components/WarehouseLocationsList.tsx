@@ -1,6 +1,6 @@
 /**
  * backend/admin/src/components/WarehouseManager/components/WarehouseLocationsList.tsx
- * Management view of physical warehouse locations, zones, racks, and bins (Phase 2B).
+ * Management view of physical warehouse locations, zones, racks, and bins (German).
  */
 import React, { useState } from 'react';
 import {
@@ -56,10 +56,10 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
 
     const handleDeactivate = async (loc: WarehouseLocation) => {
         const isConfirmed = await confirm({
-            title: 'تعطيل موقع التخزين',
-            message: `هل أنت متأكد من رغبتك في تعطيل الموقع (${loc.locationCode})؟ لن تتمكن من إضافة حركات استلام جديدة إليه. لا يمكن تعطيل المواقع التي تحتوي على أرصدة قطع غير صفرية.`,
-            confirmLabel: 'تعطيل الموقع',
-            cancelLabel: 'إلغاء',
+            title: 'Lagerort deaktivieren?',
+            message: `Möchten Sie den Lagerort (${loc.locationCode}) wirklich deaktivieren? Es können danach keine neuen Wareneingänge mehr dorthin gebucht werden. Lagerorte mit Bestand > 0 können nicht deaktiviert werden.`,
+            confirmLabel: 'Deaktivieren',
+            cancelLabel: 'Abbrechen',
             variant: 'danger'
         });
 
@@ -69,15 +69,15 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
         try {
             const res = await api.post(`/api/warehouse/locations/${loc.id}/deactivate`);
             if (res.data?.success) {
-                toast.success(`تم تعطيل الموقع ${loc.locationCode} بنجاح`);
+                toast.success(`Lagerort ${loc.locationCode} wurde erfolgreich deaktiviert.`);
                 onRefresh();
             }
         } catch (err: any) {
             const errorCode = err.response?.data?.error;
             if (errorCode === 'WAREHOUSE_LOCATION_NOT_EMPTY') {
-                toast.error('لا يمكن تعطيل الموقع لأنه يحتوي على قطع مخزنة برصيد غير صفري');
+                toast.error('Lagerort kann nicht deaktiviert werden, da er noch aktive Bestände enthält.');
             } else {
-                toast.error(err.response?.data?.message || 'فشل تعطيل الموقع');
+                toast.error(err.response?.data?.message || 'Fehler beim Deaktivieren des Lagerorts.');
             }
         } finally {
             setDeactivatingId(null);
@@ -91,7 +91,7 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
                 <div className="relative flex-1">
                     <input
                         type="text"
-                        placeholder="ابحث بكود الموقع أو المنطقة أو الرف..."
+                        placeholder="Nach Lagerort-Code, Zone oder Regal suchen …"
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
                         className="w-full bg-slate-950/70 border border-slate-700/60 rounded-xl px-4 py-2.5 pl-10 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
@@ -106,7 +106,7 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
                         onChange={(e) => onZoneChange(e.target.value)}
                         className="bg-slate-950/70 border border-slate-700/60 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-300 focus:outline-none focus:border-cyan-500 cursor-pointer"
                     >
-                        <option value="">كافة المناطق (All Zones)</option>
+                        <option value="">Alle Zonen</option>
                         {zones.map((z) => (
                             <option key={z} value={z}>
                                 {z}
@@ -120,7 +120,7 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
                         className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)]"
                     >
                         <Plus size={16} />
-                        <span>إضافة موقع جديد</span>
+                        <span>Lagerort anlegen</span>
                     </button>
                 </div>
             </div>
@@ -138,24 +138,24 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
                         className="flex items-center gap-1 px-3 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 rounded-lg text-xs font-semibold"
                     >
                         <RefreshCw size={12} />
-                        <span>إعادة المحاولة</span>
+                        <span>Erneut versuchen</span>
                     </button>
                 </div>
             )}
 
             {/* Locations Table */}
             <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-right text-sm">
+                <table className="w-full text-left text-sm">
                     <thead>
                         <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 text-xs uppercase font-semibold">
-                            <th className="py-3.5 px-4">كود الموقع (Code)</th>
-                            <th className="py-3.5 px-4">المنطقة (Zone)</th>
-                            <th className="py-3.5 px-4">الرف (Rack)</th>
-                            <th className="py-3.5 px-4">المستوى (Shelf)</th>
-                            <th className="py-3.5 px-4">الصندوق (Bin)</th>
-                            <th className="py-3.5 px-4">الوصف</th>
-                            <th className="py-3.5 px-4 text-center">الحالة</th>
-                            <th className="py-3.5 px-4 text-center">الإجراءات</th>
+                            <th className="py-3.5 px-4">Lagerort-Code</th>
+                            <th className="py-3.5 px-4">Zone</th>
+                            <th className="py-3.5 px-4">Regal (Rack)</th>
+                            <th className="py-3.5 px-4">Ebene (Shelf)</th>
+                            <th className="py-3.5 px-4">Fach (Bin)</th>
+                            <th className="py-3.5 px-4">Beschreibung</th>
+                            <th className="py-3.5 px-4 text-center">Status</th>
+                            <th className="py-3.5 px-4 text-center">Aktionen</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
@@ -171,8 +171,8 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
                             <tr>
                                 <td colSpan={8} className="py-16 text-center text-slate-500">
                                     <MapPin className="mx-auto mb-3 opacity-40" size={40} />
-                                    <p className="font-semibold text-slate-400">لا توجد مواقع تخزين تطابق البحث</p>
-                                    <p className="text-xs text-slate-600 mt-1">تأكد من إدخال كود موقع صحيح أو اختر منطقة أخرى</p>
+                                    <p className="font-semibold text-slate-400">Keine Lagerorte gefunden</p>
+                                    <p className="text-xs text-slate-600 mt-1">Prüfen Sie den Suchbegriff oder wählen Sie eine andere Zone</p>
                                 </td>
                             </tr>
                         ) : (
@@ -219,12 +219,12 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
                                         {loc.isActive ? (
                                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold">
                                                 <CheckCircle size={10} />
-                                                <span>مفعل</span>
+                                                <span>Aktiv</span>
                                             </span>
                                         ) : (
                                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-500 text-[11px] font-semibold">
                                                 <XCircle size={10} />
-                                                <span>معطل</span>
+                                                <span>Deaktiviert</span>
                                             </span>
                                         )}
                                     </td>
@@ -236,7 +236,7 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
                                                 type="button"
                                                 onClick={() => setEditingLocation(loc)}
                                                 className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs transition-colors"
-                                                title="تعديل بيانات الموقع"
+                                                title="Lagerort bearbeiten"
                                             >
                                                 <Edit2 size={13} />
                                             </button>
@@ -246,7 +246,7 @@ export const WarehouseLocationsList: React.FC<WarehouseLocationsListProps> = ({
                                                     onClick={() => handleDeactivate(loc)}
                                                     disabled={deactivatingId === loc.id}
                                                     className="p-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-300 border border-red-800/40 rounded-lg text-xs transition-colors disabled:opacity-50"
-                                                    title="تعطيل الموقع"
+                                                    title="Lagerort deaktivieren"
                                                 >
                                                     <PowerOff size={13} />
                                                 </button>
