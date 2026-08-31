@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star, Box, PhoneForwarded, ShieldCheck, Languages, TrendingUp, BarChart3, RotateCcw, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Wrench, Settings, LogOut, Headphones, ScanLine, FileText, Package, Users, Mail, ShoppingCart, CreditCard, Truck, MessageSquare, Star, Box, Boxes, PhoneForwarded, ShieldCheck, Languages, TrendingUp, BarChart3, RotateCcw, Menu, X } from 'lucide-react';
 
 // Eagerly loaded (always needed)
 import Login from './pages/Login';
@@ -15,6 +15,7 @@ import { AdminErrorBoundary } from './components/AdminErrorBoundary';
 // Lazy-loaded pages (loaded on-demand for faster initial load)
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const InventoryManager = React.lazy(() => import('./pages/InventoryManager'));
+const WarehouseManager = React.lazy(() => import('./pages/WarehouseManager'));
 const ActiveCarts = React.lazy(() => import('./components/ActiveCarts').then(m => ({ default: m.ActiveCarts })));
 const ProductsManager = React.lazy(() => import('./pages/ProductsManager'));
 const RepairManager = React.lazy(() => import('./pages/RepairManager'));
@@ -159,6 +160,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarLink to="/accessories" icon={Headphones} label="Accessories" />
 
           <SidebarSectionHeader title="Repairs & Services" />
+          <SidebarLink to="/warehouse" icon={Boxes} label="مستودع قطع الصيانة" />
           <SidebarLink to="/repairs" icon={Wrench} label="Repairs Catalog" />
           <SidebarLink to="/repair-tickets" icon={FileText} label="Repair Tickets" />
 
@@ -298,6 +300,7 @@ function AppContent() {
                   <Route path="/users" element={<UsersManager />} />
                   <Route path="/wallet" element={<WalletManager />} />
                   <Route path="/inventory" element={<InventoryManager />} />
+                  <Route path="/warehouse" element={<WarehouseManager />} />
                   <Route path="/orders" element={<OrdersManager />} />
                   <Route path="/products" element={<ProductsManager />} />
                   <Route path="/accessories" element={<AccessoriesManager />} />
