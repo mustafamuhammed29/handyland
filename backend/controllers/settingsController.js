@@ -7,11 +7,53 @@
 const { supabaseAdmin } = require('../config/supabase');
 const { clearCache } = require('../middleware/cache');
 
+const PUBLIC_SETTINGS_KEYS = [
+    'general',
+    'siteName',
+    'contactEmail',
+    'footerText',
+    'language',
+    'freeShippingThreshold',
+    'taxRate',
+    'vipTiers',
+    'ecoImpact',
+    'accessoryCategories',
+    'hero',
+    'content',
+    'stats',
+    'repairArchive',
+    'sections',
+    'footerSection',
+    'contactSection',
+    'navbar',
+    'theme',
+    'announcementBanner',
+    'promoPopup',
+    'cookieConsent',
+    'featuredServices',
+    'repairPreviewCards',
+    'serviceTerminal',
+    'features',
+    'socialAuth',
+    'seo',
+    'valuation',
+    'productFaqs',
+    'accessoryFaqs'
+];
+
+// Internal-only flag keys queried solely to derive public socialAuth booleans
+const SOCIAL_AUTH_INPUT_KEYS = ['google_enabled', 'facebook_enabled'];
+const SETTINGS_QUERY_KEYS = [...PUBLIC_SETTINGS_KEYS, ...SOCIAL_AUTH_INPUT_KEYS];
+
 // ── @route GET /api/settings ──────────────────────────────────
 exports.getSettings = async (req, res, next) => {
     try {
         const { group } = req.query;
-        let query = supabaseAdmin.from('settings').select('*');
+        let query = supabaseAdmin
+            .from('settings')
+            .select('key, value')
+            .in('key', SETTINGS_QUERY_KEYS);
+
         if (group) query = query.eq('group', group);
 
         const { data, error } = await query;
@@ -19,27 +61,56 @@ exports.getSettings = async (req, res, next) => {
 
         // Convert array to object key-value pairs
         const settings = {};
-        data.forEach(item => { 
+        let googleEnabledFromRow;
+        let facebookEnabledFromRow;
+        let socialAuthFromRow;
+
+        (data || []).forEach(item => {
+            if (!item || !item.key || !SETTINGS_QUERY_KEYS.includes(item.key) || item.key.startsWith('reset_token_')) {
+                return;
+            }
+
+            // Capture internal social auth flags without exposing them directly
+            if (item.key === 'google_enabled') {
+                googleEnabledFromRow = item.value === 'true' || item.value === true;
+                return;
+            }
+            if (item.key === 'facebook_enabled') {
+                facebookEnabledFromRow = item.value === 'true' || item.value === true;
+                return;
+            }
+
             try {
-                // Try to parse as JSON if it looks like an object/array
+                let parsed = item.value;
                 if (typeof item.value === 'string' && (item.value.startsWith('{') || item.value.startsWith('['))) {
-                    let parsed = JSON.parse(item.value);
-                    if (item.key === 'payment') {
-                        for (const provider of Object.keys(parsed)) {
-                            if (parsed[provider]) {
-                                delete parsed[provider].secretKey;
-                                delete parsed[provider].webhookSecret;
-                            }
-                        }
-                    }
+                    parsed = JSON.parse(item.value);
+                }
+
+                if (item.key === 'socialAuth') {
+                    socialAuthFromRow = (parsed && typeof parsed === 'object') ? parsed : {};
+                } else if (PUBLIC_SETTINGS_KEYS.includes(item.key)) {
                     settings[item.key] = parsed;
-                } else {
-                    settings[item.key] = item.value;
                 }
             } catch (e) {
-                settings[item.key] = item.value;
+                if (item.key !== 'socialAuth' && PUBLIC_SETTINGS_KEYS.includes(item.key)) {
+                    settings[item.key] = item.value;
+                }
             }
         });
+
+        // Determine socialAuth booleans with deterministic precedence:
+        // 1. Explicit google_enabled / facebook_enabled individual row values
+        // 2. Fallback to socialAuth JSON object properties
+        // 3. Default to false
+        const google = googleEnabledFromRow !== undefined
+            ? googleEnabledFromRow
+            : Boolean(socialAuthFromRow && socialAuthFromRow.google);
+
+        const facebook = facebookEnabledFromRow !== undefined
+            ? facebookEnabledFromRow
+            : Boolean(socialAuthFromRow && socialAuthFromRow.facebook);
+
+        settings.socialAuth = { google, facebook };
 
         return res.status(200).json({ success: true, settings, data: settings });
     } catch (error) { next(error); }

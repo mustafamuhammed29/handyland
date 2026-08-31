@@ -84,13 +84,48 @@ exports.getProducts = async (req, res, next) => {
     }
 };
 
+const PUBLIC_PRODUCT_FIELDS = [
+    'id',
+    'legacy_id',
+    'name',
+    'price',
+    'stock',
+    'sold',
+    'is_active',
+    'barcode',
+    'description',
+    'features',
+    'image',
+    'images',
+    'category',
+    'sub_category',
+    'brand',
+    'model',
+    'condition',
+    'seller',
+    'battery',
+    'processor',
+    'color',
+    'display',
+    'storage',
+    'specs',
+    'rating',
+    'num_reviews',
+    'seo_meta_title',
+    'seo_meta_description',
+    'seo_keywords',
+    'seo_canonical_url',
+    'created_at',
+    'updated_at'
+].join(', ');
+
 // ── @route GET /api/products/:id ──────────────────────────────
 exports.getProduct = async (req, res, next) => {
     try {
         const { id } = req.params;
 
         // Support both UUID and legacy string ID
-        let query = supabaseAdmin.from('products').select('*, product_imeis(*)');
+        let query = supabaseAdmin.from('products').select(PUBLIC_PRODUCT_FIELDS);
 
         if (id.includes('-') && id.length === 36) {
             query = query.eq('id', id);
