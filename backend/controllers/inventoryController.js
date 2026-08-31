@@ -153,6 +153,15 @@ exports.getStockHistory = async (req, res, next) => {
 exports.updateStock = async (req, res, next) => {
     try {
         const { id, type } = req.params;
+
+        if (type === 'RepairPart') {
+            return res.status(409).json({
+                success: false,
+                error: 'LEGACY_REPAIR_PARTS_MUTATION_DISABLED',
+                message: 'Repair parts must be managed through the warehouse module.'
+            });
+        }
+
         const { stock, newStock, price, costPrice, changeAmount, reason, notes, isMarginScheme, imeis } = req.body;
         
         const targetStock = stock !== undefined ? stock : newStock;

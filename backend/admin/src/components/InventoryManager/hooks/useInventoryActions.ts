@@ -16,6 +16,10 @@ export function useInventoryActions(refreshData: () => void) {
 
     const handleUpdateItem = async (editForm: any) => {
         try {
+            if (editingItem?.type === 'RepairPart') {
+                return { success: false, error: "Repair parts must be managed through the warehouse module." };
+            }
+
             const endpoint = `/api/inventory/${editingItem.type}/${editingItem._id}/stock`;
             const payload: any = {
                 stock: editForm.stock,
@@ -53,6 +57,10 @@ export function useInventoryActions(refreshData: () => void) {
 
     const handleInlineUpdate = async (item: any, field: string, value: any) => {
         try {
+            if (item?.type === 'RepairPart') {
+                return { success: false, error: "Repair parts must be managed through the warehouse module." };
+            }
+
             const endpoint = `/api/inventory/${item.type}/${item._id}/stock`;
             const payload: any = { reason: 'Inline Edit', notes: '' };
             payload[field] = value;
@@ -66,16 +74,8 @@ export function useInventoryActions(refreshData: () => void) {
         }
     };
 
-    const handleAddPartSave = async (addPartForm: any) => {
-        try {
-            await api.post('/api/repair-parts', addPartForm);
-            setIsAddPartModalOpen(false);
-            refreshData();
-            return { success: true };
-        } catch (error: any) {
-            console.error("Error saving part:", error);
-            return { success: false, error: error.response?.data?.message || "Error saving part. Check barcode uniqueness." };
-        }
+    const handleAddPartSave = async (_addPartForm: any) => {
+        return { success: false, error: "Repair parts must be created through the warehouse module." };
     };
 
     const handleAddDeviceSave = async (addForm: any) => {
@@ -104,11 +104,15 @@ export function useInventoryActions(refreshData: () => void) {
 
     const handleBulkDelete = async (itemsToDelete: any[]) => {
         try {
-            await Promise.all(itemsToDelete.map(async (item) => {
+            const eligibleItems = itemsToDelete.filter(item => item.type !== 'RepairPart');
+            if (eligibleItems.length === 0) {
+                return { success: false, error: "Repair parts cannot be deleted. Manage them in the warehouse." };
+            }
+
+            await Promise.all(eligibleItems.map(async (item) => {
                 let endpoint = '';
                 if (item.type === 'Product') endpoint = `/api/products/${item._id}`;
                 else if (item.type === 'Accessory') endpoint = `/api/accessories/${item._id}`;
-                else if (item.type === 'RepairPart') endpoint = `/api/repair-parts/${item._id}`;
                 
                 if (endpoint) {
                     await api.delete(endpoint);

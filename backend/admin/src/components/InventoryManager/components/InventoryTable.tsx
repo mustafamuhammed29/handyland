@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useConfirm } from '../../../context/ConfirmContext';
-import { ArrowUpDown, Box, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Box, Boxes, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 import { Pagination } from './Pagination';
 
 interface InventoryTableProps {
@@ -200,12 +201,13 @@ export function InventoryTable({
                         {itemsPageData.map((item) => (
                             <tr key={item._id} className={`transition-all duration-200 group ${selectedIds.has(item._id) ? 'bg-blue-900/20' : 'hover:bg-slate-800/60'}`}>
                                 <td className="p-4 pl-6">
-                                    <input 
-                                        type="checkbox" 
-                                        title="Select Item"
+                                    <input
+                                        type="checkbox"
+                                        title={item.type === 'RepairPart' ? 'Repair parts must be managed in warehouse' : 'Select Item'}
                                         checked={selectedIds.has(item._id)}
+                                        disabled={item.type === 'RepairPart'}
                                         onChange={() => toggleSelect(item._id)}
-                                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500 cursor-pointer" 
+                                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                                     />
                                 </td>
                                 <td className="p-4 font-bold text-white">
@@ -235,20 +237,30 @@ export function InventoryTable({
                                     </span>
                                 </td>
                                 <td className="p-4 text-sm font-medium">
-                                    <InlineEditCell 
-                                        value={item.price} 
-                                        prefix="€" 
-                                        onSave={(val: number) => handleInlineUpdate(item, 'price', val)} 
-                                    />
+                                    {item.type === 'RepairPart' ? (
+                                        <span className="text-slate-300">€{(item.price || 0).toFixed(2)}</span>
+                                    ) : (
+                                        <InlineEditCell
+                                            value={item.price}
+                                            prefix="€"
+                                            onSave={(val: number) => handleInlineUpdate(item, 'price', val)}
+                                        />
+                                    )}
                                 </td>
                                 <td className="p-4 text-emerald-400 font-bold text-sm">€{((item.price || 0) - (item.costPrice || 0)).toFixed(2)}</td>
                                 <td className="p-4 font-medium">
                                     <div className="flex items-center gap-2">
                                         <div className={`w-2 h-2 rounded-full shadow-sm ${item.stock === 0 ? 'bg-red-500 shadow-red-500/50' : item.stock <= (item.minStock || 5) ? 'bg-amber-500 shadow-amber-500/50' : 'bg-emerald-500 shadow-emerald-500/50'}`}></div>
-                                        <InlineEditCell 
-                                            value={item.stock} 
-                                            onSave={(val: number) => handleInlineUpdate(item, 'stock', val)} 
-                                        />
+                                        {item.type === 'RepairPart' ? (
+                                            <span className="text-slate-300 font-semibold px-2 py-1" title="Managed in Warehouse">
+                                                {item.stock}
+                                            </span>
+                                        ) : (
+                                            <InlineEditCell
+                                                value={item.stock}
+                                                onSave={(val: number) => handleInlineUpdate(item, 'stock', val)}
+                                            />
+                                        )}
                                     </div>
                                 </td>
                                 <td className="p-4 pr-6 text-right relative">
@@ -262,15 +274,27 @@ export function InventoryTable({
 
                                     {openDropdownId === item._id && (
                                         <div className="absolute right-6 top-10 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-[50] animate-in fade-in slide-in-from-top-2">
-                                            <button onClick={() => { handleEditClick(item); setOpenDropdownId(null); }} className="w-full text-left px-4 py-2.5 text-sm text-slate-300 hover:text-blue-400 hover:bg-slate-700/50 flex items-center gap-2 transition-colors">
-                                                <Edit2 size={16} /> Edit Details
-                                            </button>
-                                            <button onClick={() => { handleEditClick(item); setOpenDropdownId(null); }} className="w-full text-left px-4 py-2.5 text-sm text-emerald-400 hover:text-emerald-300 hover:bg-slate-700/50 flex items-center gap-2 transition-colors border-t border-slate-700/50">
-                                                <Box size={16} /> Advanced Stock
-                                            </button>
-                                            <button onClick={() => { setOpenDropdownId(null); handleDeleteSingle(item); }} className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-slate-700/50 flex items-center gap-2 transition-colors border-t border-slate-700/50">
-                                                <Trash2 size={16} /> Delete Item
-                                            </button>
+                                            {item.type === 'RepairPart' ? (
+                                                <Link
+                                                    to="/warehouse"
+                                                    onClick={() => setOpenDropdownId(null)}
+                                                    className="w-full text-left px-4 py-2.5 text-sm text-blue-400 hover:text-blue-300 hover:bg-slate-700/50 flex items-center gap-2 transition-colors"
+                                                >
+                                                    <Boxes size={16} /> فتح في المستودع
+                                                </Link>
+                                            ) : (
+                                                <>
+                                                    <button onClick={() => { handleEditClick(item); setOpenDropdownId(null); }} className="w-full text-left px-4 py-2.5 text-sm text-slate-300 hover:text-blue-400 hover:bg-slate-700/50 flex items-center gap-2 transition-colors">
+                                                        <Edit2 size={16} /> Edit Details
+                                                    </button>
+                                                    <button onClick={() => { handleEditClick(item); setOpenDropdownId(null); }} className="w-full text-left px-4 py-2.5 text-sm text-emerald-400 hover:text-emerald-300 hover:bg-slate-700/50 flex items-center gap-2 transition-colors border-t border-slate-700/50">
+                                                        <Box size={16} /> Advanced Stock
+                                                    </button>
+                                                    <button onClick={() => { setOpenDropdownId(null); handleDeleteSingle(item); }} className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-slate-700/50 flex items-center gap-2 transition-colors border-t border-slate-700/50">
+                                                        <Trash2 size={16} /> Delete Item
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
                                     )}
                                 </td>

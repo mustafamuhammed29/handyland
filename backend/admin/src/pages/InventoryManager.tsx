@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { Boxes, ArrowRight } from 'lucide-react';
 import { useInventoryData } from '../components/InventoryManager/hooks/useInventoryData';
 import { useInventoryActions } from '../components/InventoryManager/hooks/useInventoryActions';
 import { StatCards } from '../components/InventoryManager/components/StatCards';
@@ -90,12 +92,6 @@ export default function InventoryManager() {
                         >
                             + Accessory
                         </button>
-                        <button
-                            onClick={() => setIsAddPartModalOpen(true)}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center gap-2 whitespace-nowrap"
-                        >
-                            + Part
-                        </button>
                     </div>
                 )}
             </div>
@@ -103,6 +99,33 @@ export default function InventoryManager() {
             <StatCards stats={stats} />
 
             <StockTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            {/* Warehouse Transition Banner for Repair Parts */}
+            {activeTab === 'items' && typeFilter === 'RepairPart' && (
+                <div className="mb-6 p-4 bg-blue-950/40 border border-blue-800/60 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fadeIn">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                            <Boxes size={20} />
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-white">
+                                تم نقل إدارة قطع الصيانة إلى صفحة مستودع قطع الصيانة لضمان دقة الأرصدة وسجل الحركات.
+                            </p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                                تتم إدارة الكتالوج وحركات المخزون حصرياً عبر مستودع قطع الصيانة.
+                            </p>
+                        </div>
+                    </div>
+                    <Link
+                        to="/warehouse"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] shrink-0 flex items-center gap-1.5"
+                    >
+                        <span>فتح مستودع قطع الصيانة</span>
+                        <ArrowRight size={14} />
+                    </Link>
+                </div>
+            )}
+
 
             {activeTab === 'items' && (
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 bg-slate-900/40 p-3 rounded-2xl border border-slate-700/50 backdrop-blur-md shadow-lg">

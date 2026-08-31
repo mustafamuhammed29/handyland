@@ -40,57 +40,27 @@ exports.getParts = async (req, res, next) => {
 
 // @route POST /api/repair-parts
 exports.createPart = async (req, res, next) => {
-    try {
-        const { name, sku, category, compatibleDevices, stock, minStock, costPrice, sellPrice, supplierId } = req.body;
-        if (!name || !sku) return res.status(400).json({ success: false, message: 'Name and SKU are required' });
-
-        const { data, error } = await supabaseAdmin
-            .from('repair_parts')
-            .insert({
-                name, sku, category,
-                compatible_devices: compatibleDevices || [],
-                stock: stock || 0,
-                min_stock: minStock || 2,
-                cost_price: costPrice || 0,
-                sell_price: sellPrice || 0,
-                supplier_id: supplierId || null
-            })
-            .select().single();
-
-        if (error) throw error;
-        return res.status(201).json({ success: true, data });
-    } catch (error) { next(error); }
+    return res.status(409).json({
+        success: false,
+        error: 'LEGACY_REPAIR_PARTS_MUTATION_DISABLED',
+        message: 'Repair parts must be managed through the warehouse module.'
+    });
 };
 
 // @route PUT /api/repair-parts/:id
 exports.updatePart = async (req, res, next) => {
-    try {
-        const { name, sku, category, compatibleDevices, stock, minStock, costPrice, sellPrice, supplierId, isActive } = req.body;
-        const updateData = {};
-
-        if (name) updateData.name = name;
-        if (sku) updateData.sku = sku;
-        if (category) updateData.category = category;
-        if (compatibleDevices) updateData.compatible_devices = compatibleDevices;
-        if (stock !== undefined) updateData.stock = stock;
-        if (minStock !== undefined) updateData.min_stock = minStock;
-        if (costPrice !== undefined) updateData.cost_price = costPrice;
-        if (sellPrice !== undefined) updateData.sell_price = sellPrice;
-        if (supplierId !== undefined) updateData.supplier_id = supplierId;
-        if (isActive !== undefined) updateData.is_active = isActive;
-
-        const { data, error } = await supabaseAdmin.from('repair_parts').update(updateData).eq('id', req.params.id).select().single();
-        if (error || !data) return res.status(404).json({ success: false, message: 'Part not found' });
-
-        return res.status(200).json({ success: true, data });
-    } catch (error) { next(error); }
+    return res.status(409).json({
+        success: false,
+        error: 'LEGACY_REPAIR_PARTS_MUTATION_DISABLED',
+        message: 'Repair parts must be managed through the warehouse module.'
+    });
 };
 
 // @route DELETE /api/repair-parts/:id
 exports.deletePart = async (req, res, next) => {
-    try {
-        const { error } = await supabaseAdmin.from('repair_parts').delete().eq('id', req.params.id);
-        if (error) throw error;
-        return res.status(200).json({ success: true, message: 'Part deleted' });
-    } catch (error) { next(error); }
+    return res.status(409).json({
+        success: false,
+        error: 'LEGACY_REPAIR_PARTS_MUTATION_DISABLED',
+        message: 'Repair parts must be managed through the warehouse module.'
+    });
 };
