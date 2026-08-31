@@ -3,6 +3,8 @@ process.env.STRIPE_SECRET_KEY = 'sk_test_123';
 process.env.JWT_SECRET = 'test_jwt_secret';
 process.env.SUPABASE_URL = 'http://localhost:54321';
 process.env.SUPABASE_SERVICE_KEY = 'test_service_key';
+process.env.AUTH_2FA_SESSION_ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+process.env.AUTH_2FA_CHALLENGE_STORE_ENABLED = 'true';
 
 // Mock UUID to avoid ESM 'export' syntax errors in Jest
 jest.mock('uuid', () => {

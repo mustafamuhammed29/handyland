@@ -133,12 +133,35 @@ const startDataCleanupJob = () => {
 };
 
 /**
+ * 2FA Challenge Store Cleanup Job
+ * Runs every 5 minutes to safely revoke expired, max-failed, or retry-pending sessions.
+ */
+const start2FAChallengeCleanupJob = () => {
+    // '*/5 * * * *' = Every 5 minutes
+    const task = cron.schedule('*/5 * * * *', async () => {
+        try {
+            const { isChallengeStoreEnabled, cleanupExpiredAndFailedChallenges } = require('./twoFactorChallengeService');
+            if (isChallengeStoreEnabled()) {
+                const stats = await cleanupExpiredAndFailedChallenges({ batchSize: 25 });
+                if (stats.processed > 0) {
+                    logger.info(`🧹 [Cron] 2FA challenge cleanup completed: ${stats.processed} processed, ${stats.revoked} revoked, ${stats.failedRetries} retry errors.`);
+                }
+            }
+        } catch (err) {
+            logger.error(`❌ [Cron] 2FA challenge cleanup error: ${err.message}`);
+        }
+    });
+    activeTasks.push(task);
+};
+
+/**
  * Bootstraps and registers all active background services.
  */
 const initCronJobs = () => {
     logger.info('⏰ Initialize all HandyLand Background Cron Services...');
     startCartRecoveryJob();
     startDataCleanupJob();
+    start2FAChallengeCleanupJob();
 };
 
 /**
@@ -159,5 +182,6 @@ const stopCronJobs = () => {
 
 module.exports = {
     initCronJobs,
-    stopCronJobs
+    stopCronJobs,
+    start2FAChallengeCleanupJob
 };

@@ -142,6 +142,19 @@ const authLimiterWrapper = isDevelopment
     : authLimiter;
 router.post('/admin/login', authLimiterWrapper, authController.adminLogin);
 router.post('/admin/refresh', authController.adminRefreshToken);
+
+// 2FA Login Challenge Endpoints
+const verify2FALoginRules = [
+    body('challengeId').isUUID().withMessage('Valid challengeId is required'),
+    body('otp').trim().isLength({ min: 6, max: 6 }).isNumeric().withMessage('OTP must be a 6-digit number')
+];
+
+const cancel2FALoginRules = [
+    body('challengeId').isUUID().withMessage('Valid challengeId is required')
+];
+
+router.post('/2fa/verify-login', authLimiterWrapper, validate(verify2FALoginRules), authController.verify2FALogin);
+router.post('/2fa/cancel-login', authLimiterWrapper, validate(cancel2FALoginRules), authController.cancel2FALogin);
 router.get('/admin/users', protect, (req, res, next) => {
     const role = req.user?.role?.toLowerCase();
     if (role !== 'admin' && role !== 'administrator') {

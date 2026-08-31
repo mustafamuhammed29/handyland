@@ -160,22 +160,34 @@ describe('Cookie-Only Authentication & Security Hardening Tests', () => {
                 }
             });
 
-            supabaseAdmin.from.mockImplementation(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: {
-                        id: '2fa-user-1',
-                        name: '2FA User',
-                        email: '2fa@handyland.de',
-                        role: 'user',
-                        is_active: true,
-                        is_verified: true,
-                        two_factor_enabled: true
-                    },
-                    error: null
-                })
-            }));
+            supabaseAdmin.from.mockImplementation((table) => {
+                if (table === 'users') {
+                    return {
+                        select: jest.fn().mockReturnThis(),
+                        eq: jest.fn().mockReturnThis(),
+                        single: jest.fn().mockResolvedValue({
+                            data: {
+                                id: '2fa-user-1',
+                                name: '2FA User',
+                                email: '2fa@handyland.de',
+                                role: 'user',
+                                is_active: true,
+                                is_verified: true,
+                                two_factor_enabled: true
+                            },
+                            error: null
+                        }),
+                        update: jest.fn().mockReturnThis()
+                    };
+                }
+                return {
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    is: jest.fn().mockReturnThis(),
+                    insert: jest.fn().mockResolvedValue({ data: null, error: null }),
+                    update: jest.fn().mockReturnThis()
+                };
+            });
 
             const res = await request(app)
                 .post('/api/auth/login')

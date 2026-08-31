@@ -7,6 +7,12 @@
 
 const { supabaseAdmin, createAuthClient } = require('../config/supabase');
 const { getValidatedSameSitePolicy } = require('../config/originSecurity');
+const {
+    isChallengeStoreEnabled,
+    create2FAChallenge,
+    verifyLoginOtp,
+    cancelLoginChallenge
+} = require('../services/twoFactorChallengeService');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
@@ -268,11 +274,27 @@ exports.login = async (req, res, next) => {
 
         // 2FA check
         if (userProfile.two_factor_enabled) {
-            // Return partial success — frontend will prompt for OTP
-            return res.status(200).json({
-                success: true,
-                twoFactorRequired: true,
-                userId: data.user.id
+            if (isChallengeStoreEnabled()) {
+                const appType = req.headers['x-app-type'] || 'frontend';
+                const { challengeId } = await create2FAChallenge({
+                    userId: data.user.id,
+                    session: data.session,
+                    appType
+                });
+
+                return res.status(200).json({
+                    success: true,
+                    twoFactorRequired: true,
+                    challengeId,
+                    appType
+                });
+            }
+
+            // Fail closed if 2FA is enabled on account but feature store is disabled
+            return res.status(503).json({
+                success: false,
+                code: 'TWO_FACTOR_LOGIN_UNAVAILABLE',
+                message: 'Two-factor authentication is temporarily unavailable. Please contact support.'
             });
         }
 
@@ -904,6 +926,30 @@ exports.adminLogin = async (req, res, next) => {
             }
         }
         
+        // 2FA check for admin
+        if (userProfile.two_factor_enabled) {
+            if (isChallengeStoreEnabled()) {
+                const { challengeId } = await create2FAChallenge({
+                    userId: data.user.id,
+                    session: data.session,
+                    appType: 'admin'
+                });
+
+                return res.status(200).json({
+                    success: true,
+                    twoFactorRequired: true,
+                    challengeId,
+                    appType: 'admin'
+                });
+            }
+
+            return res.status(503).json({
+                success: false,
+                code: 'TWO_FACTOR_LOGIN_UNAVAILABLE',
+                message: 'Two-factor authentication is temporarily unavailable. Please contact support.'
+            });
+        }
+
         const userData = sendTokenResponse(res, data.session, userProfile, 'admin');
         return res.status(200).json({ success: true, user: userData, data: userData });
     } catch (error) { next(error); }
@@ -974,5 +1020,88 @@ exports.checkEmailAvailability = async (req, res, next) => {
     } catch (error) { 
         console.error('Check email error:', error);
         next(error); 
+    }
+};
+
+// ── @route POST /api/auth/2fa/verify-login ─────────────────────
+exports.verify2FALogin = async (req, res, next) => {
+    try {
+        const { challengeId, otp, appType } = req.body;
+        const targetAppType = appType || req.headers['x-app-type'] || 'frontend';
+
+        const result = await verifyLoginOtp({
+            challengeId,
+            otp,
+            appType: targetAppType
+        });
+
+        if (!result.success) {
+            return res.status(result.status || 400).json({
+                success: false,
+                message: result.message || 'Verification failed',
+                ...(result.attemptsRemaining !== undefined ? { attemptsRemaining: result.attemptsRemaining } : {})
+            });
+        }
+
+        // If admin login, ensure verified user actually has admin role
+        if (targetAppType === 'admin') {
+            const role = (result.user.role || '').toLowerCase();
+            if (role !== 'admin' && role !== 'administrator') {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied: Admin role required'
+                });
+            }
+        }
+
+        // Fetch addresses if frontend user
+        if (targetAppType === 'frontend') {
+            const { data: addresses } = await supabaseAdmin
+                .from('addresses')
+                .select('*')
+                .eq('user_id', result.user.id)
+                .order('is_default', { ascending: false });
+
+            result.user.addresses = (addresses || []).map(addr => ({
+                _id: addr.id,
+                id: addr.id,
+                name: addr.name,
+                street: addr.street,
+                city: addr.city,
+                state: addr.state,
+                postalCode: addr.postal_code || addr.zip_code,
+                zipCode: addr.zip_code || addr.postal_code,
+                country: addr.country,
+                phone: addr.phone,
+                isDefault: addr.is_default
+            }));
+        }
+
+        const userData = sendTokenResponse(res, result.session, result.user, targetAppType);
+
+        // Reset login attempts
+        await supabaseAdmin
+            .from('users')
+            .update({ login_attempts: 0, lock_until: null })
+            .eq('id', result.user.id);
+
+        return res.status(200).json({
+            success: true,
+            user: userData,
+            data: userData
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── @route POST /api/auth/2fa/cancel-login ─────────────────────
+exports.cancel2FALogin = async (req, res, next) => {
+    try {
+        const { challengeId } = req.body;
+        const result = await cancelLoginChallenge({ challengeId });
+        return res.status(200).json(result);
+    } catch (error) {
+        next(error);
     }
 };

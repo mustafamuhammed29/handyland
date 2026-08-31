@@ -17,6 +17,14 @@ const validateEnv = () => {
         }
     });
 
+    // Enforce 2FA Challenge Store Encryption Key when the feature is enabled
+    if (process.env.AUTH_2FA_CHALLENGE_STORE_ENABLED === 'true') {
+        const key = process.env.AUTH_2FA_SESSION_ENCRYPTION_KEY;
+        if (!key || typeof key !== 'string' || !/^[0-9a-fA-F]{64}$/.test(key.trim())) {
+            missing.push('AUTH_2FA_SESSION_ENCRYPTION_KEY (must be 64 hex characters)');
+        }
+    }
+
     if (missing.length > 0) {
         logger.error(`❌ Missing or placeholder environment variables: ${missing.join(', ')}`);
 
