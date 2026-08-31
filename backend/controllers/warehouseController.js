@@ -16,6 +16,11 @@ const {
     updateWarehouseLocation,
     deactivateWarehouseLocation
 } = require('../services/warehouseLocationService');
+const {
+    createWarehousePart,
+    updateWarehousePart,
+    discontinueWarehousePart
+} = require('../services/warehouseCatalogService');
 
 /**
  * @route POST /api/warehouse/movements
@@ -207,6 +212,80 @@ exports.deactivateLocation = async (req, res, next) => {
     try {
         const { locationId } = req.params;
         const result = await deactivateWarehouseLocation(locationId, req.body);
+        return res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        if (error instanceof WarehouseServiceError) {
+            return res.status(error.statusCode).json({
+                success: false,
+                error: error.errorCode,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
+/**
+ * @route POST /api/warehouse/parts
+ * @desc Creates a new canonical repair part in warehouse catalog
+ * @access Private (Admin only)
+ */
+exports.createPart = async (req, res, next) => {
+    try {
+        const result = await createWarehousePart(req.body);
+        return res.status(201).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        if (error instanceof WarehouseServiceError) {
+            return res.status(error.statusCode).json({
+                success: false,
+                error: error.errorCode,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
+/**
+ * @route PATCH /api/warehouse/parts/:partId
+ * @desc Updates metadata for an existing repair part
+ * @access Private (Admin only)
+ */
+exports.updatePart = async (req, res, next) => {
+    try {
+        const { partId } = req.params;
+        const result = await updateWarehousePart(partId, req.body);
+        return res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        if (error instanceof WarehouseServiceError) {
+            return res.status(error.statusCode).json({
+                success: false,
+                error: error.errorCode,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
+/**
+ * @route POST /api/warehouse/parts/:partId/discontinue
+ * @desc Safely discontinues an empty repair part
+ * @access Private (Admin only)
+ */
+exports.discontinuePart = async (req, res, next) => {
+    try {
+        const { partId } = req.params;
+        const result = await discontinueWarehousePart(partId, req.body);
         return res.status(200).json({
             success: true,
             data: result

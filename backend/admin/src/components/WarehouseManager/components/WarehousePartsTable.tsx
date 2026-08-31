@@ -1,8 +1,8 @@
 /**
  * backend/admin/src/components/WarehouseManager/components/WarehousePartsTable.tsx
- * Paginated repair parts table with comprehensive filters, search, and stock status indicators.
+ * Paginated repair parts table with comprehensive filters, search, and catalog controls (Phase 2C).
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Search,
     AlertTriangle,
@@ -10,9 +10,17 @@ import {
     XCircle,
     Boxes,
     RefreshCw,
-    SlidersHorizontal
+    SlidersHorizontal,
+    Plus,
+    Edit2,
+    PowerOff
 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useConfirm } from '../../../context/ConfirmContext';
+import { api } from '../../../utils/api';
 import AdminPagination from '../../AdminPagination';
+import { AddPartModal } from './AddPartModal';
+import { EditPartModal } from './EditPartModal';
 import type { WarehousePart, WarehouseLocation, PaginationMeta } from '../types';
 
 interface WarehousePartsTableProps {
@@ -42,6 +50,7 @@ interface WarehousePartsTableProps {
     limit: number;
     onLimitChange: (limit: number) => void;
     onRetry: () => void;
+    onRefresh?: () => void;
 }
 
 export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
@@ -70,9 +79,14 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
     onPageChange,
     limit,
     onLimitChange,
-    onRetry
+    onRetry,
+    onRefresh
 }) => {
-    const [showAdvancedFilters, setShowAdvancedFilters] = React.useState(false);
+    const { confirm } = useConfirm();
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editingPart, setEditingPart] = useState<WarehousePart | null>(null);
+    const [discontinuingId, setDiscontinuingId] = useState<string | null>(null);
 
     // Extract unique brands, part types, qualities from current parts for quick hints
     const brandsList = ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'Google', 'OnePlus', 'Sony'];
@@ -92,6 +106,37 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
         onLocationIdChange('');
         onLowStockChange(false);
         onPageChange(1);
+    };
+
+    const handleDiscontinue = async (part: WarehousePart) => {
+        const isConfirmed = await confirm({
+            title: 'إيقاف قطعة الصيانة',
+            message: `هل أنت متأكد من رغبتك في إيقاف القطعة (${part.name})؟ لا يمكن إيقاف القطع التي تحتوي على أرصدة غير صفرية في المستودع. بعد الإيقاف، لن تتمكن من استلام كميات جديدة لهذه القطعة.`,
+            confirmLabel: 'إيقاف القطعة',
+            cancelLabel: 'إلغاء',
+            variant: 'danger'
+        });
+
+        if (!isConfirmed) return;
+
+        setDiscontinuingId(part.id);
+        try {
+            const res = await api.post(`/api/warehouse/parts/${part.id}/discontinue`);
+            if (res.data?.success) {
+                toast.success(`تم إيقاف القطعة ${part.name} بنجاح`);
+                if (onRefresh) onRefresh();
+                else onRetry();
+            }
+        } catch (err: any) {
+            const errorCode = err.response?.data?.error;
+            if (errorCode === 'WAREHOUSE_PART_HAS_STOCK') {
+                toast.error('لا يمكن إيقاف القطعة لأنها ما زالت تحتوي على مخزون. انقل أو سوِّ الكمية أولاً.');
+            } else {
+                toast.error(err.response?.data?.message || 'فشل إيقاف القطعة');
+            }
+        } finally {
+            setDiscontinuingId(null);
+        }
     };
 
     return (
@@ -114,7 +159,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                         <Search className="absolute left-3 top-3 text-slate-400" size={18} />
                     </div>
 
-                    {/* Filter Action Buttons */}
+                    {/* Filter & Add Action Buttons */}
                     <div className="flex items-center gap-2 shrink-0">
                         <button
                             type="button"
@@ -162,6 +207,15 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                             <option value={50}>50 سطر</option>
                             <option value={100}>100 سطر</option>
                         </select>
+
+                        <button
+                            type="button"
+                            onClick={() => setIsAddModalOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+                        >
+                            <Plus size={16} />
+                            <span>إضافة قطعة صيانة</span>
+                        </button>
                     </div>
                 </div>
 
@@ -328,20 +382,21 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                             <th className="py-3.5 px-4 text-center">المحجوز</th>
                             <th className="py-3.5 px-4 text-center">الحد الأدنى</th>
                             <th className="py-3.5 px-4 text-center">الحالة</th>
+                            <th className="py-3.5 px-4 text-center">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
                         {loading && parts.length === 0 ? (
                             Array.from({ length: 5 }).map((_, i) => (
                                 <tr key={i} className="animate-pulse">
-                                    <td colSpan={9} className="py-4 px-4">
+                                    <td colSpan={10} className="py-4 px-4">
                                         <div className="h-6 bg-slate-800/60 rounded-lg w-full"></div>
                                     </td>
                                 </tr>
                             ))
                         ) : parts.length === 0 ? (
                             <tr>
-                                <td colSpan={9} className="py-16 text-center text-slate-500">
+                                <td colSpan={10} className="py-16 text-center text-slate-500">
                                     <Boxes className="mx-auto mb-3 opacity-40" size={40} />
                                     <p className="font-semibold text-slate-400">لا توجد قطع صيانة تطابق المعايير</p>
                                     <p className="text-xs text-slate-600 mt-1">جرّب تغيير عبارة البحث أو تفريغ الفلاتر</p>
@@ -477,6 +532,31 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                                                 </span>
                                             )}
                                         </td>
+
+                                        {/* Actions */}
+                                        <td className="py-3.5 px-4 text-center">
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEditingPart(part)}
+                                                    className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs transition-colors"
+                                                    title="تعديل بيانات القطعة"
+                                                >
+                                                    <Edit2 size={13} />
+                                                </button>
+                                                {part.status === 'active' && part.isActive && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDiscontinue(part)}
+                                                        disabled={discontinuingId === part.id}
+                                                        className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 hover:text-rose-300 border border-rose-800/40 rounded-lg text-xs transition-colors disabled:opacity-50"
+                                                        title="إيقاف القطعة"
+                                                    >
+                                                        <PowerOff size={13} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
                                     </tr>
                                 );
                             })
@@ -491,6 +571,20 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                 totalPages={pagination.totalPages}
                 onPageChange={onPageChange}
                 disabled={loading}
+            />
+
+            {/* Modals */}
+            <AddPartModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onSuccess={onRefresh ? onRefresh : onRetry}
+            />
+
+            <EditPartModal
+                isOpen={Boolean(editingPart)}
+                part={editingPart}
+                onClose={() => setEditingPart(null)}
+                onSuccess={onRefresh ? onRefresh : onRetry}
             />
         </div>
     );

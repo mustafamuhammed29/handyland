@@ -169,6 +169,7 @@ export default function WarehouseManager() {
                     limit={partsLimit}
                     onLimitChange={setPartsLimit}
                     onRetry={fetchParts}
+                    onRefresh={refreshAll}
                 />
             )}
 

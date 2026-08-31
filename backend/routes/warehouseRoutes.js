@@ -45,6 +45,15 @@ router.use(authorize('admin'));
 // GET /api/warehouse/parts — Paginated catalog with aggregated warehouse balances
 router.get('/parts', warehouseReadLimiter, warehouseController.getParts);
 
+// POST /api/warehouse/parts — Create canonical repair part
+router.post('/parts', warehouseWriteLimiter, warehouseController.createPart);
+
+// PATCH /api/warehouse/parts/:partId — Update repair part catalog metadata
+router.patch('/parts/:partId', warehouseWriteLimiter, warehouseController.updatePart);
+
+// POST /api/warehouse/parts/:partId/discontinue — Safely discontinue empty repair part
+router.post('/parts/:partId/discontinue', warehouseWriteLimiter, warehouseController.discontinuePart);
+
 // GET /api/warehouse/locations — Physical locations list
 router.get('/locations', warehouseReadLimiter, warehouseController.getLocations);
 
