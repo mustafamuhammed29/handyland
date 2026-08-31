@@ -243,7 +243,7 @@ BEGIN
     -- updated_at (handled automatically by trg_users_updated_at)
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY INVOKER SET search_path = public, pg_temp;
+$$ LANGUAGE plpgsql SET search_path = public, pg_temp;
 
 -- 2. Attach trigger to public.users table (BEFORE UPDATE)
 DROP TRIGGER IF EXISTS trg_protect_user_sensitive_fields ON public.users;
