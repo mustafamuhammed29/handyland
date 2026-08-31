@@ -1,6 +1,6 @@
 /**
  * backend/admin/src/pages/WarehouseManager.tsx
- * Admin-only page for internal repair-parts warehouse management (Phase 2A).
+ * Admin-only page for internal repair-parts warehouse management (Phase 2A & 2B).
  */
 import { useState } from 'react';
 import { Plus, Boxes, RefreshCw } from 'lucide-react';
@@ -209,6 +209,7 @@ export default function WarehouseManager() {
                     zone={locationsZone}
                     onZoneChange={setLocationsZone}
                     onRetry={fetchLocations}
+                    onRefresh={refreshAll}
                 />
             )}
 

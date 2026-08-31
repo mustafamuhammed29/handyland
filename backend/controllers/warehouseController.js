@@ -1,6 +1,6 @@
 /**
  * backend/controllers/warehouseController.js
- * Controller for internal warehouse management, stock movements, and read APIs.
+ * Controller for internal warehouse management, stock movements, read APIs, and location management.
  */
 'use strict';
 
@@ -11,6 +11,11 @@ const {
     getWarehouseMovements,
     getWarehouseStats
 } = require('../services/warehouseReadService');
+const {
+    createWarehouseLocation,
+    updateWarehouseLocation,
+    deactivateWarehouseLocation
+} = require('../services/warehouseLocationService');
 
 /**
  * @route POST /api/warehouse/movements
@@ -131,6 +136,80 @@ exports.getStats = async (req, res, next) => {
         return res.status(200).json({
             success: true,
             data: result.data
+        });
+    } catch (error) {
+        if (error instanceof WarehouseServiceError) {
+            return res.status(error.statusCode).json({
+                success: false,
+                error: error.errorCode,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
+/**
+ * @route POST /api/warehouse/locations
+ * @desc Creates a new physical warehouse location
+ * @access Private (Admin only)
+ */
+exports.createLocation = async (req, res, next) => {
+    try {
+        const result = await createWarehouseLocation(req.body);
+        return res.status(201).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        if (error instanceof WarehouseServiceError) {
+            return res.status(error.statusCode).json({
+                success: false,
+                error: error.errorCode,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
+/**
+ * @route PATCH /api/warehouse/locations/:locationId
+ * @desc Updates metadata for an existing warehouse location
+ * @access Private (Admin only)
+ */
+exports.updateLocation = async (req, res, next) => {
+    try {
+        const { locationId } = req.params;
+        const result = await updateWarehouseLocation(locationId, req.body);
+        return res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        if (error instanceof WarehouseServiceError) {
+            return res.status(error.statusCode).json({
+                success: false,
+                error: error.errorCode,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
+/**
+ * @route POST /api/warehouse/locations/:locationId/deactivate
+ * @desc Safely deactivates an empty warehouse location
+ * @access Private (Admin only)
+ */
+exports.deactivateLocation = async (req, res, next) => {
+    try {
+        const { locationId } = req.params;
+        const result = await deactivateWarehouseLocation(locationId, req.body);
+        return res.status(200).json({
+            success: true,
+            data: result
         });
     } catch (error) {
         if (error instanceof WarehouseServiceError) {

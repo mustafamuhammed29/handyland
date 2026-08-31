@@ -48,6 +48,15 @@ router.get('/parts', warehouseReadLimiter, warehouseController.getParts);
 // GET /api/warehouse/locations — Physical locations list
 router.get('/locations', warehouseReadLimiter, warehouseController.getLocations);
 
+// POST /api/warehouse/locations — Create physical warehouse location
+router.post('/locations', warehouseWriteLimiter, warehouseController.createLocation);
+
+// PATCH /api/warehouse/locations/:locationId — Update physical warehouse location metadata
+router.patch('/locations/:locationId', warehouseWriteLimiter, warehouseController.updateLocation);
+
+// POST /api/warehouse/locations/:locationId/deactivate — Safely deactivate empty warehouse location
+router.post('/locations/:locationId/deactivate', warehouseWriteLimiter, warehouseController.deactivateLocation);
+
 // GET /api/warehouse/movements — Append-only movement ledger history
 router.get('/movements', warehouseReadLimiter, warehouseController.getMovements);
 
