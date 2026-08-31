@@ -9,6 +9,15 @@ coverage/
 # Production builds
 build/
 dist/
+.next/
+.turbo/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Supabase CLI temp files
+supabase/.temp/
+**/.temp/
 
 # Environment files
 .DS_Store
@@ -20,61 +29,8 @@ dist/
 **/.env
 backend/.env
 backend/.env.production
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.log
-
-# Editor directories and files
-.idea
-.vscode
-*.swp
-*.swo
-
-# Project specific
-backend/uploads/
-backend/backups/
-backend/healthStatus.json
-backend/MAINTENANCE_MODE
-backend/lint-output.txt
-backend/test-output.txt
-backend/seed_bulk.log
-backend/seed_output.log
-backend/audit_backend.json
-front-end/audit_frontend.json
-backend/tests/screenshots/
-backend/scripts/err.txt
-backend/scripts/out.txt
-backend/scripts/test_output.json
-backend/scripts/test_output.txt
-
-# Temporary dev/debug scripts
-make_admin.js
-unlock_admin.js
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Testing
-coverage/
-
-# Production builds
-build/
-dist/
-
-# Environment files
-.DS_Store
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-**/.env
-backend/.env
-backend/.env.production
+front-end/.env.production
+backend/admin/.env.production
 
 # Logs
 npm-debug.log*
@@ -124,5 +80,3 @@ backend/*.txt
 
 # OS files
 Thumbs.db
-front-end/.env.production
-backend/admin/.env.production 
