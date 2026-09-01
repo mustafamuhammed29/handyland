@@ -230,3 +230,73 @@ exports.lookupTicket = async (req, res, next) => {
         next(error);
     }
 };
+
+// ── @route POST /api/repairs/track-guest ────────────────────────
+exports.lookupGuestTicket = async (req, res, next) => {
+    try {
+        const { ticketId, email } = req.body;
+
+        if (!ticketId || typeof ticketId !== 'string' || !ticketId.trim()) {
+            return res.status(400).json({ success: false, message: 'Ticket-ID ist erforderlich' });
+        }
+        if (!email || typeof email !== 'string' || !email.trim()) {
+            return res.status(400).json({ success: false, message: 'E-Mail-Adresse ist erforderlich' });
+        }
+
+        const cleanTicketId = ticketId.trim();
+        const cleanEmail = email.trim().toLowerCase();
+
+        // Query ticket and related user email if applicable
+        const { data: ticket, error } = await supabaseAdmin
+            .from('repair_tickets')
+            .select('id, ticket_id, device, issue, status, estimated_cost, appointment_date, service_type, guest_email, user_id, repair_ticket_timeline(*)')
+            .eq('ticket_id', cleanTicketId)
+            .maybeSingle();
+
+        if (error || !ticket) {
+            return res.status(404).json({ success: false, message: 'Kein Reparaturticket mit dieser Ticket-ID gefunden' });
+        }
+
+        // Validate that provided email matches guest_email or registered user email
+        let emailMatches = false;
+        if (ticket.guest_email && ticket.guest_email.toLowerCase() === cleanEmail) {
+            emailMatches = true;
+        } else if (ticket.user_id) {
+            const { data: userRecord } = await supabaseAdmin
+                .from('users')
+                .select('email')
+                .eq('id', ticket.user_id)
+                .maybeSingle();
+
+            if (userRecord && userRecord.email && userRecord.email.toLowerCase() === cleanEmail) {
+                emailMatches = true;
+            }
+        }
+
+        if (!emailMatches) {
+            return res.status(403).json({ success: false, message: 'Die angegebene E-Mail-Adresse stimmt nicht mit diesem Ticket überein' });
+        }
+
+        // Sanitize returned data (do not leak internal user IDs or other customer details)
+        const sanitized = {
+            _id: ticket.id,
+            id: ticket.id,
+            ticketId: ticket.ticket_id,
+            ticket_id: ticket.ticket_id,
+            device: ticket.device,
+            issue: ticket.issue,
+            status: ticket.status,
+            estimatedCost: ticket.estimated_cost,
+            estimated_cost: ticket.estimated_cost,
+            appointmentDate: ticket.appointment_date,
+            appointment_date: ticket.appointment_date,
+            serviceType: ticket.service_type,
+            service_type: ticket.service_type,
+            timeline: ticket.repair_ticket_timeline || []
+        };
+
+        return res.status(200).json({ success: true, data: sanitized });
+    } catch (error) {
+        next(error);
+    }
+};

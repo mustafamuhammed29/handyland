@@ -78,7 +78,7 @@ export const getPublicRoutes = ({ settings, lang, user, cartCount }: PublicRoute
             <Route path="/accessories/:id" element={settings.sections?.accessoriesPage !== false && settings.sections?.accessoriesPageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><AccessoryDetails /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Zubehör Details" /></PageTransition>} />
             <Route path="/compare" element={((settings as any).features?.comparisonEngine !== false && settings.sections?.marketplacePage !== false && settings.sections?.marketplacePageComingSoon !== true) ? <PageTransition><Suspense fallback={<GlobalLoader />}><ComparePage /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Vergleichen" /></PageTransition>} />
             <Route path="/contact" element={<PageTransition><Suspense fallback={<GlobalLoader />}><Contact /></Suspense></PageTransition>} />
-            <Route path="/checkout" element={<ProtectedRoute><ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary></ProtectedRoute>} />
+            <Route path="/checkout" element={<ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><Checkout /></Suspense></PageTransition></ErrorBoundary>} />
             <Route path="/payment-success" element={<PageTransition><Suspense fallback={<GlobalLoader />}><PaymentSuccess /></Suspense></PageTransition>} />
             
             <Route path="/cart" element={<ErrorBoundary><PageTransition><Suspense fallback={<GlobalLoader />}><CartPage lang={lang} /></Suspense></PageTransition></ErrorBoundary>} />

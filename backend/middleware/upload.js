@@ -252,12 +252,27 @@ const uploadHeroVideo = (fieldName = 'video') => {
     ];
 };
 
+// Receipt upload for wallet bank transfer receipts
+const receiptUpload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter: (req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+        if (allowed.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Nur Bilder (JPG, PNG, WebP) oder PDF-Dateien sind als Zahlungsbeleg erlaubt'), false);
+        }
+    },
+    limits: { fileSize: 10 * 1024 * 1024 }
+});
+
 module.exports = {
     upload,
     uploadSingle,
     uploadMultiple,
     uploadFields,
     uploadHeroVideo,
+    receiptUpload,
     isValidVideoSignature,
     processAndUpload
 };

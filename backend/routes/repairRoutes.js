@@ -8,6 +8,7 @@ const { protect, authorize, optionalProtect } = require('../middleware/auth');
 router.get('/', repairController.getRepairCatalog);
 router.get('/catalog', repairController.getRepairCatalog);
 router.post('/estimate', repairController.estimateRepairCost); // Replaces getRepairAdvice
+router.post('/track-guest', repairTicketController.lookupGuestTicket);
 router.get('/track-guest/:ticketId', repairTicketController.lookupTicket);
 
 // Protected routes (Tickets) - specific paths BEFORE :id catch-all

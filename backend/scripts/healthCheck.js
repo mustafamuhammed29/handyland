@@ -31,24 +31,28 @@ async function request(method, path, body = null, token = '') {
 async function run() {
   console.log('=== HANDYLAND POST-MIGRATION API HEALTH CHECK ===\n');
 
+  const adminEmail = process.env.HEALTHCHECK_ADMIN_EMAIL || process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.HEALTHCHECK_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    console.error('❌ Missing health check credentials.');
+    console.error('   Please provide HEALTHCHECK_ADMIN_EMAIL and HEALTHCHECK_ADMIN_PASSWORD via environment variables.');
+    process.exit(1);
+  }
+
   // Get admin session token directly from Supabase
   const { data: session, error } = await supabase.auth.signInWithPassword({
-    email: 'admin@handyland.de', password: 'Admin@HandyLand2024!'
+    email: adminEmail,
+    password: adminPassword
   });
   
   if (error) {
-    console.log('Admin login error:', error.message);
-    // Try admin_new
-    const { data: s2, error: e2 } = await supabase.auth.signInWithPassword({
-      email: 'admin_new@handyland.com', password: 'Admin@HandyLand2024!'
-    });
-    if (e2) { console.log('admin_new also failed:', e2.message); return; }
-    var token = s2.session.access_token;
-    console.log('Logged in as admin_new\n');
-  } else {
-    var token = session.session.access_token;
-    console.log('Logged in as admin@handyland.de\n');
+    console.error('Admin login error:', error.message);
+    process.exit(1);
   }
+
+  const token = session.session.access_token;
+  console.log(`Logged in as ${adminEmail}\n`);
 
   const endpoints = [
     ['GET', '/settings', 'Settings'],

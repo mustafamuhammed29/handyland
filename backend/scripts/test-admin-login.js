@@ -5,8 +5,13 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 async function testAdminLogin() {
     try {
-        const email = 'admin2@handyland.com';
-        const password = 'password1234';
+        const email = process.env.ADMIN_EMAIL;
+        const password = process.env.ADMIN_PASSWORD;
+
+        if (!email || !password) {
+            console.error('❌ Missing credentials. Please provide ADMIN_EMAIL and ADMIN_PASSWORD.');
+            process.exit(1);
+        }
         
         console.log(`Testing login for ${email}...`);
         

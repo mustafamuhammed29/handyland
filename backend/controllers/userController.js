@@ -269,9 +269,11 @@ exports.updateBalance = async (req, res, next) => {
 
         // Log the adjustment in transactions if a note is provided
         if (note || amount !== 0) {
+            const amountInCents = Math.round(Math.abs(Number(amount) || 0) * 100);
             await supabaseAdmin.from('transactions').insert({
                 user_id: req.params.id,
-                amount: Math.abs(amount),
+                amount: amountInCents,
+                currency: 'eur',
                 type: amount >= 0 ? 'deposit' : 'withdrawal',
                 status: 'completed',
                 description: note || `Manual balance adjustment: ${amount >= 0 ? '+' : ''}${amount}€`,

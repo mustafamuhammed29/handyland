@@ -26,15 +26,21 @@ async function checkHealth() {
         else console.log('✅ SERVICE_ROLE Success! Count:', data);
     } catch (e) { console.error('❌ SERVICE_ROLE Exception:', e.message); }
 
-    console.log('\n[3] Testing AUTH sign-in (admin2@handyland.com)...');
-    try {
-        const { data, error } = await sbAdmin.auth.signInWithPassword({
-            email: 'admin2@handyland.com',
-            password: 'password1234'
-        });
-        if (error) console.error('❌ AUTH Error:', error.message, error);
-        else console.log('✅ AUTH Success! User ID:', data.user.id);
-    } catch (e) { console.error('❌ AUTH Exception:', e.message); }
+    console.log('\n[3] Testing AUTH sign-in...');
+    const testEmail = process.env.HEALTHCHECK_ADMIN_EMAIL || process.env.ADMIN_EMAIL;
+    const testPassword = process.env.HEALTHCHECK_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD;
+    if (testEmail && testPassword) {
+        try {
+            const { data, error } = await sbAdmin.auth.signInWithPassword({
+                email: testEmail,
+                password: testPassword
+            });
+            if (error) console.error('❌ AUTH Error:', error.message);
+            else console.log('✅ AUTH Success! User ID:', data.user.id);
+        } catch (e) { console.error('❌ AUTH Exception:', e.message); }
+    } else {
+        console.log('ℹ️ Skipping Auth test: HEALTHCHECK_ADMIN_EMAIL or HEALTHCHECK_ADMIN_PASSWORD not set.');
+    }
 
     console.log('\n--- CHECK COMPLETE ---');
 }

@@ -5,11 +5,19 @@ import { User } from '../types';
 import { useLang } from './LanguageContext';
 import { api } from '../utils/api';
 
+export interface TwoFactorChallenge {
+    challengeId: string;
+    redirectTo?: string;
+}
+
 interface AuthContextType {
     user: User | null;
     setUser: (user: User | null) => void;
-    login: (email: string, password: string, redirectTo?: string) => Promise<void>;
+    login: (email: string, password: string, redirectTo?: string) => Promise<{ twoFactorRequired?: boolean; challengeId?: string } | void>;
     loginWithToken: (token: string) => Promise<void>;
+    verify2FA: (otp: string) => Promise<void>;
+    cancel2FA: () => Promise<void>;
+    twoFactorChallenge: TwoFactorChallenge | null;
     logout: () => void;
     isAuthenticated: boolean;
     loading: boolean;
@@ -55,6 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // isVerified: only becomes true after the backend confirms the session via getMe().
     // Until then, user data from sessionStorage must NOT be trusted for role-based rendering.
     const [isVerified, setIsVerified] = useState<boolean>(false);
+    const [twoFactorChallenge, setTwoFactorChallenge] = useState<TwoFactorChallenge | null>(null);
     const navigate = useNavigate();
 
     const { setLang } = useLang();
@@ -76,60 +85,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
 
-    // Guard against React StrictMode double-invocation
     useEffect(() => {
-        let ignore = false; // cleanup flag to cancel stale invocations
+        let ignore = false;
 
         const initAuth = async () => {
-            const storedUser = localStorage.getItem('user');
-
-            if (!storedUser) {
-                if (!ignore) setLoading(false);
-                return;
-            }
-
             try {
-                const parsedUser = JSON.parse(storedUser);
-                // Optimistically set user so ProtectedRoute doesn't flash to login
-                if (!ignore) setUser(parsedUser);
-
-                // Verify session with backend
-                try {
-                    const { user } = await authService.getMe();
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    const parsedUser = JSON.parse(storedUser);
                     if (!ignore) {
-                        setUser(user);
-                        setIsVerified(true); // Session confirmed by backend
-                        localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
+                        setUser(parsedUser);
                     }
-                } catch (error: any) {
-                    // Check if error is a network connection error (server offline/no response)
-                    const isNetworkError = !error?.response || error?.code === 'ERR_NETWORK' || error?.message === 'Network Error';
-                    if (isNetworkError) {
-                        // Keep user state optimistically, but do not mark verified yet
+
+                    try {
+                        const { user } = await authService.getMe();
                         if (!ignore) {
-                            setIsVerified(false);
+                            setUser(user);
+                            setIsVerified(true);
+                            localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
                         }
-                        return;
-                    }
-
-                    // Try refresh before giving up
-                    const refreshed = await refreshAccessToken();
-                    if (!ignore) {
-                        if (refreshed) {
-                            try {
-                                const { user } = await authService.getMe();
-                                setUser(user);
-                                setIsVerified(true); // Session confirmed after refresh
-                                localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
-                            } catch {
+                    } catch (error: any) {
+                        if (ignore) return;
+                        const isExpired = error?.response?.status === 401;
+                        if (isExpired) {
+                            const refreshed = await refreshAccessToken();
+                            if (refreshed) {
+                                try {
+                                    const { user } = await authService.getMe();
+                                    setUser(user);
+                                    setIsVerified(true);
+                                    localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(user)));
+                                } catch {
+                                    setUser(null);
+                                    setIsVerified(false);
+                                    localStorage.removeItem('user');
+                                }
+                            } else {
                                 setUser(null);
                                 setIsVerified(false);
                                 localStorage.removeItem('user');
                             }
-                        } else {
-                            setUser(null);
-                            setIsVerified(false);
-                            localStorage.removeItem('user');
                         }
                     }
                 }
@@ -144,8 +139,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
 
         initAuth();
-        return () => { ignore = true; }; // cleanup: cancel stale invocation
-    }, []);
+        return () => { ignore = true; };
+    }, [refreshAccessToken]);
 
 
     const loginWithToken = useCallback(async (token: string) => {
@@ -155,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(userData)));
             setUser(userData);
-            setIsVerified(true); // Social login confirmed by backend
+            setIsVerified(true);
         } catch (error) {
             setUser(null);
             setIsVerified(false);
@@ -164,42 +159,76 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, []);
 
-    const login = useCallback(async (email: string, password: string, redirectTo?: string) => {
+    const completeLogin = useCallback((userData: User, redirectTo?: string) => {
+        localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(userData)));
+        setUser(userData);
+        setIsVerified(true);
+        setTwoFactorChallenge(null);
 
+        const pendingQuote = sessionStorage.getItem('pendingValuationQuote');
+        if (pendingQuote) {
+            try {
+                const { quoteData } = JSON.parse(pendingQuote);
+                if (quoteData?.quoteReference) {
+                    navigate(`/sell/${quoteData.quoteReference}`, { replace: true });
+                    return;
+                }
+            } catch {
+                sessionStorage.removeItem('pendingValuationQuote');
+            }
+        }
+        if (redirectTo) {
+            navigate(redirectTo, { replace: true });
+        } else {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [navigate]);
+
+    const login = useCallback(async (email: string, password: string, redirectTo?: string) => {
         try {
             const data = await authService.login(email, password);
 
-            if (data.success && data.user) {
-                localStorage.setItem('user', JSON.stringify(getSafeUserForStorage(data.user)));
-                setUser(data.user);
-                setIsVerified(true); // Login confirmed directly by backend
+            if (data.twoFactorRequired && data.challengeId) {
+                setTwoFactorChallenge({
+                    challengeId: data.challengeId,
+                    redirectTo
+                });
+                return { twoFactorRequired: true, challengeId: data.challengeId };
+            }
 
-                // Check if user was redirected from valuation flow
-                const pendingQuote = sessionStorage.getItem('pendingValuationQuote');
-                if (pendingQuote) {
-                    try {
-                        const { quoteData } = JSON.parse(pendingQuote);
-                        if (quoteData?.quoteReference) {
-                            // Don't clear here; SellDevice will clear after loading
-                            navigate(`/sell/${quoteData.quoteReference}`, { replace: true });
-                            return;
-                        }
-                    } catch {
-                        sessionStorage.removeItem('pendingValuationQuote');
-                    }
-                }
-                if (redirectTo) {
-                    navigate(redirectTo, { replace: true });
-                } else {
-                    navigate('/dashboard', { replace: true });
-                }
+            if (data.success && data.user) {
+                completeLogin(data.user, redirectTo);
+                return;
             } else {
                 throw new Error('Login failed');
             }
         } catch (error) {
             throw error;
         }
-    }, [navigate]);
+    }, [completeLogin]);
+
+    const verify2FA = useCallback(async (otp: string) => {
+        if (!twoFactorChallenge?.challengeId) {
+            throw new Error('No active 2FA challenge');
+        }
+        try {
+            const data = await authService.verify2FALogin(twoFactorChallenge.challengeId, otp, 'frontend');
+            if (data.success && data.user) {
+                completeLogin(data.user, twoFactorChallenge.redirectTo);
+            } else {
+                throw new Error('2FA verification failed');
+            }
+        } catch (error) {
+            throw error;
+        }
+    }, [twoFactorChallenge, completeLogin]);
+
+    const cancel2FA = useCallback(async () => {
+        if (twoFactorChallenge?.challengeId) {
+            await authService.cancel2FALogin(twoFactorChallenge.challengeId);
+        }
+        setTwoFactorChallenge(null);
+    }, [twoFactorChallenge]);
 
     const logout = useCallback(() => {
         // Call the API in the background (fire-and-forget is fine, but we can wait or handle it)

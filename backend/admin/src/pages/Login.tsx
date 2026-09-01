@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, User, AlertCircle, ShieldCheck, ArrowRight, Activity } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TwoFactorModal } from '../components/TwoFactorModal';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -12,7 +13,7 @@ const Login: React.FC = () => {
     const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
     
     const navigate = useNavigate();
-    const { login, loading } = useAuth();
+    const { login, loading, twoFactorChallenge } = useAuth();
 
     const validateForm = () => {
         const errors: { email?: string; password?: string } = {};
@@ -37,7 +38,11 @@ const Login: React.FC = () => {
         if (!validateForm()) return;
         
         try {
-            await login(email, password);
+            const res = await login(email, password);
+            if (res && res.twoFactorRequired) {
+                // 2FA challenge initiated; modal will appear
+                return;
+            }
             navigate('/', { replace: true });
         } catch (err: any) {
             // Enhanced error message
@@ -193,6 +198,8 @@ const Login: React.FC = () => {
                     </p>
                 </div>
             </motion.div>
+
+            <TwoFactorModal isOpen={!!twoFactorChallenge} onSuccess={() => navigate('/', { replace: true })} />
         </div>
     );
 };

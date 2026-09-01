@@ -5,10 +5,17 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 async function forceResetPassword() {
     try {
-        const userId = 'becc4862-61ef-41f5-bc77-c3a159ded0c9';
-        const newPassword = 'password1234';
+        const userId = process.env.TARGET_USER_ID || process.argv[2];
+        const newPassword = process.env.NEW_PASSWORD || process.argv[3];
+
+        if (!userId || !newPassword) {
+            console.error('❌ Missing reset parameters.');
+            console.error('   Usage: TARGET_USER_ID=<uuid> NEW_PASSWORD=<pass> node reset-admin-password.js');
+            console.error('   Or: node reset-admin-password.js <uuid> <password>');
+            process.exit(1);
+        }
         
-        console.log(`Force resetting password for ID ${userId} to ${newPassword}...`);
+        console.log(`Force resetting password for user ID ${userId}...`);
         
         const { error } = await supabase.auth.admin.updateUserById(userId, { password: newPassword });
         if (error) throw error;

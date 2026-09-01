@@ -18,8 +18,20 @@ export default defineConfig(({ mode }) => {
         threshold: 1024,
       }),
       Sitemap({
-        hostname: env.VITE_URL || 'https://handyland.test',
-        dynamicRoutes: ['/marketplace', '/login', '/register', '/compare', '/repair', '/dashboard', '/checkout'],
+        hostname: env.VITE_URL || 'https://handyland.com',
+        dynamicRoutes: [
+          '/marketplace',
+          '/repair',
+          '/accessories',
+          '/valuation',
+          '/compare',
+          '/track-repair',
+          '/uber-uns',
+          '/privacy',
+          '/agb',
+          '/impressum'
+        ],
+        exclude: ['/login', '/register', '/dashboard', '/checkout', '/cart', '/seller', '/admin']
       }),
       VitePWA({
         registerType: 'autoUpdate',

@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role IN ('admin', 'administrator')
+    WHERE id = auth.uid() AND role = 'admin'
   );
 $$ LANGUAGE SQL SECURITY DEFINER STABLE;
 

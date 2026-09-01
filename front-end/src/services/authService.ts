@@ -12,9 +12,12 @@ const devLog = (message: string, error: any) => {
     }
 };
 
-interface LoginResponse {
+export interface LoginResponse {
     success: boolean;
-    user: User & { deviceInfo?: any };
+    user?: User & { deviceInfo?: any };
+    twoFactorRequired?: boolean;
+    challengeId?: string;
+    appType?: string;
 }
 interface RegisterResponse {
     success: boolean;
@@ -31,6 +34,26 @@ export const authService = {
         } catch (error: any) {
             devLog('Auth Service Login Result', error);
             throw error.response?.data || { message: error.message || 'Login failed' };
+        }
+    },
+
+    verify2FALogin: async (challengeId: string, otp: string, appType = 'frontend'): Promise<LoginResponse> => {
+        try {
+            await api.get('/api/auth/csrf');
+            const response = await api.post('/api/auth/2fa/verify-login', { challengeId, otp, appType });
+            return response as any;
+        } catch (error: any) {
+            devLog('Auth Service 2FA Verification Error:', error.response?.data || error);
+            throw error.response?.data || { message: error.message || '2FA Verification failed' };
+        }
+    },
+
+    cancel2FALogin: async (challengeId: string): Promise<void> => {
+        try {
+            await api.get('/api/auth/csrf');
+            await api.post('/api/auth/2fa/cancel-login', { challengeId });
+        } catch (error: any) {
+            devLog('Auth Service 2FA Cancellation Error:', error.response?.data || error);
         }
     },
 

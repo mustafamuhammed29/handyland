@@ -298,21 +298,27 @@ BEGIN
       );
 
     -- 4. Identify only exclusive/non-shared active eligible repair parts and lock them in deterministic order
-    SELECT COALESCE(array_agg(rp.id ORDER BY rp.id), '{}')
+    -- Concurrency approach: Lock candidate rows in deterministic ID order inside a subquery
+    -- to prevent race conditions/deadlocks while avoiding PostgreSQL error 42803 ('FOR UPDATE is not allowed with aggregate functions').
+    SELECT COALESCE(array_agg(locked.id), '{}')
     INTO v_eligible_part_ids
-    FROM public.repair_parts rp
-    INNER JOIN public.repair_part_compatible_models cm ON cm.repair_part_id = rp.id
-    WHERE cm.device_model_id = p_model_id
-      AND (rp.status <> 'discontinued' OR rp.is_active = true)
-      AND NOT EXISTS (
-          SELECT 1
-          FROM public.repair_part_compatible_models other_cm
-          INNER JOIN public.device_models other_dm ON other_dm.id = other_cm.device_model_id
-          WHERE other_cm.repair_part_id = rp.id
-            AND other_cm.device_model_id <> p_model_id
-            AND other_dm.is_active = true
-      )
-    FOR UPDATE OF rp;
+    FROM (
+        SELECT rp.id
+        FROM public.repair_parts rp
+        INNER JOIN public.repair_part_compatible_models cm ON cm.repair_part_id = rp.id
+        WHERE cm.device_model_id = p_model_id
+          AND (rp.status <> 'discontinued' OR rp.is_active = true)
+          AND NOT EXISTS (
+              SELECT 1
+              FROM public.repair_part_compatible_models other_cm
+              INNER JOIN public.device_models other_dm ON other_dm.id = other_cm.device_model_id
+              WHERE other_cm.repair_part_id = rp.id
+                AND other_cm.device_model_id <> p_model_id
+                AND other_dm.is_active = true
+          )
+        ORDER BY rp.id
+        FOR UPDATE OF rp
+    ) locked;
 
     -- If no eligible parts to discontinue (e.g. all are shared-active or already discontinued)
     IF array_length(v_eligible_part_ids, 1) IS NULL OR array_length(v_eligible_part_ids, 1) = 0 THEN

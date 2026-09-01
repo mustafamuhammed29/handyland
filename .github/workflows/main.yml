@@ -12,46 +12,68 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [20.x, 22.x]
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
 
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: |
+          backend/package-lock.json
+          front-end/package-lock.json
+          backend/admin/package-lock.json
 
+    # ── Backend Checks ─────────────────────────────────────────
     - name: Install Backend Dependencies
-      run: npm install
+      run: npm ci
       working-directory: ./backend
 
+    - name: Lint Backend Code
+      run: npm run lint
+      working-directory: ./backend
+
+    - name: Run Backend Test Suite & Migration Validation
+      run: npm test
+      working-directory: ./backend
+      env:
+        NODE_ENV: test
+        JWT_SECRET: test_jwt_secret_for_ci_pipeline_32bytes_long
+        SESSION_SECRET: test_session_secret_for_ci_32bytes_long
+        ADMIN_JWT_SECRET: test_admin_jwt_secret_for_ci_pipeline
+
+    # ── Frontend Checks ────────────────────────────────────────
     - name: Install Frontend Dependencies
-      run: npm install --legacy-peer-deps
+      run: npm ci --legacy-peer-deps
       working-directory: ./front-end
 
-    - name: Install Admin Panel Dependencies
-      run: npm install
-      working-directory: ./backend/admin
-
-    - name: Test / Lint Backend
-      run: npm run test --if-present || echo "No tests configured"
-      working-directory: ./backend
-
-    - name: Build Frontend
+    - name: Typecheck & Build Frontend (Customer Portal)
       run: npm run build
       working-directory: ./front-end
 
-    - name: Build Admin Panel
+    # ── Admin Panel Checks ─────────────────────────────────────
+    - name: Install Admin Panel Dependencies
+      run: npm ci
+      working-directory: ./backend/admin
+
+    - name: Typecheck & Build Admin Panel
       run: npm run build
       working-directory: ./backend/admin
 
   deploy:
+    name: Deploy to Production / Staging
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     steps:
-      - name: Trigger Render.com Webhook Deploy
+      - name: Trigger Webhook Deploy
         run: |
-          curl -f "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" || echo "RENDER_DEPLOY_HOOK_URL secret not set"
-
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "::warning ::RENDER_DEPLOY_HOOK_URL secret not configured. Skipping automated deploy trigger."
+          else
+            curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          fi

@@ -3,11 +3,12 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') }
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 async function fixViaSQL() {
-  const corruptedEmails = [
-    'mustafamohammad0545@gmail.com',
-    'admin@handyland.de', 
-    'jifesa7479@availors.com'
-  ];
+  const corruptedEmails = process.env.CORRUPTED_EMAILS ? process.env.CORRUPTED_EMAILS.split(',') : (process.argv[2] ? [process.argv[2]] : []);
+
+  if (corruptedEmails.length === 0) {
+    console.log('ℹ️ No corrupted emails specified. Pass via CORRUPTED_EMAILS=email1,email2 or as CLI argument.');
+    return;
+  }
 
   for (const email of corruptedEmails) {
     console.log(`\nCleaning: ${email}`);
@@ -33,6 +34,15 @@ async function fixViaSQL() {
   console.log('\n=== Recreating users ===');
   const { data: dbUsers } = await supabase.from('users').select('id, email, name, role');
   
+  const defaultAdminPass = process.env.DEFAULT_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD;
+  const defaultUserPass = process.env.DEFAULT_USER_PASSWORD;
+
+  if (!defaultAdminPass || !defaultUserPass) {
+    console.error('❌ Missing recreation passwords.');
+    console.error('   Please provide DEFAULT_ADMIN_PASSWORD and DEFAULT_USER_PASSWORD via environment variables.');
+    process.exit(1);
+  }
+
   for (const u of dbUsers) {
     const { error } = await supabase.auth.admin.getUserById(u.id);
     if (!error) {
@@ -41,7 +51,7 @@ async function fixViaSQL() {
     }
 
     console.log(`Recreating: ${u.email}`);
-    const defaultPass = u.role === 'admin' ? 'Admin@HandyLand2024!' : 'HandyLand2024!';
+    const defaultPass = u.role === 'admin' ? defaultAdminPass : defaultUserPass;
     const { data: newUser, error: createErr } = await supabase.auth.admin.createUser({
       email: u.email,
       password: defaultPass,

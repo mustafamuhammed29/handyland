@@ -21,6 +21,17 @@ export const api = axios.create({
 });
 
 let cachedCsrfToken = '';
+let isRefreshing = false;
+let refreshSubscribers: Array<(err?: any) => void> = [];
+
+const subscribeTokenRefresh = (cb: (err?: any) => void) => {
+    refreshSubscribers.push(cb);
+};
+
+const onRefreshed = (err?: any) => {
+    refreshSubscribers.forEach((cb) => cb(err));
+    refreshSubscribers = [];
+};
 
 // Request interceptor
 api.interceptors.request.use(
@@ -96,13 +107,31 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
             originalRequest._retry = true;
 
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    subscribeTokenRefresh((refreshErr) => {
+                        if (refreshErr) {
+                            return reject(refreshErr);
+                        }
+                        resolve(api.request(originalRequest));
+                    });
+                });
+            }
+
+            isRefreshing = true;
+
             try {
                 // Try to refresh the access token — backend sets new HttpOnly cookie directly
                 await api.post('/api/auth/refresh');
+                isRefreshing = false;
+                onRefreshed(null);
 
                 // Retry the original request with the refreshed cookie
                 return api.request(originalRequest);
             } catch (refreshError) {
+                isRefreshing = false;
+                onRefreshed(refreshError);
+
                 // Clear authentication state
                 localStorage.removeItem('user');
 

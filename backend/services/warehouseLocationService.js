@@ -8,7 +8,7 @@ const { supabaseAdmin } = require('../config/supabase');
 const { WarehouseServiceError } = require('./warehouseMovementService');
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const LOCATION_CODE_REGEX = /^[A-Z0-9_\-\.\/]{1,80}$/;
+const LOCATION_CODE_REGEX = /^[A-Z0-9_\-./]{1,80}$/;
 
 const ALLOWED_CREATE_FIELDS = Object.freeze([
     'locationCode',

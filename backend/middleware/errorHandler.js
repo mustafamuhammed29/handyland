@@ -11,7 +11,7 @@ const errorHandler = (err, req, res, next) => {
             error: {
                 code: 'DUPLICATE_KEY',
                 message: 'A record with this value already exists',
-                details: err.detail
+                details: process.env.NODE_ENV === 'development' ? err.detail : undefined
             }
         });
     }
@@ -50,18 +50,23 @@ const errorHandler = (err, req, res, next) => {
 
     // Default error
     const statusCode = err.statusCode || 500;
-    const message = err.message || 'Server Error';
+    const isDev = process.env.NODE_ENV === 'development';
+    const message = (statusCode === 500 && !isDev && !err.isOperational) ? 'Internal Server Error' : (err.message || 'Server Error');
 
-    // Log to file
-    const errLog = `[${new Date().toISOString()}] GLOBAL ERROR ${statusCode} on ${req.method} ${req.originalUrl}: ${err.stack || message}\n`;
-    require('fs').appendFileSync('backend_errors.log', errLog);
+    // Log to file safely
+    try {
+        const errLog = `[${new Date().toISOString()}] GLOBAL ERROR ${statusCode} on ${req.method} ${req.originalUrl}: ${err.stack || message}\n`;
+        require('fs').appendFileSync('backend_errors.log', errLog);
+    } catch (_logErr) {
+        // Suppress file system logging failures gracefully
+    }
 
     res.status(statusCode).json({
         success: false,
         error: {
-            code: 'SERVER_ERROR',
+            code: err.code || 'SERVER_ERROR',
             message: message,
-            details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+            details: isDev ? err.stack : undefined
         }
     });
 };

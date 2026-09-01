@@ -15,6 +15,17 @@ export const api = axios.create({
 });
 
 let cachedCsrfToken = '';
+let isRefreshing = false;
+let refreshSubscribers: Array<(err?: any) => void> = [];
+
+const subscribeTokenRefresh = (cb: (err?: any) => void) => {
+    refreshSubscribers.push(cb);
+};
+
+const onRefreshed = (err?: any) => {
+    refreshSubscribers.forEach((cb) => cb(err));
+    refreshSubscribers = [];
+};
 
 // Request interceptor for CSRF Protection
 api.interceptors.request.use(
@@ -76,15 +87,33 @@ api.interceptors.response.use(
             const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') || originalRequest?.url?.includes('/admin/login');
 
             if (!originalRequest._retry && !isAuthEndpoint) {
-                console.error(`[API Interceptor] Attempting refresh for ${originalRequest.url}`);
                 originalRequest._retry = true;
+
+                if (isRefreshing) {
+                    return new Promise((resolve, reject) => {
+                        subscribeTokenRefresh((refreshErr) => {
+                            if (refreshErr) {
+                                return reject(refreshErr);
+                            }
+                            resolve(api.request(originalRequest));
+                        });
+                    });
+                }
+
+                isRefreshing = true;
+                console.error(`[API Interceptor] Attempting refresh for ${originalRequest.url}`);
+
                 try {
                     // Attempt to refresh token via dedicated admin refresh endpoint
                     await api.post('/api/auth/admin/refresh');
+                    isRefreshing = false;
+                    onRefreshed(null);
                     console.error(`[API Interceptor] Refresh successful! Retrying request.`);
                     // Retry original request
                     return api.request(originalRequest);
                 } catch (refreshError) {
+                    isRefreshing = false;
+                    onRefreshed(refreshError);
                     console.error("[API Interceptor] Refresh failed! Redirecting to login...");
                     localStorage.removeItem('adminUser');
                     localStorage.removeItem('user');
@@ -94,7 +123,7 @@ api.interceptors.response.use(
             }
             
             // Only logout on unhandled 401 for non-auth endpoints
-            if (!isAuthEndpoint) {
+            if (!isAuthEndpoint && !isRefreshing) {
                 console.error("[API Interceptor] Unauthorized fallback! Redirecting to login...");
                 localStorage.removeItem('adminUser');
                 localStorage.removeItem('user');

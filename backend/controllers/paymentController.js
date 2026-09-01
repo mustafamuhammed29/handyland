@@ -13,14 +13,23 @@ exports.createPaymentIntent = async (req, res, next) => {
     try {
         const { orderId } = req.body;
         
-        const { data: order, error } = await supabaseAdmin.from('orders').select('id, user_id, total_amount').eq('id', orderId).single();
+        const { data: order, error } = await supabaseAdmin
+            .from('orders')
+            .select('id, user_id, total_amount, shipping_email')
+            .eq('id', orderId)
+            .single();
         if (error || !order) return res.status(404).json({ success: false, message: 'Order not found' });
         
         if (order.user_id && (!req.user || (order.user_id !== req.user.id && req.user.role !== 'admin'))) {
             return res.status(403).json({ success: false, message: 'Not authorized' });
         }
 
-        const amountInCents = Math.round(order.total_amount * 100);
+        const totalAmount = Number(order.total_amount) || 0;
+        if (totalAmount < 0) {
+            return res.status(400).json({ success: false, message: 'Invalid order amount' });
+        }
+
+        const amountInCents = Math.round(totalAmount * 100);
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amountInCents,
@@ -28,11 +37,12 @@ exports.createPaymentIntent = async (req, res, next) => {
             metadata: { orderId: order.id, userId: order.user_id || 'guest' }
         }, { idempotencyKey: `pi-${order.id}` });
 
-        // Store transaction
+        // Store transaction with integer cents amount and optional guest email
         await supabaseAdmin.from('transactions').insert({
-            user_id: req.user ? req.user.id : null,
+            user_id: req.user ? req.user.id : (order.user_id || null),
+            guest_email: !req.user && !order.user_id ? order.shipping_email : null,
             order_id: order.id,
-            amount: order.total_amount,
+            amount: amountInCents,
             currency: 'eur',
             status: 'pending',
             type: 'purchase',
@@ -182,6 +192,9 @@ exports.capturePayPalOrder = async (req, res, next) => {
         const data = await response.json();
         
         if (data.status === 'COMPLETED') {
+            const capturedValue = data.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value;
+            const capturedCents = capturedValue ? Math.round(parseFloat(capturedValue) * 100) : null;
+
             const fakeReq = {
                 user: req.user,
                 body: {
@@ -204,13 +217,24 @@ exports.capturePayPalOrder = async (req, res, next) => {
             
             if (fakeRes.data && fakeRes.data.success) {
                 const order = fakeRes.data.order;
+                const orderAmountCents = Math.round((Number(order.totalAmount) || 0) * 100);
+
+                // Verify captured amount matches server-calculated order total (if capturedValue was returned)
+                if (capturedCents !== null && Math.abs(capturedCents - orderAmountCents) > 1) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Payment amount mismatch: captured €${(capturedCents/100).toFixed(2)} vs order total €${(orderAmountCents/100).toFixed(2)}`
+                    });
+                }
+
                 // Update order to paid immediately since PayPal captured
                 await supabaseAdmin.from('orders').update({ payment_status: 'paid', status: 'processing' }).eq('id', order._id);
                 
                 await supabaseAdmin.from('transactions').insert({
                     user_id: req.user ? req.user.id : null,
+                    guest_email: !req.user ? (order.shippingAddress?.email || orderData.shippingAddress?.email) : null,
                     order_id: order._id,
-                    amount: order.totalAmount,
+                    amount: orderAmountCents,
                     currency: 'eur',
                     status: 'completed',
                     type: 'purchase',

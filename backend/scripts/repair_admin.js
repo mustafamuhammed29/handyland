@@ -2,8 +2,14 @@ require('dotenv').config();
 const { supabaseAdmin } = require('../config/supabase');
 
 async function repairAdmin() {
-    const email = 'admin@handyland.de';
-    const password = 'admin123456'; // المؤقت
+    const email = process.env.ADMIN_REPAIR_EMAIL || process.env.ADMIN_EMAIL;
+    const password = process.env.ADMIN_REPAIR_PASSWORD || process.env.ADMIN_PASSWORD;
+
+    if (!email || !password) {
+        console.error('❌ Missing repair credentials.');
+        console.error('   Please provide ADMIN_REPAIR_EMAIL and ADMIN_REPAIR_PASSWORD via environment variables.');
+        process.exit(1);
+    }
 
     console.log(`Repairing admin: ${email}...`);
 

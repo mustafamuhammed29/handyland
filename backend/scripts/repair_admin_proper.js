@@ -3,8 +3,14 @@ const { createClient } = require('@supabase/supabase-js');
 
 async function repairAdminProper() {
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-    const email = 'admin@handyland.com';
-    const password = 'admin123';
+    const email = process.env.ADMIN_REPAIR_EMAIL || process.env.ADMIN_EMAIL;
+    const password = process.env.ADMIN_REPAIR_PASSWORD || process.env.ADMIN_PASSWORD;
+
+    if (!email || !password) {
+        console.error('❌ Missing repair credentials.');
+        console.error('   Please provide ADMIN_REPAIR_EMAIL and ADMIN_REPAIR_PASSWORD via environment variables.');
+        process.exit(1);
+    }
 
     console.log(`Repairing admin: ${email}...`);
 

@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { authService } from '../services/authService';
 import { useTranslation } from 'react-i18next';
+import { TwoFactorChallengeModal } from '../components/auth/TwoFactorChallengeModal';
 
 const SocialButton: React.FC<{ provider: 'google' | 'facebook'; disabled?: boolean }> = ({ provider }) => {
     const { t } = useTranslation();
@@ -45,7 +46,7 @@ const SocialButton: React.FC<{ provider: 'google' | 'facebook'; disabled?: boole
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
-    const { login, user } = useAuth();
+    const { login, user, twoFactorChallenge } = useAuth();
     
     React.useEffect(() => {
         if (user) {
@@ -273,6 +274,8 @@ const Login: React.FC = () => {
 
                 <p className="text-center text-slate-500 text-sm mt-6">HandyLand © {new Date().getFullYear()}</p>
             </div>
+
+            <TwoFactorChallengeModal isOpen={!!twoFactorChallenge} onClose={() => {}} />
         </div>
     );
 };

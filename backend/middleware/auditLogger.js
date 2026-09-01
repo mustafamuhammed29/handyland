@@ -18,12 +18,14 @@ const auditLogger = async (req, res, next) => {
         try {
             // We do not wait for the DB to save the log so it doesn't slow down the response
             supabaseAdmin.from('audit_logs').insert({
+                user_id: req.user.id,
                 admin_id: req.user.id,
                 admin_email: req.user.email,
                 action: req.method,
                 resource: req.originalUrl,
+                details: Object.keys(payload).length > 0 ? payload : {},
                 payload: Object.keys(payload).length > 0 ? payload : null,
-                ip_address: req.ip || req.connection.remoteAddress
+                ip_address: req.ip || req.connection?.remoteAddress || null
             }).then(({error}) => {
                 if (error) console.error('Failed to save audit log to Supabase:', error);
             });

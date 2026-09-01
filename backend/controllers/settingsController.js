@@ -323,6 +323,7 @@ const isSafeServiceTerminalUrl = (urlStr) => {
     if (!trimmed) return false;
 
     // Reject control characters, spaces, quotes, angle brackets
+    // eslint-disable-next-line no-control-regex
     if (/[\s<>"'`\x00-\x1F\x7F]/.test(trimmed)) {
         return false;
     }

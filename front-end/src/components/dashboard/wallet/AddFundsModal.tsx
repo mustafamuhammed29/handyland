@@ -5,6 +5,7 @@ import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { api } from '../../../utils/api';
 import { useToast } from '../../../context/ToastContext';
 import { useSettings } from '../../../context/SettingsContext';
+import { useDialogAccessibility } from '../../../hooks/useDialogAccessibility';
 
 interface AddFundsModalProps {
     isOpen: boolean;
@@ -34,12 +35,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
     const [isUploading, setIsUploading] = useState(false);
     const [copiedField, setCopiedField] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const presetAmounts = ['20', '50', '100', '200'];
-
-    if (!isOpen) return null;
-
-    const getFinalAmount = () => amount === 'custom' ? parseFloat(customAmount) : parseFloat(amount);
+    const dialogRef = useRef<HTMLDivElement>(null);
 
     const handleClose = () => {
         if (isProcessing || isUploading) return;
@@ -53,6 +49,18 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
         setReceiptPreview(null);
         onClose();
     };
+
+    useDialogAccessibility({
+        isOpen,
+        onClose: handleClose,
+        dialogRef
+    });
+
+    const presetAmounts = ['20', '50', '100', '200'];
+
+    if (!isOpen) return null;
+
+    const getFinalAmount = () => amount === 'custom' ? parseFloat(customAmount) : parseFloat(amount);
 
     const handleCopy = (text: string, field: string) => {
         navigator.clipboard.writeText(text).then(() => {
@@ -163,7 +171,14 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
             />
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="wallet-modal-title"
+                tabIndex={-1}
+                className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 outline-none"
+            >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-slate-800">
                     <div className="flex items-center gap-2">
@@ -176,7 +191,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                         )}
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                        <h3 id="wallet-modal-title" className="text-xl font-bold text-white flex items-center gap-2">
                             <Wallet className="w-5 h-5 text-blue-400" />
                             {step === 'select' ? t('wallet.modal.title.add', 'Add Funds') : t('wallet.modal.title.bankTransfer', 'Bank Transfer')}
                         </h3>
