@@ -232,6 +232,7 @@ exports.lookupTicket = async (req, res, next) => {
 };
 
 // ── @route POST /api/repairs/track-guest ────────────────────────
+// TODO: P1 Security Requirement - Temporary compatibility control only (ticketId + email). Final design requires a high-entropy, revocable, expiring tracking token (or signed short-lived JWT) generated upon ticket creation. Email verification alone is not considered final authorization.
 exports.lookupGuestTicket = async (req, res, next) => {
     try {
         const { ticketId, email } = req.body;

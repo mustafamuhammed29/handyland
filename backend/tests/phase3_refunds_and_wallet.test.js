@@ -245,42 +245,12 @@ describe('Phase 3: Refunds, Wallet Top-up, Accessibility, SEO/PWA & Hardening Te
         });
     });
 
-    describe('3. Wallet Top-up & Double-Credit Protection', () => {
+    describe('3. Wallet Top-up & Double-Credit Protection (P0 Containment)', () => {
         const mockUserId = '00000000-0000-4000-8000-000000000031';
-        const mockTxId = '00000000-0000-4000-8000-000000000032';
 
-        test('createTopUpSession creates pending transaction with integer cents and Stripe checkout session', async () => {
-            let insertedTx = null;
-            let updatedTx = null;
-            const originalFrom = supabaseAdmin.from;
-
-            supabaseAdmin.from = jest.fn((table) => {
-                if (table === 'transactions') {
-                    return {
-                        insert: jest.fn((data) => {
-                            insertedTx = data;
-                            return {
-                                select: jest.fn().mockReturnValue({
-                                    single: jest.fn().mockResolvedValue({
-                                        data: { id: mockTxId, ...data },
-                                        error: null
-                                    })
-                                })
-                            };
-                        }),
-                        update: jest.fn((data) => {
-                            updatedTx = data;
-                            return {
-                                eq: jest.fn().mockResolvedValue({ error: null })
-                            };
-                        })
-                    };
-                }
-                return originalFrom.call(supabaseAdmin, table);
-            });
-
+        test('createStripeTopUpSession returns 503 while in P0 containment', async () => {
             const req = {
-                body: { amount: 50 }, // 50.00 €
+                body: { amount: 50 },
                 user: { id: mockUserId }
             };
             const res = {
@@ -289,102 +259,37 @@ describe('Phase 3: Refunds, Wallet Top-up, Accessibility, SEO/PWA & Hardening Te
                 json: jest.fn()
             };
 
-            await transactionController.createTopUpSession(req, res, jest.fn());
-            supabaseAdmin.from = originalFrom;
+            await transactionController.createStripeTopUpSession(req, res);
 
-            expect(res.statusCode).toBe(200);
-            expect(insertedTx).not.toBeNull();
-            expect(insertedTx.amount).toBe(5000); // 50.00 € = 5000 integer cents
-            expect(insertedTx.currency).toBe('eur');
-            expect(insertedTx.type).toBe('deposit');
-            expect(insertedTx.status).toBe('pending');
-            expect(mockStripeInstance.checkout.sessions.create).toHaveBeenCalledWith(
+            expect(res.statusCode).toBe(503);
+            expect(res.json).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    mode: 'payment',
-                    line_items: [expect.objectContaining({
-                        price_data: expect.objectContaining({
-                            unit_amount: 5000,
-                            currency: 'eur'
-                        })
-                    })]
+                    success: false,
+                    error: expect.objectContaining({ code: 'SERVICE_UNAVAILABLE' })
                 })
             );
         });
 
-        test('confirmTopUp credits balance atomically and prevents duplicate credit on replay', async () => {
-            let userBalance = 10.00;
-            let txStatus = 'pending';
-            const originalFrom = supabaseAdmin.from;
-
-            supabaseAdmin.from = jest.fn((table) => {
-                if (table === 'transactions') {
-                    return {
-                        select: jest.fn().mockReturnValue({
-                            eq: jest.fn().mockReturnValue({
-                                maybeSingle: jest.fn().mockImplementation(() => {
-                                    return Promise.resolve({
-                                        data: {
-                                            id: mockTxId,
-                                            user_id: mockUserId,
-                                            amount: 5000, // 50.00 € in cents
-                                            status: txStatus,
-                                            users: { id: mockUserId, balance: userBalance }
-                                        },
-                                        error: null
-                                    });
-                                })
-                            })
-                        }),
-                        update: jest.fn((data) => {
-                            if (data.status) txStatus = data.status;
-                            return { eq: jest.fn().mockResolvedValue({ error: null }) };
-                        })
-                    };
-                }
-                if (table === 'users') {
-                    return {
-                        update: jest.fn((data) => {
-                            if (data.balance !== undefined) userBalance = data.balance;
-                            return { eq: jest.fn().mockResolvedValue({ error: null }) };
-                        })
-                    };
-                }
-                return originalFrom.call(supabaseAdmin, table);
-            });
-
+        test('confirmTopUp returns 503 while in P0 containment', async () => {
             const req = {
                 body: { sessionId: 'cs_test_topup_123' },
                 user: { id: mockUserId }
             };
-            const res1 = {
+            const res = {
                 statusCode: 200,
                 status: function(code) { this.statusCode = code; return this; },
                 json: jest.fn()
             };
 
-            // First confirmation call
-            await transactionController.confirmTopUp(req, res1, jest.fn());
-            expect(res1.statusCode).toBe(200);
-            expect(userBalance).toBe(60.00); // 10.00 + 50.00 = 60.00 €
-            expect(txStatus).toBe('completed');
+            await transactionController.confirmTopUp(req, res);
 
-            // Second confirmation call (Replay / duplicate attempt)
-            const res2 = {
-                statusCode: 200,
-                status: function(code) { this.statusCode = code; return this; },
-                json: jest.fn()
-            };
-            await transactionController.confirmTopUp(req, res2, jest.fn());
-            expect(res2.statusCode).toBe(200);
-            expect(userBalance).toBe(60.00); // Must NOT credit again! (Still 60.00)
-            expect(res2.json).toHaveBeenCalledWith(
+            expect(res.statusCode).toBe(503);
+            expect(res.json).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    success: true,
-                    message: expect.stringContaining("Bereits verarbeitet")
+                    success: false,
+                    error: expect.objectContaining({ code: 'SERVICE_UNAVAILABLE' })
                 })
             );
-
-            supabaseAdmin.from = originalFrom;
         });
     });
 

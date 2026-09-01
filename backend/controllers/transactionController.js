@@ -131,214 +131,57 @@ exports.getTransaction = async (req, res, next) => {
 };
 
 // @route POST /api/transactions/create-topup-session
-exports.createTopUpSession = async (req, res, next) => {
-    try {
-        const { amount } = req.body;
-        const numAmount = Number(amount);
-        if (!numAmount || numAmount < 5) {
-            return res.status(400).json({ success: false, message: 'Mindestbetrag für Guthabenaufladung beträgt 5,00 €' });
-        }
-        if (numAmount > 5000) {
-            return res.status(400).json({ success: false, message: 'Maximaler Aufladebetrag beträgt 5.000,00 €' });
-        }
-        const amountInCents = Math.round(numAmount * 100);
-
-        // Create pending transaction in DB
-        const { data: pendingTx, error: txErr } = await supabaseAdmin
-            .from('transactions')
-            .insert({
-                user_id: req.user.id,
-                amount: amountInCents,
-                currency: 'eur',
-                type: 'deposit',
-                status: 'pending',
-                payment_method: 'stripe',
-                description: `Guthabenaufladung per Kreditkarte (Stripe): €${numAmount.toFixed(2)}`
-            })
-            .select()
-            .single();
-
-        if (txErr) throw txErr;
-
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: [{
-                price_data: {
-                    currency: 'eur',
-                    product_data: {
-                        name: 'HandyLand Guthabenaufladung',
-                        description: `Wallet-Aufladung: €${numAmount.toFixed(2)}`
-                    },
-                    unit_amount: amountInCents
-                },
-                quantity: 1
-            }],
-            mode: 'payment',
-            success_url: `${frontendUrl}/dashboard?tab=wallet&wallet=success&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${frontendUrl}/dashboard?tab=wallet&wallet=cancelled`,
-            client_reference_id: req.user.id,
-            metadata: {
-                userId: req.user.id,
-                transactionId: pendingTx.id,
-                topupAmountCents: String(amountInCents)
-            }
-        });
-
-        // Update transaction with stripe session ID
-        await supabaseAdmin
-            .from('transactions')
-            .update({ stripe_payment_id: session.id })
-            .eq('id', pendingTx.id);
-
-        return res.status(200).json({
-            success: true,
-            url: session.url,
-            sessionId: session.id,
-            transactionId: pendingTx.id,
-            data: { url: session.url, sessionId: session.id }
-        });
-    } catch (error) { next(error); }
+// TODO: P1 Security Requirement - Re-enable only after implementing atomic database RPC for wallet crediting, database-level row locking, and server-side webhook reconciliation.
+const createTopUpSession = async (req, res) => {
+    return res.status(503).json({
+        success: false,
+        error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+        },
+        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+    });
 };
+exports.createTopUpSession = createTopUpSession;
+exports.createStripeTopUpSession = createTopUpSession;
 
 // @route POST /api/transactions/confirm-topup
-exports.confirmTopUp = async (req, res, next) => {
-    try {
-        const { sessionId } = req.body;
-        if (!sessionId) {
-            return res.status(400).json({ success: false, message: 'Session ID ist erforderlich' });
-        }
-
-        // Retrieve Stripe session
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
-        if (!session) {
-            return res.status(404).json({ success: false, message: 'Stripe-Sitzung nicht gefunden' });
-        }
-
-        if (session.payment_status !== 'paid') {
-            return res.status(400).json({ success: false, message: 'Zahlung wurde noch nicht abgeschlossen' });
-        }
-
-        // Find transaction
-        const { data: tx, error: txErr } = await supabaseAdmin
-            .from('transactions')
-            .select('*, users(id, balance)')
-            .eq('stripe_payment_id', sessionId)
-            .maybeSingle();
-
-        if (txErr || !tx) {
-            return res.status(404).json({ success: false, message: 'Zugehörige Transaktion nicht gefunden' });
-        }
-
-        // DOUBLE-CREDIT GUARD: If already completed, return success idempotently
-        if (tx.status === 'completed') {
-            return res.status(200).json({ success: true, message: 'Bereits verarbeitet', data: tx });
-        }
-
-        // Mark transaction completed
-        await supabaseAdmin
-            .from('transactions')
-            .update({ status: 'completed' })
-            .eq('id', tx.id);
-
-        // Credit user balance in Euros atomically
-        const creditEuros = Number((Number(tx.amount) / 100).toFixed(2));
-        const currentBalance = Number(tx.users?.balance || 0);
-        const newBalance = Number((currentBalance + creditEuros).toFixed(2));
-
-        await supabaseAdmin
-            .from('users')
-            .update({ balance: newBalance })
-            .eq('id', tx.user_id);
-
-        return res.status(200).json({
-            success: true,
-            message: 'Guthaben erfolgreich aufgeladen',
-            newBalance,
-            data: { ...tx, status: 'completed' }
-        });
-    } catch (error) { next(error); }
+// TODO: P1 Security Requirement - Re-enable only after implementing atomic database RPC for wallet crediting, database-level row locking, and server-side webhook reconciliation.
+exports.confirmTopUp = async (req, res) => {
+    return res.status(503).json({
+        success: false,
+        error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+        },
+        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+    });
 };
 
 // @route POST /api/transactions/paypal/create-topup
-exports.createPayPalTopUp = async (req, res, next) => {
-    try {
-        const { amount } = req.body;
-        const numAmount = Number(amount);
-        if (!numAmount || numAmount < 5) {
-            return res.status(400).json({ success: false, message: 'Mindestbetrag beträgt 5,00 €' });
-        }
-        if (numAmount > 5000) {
-            return res.status(400).json({ success: false, message: 'Maximaler Betrag beträgt 5.000,00 €' });
-        }
-        const amountInCents = Math.round(numAmount * 100);
-
-        const { data: tx, error } = await supabaseAdmin
-            .from('transactions')
-            .insert({
-                user_id: req.user.id,
-                amount: amountInCents,
-                currency: 'eur',
-                type: 'deposit',
-                status: 'pending',
-                payment_method: 'paypal',
-                description: `Guthabenaufladung per PayPal: €${numAmount.toFixed(2)}`
-            })
-            .select().single();
-
-        if (error) throw error;
-
-        return res.status(200).json({
-            success: true,
-            id: tx.id,
-            transactionId: tx.id,
-            data: { id: tx.id, amount: numAmount }
-        });
-    } catch (error) { next(error); }
+// TODO: P1 Security Requirement - Re-enable only after implementing authoritative server-side PayPal API order capture, verified merchant payout confirmation, and atomic database RPC for wallet crediting.
+exports.createPayPalTopUp = async (req, res) => {
+    return res.status(503).json({
+        success: false,
+        error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+        },
+        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+    });
 };
 
 // @route POST /api/transactions/paypal/capture-topup
-exports.capturePayPalTopUp = async (req, res, next) => {
-    try {
-        const { orderID, transactionId } = req.body;
-        const lookupId = transactionId || orderID;
-
-        // Find transaction
-        let { data: tx, error: txErr } = await supabaseAdmin
-            .from('transactions')
-            .select('*, users(balance)')
-            .eq('id', lookupId)
-            .maybeSingle();
-
-        if (txErr || !tx) {
-            const { data: pendingTx } = await supabaseAdmin
-                .from('transactions')
-                .select('*, users(balance)')
-                .eq('user_id', req.user.id)
-                .eq('payment_method', 'paypal')
-                .eq('status', 'pending')
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .maybeSingle();
-
-            if (!pendingTx) return res.status(404).json({ success: false, message: 'Transaktion nicht gefunden' });
-            tx = pendingTx;
-        }
-
-        // Double-credit guard
-        if (tx.status === 'completed') {
-            return res.status(200).json({ success: true, message: 'Bereits verarbeitet' });
-        }
-
-        await supabaseAdmin.from('transactions').update({ status: 'completed' }).eq('id', tx.id);
-
-        const creditEuros = Number((Number(tx.amount) / 100).toFixed(2));
-        const currentBal = Number(tx.users?.balance || 0);
-        const newBal = Number((currentBal + creditEuros).toFixed(2));
-
-        await supabaseAdmin.from('users').update({ balance: newBal }).eq('id', tx.user_id);
-        return res.status(200).json({ success: true, newBalance: newBal });
-    } catch (error) { next(error); }
+// TODO: P1 Security Requirement - Re-enable only after implementing authoritative server-side PayPal API order capture, verified merchant payout confirmation, and atomic database RPC for wallet crediting.
+exports.capturePayPalTopUp = async (req, res) => {
+    return res.status(503).json({
+        success: false,
+        error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+        },
+        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+    });
 };
 
 // @route POST /api/transactions/bank-transfer
@@ -392,61 +235,16 @@ exports.createBankTransferTopUp = async (req, res, next) => {
 };
 
 // @route POST /api/transactions/:id/upload-receipt
-exports.uploadTransactionReceipt = async (req, res, next) => {
-    try {
-        const transactionId = req.params.id;
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'Kein Beleg hochgeladen' });
-        }
-
-        const { data: tx, error: fetchErr } = await supabaseAdmin
-            .from('transactions')
-            .select('id, user_id')
-            .eq('id', transactionId)
-            .single();
-
-        if (fetchErr || !tx) {
-            return res.status(404).json({ success: false, message: 'Transaktion nicht gefunden' });
-        }
-        if (req.user.role !== 'admin' && tx.user_id !== req.user.id) {
-            return res.status(403).json({ success: false, message: 'Nicht autorisiert' });
-        }
-
-        // Upload file to Supabase storage receipts bucket
-        const fileExt = (req.file.originalname || '').split('.').pop() || 'png';
-        const fileName = `receipt-${transactionId}-${Date.now()}.${fileExt}`;
-        const filePath = `receipts/${fileName}`;
-
-        const { error: uploadError } = await supabaseAdmin.storage
-            .from('receipts')
-            .upload(filePath, req.file.buffer, {
-                contentType: req.file.mimetype,
-                upsert: true
-            });
-
-        let receiptUrl = `/uploads/${filePath}`;
-        if (!uploadError) {
-            const { data: publicUrlData } = supabaseAdmin.storage
-                .from('receipts')
-                .getPublicUrl(filePath);
-            if (publicUrlData?.publicUrl) {
-                receiptUrl = publicUrlData.publicUrl;
-            }
-        }
-
-        // Update transaction record
-        await supabaseAdmin
-            .from('transactions')
-            .update({ receipt_url: receiptUrl })
-            .eq('id', transactionId);
-
-        return res.status(200).json({
-            success: true,
-            message: 'Beleg erfolgreich hochgeladen',
-            receiptUrl,
-            data: { receiptUrl }
-        });
-    } catch (error) { next(error); }
+// TODO: P1 Security Requirement - Re-enable only after provisioning private 'receipts' storage bucket with RLS policies and time-limited signed URLs.
+exports.uploadTransactionReceipt = async (req, res) => {
+    return res.status(503).json({
+        success: false,
+        error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+        },
+        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+    });
 };
 
 // Internal method used by webhooks or payment controller

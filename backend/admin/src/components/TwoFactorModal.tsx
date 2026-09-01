@@ -40,6 +40,10 @@ export const TwoFactorModal: React.FC<Props> = ({ isOpen, onSuccess }) => {
         return () => clearInterval(timer);
     }, [isOpen, timeLeft]);
 
+    const handleCancel = async () => {
+        await cancel2FA();
+    };
+
     useEffect(() => {
         if (!isOpen) return;
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -53,10 +57,6 @@ export const TwoFactorModal: React.FC<Props> = ({ isOpen, onSuccess }) => {
     }, [isOpen]);
 
     if (!isOpen || !twoFactorChallenge) return null;
-
-    const handleCancel = async () => {
-        await cancel2FA();
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

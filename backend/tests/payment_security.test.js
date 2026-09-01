@@ -198,19 +198,8 @@ describe('Payment Security & Webhook Tests', () => {
             expect(res.status).toBe(401);
         });
 
-        it('POST /api/payment/paypal/create-order should create PayPal order using mocked fetch', async () => {
+        it('POST /api/payment/paypal/create-order returns 503 under P0 security containment', async () => {
             setupAuthAndDb('user-123', 'user');
-
-            // Mock global.fetch for PayPal OAuth token and Order creation
-            global.fetch = jest.fn()
-                .mockResolvedValueOnce({
-                    ok: true,
-                    json: async () => ({ access_token: 'fake_paypal_token' })
-                })
-                .mockResolvedValueOnce({
-                    ok: true,
-                    json: async () => ({ id: 'PAYPAL-ORDER-12345', status: 'CREATED' })
-                });
 
             const res = await request(app)
                 .post('/api/payment/paypal/create-order')
@@ -218,9 +207,9 @@ describe('Payment Security & Webhook Tests', () => {
                 .set('x-app-type', 'frontend')
                 .send({ items: [{ price: 25, quantity: 2 }], shippingFee: 4.90 });
 
-            expect(res.status).toBe(200);
-            expect(res.body.success).toBe(true);
-            expect(res.body.id).toBe('PAYPAL-ORDER-12345');
+            expect(res.status).toBe(503);
+            expect(res.body.success).toBe(false);
+            expect(res.body.error?.code).toBe('SERVICE_UNAVAILABLE');
         });
     });
 });

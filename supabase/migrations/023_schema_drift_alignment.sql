@@ -182,7 +182,7 @@ BEGIN
                 psl.repair_part_id,
                 SUM(psl.quantity_on_hand) AS total_on_hand
             FROM public.part_stock_locations psl
-            INNER JOIN public.warehouse_locations wl ON wl.id = psl.location_id
+            INNER JOIN public.warehouse_locations wl ON wl.id = psl.warehouse_location_id
             WHERE wl.is_active = true
             GROUP BY psl.repair_part_id
         ) loc_stock ON loc_stock.repair_part_id = rp.id

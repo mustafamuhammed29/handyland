@@ -138,120 +138,27 @@ const generatePayPalAccessToken = async () => {
 };
 
 // @route POST /api/payment/paypal/create-order
-exports.createPayPalOrder = async (req, res, next) => {
-    try {
-        const orderData = req.body;
-        const total = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) + (orderData.shippingFee || 0) - (orderData.discountAmount || 0);
-
-        const accessToken = await generatePayPalAccessToken();
-        const url = `${process.env.PAYPAL_API_BASE || 'https://api-m.sandbox.paypal.com'}/v2/checkout/orders`;
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({
-                intent: 'CAPTURE',
-                purchase_units: [{
-                    amount: {
-                        currency_code: 'EUR',
-                        value: Math.max(0, total).toFixed(2),
-                    },
-                }],
-            }),
-        });
-
-        const data = await response.json();
-        if (data.id) {
-            return res.status(200).json({ success: true, id: data.id });
-        } else {
-            return res.status(400).json({ success: false, message: data.message || 'Failed to create PayPal order' });
-        }
-    } catch (error) {
-        next(error);
-    }
+// TODO: P1 Security Requirement - Re-enable only after implementing authoritative server-side order drafts, database price verification, and webhook-verified PayPal capture reconciliation.
+exports.createPayPalOrder = async (req, res) => {
+    return res.status(503).json({
+        success: false,
+        error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+        },
+        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+    });
 };
 
 // @route POST /api/payment/paypal/capture-order
-exports.capturePayPalOrder = async (req, res, next) => {
-    try {
-        const { orderID, orderData } = req.body;
-        const accessToken = await generatePayPalAccessToken();
-        const url = `${process.env.PAYPAL_API_BASE || 'https://api-m.sandbox.paypal.com'}/v2/checkout/orders/${orderID}/capture`;
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
-            }
-        });
-
-        const data = await response.json();
-        
-        if (data.status === 'COMPLETED') {
-            const capturedValue = data.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value;
-            const capturedCents = capturedValue ? Math.round(parseFloat(capturedValue) * 100) : null;
-
-            const fakeReq = {
-                user: req.user,
-                body: {
-                    items: orderData.items,
-                    shippingAddress: orderData.shippingAddress,
-                    shippingMethod: orderData.shippingMethod,
-                    paymentMethod: 'paypal',
-                    couponCode: orderData.couponCode,
-                    appliedPoints: orderData.appliedPoints
-                }
-            };
-            
-            const fakeRes = {
-                status: function(code) { this.statusCode = code; return this; },
-                json: function(payload) { this.data = payload; return this; }
-            };
-            
-            const { createOrder } = require('./orderController');
-            await createOrder(fakeReq, fakeRes, next);
-            
-            if (fakeRes.data && fakeRes.data.success) {
-                const order = fakeRes.data.order;
-                const orderAmountCents = Math.round((Number(order.totalAmount) || 0) * 100);
-
-                // Verify captured amount matches server-calculated order total (if capturedValue was returned)
-                if (capturedCents !== null && Math.abs(capturedCents - orderAmountCents) > 1) {
-                    return res.status(400).json({
-                        success: false,
-                        message: `Payment amount mismatch: captured €${(capturedCents/100).toFixed(2)} vs order total €${(orderAmountCents/100).toFixed(2)}`
-                    });
-                }
-
-                // Update order to paid immediately since PayPal captured
-                await supabaseAdmin.from('orders').update({ payment_status: 'paid', status: 'processing' }).eq('id', order._id);
-                
-                await supabaseAdmin.from('transactions').insert({
-                    user_id: req.user ? req.user.id : null,
-                    guest_email: !req.user ? (order.shippingAddress?.email || orderData.shippingAddress?.email) : null,
-                    order_id: order._id,
-                    amount: orderAmountCents,
-                    currency: 'eur',
-                    status: 'completed',
-                    type: 'purchase',
-                    payment_method: 'paypal',
-                    stripe_payment_id: orderID
-                });
-                
-                // Fetch the updated order
-                const { data: finalOrder } = await supabaseAdmin.from('orders').select('*').eq('id', order._id).single();
-                return res.status(200).json({ success: true, order: { ...finalOrder, _id: finalOrder.id } });
-            } else {
-                return res.status(500).json({ success: false, message: 'PayPal Captured but order creation failed' });
-            }
-        } else {
-            return res.status(400).json({ success: false, message: 'PayPal Capture Failed' });
-        }
-    } catch (error) {
-        next(error);
-    }
+// TODO: P1 Security Requirement - Re-enable only after implementing authoritative server-side order drafts, database price verification, and webhook-verified PayPal capture reconciliation.
+exports.capturePayPalOrder = async (req, res) => {
+    return res.status(503).json({
+        success: false,
+        error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+        },
+        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+    });
 };

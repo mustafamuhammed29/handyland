@@ -77,12 +77,24 @@ const valuationLimiter = rateLimit({
     legacyHeaders: false
 });
 
+// Guest repair tracking limiter - strict (prevents enumeration / brute force)
+const guestTrackingLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: isProduction ? 10 : 200, // 10 requests per 15 minutes in prod, 200 in dev
+    message: {
+        success: false,
+        message: 'Too many tracking attempts from this IP. Please try again after 15 minutes.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
 module.exports = {
     authLimiter,
     apiLimiter,
     passwordResetLimiter,
     paymentLimiter,
     otpLimiter,
-    valuationLimiter
+    valuationLimiter,
+    guestTrackingLimiter
 };
-

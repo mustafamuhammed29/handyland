@@ -587,34 +587,14 @@ exports.createInvoiceAction = async (req, res, next) => {
 };
 
 // ── @route POST /api/orders/:id/receipt ───────────────────────
-exports.uploadPaymentReceipt = async (req, res, next) => {
-    try {
-        if (!req.fileUrl) {
-            return res.status(400).json({ success: false, message: 'No receipt file uploaded' });
-        }
-
-        const { data: order, error: findError } = await supabaseAdmin
-            .from('orders')
-            .select('id')
-            .eq('id', req.params.id)
-            .single();
-
-        if (findError || !order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
-        }
-
-        const { error: updateError } = await supabaseAdmin
-            .from('orders')
-            .update({ receipt_url: req.fileUrl })
-            .eq('id', req.params.id);
-
-        if (updateError) {
-            console.error('Failed to update receipt URL in DB:', updateError);
-            throw updateError;
-        }
-
-        return res.status(200).json({ success: true, receiptUrl: req.fileUrl });
-    } catch (error) {
-        next(error);
-    }
+// TODO: P1 Security Requirement - Re-enable only after establishing strict authenticated order ownership validation and provisioning private storage buckets with signed URLs.
+exports.uploadPaymentReceipt = async (req, res) => {
+    return res.status(503).json({
+        success: false,
+        error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+        },
+        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+    });
 };

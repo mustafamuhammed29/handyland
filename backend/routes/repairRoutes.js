@@ -3,13 +3,25 @@ const router = express.Router();
 const repairController = require('../controllers/repairController');
 const repairTicketController = require('../controllers/repairTicketController');
 const { protect, authorize, optionalProtect } = require('../middleware/auth');
+const { guestTrackingLimiter } = require('../middleware/rateLimiter');
 
 // Public routes (Catalog & Estimation)
 router.get('/', repairController.getRepairCatalog);
 router.get('/catalog', repairController.getRepairCatalog);
 router.post('/estimate', repairController.estimateRepairCost); // Replaces getRepairAdvice
-router.post('/track-guest', repairTicketController.lookupGuestTicket);
-router.get('/track-guest/:ticketId', repairTicketController.lookupTicket);
+router.post('/track-guest', guestTrackingLimiter, repairTicketController.lookupGuestTicket);
+
+// TODO: P1 Security Requirement - GET /track-guest/:ticketId is disabled because ticket-ID-only lookups allow enumeration and IDOR. Final design requires a high-entropy, revocable, expiring tracking token.
+router.get('/track-guest/:ticketId', (req, res) => {
+    return res.status(503).json({
+        success: false,
+        error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+        },
+        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
+    });
+});
 
 // Protected routes (Tickets) - specific paths BEFORE :id catch-all
 router.post('/tickets', optionalProtect, repairTicketController.createTicket);
