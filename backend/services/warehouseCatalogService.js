@@ -21,7 +21,8 @@ const ALLOWED_CREATE_FIELDS = Object.freeze([
     'partType',
     'quality',
     'barcode',
-    'minStock'
+    'minStock',
+    'deviceModelId'
 ]);
 
 const ALLOWED_PATCH_FIELDS = Object.freeze([
@@ -218,7 +219,34 @@ async function createWarehousePart(body) {
         normalizedDevices = sanitizeCompatibleDevices(compatibleDevices);
     }
 
-    // 6. Validate minStock
+    // 6. Validate deviceModelId (optional model relation link)
+    let targetModel = null;
+    if (body.deviceModelId !== undefined && body.deviceModelId !== null) {
+        if (typeof body.deviceModelId !== 'string' || !UUID_REGEX.test(body.deviceModelId)) {
+            throw new WarehouseServiceError(400, 'WAREHOUSE_INVALID_ID', 'Invalid deviceModelId UUID');
+        }
+
+        const { data: modelRow, error: modelErr } = await supabaseAdmin
+            .from('device_models')
+            .select('id, brand, model_name, device_family, is_active')
+            .eq('id', body.deviceModelId)
+            .single();
+
+        if (modelErr || !modelRow) {
+            throw new WarehouseServiceError(404, 'WAREHOUSE_MODEL_NOT_FOUND', 'Target device model not found');
+        }
+
+        if (modelRow.is_active === false) {
+            throw new WarehouseServiceError(409, 'WAREHOUSE_MODEL_INACTIVE', 'This device model is inactive.');
+        }
+
+        targetModel = modelRow;
+        if (!normalizedDevices.includes(targetModel.model_name)) {
+            normalizedDevices.push(targetModel.model_name);
+        }
+    }
+
+    // 7. Validate minStock
     let parsedMinStock = 2;
     if (minStock !== undefined && minStock !== null) {
         const num = Number(minStock);
@@ -228,14 +256,14 @@ async function createWarehousePart(body) {
         parsedMinStock = num;
     }
 
-    // 7. Insert into repair_parts
+    // 8. Insert into repair_parts
     const insertPayload = {
         name: trimmedName,
         sku: normalizedSku,
         barcode: normalizedBarcode,
         category: category ? category.trim() : null,
-        brand: brand ? brand.trim() : null,
-        device_family: deviceFamily ? deviceFamily.trim() : null,
+        brand: brand ? brand.trim() : (targetModel ? targetModel.brand : null),
+        device_family: deviceFamily ? deviceFamily.trim() : (targetModel ? targetModel.device_family : null),
         part_type: partType ? partType.trim() : null,
         quality: quality ? quality.trim() : null,
         compatible_devices: normalizedDevices,
@@ -262,6 +290,17 @@ async function createWarehousePart(body) {
             throw new WarehouseServiceError(409, 'WAREHOUSE_PART_SKU_EXISTS', 'Warehouse repair part SKU already exists');
         }
         throw new WarehouseServiceError(503, 'WAREHOUSE_SERVICE_UNAVAILABLE', 'Failed to create repair part catalog item');
+    }
+
+    // 9. If targetModel was supplied, link relation in repair_part_compatible_models
+    if (targetModel && data?.id) {
+        await supabaseAdmin
+            .from('repair_part_compatible_models')
+            .insert({
+                repair_part_id: data.id,
+                device_model_id: targetModel.id,
+                is_primary: true
+            });
     }
 
     return sanitizePart(data);

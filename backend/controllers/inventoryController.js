@@ -8,16 +8,18 @@ exports.getInventoryStats = async (req, res, next) => {
         const { data, error } = await supabaseAdmin.rpc('get_inventory_stats');
         if (error) throw error;
 
+        const stats = data || {};
+
         return res.status(200).json({
             success: true,
             data: {
-                totalStock: data.totalStock,
-                totalValue: Number(Number(data.totalValue).toFixed(2)),
-                lowStockCount: data.lowStockCount,
-                criticalStockCount: data.lowStockCount,
-                outOfStockCount: data.outOfStockCount,
-                totalItemsSold: data.totalItemsSold,
-                totalRevenue: Number(Number(data.totalRevenue).toFixed(2))
+                totalStock: Number(stats.totalStock || 0),
+                totalValue: Number(Number(stats.totalValue || 0).toFixed(2)),
+                lowStockCount: Number(stats.lowStockCount || 0),
+                criticalStockCount: Number(stats.lowStockCount || 0),
+                outOfStockCount: Number(stats.outOfStockCount || 0),
+                totalItemsSold: Number(stats.totalItemsSold || 0),
+                totalRevenue: Number(Number(stats.totalRevenue || 0).toFixed(2))
             }
         });
     } catch (error) { next(error); }
@@ -98,7 +100,7 @@ exports.getRecentSales = async (req, res, next) => {
         if (error) throw error;
 
         const sales = [];
-        orders.forEach(order => {
+        (orders || []).forEach(order => {
             order.order_items?.forEach(item => {
                 sales.push({
                     _id: item.id,

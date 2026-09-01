@@ -97,4 +97,76 @@ export interface CreateMovementPayload {
     reason?: string;
 }
 
+export interface CreatePartCatalogPayload {
+    name: string;
+    sku: string;
+    minStock: number;
+    category?: string | null;
+    brand?: string | null;
+    deviceFamily?: string | null;
+    partType?: string | null;
+    quality?: string | null;
+    barcode?: string | null;
+    compatibleDevices?: string[];
+    deviceModelId?: string | null;
+}
+
+export interface UpdatePartMetadataPayload {
+    name: string;
+    minStock: number;
+    barcode: string | null;
+    category: string | null;
+    brand: string | null;
+    deviceFamily: string | null;
+    partType: string | null;
+    quality: string | null;
+    compatibleDevices: string[];
+}
+
+export interface DeviceModel {
+    id: string;
+    brand: string;
+    modelName: string;
+    deviceFamily: string;
+    normalizedKey: string;
+    releaseYear?: number | null;
+    sortWeight: number;
+    isActive: boolean;
+    partCount: number;
+    totalAvailable: number;
+    totalOnHand: number;
+    lowStockCount: number;
+    outOfStockCount: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CreateModelPayload {
+    brand: string;
+    modelName: string;
+    deviceFamily: string;
+    releaseYear?: number | null;
+    sortWeight?: number;
+}
+
+export interface UpdateModelPayload {
+    brand?: string;
+    modelName?: string;
+    deviceFamily?: string;
+    releaseYear?: number | null;
+    sortWeight?: number;
+}
+
+export interface ModelPartsPreview {
+    modelId: string;
+    modelName: string;
+    brand: string;
+    totalLinkedParts: number;
+    eligiblePartsCount: number;
+    sharedActivePartsCount: number;
+    blockedByStockCount: number;
+    alreadyDiscontinuedCount: number;
+    isBlocked: boolean;
+}
+
 export type WarehouseTab = 'parts' | 'movements' | 'locations';

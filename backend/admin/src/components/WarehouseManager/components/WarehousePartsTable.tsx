@@ -51,6 +51,7 @@ interface WarehousePartsTableProps {
     onLimitChange: (limit: number) => void;
     onRetry: () => void;
     onRefresh?: () => void;
+    onNavigateToMovements?: () => void;
 }
 
 export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
@@ -80,7 +81,8 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
     limit,
     onLimitChange,
     onRetry,
-    onRefresh
+    onRefresh,
+    onNavigateToMovements
 }) => {
     const { confirm } = useConfirm();
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -578,6 +580,8 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSuccess={onRefresh ? onRefresh : onRetry}
+                existingParts={parts}
+                locations={locations}
             />
 
             <EditPartModal
@@ -585,6 +589,7 @@ export const WarehousePartsTable: React.FC<WarehousePartsTableProps> = ({
                 part={editingPart}
                 onClose={() => setEditingPart(null)}
                 onSuccess={onRefresh ? onRefresh : onRetry}
+                onNavigateToMovements={onNavigateToMovements}
             />
         </div>
     );

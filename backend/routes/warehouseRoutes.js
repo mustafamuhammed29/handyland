@@ -75,4 +75,29 @@ router.get('/stats', warehouseReadLimiter, warehouseController.getStats);
 // POST /api/warehouse/movements — Atomically record stock movement
 router.post('/movements', warehouseWriteLimiter, warehouseController.createMovement);
 
+// ── Device Model Management (Phase 3A) ──────────────────────────────────────
+// GET /api/warehouse/models — List device models
+router.get('/models', warehouseReadLimiter, warehouseController.getModels);
+
+// POST /api/warehouse/models — Create device model
+router.post('/models', warehouseWriteLimiter, warehouseController.createModel);
+
+// PATCH /api/warehouse/models/:modelId — Update device model metadata
+router.patch('/models/:modelId', warehouseWriteLimiter, warehouseController.updateModel);
+
+// POST /api/warehouse/models/:modelId/deactivate — Soft deactivate device model
+router.post('/models/:modelId/deactivate', warehouseWriteLimiter, warehouseController.deactivateModel);
+
+// POST /api/warehouse/models/:modelId/reactivate — Reactivate device model
+router.post('/models/:modelId/reactivate', warehouseWriteLimiter, warehouseController.reactivateModel);
+
+// GET /api/warehouse/models/:modelId/parts — List parts linked to device model
+router.get('/models/:modelId/parts', warehouseReadLimiter, warehouseController.getModelParts);
+
+// GET /api/warehouse/models/:modelId/discontinue-parts/preview — Preview discontinuation eligibility
+router.get('/models/:modelId/discontinue-parts/preview', warehouseReadLimiter, warehouseController.previewDiscontinueModelParts);
+
+// POST /api/warehouse/models/:modelId/discontinue-parts — Batch discontinue zero-stock parts linked to model
+router.post('/models/:modelId/discontinue-parts', warehouseWriteLimiter, warehouseController.discontinueModelParts);
+
 module.exports = router;

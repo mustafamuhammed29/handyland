@@ -170,6 +170,7 @@ export default function WarehouseManager() {
                     onLimitChange={setPartsLimit}
                     onRetry={fetchParts}
                     onRefresh={refreshAll}
+                    onNavigateToMovements={() => setActiveTab('movements')}
                 />
             )}
 

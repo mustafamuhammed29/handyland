@@ -30,14 +30,17 @@ interface CatalogPartsViewProps {
     locations?: WarehouseLocation[];
     onBackToModels: () => void;
     onRefresh: () => void;
+    onNavigateToMovements?: () => void;
 }
 
 export const CatalogPartsView: React.FC<CatalogPartsViewProps> = ({
     brand,
     modelName,
     parts,
+    locations = [],
     onBackToModels,
-    onRefresh
+    onRefresh,
+    onNavigateToMovements
 }) => {
     const { confirm } = useConfirm();
 
@@ -98,6 +101,7 @@ export const CatalogPartsView: React.FC<CatalogPartsViewProps> = ({
                 const qLabel = getQualityLabelDE(p.quality);
                 if (selectedQuality === 'Original / OEM' && qLabel !== 'Original / OEM') return false;
                 if (selectedQuality === 'Kompatibel' && qLabel !== 'Kompatibel') return false;
+                if (selectedQuality === 'Refurbished' && qLabel !== 'Refurbished') return false;
             }
 
             // Stock filter
@@ -272,6 +276,7 @@ export const CatalogPartsView: React.FC<CatalogPartsViewProps> = ({
                         <option value="Alle Qualitäten">Alle Qualitäten</option>
                         <option value="Original / OEM">Original / OEM</option>
                         <option value="Kompatibel">Kompatibel</option>
+                        <option value="Refurbished">Refurbished</option>
                     </select>
 
                     {/* Stock Filter */}
@@ -453,13 +458,12 @@ export const CatalogPartsView: React.FC<CatalogPartsViewProps> = ({
             <AddPartModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
-                onSuccess={() => {
-                    setIsAddModalOpen(false);
-                    onRefresh();
-                }}
+                onSuccess={onRefresh}
                 initialBrand={brand}
                 initialDeviceFamily={parts[0]?.deviceFamily || modelName}
                 initialCompatibleDevice={modelName}
+                existingParts={parts}
+                locations={locations}
             />
 
             {/* Edit Part Modal */}
@@ -471,6 +475,7 @@ export const CatalogPartsView: React.FC<CatalogPartsViewProps> = ({
                     setEditingPart(null);
                     onRefresh();
                 }}
+                onNavigateToMovements={onNavigateToMovements}
             />
         </div>
     );
