@@ -411,7 +411,7 @@ export const CatalogModelView: React.FC<CatalogModelViewProps> = ({
                                             <Layers size={13} />
                                             <span>Artikel</span>
                                         </span>
-                                        <span className="text-white font-semibold">{m.partCount} Typen</span>
+                                        <span className="text-white font-semibold">{m.partCount} Artikel</span>
                                     </div>
 
                                     <div className="flex items-center justify-between text-xs">

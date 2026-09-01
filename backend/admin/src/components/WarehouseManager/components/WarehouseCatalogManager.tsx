@@ -23,7 +23,9 @@ import { WarehousePartsTable } from './WarehousePartsTable';
 import { AddPartModal } from './AddPartModal';
 import {
     groupPartsByBrand,
-    groupPartsByModel
+    groupPartsByModel,
+    normalizeWarehousePart,
+    type ModelSummary
 } from '../utils/catalogHelpers';
 import type { WarehousePart, WarehouseLocation, PaginationMeta, DeviceModel } from '../types';
 
@@ -104,9 +106,10 @@ export const WarehouseCatalogManager: React.FC<WarehouseCatalogManagerProps> = (
     const [catalogError, setCatalogError] = useState<string | null>(null);
     const [modelsUnavailableNotice, setModelsUnavailableNotice] = useState<string | null>(null);
 
-    // Relational model parts state
+    // Relational model parts state & refresh version
     const [modelParts, setModelParts] = useState<WarehousePart[]>([]);
     const [modelPartsLoading, setModelPartsLoading] = useState(false);
+    const [modelRefreshVersion, setModelRefreshVersion] = useState(0);
 
     // Selected model context for AddPartModal
     const [modalContext, setModalContext] = useState<{
@@ -116,7 +119,7 @@ export const WarehouseCatalogManager: React.FC<WarehouseCatalogManagerProps> = (
         modelId?: string;
     } | null>(null);
 
-    // Fetch all active parts and device models
+    // Fetch all active parts and device models (Runs ONCE on mount)
     const fetchFullCatalog = useCallback(async () => {
         setCatalogLoading(true);
         setCatalogError(null);
@@ -144,9 +147,62 @@ export const WarehouseCatalogManager: React.FC<WarehouseCatalogManagerProps> = (
         }
     }, []);
 
+    // Initial catalog load on mount (no circular dependencies)
     useEffect(() => {
         fetchFullCatalog();
     }, [fetchFullCatalog]);
+
+    // Model-specific parts load with Abort/Cancellation protection
+    useEffect(() => {
+        if (!selectedModel) {
+            setModelParts([]);
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadModelParts() {
+            if (!selectedModel) return;
+            setModelPartsLoading(true);
+            try {
+                if (selectedModel.id && !selectedModel.id.startsWith('derived-')) {
+                    const res = await api.get(`/api/warehouse/models/${selectedModel.id}/parts`);
+                    if (!cancelled && res.data?.success && Array.isArray(res.data?.data)) {
+                        const normalized = res.data.data.map(normalizeWarehousePart);
+                        setModelParts(normalized);
+                        return;
+                    }
+                }
+
+                // Fallback for pre-migration derived models or network failure
+                if (!cancelled) {
+                    const modelLower = selectedModel.modelName.trim().toLowerCase();
+                    const fallback = allCatalogParts.filter((p) => {
+                        const hasCompat = Array.isArray(p.compatibleDevices) && p.compatibleDevices.length > 0;
+                        if (hasCompat) {
+                            return p.compatibleDevices.some((d) => d.trim().toLowerCase() === modelLower);
+                        }
+                        return p.deviceFamily ? p.deviceFamily.trim().toLowerCase() === modelLower : false;
+                    }).map(normalizeWarehousePart);
+                    setModelParts(fallback);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.warn('Relational model parts lookup failed, using catalog fallback:', err);
+                }
+            } finally {
+                if (!cancelled) {
+                    setModelPartsLoading(false);
+                }
+            }
+        }
+
+        void loadModelParts();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [selectedModel, modelRefreshVersion, allCatalogParts]);
 
     // Derived Brand & Model Groups
     const brandSummaries = useMemo(() => {
@@ -158,16 +214,43 @@ export const WarehouseCatalogManager: React.FC<WarehouseCatalogManagerProps> = (
         if (!selectedBrand) return [];
         const brandLower = selectedBrand.trim().toLowerCase();
 
-        // 1. Models from API
+        // 1. Derived model summaries from allCatalogParts using exact catalog helper logic
+        const derivedSummaries = groupPartsByModel(allCatalogParts, selectedBrand);
+        const derivedMap = new Map<string, ModelSummary>();
+        for (const s of derivedSummaries) {
+            derivedMap.set(s.modelName.trim().toLowerCase(), s);
+        }
+
+        // 2. Models from API
         const apiModels = deviceModels.filter(
             (m) => (m.brand || '').trim().toLowerCase() === brandLower
         );
 
+        const mergedApiModels = apiModels.map((m) => {
+            const mKey = m.modelName.trim().toLowerCase();
+            const derived = derivedMap.get(mKey);
+
+            // Merge available quantities and stock counts from allCatalogParts
+            const partCount = derived ? derived.partCount : (m.partCount || 0);
+            const totalAvailable = derived ? derived.totalAvailable : (m.totalAvailable || 0);
+            const totalOnHand = derived ? derived.totalOnHand : (m.totalOnHand || 0);
+            const lowStockCount = derived ? derived.lowStockCount : (m.lowStockCount || 0);
+            const outOfStockCount = derived ? derived.outOfStockCount : (m.outOfStockCount || 0);
+
+            return {
+                ...m,
+                partCount,
+                totalAvailable,
+                totalOnHand,
+                lowStockCount,
+                outOfStockCount
+            };
+        });
+
         const knownModelNames = new Set(apiModels.map((m) => m.modelName.trim().toLowerCase()));
 
-        // 2. Fallback derived models from parts if not already in API list
-        const derived = groupPartsByModel(allCatalogParts, selectedBrand);
-        const missingDerived: DeviceModel[] = derived
+        // 3. Fallback derived models from parts if not already in API list
+        const missingDerived: DeviceModel[] = derivedSummaries
             .filter((d) => !knownModelNames.has(d.modelName.trim().toLowerCase()))
             .map((d) => ({
                 id: `derived-${d.modelName}`,
@@ -180,43 +263,14 @@ export const WarehouseCatalogManager: React.FC<WarehouseCatalogManagerProps> = (
                 partCount: d.partCount,
                 totalAvailable: d.totalAvailable,
                 totalOnHand: d.totalOnHand,
-                lowStockCount: d.stockStatus === 'low' ? 1 : 0,
-                outOfStockCount: d.stockStatus === 'out_of_stock' ? 1 : 0,
+                lowStockCount: d.lowStockCount,
+                outOfStockCount: d.outOfStockCount,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             }));
 
-        return [...apiModels, ...missingDerived];
+        return [...mergedApiModels, ...missingDerived];
     }, [deviceModels, allCatalogParts, selectedBrand]);
-
-    // Fetch parts for a specific selected model using relational endpoint
-    const fetchPartsForModel = useCallback(async (model: DeviceModel) => {
-        if (model.id && !model.id.startsWith('derived-')) {
-            setModelPartsLoading(true);
-            try {
-                const res = await api.get(`/api/warehouse/models/${model.id}/parts`);
-                if (res.data?.success && Array.isArray(res.data?.data)) {
-                    setModelParts(res.data.data);
-                    return;
-                }
-            } catch (err) {
-                console.warn('Relational model parts lookup failed, using catalog fallback:', err);
-            } finally {
-                setModelPartsLoading(false);
-            }
-        }
-
-        // Fallback for pre-migration derived models or network failure
-        const modelLower = model.modelName.trim().toLowerCase();
-        const fallback = allCatalogParts.filter((p) => {
-            const hasCompat = Array.isArray(p.compatibleDevices) && p.compatibleDevices.length > 0;
-            if (hasCompat) {
-                return p.compatibleDevices.some((d) => d.trim().toLowerCase() === modelLower);
-            }
-            return p.deviceFamily ? p.deviceFamily.trim().toLowerCase() === modelLower : false;
-        });
-        setModelParts(fallback);
-    }, [allCatalogParts]);
 
     // Search trigger
     useEffect(() => {
@@ -240,7 +294,6 @@ export const WarehouseCatalogManager: React.FC<WarehouseCatalogManagerProps> = (
     const handleSelectModel = (m: DeviceModel) => {
         setSelectedModel(m);
         setViewMode('parts');
-        fetchPartsForModel(m);
     };
 
     const handleSelectModelFromSearch = (brandName: string, modelName: string) => {
@@ -295,11 +348,9 @@ export const WarehouseCatalogManager: React.FC<WarehouseCatalogManagerProps> = (
 
     const handleRefreshAll = useCallback(async () => {
         await fetchFullCatalog();
-        if (selectedModel) {
-            await fetchPartsForModel(selectedModel);
-        }
+        setModelRefreshVersion((v) => v + 1);
         onRefresh();
-    }, [fetchFullCatalog, fetchPartsForModel, selectedModel, onRefresh]);
+    }, [fetchFullCatalog, onRefresh]);
 
     return (
         <div className="space-y-6 animate-fadeIn">

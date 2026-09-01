@@ -285,13 +285,13 @@ export function useWarehouseData() {
         }
     }, [activeTab, fetchParts, fetchMovements, fetchLocations]);
 
-    // Comprehensive refresh after a successful movement
+    // Comprehensive refresh after a successful movement or manual update
     const refreshAll = useCallback(() => {
         fetchStats();
-        if (activeTab === 'parts') fetchParts();
-        if (activeTab === 'movements') fetchMovements();
-        if (activeTab === 'locations') fetchLocations();
-    }, [fetchStats, fetchParts, fetchMovements, fetchLocations, activeTab]);
+        fetchParts();
+        fetchMovements();
+        fetchLocations();
+    }, [fetchStats, fetchParts, fetchMovements, fetchLocations]);
 
     return {
         // Tab

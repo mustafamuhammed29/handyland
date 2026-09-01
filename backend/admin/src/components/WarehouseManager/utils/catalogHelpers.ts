@@ -13,6 +13,7 @@ export interface BrandSummary {
     totalOnHand: number;
     lowStockCount: number;
     outOfStockCount: number;
+    stockStatus: 'available' | 'low' | 'out_of_stock' | 'empty';
 }
 
 export interface ModelSummary {
@@ -186,6 +187,173 @@ export function getModelName(part: WarehousePart): string {
 }
 
 /**
+ * Pure normalizer for WarehousePart shape ensuring single source of truth across components
+ */
+export function normalizeWarehousePart(rawPart: any): WarehousePart {
+    if (!rawPart || typeof rawPart !== 'object') {
+        return {
+            id: '',
+            name: 'Unbekanntes Ersatzteil',
+            sku: '',
+            barcode: null,
+            category: null,
+            compatibleDevices: [],
+            brand: null,
+            deviceFamily: null,
+            partType: null,
+            quality: null,
+            status: 'discontinued',
+            isActive: false,
+            minStock: 0,
+            imageUrl: null,
+            onHandQuantity: 0,
+            reservedQuantity: 0,
+            defectiveQuantity: 0,
+            inspectionQuantity: 0,
+            availableQuantity: 0
+        };
+    }
+
+    const availableQuantity =
+        typeof rawPart.availableQuantity === 'number'
+            ? rawPart.availableQuantity
+            : typeof rawPart.available === 'number'
+            ? rawPart.available
+            : typeof rawPart.stock === 'number'
+            ? rawPart.stock
+            : 0;
+
+    const reservedQuantity =
+        typeof rawPart.reservedQuantity === 'number'
+            ? rawPart.reservedQuantity
+            : typeof rawPart.reserved === 'number'
+            ? rawPart.reserved
+            : 0;
+
+    const minStock =
+        typeof rawPart.minStock === 'number'
+            ? rawPart.minStock
+            : typeof rawPart.min_stock === 'number'
+            ? rawPart.min_stock
+            : 0;
+
+    const onHandQuantity =
+        typeof rawPart.onHandQuantity === 'number'
+            ? rawPart.onHandQuantity
+            : availableQuantity + reservedQuantity;
+
+    return {
+        id: String(rawPart.id || ''),
+        name: String(rawPart.name || 'Unbekanntes Ersatzteil'),
+        sku: String(rawPart.sku || ''),
+        barcode: rawPart.barcode ? String(rawPart.barcode) : null,
+        category: rawPart.category ? String(rawPart.category) : null,
+        compatibleDevices: Array.isArray(rawPart.compatibleDevices) ? rawPart.compatibleDevices : [],
+        brand: rawPart.brand ? String(rawPart.brand) : null,
+        deviceFamily: rawPart.deviceFamily ? String(rawPart.deviceFamily) : null,
+        partType: rawPart.partType ? String(rawPart.partType) : null,
+        quality: rawPart.quality ? String(rawPart.quality) : null,
+        status: rawPart.status || (rawPart.isActive ? 'active' : 'discontinued'),
+        isActive: rawPart.isActive !== false,
+        minStock,
+        imageUrl: rawPart.imageUrl ? String(rawPart.imageUrl) : null,
+        onHandQuantity,
+        reservedQuantity,
+        defectiveQuantity: typeof rawPart.defectiveQuantity === 'number' ? rawPart.defectiveQuantity : 0,
+        inspectionQuantity: typeof rawPart.inspectionQuantity === 'number' ? rawPart.inspectionQuantity : 0,
+        availableQuantity
+    };
+}
+
+/**
+ * Safe accessor for part available quantity
+ */
+export function getAvailableQuantity(part: Partial<WarehousePart> | null | undefined): number {
+    if (!part) return 0;
+    if (typeof part.availableQuantity === 'number') return part.availableQuantity;
+    if (typeof (part as any).available === 'number') return (part as any).available;
+    if (typeof (part as any).stock === 'number') return (part as any).stock;
+    return 0;
+}
+
+/**
+ * Safe accessor for part reserved quantity
+ */
+export function getReservedQuantity(part: Partial<WarehousePart> | null | undefined): number {
+    if (!part) return 0;
+    if (typeof part.reservedQuantity === 'number') return part.reservedQuantity;
+    if (typeof (part as any).reserved === 'number') return (part as any).reserved;
+    return 0;
+}
+
+/**
+ * Safe accessor for part minimum stock threshold
+ */
+export function getMinimumStock(part: Partial<WarehousePart> | null | undefined): number {
+    if (!part) return 0;
+    if (typeof part.minStock === 'number') return part.minStock;
+    if (typeof (part as any).min_stock === 'number') return (part as any).min_stock;
+    return 0;
+}
+
+/**
+ * Summarizes an array of model parts using normalized field accessors
+ */
+export function summarizeModelParts(parts: WarehousePart[]): {
+    partCount: number;
+    totalAvailable: number;
+    totalOnHand: number;
+    totalReserved: number;
+    lowStockCount: number;
+    outOfStockCount: number;
+    stockStatus: 'available' | 'low' | 'out_of_stock' | 'empty';
+} {
+    let partCount = 0;
+    let totalAvailable = 0;
+    let totalOnHand = 0;
+    let totalReserved = 0;
+    let lowStockCount = 0;
+    let outOfStockCount = 0;
+
+    for (const part of parts) {
+        partCount++;
+        const avail = getAvailableQuantity(part);
+        const res = getReservedQuantity(part);
+        const onHand = typeof part.onHandQuantity === 'number' ? part.onHandQuantity : avail + res;
+        const minStock = getMinimumStock(part);
+
+        totalAvailable += avail;
+        totalOnHand += onHand;
+        totalReserved += res;
+
+        if (avail <= 0) {
+            outOfStockCount++;
+        } else if (avail <= minStock) {
+            lowStockCount++;
+        }
+    }
+
+    let stockStatus: 'available' | 'low' | 'out_of_stock' | 'empty' = 'available';
+    if (partCount === 0) {
+        stockStatus = 'empty';
+    } else if (totalAvailable <= 0) {
+        stockStatus = 'out_of_stock';
+    } else if (lowStockCount > 0 || outOfStockCount > 0) {
+        stockStatus = 'low';
+    }
+
+    return {
+        partCount,
+        totalAvailable,
+        totalOnHand,
+        totalReserved,
+        lowStockCount,
+        outOfStockCount,
+        stockStatus
+    };
+}
+
+/**
  * Extract brand name from part
  */
 export function getBrandName(part: WarehousePart): string {
@@ -246,6 +414,15 @@ export function groupPartsByBrand(parts: WarehousePart[]): BrandSummary[] {
 
     const summaries: BrandSummary[] = [];
     for (const [brand, data] of brandMap.entries()) {
+        let stockStatus: 'available' | 'low' | 'out_of_stock' | 'empty' = 'available';
+        if (data.partCount === 0) {
+            stockStatus = 'empty';
+        } else if (data.totalAvailable <= 0) {
+            stockStatus = 'out_of_stock';
+        } else if (data.lowStockCount > 0 || data.outOfStockCount > 0) {
+            stockStatus = 'low';
+        }
+
         summaries.push({
             brand,
             modelCount: data.models.size,
@@ -253,7 +430,8 @@ export function groupPartsByBrand(parts: WarehousePart[]): BrandSummary[] {
             totalAvailable: data.totalAvailable,
             totalOnHand: data.totalOnHand,
             lowStockCount: data.lowStockCount,
-            outOfStockCount: data.outOfStockCount
+            outOfStockCount: data.outOfStockCount,
+            stockStatus
         });
     }
 
