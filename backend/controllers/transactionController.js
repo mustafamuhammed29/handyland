@@ -1,6 +1,7 @@
 /**
  * backend/controllers/transactionController.js
  * Transactions & Wallet Top-up management using Supabase and Stripe/PayPal
+ * Milestone 4: Refactored to use privileged top_up_wallet_atomic RPC
  */
 'use strict';
 
@@ -41,6 +42,9 @@ exports.getTransactions = async (req, res, next) => {
                 type: t.type,
                 status: t.status,
                 paymentMethod: t.payment_method,
+                providerName: t.provider_name,
+                providerPaymentId: t.provider_payment_id,
+                idempotencyKey: t.idempotency_key,
                 description: t.description,
                 createdAt: t.created_at,
                 receiptUrl: t.receipt_url,
@@ -74,10 +78,10 @@ exports.adminUpdateTransactionStatus = async (req, res, next) => {
         const { status } = req.body;
         const transactionId = req.params.id;
 
-        // 1. Get the transaction and user details
+        // 1. Get the transaction details
         const { data: tx, error: fetchErr } = await supabaseAdmin
             .from('transactions')
-            .select('*, users(balance)')
+            .select('*')
             .eq('id', transactionId)
             .single();
 
@@ -88,27 +92,40 @@ exports.adminUpdateTransactionStatus = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Transaction already completed' });
         }
 
-        // 2. Update transaction status
-        const { data: updatedTx, error: updateErr } = await supabaseAdmin
-            .from('transactions')
-            .update({ status })
-            .eq('id', transactionId)
-            .select()
-            .single();
-
-        if (updateErr) throw updateErr;
-
-        // 3. If marked as completed, credit user balance (convert cents to decimal euros)
+        // 2. If marked as completed, credit user wallet atomically via RPC
         if (status === 'completed' && tx.user_id) {
-            const currentBalance = Number(tx.users?.balance) || 0;
-            const creditEuros = Number((Number(tx.amount) / 100).toFixed(2));
-            const newBalance = Number((currentBalance + creditEuros).toFixed(2));
+            const providerName = tx.provider_name || 'bank_transfer';
+            const providerPaymentId = tx.provider_payment_id || `bt_${tx.id}`;
+            const idempotencyKey = `adm_approve_${tx.id}`;
 
-            await supabaseAdmin
-                .from('users')
-                .update({ balance: newBalance })
-                .eq('id', tx.user_id);
+            const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('top_up_wallet_atomic', {
+                p_user_id: tx.user_id,
+                p_amount_cents: Number(tx.amount),
+                p_provider_name: providerName,
+                p_provider_payment_id: providerPaymentId,
+                p_idempotency_key: idempotencyKey,
+                p_metadata: { description: `Bank Transfer approved by Admin (${req.user.id})` }
+            });
+
+            if (rpcError) {
+                console.error('Error in top_up_wallet_atomic during admin approval:', rpcError.message);
+                return res.status(409).json({ success: false, message: 'Failed to credit wallet: ' + rpcError.message });
+            }
+        } else {
+            // Update transaction status for other transitions (e.g., failed, cancelled)
+            const { error: updateErr } = await supabaseAdmin
+                .from('transactions')
+                .update({ status })
+                .eq('id', transactionId);
+
+            if (updateErr) throw updateErr;
         }
+
+        const { data: updatedTx } = await supabaseAdmin
+            .from('transactions')
+            .select('*')
+            .eq('id', transactionId)
+            .single();
 
         return res.status(200).json({ success: true, data: updatedTx });
     } catch (error) { next(error); }
@@ -131,57 +148,316 @@ exports.getTransaction = async (req, res, next) => {
 };
 
 // @route POST /api/transactions/create-topup-session
-// TODO: P1 Security Requirement - Re-enable only after implementing atomic database RPC for wallet crediting, database-level row locking, and server-side webhook reconciliation.
-const createTopUpSession = async (req, res) => {
-    return res.status(503).json({
-        success: false,
-        error: {
-            code: 'SERVICE_UNAVAILABLE',
-            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-        },
-        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-    });
+exports.createTopUpSession = async (req, res, next) => {
+    let pendingTxId = null;
+    try {
+        const { amount } = req.body;
+        const numAmount = Number(amount);
+        if (!numAmount || numAmount < 1.00) {
+            return res.status(400).json({ success: false, message: 'Mindestbetrag beträgt 1,00 €' });
+        }
+        if (numAmount > 5000.00) {
+            return res.status(400).json({ success: false, message: 'Maximaler Betrag beträgt 5.000,00 €' });
+        }
+        const amountInCents = Math.round(numAmount * 100);
+
+        // 1. Establish pending transaction audit record
+        const { data: pendingTx, error: txError } = await supabaseAdmin
+            .from('transactions')
+            .insert({
+                user_id: req.user.id,
+                amount: amountInCents,
+                currency: 'eur',
+                type: 'topup',
+                status: 'pending',
+                payment_method: 'stripe',
+                provider_name: 'stripe',
+                description: `Guthabenaufladung via Stripe: €${numAmount.toFixed(2)}`
+            })
+            .select('id')
+            .single();
+
+        if (txError) throw txError;
+        pendingTxId = pendingTx.id;
+
+        // 2. Create Stripe Checkout Session / Payment Intent
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'eur',
+                    product_data: {
+                        name: 'HandyLand Wallet Top-up',
+                        description: `Guthabenaufladung für ${req.user.email || req.user.name}`
+                    },
+                    unit_amount: amountInCents
+                },
+                quantity: 1
+            }],
+            mode: 'payment',
+            success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/wallet?session_id={CHECKOUT_SESSION_ID}&success=true`,
+            cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/wallet?canceled=true`,
+            client_reference_id: req.user.id,
+            metadata: {
+                userId: req.user.id,
+                transactionId: pendingTxId,
+                type: 'topup',
+                amountCents: String(amountInCents)
+            }
+        });
+
+        // 3. Update pending transaction with stripe session/payment reference
+        await supabaseAdmin
+            .from('transactions')
+            .update({
+                stripe_payment_id: session.id,
+                provider_payment_id: session.id,
+                idempotency_key: `session_${session.id}`
+            })
+            .eq('id', pendingTxId);
+
+        return res.status(200).json({
+            success: true,
+            sessionId: session.id,
+            url: session.url,
+            transactionId: pendingTxId
+        });
+    } catch (error) {
+        if (pendingTxId) {
+            await supabaseAdmin.from('transactions').update({ status: 'failed' }).eq('id', pendingTxId).catch(() => {});
+        }
+        if (typeof next === 'function') return next(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };
-exports.createTopUpSession = createTopUpSession;
-exports.createStripeTopUpSession = createTopUpSession;
+exports.createStripeTopUpSession = exports.createTopUpSession;
 
 // @route POST /api/transactions/confirm-topup
-// TODO: P1 Security Requirement - Re-enable only after implementing atomic database RPC for wallet crediting, database-level row locking, and server-side webhook reconciliation.
-exports.confirmTopUp = async (req, res) => {
-    return res.status(503).json({
-        success: false,
-        error: {
-            code: 'SERVICE_UNAVAILABLE',
-            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-        },
-        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-    });
+exports.confirmTopUp = async (req, res, next) => {
+    try {
+        const { sessionId, paymentIntentId } = req.body;
+        const refId = sessionId || paymentIntentId;
+
+        if (!refId) {
+            return res.status(400).json({ success: false, message: 'Session ID or Payment Intent ID is required' });
+        }
+
+        let isPaid = false;
+        let amountInCents = 0;
+        let providerPaymentId = refId;
+
+        if (sessionId) {
+            const session = await stripe.checkout.sessions.retrieve(sessionId);
+            if (session.payment_status === 'paid') {
+                isPaid = true;
+                amountInCents = session.amount_total;
+                providerPaymentId = session.payment_intent || session.id;
+            }
+        } else if (paymentIntentId) {
+            const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+            if (paymentIntent.status === 'succeeded') {
+                isPaid = true;
+                amountInCents = paymentIntent.amount;
+                providerPaymentId = paymentIntent.id;
+            }
+        }
+
+        if (!isPaid) {
+            return res.status(400).json({ success: false, message: 'Payment has not been confirmed yet' });
+        }
+
+        // Call atomic top-up RPC
+        const idempotencyKey = `confirm_stripe_${providerPaymentId}`;
+        const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('top_up_wallet_atomic', {
+            p_user_id: req.user.id,
+            p_amount_cents: amountInCents,
+            p_provider_name: 'stripe',
+            p_provider_payment_id: providerPaymentId,
+            p_idempotency_key: idempotencyKey,
+            p_metadata: { description: `Stripe Top-up Confirmed: €${(amountInCents / 100).toFixed(2)}` }
+        });
+
+        if (rpcError) {
+            console.error('RPC Error during confirmTopUp:', rpcError.message);
+            return res.status(409).json({ success: false, message: rpcError.message });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Guthaben erfolgreich aufgeladen',
+            data: rpcData
+        });
+    } catch (error) {
+        if (typeof next === 'function') return next(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 // @route POST /api/transactions/paypal/create-topup
-// TODO: P1 Security Requirement - Re-enable only after implementing authoritative server-side PayPal API order capture, verified merchant payout confirmation, and atomic database RPC for wallet crediting.
-exports.createPayPalTopUp = async (req, res) => {
-    return res.status(503).json({
-        success: false,
-        error: {
-            code: 'SERVICE_UNAVAILABLE',
-            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-        },
-        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-    });
+exports.createPayPalTopUp = async (req, res, next) => {
+    let pendingTxId = null;
+    try {
+        const { amount } = req.body;
+        const numAmount = Number(amount);
+        if (!numAmount || numAmount < 1.00) {
+            return res.status(400).json({ success: false, message: 'Mindestbetrag beträgt 1,00 €' });
+        }
+        if (numAmount > 5000.00) {
+            return res.status(400).json({ success: false, message: 'Maximaler Betrag beträgt 5.000,00 €' });
+        }
+        const amountInCents = Math.round(numAmount * 100);
+
+        // Record pending PayPal transaction
+        const { data: pendingTx, error: txError } = await supabaseAdmin
+            .from('transactions')
+            .insert({
+                user_id: req.user.id,
+                amount: amountInCents,
+                currency: 'eur',
+                type: 'topup',
+                status: 'pending',
+                payment_method: 'paypal',
+                provider_name: 'paypal',
+                description: `Guthabenaufladung via PayPal: €${numAmount.toFixed(2)}`
+            })
+            .select('id')
+            .single();
+
+        if (txError) throw txError;
+        pendingTxId = pendingTx.id;
+
+        // Generate PayPal Order
+        const clientId = process.env.PAYPAL_CLIENT_ID;
+        const secret = process.env.PAYPAL_SECRET;
+        if (!clientId || !secret) {
+            return res.status(503).json({ success: false, message: 'PayPal ist derzeit nicht konfiguriert' });
+        }
+
+        const auth = Buffer.from(clientId + ':' + secret).toString('base64');
+        const tokenRes = await fetch(`${process.env.PAYPAL_API_BASE || 'https://api-m.sandbox.paypal.com'}/v1/oauth2/token`, {
+            method: 'POST',
+            body: 'grant_type=client_credentials',
+            headers: {
+                Authorization: `Basic ${auth}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+        if (!tokenRes.ok) throw new Error('PayPal authentication failed');
+        const { access_token } = await tokenRes.json();
+
+        const orderRes = await fetch(`${process.env.PAYPAL_API_BASE || 'https://api-m.sandbox.paypal.com'}/v2/checkout/orders`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                intent: 'CAPTURE',
+                purchase_units: [{
+                    amount: {
+                        currency_code: 'EUR',
+                        value: numAmount.toFixed(2)
+                    },
+                    custom_id: req.user.id,
+                    description: `HandyLand Wallet Top-up: ${req.user.email}`
+                }]
+            })
+        });
+
+        if (!orderRes.ok) throw new Error('PayPal order creation failed');
+        const orderData = await orderRes.json();
+
+        await supabaseAdmin
+            .from('transactions')
+            .update({
+                provider_payment_id: orderData.id,
+                idempotency_key: `paypal_order_${orderData.id}`
+            })
+            .eq('id', pendingTxId);
+
+        return res.status(200).json({
+            success: true,
+            orderId: orderData.id,
+            transactionId: pendingTxId
+        });
+    } catch (error) {
+        if (pendingTxId) {
+            await supabaseAdmin.from('transactions').update({ status: 'failed' }).eq('id', pendingTxId).catch(() => {});
+        }
+        next(error);
+    }
 };
 
 // @route POST /api/transactions/paypal/capture-topup
-// TODO: P1 Security Requirement - Re-enable only after implementing authoritative server-side PayPal API order capture, verified merchant payout confirmation, and atomic database RPC for wallet crediting.
-exports.capturePayPalTopUp = async (req, res) => {
-    return res.status(503).json({
-        success: false,
-        error: {
-            code: 'SERVICE_UNAVAILABLE',
-            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-        },
-        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-    });
+exports.capturePayPalTopUp = async (req, res, next) => {
+    try {
+        const { orderId } = req.body;
+        if (!orderId) {
+            return res.status(400).json({ success: false, message: 'PayPal Order ID is required' });
+        }
+
+        const clientId = process.env.PAYPAL_CLIENT_ID;
+        const secret = process.env.PAYPAL_SECRET;
+        if (!clientId || !secret) {
+            return res.status(503).json({ success: false, message: 'PayPal ist derzeit nicht konfiguriert' });
+        }
+
+        const auth = Buffer.from(clientId + ':' + secret).toString('base64');
+        const tokenRes = await fetch(`${process.env.PAYPAL_API_BASE || 'https://api-m.sandbox.paypal.com'}/v1/oauth2/token`, {
+            method: 'POST',
+            body: 'grant_type=client_credentials',
+            headers: {
+                Authorization: `Basic ${auth}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+        if (!tokenRes.ok) throw new Error('PayPal authentication failed');
+        const { access_token } = await tokenRes.json();
+
+        const captureRes = await fetch(`${process.env.PAYPAL_API_BASE || 'https://api-m.sandbox.paypal.com'}/v2/checkout/orders/${orderId}/capture`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!captureRes.ok) {
+            const errData = await captureRes.json().catch(() => ({}));
+            return res.status(400).json({ success: false, message: 'PayPal capture failed', details: errData });
+        }
+
+        const captureData = await captureRes.json();
+        if (captureData.status !== 'COMPLETED') {
+            return res.status(400).json({ success: false, message: 'PayPal order status is not COMPLETED' });
+        }
+
+        const captureItem = captureData.purchase_units?.[0]?.payments?.captures?.[0];
+        const captureId = captureItem?.id || orderId;
+        const amountCents = Math.round(Number(captureItem?.amount?.value || 0) * 100);
+
+        // Atomic top-up RPC
+        const idempotencyKey = `capture_paypal_${captureId}`;
+        const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('top_up_wallet_atomic', {
+            p_user_id: req.user.id,
+            p_amount_cents: amountCents,
+            p_provider_name: 'paypal',
+            p_provider_payment_id: captureId,
+            p_idempotency_key: idempotencyKey,
+            p_metadata: { description: `PayPal Top-up Confirmed: €${(amountCents / 100).toFixed(2)}` }
+        });
+
+        if (rpcError) {
+            console.error('RPC Error during capturePayPalTopUp:', rpcError.message);
+            return res.status(409).json({ success: false, message: rpcError.message });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'PayPal Guthaben erfolgreich aufgeladen',
+            data: rpcData
+        });
+    } catch (error) { next(error); }
 };
 
 // @route POST /api/transactions/bank-transfer
@@ -189,10 +465,10 @@ exports.createBankTransferTopUp = async (req, res, next) => {
     try {
         const { amount } = req.body;
         const numAmount = Number(amount);
-        if (!numAmount || numAmount < 5) {
+        if (!numAmount || numAmount < 5.00) {
             return res.status(400).json({ success: false, message: 'Mindestbetrag beträgt 5,00 €' });
         }
-        if (numAmount > 5000) {
+        if (numAmount > 5000.00) {
             return res.status(400).json({ success: false, message: 'Maximaler Betrag beträgt 5.000,00 €' });
         }
         const amountInCents = Math.round(numAmount * 100);
@@ -203,9 +479,10 @@ exports.createBankTransferTopUp = async (req, res, next) => {
                 user_id: req.user.id,
                 amount: amountInCents,
                 currency: 'eur',
-                type: 'deposit',
+                type: 'topup',
                 status: 'pending',
                 payment_method: 'bank_transfer',
+                provider_name: 'bank_transfer',
                 description: `Guthabenaufladung per Banküberweisung: €${numAmount.toFixed(2)}`
             })
             .select().single();
@@ -214,7 +491,7 @@ exports.createBankTransferTopUp = async (req, res, next) => {
 
         // Notify admins about the new bank transfer
         const { data: admins } = await supabaseAdmin.from('users').select('id').eq('role', 'admin');
-        if (admins) {
+        if (admins && admins.length > 0) {
             await supabaseAdmin.from('notifications').insert(
                 admins.map(a => ({
                     user_id: a.id,
@@ -222,7 +499,7 @@ exports.createBankTransferTopUp = async (req, res, next) => {
                     type: 'info',
                     link: '/admin/transactions'
                 }))
-            );
+            ).catch(() => {});
         }
 
         return res.status(201).json({
@@ -235,16 +512,80 @@ exports.createBankTransferTopUp = async (req, res, next) => {
 };
 
 // @route POST /api/transactions/:id/upload-receipt
-// TODO: P1 Security Requirement - Re-enable only after provisioning private 'receipts' storage bucket with RLS policies and time-limited signed URLs.
-exports.uploadTransactionReceipt = async (req, res) => {
-    return res.status(503).json({
-        success: false,
-        error: {
-            code: 'SERVICE_UNAVAILABLE',
-            message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-        },
-        message: 'Dieser Dienst ist vorübergehend nicht verfügbar.'
-    });
+// Uploads bank transfer receipt to private Supabase bucket and attaches signed URL
+exports.uploadTransactionReceipt = async (req, res, next) => {
+    try {
+        const transactionId = req.params.id;
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Keine Datei hochgeladen' });
+        }
+
+        // 1. File validation
+        const maxSizeBytes = 10 * 1024 * 1024; // 10MB
+        if (req.file.size > maxSizeBytes) {
+            return res.status(400).json({ success: false, message: 'Dateigröße überschreitet das Limit von 10 MB' });
+        }
+
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+        if (!allowedMimeTypes.includes(req.file.mimetype)) {
+            return res.status(400).json({ success: false, message: 'Ungültiger Dateityp. Erlaubt: JPG, PNG, WebP, PDF' });
+        }
+
+        // 2. Verify transaction ownership
+        const { data: tx, error: fetchErr } = await supabaseAdmin
+            .from('transactions')
+            .select('*')
+            .eq('id', transactionId)
+            .single();
+
+        if (fetchErr || !tx) {
+            return res.status(404).json({ success: false, message: 'Transaktion nicht gefunden' });
+        }
+
+        if (req.user && req.user.role !== 'admin' && tx.user_id !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Nicht autorisiert' });
+        }
+
+        // 3. Upload to private 'receipts' bucket
+        const ext = req.file.mimetype === 'application/pdf' ? 'pdf' : (req.file.mimetype.split('/')[1] || 'jpg');
+        const randomUUID = require('crypto').randomUUID ? require('crypto').randomUUID() : require('crypto').randomBytes(16).toString('hex');
+        const storagePath = `receipts/${transactionId}/${randomUUID}.${ext}`;
+
+        const { error: uploadErr } = await supabaseAdmin.storage
+            .from('receipts')
+            .upload(storagePath, req.file.buffer, {
+                contentType: req.file.mimetype,
+                upsert: true
+            });
+
+        if (uploadErr) {
+            console.error('Storage upload error for receipt:', uploadErr.message);
+            return res.status(500).json({ success: false, message: 'Fehler beim Hochladen des Belegs: ' + uploadErr.message });
+        }
+
+        // 4. Generate 1-hour signed URL
+        const { data: signedData, error: signedErr } = await supabaseAdmin.storage
+            .from('receipts')
+            .createSignedUrl(storagePath, 3600);
+
+        const signedUrl = signedData?.signedUrl || storagePath;
+
+        // 5. Update transaction record
+        await supabaseAdmin
+            .from('transactions')
+            .update({ receipt_url: storagePath })
+            .eq('id', transactionId);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Zahlungsbeleg erfolgreich hochgeladen',
+            receiptPath: storagePath,
+            signedUrl
+        });
+    } catch (error) {
+        if (typeof next === 'function') return next(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 // Internal method used by webhooks or payment controller

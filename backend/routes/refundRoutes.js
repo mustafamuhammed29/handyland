@@ -8,9 +8,10 @@ const {
     deleteRefundRequest
 } = require('../controllers/refundController');
 const { protect, authorize } = require('../middleware/auth');
+const { refundLimiter } = require('../middleware/rateLimiter');
 
 // Customer routes
-router.post('/', protect, createRefund);
+router.post('/', protect, refundLimiter, createRefund);
 router.get('/my', protect, getRefunds);
 router.delete('/:id', protect, deleteRefundRequest);
 

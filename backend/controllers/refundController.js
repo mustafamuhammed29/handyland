@@ -1,6 +1,7 @@
 /**
  * backend/controllers/refundController.js
  * Hardened Refund State Machine, Idempotency & Provider Reconciliation
+ * Milestone 5B: Full Refund Lifecycle with system provider ledger credits
  */
 'use strict';
 
@@ -81,7 +82,10 @@ exports.getRefunds = async (req, res, next) => {
             pagination: { page: Number(page), limit: Number(limit), total: count, pages: Math.ceil(count / Number(limit)) },
             data: formattedData
         });
-    } catch (error) { next(error); }
+    } catch (error) {
+        if (typeof next === 'function') return next(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 // @route GET /api/refunds/:id
@@ -133,21 +137,26 @@ exports.getRefund = async (req, res, next) => {
         };
 
         return res.status(200).json({ success: true, data: formattedData });
-    } catch (error) { next(error); }
+    } catch (error) {
+        if (typeof next === 'function') return next(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 // @route POST /api/refunds
 exports.createRefund = async (req, res, next) => {
     try {
-        const { orderId, reason, description, items, idempotencyKey, refundAmount } = req.body;
+        const { orderId, reason, description, items, idempotencyKey, refundAmount, refundMethod = 'original_payment' } = req.body;
         if (!orderId || !reason) return res.status(400).json({ success: false, message: 'Order ID and reason are required' });
 
-        // Verify order belongs to user
+        // 1. Verify order belongs to user
         const { data: order, error: orderError } = await supabaseAdmin.from('orders').select('*').eq('id', orderId).single();
         if (orderError || !order) return res.status(404).json({ success: false, message: 'Order not found' });
-        if (order.user_id !== req.user.id) return res.status(403).json({ success: false, message: 'Not authorized' });
+        if (req.user && req.user.role !== 'admin' && order.user_id !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
 
-        // Idempotency check: if request with idempotencyKey exists, return it
+        // 2. Idempotency check: if request with idempotencyKey exists, return it
         if (idempotencyKey) {
             const { data: existingIdempotent } = await supabaseAdmin
                 .from('refund_requests')
@@ -166,14 +175,14 @@ exports.createRefund = async (req, res, next) => {
             .from('refund_requests')
             .select('id, status')
             .eq('order_id', orderId)
-            .in('status', ['pending', 'under_review', 'processing', 'approved', 'processed', 'completed'])
+            .in('status', ['pending', 'under_review', 'processing', 'approved'])
             .maybeSingle();
 
         if (existingRefund) {
             return res.status(400).json({ success: false, message: 'Es existiert bereits eine aktive Rückgabeanfrage für diese Bestellung.' });
         }
 
-        // Check withdrawal period (14 days)
+        // 3. Check withdrawal period (14 days)
         const orderDate = new Date(order.created_at);
         const daysSinceOrder = (new Date() - orderDate) / (1000 * 60 * 60 * 24);
         const withinWithdrawalPeriod = daysSinceOrder <= 14;
@@ -188,21 +197,24 @@ exports.createRefund = async (req, res, next) => {
             return res.status(400).json({ success: false, message: `Rückerstattungsbetrag (€${requestedEuros.toFixed(2)}) übersteigt den Bestellwert (€${Number(order.total_amount).toFixed(2)})` });
         }
 
-        // Create refund request
+        // 4. Create refund request
+        const userId = req.user ? req.user.id : (order.user_id || null);
         const { data: refundReq, error } = await supabaseAdmin
             .from('refund_requests')
             .insert({
-                user_id: req.user.id,
+                user_id: userId,
                 order_id: orderId,
                 reason,
                 description,
                 within_withdrawal_period: withinWithdrawalPeriod,
                 refund_amount: requestedEuros,
                 refund_amount_cents: requestedCents,
-                idempotency_key: idempotencyKey || null,
+                refund_method: refundMethod,
+                idempotency_key: idempotencyKey || `ref_req_${orderId}_${Date.now()}`,
                 status: 'pending'
             })
             .select().single();
+
         if (error) throw error;
 
         // Update order status to reflect the return request
@@ -219,7 +231,18 @@ exports.createRefund = async (req, res, next) => {
                 quantity: i.quantity,
                 price: i.price
             }));
-            await supabaseAdmin.from('refund_request_items').insert(refundItems);
+            await supabaseAdmin.from('refund_request_items').insert(refundItems).catch(() => {});
+        }
+
+        // Audit Logging
+        if (userId) {
+            await supabaseAdmin.from('audit_logs').insert({
+                user_id: userId,
+                action: 'REFUND_REQUESTED',
+                entity_type: 'refund_request',
+                entity_id: String(refundReq.id),
+                details: { orderId, amountCents: requestedCents, reason }
+            }).catch(() => {});
         }
 
         // Notify admins
@@ -227,23 +250,31 @@ exports.createRefund = async (req, res, next) => {
         if (admins) {
             await supabaseAdmin.from('notifications').insert(admins.map(a => ({
                 user_id: a.id, message: `Neue Rücksendeanfrage (Bestellung ${order.order_number})`, link: `/admin/refunds/${refundReq.id}`
-            })));
+            }))).catch(() => {});
         }
 
         return res.status(201).json({ success: true, message: 'Refund request created', data: refundReq });
-    } catch (error) { next(error); }
+    } catch (error) {
+        if (typeof next === 'function') return next(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 // @route PUT /api/refunds/:id/status (Admin)
 exports.updateRefundStatus = async (req, res, next) => {
     try {
-        const { status, adminNotes, refundAmount, refundMethod = 'original_payment', processProviderRefund = true } = req.body;
+        const { status, adminNotes, refundAmount, refundMethod = 'original_payment', processProviderRefund = true } = req.body || {};
+        const refundId = req.params?.id;
+
+        if (!refundId || !status) {
+            return res.status(400).json({ success: false, message: 'ID und Status sind erforderlich' });
+        }
         
         // 1. Fetch current refund request with order details
         const { data: refundReq, error: fetchErr } = await supabaseAdmin
             .from('refund_requests')
             .select('*, orders(id, order_number, payment_id, payment_method, total_amount, user_id, status)')
-            .eq('id', req.params.id)
+            .eq('id', refundId)
             .single();
 
         if (fetchErr || !refundReq) return res.status(404).json({ success: false, message: 'Refund request not found' });
@@ -290,95 +321,80 @@ exports.updateRefundStatus = async (req, res, next) => {
             }
         }
 
-        const updateData = {
-            status,
+        let gatewayRefundId = refundReq.gateway_refund_id;
+        let errorMessage = null;
+        let finalStatus = status;
+
+        // 4. Execute Refund Mutation
+        if (['approved', 'processing', 'processed', 'completed'].includes(status) && processProviderRefund) {
+            const targetUserId = refundReq.user_id || refundReq.orders.user_id;
+
+            // Scenario A: Refund to Customer Wallet (uses process_wallet_ledger_entry with provider_name = 'system')
+            if (refundMethod === 'wallet' || refundReq.orders.payment_method === 'wallet') {
+                if (targetUserId) {
+                    const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('process_wallet_ledger_entry', {
+                        p_user_id: targetUserId,
+                        p_direction: 'credit',
+                        p_amount_cents: effectiveRefundCents,
+                        p_reason: 'refund',
+                        p_reference_type: 'refund',
+                        p_reference_id: String(refundReq.id),
+                        p_provider_name: 'system',
+                        p_provider_payment_id: null,
+                        p_idempotency_key: `ref_wallet_${refundReq.id}`,
+                        p_description: `Rückerstattung für Bestellung #${refundReq.orders.order_number || refundReq.order_id.slice(0, 8)}`
+                    });
+
+                    if (rpcError) {
+                        console.error('RPC Error during wallet refund:', rpcError.message);
+                        return res.status(500).json({ success: false, message: 'Fehler bei der Wallet-Gutschrift: ' + rpcError.message });
+                    }
+                    finalStatus = 'completed';
+                }
+            } 
+            // Scenario B: Refund to Original Stripe Payment Intent
+            else if (refundMethod === 'original_payment' && refundReq.orders.payment_method === 'stripe') {
+                const paymentId = refundReq.orders.payment_id;
+                if (paymentId && !gatewayRefundId) {
+                    try {
+                        const idempotencyKey = refundReq.idempotency_key || `ref_stripe_${refundReq.id}`;
+                        const stripeRefund = await stripe.refunds.create({
+                            payment_intent: paymentId,
+                            amount: effectiveRefundCents,
+                            reason: 'requested_by_customer',
+                            metadata: {
+                                refund_request_id: refundReq.id,
+                                order_id: refundReq.order_id
+                            }
+                        }, { idempotencyKey });
+
+                        gatewayRefundId = stripeRefund.id;
+                        finalStatus = 'completed';
+                    } catch (stripeErr) {
+                        console.error('Stripe Refund Processing Error:', stripeErr.message);
+                        errorMessage = `Stripe Gateway Error: ${stripeErr.message}`;
+                        finalStatus = 'failed';
+                    }
+                }
+            }
+        }
+
+        // 5. Update refund request in database
+        const updatePayload = {
+            status: finalStatus,
+            admin_notes: adminNotes || refundReq.admin_notes,
             refund_amount: effectiveRefundEuros,
             refund_amount_cents: effectiveRefundCents,
-            refund_method: refundMethod
+            refund_method: refundMethod,
+            gateway_refund_id: gatewayRefundId,
+            stripe_refund_id: gatewayRefundId,
+            error_message: errorMessage,
+            resolved_at: isTerminalStatus(finalStatus) ? new Date().toISOString() : null
         };
-        if (adminNotes !== undefined) updateData.admin_notes = adminNotes;
 
-        // 4. Provider Reconciliation for finalization (processed / completed)
-        if (['processed', 'completed'].includes(status) && processProviderRefund) {
-            const orderPaymentMethod = refundReq.orders.payment_method;
-            const orderPaymentId = refundReq.orders.payment_id;
-
-            // Scenario A: Refund to Original Payment via Stripe
-            if (refundMethod === 'original_payment' && orderPaymentMethod === 'stripe') {
-                if (!orderPaymentId) {
-                    return res.status(400).json({ success: false, message: 'Stripe Payment-ID fehlt für diese Bestellung' });
-                }
-                try {
-                    const refund = await stripe.refunds.create({
-                        payment_intent: orderPaymentId,
-                        amount: effectiveRefundCents > 0 ? effectiveRefundCents : undefined
-                    });
-                    updateData.gateway_refund_id = refund.id;
-                    updateData.stripe_refund_id = refund.id;
-                } catch (stripeErr) {
-                    // Do not mark completed on provider failure
-                    await supabaseAdmin
-                        .from('refund_requests')
-                        .update({
-                            status: 'failed',
-                            error_message: stripeErr.message,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', req.params.id);
-
-                    return res.status(400).json({
-                        success: false,
-                        message: `Stripe-Rückerstattungsfehler: ${stripeErr.message}. Lokaler Status wurde auf 'failed' gesetzt.`
-                    });
-                }
-            }
-
-            // Scenario B: Refund to Customer Wallet
-            if (refundMethod === 'wallet' || orderPaymentMethod === 'wallet') {
-                const targetUserId = refundReq.user_id || refundReq.orders.user_id;
-                if (targetUserId) {
-                    // Fetch user balance
-                    const { data: userRec } = await supabaseAdmin
-                        .from('users')
-                        .select('balance')
-                        .eq('id', targetUserId)
-                        .single();
-
-                    const currentBal = Number(userRec?.balance || 0);
-                    const newBal = Number((currentBal + effectiveRefundEuros).toFixed(2));
-
-                    // Atomically credit user balance
-                    await supabaseAdmin
-                        .from('users')
-                        .update({ balance: newBal })
-                        .eq('id', targetUserId);
-
-                    // Insert wallet refund transaction in integer cents
-                    await supabaseAdmin.from('transactions').insert({
-                        user_id: targetUserId,
-                        amount: effectiveRefundCents,
-                        currency: 'eur',
-                        type: 'refund',
-                        status: 'completed',
-                        payment_method: 'wallet',
-                        description: `Rückerstattung für Bestellung #${refundReq.orders.order_number || refundReq.order_id.slice(0, 8)}`
-                    });
-                }
-            }
-
-            updateData.resolved_at = new Date().toISOString();
-            updateData.resolved_by = req.user.id;
-        }
-
-        if (status === 'rejected') {
-            updateData.resolved_at = new Date().toISOString();
-            updateData.resolved_by = req.user.id;
-        }
-
-        // 5. Update refund request in DB
         const { data: updatedRefund, error: updateErr } = await supabaseAdmin
             .from('refund_requests')
-            .update(updateData)
+            .update(updatePayload)
             .eq('id', req.params.id)
             .select()
             .single();
@@ -386,30 +402,44 @@ exports.updateRefundStatus = async (req, res, next) => {
         if (updateErr) throw updateErr;
 
         // 6. Synchronize Order Status
-        if (['processed', 'completed'].includes(status)) {
+        if (['processed', 'completed'].includes(finalStatus)) {
             const isFullRefund = effectiveRefundCents >= orderTotalCents;
             await supabaseAdmin
                 .from('orders')
                 .update({ status: isFullRefund ? 'refunded' : 'partially_refunded' })
                 .eq('id', refundReq.order_id);
-        } else if (status === 'rejected') {
+        } else if (finalStatus === 'rejected') {
             await supabaseAdmin
                 .from('orders')
                 .update({ status: 'delivered' })
                 .eq('id', refundReq.order_id);
         }
 
-        // 7. Notify customer
+        // 7. Audit Logging
+        if (req.user?.id) {
+            await supabaseAdmin.from('audit_logs').insert({
+                user_id: req.user.id,
+                action: 'REFUND_STATUS_UPDATED',
+                entity_type: 'refund_request',
+                entity_id: String(refundReq.id),
+                details: { oldStatus: currentStatus, newStatus: finalStatus, refundAmount: effectiveRefundEuros }
+            }).catch(() => {});
+        }
+
+        // 8. Notify customer
         if (refundReq.user_id) {
             await supabaseAdmin.from('notifications').insert({
                 user_id: refundReq.user_id,
-                message: `Status Ihrer Rücksendeanfrage wurde aktualisiert: ${status}`,
+                message: `Status Ihrer Rücksendeanfrage wurde aktualisiert: ${finalStatus}`,
                 link: `/dashboard?tab=orders`
-            });
+            }).catch(() => {});
         }
 
         return res.status(200).json({ success: true, data: updatedRefund });
-    } catch (error) { next(error); }
+    } catch (error) {
+        if (typeof next === 'function') return next(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 // @route DELETE /api/refunds/:id
@@ -418,7 +448,7 @@ exports.deleteRefundRequest = async (req, res, next) => {
         const { data: refundReq } = await supabaseAdmin.from('refund_requests').select('order_id, user_id, status').eq('id', req.params.id).single();
         if (!refundReq) return res.status(404).json({ success: false, message: 'Refund request not found' });
         
-        const isAdmin = req.user.role === 'admin' || req.user.role === 'staff';
+        const isAdmin = req.user?.role === 'admin' || req.user?.role === 'staff';
         if (!isAdmin && refundReq.user_id !== req.user.id) {
             return res.status(403).json({ success: false, message: 'Not authorized' });
         }
@@ -435,5 +465,8 @@ exports.deleteRefundRequest = async (req, res, next) => {
         await supabaseAdmin.from('orders').update({ status: 'delivered' }).eq('id', refundReq.order_id);
 
         return res.status(200).json({ success: true, message: 'Refund request deleted' });
-    } catch (error) { next(error); }
+    } catch (error) {
+        if (typeof next === 'function') return next(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };

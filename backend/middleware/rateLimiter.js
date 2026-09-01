@@ -41,13 +41,13 @@ const passwordResetLimiter = rateLimit({
     legacyHeaders: false
 });
 
-// Payment endpoint limiter - strict
+// Payment endpoint limiter - strict (10 requests per minute per IP)
 const paymentLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: isProduction ? 15 : 500, // 15 requests per 15 minutes in prod
+    windowMs: 60 * 1000, // 1 minute
+    max: isProduction ? 10 : 500, // 10 requests per minute in prod, 500 in dev
     message: {
         success: false,
-        message: 'Too many payment requests from this IP. Please try again after 15 minutes.'
+        message: 'Too many payment/top-up requests from this IP. Please try again after 1 minute.'
     },
     standardHeaders: true,
     legacyHeaders: false
@@ -89,6 +89,18 @@ const guestTrackingLimiter = rateLimit({
     legacyHeaders: false
 });
 
+// Refund requests limiter - strict (5 requests per hour per user/IP)
+const refundLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: isProduction ? 5 : 100, // 5 requests per hour in prod, 100 in dev
+    message: {
+        success: false,
+        message: 'Too many refund requests. Please try again after 1 hour.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
 module.exports = {
     authLimiter,
     apiLimiter,
@@ -96,5 +108,6 @@ module.exports = {
     paymentLimiter,
     otpLimiter,
     valuationLimiter,
-    guestTrackingLimiter
+    guestTrackingLimiter,
+    refundLimiter
 };
