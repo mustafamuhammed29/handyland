@@ -14,7 +14,6 @@ interface ContactStepProps {
 }
 
 export const ContactStep: React.FC<ContactStepProps> = ({ formData, errors, handleChange, onNext, t }) => {
-    const { t } = useTranslation();
     return (
         <div className="space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
             <div className="text-center mb-8">

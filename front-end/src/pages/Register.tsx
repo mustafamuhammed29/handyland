@@ -17,7 +17,6 @@ import { useTranslation } from "react-i18next";
 const API_URL = ENV.API_URL;
 
 const SocialButton: React.FC<{ provider: 'google' | 'facebook' }> = ({ provider }) => {
-    const { t } = useTranslation();
     const isGoogle = provider === 'google';
     const lang = localStorage.getItem('handyland_lang') || 'en';
     const label = isGoogle
@@ -63,7 +62,6 @@ const PasswordInput: React.FC<{
     minLength?: number;
     maxLength?: number;
 }> = ({ name, value, onChange, placeholder = '••••••••', required, minLength, maxLength }) => {
-    const { t } = useTranslation();
     const [show, setShow] = useState(false);
     return (
         <div className="relative">
@@ -92,7 +90,6 @@ const PasswordInput: React.FC<{
 };
 
 const Register: React.FC = () => {
-    const { t } = useTranslation();
     const { settings } = useSettings();
     const { user } = useAuth();
     const navigate = useNavigate();
