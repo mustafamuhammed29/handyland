@@ -6,7 +6,13 @@ export default defineConfig(({ mode }) => ({
   plugins: [react()],
   build: {
     chunkSizeWarningLimit: 600,
-    minify: 'esbuild',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: {
@@ -23,10 +29,6 @@ export default defineConfig(({ mode }) => ({
         }
       }
     }
-  },
-  // Strip console.log and debugger from production builds
-  esbuild: {
-    drop: mode === 'production' ? ['console', 'debugger'] : [],
   },
   server: {
     port: 3001,
