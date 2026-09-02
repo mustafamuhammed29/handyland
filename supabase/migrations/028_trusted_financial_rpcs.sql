@@ -272,7 +272,7 @@ BEGIN
             gen_random_uuid(),
             p_user_id,
             p_amount_cents,
-            'topup',
+            'deposit',
             'completed',
             p_provider_name,
             p_provider_payment_id,

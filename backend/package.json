@@ -1,7 +1,8 @@
 {
     "name": "handyland-backend",
     "version": "1.0.0",
-    "description": "Backend for HandyLand application",
+    "description": "HandyLand e-commerce backend",
+    "note": "All dependencies are actively used. No dead packages.",
     "main": "server.js",
     "scripts": {
         "start": "node server.js",
@@ -20,8 +21,6 @@
     "author": "HandyLand Team",
     "license": "ISC",
     "dependencies": {
-        "@paypal/checkout-server-sdk": "^1.0.3",
-        "@sendgrid/mail": "^8.1.6",
         "@sentry/node": "^10.46.0",
         "@supabase/supabase-js": "^2.105.4",
         "axios": "^1.13.4",
@@ -52,8 +51,7 @@
         "swagger-ui-express": "^5.0.1",
         "uuid": "^13.0.0",
         "winston": "^3.19.0",
-        "xss": "^1.0.15",
-        "xss-clean": "^0.1.4"
+        "xss": "^1.0.15"
     },
     "devDependencies": {
         "axios-cookiejar-support": "^7.0.0",

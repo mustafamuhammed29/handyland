@@ -235,6 +235,23 @@ npm run dev
 
 ---
 
+## CI/CD
+
+The CI pipeline runs:
+1. Backend tests (Jest)
+2. Frontend build
+3. Admin build
+4. E2E tests (Playwright) - only on main branch
+
+Required secrets:
+- SUPABASE_URL
+- SUPABASE_SERVICE_KEY
+- JWT_SECRET
+- STRIPE_SECRET_KEY
+- STRIPE_WEBHOOK_SECRET
+
+---
+
 ## 🛠️ Troubleshooting
 
 ### Server Fails to Start

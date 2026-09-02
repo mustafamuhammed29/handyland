@@ -13,10 +13,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true, // for OAuth and magic link callbacks
-        storageKey: 'handyland-auth'
+        persistSession: false,  // Don't persist - use HttpOnly cookies
+        autoRefreshToken: false,  // Backend handles refresh
+        detectSessionInUrl: false,  // No URL session detection
+        flowType: 'implicit'  // Use implicit flow for OAuth
     }
 });
 

@@ -35,7 +35,17 @@ const validateAndGetAllowedOrigins = () => {
 
     if (isProd) {
         if (!envRaw || typeof envRaw !== 'string' || envRaw.trim() === '') {
-            throw new Error('[Security] ALLOWED_ORIGINS environment variable is required and cannot be empty in production.');
+            // Fallback to environment-based detection
+            const renderUrl = process.env.RENDER_EXTERNAL_URL;
+            const vercelUrl = process.env.VERCEL_URL;
+            const fallbacks = [];
+            if (renderUrl) fallbacks.push(renderUrl);
+            if (vercelUrl) fallbacks.push(`https://${vercelUrl}`);
+            
+            if (fallbacks.length === 0) {
+                throw new Error('[Security] ALLOWED_ORIGINS environment variable is required and cannot be empty in production.');
+            }
+            return fallbacks;
         }
 
         const origins = envRaw.split(',').map(o => o.trim()).filter(Boolean);
@@ -100,6 +110,10 @@ const isOriginAllowed = (origin) => {
 
     const isProd = process.env.NODE_ENV === 'production';
     if (!isProd && /^http:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/.test(origin)) {
+        return true;
+    }
+    // Allow .vercel.app and .onrender.com only in dev (not test)
+    if (process.env.NODE_ENV === 'development' && (origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com'))) {
         return true;
     }
 

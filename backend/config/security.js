@@ -61,7 +61,16 @@ const helmetMiddleware = helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
 });
 
-// ── CORS & Origin Configuration ───────────────────────────────────────────────
+/**
+ * CORS Configuration
+ * 
+ * Production: Only explicit origins from ALLOWED_ORIGINS env var
+ * Development: localhost, LAN ranges, .vercel.app, .onrender.com
+ * 
+ * To add new production origin:
+ * 1. Add to ALLOWED_ORIGINS in Render dashboard
+ * 2. Format: https://domain1.com,https://domain2.com
+ */
 const {
     validateAndGetAllowedOrigins,
     isOriginAllowed,

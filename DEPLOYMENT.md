@@ -205,6 +205,35 @@ Verify that all 5 pillars achieve **100% PASS**:
 - [x] **Password Reset & Security Links**
 - [x] **Notifications & Real-Time Socket Events**
 
+## Production Deployment
+
+### Recommended: Render Standard Plan
+
+**Why Standard over Free:**
+- No cold starts (always-on)
+- 100% uptime SLA
+- Better performance
+- Auto-deploy on git push
+- Better monitoring
+
+**Cost:** $7/month for backend
+
+**Upgrade Steps:**
+1. Go to: https://dashboard.render.com
+2. Select your service
+3. Settings → Plan → Standard
+4. Confirm upgrade
+
+### Free Plan Limitations
+
+If using Free plan:
+- Cold starts (30-60s delay after inactivity)
+- No uptime guarantee
+- Auto-sleep after 15 minutes inactivity
+- Not suitable for production
+
+**Recommendation:** Use Free for staging, Standard for production.
+
 ---
 
 ## 🛡️ Support & Troubleshooting
