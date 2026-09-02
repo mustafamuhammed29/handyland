@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { WifiOff, RefreshCw, ServerCrash, ShieldAlert } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 interface GlobalErrorProps {
     onRetry?: () => void;
@@ -7,6 +8,7 @@ interface GlobalErrorProps {
 }
 
 export const GlobalError: React.FC<GlobalErrorProps> = ({ onRetry, errorType = 'connection' }) => {
+    const { t } = useTranslation();
     const [countdown, setCountdown] = useState(8);
 
     useEffect(() => {
@@ -31,8 +33,8 @@ export const GlobalError: React.FC<GlobalErrorProps> = ({ onRetry, errorType = '
                 <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 relative">
                     <WifiOff className="w-8 h-8 text-amber-400" />
                     <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="4" className="text-slate-800" />
-                        <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="4" className="text-amber-500 transition-all duration-1000 ease-linear" strokeDasharray="301" strokeDashoffset={301 - (301 * (countdown / 8))} />
+                        <circle cx="50" cy="50" r="48" fill={t('none')} stroke="currentColor" strokeWidth="4" className="text-slate-800" />
+                        <circle cx="50" cy="50" r="48" fill={t('none')} stroke="currentColor" strokeWidth="4" className="text-amber-500 transition-all duration-1000 ease-linear" strokeDasharray="301" strokeDashoffset={301 - (301 * (countdown / 8))} />
                     </svg>
                 </div>
 

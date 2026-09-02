@@ -219,14 +219,14 @@ export const DashboardGlobalSettings: React.FC = () => {
                                 <label htmlFor="contactPhone" className="block text-sm font-medium text-slate-400 mb-1">{t('common.phone', 'Phone')}</label>
                                 <input
                                     id="contactPhone"
-                                    type="text"
+                                    type="tel"
                                     value={localSettings.contactSection?.phone || ''}
                                     onChange={e => setLocalSettings(prev => ({
                                         ...prev,
                                         contactSection: { ...prev.contactSection, phone: e.target.value }
                                     }))}
                                     className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
-                                    placeholder={t('common.phone', 'Phone')}
+                                    placeholder={t('common.phone', 'Phone')} inputMode="numeric"
                                 />
                             </div>
                             <div>

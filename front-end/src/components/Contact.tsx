@@ -254,7 +254,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                         <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                                         <input
                                             type="text"
-                                            name="name"
+                                            name={t('name')}
                                             required
                                             className="w-full bg-slate-100/50 dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                                             placeholder={settings.labels.name}
@@ -267,8 +267,8 @@ export const Contact: React.FC<ContactProps> = () => {
                                     <div className="relative group">
                                         <AtSign className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
                                         <input
-                                            type="email"
-                                            name="email"
+                                            type={t('email')}
+                                            name={t('email')}
                                             required
                                             className="w-full bg-slate-100/50 dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                                             placeholder={settings.labels.email}
@@ -279,7 +279,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                 <div className="space-y-2">
                                     <label className="text-xs text-slate-400 font-bold ml-1 uppercase">{t('contact.message', 'Ihre Nachricht')}</label>
                                     <textarea
-                                        name="message"
+                                        name={t('message')}
                                         required
                                         rows={4}
                                         className="w-full bg-slate-100/50 dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-xl py-3 px-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none"
@@ -288,7 +288,7 @@ export const Contact: React.FC<ContactProps> = () => {
                                 </div>
 
                                 <button
-                                    type="submit"
+                                    type={t('submit')}
                                     disabled={formState !== 'idle'}
                                     className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-300 ${formState === 'success'
                                         ? 'bg-emerald-500 text-white'

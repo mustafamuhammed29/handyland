@@ -248,7 +248,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ isOpen, onClose }) => 
                                                                 src={getImageUrl(product.imageUrl || product.images?.[0])} 
                                                                 alt={product.model} 
                                                                 className="w-full h-full object-contain"
-                                                                onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
+                                                                onError={(e: any) => { e.target.src = '/images/placeholder.png'; }} loading="lazy"
                                                             />
                                                         </div>
                                                         <div className="flex-1 min-w-0">

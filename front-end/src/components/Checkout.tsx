@@ -7,6 +7,7 @@ import { CreditCard, Truck, ShieldCheck, Lock, ArrowRight, CheckCircle, AlertCir
 import { api } from '../utils/api';
 import { getSecureItem, setSecureItem } from '../utils/storage';
 import { z } from 'zod';
+import { useTranslation } from "react-i18next";
 
 const shippingSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -24,6 +25,7 @@ const shippingSchema = z.object({
 type ShippingFormData = z.infer<typeof shippingSchema>;
 
 export const Checkout: React.FC = () => {
+    const { t } = useTranslation();
     const { cart, cartTotal, clearCart } = useCart();
     const { addToast } = useToast();
     const navigate = useNavigate();
@@ -164,11 +166,11 @@ export const Checkout: React.FC = () => {
                         </h3>
                         <div className="grid md:grid-cols-2 gap-4">
                             <input name="fullName" value={shippingInfo.fullName} onChange={handleInputChange} type="text" placeholder="Full Name" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
-                            <input name="email" value={shippingInfo.email} onChange={handleInputChange} type="email" placeholder="Email Address" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
-                            <input name="phone" value={shippingInfo.phone} onChange={handleInputChange} type="tel" placeholder="Phone (+49... or 017...)" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
-                            <select name="country" title="Shipping country" value={shippingInfo.country} onChange={handleInputChange} className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary">
+                            <input name={t('email')} value={shippingInfo.email} onChange={handleInputChange} type={t('email')} placeholder="Email Address" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
+                            <input name={t('phone')} value={shippingInfo.phone} onChange={handleInputChange} type="tel" placeholder="Phone (+49... or 017...)" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
+                            <select name={t('country')} title="Shipping country" value={shippingInfo.country} onChange={handleInputChange} className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary">
                                 <option value="DE">🇩🇪 Germany</option>
-                                <option value="AT">🇦🇹 Austria</option>
+                                <option value={t('at')}>🇦🇹 Austria</option>
                                 <option value="CH">🇨🇭 Switzerland</option>
                                 <option value="NL">🇳🇱 Netherlands</option>
                                 <option value="BE">🇧🇪 Belgium</option>
@@ -184,8 +186,8 @@ export const Checkout: React.FC = () => {
                                 <option value="TR">🇹🇷 Turkey</option>
                             </select>
                             <input name="street" value={shippingInfo.street} onChange={handleInputChange} type="text" placeholder="Address (Street, House No.)" className="md:col-span-2 bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
-                            <input name="city" value={shippingInfo.city} onChange={handleInputChange} type="text" placeholder="City" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
-                            <input name="zipCode" value={shippingInfo.zipCode} onChange={handleInputChange} type="text" placeholder="Postal Code" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
+                            <input name={t('city')} value={shippingInfo.city} onChange={handleInputChange} type="text" placeholder={t('city')} className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" />
+                            <input name="zipCode" value={shippingInfo.zipCode} onChange={handleInputChange} type="text" placeholder="Postal Code" className="bg-black/50 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-brand-primary" inputMode="numeric" />
                         </div>
                     </div>
 
@@ -221,7 +223,7 @@ export const Checkout: React.FC = () => {
                                     <img 
                                         src={item.image} 
                                         alt={item.title}
-                                        className="w-12 h-12 object-cover rounded-lg"
+                                        className="w-12 h-12 object-cover rounded-lg" loading="lazy"
                                     />
                                     {(item.quantity || 1) > 1 && (
                                         <span className="absolute -top-1 -right-1 bg-brand-primary text-white 
@@ -254,13 +256,13 @@ export const Checkout: React.FC = () => {
                                     <span>{(cartTotal - (cartTotal / 1.19)).toFixed(2)}€</span>
                                 </div>
                                 <div className="flex justify-between text-slate-400">
-                                    <span>Shipping</span>
+                                    <span>{t('shipping')}</span>
                                     <span className="text-green-400">
                                         {cartTotal >= 100 ? 'Free' : '5.99€'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between text-white font-bold text-base border-t border-slate-700 pt-2">
-                                    <span>Total</span>
+                                    <span>{t('total')}</span>
                                     <span>
                                         {(cartTotal + (cartTotal >= 100 ? 0 : 5.99)).toFixed(2)}€
                                     </span>
@@ -285,7 +287,7 @@ export const Checkout: React.FC = () => {
                                 </div>
                             </div>
                             <span className="text-xs text-slate-400 leading-relaxed">
-                                I agree to the <span className="text-brand-primary hover:underline">Terms of Service</span> and <span className="text-brand-primary hover:underline">Privacy Policy</span>. I confirm that all provided shipping information is correct.
+                                I agree to the <span className="text-brand-primary hover:underline">{t('termsOfService')}</span> {t('and')}<span className="text-brand-primary hover:underline">{t('privacyPolicy')}</span>. I confirm that all provided shipping information is correct.
                             </span>
                         </label>
                     </div>

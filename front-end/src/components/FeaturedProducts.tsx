@@ -126,7 +126,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                                             src={imageUrl || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=400&auto=format&fit=crop'}
                                             alt={name}
                                             onError={(e: any) => { e.target.src = 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=400&auto=format&fit=crop'; }}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy"
                                         />
                                     </div>
 

@@ -320,7 +320,7 @@ export const Hero: React.FC<HeroProps> = ({ lang }) => {
                                 fetchPriority="high"
                                 decoding="async"
                                 width={320}
-                                height={480}
+                                height={480} loading="lazy"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
 

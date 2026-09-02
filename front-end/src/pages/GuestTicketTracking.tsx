@@ -83,7 +83,7 @@ export const GuestTicketTracking: React.FC = () => {
                         <div>
                             <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">{t('trackRepair.emailAddress', 'E-Mail-Adresse')}</label>
                             <input
-                                type="email"
+                                type={t('email')}
                                 required
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
@@ -99,7 +99,7 @@ export const GuestTicketTracking: React.FC = () => {
                         )}
 
                         <button
-                            type="submit"
+                            type={t('submit')}
                             disabled={loading || !ticketId || !email}
                             className="w-full py-4 bg-brand-primary hover:bg-brand-primary text-slate-900 dark:text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >

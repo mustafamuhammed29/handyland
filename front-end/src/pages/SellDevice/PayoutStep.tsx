@@ -1,6 +1,7 @@
 import React from 'react';
 import { CreditCard, CheckCircle2, Truck, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { validateIban } from '../../utils/ibanUtils';
+import { useTranslation } from "react-i18next";
 
 interface PayoutStepProps {
     formData: {
@@ -14,6 +15,7 @@ interface PayoutStepProps {
 }
 
 export const PayoutStep: React.FC<PayoutStepProps> = ({ formData, errors, handleChange, onPrev, t }) => {
+    const { t } = useTranslation();
     return (
         <div className="space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
             <div className="text-center mb-8">
@@ -68,7 +70,7 @@ export const PayoutStep: React.FC<PayoutStepProps> = ({ formData, errors, handle
                 <button type="button" onClick={onPrev} title={t('sellDevice.backBtn', 'Zurück')} className="py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white font-bold transition-all cursor-pointer">
                     <ArrowLeft className="w-5 h-5" />
                 </button>
-                <button type="submit" className="flex-1 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-emerald-950 font-bold text-lg shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <button type={t('submit')} className="flex-1 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-emerald-950 font-bold text-lg shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
                     <ShieldCheck className="w-5 h-5" /> {t('sellDevice.completeOrder', 'Verkauf verbindlich abschließen')}
                 </button>
             </div>

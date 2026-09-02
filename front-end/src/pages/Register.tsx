@@ -12,9 +12,12 @@ import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
 
 import { ENV } from '../config/env';
+import { useTranslation } from "react-i18next";
+
 const API_URL = ENV.API_URL;
 
 const SocialButton: React.FC<{ provider: 'google' | 'facebook' }> = ({ provider }) => {
+    const { t } = useTranslation();
     const isGoogle = provider === 'google';
     const lang = localStorage.getItem('handyland_lang') || 'en';
     const label = isGoogle
@@ -60,6 +63,7 @@ const PasswordInput: React.FC<{
     minLength?: number;
     maxLength?: number;
 }> = ({ name, value, onChange, placeholder = '••••••••', required, minLength, maxLength }) => {
+    const { t } = useTranslation();
     const [show, setShow] = useState(false);
     return (
         <div className="relative">
@@ -88,6 +92,7 @@ const PasswordInput: React.FC<{
 };
 
 const Register: React.FC = () => {
+    const { t } = useTranslation();
     const { settings } = useSettings();
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -249,7 +254,7 @@ const Register: React.FC = () => {
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                     <input
-                                        type="text" name="name" value={formData.name} onChange={handleChange}
+                                        type="text" name={t('name')} value={formData.name} onChange={handleChange}
                                         placeholder="z.B. Max Mustermann" required
                                         className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                                     />
@@ -279,7 +284,7 @@ const Register: React.FC = () => {
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                 <input
-                                    type="email" name="email" value={formData.email} onChange={handleChange}
+                                    type={t('email')} name={t('email')} value={formData.email} onChange={handleChange}
                                     placeholder="secure@handyland.com" required
                                     className={`w-full pl-11 pr-11 py-3 bg-white dark:bg-slate-800/50 border rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
                                         emailStatus === 'available' ? 'border-emerald-500/70 focus:ring-emerald-500'
@@ -363,7 +368,7 @@ const Register: React.FC = () => {
 
                         {/* Submit */}
                         <button
-                            type="submit" disabled={loading}
+                            type={t('submit')} disabled={loading}
                             className="w-full py-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-bold rounded-lg shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {loading ? <><Loader className="w-5 h-5 animate-spin" />Konto wird erstellt...</> : 'Konto erstellen'}

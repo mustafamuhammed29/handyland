@@ -219,7 +219,7 @@ export const Accessories: React.FC<AccessoriesProps> = ({ lang }) => {
                                     alt={cleanAccessoryName(item.name)}
                                     onError={(e: any) => { e.target.src = getFallbackImage(item); }}
                                     className={`w-full h-full object-cover transition-transform duration-700 ${hoveredId === itemId ? 'scale-110' : 'scale-100'
-                                        }`}
+                                        }`} loading="lazy"
                                 />
 
                                 {/* Tag */}

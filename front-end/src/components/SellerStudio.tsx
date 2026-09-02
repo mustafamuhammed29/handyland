@@ -4,12 +4,14 @@ import { Upload, Camera, Tag, Smartphone, CheckCircle2, AlertCircle, ArrowRight,
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
 import { RevenueChart } from './dashboard/RevenueChart';
+import { useTranslation } from "react-i18next";
 
 interface SellerStudioProps {
     lang: LanguageCode;
 }
 
 export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { addToast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -175,7 +177,7 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
                                             onChange={e => setCondition(e.target.value)}
                                             className="w-full bg-black/40 border border-slate-700 rounded-xl p-4 text-white focus:border-orange-500 outline-none appearance-none"
                                         >
-                                            <option value="new">Brand New (Sealed)</option>
+                                            <option value={t('new')}>Brand New (Sealed)</option>
                                             <option value="like-new">Like New</option>
                                             <option value="used">Used (Good)</option>
                                             <option value="fair">Fair (Visible Wear)</option>
@@ -184,7 +186,7 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Description</label>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-2">{t('description')}</label>
                                     <textarea
                                         rows={4}
                                         placeholder="Describe scratches, battery health, included accessories..."
@@ -195,8 +197,7 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
 
                             <div className="flex gap-4">
                                 <button type="button" onClick={() => setStep(1)} className="flex-1 py-4 bg-transparent border border-slate-700 hover:bg-slate-800 text-slate-400 font-bold rounded-xl transition-all">
-                                    Back
-                                </button>
+                                    {t('back')}</button>
                                 <button type="button" onClick={() => setStep(3)} className="flex-[2] py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all">
                                     Review Listing
                                 </button>
@@ -230,10 +231,9 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
 
                             <div className="flex gap-4 pt-4">
                                 <button type="button" onClick={() => setStep(2)} className="flex-1 py-4 bg-transparent border border-slate-700 hover:bg-slate-800 text-slate-400 font-bold rounded-xl transition-all">
-                                    Edit
-                                </button>
+                                    {t('edit')}</button>
                                 <button
-                                    type="submit"
+                                    type={t('submit')}
                                     disabled={isSubmitting}
                                     className="flex-[2] py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold rounded-xl shadow-lg shadow-orange-900/20 transition-all flex items-center justify-center gap-2"
                                 >
@@ -249,5 +249,5 @@ export const SellerStudio: React.FC<SellerStudioProps> = ({ lang }) => {
 };
 
 const PlusIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={t('none')} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
 );

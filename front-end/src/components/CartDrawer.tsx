@@ -264,7 +264,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = () => {
                                                 src={getImageUrl(item.image)}
                                                 className="w-full h-full object-cover"
                                                 alt=""
-                                                onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }}
+                                                onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }} loading="lazy"
                                             />
                                         </div>
 

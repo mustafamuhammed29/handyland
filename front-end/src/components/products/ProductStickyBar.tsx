@@ -44,7 +44,7 @@ export const ProductStickyBar: React.FC<ProductStickyBarProps> = ({ product, han
                 >
                     <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4 flex-1">
-                            <img src={getImageUrl(product.imageUrl || product.images?.[0])} alt={product.model} className="w-12 h-12 object-cover rounded-md hidden sm:block bg-slate-100 dark:bg-slate-900" />
+                            <img src={getImageUrl(product.imageUrl || product.images?.[0])} alt={product.model} className="w-12 h-12 object-cover rounded-md hidden sm:block bg-slate-100 dark:bg-slate-900" loading="lazy" />
                             <div>
                                 <div className="text-sm md:text-base font-bold text-slate-900 dark:text-white line-clamp-1">{product.model}</div>
                                 <div className="text-xs text-brand-primary font-bold">{formatPrice(product.price)}</div>

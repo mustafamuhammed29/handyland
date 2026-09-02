@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Lock, Send, Loader2 } from 'lucide-react';
 import { Message, Reply } from './types';
+import { useTranslation } from "react-i18next";
 
 interface InboxThreadViewProps {
     selectedMessage: Message;
@@ -20,6 +21,7 @@ export const InboxThreadView: React.FC<InboxThreadViewProps> = ({
     handleReply,
     submitting,
 }) => {
+    const { t } = useTranslation();
     const formatDateSafe = (dateVal?: string | number | Date | null): string => {
         if (dateVal === undefined || dateVal === null || dateVal === '') return '';
         try {
@@ -152,7 +154,7 @@ export const InboxThreadView: React.FC<InboxThreadViewProps> = ({
                         />
                     </div>
                     <button
-                        type="submit"
+                        type={t('submit')}
                         disabled={submitting || !replyText.trim()}
                         className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-md shadow-blue-900/30 flex-shrink-0"
                     >

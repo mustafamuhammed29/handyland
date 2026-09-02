@@ -83,14 +83,14 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                         onChange={(e) => setOrderFilter(e.target.value)}
                         className="w-full sm:w-auto px-4 py-2 bg-white/60 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:border-brand-primary dark:focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all backdrop-blur-md shadow-sm"
                     >
-                        <option value="all">{t('orders.all_status', 'Alle Status')}</option>
-                        <option value="pending">{t('orders.status.pending', 'Ausstehend')}</option>
-                        <option value="processing">{t('orders.status.processing', 'In Bearbeitung')}</option>
-                        <option value="shipped">{t('orders.status.shipped', 'Versandt')}</option>
-                        <option value="delivered">{t('orders.status.delivered', 'Geliefert')}</option>
+                        <option value={t('all')}>{t('orders.all_status', 'Alle Status')}</option>
+                        <option value={t('pending')}>{t('orders.status.pending', 'Ausstehend')}</option>
+                        <option value={t('processing')}>{t('orders.status.processing', 'In Bearbeitung')}</option>
+                        <option value={t('shipped')}>{t('orders.status.shipped', 'Versandt')}</option>
+                        <option value={t('delivered')}>{t('orders.status.delivered', 'Geliefert')}</option>
                         <option value="return_requested">{t('orders.status.return_requested', 'Rückgabe beantragt')}</option>
-                        <option value="refunded">{t('orders.status.refunded', 'Rückerstattet')}</option>
-                        <option value="cancelled">{t('orders.status.cancelled', 'Storniert')}</option>
+                        <option value={t('refunded')}>{t('orders.status.refunded', 'Rückerstattet')}</option>
+                        <option value={t('cancelled')}>{t('orders.status.cancelled', 'Storniert')}</option>
                     </select>
                 </div>
             </div>
@@ -141,7 +141,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                 <div className="h-px bg-slate-200 dark:bg-slate-800 mb-6"></div>
 
                                 <div className="mb-6 bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800">
-                                    <VisualOrderTimeline currentStatus={order.status || 'pending'} type="order" />
+                                    <VisualOrderTimeline currentStatus={order.status || 'pending'} type={t('order')} />
                                 </div>
 
                                 {/* Order Items */}
@@ -149,7 +149,7 @@ export const DashboardOrders: React.FC<DashboardOrdersProps> = ({
                                     {order.items?.map((item, idx) => (
                                         <div key={idx} className="flex items-center gap-4 p-3 bg-white/50 dark:bg-slate-800/30 rounded-xl border border-slate-100 dark:border-slate-800/50">
                                             {item.image && (
-                                                <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700" />
+                                                <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700" loading="lazy" />
                                             )}
                                             <div className="flex-1">
                                                 <p className="text-slate-900 dark:text-white font-bold text-sm sm:text-base">{item.name}</p>

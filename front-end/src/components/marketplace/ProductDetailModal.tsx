@@ -40,7 +40,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
                 <button
                     onClick={onClose}
-                    title="Close"
+                    title={t('close')}
                     className="absolute top-4 right-4 z-50 p-2 bg-black/10 dark:bg-black/50 hover:bg-black/20 dark:hover:bg-white/10 rounded-full text-slate-800 dark:text-white transition-colors"
                 >
                     <X className="w-6 h-6" />
@@ -52,7 +52,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                         src={getProductImage(product)}
                         alt={product.model}
                         onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
-                        className="relative z-10 w-3/4 max-w-sm drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                        className="relative z-10 w-3/4 max-w-sm drop-shadow-2xl hover:scale-105 transition-transform duration-500" loading="lazy"
                     />
                     <div className="absolute bottom-6 left-6 right-6 grid grid-cols-2 gap-2">
                         <div className="bg-white/80 dark:bg-black/60 backdrop-blur border border-black/10 dark:border-white/10 p-3 rounded-xl">
@@ -86,7 +86,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
                     <div className="space-y-3 mb-8">
                         <div className="flex justify-between py-2 border-b border-black/10 dark:border-slate-800/50">
-                            <span className="text-slate-500 text-sm">Status</span>
+                            <span className="text-slate-500 text-sm">{t('status')}</span>
                             {product.stock > 0 ? (
                                 <span className="text-emerald-500 dark:text-emerald-400 font-bold">{product.stock} In Stock</span>
                             ) : (

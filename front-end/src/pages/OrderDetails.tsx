@@ -183,7 +183,7 @@ export const OrderDetails = () => {
                             {t(`orders.status.${order.status}`, order.status)}
                         </span>
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Placed on {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString()}</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Placed on {new Date(order.createdAt).toLocaleDateString()} {t('at')}{new Date(order.createdAt).toLocaleTimeString()}</p>
                 </div>
             </div>
 
@@ -199,7 +199,7 @@ export const OrderDetails = () => {
 
                     <VisualOrderTimeline
                         currentStatus={order.status}
-                        type="order"
+                        type={t('order')}
                         history={order.history || [{ status: order.status, date: order.updatedAt || new Date().toISOString() }]}
                     />
 

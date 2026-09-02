@@ -211,10 +211,10 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                 {/* Avatar Overlaying Banner */}
                 <div className="flex flex-col sm:flex-row gap-6 sm:items-end -mt-12 sm:-mt-16 mb-8 relative z-10">
                     <div className="relative group cursor-pointer inline-block" onClick={() => fileInputRef.current?.click()}>
-                        <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg, image/png, image/webp" onChange={handleAvatarUpload} />
+                        <input type="file" ref={fileInputRef} className={t('hidden')} accept="image/jpeg, image/png, image/webp" onChange={handleAvatarUpload} />
                         <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-slate-800 border-4 border-white dark:border-slate-900 flex items-center justify-center text-white text-4xl font-black shadow-xl select-none overflow-hidden relative ${isUploadingAvatar ? 'opacity-50' : ''}`}>
                             {user.avatar ? (
-                                <img src={getImageUrl(user.avatar)} alt="Profile" className="w-full h-full object-cover" />
+                                <img src={getImageUrl(user.avatar)} alt={t('profile')} className="w-full h-full object-cover" loading="lazy" />
                             ) : (
                                 (profileForm.name || user.name || '?').charAt(0).toUpperCase()
                             )}
@@ -285,7 +285,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                             <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-slate-400"/> Primary</span>
                         </label>
                         <input
-                            type="email"
+                            type={t('email')}
                             value={profileForm.email}
                             disabled
                             className="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border-2 border-transparent text-slate-500 dark:text-slate-400 cursor-not-allowed font-medium"

@@ -424,7 +424,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                     type="file"
                                     accept="image/jpeg,image/png,image/webp,application/pdf"
                                     onChange={handleReceiptChange}
-                                    className="hidden"
+                                    className={t('hidden')}
                                     title={t('wallet.modal.bank.uploadTitle', 'Upload Receipt')}
                                 />
                                 <div
@@ -435,7 +435,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ isOpen, onClose, o
                                         }`}
                                 >
                                     {receiptPreview ? (
-                                        <img src={receiptPreview} alt="Beleg Vorschau" className="max-h-32 mx-auto rounded-lg object-contain" />
+                                        <img src={receiptPreview} alt="Beleg Vorschau" className="max-h-32 mx-auto rounded-lg object-contain" loading="lazy" />
                                     ) : receiptFile ? (
                                         <div className="flex flex-col items-center gap-2">
                                             <FileText className="w-10 h-10 text-emerald-400" />

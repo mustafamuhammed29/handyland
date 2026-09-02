@@ -28,7 +28,7 @@ export const ValuationResult = ({
                                         src={selectedDevice.imageUrl}
                                         alt={selectedDevice.modelName}
                                         className="object-contain w-full h-full drop-shadow-sm"
-                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
+                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }} loading="lazy"
                                     />
                                 ) : null}
                                 <Smartphone className={`w-12 h-12 text-slate-400 ${selectedDevice?.imageUrl ? 'hidden' : ''}`} />

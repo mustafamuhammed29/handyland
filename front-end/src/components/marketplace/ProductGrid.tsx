@@ -4,6 +4,7 @@ import { PhoneListing } from '../../types';
 import { ProductCard } from './ProductCard';
 import { SkeletonProductCard } from '../SkeletonProductCard';
 import { Search } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 interface ProductGridProps {
     products: PhoneListing[];
@@ -34,6 +35,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     onClearFilters,
     whatsappMode
 }) => {
+    const { t } = useTranslation();
     if (loading) {
         return (
             <div className={`grid gap-3 md:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
@@ -75,8 +77,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
     return (
         <motion.div
-            initial="hidden"
-            animate="visible"
+            initial={t('hidden')}
+            animate={t('visible')}
             variants={{
                 hidden: { opacity: 0 },
                 visible: {

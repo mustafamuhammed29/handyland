@@ -244,7 +244,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                     onClick={() => setIsLightboxOpen(false)}
                 >
                     <button onClick={() => setIsLightboxOpen(false)} aria-label="Close lightbox" className="absolute top-8 right-8 text-white hover:text-brand-primary transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill={t('none')} viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -253,7 +253,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                         alt="Zoomed Product"
                         className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
                         onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()} loading="lazy"
                     />
                 </div>
             )}
@@ -474,7 +474,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = () => {
                             {relatedProducts.map((related) => (
                                 <div key={related.id} onClick={() => navigate(`/products/${related.id}`)} className="group cursor-pointer bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 transition-all hover:-translate-y-2 hover:border-brand-primary/50">
                                     <div className="aspect-[4/5] bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden mb-4 relative">
-                                        <img src={getImageUrl(related.imageUrl)} alt={related.model} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                        <img src={getImageUrl(related.imageUrl)} alt={related.model} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" loading="lazy" />
                                     </div>
                                     <h4 className="font-bold text-slate-900 dark:text-white mb-1 truncate">{related.model}</h4>
                                     <div className="text-brand-primary font-bold">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(related.price)}</div>

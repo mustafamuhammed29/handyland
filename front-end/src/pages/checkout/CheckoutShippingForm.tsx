@@ -143,8 +143,8 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-400">{t('checkout.emailForUpdates', 'E-Mail (für Bestellupdates)')}</label>
                         <input
-                            type="email"
-                            name="email"
+                            type={t('email')}
+                            name={t('email')}
                             value={formData.email}
                             onChange={onChange}
                             className={`w-full bg-black/40 border ${formErrors.email ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
@@ -158,7 +158,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                     <label className="text-sm font-bold text-slate-400">{t('checkout.phone', 'Phone')}</label>
                     <input
                         type="tel"
-                        name="phone"
+                        name={t('phone')}
                         value={formData.phone}
                         onChange={onChange}
                         className={`w-full bg-black/40 border ${formErrors.phone ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
@@ -171,7 +171,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                     <label className="text-sm font-bold text-slate-400">{t('checkout.address', 'Address')}</label>
                     <input
                         type="text"
-                        name="address"
+                        name={t('address')}
                         value={formData.address}
                         onChange={onChange}
                         className={`w-full bg-black/40 border ${formErrors.address ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
@@ -184,7 +184,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                         <label className="text-sm font-bold text-slate-400">{t('checkout.city', 'City')}</label>
                         <input
                             type="text"
-                            name="city"
+                            name={t('city')}
                             value={formData.city}
                             onChange={onChange}
                             className={`w-full bg-black/40 border ${formErrors.city ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
@@ -212,17 +212,17 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                             value={formData.zipCode}
                             onChange={onChange}
                             className={`w-full bg-black/40 border ${formErrors.zipCode ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none rtl:text-right transition-colors`}
-                            placeholder="10115"
+                            placeholder="10115" inputMode="numeric"
                         />
                         {formErrors.zipCode && <p className="text-red-500 text-xs font-semibold mt-1">{formErrors.zipCode}</p>}
                     </div>
                     <div className="space-y-2 col-span-2 md:col-span-1">
                         <label className="text-sm font-bold text-slate-400">{t('checkout.country', 'Country')}</label>
                         <select
-                            name="country"
+                            name={t('country')}
                             value={formData.country}
                             onChange={onChange}
-                            aria-label="Country"
+                            aria-label={t('country')}
                             className={`w-full bg-black/40 border ${formErrors.country ? 'border-red-500 bg-red-500/5' : 'border-slate-700'} rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors`}
                         >
                             <option value="Germany">Germany</option>
@@ -244,7 +244,7 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                                 name="saveAddress"
                                 checked={formData.saveAddress || false}
                                 onChange={(e) => onChange({ target: { name: 'saveAddress', value: e.target.checked } } as any)}
-                                className="hidden"
+                                className={t('hidden')}
                             />
                             <span className="text-sm text-slate-400 group-hover:text-slate-300">
                                 {t('checkout.saveAddressForNextTime', 'Adresse für das nächste Mal in meinem Profil speichern')}
@@ -311,17 +311,17 @@ export const CheckoutShippingForm: React.FC<CheckoutShippingFormProps> = ({
                                 onTermsChange(e.target.checked);
                                 if (e.target.checked) onClearError();
                             }}
-                            className="hidden"
+                            className={t('hidden')}
                         />
                         <span className={`text-sm ${error && !termsAccepted ? 'text-red-400 font-bold' : 'text-slate-400'} group-hover:text-slate-300`}>
-                            {t('checkout.terms', 'I agree to the')} <Link to="/agb" target="_blank" className="text-blue-400 hover:underline">{t('checkout.terms_link', 'Terms & Conditions')}</Link> and <Link to="/privacy" target="_blank" className="text-blue-400 hover:underline">{t('checkout.privacy_link', 'Privacy Policy')}</Link>.
+                            {t('checkout.terms', 'I agree to the')} <Link to="/agb" target="_blank" className="text-blue-400 hover:underline" rel="noopener noreferrer">{t('checkout.terms_link', 'Terms & Conditions')}</Link> {t('and')}<Link to="/privacy" target="_blank" className="text-blue-400 hover:underline" rel="noopener noreferrer">{t('checkout.privacy_link', 'Privacy Policy')}</Link>.
                         </span>
                     </label>
                 </div>
 
                 <div className="pt-4 flex justify-end">
                     <button
-                        type="submit"
+                        type={t('submit')}
                         className="w-full md:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
                     >
                         {t('checkout.proceedPayment', 'Weiter zur Zahlung')} <ArrowRight className="w-4 h-4" />

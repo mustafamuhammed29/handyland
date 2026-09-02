@@ -269,7 +269,7 @@ export const DashboardMessages: React.FC = () => {
                                             {t('common.cancel', 'Cancel')}
                                         </button>
                                         <button
-                                            type="submit"
+                                            type={t('submit')}
                                             disabled={submitting || !newMsgContent.trim()}
                                             className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 disabled:opacity-50 transition-colors shadow-lg shadow-blue-500/25"
                                         >
@@ -360,7 +360,7 @@ export const DashboardMessages: React.FC = () => {
                                                 className="flex-1 bg-slate-900 border border-slate-700 rounded-full px-5 text-white focus:border-blue-500 outline-none transition-colors shadow-inner"
                                             />
                                             <button
-                                                type="submit"
+                                                type={t('submit')}
                                                 disabled={submitting || !replyText.trim()}
                                                 className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 disabled:opacity-50 transition-colors shadow-lg shadow-blue-500/20"
                                             >

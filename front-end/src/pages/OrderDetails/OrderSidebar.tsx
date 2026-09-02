@@ -92,7 +92,7 @@ export const OrderSidebar: React.FC<OrderSidebarProps> = ({
                         </span>
                     </div>
                     <div className="flex justify-between">
-                        <span>Status</span>
+                        <span>{t('status')}</span>
                         <span className={`capitalize font-bold ${order.paymentStatus === 'paid' ? 'text-emerald-400' : 'text-yellow-400'}`}>
                             {order.paymentStatus}
                         </span>

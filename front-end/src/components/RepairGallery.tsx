@@ -237,7 +237,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                     <img
                                         src={getImageUrl(getCleanArchiveImage(activeProject.imgAfter, activeProject.category, true))}
                                         alt="After"
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover" loading="lazy"
                                     />
                                     <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 bg-emerald-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm flex items-center gap-2 shadow-lg z-40">
                                         <CheckCircle className="w-4 h-4" />
@@ -253,7 +253,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                     <img
                                         src={getImageUrl(getCleanArchiveImage(activeProject.imgBefore, activeProject.category, false))}
                                         alt="Before"
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover" loading="lazy"
                                     />
                                     <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4 bg-red-500/90 backdrop-blur-md px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg z-40">
                                         {activeProject.labelBefore || t('repairGallery.before', 'VORHER')}
@@ -356,7 +356,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                                 <img
                                                     src={getImageUrl(getCleanArchiveImage(project.imgAfter, project.category, true))}
                                                     alt={project.title}
-                                                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" loading="lazy"
                                                 />
 
                                                 {/* Icons overlay */}
@@ -432,7 +432,7 @@ export const RepairGallery: React.FC<RepairGalleryProps> = () => {
                                         className="w-full text-left rtl:text-right group flex flex-col cursor-pointer"
                                     >
                                         <div className={`relative w-full aspect-[4/5] rounded-xl overflow-hidden border-2 mb-2 transition-all ${selectedId === item.id ? 'border-brand-primary shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'border-slate-800 group-hover:border-slate-600'}`}>
-                                            <img src={getImageUrl(getCleanArchiveImage(item.imgAfter, item.category, true))} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                            <img src={getImageUrl(getCleanArchiveImage(item.imgAfter, item.category, true))} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" loading="lazy" />
                                             <div className="absolute top-2 right-2 rtl:right-auto rtl:left-2 bg-slate-900/80 backdrop-blur-sm p-1 rounded-md">
                                                 {item.category === 'water' && <Droplets className="w-3 h-3 text-blue-400" />}
                                                 {item.category === 'screen' && <Monitor className="w-3 h-3 text-purple-400" />}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Send, Loader2 } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 interface InboxNewTicketViewProps {
     newMessageText: string;
@@ -17,9 +18,10 @@ export const InboxNewTicketView: React.FC<InboxNewTicketViewProps> = ({
     goBack,
     submitting,
 }) => {
+    const { t } = useTranslation();
     return (
         <motion.div
-            key="new"
+            key={t('new')}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -48,7 +50,7 @@ export const InboxNewTicketView: React.FC<InboxNewTicketViewProps> = ({
                             Abbrechen
                         </button>
                         <button
-                            type="submit"
+                            type={t('submit')}
                             disabled={submitting || newMessageText.trim().length < 10}
                             className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white py-3 px-5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-900/25 text-sm"
                         >

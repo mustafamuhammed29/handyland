@@ -120,7 +120,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                                 src={getImageUrl(activeImage)}
                                 alt={product.model}
                                 className="w-full h-full object-contain drop-shadow-xl"
-                                onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
+                                onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }} loading="lazy"
                             />
                             {product.condition && (
                                 <div className="absolute top-2 left-2 z-10 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
@@ -139,7 +139,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                                         title={`View image ${idx + 1}`}
                                         className={`w-16 h-16 rounded-lg border-2 overflow-hidden flex-shrink-0 transition-all ${activeImageIndex === idx ? 'border-brand-primary opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
                                     >
-                                        <img src={getImageUrl(img)} alt="" className="w-full h-full object-cover" />
+                                        <img src={getImageUrl(img)} alt="" className="w-full h-full object-cover" loading="lazy" />
                                     </button>
                                 ))}
                             </div>

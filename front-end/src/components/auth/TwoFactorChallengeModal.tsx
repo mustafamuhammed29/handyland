@@ -160,7 +160,7 @@ export const TwoFactorChallengeModal: React.FC<Props> = ({ isOpen, onClose }) =>
                     {/* Action Buttons */}
                     <div className="pt-3 space-y-2">
                         <button
-                            type="submit"
+                            type={t('submit')}
                             disabled={loading || otp.length !== 6 || timeLeft <= 0}
                             className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30"
                         >

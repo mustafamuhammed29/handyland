@@ -22,7 +22,7 @@ export const OrderItemsList: React.FC<OrderItemsListProps> = ({ order, onBuyAgai
                     <div key={idx} className="flex gap-4 p-3 bg-black/30 rounded-xl border border-slate-800/50">
                         <div className="w-16 h-16 bg-slate-800 rounded-lg shrink-0 overflow-hidden">
                             {item.image ? (
-                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-600">
                                     <Package className="w-6 h-6" />

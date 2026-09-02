@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Lock, ArrowRight, Loader2, KeyRound } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { useTranslation } from "react-i18next";
 
 export const ResetPassword = () => {
+    const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const token = searchParams.get('token');
@@ -45,13 +47,13 @@ export const ResetPassword = () => {
                     <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-700">
                         <KeyRound className="w-8 h-8 text-yellow-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white">Reset Password</h2>
+                    <h2 className="text-2xl font-bold text-white">{t('resetPassword')}</h2>
                     <p className="text-slate-500 text-sm mt-1">Enter your new secure password</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">New Password</label>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">{t('newPassword')}</label>
                         <div className="relative group">
                             <Lock className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-yellow-400 transition-colors" />
                             <input
@@ -66,7 +68,7 @@ export const ResetPassword = () => {
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Confirm Password</label>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">{t('confirmPassword')}</label>
                         <div className="relative group">
                             <Lock className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-yellow-400 transition-colors" />
                             <input
@@ -86,7 +88,7 @@ export const ResetPassword = () => {
                     >
                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                             <>
-                                Reset Password <ArrowRight className="w-5 h-5" />
+                                {t('resetPassword')}<ArrowRight className="w-5 h-5" />
                             </>
                         )}
                     </button>

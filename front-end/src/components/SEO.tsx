@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSettings } from '../context/SettingsContext';
 import { getImageUrl } from '../utils/imageUrl';
+import { useTranslation } from "react-i18next";
 
 interface SEOProps {
     title?: string;
@@ -22,6 +23,7 @@ export const SEO: React.FC<SEOProps> = ({
     ogType = 'website',
     twitterHandle = '@handyland'
 }) => {
+    const { t } = useTranslation();
     const { settings } = useSettings();
     const seoSettings = settings?.seo || {};
 
@@ -66,7 +68,7 @@ export const SEO: React.FC<SEOProps> = ({
         <Helmet>
             {/* Standard metadata tags */}
             <title>{finalTitle}</title>
-            <meta name='description' content={finalDescription} />
+            <meta name={t('description')} content={finalDescription} />
             {finalKeywords && <meta name='keywords' content={finalKeywords} />}
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             {canonical && <link rel="canonical" href={canonical} />}

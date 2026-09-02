@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { AuthLayout } from './AuthLayout';
 import { api } from '../../utils/api';
+import { useTranslation } from "react-i18next";
 
 const loginSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -17,6 +18,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export const Login: React.FC = () => {
+    const { t } = useTranslation();
     const { login } = useAuth();
     const { addToast } = useToast();
     const navigate = useNavigate();
@@ -65,18 +67,18 @@ export const Login: React.FC = () => {
 
     return (
         <AuthLayout
-            title="Login"
+            title={t('login')}
             subtitle="System Access Protocol"
             icon={<UserIcon className="w-10 h-10 text-brand-primary" />}
         >
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-1 animate-in slide-in-from-top-4">
-                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Email</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">{t('email')}</label>
                     <div className="relative group">
                         <UserIcon className="w-4 h-4 text-slate-500 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
                         <input
                             {...register("email")}
-                            type="email"
+                            type={t('email')}
                             className={`w-full pl-10 pr-4 py-3 bg-black/40 border ${errors.email ? 'border-red-500' : 'border-slate-800'} rounded-xl text-white focus:border-brand-primary outline-none transition-all text-sm`}
                             placeholder="secure@handyland.com"
                         />
@@ -106,7 +108,7 @@ export const Login: React.FC = () => {
 
                 <button
                     disabled={isLoading}
-                    type="submit"
+                    type={t('submit')}
                     className="w-full py-4 rounded-2xl font-black text-white shadow-xl flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 mt-4 uppercase tracking-widest bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary hover:to-brand-secondary"
                 >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
@@ -130,8 +132,7 @@ export const Login: React.FC = () => {
                 <p className="text-slate-500 text-xs font-medium">
                     No account? {' '}
                     <Link to="/register" className="text-brand-primary hover:text-brand-primary font-black ml-1 uppercase">
-                        Register
-                    </Link>
+                        {t('register')}</Link>
                 </p>
             </div>
         </AuthLayout>

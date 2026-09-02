@@ -268,13 +268,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                         title="Upload Profile Picture"
                                         aria-label="Upload Profile Picture"
                                         ref={fileInputRef} 
-                                        className="hidden" 
+                                        className={t('hidden')} 
                                         accept="image/jpeg, image/png, image/webp"
                                         onChange={handleAvatarUpload}
                                     />
                                     <div className={`w-16 h-16 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-2xl shadow-sm overflow-hidden relative ${isUploadingAvatar ? 'opacity-50' : ''}`}>
                                         {currentUser.avatar ? (
-                                            <img src={getImageUrl(currentUser.avatar)} alt="Profile" className="w-full h-full object-cover" />
+                                            <img src={getImageUrl(currentUser.avatar)} alt={t('profile')} className="w-full h-full object-cover" loading="lazy" />
                                         ) : (
                                             (currentUser.name || '?').charAt(0).toUpperCase()
                                         )}
@@ -371,7 +371,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                             {unreadCount}
                                         </span>
                                     )}
-                                    <svg className={`w-4 h-4 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className={`w-4 h-4 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180' : ''}`} fill={t('none')} viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </div>
@@ -415,7 +415,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: initialUser, logout 
                                 <NotificationBell userId={currentUser?._id} />
                                 <button
                                     onClick={() => { logout(); navigate('/'); }}
-                                    aria-label="Logout"
+                                    aria-label={t('logout')}
                                     className="flex items-center justify-center flex-1 lg:flex-none lg:w-auto lg:h-auto px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-all font-semibold text-sm"
                                 >
                                     <LogOut className="w-4 h-4" />

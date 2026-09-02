@@ -139,7 +139,7 @@ export const MarketPrices: React.FC = () => {
                                             <img 
                                                 src={device.imageUrl} 
                                                 alt={device.modelName} 
-                                                className="h-full object-contain filter drop-shadow-2xl group-hover:scale-105 transition-transform duration-500 relative z-20"
+                                                className="h-full object-contain filter drop-shadow-2xl group-hover:scale-105 transition-transform duration-500 relative z-20" loading="lazy"
                                             />
                                         ) : (
                                             <Smartphone className="w-20 h-20 text-slate-700" />

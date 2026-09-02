@@ -251,7 +251,7 @@ const PaymentSuccess: React.FC = () => {
                                                 <span className="text-white text-sm font-medium">
                                                     {uploading ? t('paymentSuccess.uploading', 'Wird hochgeladen...') : t('paymentSuccess.uploadReceipt', 'Rechnung hochladen')}
                                                 </span>
-                                                <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} disabled={uploading} />
+                                                <input type="file" accept="image/*" className={t('hidden')} onChange={handleFileUpload} disabled={uploading} />
                                             </label>
                                         )}
                                     </div>

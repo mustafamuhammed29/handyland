@@ -204,7 +204,7 @@ export const ComparePage: React.FC = () => {
                                     onClick={() => handleSelectProduct(p, 0)}
                                     className="flex items-center gap-3 bg-slate-900 border border-slate-800 hover:border-brand-primary/50 px-4 py-3 rounded-2xl transition-colors w-full sm:w-auto max-w-full text-left"
                                 >
-                                    <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-8 h-8 object-contain bg-white rounded-md p-1 shrink-0" />
+                                    <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-8 h-8 object-contain bg-white rounded-md p-1 shrink-0" loading="lazy" />
                                     <span className="font-bold text-sm text-slate-700 dark:text-slate-300 truncate">{stripInternalId(p.name || p.model)}</span>
                                 </button>
                             ))}

@@ -176,7 +176,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ className = "h
                                                     src={getImageUrl(product.images?.[0] || product.image || product.imageUrl)}
                                                     alt={product.name || product.model}
                                                     className="w-full h-full object-cover"
-                                                    onError={(e: any) => e.target.src = '/images/placeholder.png'}
+                                                    onError={(e: any) => e.target.src = '/images/placeholder.png'} loading="lazy"
                                                 />
                                             </div>
                                             <div className="flex-1 min-w-0">

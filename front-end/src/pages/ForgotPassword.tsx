@@ -84,7 +84,7 @@ const ForgotPassword: React.FC = () => {
                                     <div className="relative">
                                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
                                         <input
-                                            type="email"
+                                            type={t('email')}
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             placeholder="you@example.com"
@@ -95,7 +95,7 @@ const ForgotPassword: React.FC = () => {
                                 </div>
 
                                 <button
-                                    type="submit"
+                                    type={t('submit')}
                                     disabled={status === 'loading'}
                                     className="w-full py-3 bg-gradient-to-r from-brand-secondary to-brand-primary text-white font-bold rounded-lg shadow-lg shadow-brand-primary/25 hover:from-brand-secondary/90 hover:to-brand-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >

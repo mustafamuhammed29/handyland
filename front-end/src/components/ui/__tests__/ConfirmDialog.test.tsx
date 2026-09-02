@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ConfirmDialog } from '../ConfirmDialog';
+import { useTranslation } from "react-i18next";
 
 describe('ConfirmDialog', () => {
   it('renders the dialog with correct content when open', () => {
@@ -24,7 +25,7 @@ describe('ConfirmDialog', () => {
       <ConfirmDialog
         isOpen={false}
         title="Delete Item"
-        message="Are you sure?"
+        message={t('areYouSure')}
         onConfirm={() => {}}
         onCancel={() => {}}
       />
@@ -38,8 +39,8 @@ describe('ConfirmDialog', () => {
     render(
       <ConfirmDialog
         isOpen={true}
-        title="Confirm"
-        message="Are you sure?"
+        title={t('confirm')}
+        message={t('areYouSure')}
         onConfirm={onConfirmMock}
         onCancel={() => {}}
       />
@@ -54,8 +55,8 @@ describe('ConfirmDialog', () => {
     render(
       <ConfirmDialog
         isOpen={true}
-        title="Confirm"
-        message="Are you sure?"
+        title={t('confirm')}
+        message={t('areYouSure')}
         onConfirm={() => {}}
         onCancel={onCancelMock}
       />

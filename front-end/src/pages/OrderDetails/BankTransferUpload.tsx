@@ -121,7 +121,7 @@ export const BankTransferUpload: React.FC<BankTransferUploadProps> = ({ order, o
                     <label className="flex items-center justify-center gap-2 cursor-pointer bg-blue-600 hover:bg-blue-500 p-4 rounded-xl transition-all shadow-lg shadow-blue-900/20 group">
                         {uploading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Upload className="w-5 h-5 text-blue-200 group-hover:-translate-y-1 transition-transform" />}
                         <span className="text-slate-900 dark:text-white font-bold group-hover:text-slate-900 dark:text-white transition-colors">{uploading ? 'Uploading...' : 'Upload Receipt Image'}</span>
-                        <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} disabled={uploading} />
+                        <input type="file" accept="image/*" className={t('hidden')} onChange={handleFileUpload} disabled={uploading} />
                     </label>
                 )}
             </div>

@@ -439,7 +439,7 @@ export const ValuationLanding = ({
                                             className="group bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-3xl p-5 shadow-sm hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-500 transition-all flex flex-col items-center justify-center w-full sm:w-44 aspect-[4/3] hover:-translate-y-1"
                                         >
                                             {brandLogos[brand] ? (
-                                                <img src={brandLogos[brand]} alt={brand} className="w-16 h-16 object-contain mb-2 opacity-75 group-hover:opacity-100 group-hover:scale-105 transition-all dark:invert" />
+                                                <img src={brandLogos[brand]} alt={brand} className="w-16 h-16 object-contain mb-2 opacity-75 group-hover:opacity-100 group-hover:scale-105 transition-all dark:invert" loading="lazy" />
                                             ) : (
                                                 <span className="text-4xl mb-2">🏷️</span>
                                             )}

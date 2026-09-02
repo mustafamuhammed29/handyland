@@ -140,7 +140,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
                     )}
                 </div>
 
-                <button type="submit" disabled={pwSaving || !pwForm.current || !pwForm.newPw || !pwForm.confirm}
+                <button type={t('submit')} disabled={pwSaving || !pwForm.current || !pwForm.newPw || !pwForm.confirm}
                     className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-900/20">
                     {pwSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
                     {t('settings.security.submit', 'Update Password')}

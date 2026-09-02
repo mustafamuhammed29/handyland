@@ -111,7 +111,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                         src={getImageUrl(item.image)}
                                         alt={item.title || (item as any).name}
                                         className="w-full h-full object-contain"
-                                        onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }}
+                                        onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }} loading="lazy"
                                     />
                                 </div>
 
@@ -179,7 +179,7 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                                 {upsellItems.map((item) => (
                                     <div key={item._id || item.id} className="bg-slate-950/80 backdrop-blur-sm rounded-xl p-4 border border-slate-800 hover:border-brand-primary/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all flex flex-col group/item relative overflow-hidden">
                                         <div className="h-28 bg-white/5 rounded-lg p-2 mb-4 flex items-center justify-center relative">
-                                            <img src={getImageUrl(item.image)} alt={item.name} className="max-h-full object-contain drop-shadow-lg group-hover/item:scale-110 transition-transform duration-500" onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }} />
+                                            <img src={getImageUrl(item.image)} alt={item.name} className="max-h-full object-contain drop-shadow-lg group-hover/item:scale-110 transition-transform duration-500" onError={(e: any) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/placeholder-device.svg'; }} loading="lazy" />
                                         </div>
                                         <h4 className="text-slate-900 dark:text-white font-bold text-sm mb-1 line-clamp-2 leading-tight flex-1" title={item.name}>{item.name}</h4>
                                         <div className="flex justify-between items-center mt-3">
@@ -306,10 +306,10 @@ export const Cart: React.FC<CartProps> = ({ lang }) => {
                             {/* Trust Badges */}
                             <div className="mt-8 pt-6 border-t border-slate-800/80">
                                 <div className="flex justify-center flex-wrap gap-4 opacity-70 grayscale">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-4" />
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-4" />
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4" />
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-4" />
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-4" loading="lazy" />
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-4" loading="lazy" />
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4" loading="lazy" />
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-4" loading="lazy" />
                                 </div>
                             </div>
                         </div>

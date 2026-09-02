@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, X } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 interface ReviewModalProps {
     showReviewModal: boolean;
@@ -16,6 +17,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
     setNewReview,
     handleSubmitReview
 }) => {
+    const { t } = useTranslation();
     if (!showReviewModal) return null;
 
     return (
@@ -62,15 +64,13 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                             onClick={() => setShowReviewModal(false)}
                             className="flex-1 py-3 px-4 font-bold rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
                         >
-                            Cancel
-                        </button>
+                            {t('cancel')}</button>
                         <button
-                            type="submit"
+                            type={t('submit')}
                             disabled={!newReview.comment.trim()}
                             className="flex-1 py-3 px-4 font-bold rounded-xl bg-brand-primary hover:bg-brand-primary text-white transition-colors disabled:opacity-50"
                         >
-                            Submit
-                        </button>
+                            {t('submit')}</button>
                     </div>
                 </form>
             </div>

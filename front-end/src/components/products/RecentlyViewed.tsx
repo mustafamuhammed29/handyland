@@ -36,7 +36,7 @@ export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ products, curren
                                 src={getImageUrl(product.imageUrl)} 
                                 alt={product.model} 
                                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
-                                onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
+                                onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }} loading="lazy"
                             />
                         </div>
                         <h4 className="font-bold text-slate-900 dark:text-white mb-1 truncate" title={product.model}>{product.model}</h4>

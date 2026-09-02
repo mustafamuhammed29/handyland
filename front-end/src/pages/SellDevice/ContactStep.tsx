@@ -1,5 +1,6 @@
 import React from 'react';
 import { User, ArrowRight } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 interface ContactStepProps {
     formData: {
@@ -13,6 +14,7 @@ interface ContactStepProps {
 }
 
 export const ContactStep: React.FC<ContactStepProps> = ({ formData, errors, handleChange, onNext, t }) => {
+    const { t } = useTranslation();
     return (
         <div className="space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
             <div className="text-center mb-8">
@@ -37,9 +39,9 @@ export const ContactStep: React.FC<ContactStepProps> = ({ formData, errors, hand
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">E-Mail</label>
                     <input
-                        name="email"
+                        name={t('email')}
                         required
-                        type="email"
+                        type={t('email')}
                         placeholder="ihre@email.de"
                         value={formData.email}
                         className={`w-full bg-slate-950/50 border ${errors.email ? 'border-red-500' : 'border-slate-700'} rounded-xl p-4 text-slate-900 dark:text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all`}

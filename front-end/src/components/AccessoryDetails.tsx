@@ -109,7 +109,7 @@ export const AccessoryDetails: React.FC = () => {
                     onClick={() => setIsLightboxOpen(false)}
                 >
                     <button onClick={() => setIsLightboxOpen(false)} title="Close lightbox" aria-label="Close lightbox" className="absolute top-8 right-8 text-white hover:text-brand-primary">
-                        <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="h-10 w-10" fill={t('none')} viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -117,7 +117,7 @@ export const AccessoryDetails: React.FC = () => {
                         src={getImageUrl(activeImage)}
                         alt="Zoomed"
                         className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()} loading="lazy"
                     />
                 </div>
             )}
@@ -194,7 +194,7 @@ export const AccessoryDetails: React.FC = () => {
 
                         <div className="mt-auto space-y-4">
                             <div className="flex items-center gap-4 mb-4">
-                                <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">Quantity</span>
+                                <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">{t('quantity')}</span>
                                 <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg">
                                     <button
                                         title="Decrease quantity" 

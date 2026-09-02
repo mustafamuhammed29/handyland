@@ -254,7 +254,7 @@ export const NotificationBell: React.FC<Props> = ({ userId, variant = 'sidebar' 
                         <div className="px-4 py-2 border-t border-slate-800 bg-slate-950/60 backdrop-blur-md flex justify-between items-center">
                             {isSelectMode ? (
                                 <>
-                                    <button onClick={() => setSelectedIds(new Set(notifications.map(n => n._id)))} className="text-[11px] text-blue-400 hover:text-blue-300 font-medium px-2 py-1">Select All</button>
+                                    <button onClick={() => setSelectedIds(new Set(notifications.map(n => n._id)))} className="text-[11px] text-blue-400 hover:text-blue-300 font-medium px-2 py-1">{t('selectAll')}</button>
                                     <button onClick={deleteSelected} disabled={selectedIds.size === 0} className="text-[11px] bg-red-500/20 text-red-400 px-3 py-1.5 rounded hover:bg-red-500/30 disabled:opacity-50 flex items-center gap-1 font-medium transition-colors">
                                         <Trash2 className="w-3 h-3" /> Delete ({selectedIds.size})
                                     </button>

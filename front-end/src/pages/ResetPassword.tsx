@@ -219,7 +219,7 @@ const ResetPassword: React.FC = () => {
                                 </div>
 
                                 <button
-                                    type="submit" disabled={status === 'loading'}
+                                    type={t('submit')} disabled={status === 'loading'}
                                     className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-slate-900 dark:text-white font-bold rounded-lg shadow-lg hover:from-purple-500 hover:to-pink-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {status === 'loading'

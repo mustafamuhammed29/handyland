@@ -169,7 +169,7 @@ export const DashboardWallet: React.FC<DashboardWalletProps> = ({
                                 { name: t('wallet.in', 'In'), value: transactions.filter((t: any) => (t.type === 'deposit' || t.type === 'refund') && t.status === 'completed').reduce((s, t) => s + t.amount, 0) },
                                 { name: t('wallet.out', 'Out'), value: transactions.filter((t: any) => t.type !== 'deposit' && t.type !== 'refund' && t.status === 'completed').reduce((s, t) => s + t.amount, 0) }
                             ]} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                <XAxis dataKey={t('name')} stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                                 <YAxis hide />
                                 <Tooltip
                                     cursor={{ fill: 'transparent' }}

@@ -32,9 +32,11 @@ const Contact = React.lazy(() => import('../components/Contact').then(m => ({ de
 const SellDevice = React.lazy(() => import('../pages/SellDevice').then(m => ({ default: m.SellDevice })));
 const ComparePage = React.lazy(() => import('../pages/ComparePage').then(m => ({ default: m.ComparePage })));
 import { Home } from './Home';
+import { useTranslation } from "react-i18next";
 
 // Legacy Redirect Helpers
 const LegacyOrderRedirect = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     if (!id || id === ':id') return <Navigate to="/dashboard?tab=orders" replace />;
     return <Navigate to={`/orders/${id}`} replace />;
@@ -48,6 +50,7 @@ interface PublicRoutesProps {
 }
 
 export const getPublicRoutes = ({ settings, lang, user, cartCount }: PublicRoutesProps) => {
+    const { t } = useTranslation();
     return (
         <Route path="/" element={<PublicLayout lang={lang} user={user} cartCount={cartCount} />}>
             <Route path="/" element={<PageTransition><Home lang={lang} /></PageTransition>} />
@@ -64,7 +67,7 @@ export const getPublicRoutes = ({ settings, lang, user, cartCount }: PublicRoute
             <Route path="/valuation" element={settings.sections?.valuationPage !== false && settings.sections?.valuationPageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Valuation lang={lang} /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Bewertung" /></PageTransition>} />
             <Route path="/sell/:quoteRef" element={settings.sections?.valuationPage !== false && settings.sections?.valuationPageComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><SellDevice /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Gerät verkaufen" /></PageTransition>} />
 
-            <Route path="/login" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Login /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Login" /></PageTransition>} />
+            <Route path="/login" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Login /></Suspense></PageTransition> : <PageTransition><ComingSoon title={t('login')} /></PageTransition>} />
             <Route path="/register" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><Register /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Registrieren" /></PageTransition>} />
             <Route path="/reset-password" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><ResetPassword /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Passwort zurücksetzen" /></PageTransition>} />
             <Route path="/forgot-password" element={settings.sections?.authSystem !== false && settings.sections?.authSystemComingSoon !== true ? <PageTransition><Suspense fallback={<GlobalLoader />}><ForgotPassword /></Suspense></PageTransition> : <PageTransition><ComingSoon title="Passwort vergessen" /></PageTransition>} />

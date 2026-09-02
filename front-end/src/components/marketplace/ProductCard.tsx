@@ -126,7 +126,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         src={getProductImage(product)}
                         alt={`${cleanProductName(product.model || (product as any).name, product.brand)}${product.color ? ' - ' + product.color : ''}`}
                         onError={(e: any) => { e.target.onerror = null; e.target.src = '/placeholder-device.svg'; }}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy"
                     />
                 </div>
                 <div className="flex-1 flex flex-col justify-center">

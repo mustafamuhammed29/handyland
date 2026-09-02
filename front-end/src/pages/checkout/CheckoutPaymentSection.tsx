@@ -97,7 +97,7 @@ const StripePaymentForm: React.FC<{
             </div>
 
             <button
-                type="submit"
+                type={t('submit')}
                 disabled={!stripe || submitting}
                 className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-900/20 cursor-pointer"
             >

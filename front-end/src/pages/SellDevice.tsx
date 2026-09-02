@@ -224,8 +224,8 @@ export const SellDevice = () => {
                         <div className={`flex-1 h-2 rounded-full transition-colors ${formStep >= 3 ? 'bg-brand-primary' : 'bg-slate-800'}`} />
                     </div>
                     <div className="flex justify-between max-w-xs mx-auto mt-2 text-xs font-bold text-slate-500 uppercase">
-                        <span className={formStep >= 1 ? 'text-brand-primary' : ''}>Contact</span>
-                        <span className={formStep >= 2 ? 'text-brand-primary' : ''}>Address</span>
+                        <span className={formStep >= 1 ? 'text-brand-primary' : ''}>{t('contact')}</span>
+                        <span className={formStep >= 2 ? 'text-brand-primary' : ''}>{t('address')}</span>
                         <span className={formStep >= 3 ? 'text-brand-primary' : ''}>Payout</span>
                     </div>
                 </div>

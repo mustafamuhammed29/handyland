@@ -3,6 +3,7 @@ import { RotateCcw, X, ShieldCheck } from 'lucide-react';
 import { formatPrice } from '../../utils/formatPrice';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useTranslation } from "react-i18next";
 
 interface RefundModalProps {
     orderId: string;
@@ -12,6 +13,7 @@ interface RefundModalProps {
 }
 
 export const RefundModal: React.FC<RefundModalProps> = ({ orderId, totalAmount, onClose, onSuccess }) => {
+    const { t } = useTranslation();
     const { addToast } = useToast();
     const [refundReason, setRefundReason] = useState('widerrufsrecht');
     const [refundDescription, setRefundDescription] = useState('');
@@ -65,7 +67,7 @@ export const RefundModal: React.FC<RefundModalProps> = ({ orderId, totalAmount, 
                         <option value="defective">Defective / Damaged (Mangelhaft)</option>
                         <option value="wrong_item">Wrong Item Received (Falsche Lieferung)</option>
                         <option value="not_as_described">Not as Described</option>
-                        <option value="other">Other / Sonstiges</option>
+                        <option value={t('other')}>Other / Sonstiges</option>
                     </select>
                 </div>
                 <div>
@@ -85,10 +87,10 @@ export const RefundModal: React.FC<RefundModalProps> = ({ orderId, totalAmount, 
                     </span>
                 </label>
                 <div className="flex gap-3">
-                    <button onClick={onClose} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold">Cancel</button>
+                    <button onClick={onClose} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold">{t('cancel')}</button>
                     <button onClick={handleSubmitRefund} disabled={!refundConfirmed || submittingRefund}
                         className="flex-1 py-3 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-slate-900 dark:text-white rounded-xl font-bold flex items-center justify-center gap-2">
-                        {submittingRefund ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting...</> : <><RotateCcw className="w-4 h-4" /> Submit</>}
+                        {submittingRefund ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting...</> : <><RotateCcw className="w-4 h-4" /> {t('submit')}</>}
                     </button>
                 </div>
             </div>

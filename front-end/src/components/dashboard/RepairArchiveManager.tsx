@@ -114,7 +114,7 @@ export const RepairArchiveManager: React.FC = () => {
                             {/* Images */}
                             <div className="grid grid-cols-2 gap-px bg-slate-800">
                                 <div className="relative group aspect-square">
-                                    <img src={c.imgBefore} alt={t('common.before', 'Before')} className="w-full h-full object-cover" />
+                                    <img src={c.imgBefore} alt={t('common.before', 'Before')} className="w-full h-full object-cover" loading="lazy" />
                                     <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm text-white text-xs font-bold rounded-md uppercase">
                                         {t('common.before', 'Before')}
                                     </div>
@@ -123,7 +123,7 @@ export const RepairArchiveManager: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="relative group aspect-square">
-                                    <img src={c.imgAfter} alt={t('common.after', 'After')} className="w-full h-full object-cover" />
+                                    <img src={c.imgAfter} alt={t('common.after', 'After')} className="w-full h-full object-cover" loading="lazy" />
                                     <div className="absolute top-2 left-2 px-2 py-1 bg-emerald-500/80 backdrop-blur-sm text-white text-xs font-bold rounded-md uppercase">
                                         {t('common.after', 'After')}
                                     </div>

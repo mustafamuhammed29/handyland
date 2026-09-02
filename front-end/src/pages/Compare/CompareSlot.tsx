@@ -65,7 +65,7 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                                 onClick={() => onSelectProduct(p, slotIndex)}
                                 className="w-full flex items-center gap-3 p-2 hover:bg-slate-800 rounded-lg transition-colors text-left"
                             >
-                                <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-10 h-10 object-contain bg-white rounded-md p-1" />
+                                <img src={getImageUrl(p.images?.[0] || p.image || p.thumbnail)} alt={p.name} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-10 h-10 object-contain bg-white rounded-md p-1" loading="lazy" />
                                 <div className="min-w-0">
                                     <div className="font-bold text-sm truncate">{stripInternalId(p.name || p.model)}</div>
                                     <div className="text-xs text-slate-500 dark:text-slate-400">{p.price} €</div>
@@ -86,7 +86,7 @@ export const CompareSlot: React.FC<CompareSlotProps> = ({
                     </button>
                     <div className="h-32 md:h-40 w-full mb-4 md:mb-6 relative flex items-center justify-center">
                         <div className="absolute inset-0 bg-brand-primary/10 rounded-full blur-[40px] -z-10 group-hover:bg-brand-primary/20 transition-all"></div>
-                        <img src={getImageUrl(product.images?.[0] || product.image || product.thumbnail)} alt={product.name || product.model} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-auto h-full max-w-full rounded-2xl object-cover mb-2 md:mb-4 shadow-xl group-hover:scale-105 transition-transform duration-500" />
+                        <img src={getImageUrl(product.images?.[0] || product.image || product.thumbnail)} alt={product.name || product.model} onError={(e) => e.currentTarget.src = '/images/placeholder.png'} className="w-auto h-full max-w-full rounded-2xl object-cover mb-2 md:mb-4 shadow-xl group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                     </div>
                     <h3 className="text-lg md:text-xl font-black text-center mb-1 md:mb-2 line-clamp-1">{stripInternalId(product.name || product.model)}</h3>
                     

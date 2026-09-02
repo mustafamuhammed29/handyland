@@ -179,21 +179,21 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                                         <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{t('fullName', 'Full Name')}</label>
                                         <div className="relative group">
                                             <UserIcon className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                            <input type="text" name="name" required value={formData.name} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="e.g. Mark Tech" />
+                                            <input type="text" name={t('name')} required value={formData.name} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="e.g. Mark Tech" />
                                         </div>
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{currentLang === 'ar' ? 'الهاتف' : 'Phone'}</label>
                                         <div className="relative group">
                                             <Phone className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                            <input type="tel" name="phone" required value={formData.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="+49..." />
+                                            <input type="tel" name={t('phone')} required value={formData.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="+49..." />
                                         </div>
                                     </div>
                                     <div className="md:col-span-2 space-y-1">
                                         <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{currentLang === 'ar' ? 'العنوان' : 'Location'}</label>
                                         <div className="relative group">
                                             <MapPin className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                            <input type="text" name="address" required value={formData.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="Berlin, Germany" />
+                                            <input type="text" name={t('address')} required value={formData.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="Berlin, Germany" />
                                         </div>
                                     </div>
                                 </div>
@@ -206,7 +206,7 @@ export const Auth: React.FC<AuthProps> = ({ setUser }) => {
                                         <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase ml-1 tracking-widest">{t('email', 'Email Address')}</label>
                                         <div className="relative group">
                                             <Mail className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute top-3.5 left-3 group-focus-within:text-brand-primary transition-colors" />
-                                            <input type="email" name="email" required value={formData.email} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="secure@handyland.com" />
+                                            <input type={t('email')} name={t('email')} required value={formData.email} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:border-brand-primary outline-none transition-all text-sm" placeholder="secure@handyland.com" />
                                         </div>
                                     </div>
 

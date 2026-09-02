@@ -343,7 +343,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.5} vertical={false} />
-                                <XAxis dataKey="name" stroke="#94a3b8" tick={{fill: '#64748b', fontSize: 12}} tickLine={false} axisLine={false} />
+                                <XAxis dataKey={t('name')} stroke="#94a3b8" tick={{fill: '#64748b', fontSize: 12}} tickLine={false} axisLine={false} />
                                 <YAxis stroke="#94a3b8" tick={{fill: '#64748b', fontSize: 12}} tickLine={false} axisLine={false} tickFormatter={(value) => `€${value}`} />
                                 <Tooltip 
                                     contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}

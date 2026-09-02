@@ -58,7 +58,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data, height = 300 }
                         tick={{ fill: '#94a3b8', fontSize: 12 }}
                         tickFormatter={(value) => new Intl.NumberFormat(currentLocale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value)}
                         dx={-10}
-                        orientation='left'
+                        orientation={t('left')}
                         width={60}
                     />
                     <Tooltip content={<CustomTooltip />} />
