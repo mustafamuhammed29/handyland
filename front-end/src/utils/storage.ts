@@ -1,7 +1,10 @@
 import CryptoJS from 'crypto-js';
 
-const SECRET_KEY = import.meta.env.VITE_STORAGE_KEY || 'handyland-storage-secret-key-123';
+const SECRET_KEY = import.meta.env.VITE_STORAGE_KEY;
 
+if (!SECRET_KEY) {
+    console.error('VITE_STORAGE_KEY is missing. LocalStorage encryption will fail.');
+}
 /**
  * Encrypt and save data to localStorage
  */

@@ -3,7 +3,7 @@ import { Save, FileText, Check, AlertCircle, Eye, Edit3, BookOpen, ShieldCheck, 
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { api } from '../utils/api';
-
+import DOMPurify from 'dompurify';
 const PAGES = [
     { id: 'agb', label: 'AGB', full: 'Geschäftsbedingungen', icon: BookOpen },
     { id: 'privacy', label: 'Privacy', full: 'Datenschutz & Privatsphäre', icon: ShieldCheck },
@@ -199,7 +199,7 @@ export default function PageManager() {
                                     
                                     <div 
                                         className="prose prose-invert max-w-none prose-p:leading-loose prose-p:mb-6 prose-headings:text-white prose-strong:text-blue-400 whitespace-pre-wrap text-lg leading-relaxed"
-                                        dangerouslySetInnerHTML={{ __html: content }} 
+                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }} 
                                     />
                                     
                                     {(!content || content === '<p><br></p>') && (

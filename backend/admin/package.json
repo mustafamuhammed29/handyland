@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.5",
+    "@types/dompurify": "^3.0.5",
     "axios": "^1.13.5",
     "cookie-parser": "^1.4.7",
+    "dompurify": "^3.4.14",
     "framer-motion": "^12.34.5",
     "lucide-react": "^0.563.0",
     "papaparse": "^5.5.4",

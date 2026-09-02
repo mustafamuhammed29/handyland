@@ -22,6 +22,7 @@ import { CookieSettingsTab } from './settings/CookieSettingsTab';
 import { SEOTab } from './settings/SEOTab';
 import { RepairCardsTab } from './settings/RepairCardsTab';
 import { FeaturedServicesTab } from './settings/FeaturedServicesTab';
+import DOMPurify from 'dompurify';
 
 export interface HeroMediaSettings {
     mode: 'content' | 'video';
@@ -1361,7 +1362,7 @@ export default function SettingsManager() {
                                         </div>
                                         {emailPreview ? (
                                             <div className="p-6 bg-white rounded-b-xl min-h-[200px]">
-                                                <div dangerouslySetInnerHTML={{ __html: editHtml }} />
+                                                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(editHtml) }} />
                                             </div>
                                         ) : (
                                             <textarea

@@ -3,6 +3,7 @@ import { Save, X, CheckCircle, AlertCircle, Smartphone, Mail, Settings, LayoutTe
 import { api } from '../utils/api';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import DOMPurify from 'dompurify';
 
 interface EmailTemplate {
     _id: string;
@@ -366,7 +367,7 @@ const EmailManager: React.FC = () => {
                                     
                                     {/* Email Body rendered with mock logic */}
                                     <div className="p-6 text-slate-800 leading-relaxed overflow-x-hidden text-base preview-content">
-                                        <div dangerouslySetInnerHTML={{ __html: renderWithMockData(editHtml) }} />
+                                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderWithMockData(editHtml)) }} />
                                     </div>
                                 </div>
                             </div>

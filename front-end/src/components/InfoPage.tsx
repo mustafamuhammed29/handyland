@@ -4,6 +4,7 @@ import { api } from '../utils/api';
 import { useSettings } from '../context/SettingsContext';
 import { SEO } from './SEO';
 import NotFound from '../pages/NotFound';
+import DOMPurify from 'dompurify';
 
 interface InfoPageProps {}
 
@@ -298,7 +299,7 @@ export const InfoPage: React.FC<InfoPageProps> = () => {
                     <div className="ql-writing-format mt-6">
                         {content ? (
                             <div className="ql-snow">
-                                <div className="ql-editor" dangerouslySetInnerHTML={{ __html: formatMarkdownToHTML(content) }} />
+                                <div className="ql-editor" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formatMarkdownToHTML(content)) }} />
                             </div>
                         ) : (
                             <div className="p-12 text-center border border-dashed border-slate-300 dark:border-slate-700 rounded-xl">

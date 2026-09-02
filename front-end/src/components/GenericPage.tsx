@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 
 export const GenericPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
@@ -102,7 +103,7 @@ export const GenericPage: React.FC = () => {
                     prose-ul:list-disc prose-ul:ml-6 prose-ul:text-slate-300
                     prose-ol:list-decimal prose-ol:ml-6 prose-ol:text-slate-300
                     bg-slate-900/30 border border-slate-800 rounded-2xl p-8 md:p-12"
-                    dangerouslySetInnerHTML={{ __html: page.content }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content) }}
                 />
 
                 {/* Back to Home */}
