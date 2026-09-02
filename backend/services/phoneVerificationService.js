@@ -143,10 +143,14 @@ class PhoneVerificationService {
         // Cache code with key: phone_otp_+49...
         otpCache.set(`phone_otp_${phone}`, otp);
 
-        console.log('\n--- 📱 PHONE VERIFICATION REQUEST ---');
-        console.log(`Target Phone: ${phone}`);
-        console.log(`Generated OTP Code: ${otp}`);
-        console.log('-------------------------------------\n');
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('\n--- 📱 PHONE VERIFICATION REQUEST ---');
+            console.log(`Target Phone: ${phone}`);
+            console.log(`Generated OTP Code: ${otp}`);
+            console.log('-------------------------------------\n');
+        } else {
+            console.log(`[Phone Verification] Sending OTP to ${phone}`);
+        }
 
         // 1. Try WhatsApp first if configured
         if (process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID) {
@@ -169,7 +173,9 @@ class PhoneVerificationService {
         }
 
         // 3. Fallback to Console Log (Development Mode)
-        console.log(`[DEVELOPMENT MODE] Verification code for ${phone} is: ${otp}`);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`[DEVELOPMENT MODE] Verification code for ${phone} is: ${otp}`);
+        }
         
         return { 
             success: true, 

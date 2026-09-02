@@ -30,6 +30,30 @@ When executing maintenance or setup tasks, supply the necessary configuration vi
 
 ---
 
-## 3. Reporting Security Vulnerabilities
+## 3. Web & Application Security Measures
+
+### CORS (Cross-Origin Resource Sharing)
+- Production uses strict `ALLOWED_ORIGINS` via environment variables. Wildcards (e.g., `*.vercel.app`) and LAN IPs are strictly forbidden.
+- Development uses relaxed CORS specifically mapped to localhost and frontend dev URLs.
+- Admin routes use strict credential-based CORS.
+
+### Rate Limit & Brute Force Protection
+- Global API limit: 500 requests / 15 minutes.
+- Auth endpoints (login, register): 10 requests / 10 minutes.
+- OTP verification: 5 requests / 15 minutes.
+- Security headers (Helmet) are enabled universally.
+
+### RLS (Row Level Security)
+- Supabase enforces strict Row-Level Security on all tables.
+- Standard users can only access their own `transactions`, `orders`, and `repair_tickets`.
+- Admins bypass RLS via privileged service roles when using the `authorize('admin')` middleware.
+
+### CSRF Protection
+- Session cookies are strictly `HttpOnly`, `Secure`, and `SameSite=Lax` (or `Strict` for API routes).
+- Critical mutations (e.g., wallet top-ups) require explicit backend verification via trusted provider webhooks (e.g., Stripe, PayPal).
+
+---
+
+## 4. Reporting Security Vulnerabilities
 
 If you discover a security vulnerability within HandyLand, please report it privately to the security team. Do not disclose vulnerabilities publicly in issues or pull requests until a fix has been released.
