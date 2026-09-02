@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, Trash2, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, ArrowRight, Edit3, X, Eye, EyeOff, AlertCircle, Shield, Bell, Gift, Globe, FileText, Zap, Wrench, HelpCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Save, Layers, MonitorPlay, BarChart, ScanLine, LayoutTemplate, MessageSquare, Edit3, X, Eye, EyeOff, AlertCircle, Shield, Gift, Globe, FileText, Zap, Wrench, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '../utils/api';
 

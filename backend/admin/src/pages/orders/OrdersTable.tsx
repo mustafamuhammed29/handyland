@@ -1,6 +1,7 @@
 import React from 'react';
 import { Package, Copy, Eye, Trash2, CheckSquare, Square, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
-import { Order, STATUS_CONFIG } from './types';
+import type { Order } from './types';
+import { STATUS_CONFIG } from './types';
 import { formatDate, formatTime } from '../../utils/formatDate';
 
 interface OrdersTableProps {

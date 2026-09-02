@@ -1,15 +1,4 @@
-import React from 'react';
-import { Package } from 'lucide-react';
-
-interface Stats {
-    totalOrders: number;
-    pendingOrders: number;
-    processingOrders: number;
-    shippedOrders: number;
-    deliveredOrders: number;
-    cancelledOrders: number;
-    totalRevenue: number;
-}
+import type { Stats } from './types';
 
 export const OrdersStats = ({ stats }: { stats: Stats | null }) => {
     if (!stats) return null;

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Truck, Copy, CheckCircle, Package, AlertTriangle, Send } from 'lucide-react';
-import { Order, STATUS_CONFIG } from './types';
+import { Truck, CheckCircle, Package, AlertTriangle, Send } from 'lucide-react';
+import type { Order } from './types';
+import { STATUS_CONFIG } from './types';
 
 interface OrderStatusModalProps {
     selectedOrder: Order;

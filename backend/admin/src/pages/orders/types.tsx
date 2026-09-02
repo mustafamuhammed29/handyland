@@ -9,6 +9,16 @@ export const STATUS_CONFIG: Record<string, { label: string; color: string; bg: s
     cancelled: { label: 'Cancelled', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: <XCircle className="w-4 h-4" />, description: 'Order has been cancelled.' },
 };
 
+export interface Stats {
+    totalOrders: number;
+    pendingOrders: number;
+    processingOrders: number;
+    shippedOrders: number;
+    deliveredOrders: number;
+    cancelledOrders: number;
+    totalRevenue: number;
+}
+
 export interface OrderItem {
     product: string;
     productType: string;

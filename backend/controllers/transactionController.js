@@ -657,12 +657,23 @@ exports.updateTransactionStatus = async (stripePaymentId, status, receiptUrl = n
         const { data, error } = await supabaseAdmin
             .from('transactions')
             .update(updateData)
-            .eq('stripe_payment_id', stripePaymentId)
-            .select().single();
-        if (error) throw error;
+            .or(`provider_payment_id.eq.${stripePaymentId},stripe_payment_id.eq.${stripePaymentId}`)
+            .select()
+            .maybeSingle();
+
+        if (error) {
+            console.error('Error updating transaction in updateTransactionStatus:', error.message);
+            return null;
+        }
+
+        if (!data) {
+            console.warn(`[Webhook] Transaction not found for payment ID: ${stripePaymentId}`);
+            return null;
+        }
+
         return data;
     } catch (error) {
         console.error('Error updating transaction:', error.message);
-        throw error;
+        return null;
     }
 };

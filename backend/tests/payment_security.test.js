@@ -70,6 +70,10 @@ describe('Payment Security & Webhook Tests', () => {
                         data: { id: 'order-123', user_id: userId, total_amount: 49.99, status: 'pending' },
                         error: null
                     }),
+                    maybeSingle: jest.fn().mockResolvedValue({
+                        data: { id: 'order-123', user_id: userId, total_amount: 49.99, status: 'pending', payment_status: 'pending' },
+                        error: null
+                    }),
                     update: jest.fn().mockReturnValue({
                         eq: jest.fn().mockResolvedValue({ data: { id: 'order-123' }, error: null })
                     }),
@@ -82,8 +86,15 @@ describe('Payment Security & Webhook Tests', () => {
                         then: function(resolve) { resolve({ data: [], error: null }); }
                     }),
                     update: jest.fn().mockReturnValue({
+                        or: jest.fn().mockReturnValue({
+                            select: jest.fn().mockReturnValue({
+                                maybeSingle: jest.fn().mockResolvedValue({ data: { id: 'tx-123' }, error: null }),
+                                single: jest.fn().mockResolvedValue({ data: { id: 'tx-123' }, error: null })
+                            })
+                        }),
                         eq: jest.fn().mockReturnValue({
                             select: jest.fn().mockReturnValue({
+                                maybeSingle: jest.fn().mockResolvedValue({ data: { id: 'tx-123' }, error: null }),
                                 single: jest.fn().mockResolvedValue({ data: { id: 'tx-123' }, error: null })
                             })
                         })

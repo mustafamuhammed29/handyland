@@ -55,16 +55,49 @@ Navigate to **Project Settings → API**:
 - **anon / public**: Use for `SUPABASE_ANON_KEY`
 - **service_role**: Use for `SUPABASE_SERVICE_ROLE_KEY` (Backend only, never expose to clients)
 
-### Step 3: Run Database Migrations
+### Step 3: Run Database Migrations (001-028)
 Execute the SQL files located in `/supabase/migrations/` in numerical sequence inside the **Supabase SQL Editor**:
 
-1. `001_initial_schema.sql` (Tables, enums, & relations)
-2. `002_rls_policies.sql` (Row-Level Security & access control)
-3. `003_indexes_and_triggers.sql` (Performance indexes & automated triggers)
-4. `004_storage_buckets.sql` (Object storage for receipts & invoices)
-5. `005_inventory_optimization.sql` (Stock & catalog rules)
-6. `006_atomic_stock_and_coupon.sql` (Atomic transaction RPCs)
-7. `007_valuation_dynamic_settings.sql` (Device valuation algorithms)
+#### Core Schema (001-007)
+- 001: `001_initial_schema.sql` - Users, products, orders tables
+- 002: `002_rls_policies.sql` - Authentication, JWT tokens, sessions, RLS policies
+- 003: `003_indexes_and_triggers.sql` - Cart system, performance indexes, automated triggers
+- 004: `004_storage_buckets.sql` - Order management, storage buckets for receipts & media
+- 005: `005_inventory_optimization.sql` - Stock & catalog rules
+- 006: `006_atomic_stock_and_coupon.sql` - Atomic transaction RPCs for stock and coupons
+- 007: `007_valuation_dynamic_settings.sql` - Device valuation algorithms & settings
+
+#### Enhanced Features (008-015)
+- 008: `008_get_inventory_stats.sql` - Inventory statistics RPC
+- 009: `009_valuation_categories_and_brands.sql` - Product categories and brands filtering
+- 010: `010_enable_rls_missing_tables.sql` - Comprehensive RLS enforcement on all tables
+- 011: `011_least_privilege_rls_policies.sql` - Least privilege RLS policies - User data isolation
+- 012: `012_media_storage_bucket.sql` - Media storage buckets for receipts and product images
+- 013: `013_fix_critical_rls_security.sql` - Critical RLS hardening and policy patches
+- 014: `014_harden_valuation_and_security_definer.sql` - Hardened valuation RPCs & SECURITY DEFINER scopes
+- 015: `015_user_activity_and_orders.sql` - Order status tracking & activity history
+
+#### Security & Performance (016-023)
+- 016: `016_rate_limiting_and_session_logs.sql` - Rate limiting logs and session tracking
+- 017: `017_auth_2fa_challenges.sql` - Two-factor authentication (2FA) challenges table
+- 018: `018_repair_parts_warehouse_foundation.sql` - Warehouse & repair parts foundation
+- 019: `019_apply_part_stock_movement_rpc.sql` - Atomic part stock movement RPC
+- 020: `020_deactivate_warehouse_location_rpc.sql` - Warehouse location management RPC
+- 021: `021_discontinue_repair_part_rpc.sql` - Discontinue repair part RPC
+- 022: `022_device_models_management.sql` - Device models and repair catalog management
+- 023: `023_schema_drift_alignment.sql` - Schema drift alignment and index optimizations
+
+#### Financial Integrity (024-028)
+- 024: `024_transactions_money_and_guest_alignment.sql` - Money representation in integer cents
+- 025: `025_refunds_state_machine.sql` - Refunds state machine and validation
+- 026: `026_order_status_and_wallet_cents_foundation.sql` - Order status and wallet cents foundation
+- 027: `027_immutable_wallet_ledger_and_provider_identity.sql` - Immutable wallet ledger & provider identity
+- 028: `028_trusted_financial_rpcs.sql` - Trusted financial RPCs - Banking-grade atomic operations
+  - `process_wallet_ledger_entry`: Atomic immutable ledger recording with row-locking
+  - `top_up_wallet_atomic`: Idempotent atomic wallet balance top-ups
+  - `admin_adjust_wallet_atomic`: Idempotent administrative adjustments
+  - Strict `SECURITY DEFINER` with `SET search_path = public, pg_temp`
+  - Zero SQL concatenation, strictly parameterized queries only
 
 ---
 

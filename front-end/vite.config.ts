@@ -106,6 +106,8 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: './src/vitest.setup.ts',
+      include: ['src/**/*.{test,spec}.{ts,tsx}'],
+      exclude: ['e2e-tests/**', 'node_modules/**'],
       css: true,
       coverage: {
         provider: 'v8',

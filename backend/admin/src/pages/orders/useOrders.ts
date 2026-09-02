@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useConfirm } from '../../../context/ConfirmContext';
-import { api } from '../../../utils/api';
+import { useState, useCallback } from 'react';
+import { useConfirm } from '../../context/ConfirmContext';
+import { api } from '../../utils/api';
 import toast from 'react-hot-toast';
-import useDebounce from '../../../hooks/useDebounce';
-import { Order, Stats, STATUS_CONFIG } from './types';
-import { formatDate } from '../../../utils/formatDate';
+import useDebounce from '../../hooks/useDebounce';
+import type { Order, Stats } from './types';
+import { STATUS_CONFIG } from './types';
+import { formatDate } from '../../utils/formatDate';
 
 export const useOrders = () => {
     const [orders, setOrders] = useState<Order[]>([]);

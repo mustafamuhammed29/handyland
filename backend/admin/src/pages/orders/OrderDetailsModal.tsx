@@ -1,7 +1,7 @@
-import React from 'react';
-import { Copy, Printer, FileText, Download, CheckCircle, Package } from 'lucide-react';
-import { Order, STATUS_CONFIG } from './types';
-import { formatDate, formatDateTime, formatTime } from '../../utils/formatDate';
+import { Copy, Printer, FileText, Download, CheckCircle, Package, Clock } from 'lucide-react';
+import type { Order } from './types';
+import { STATUS_CONFIG } from './types';
+import { formatDateTime } from '../../utils/formatDate';
 
 interface OrderDetailsModalProps {
     selectedOrder: Order;

@@ -40,7 +40,7 @@ describe('ResetPassword', () => {
     fireEvent.change(inputs[0], { target: { value: 'password123' } });
     fireEvent.change(inputs[1], { target: { value: 'password456' } });
     
-    fireEvent.click(screen.getByRole('button', { name: /Reset Password/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Reset Password|resetPassword/i }));
     
     expect(mockAddToast).toHaveBeenCalledWith('Passwords do not match', 'error');
   });
@@ -52,7 +52,7 @@ describe('ResetPassword', () => {
     fireEvent.change(inputs[0], { target: { value: 'password123' } });
     fireEvent.change(inputs[1], { target: { value: 'password123' } });
     
-    fireEvent.click(screen.getByRole('button', { name: /Reset Password/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Reset Password|resetPassword/i }));
     
     await waitFor(() => {
       expect(mockAddToast).toHaveBeenCalledWith('Password reset successfully (Mock)', 'success');
