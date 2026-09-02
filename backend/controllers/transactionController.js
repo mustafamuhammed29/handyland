@@ -246,12 +246,15 @@ exports.confirmTopUp = async (req, res, next) => {
         let amountInCents = 0;
         let providerPaymentId = refId;
 
+        let expectedTxId = null;
+
         if (sessionId) {
             const session = await stripe.checkout.sessions.retrieve(sessionId);
             if (session.payment_status === 'paid') {
                 isPaid = true;
                 amountInCents = session.amount_total;
                 providerPaymentId = session.payment_intent || session.id;
+                expectedTxId = session.metadata?.transactionId;
             }
         } else if (paymentIntentId) {
             const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
@@ -259,11 +262,34 @@ exports.confirmTopUp = async (req, res, next) => {
                 isPaid = true;
                 amountInCents = paymentIntent.amount;
                 providerPaymentId = paymentIntent.id;
+                expectedTxId = paymentIntent.metadata?.transactionId;
             }
         }
 
         if (!isPaid) {
             return res.status(400).json({ success: false, message: 'Payment has not been confirmed yet' });
+        }
+
+        // 1. Strict Ownership & Idempotency Check
+        let query = supabaseAdmin.from('transactions').select('*');
+        if (expectedTxId) {
+            query = query.eq('id', expectedTxId);
+        } else {
+            query = query.eq('provider_payment_id', sessionId || paymentIntentId);
+        }
+        
+        const { data: tx, error: fetchErr } = await query.single();
+
+        if (fetchErr || !tx) {
+            return res.status(404).json({ success: false, message: 'Transaktion nicht gefunden' });
+        }
+
+        if (tx.user_id !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Nicht autorisiert' });
+        }
+
+        if (tx.status !== 'pending') {
+            return res.status(400).json({ success: false, message: 'Transaktion wurde bereits verarbeitet' });
         }
 
         // Call atomic top-up RPC
@@ -394,6 +420,25 @@ exports.capturePayPalTopUp = async (req, res, next) => {
         const { orderId } = req.body;
         if (!orderId) {
             return res.status(400).json({ success: false, message: 'PayPal Order ID is required' });
+        }
+
+        // 1. Strict Ownership & Idempotency Check BEFORE capturing
+        const { data: tx, error: fetchErr } = await supabaseAdmin
+            .from('transactions')
+            .select('*')
+            .eq('provider_payment_id', orderId)
+            .single();
+
+        if (fetchErr || !tx) {
+            return res.status(404).json({ success: false, message: 'Transaktion nicht gefunden' });
+        }
+
+        if (tx.user_id !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Nicht autorisiert' });
+        }
+
+        if (tx.status !== 'pending') {
+            return res.status(400).json({ success: false, message: 'Transaktion wurde bereits verarbeitet' });
         }
 
         const clientId = process.env.PAYPAL_CLIENT_ID;

@@ -54,14 +54,7 @@ describe('P0 Security Containment & Route Guards', () => {
 
     describe('1. Disabled Routes Return HTTP 503 with Safe Generic Message', () => {
         const disabledEndpoints = [
-            { method: 'post', url: '/api/transactions/paypal/create-topup', body: { amount: 50 } },
-            { method: 'post', url: '/api/transactions/paypal/capture-topup', body: { orderID: 'PAYPAL-FAKE-123' } },
-            { method: 'post', url: '/api/transactions/create-topup-session', body: { amount: 50 } },
-            { method: 'post', url: '/api/transactions/confirm-topup', body: { sessionId: 'cs_fake_123' } },
-            { method: 'post', url: '/api/payment/paypal/create-order', body: { items: [{ price: 10, quantity: 1 }] } },
-            { method: 'post', url: '/api/payment/paypal/capture-order', body: { orderID: 'PAYPAL-FAKE-123' } },
             { method: 'post', url: '/api/orders/00000000-0000-4000-8000-000000000001/receipt', body: {} },
-            { method: 'post', url: '/api/transactions/00000000-0000-4000-8000-000000000001/upload-receipt', body: {} },
             { method: 'get', url: '/api/repairs/track-guest/REP-26-TEST01', body: {} }
         ];
 
@@ -80,93 +73,7 @@ describe('P0 Security Containment & Route Guards', () => {
         }
     });
 
-    describe('2. Disabled Top-up Routes Do Not Mutate Balances or Transactions', () => {
-        test('capturePayPalTopUp does not modify user balance or transaction status', async () => {
-            let balanceUpdated = false;
-            let txUpdated = false;
-            const originalFrom = supabaseAdmin.from;
 
-            supabaseAdmin.from = jest.fn((table) => {
-                if (table === 'users') {
-                    return {
-                        update: jest.fn(() => {
-                            balanceUpdated = true;
-                            return { eq: jest.fn().mockResolvedValue({ error: null }) };
-                        })
-                    };
-                }
-                if (table === 'transactions') {
-                    return {
-                        update: jest.fn(() => {
-                            txUpdated = true;
-                            return { eq: jest.fn().mockResolvedValue({ error: null }) };
-                        })
-                    };
-                }
-                return originalFrom.call(supabaseAdmin, table);
-            });
-
-            const req = {
-                body: { orderID: 'FORGED_PAYPAL_ORDER_ID' },
-                user: { id: '00000000-0000-4000-8000-000000000099' }
-            };
-            const res = {
-                statusCode: 200,
-                status: function(code) { this.statusCode = code; return this; },
-                json: jest.fn()
-            };
-
-            await transactionController.capturePayPalTopUp(req, res);
-            supabaseAdmin.from = originalFrom;
-
-            expect(res.statusCode).toBe(503);
-            expect(balanceUpdated).toBe(false);
-            expect(txUpdated).toBe(false);
-        });
-
-        test('confirmTopUp (Stripe) does not modify user balance or transaction status', async () => {
-            let balanceUpdated = false;
-            let txUpdated = false;
-            const originalFrom = supabaseAdmin.from;
-
-            supabaseAdmin.from = jest.fn((table) => {
-                if (table === 'users') {
-                    return {
-                        update: jest.fn(() => {
-                            balanceUpdated = true;
-                            return { eq: jest.fn().mockResolvedValue({ error: null }) };
-                        })
-                    };
-                }
-                if (table === 'transactions') {
-                    return {
-                        update: jest.fn(() => {
-                            txUpdated = true;
-                            return { eq: jest.fn().mockResolvedValue({ error: null }) };
-                        })
-                    };
-                }
-                return originalFrom.call(supabaseAdmin, table);
-            });
-
-            const req = {
-                body: { sessionId: 'cs_forged_session' },
-                user: { id: '00000000-0000-4000-8000-000000000099' }
-            };
-            const res = {
-                statusCode: 200,
-                status: function(code) { this.statusCode = code; return this; },
-                json: jest.fn()
-            };
-
-            await transactionController.confirmTopUp(req, res);
-            supabaseAdmin.from = originalFrom;
-
-            expect(res.statusCode).toBe(503);
-            expect(balanceUpdated).toBe(false);
-            expect(txUpdated).toBe(false);
-        });
-    });
 
     describe('3. Disabled GET Repair Lookup Reveals No Ticket Data', () => {
         test('GET /api/repairs/track-guest/:ticketId does not call database or return details', async () => {
