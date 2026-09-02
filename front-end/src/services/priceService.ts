@@ -1,23 +1,40 @@
 import { ValuationRequest } from "../types";
 
+export interface ValuationSettings {
+  valuation?: {
+    models?: { name: string; basePrice: number }[];
+    storageOptions?: { label: string; multiplier: number }[];
+    conditionOptions?: { id: string; multiplier: number }[];
+    batteryOptions?: { id: string; multiplier: number }[];
+  };
+}
+
+export interface DeviceBlueprint {
+  priceConfig?: {
+    storagePrices?: Record<string, number>;
+    conditionModifiers?: Record<string, number>;
+    batteryPenalty?: { threshold: number; deductionPerPercent: number };
+  };
+}
+
 // Helper to get the raw number
 export const calculatePriceValue = (
   details: ValuationRequest,
-  settings: any,
+  settings: ValuationSettings,
   basePriceOverride?: number,
-  deviceBlueprint?: any
+  deviceBlueprint?: DeviceBlueprint
 ): number => {
   // 1. Base Price
-  const dynamicModel = settings?.valuation?.models?.find((m: any) => m.name === details.model);
+  const dynamicModel = settings?.valuation?.models?.find((m) => m.name === details.model);
   let currentPrice = basePriceOverride !== undefined ? basePriceOverride : (dynamicModel?.basePrice || 500);
 
   // 2. Storage Logic
-  const specificStoragePrice = deviceBlueprint?.priceConfig?.storagePrices?.[details.storage];
+  const specificStoragePrice = details.storage ? deviceBlueprint?.priceConfig?.storagePrices?.[details.storage] : undefined;
 
   if (specificStoragePrice !== undefined) {
     currentPrice += specificStoragePrice;
   } else {
-    const storageOpt = settings?.valuation?.storageOptions?.find((s: any) => s.label === details.storage);
+    const storageOpt = settings?.valuation?.storageOptions?.find((s) => s.label === details.storage);
     let storageMult = storageOpt?.multiplier || 1.0;
 
     if (storageMult === 1.0 && details.storage) {
@@ -37,10 +54,10 @@ export const calculatePriceValue = (
     'broken': 0.3
   };
 
-  const conditionOpt = settings?.valuation?.conditionOptions?.find((c: any) => c.id === details.condition);
-  const conditionMult = deviceBlueprint?.priceConfig?.conditionModifiers?.[details.condition]
+  const conditionOpt = settings?.valuation?.conditionOptions?.find((c) => c.id === details.condition);
+  const conditionMult = (details.condition && deviceBlueprint?.priceConfig?.conditionModifiers?.[details.condition])
     || conditionOpt?.multiplier
-    || defaultModifiers[details.condition]
+    || (details.condition ? defaultModifiers[details.condition] : 1.0)
     || 0.75;
 
   currentPrice = currentPrice * conditionMult;
@@ -58,7 +75,7 @@ export const calculatePriceValue = (
     }
   } else {
     // Fallback logic
-    const batteryOpt = settings?.valuation?.batteryOptions?.find((b: any) => b.id === details.battery);
+    const batteryOpt = settings?.valuation?.batteryOptions?.find((b) => b.id === details.battery);
     const batteryMult = batteryOpt?.multiplier || 1.0;
     currentPrice = currentPrice * batteryMult;
   }
@@ -78,15 +95,15 @@ export const calculatePriceValue = (
 
 export const calculateManualPrice = (
   details: ValuationRequest,
-  settings: any,
+  settings: ValuationSettings,
   basePriceOverride?: number,
-  deviceBlueprint?: any
+  deviceBlueprint?: DeviceBlueprint
 ): string => {
   const finalPrice = calculatePriceValue(details, settings, basePriceOverride, deviceBlueprint);
 
   // Helper variables for report (re-derived briefly for display string)
-  const storageOpt = settings?.valuation?.storageOptions?.find((s: any) => s.label === details.storage);
-  const conditionOpt = settings?.valuation?.conditionOptions?.find((c: any) => c.id === details.condition);
+  const storageOpt = settings?.valuation?.storageOptions?.find((s) => s.label === details.storage);
+  const conditionOpt = settings?.valuation?.conditionOptions?.find((c) => c.id === details.condition);
 
   // Create range
   const minRange = Math.max(0, finalPrice - 20);
@@ -98,9 +115,7 @@ export const calculateManualPrice = (
     
     Analysis:
     - Base Value: €${basePriceOverride || 500}
-    - Storage: ${details.storage}
-    - Condition: ${conditionOpt?.label || details.condition}
-    ${details.batteryHealth ? `- Battery Health: ${details.batteryHealth}%` : ''}
-    ${details.accessories ? '- Accessories: +€25' : ''}
+    - Storage (${details.storage}): ${storageOpt ? `x${storageOpt.multiplier}` : 'Standard'}
+    - Condition (${details.condition}): ${conditionOpt ? `x${conditionOpt.multiplier}` : 'Standard'}
   `;
 };

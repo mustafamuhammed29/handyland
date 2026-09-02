@@ -87,7 +87,6 @@ export interface Address {
 }
 
 export interface User {
-  [x: string]: any;
   id: string;
   name: string;
   email: string;
@@ -126,8 +125,15 @@ export interface Order {
   _id: string; // Backend uses _id
   id?: string; // Frontend might use id
   orderNumber?: string;
-  user: any;
-  items: any[];
+  user: Partial<User>;
+  items: {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image?: string;
+    productType?: string;
+  }[];
   totalAmount: number;
   tax?: number;
   shippingFee?: number;
